@@ -288,9 +288,9 @@ namespace Microsoft.Identity.Client.Broker
             try
             {
                 if (wamAccount.AccountId == null ||
-                wamAccount.HomeAccountid == null ||
-                wamAccount.Environment == null ||
-                wamAccount.UserName == null)
+                    wamAccount.HomeAccountid == null ||
+                    wamAccount.Environment == null ||
+                    wamAccount.UserName == null)
                 {
                     logger.Info($"[WamBroker] wamAccount.AccountId: {wamAccount.AccountId}.");
                     logger.Info($"[WamBroker] wamAccount.HomeAccountid: {wamAccount.HomeAccountid}.");
