@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client.Broker
@@ -352,25 +354,49 @@ namespace Microsoft.Identity.Client.Broker
             string correlationId = Guid.NewGuid().ToString();
             List<IAccount> accounts = new List<IAccount>();
             var requestContext = cacheSessionManager.RequestContext;
-            var instanceMetadata = await instanceDiscoveryManager.GetMetadataEntryAsync(authorityInfo, requestContext, false).ConfigureAwait(false);
 
             using (var core = new NativeInterop.Core())
             using (var discoverAccountsResult = await core.DiscoverAccountsAsync(clientID, correlationId).ConfigureAwait(false))
             {
                 if (discoverAccountsResult.IsSuccess)
                 {
-                    foreach (var acc in discoverAccountsResult.Accounts)
+                    IEnumerable<NativeInterop.Account> wamAccounts = discoverAccountsResult.Accounts;
+
+                    _logger.Info($"[WamBroker] Broker returned {wamAccounts.Count()} account(s).");
+
+                    //If "multi-cloud" is enabled, we do not have do instanceMetadata matching
+                    if (!requestContext.ServiceBundle.Config.MultiCloudSupportEnabled)
                     {
-                        string environment = acc.Environment; 
-                        bool matches = instanceMetadata.Aliases.Any(alias => string.Equals(alias, environment, StringComparison.OrdinalIgnoreCase));
-                        
-                        if(matches)
-                            accounts.Add(WamAdapters.ConvertToMsalAccount(acc, clientID));
+                        var environment = discoverAccountsResult.Accounts.Select(acc => acc.Environment).ToList();
+
+                        var instanceMetadata = await instanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                                authorityInfo,
+                                environment,
+                                requestContext).ConfigureAwait(false);
+
+                        _logger.Info($"[WamBroker] Filtering WAM accounts based on Environment.");
+
+                        wamAccounts = wamAccounts.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
+
+                        _logger.Info($"[WamBroker] {wamAccounts.Count()} account(s) returned after filtering.");
                     }
+                    
+                    foreach (var acc in wamAccounts)
+                    {
+                        accounts.Add(WamAdapters.ConvertToMsalAccount(acc, clientID, _logger));
+                    }
+
+                    _logger.Info($"[WamBroker] Converted {accounts.Count} WAM account(s) to MSAL IAccount.");
                 }
                 else
                 {
-                    _logger.Info("[WamBroker] No accounts returned from WAM.");
+                    string errorMessage =
+                        $" [WamBroker] \n" +
+                        $" Error Code: {discoverAccountsResult.Error.ErrorCode} \n" +
+                        $" Error Message: {discoverAccountsResult.Error.Context} \n" +
+                        $" Internal Error Code: {discoverAccountsResult.Error.Tag.ToString(CultureInfo.InvariantCulture)} \n";
+                    _logger.Error($"[WamBroker] {errorMessage}");
+
                     return Array.Empty<IAccount>();
                 }
             }

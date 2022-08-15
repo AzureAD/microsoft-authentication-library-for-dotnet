@@ -257,6 +257,7 @@ namespace Microsoft.Identity.Client.Broker
             }
             catch (NativeInterop.MsalRuntimeException ex)
             {
+                logger.Error($"[WamBroker] Could not acquire token using WAM. {ex.Message}");
                 throw new MsalServiceException("wam_failed", $"Could not acquire token using WAM. {ex.Message}");
             }
 
@@ -276,39 +277,38 @@ namespace Microsoft.Identity.Client.Broker
         /// </summary>
         /// <param name="wamAccount"></param>
         /// <param name="clientID"></param>
+        /// <param name="logger"></param>
         public static IAccount ConvertToMsalAccount(
                 NativeInterop.Account wamAccount, 
-                string clientID)
+                string clientID,
+                ILoggerAdapter logger)
         {
             IAccount runtimeAccount;
 
+            if (wamAccount.AccountId == null || 
+                wamAccount.HomeAccountid == null || 
+                wamAccount.Environment == null || 
+                wamAccount.HomeAccountid == null)
+            {
+                logger.Error($"[WamBroker] WAM Account properties are missing. Cannot convert to MSAL Accounts.");
+                throw new MsalServiceException("wam_failed", $"WAM Account properties are missing.");
+            }
+
             try
             {
-                string homeAccountId = GetHomeAccountId(wamAccount);
-
                 runtimeAccount = new Account(
-                    wamAccount.AccountId,
+                    wamAccount.HomeAccountid,
                     wamAccount.UserName,
                     wamAccount.Environment,
                     new Dictionary<string, string>() { { clientID, wamAccount.AccountId } });
-
             }
             catch (Exception ex)
             {
+                logger.Error($"[WamBroker] Could not convert into MSAL Account. {ex.Message}");
                 throw new MsalServiceException("wam_failed", $"Could not convert into MSAL Account. {ex.Message}");
             }
 
             return runtimeAccount;
-        }
-
-        /// <summary>
-        /// Gets the home account id from client info
-        /// </summary>
-        /// <returns></returns>
-        public static string GetHomeAccountId(NativeInterop.Account account)
-        {
-            string homeAccId = ClientInfo.CreateFromJson(account.ClientInfo).ToAccountIdentifier();
-            return homeAccId;
         }
     }
 }
