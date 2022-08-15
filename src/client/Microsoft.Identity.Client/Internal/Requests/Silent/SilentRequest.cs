@@ -21,6 +21,10 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         private readonly Lazy<ISilentAuthRequestStrategy> _brokerStrategyLazy;
         private readonly ILoggerAdapter _logger;
 
+        private bool IsBrokerConfigured => 
+            AuthenticationRequestParameters.AppConfig.IsBrokerEnabled &&
+            ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth();
+
         public SilentRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
@@ -46,10 +50,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
         {
             await UpdateRequestWithAccountAsync().ConfigureAwait(false);
 
-            bool isBrokerConfigured = AuthenticationRequestParameters.AppConfig.IsBrokerEnabled &&
-                                      ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth();
-
-            if (isBrokerConfigured && AuthenticationRequestParameters.PopAuthenticationConfiguration != null)
+            if (IsBrokerConfigured && AuthenticationRequestParameters.PopAuthenticationConfiguration != null)
             {
                 _logger.Info("[Silent Request] Attempting to use broker instead of searching local cache for Proof-of-Possession tokens. ");
 
@@ -76,7 +77,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             {
                 _logger.Verbose($"Token cache could not satisfy silent request.");
 
-                if (isBrokerConfigured && ShouldTryWithBrokerError(ex.ErrorCode))
+                if (IsBrokerConfigured && ShouldTryWithBrokerError(ex.ErrorCode))
                 {
                     _logger.Info("Attempting to use broker instead. ");
                     var brokerResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
@@ -91,7 +92,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             }
         }
 
-        private static HashSet<string> s_tryWithBrokerErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+        private static readonly HashSet<string> s_tryWithBrokerErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
             MsalError.InvalidGrantError,
             MsalError.InteractionRequired,
             MsalError.NoTokensFoundError,
@@ -144,7 +145,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                            a.Username.Equals(loginHint, StringComparison.OrdinalIgnoreCase))
                     .ToList();
 
-                if (accounts.Count == 0 && DesktopOsHelper.IsWindows())
+                if (accounts.Count == 0 && IsBrokerConfigured)
                 {
                     string currentUpn;
                     
@@ -159,7 +160,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     }
 
 
-                    if (currentUpn == loginHint)
+                    if (!string.IsNullOrEmpty(currentUpn) && currentUpn == loginHint)
                     {
                         accounts.Add(PublicClientApplication.OperatingSystemAccount);
                     }
