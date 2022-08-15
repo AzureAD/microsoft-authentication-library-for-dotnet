@@ -81,8 +81,8 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal static MsalRefreshTokenCacheItem FromJObject(JObject j)
         {
             var item = new MsalRefreshTokenCacheItem();
-            item.FamilyId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyId);
-            item.OboCacheKey = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash);
+            item.FamilyId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyId);
+            item.OboCacheKey = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash);
 
             item.PopulateFieldsFromJObject(j);
 

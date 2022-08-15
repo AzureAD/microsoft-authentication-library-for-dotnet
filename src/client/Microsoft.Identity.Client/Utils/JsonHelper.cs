@@ -1,11 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Json;
+using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Utils
 {
@@ -56,6 +59,66 @@ namespace Microsoft.Identity.Client.Utils
             using (var stream = new MemoryStream(jsonByteArray))
             using (var reader = new StreamReader(stream, Encoding.UTF8))
                 return (T)JsonSerializer.Create().Deserialize(reader, typeof(T));
+        }
+
+        public static string GetExistingOrEmptyString(JObject json, string key)
+        {
+            if (json.TryGetValue(key, out var val))
+            {
+                return val.ToObject<string>();
+            }
+
+            return string.Empty;
+        }
+
+        public static string ExtractExistingOrEmptyString(JObject json, string key)
+        {
+            if (json.TryGetValue(key, out var val))
+            {
+                string strVal = val.ToObject<string>();
+                json.Remove(key);
+                return strVal;
+            }
+
+            return string.Empty;
+        }
+
+        public static IDictionary<string, string> ExtractInnerJsonAsDictionary(JObject json, string key)
+        {
+            if (json.TryGetValue(key, out JToken val))
+            {
+                IDictionary<string, JToken> valueAsDict = (JObject)val;
+                Dictionary<string, string> dictionary =
+                    valueAsDict.ToDictionary(pair => pair.Key, pair => (string)pair.Value);
+
+                json.Remove(key);
+                return dictionary;
+            }
+
+            return null;
+        }
+
+        public static T ExtractExistingOrDefault<T>(JObject json, string key)
+        {
+            if (json.TryGetValue(key, out var val))
+            {
+                T obj = val.ToObject<T>();
+                json.Remove(key);
+                return obj;
+            }
+
+            return default;
+        }
+
+        public static long ExtractParsedIntOrZero(JObject json, string key)
+        {
+            string strVal = ExtractExistingOrEmptyString(json, key);
+            if (!string.IsNullOrWhiteSpace(strVal) && long.TryParse(strVal, out long result))
+            {
+                return result;
+            }
+
+            return 0;
         }
     }
 }

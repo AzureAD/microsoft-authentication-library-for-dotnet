@@ -14,9 +14,9 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal override void PopulateFieldsFromJObject(JObject j)
         {
-            HomeAccountId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.HomeAccountId);
-            Environment = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Environment);
-            RawClientInfo = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.ClientInfo);
+            HomeAccountId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.HomeAccountId);
+            Environment = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Environment);
+            RawClientInfo = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.ClientInfo);
 
             // Important: order matters.  This MUST be the last one called since it will extract the
             // remaining fields out.

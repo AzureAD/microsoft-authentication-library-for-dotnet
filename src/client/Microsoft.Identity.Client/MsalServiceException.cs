@@ -233,10 +233,10 @@ namespace Microsoft.Identity.Client
         {
             base.PopulateObjectFromJson(jobj);
 
-            Claims = JsonUtils.GetExistingOrEmptyString(jobj, ClaimsKey);
-            ResponseBody = JsonUtils.GetExistingOrEmptyString(jobj, ResponseBodyKey);
-            CorrelationId = JsonUtils.GetExistingOrEmptyString(jobj, CorrelationIdKey);
-            SubError = JsonUtils.GetExistingOrEmptyString(jobj, SubErrorKey);
+            Claims = JsonHelper.GetExistingOrEmptyString(jobj, ClaimsKey);
+            ResponseBody = JsonHelper.GetExistingOrEmptyString(jobj, ResponseBodyKey);
+            CorrelationId = JsonHelper.GetExistingOrEmptyString(jobj, CorrelationIdKey);
+            SubError = JsonHelper.GetExistingOrEmptyString(jobj, SubErrorKey);
         }
         #endregion
     }
