@@ -285,17 +285,17 @@ namespace Microsoft.Identity.Client.Broker
         {
             IAccount runtimeAccount;
 
-            if (wamAccount.AccountId == null || 
-                wamAccount.HomeAccountid == null || 
-                wamAccount.Environment == null || 
-                wamAccount.HomeAccountid == null)
-            {
-                logger.Error($"[WamBroker] WAM Account properties are missing. Cannot convert to MSAL Accounts.");
-                throw new MsalServiceException("wam_failed", $"WAM Account properties are missing.");
-            }
-
             try
             {
+                if (wamAccount.AccountId == null ||
+                wamAccount.HomeAccountid == null ||
+                wamAccount.Environment == null ||
+                wamAccount.HomeAccountid == null)
+                {
+                    logger.Error($"[WamBroker] WAM Account properties are missing. Cannot convert to MSAL Accounts.");
+                    throw new MsalServiceException("wam_failed", $"WAM Account properties are missing.");
+                }
+
                 runtimeAccount = new Account(
                     wamAccount.HomeAccountid,
                     wamAccount.UserName,
