@@ -290,8 +290,12 @@ namespace Microsoft.Identity.Client.Broker
                 if (wamAccount.AccountId == null ||
                 wamAccount.HomeAccountid == null ||
                 wamAccount.Environment == null ||
-                wamAccount.HomeAccountid == null)
+                wamAccount.UserName == null)
                 {
+                    logger.Info($"[WamBroker] wamAccount.AccountId: {wamAccount.AccountId}.");
+                    logger.Info($"[WamBroker] wamAccount.HomeAccountid: {wamAccount.HomeAccountid}.");
+                    logger.Info($"[WamBroker] wamAccount.Environment: {wamAccount.Environment}.");
+                    logger.Info($"[WamBroker] wamAccount.UserName: {wamAccount.UserName}.");
                     logger.Error($"[WamBroker] WAM Account properties are missing. Cannot convert to MSAL Accounts.");
                     throw new MsalServiceException("wam_failed", $"WAM Account properties are missing.");
                 }
