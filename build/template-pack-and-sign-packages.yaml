@@ -38,7 +38,7 @@ steps:
     solution: 'LibsAndSamples.sln'
     msbuildArgs: '/t:restore'
     platform: 'any cpu'
-    configuration: 'debug'
+    configuration: 'Release'
 
 # Run Post-build code analysis (e.g. Roslyn)
 - template: template-postbuild-code-analysis.yaml
