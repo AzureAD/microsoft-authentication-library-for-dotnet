@@ -319,7 +319,7 @@ namespace Microsoft.Identity.Client.Broker
             }
             catch (Exception ex)
             {
-                logger.Error($"[WamBroker] Could not convert into MSAL Account. {ex.Message}");
+                logger.Error($"[WamBroker] Could not convert WAM account into MSAL account. {ex.Message}");
                 throw new MsalServiceException("wam_failed", $"Could not convert into MSAL Account. {ex.Message}");
             }
 
