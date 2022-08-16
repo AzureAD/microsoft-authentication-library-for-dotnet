@@ -164,6 +164,6 @@ namespace Microsoft.Identity.Client
         /// Used to determine if the currently available broker is able to perform Proof-of-Possesion.
         /// </summary>
         /// <returns>Boolean indicating Proof-of-Possesion is supported</returns>
-        public bool IsProofOfPosessionSupportedByClient();
+        public bool IsProofOfPossessionSupportedByClient();
     }
 }
