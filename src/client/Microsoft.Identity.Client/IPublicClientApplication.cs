@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client
             string password);
 
         /// <summary>
-        /// Used to determine if the currently available broker is able to perform Proof-of-Possesion.
+        /// Used to determine if the currently available broker is able to perform Proof-of-Possession.
         /// </summary>
         /// <returns>Boolean indicating Proof-of-Possesion is supported</returns>
         public bool IsProofOfPossessionSupportedByClient();
