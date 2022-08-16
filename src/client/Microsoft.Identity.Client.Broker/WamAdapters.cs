@@ -287,16 +287,27 @@ namespace Microsoft.Identity.Client.Broker
 
             try
             {
-                if (wamAccount.AccountId == null ||
-                    wamAccount.HomeAccountid == null ||
-                    wamAccount.Environment == null ||
-                    wamAccount.UserName == null)
+                if (string.IsNullOrEmpty(wamAccount.AccountId) ||
+                    string.IsNullOrEmpty(wamAccount.HomeAccountid) ||
+                    string.IsNullOrEmpty(wamAccount.Environment) ||
+                    string.IsNullOrEmpty(wamAccount.UserName))
                 {
-                    logger.Info($"[WamBroker] wamAccount.AccountId: {wamAccount.AccountId}.");
-                    logger.Info($"[WamBroker] wamAccount.HomeAccountid: {wamAccount.HomeAccountid}.");
+                    logger.InfoPii(
+                        $"[WamBroker] wamAccount.AccountId: {wamAccount.AccountId}.",
+                        $"[WamBroker] wamAccount.AccountId: {string.IsNullOrEmpty(wamAccount.AccountId)}.");
+
+                    logger.InfoPii(
+                        $"[WamBroker] wamAccount.HomeAccountid: {wamAccount.HomeAccountid}.",
+                        $"[WamBroker] wamAccount.HomeAccountid: {string.IsNullOrEmpty(wamAccount.HomeAccountid)}.");
+                    
                     logger.Info($"[WamBroker] wamAccount.Environment: {wamAccount.Environment}.");
-                    logger.Info($"[WamBroker] wamAccount.UserName: {wamAccount.UserName}.");
+                    
+                    logger.InfoPii(
+                        $"[WamBroker] wamAccount.UserName: {wamAccount.UserName}.",
+                        $"[WamBroker] wamAccount.UserName: {string.IsNullOrEmpty(wamAccount.UserName)}.");
+
                     logger.Error($"[WamBroker] WAM Account properties are missing. Cannot convert to MSAL Accounts.");
+                    
                     throw new MsalServiceException("wam_failed", $"WAM Account properties are missing.");
                 }
 

@@ -396,14 +396,14 @@ namespace Microsoft.Identity.Client.Broker
                 return Array.Empty<IAccount>();
             }
 
-            string correlationId = Guid.NewGuid().ToString();
-            List<IAccount> accounts = new List<IAccount>();
+            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
+
+            List<IAccount> msalAccounts = new List<IAccount>();
             var requestContext = cacheSessionManager.RequestContext;
 
-            using (var core = new NativeInterop.Core())
-            using (var discoverAccountsResult = await core.DiscoverAccountsAsync(
-                clientID, 
-                correlationId, 
+            using (var discoverAccountsResult = await s_lazyCore.Value.DiscoverAccountsAsync(
+                clientID,
+                cacheSessionManager.RequestContext.CorrelationId.ToString("D"), 
                 cacheSessionManager.RequestContext.UserCancellationToken).ConfigureAwait(false))
             {
                 if (discoverAccountsResult.IsSuccess)
@@ -412,14 +412,14 @@ namespace Microsoft.Identity.Client.Broker
 
                     _logger.Info($"[WamBroker] Broker returned {wamAccounts.Count()} account(s).");
 
-                    //If "multi-cloud" is enabled, we do not have do instanceMetadata matching
+                    //If "multi-cloud" is enabled, we do not have to do instanceMetadata matching
                     if (!requestContext.ServiceBundle.Config.MultiCloudSupportEnabled)
                     {
-                        var environment = discoverAccountsResult.Accounts.Select(acc => acc.Environment).ToList();
+                        var environmentList = discoverAccountsResult.Accounts.Select(acc => acc.Environment).ToList();
 
                         var instanceMetadata = await instanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                                 authorityInfo,
-                                environment,
+                                environmentList,
                                 requestContext).ConfigureAwait(false);
 
                         _logger.Info($"[WamBroker] Filtering WAM accounts based on Environment.");
@@ -431,10 +431,10 @@ namespace Microsoft.Identity.Client.Broker
                     
                     foreach (var acc in wamAccounts)
                     {
-                        accounts.Add(WamAdapters.ConvertToMsalAccount(acc, clientID, _logger));
+                        msalAccounts.Add(WamAdapters.ConvertToMsalAccount(acc, clientID, _logger));
                     }
 
-                    _logger.Info($"[WamBroker] Converted {accounts.Count} WAM account(s) to MSAL IAccount.");
+                    _logger.Info($"[WamBroker] Converted {msalAccounts.Count} WAM account(s) to MSAL Account(s).");
                 }
                 else
                 {
@@ -450,7 +450,7 @@ namespace Microsoft.Identity.Client.Broker
                 }
             }
 
-            return accounts;
+            return msalAccounts;
         }
 
         public void HandleInstallUrl(string appLink)
