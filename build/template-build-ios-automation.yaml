@@ -46,7 +46,7 @@ steps:
   displayName: 'Build Xamarin.iOS solution LibsMacOS.sln'
   inputs:
     solutionFile: LibsMacOS.sln
-    configuration: Debug
+    configuration: Release
     clean: true
     runNugetRestore: false
     args: '/p:APPCENTER_BUILD=1 /p:RunCodeAnalysis=false'
