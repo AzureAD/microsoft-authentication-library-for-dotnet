@@ -1268,7 +1268,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
 #if NET_CORE
         [TestMethod]
-        public void CheckRuntimeBrokerSupportTest()
+        public void CheckPopRuntimeBrokerSupportTest()
         {
             //Broker enabled
             IPublicClientApplication app = PublicClientApplicationBuilder
@@ -1289,6 +1289,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             //Broker not configured
             app = PublicClientApplicationBuilder
                                 .Create(TestConstants.ClientId)
+                                .Build();
+
+            Assert.IsFalse(app.IsProofOfPosessionSupportedByClient());
+
+            //App configured for desktop Broker
+            app = PublicClientApplicationBuilder
+                                .Create(TestConstants.ClientId)
+                                .WithBroker()
                                 .Build();
 
             Assert.IsFalse(app.IsProofOfPosessionSupportedByClient());

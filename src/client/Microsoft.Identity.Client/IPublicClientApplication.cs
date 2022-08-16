@@ -159,11 +159,5 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             string username,
             string password);
-
-        /// <summary>
-        /// Used to determine if the currently available broker is able to perform Proof-of-Possession.
-        /// </summary>
-        /// <returns>Boolean indicating Proof-of-Possession is supported</returns>
-        public bool IsProofOfPossessionSupportedByClient();
     }
 }

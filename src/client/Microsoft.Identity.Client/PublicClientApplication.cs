@@ -273,22 +273,16 @@ namespace Microsoft.Identity.Client
                 password);
         }
 
-        /// <summary>
-        /// Used to determine if the currently available broker is able to perform Proof-of-Possession.
-        /// </summary>
-        /// <returns>Boolean indicating Proof-of-Possession is supported</returns>
-        /// <exception cref="MsalClientException"></exception>
-        public bool IsProofOfPossessionSupportedByClient()
+        internal bool IsProofOfPosessionSupportedByClient()
         {
-            if (DesktopOsHelper.IsWin10OrServerEquivalent())
+            if (!ServiceBundle.Config.IsBrokerEnabled)
             {
-                if (!ServiceBundle.Config.IsBrokerEnabled)
-                {
-                    return false;
-                }
-
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
-                return broker.IsPopSupported;
+
+                if (broker.IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType))
+                {
+                    return broker.IsPopSupported;
+                }
             }
 
             return false;
