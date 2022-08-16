@@ -31,7 +31,7 @@ steps:
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
   inputs:
-    solution: 'LibsAndSamples.sln'
+    solution: 'Libs.sln'
     msbuildArgs: '/t:restore'
     platform: 'any cpu'
     configuration: 'Release'
