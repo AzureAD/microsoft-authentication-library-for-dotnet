@@ -526,10 +526,20 @@ namespace Microsoft.Identity.Client
         {
             ValidateUseOfExperimentalFeature("ITelemetryClient");
 
-            if (telemetryClients.Length > 0)
+            if (telemetryClients == null)
+            {
+                throw new ArgumentNullException(nameof(telemetryClients));
+            }
+
+            if (telemetryClients != null && telemetryClients.Length > 0)
             {
                 foreach (var telemetryClient in telemetryClients)
                 {
+                    if (telemetryClient == null)
+                    { 
+                        throw new ArgumentNullException(nameof(telemetryClient));
+                    }
+
                     telemetryClient.Initialize();
                 }
 
