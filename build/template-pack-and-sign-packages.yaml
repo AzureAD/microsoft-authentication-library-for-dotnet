@@ -2,11 +2,12 @@ parameters:
   PublishArtifacts: 'false'
 
 steps:
-- task: DownloadBuildArtifacts@0
+- task: DownloadPipelineArtifact@2
   displayName: 'Download Drop'
   inputs:
-    artifactName: drop
-    itemPattern: '**/*'
+    artifact: drop
+    patterns: '**/*'
+    path: $(Build.artifactstagingdirectory)/drop
 
 - task: CopyFiles@2
   displayName: 'Get MSAL src'

@@ -64,7 +64,8 @@ steps:
     CleanTargetFolder: true
     OverWrite: true
 
-- task: PublishBuildArtifacts@1
+- task: PublishPipelineArtifact@1
   displayName: 'Publish Artifact: Xamarin.iOS'
   inputs:
-    ArtifactName: Xamarin.iOS
+    targetPath: $(build.artifactstagingdirectory)
+    artifactName: Xamarin.iOS
