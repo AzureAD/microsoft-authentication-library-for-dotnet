@@ -401,7 +401,10 @@ namespace Microsoft.Identity.Client.Broker
             var requestContext = cacheSessionManager.RequestContext;
 
             using (var core = new NativeInterop.Core())
-            using (var discoverAccountsResult = await core.DiscoverAccountsAsync(clientID, correlationId).ConfigureAwait(false))
+            using (var discoverAccountsResult = await core.DiscoverAccountsAsync(
+                clientID, 
+                correlationId, 
+                cacheSessionManager.RequestContext.UserCancellationToken).ConfigureAwait(false))
             {
                 if (discoverAccountsResult.IsSuccess)
                 {
@@ -439,7 +442,8 @@ namespace Microsoft.Identity.Client.Broker
                         $" [WamBroker] \n" +
                         $" Error Code: {discoverAccountsResult.Error.ErrorCode} \n" +
                         $" Error Message: {discoverAccountsResult.Error.Context} \n" +
-                        $" Internal Error Code: {discoverAccountsResult.Error.Tag.ToString(CultureInfo.InvariantCulture)} \n";
+                        $" Internal Error Code: {discoverAccountsResult.Error.Tag.ToString(CultureInfo.InvariantCulture)} \n" +
+                        $" Telemetry Data: {discoverAccountsResult.TelemetryData } \n";
                     _logger.Error($"[WamBroker] {errorMessage}");
 
                     return Array.Empty<IAccount>();
