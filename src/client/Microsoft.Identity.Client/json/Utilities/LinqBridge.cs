@@ -3032,6 +3032,8 @@ namespace Microsoft.Identity.Json.Utilities.LinqBridge
   }
 }
 
+
+#if !(__MACOS__ || __IOS__ || __ANDROID__)
 namespace Microsoft.Identity.Json.Serialization
 {
 #pragma warning disable 1591
@@ -3054,6 +3056,7 @@ namespace Microsoft.Identity.Json.Serialization
   public delegate void Action<T1, T2, T3, T4>(T1 arg1, T2 arg2, T3 arg3, T4 arg4);
 #pragma warning restore 1591
 }
+#endif
 
 namespace System.Runtime.CompilerServices
 {

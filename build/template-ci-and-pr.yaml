@@ -24,7 +24,7 @@ steps:
   parameters:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
-    Solution: 'LibsAndSamples.sln'
+    Solution: 'Libs.sln'
 
 # Run All Tests
 - template: template-run-all-tests.yaml

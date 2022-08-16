@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32804.467
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client", "..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj", "{74680ECC-6BBF-4284-874A-D66E3BEF9171}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug + MobileApps|Any CPU = Debug + MobileApps|Any CPU
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{74680ECC-6BBF-4284-874A-D66E3BEF9171}.Debug + MobileApps|Any CPU.ActiveCfg = Debug + MobileApps|Any CPU
+		{74680ECC-6BBF-4284-874A-D66E3BEF9171}.Debug + MobileApps|Any CPU.Build.0 = Debug + MobileApps|Any CPU
+		{74680ECC-6BBF-4284-874A-D66E3BEF9171}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74680ECC-6BBF-4284-874A-D66E3BEF9171}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74680ECC-6BBF-4284-874A-D66E3BEF9171}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74680ECC-6BBF-4284-874A-D66E3BEF9171}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ACDB7A71-CE07-4B45-882D-E03C9ED0C45E}
+	EndGlobalSection
+EndGlobal

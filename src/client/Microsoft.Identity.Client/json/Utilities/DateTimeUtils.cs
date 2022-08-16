@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Json.Utilities
 
         public static TimeSpan GetUtcOffset(this DateTime d)
         {
-#if !HAVE_TIME_ZONE_INFO
+#if !HAVE_TIME_ZONE_INFO && !__ANDROID__ && !__IOS__ && !__MACOS__
             return TimeZone.CurrentTimeZone.GetUtcOffset(d);
 #else
             return TimeZoneInfo.Local.GetUtcOffset(d);
