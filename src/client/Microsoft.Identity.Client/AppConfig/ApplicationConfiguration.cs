@@ -98,6 +98,8 @@ namespace Microsoft.Identity.Client
         public bool CacheSynchronizationEnabled { get; internal set; } = true;
         public bool MultiCloudSupportEnabled { get; set; } = false;
 
+        public bool RetryOnServerErrors { get; set; } = true;
+
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
 #region ClientCredentials

@@ -517,6 +517,19 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
+        /// <summary>
+        /// Configures MSAL to retry on 5xx server errors. When enabled (on by default), MSAL will wait 1 second after recieving a 5xx error and then retry the
+        /// http request again.
+        /// </summary>
+        /// <param name="shouldRetry">Determines if MSAL should retry on 5xx errors.</param>
+        /// <returns></returns>
+        public T WithRetryOnServerErrors(bool shouldRetry)
+        {
+            Config.RetryOnServerErrors = shouldRetry;
+
+            return (T)this;
+        }
+
         internal virtual void Validate()
         {
             if (string.IsNullOrWhiteSpace(Config.ClientId))

@@ -24,8 +24,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         private readonly TestContext _testContext;
         public Func<MockHttpMessageHandler> MessageHandlerFunc;
 
-        public MockHttpManager(TestContext testContext = null) :
-            base(new SimpleHttpClientFactory())
+        public MockHttpManager(TestContext testContext = null, bool retry = true) :
+            base(new SimpleHttpClientFactory(), retry)
         {
             _testContext = testContext;
         }
