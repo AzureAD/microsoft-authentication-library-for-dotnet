@@ -392,7 +392,7 @@ namespace Microsoft.Identity.Client.Broker
         {
             if (!_wamOptions.ListWindowsWorkAndSchoolAccounts)
             {
-                _logger.Info("[WamBroker] Returning no accounts due to configuration option.");
+                _logger.Info("[WamBroker] ListWindowsWorkAndSchoolAccounts option was not enabled.");
                 return Array.Empty<IAccount>();
             }
 
@@ -410,7 +410,7 @@ namespace Microsoft.Identity.Client.Broker
                 {
                     IEnumerable<NativeInterop.Account> wamAccounts = discoverAccountsResult.Accounts;
 
-                    _logger.Info($"[WamBroker] Broker returned {wamAccounts.Count()} account(s).");
+                    _logger.Verbose($"[WamBroker] Broker returned {wamAccounts.Count()} account(s).");
 
                     //If "multi-cloud" is enabled, we do not have to do instanceMetadata matching
                     if (!requestContext.ServiceBundle.Config.MultiCloudSupportEnabled)
@@ -422,11 +422,11 @@ namespace Microsoft.Identity.Client.Broker
                                 environmentList,
                                 requestContext).ConfigureAwait(false);
 
-                        _logger.Info($"[WamBroker] Filtering WAM accounts based on Environment.");
+                        _logger.Verbose($"[WamBroker] Filtering WAM accounts based on Environment.");
 
                         wamAccounts = wamAccounts.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
 
-                        _logger.Info($"[WamBroker] {wamAccounts.Count()} account(s) returned after filtering.");
+                        _logger.Verbose($"[WamBroker] {wamAccounts.Count()} account(s) returned after filtering.");
                     }
                     
                     foreach (var acc in wamAccounts)
@@ -434,7 +434,7 @@ namespace Microsoft.Identity.Client.Broker
                         msalAccounts.Add(WamAdapters.ConvertToMsalAccount(acc, clientID, _logger));
                     }
 
-                    _logger.Info($"[WamBroker] Converted {msalAccounts.Count} WAM account(s) to MSAL Account(s).");
+                    _logger.Verbose($"[WamBroker] Converted {msalAccounts.Count} WAM account(s) to MSAL Account(s).");
                 }
                 else
                 {
