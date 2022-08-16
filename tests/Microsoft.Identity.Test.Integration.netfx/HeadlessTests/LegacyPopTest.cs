@@ -7,12 +7,14 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
+using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
@@ -24,7 +26,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class LegacyPopTests
     {
         [TestMethod]
-        public async Task LegacyPoPAsync()
+        public async Task LegacyPoP_S2S_Async()
         {
             IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
             X509Certificate2 clientCredsCert = settings.GetCertificate();
@@ -41,7 +43,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithProofOfPossessionKeyId(popKey.KeyId)
                 .OnBeforeTokenRequest((data) =>
                     {
-                        ModifyRequestWithLegacyPop(data, settings, clientCredsCert, popKey);
+                        ModifyRequestWithLegacyPop(data, settings.ClientId, clientCredsCert, popKey);
                         return Task.CompletedTask;
                     })
                 .ExecuteAsync().ConfigureAwait(false);
@@ -54,7 +56,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithProofOfPossessionKeyId(popKey.KeyId)
                 .OnBeforeTokenRequest((data) =>
                 {
-                    ModifyRequestWithLegacyPop(data, settings, clientCredsCert, popKey);
+                    ModifyRequestWithLegacyPop(data, settings.ClientId, clientCredsCert, popKey);
                     return Task.CompletedTask;
                 }).ExecuteAsync().ConfigureAwait(false);
 
@@ -68,7 +70,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithProofOfPossessionKeyId(popKey2.KeyId)
                 .OnBeforeTokenRequest((data) =>
                 {
-                    ModifyRequestWithLegacyPop(data, settings, clientCredsCert, popKey2);
+                    ModifyRequestWithLegacyPop(data, settings.ClientId, clientCredsCert, popKey2);
                     return Task.CompletedTask;
                 }).ExecuteAsync().ConfigureAwait(false);
 
@@ -78,11 +80,82 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(ats.SingleOrDefault(a => a.KeyId == popKey.KeyId));
         }
 
-        private static void ModifyRequestWithLegacyPop(OnBeforeTokenRequestData data, IConfidentialAppSettings settings, X509Certificate2 clientCredsCert, RsaSecurityKey popKey)
+        [TestMethod]
+        public async Task LegacyPoP_OBO_Async()
+        {
+            // Setup: Get lab users, create PCA and get user tokens
+            var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+
+            // Step 1: Simualte the client, use a public client username / password for simplicity
+            var pca = PublicClientApplicationBuilder
+                .Create(OboTests.PublicClientID)
+                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                .Build();
+
+            var user1AuthResult = await pca
+                .AcquireTokenByUsernamePassword(OboTests.s_oboServiceScope, user1.Upn, user1.GetOrFetchPassword())
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            // Step 2 - OBO
+
+            IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            X509Certificate2 clientCredsCert = settings.GetCertificate();
+            RsaSecurityKey popKey = CreateRsaSecurityKey();
+
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(settings.ClientId)
+                .WithAuthority(settings.Authority, true)
+                .WithExperimentalFeatures(true)
+                .WithTestLogging()
+                .Build();
+
+            var result = await cca.AcquireTokenOnBehalfOf(OboTests.s_scopes, new UserAssertion(user1AuthResult.AccessToken))
+                .WithProofOfPossessionKeyId(popKey.KeyId)
+                .OnBeforeTokenRequest((data) =>
+                {
+                    ModifyRequestWithLegacyPop(data, settings.ClientId, clientCredsCert, popKey);
+                    return Task.CompletedTask;
+                })
+                .ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            MsalAccessTokenCacheItem at = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single();
+            Assert.AreEqual(at.KeyId, popKey.KeyId);
+
+            result = await cca.AcquireTokenForClient(settings.AppScopes)
+                .WithProofOfPossessionKeyId(popKey.KeyId)
+                .OnBeforeTokenRequest((data) =>
+                {
+                    ModifyRequestWithLegacyPop(data, settings.ClientId, clientCredsCert, popKey);
+                    return Task.CompletedTask;
+                }).ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            at = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens().Single();
+            Assert.AreEqual(at.KeyId, popKey.KeyId);
+
+            RsaSecurityKey popKey2 = CreateRsaSecurityKey();
+
+            result = await cca.AcquireTokenForClient(settings.AppScopes)
+                .WithProofOfPossessionKeyId(popKey2.KeyId)
+                .OnBeforeTokenRequest((data) =>
+                {
+                    ModifyRequestWithLegacyPop(data, settings.ClientId, clientCredsCert, popKey2);
+                    return Task.CompletedTask;
+                }).ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            var ats = (cca.AppTokenCache as ITokenCacheInternal).Accessor.GetAllAccessTokens();
+            Assert.IsNotNull(ats.SingleOrDefault(a => a.KeyId == popKey2.KeyId));
+            Assert.IsNotNull(ats.SingleOrDefault(a => a.KeyId == popKey.KeyId));
+        }
+
+        public static void ModifyRequestWithLegacyPop(OnBeforeTokenRequestData data, string clientId, X509Certificate2 clientCredsCert, RsaSecurityKey popKey)
         {
             var clientCredsSigningCredentials = new SigningCredentials(new X509SecurityKey(clientCredsCert), SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256);
             string request = CreateMs10ATPOPAssertion(
-                settings.ClientId,
+                clientId,
                 data.RequestUri.AbsoluteUri,
                 clientCredsSigningCredentials,
                 popKey,
@@ -91,7 +164,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             data.BodyParameters.Add("request", request);
         }
 
-        private static RsaSecurityKey CreateRsaSecurityKey()
+        public static RsaSecurityKey CreateRsaSecurityKey()
         {
 #if NET472
             RSA rsa = RSA.Create(2048);

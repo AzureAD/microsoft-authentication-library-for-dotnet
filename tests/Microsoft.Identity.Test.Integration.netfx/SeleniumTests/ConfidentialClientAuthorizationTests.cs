@@ -9,13 +9,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Advanced;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Integration.HeadlessTests;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
@@ -113,7 +116,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             cca = ConfidentialClientApplicationBuilder
                 .Create(appId)
                 .WithAuthority(authority)
-                .WithCertificate(cert)
+                 .WithCertificate(cert)
+                 .WithExperimentalFeatures(true)
                 .WithRedirectUri(redirectUri)
                 .WithTestLogging(out factory)
                 .Build();
@@ -153,12 +157,29 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.AreEqual(AuthorizationStatus.Success, authorizationResult.Status);
 
             factory.RequestsAndResponses.Clear();
+            RsaSecurityKey popKey = LegacyPopTests.CreateRsaSecurityKey();
 
             Trace.WriteLine("Part 3 - Get a token using the auth code, just like a website");
-             var result = await cca.AcquireTokenByAuthorizationCode(s_scopes, authorizationResult.Code)
+
+            cca = ConfidentialClientApplicationBuilder
+               .Create(appId)
+               .WithAuthority(authority)
+                //.WithCertificate(cert)
+                .WithExperimentalFeatures(true)
+               .WithRedirectUri(redirectUri)
+               .WithTestLogging(out factory)
+               .Build();
+
+            var result = await cca.AcquireTokenByAuthorizationCode(s_scopes, authorizationResult.Code)
                 .WithPkceCodeVerifier(codeVerifier)
                 .WithExtraHttpHeaders(TestConstants.ExtraHttpHeader)
                 .WithSpaAuthorizationCode(spaCode)
+                .WithProofOfPossessionKeyId(popKey.KeyId)
+                .OnBeforeTokenRequest((data) =>
+                {
+                    LegacyPopTests.ModifyRequestWithLegacyPop(data, appId, cert, popKey);
+                    return Task.CompletedTask;
+                })
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
