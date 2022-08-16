@@ -276,9 +276,9 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Used to determine if the currently available broker is able to perform Proof-of-Possession.
         /// </summary>
-        /// <returns>Boolean indicating Proof-of-Possesion is supported</returns>
+        /// <returns>Boolean indicating Proof-of-Possession is supported</returns>
         /// <exception cref="MsalClientException"></exception>
-        public bool IsProofOfPosessionSupportedByClient()
+        public bool IsProofOfPossessionSupportedByClient()
         {
             if (DesktopOsHelper.IsWin10OrServerEquivalent())
             {
