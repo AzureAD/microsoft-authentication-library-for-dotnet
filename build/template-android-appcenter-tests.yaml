@@ -1,5 +1,5 @@
 parameters:
-  DataFileDirectory: 'Debug'
+  DataFileDirectory: 'Release'
 
 steps:
 

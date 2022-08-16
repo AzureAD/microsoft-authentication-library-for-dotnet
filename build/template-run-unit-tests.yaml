@@ -2,7 +2,7 @@
 # Run all unit tests across the LibsAndSamples.sln project
 
 parameters:
-  BuildConfiguration: 'debug'
+  BuildConfiguration: 'Release'
 
 steps:
 
