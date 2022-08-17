@@ -3,7 +3,7 @@
 
 parameters:
   BuildPlatform: 'any cpu'
-  BuildConfiguration: 'debug'
+  BuildConfiguration: 'Release'
   
 steps:
 - task: UseDotNet@2
