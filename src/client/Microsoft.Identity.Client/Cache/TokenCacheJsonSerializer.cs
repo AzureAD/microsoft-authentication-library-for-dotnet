@@ -5,7 +5,11 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Utils;
+#if NET6_0_OR_GREATER
+using JToken = System.Text.Json.Nodes.JsonNode;
+#else
 using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.Cache
 {

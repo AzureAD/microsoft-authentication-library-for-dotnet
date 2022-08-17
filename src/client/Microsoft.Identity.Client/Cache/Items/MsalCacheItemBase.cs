@@ -2,7 +2,11 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.Utils;
+#if NET6_0_OR_GREATER
+using JObject = System.Text.Json.Nodes.JsonObject;
+#else
 using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.Cache.Items
 {

@@ -1,26 +1,36 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using Microsoft.Identity.Client.Utils;
+#if !NET6_0_OR_GREATER
 using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client.Cache
 {
+#if !NET6_0_OR_GREATER
     [JsonObject]
+#endif
     [Preserve(AllMembers = true)]
     internal class AdalResultWrapper
     {
+
+#if !NET6_0_OR_GREATER
         [JsonProperty]
+#endif
         public AdalResult Result { get; set; }
 
+#if !NET6_0_OR_GREATER
         [JsonProperty]
+#endif
         public string RawClientInfo { get; set; }
 
         /// <summary>
         /// Gets the Refresh Token associated with the requested Access Token. Note: not all operations will return a Refresh Token.
         /// </summary>
+#if !NET6_0_OR_GREATER
         [JsonProperty]
+#endif
         public string RefreshToken { get; set; }
 
         /// <summary>
@@ -30,7 +40,9 @@ namespace Microsoft.Identity.Client.Cache
 
         // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
         // to get it from the STS response.
+#if !NET6_0_OR_GREATER
         [JsonProperty]
+#endif
         internal string ResourceInResponse { get; set; }
 
         /// <summary>
@@ -51,9 +63,9 @@ namespace Microsoft.Identity.Client.Cache
             return JsonHelper.SerializeToJson(this);
         }
 
-        internal Exception Exception { get; set; }
-
+#if !NET6_0_OR_GREATER
         [JsonProperty]
+#endif
         public string UserAssertionHash { get; set; }
 
         internal AdalResultWrapper Clone()

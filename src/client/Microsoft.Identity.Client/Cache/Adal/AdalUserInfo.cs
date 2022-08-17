@@ -2,14 +2,20 @@
 // Licensed under the MIT License.
 
 using System;
+#if NET6_0_OR_GREATER
+using JsonProperty = System.Text.Json.Serialization.JsonIncludeAttribute;
+#else
 using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client.Cache
 {
     /// <summary>
     /// Contains information of a single user. This information is used for token cache lookup. Also if created with userId, userId is sent to the service when login_hint is accepted.
     /// </summary>
+#if !NET6_0_OR_GREATER
     [JsonObject]
+#endif
     [Preserve(AllMembers = true)]
     internal sealed class AdalUserInfo
     {

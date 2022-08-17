@@ -7,8 +7,11 @@ using System.Linq;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
+#if NET6_0_OR_GREATER
+using JObject = System.Text.Json.Nodes.JsonObject;
+#else
 using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -56,7 +59,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 preferredUsername,
                 tenantId,
                 idToken?.GivenName,
-                idToken?.FamilyName, 
+                idToken?.FamilyName,
                 wamAccountIds);
         }
 
@@ -69,7 +72,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string preferredUsername,
             string tenantId,
             string givenName,
-            string familyName, 
+            string familyName,
             IDictionary<string, string> wamAccountIds)
             : this()
         {
@@ -111,7 +114,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string preferredUsername,
             string tenantId,
             string givenName,
-            string familyName, 
+            string familyName,
             IDictionary<string, string> wamAccountIds)
         {
             Environment = environment;
@@ -138,7 +141,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 return null;
             }
 
-            return FromJObject(JObject.Parse(json));
+            return FromJObject(JsonHelper.ParseIntoJsonObject(json));
         }
 
         internal static MsalAccountCacheItem FromJObject(JObject j)
@@ -173,7 +176,18 @@ namespace Microsoft.Identity.Client.Cache.Items
             SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);
             if (WamAccountIds != null && WamAccountIds.Any())
             {
-                json[StorageJsonKeys.WamAccountIds] = JObject.FromObject(WamAccountIds);                
+#if NET6_0_OR_GREATER
+                var obj = new JsonObject();
+
+                foreach (KeyValuePair<string, string> accId in WamAccountIds)
+                {
+                    obj[accId.Key] = accId.Value;
+                }
+
+                json[StorageJsonKeys.WamAccountIds] = obj;
+#else
+                json[StorageJsonKeys.WamAccountIds] = JObject.FromObject(WamAccountIds);
+#endif
             }
 
             return json;

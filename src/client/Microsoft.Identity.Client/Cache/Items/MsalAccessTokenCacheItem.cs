@@ -3,12 +3,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
+#if NET6_0_OR_GREATER
+using JObject = System.Text.Json.Nodes.JsonObject;
+#else
 using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -155,7 +158,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 return null;
             }
 
-            return FromJObject(JObject.Parse(json));
+            return FromJObject(JsonHelper.ParseIntoJsonObject(json));
         }
 
         internal static MsalAccessTokenCacheItem FromJObject(JObject j)
@@ -211,7 +214,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 json,
                 StorageJsonKeys.RefreshOn,
                 RefreshOn.HasValue ? DateTimeHelpers.DateTimeToUnixTimestamp(RefreshOn.Value) : null);
-            
+
             // previous versions of MSAL used "ext_expires_on" instead of the correct "extended_expires_on".
             // this is here for back compatibility
             SetItemIfValueNotNull(json, StorageJsonKeys.ExtendedExpiresOn_MsalCompat, extExpiresUnixTimestamp);
@@ -231,7 +234,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 TenantId,
                 HomeAccountId,
                 ClientId,
-                ScopeString, 
+                ScopeString,
                 TokenType);
         }
 

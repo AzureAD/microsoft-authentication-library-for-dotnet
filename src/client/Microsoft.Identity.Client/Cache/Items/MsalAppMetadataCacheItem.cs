@@ -5,7 +5,11 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Utils;
+#if NET6_0_OR_GREATER
+using JObject = System.Text.Json.Nodes.JsonObject;
+#else
 using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -50,7 +54,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 return null;
             }
 
-            return FromJObject(JObject.Parse(json));
+            return FromJObject(JsonHelper.ParseIntoJsonObject(json));
         }
 
         internal static MsalAppMetadataCacheItem FromJObject(JObject j)
@@ -88,10 +92,10 @@ namespace Microsoft.Identity.Client.Cache.Items
         public override int GetHashCode()
         {
             var hashCode = -1793347351;
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ClientId);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Environment);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(FamilyId);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AdditionalFieldsJson);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(ClientId);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Environment);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(FamilyId);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(AdditionalFieldsJson);
 
             return hashCode;
         }

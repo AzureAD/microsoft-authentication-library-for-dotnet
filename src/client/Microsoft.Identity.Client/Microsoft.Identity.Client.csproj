@@ -46,7 +46,7 @@
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
-    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.7.1</MsalClientSemVer>
+    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.46.0</MsalClientSemVer>
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
     <Version>$(MsalClientSemVer)</Version>
 
