@@ -19,6 +19,7 @@ steps:
 
 #Workaround for Xamarin iOS/MAC build issue. See https://github.com/actions/runner-images/issues/6082
 - task: PowerShell@2
+  displayName: 'Installing Xamarin iOS/macOS components'
   inputs:
     targetType: 'inline'
     script: |
