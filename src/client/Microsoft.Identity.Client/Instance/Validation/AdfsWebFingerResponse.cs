@@ -3,7 +3,12 @@
 
 using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
+#if NET6_0_OR_GREATER
+using System.Text.Json.Nodes;
+using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+#else
 using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client.Instance.Validation
 {
@@ -15,25 +20,29 @@ namespace Microsoft.Identity.Client.Instance.Validation
         public const string Href = "href";
     }
 
+#if !NET6_0_OR_GREATER
     [JsonObject(Title = AdfsWebFingerResponseClaim.Links)]
+#endif
     [Preserve(AllMembers = true)]
     internal class LinksList
     {
-        [JsonProperty(PropertyName = AdfsWebFingerResponseClaim.Rel)]
+        [JsonProperty(AdfsWebFingerResponseClaim.Rel)]
         public string Rel { get; set; }
 
-        [JsonProperty(PropertyName = AdfsWebFingerResponseClaim.Href)]
+        [JsonProperty(AdfsWebFingerResponseClaim.Href)]
         public string Href { get; set; }
     }
 
+#if !NET6_0_OR_GREATER
     [JsonObject]
+#endif
     [Preserve(AllMembers = true)]
     internal class AdfsWebFingerResponse : OAuth2ResponseBase
     {
-        [JsonProperty(PropertyName = AdfsWebFingerResponseClaim.Subject)]
+        [JsonProperty(AdfsWebFingerResponseClaim.Subject)]
         public string Subject { get; set; }
 
-        [JsonProperty(PropertyName = AdfsWebFingerResponseClaim.Links)]
+        [JsonProperty(AdfsWebFingerResponseClaim.Links)]
         public List<LinksList> Links { get; set; }
     }
 }

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 #if NET6_0_OR_GREATER
-using System.Text.Json.Serialization;
 using JsonProperty = System.Text.Json.Serialization.JsonIncludeAttribute;
 #else
 using Microsoft.Identity.Json;
