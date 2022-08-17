@@ -3,9 +3,9 @@
 
 using Microsoft.IdentityModel.Abstractions;
 
-namespace Microsoft.Identity.Client.TelemetryCore
+namespace Microsoft.Identity.Client.TelemetryCore.TelemetryClient
 {
-    internal class MsalTelemetryEventDetails: TelemetryEventDetails
+    internal class MsalTelemetryEventDetails : TelemetryEventDetails
     {
         public MsalTelemetryEventDetails()
         {

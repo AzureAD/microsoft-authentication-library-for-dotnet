@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.IdentityModel.Abstractions;
 
-namespace Microsoft.Identity.Client.TelemetryCore
+namespace Microsoft.Identity.Client.TelemetryCore.TelemetryClient
 {
     /// <summary>
     /// Extension methods used for telemetry client.
@@ -22,7 +22,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
         {
             foreach (var client in clients)
             {
-                if (client.IsEnabled(eventName)) return true;
+                if (client.IsEnabled(eventName))
+                    return true;
             }
 
             return false;
@@ -37,7 +38,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
         {
             foreach (var client in clients)
             {
-                if (client.IsEnabled(eventDetails.Name)) client.TrackEvent(eventDetails);
+                if (client.IsEnabled(eventDetails.Name))
+                    client.TrackEvent(eventDetails);
             }
         }
     }
