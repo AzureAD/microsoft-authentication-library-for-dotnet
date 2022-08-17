@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
             internal set { _clientVersion = string.IsNullOrWhiteSpace(value) ? DefaultClientVersion : value; }
         }
 
-        public IEnumerable<ITelemetryClient> TelemetryClients { get; internal set; } = new List<ITelemetryClient>();
+        public ITelemetryClient[] TelemetryClients { get; internal set; } = new ITelemetryClient[0];
 
         public Func<object> ParentActivityOrWindowFunc { get; internal set; }
 

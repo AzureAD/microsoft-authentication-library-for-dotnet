@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     {
         private MockHttpAndServiceBundle _harness;
         private PublicClientApplication _pca;
-        private ITelemetryClient _telemetryClient;
+        private TelemetryClient _telemetryClient;
 
         [TestInitialize]
         public override void TestInitialize()
@@ -38,15 +38,52 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void TelemetryClientExperimental()
         {
-            ITelemetryClient telemetryClient = new TelemetryClient(TestConstants.ClientId);
-
             var e = AssertException.Throws<MsalClientException>(() => ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithClientSecret("secret")
-                .WithTelemetryClient(telemetryClient)
+                .WithTelemetryClient(_telemetryClient)
                 .Build());
 
             Assert.AreEqual(MsalError.ExperimentalFeature, e.ErrorCode);
+        }
+
+        [TestMethod]
+        public void TelemetryClientListNull()
+        {
+            var e = AssertException.Throws<ArgumentNullException>(() => ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
+                .WithClientSecret("secret")
+                .WithTelemetryClient(null)
+                .Build());
+
+            Assert.AreEqual("telemetryClients", e.ParamName);
+        }
+
+        [TestMethod]
+        public void TelemetryClientNullClientInList()
+        {
+            var e = AssertException.Throws<ArgumentNullException>(() => ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
+                .WithClientSecret("secret")
+                .WithTelemetryClient(_telemetryClient, null)
+                .Build());
+
+            Assert.AreEqual("telemetryClient", e.ParamName);
+        }
+
+        [TestMethod]
+        public void TelemetryClientNoArg()
+        {
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
+                .WithClientSecret("secret")
+                .WithTelemetryClient()
+                .Build();
+
+            Assert.IsNotNull(cca);
         }
 
         [TestMethod] 
@@ -56,7 +93,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 
-                _pca = CreateApplication();
+                CreateApplication();
                 _pca.ServiceBundle.ConfigureMockWebUI();
                 _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
 
@@ -68,7 +105,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNotNull(result);
 
-                MsalTelemetryEventDetails eventDetails = ((TelemetryClient)_telemetryClient).TestTelemetryEventDetails;
+                MsalTelemetryEventDetails eventDetails = _telemetryClient.TestTelemetryEventDetails;
                 AssertLoggedTelemetry(result, eventDetails, TokenSource.IdentityProvider, CacheRefreshReason.NotApplicable);
 
                 // Acquire token silently
@@ -76,7 +113,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 result = await _pca.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync().ConfigureAwait(false);
                 Assert.IsNotNull(result);
 
-                eventDetails = ((TelemetryClient)_telemetryClient).TestTelemetryEventDetails;
+                eventDetails = _telemetryClient.TestTelemetryEventDetails;
                 AssertLoggedTelemetry(result, eventDetails, TokenSource.Cache, CacheRefreshReason.NotApplicable);
             }
         }
@@ -92,9 +129,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs, eventDetails.Properties[TelemetryConstants.Duration]);
         }
 
-        private PublicClientApplication CreateApplication()
+        private void CreateApplication()
         {
-            PublicClientApplication pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+            _pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithHttpManager(_harness.HttpManager)
                     .WithDefaultRedirectUri()
                     .WithExperimentalFeatures()
@@ -102,8 +139,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .BuildConcrete();
 
             TokenCacheHelper.PopulateCache(_pca.UserTokenCacheInternal.Accessor);
-
-            return pca;
         }
     }
 

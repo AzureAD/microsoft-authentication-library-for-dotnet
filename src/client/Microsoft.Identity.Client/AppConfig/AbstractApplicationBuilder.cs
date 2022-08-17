@@ -531,7 +531,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(telemetryClients));
             }
 
-            if (telemetryClients != null && telemetryClients.Length > 0)
+            if (telemetryClients.Length > 0)
             {
                 foreach (var telemetryClient in telemetryClients)
                 {
