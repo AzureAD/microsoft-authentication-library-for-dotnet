@@ -6,6 +6,7 @@
     <LangVersion>8</LangVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <UseWinForms>true</UseWinForms>
+    <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

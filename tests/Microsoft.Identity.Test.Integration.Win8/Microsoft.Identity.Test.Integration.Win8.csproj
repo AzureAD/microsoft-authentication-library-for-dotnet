@@ -7,6 +7,7 @@
 
     <TargetFrameworks>$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetCore);$(TargetFrameworkNet5Win)</TargetFrameworks>
     <IsPackable>false</IsPackable>
+    <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

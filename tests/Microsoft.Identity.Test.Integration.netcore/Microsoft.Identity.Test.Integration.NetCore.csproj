@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <IsPackable>false</IsPackable>
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
+    <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

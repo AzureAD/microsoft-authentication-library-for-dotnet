@@ -9,6 +9,8 @@
     <IsPackable>false</IsPackable>
 
     <LangVersion>latest</LangVersion>
+
+    <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

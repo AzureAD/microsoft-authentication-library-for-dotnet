@@ -7,6 +7,7 @@
     <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
     <TargetFrameworkNet5Win>net5.0-windows10.0.17763.0</TargetFrameworkNet5Win>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
+    <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
   <!-- Mobile and legacy targets - comment these out or set env variable MSAL_DESKTOP_ONLY_DEV to speedup the build -->

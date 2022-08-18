@@ -65,6 +65,9 @@ namespace Microsoft.Identity.Client.Broker
             long errorCode = authResult.Error.ErrorCode;
             string errorMessage;
 
+            logger.Info("[WamBroker] Processing WAM exception");
+            logger.Verbose($"[WamBroker] TelemetryData: {authResult.TelemetryData}");
+
             switch ((ResponseStatus)authResult.Error.Status)
             {
                 case ResponseStatus.UserCanceled:
@@ -179,7 +182,7 @@ namespace Microsoft.Identity.Client.Broker
             // if PopAuthenticationConfiguration is set, proof of possession will be performed via the runtime broker
             if (authenticationRequestParameters.PopAuthenticationConfiguration != null)
             {
-                authenticationRequestParameters.RequestContext.Logger.Info("[WamBroker] Proof-of-Possession is configured. Using Proof-of-Posession with broker request");
+                authenticationRequestParameters.RequestContext.Logger.Info("[WamBroker] Proof-of-Possession is configured. Using Proof-of-Possession with broker request. ");
                 authParams.PopParams.HttpMethod = authenticationRequestParameters.PopAuthenticationConfiguration.HttpMethod?.Method;
                 authParams.PopParams.UriHost = authenticationRequestParameters.PopAuthenticationConfiguration.HttpHost;
                 authParams.PopParams.UriPath = authenticationRequestParameters.PopAuthenticationConfiguration.HttpPath;
