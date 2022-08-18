@@ -4,9 +4,13 @@
 using System;
 using System.Globalization;
 using System.Net.Http.Headers;
+using System.Text.Json.Serialization;
 using Microsoft.Identity.Client.Utils;
+#if NET6_0_OR_GREATER
+using JObject = System.Text.Json.Nodes.JsonObject;
+#else
 using Microsoft.Identity.Json.Linq;
-
+#endif
 namespace Microsoft.Identity.Client
 {
 
@@ -146,7 +150,6 @@ namespace Microsoft.Identity.Client
         public int StatusCode { get; internal set; } = 0;
 
 #if !DESKTOP
-#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
 #endif
         /// <summary>
         /// Additional claims requested by the service. When this property is not null or empty, this means that the service requires the user to
@@ -161,8 +164,10 @@ namespace Microsoft.Identity.Client
         /// </list>
         /// For more details see https://aka.ms/msal-net-claim-challenge
         /// </summary>
+#if NET6_0_OR_GREATER
+        [JsonInclude]
+#endif
         public string Claims { get; internal set; }
-#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
         /// Raw response body received from the server.
@@ -195,9 +200,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal bool IsAadUnavailable()
         {
-            return 
+            return
                 StatusCode == 429 || // "Too Many Requests", does not mean AAD is down
-                StatusCode >= 500 || 
+                StatusCode >= 500 ||
                 string.Equals(ErrorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase);
         }
 

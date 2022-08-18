@@ -4,8 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+#if NET6_0_OR_GREATER
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using JObject = System.Text.Json.Nodes.JsonObject;
+using JToken = System.Text.Json.Nodes.JsonNode;
+#else
 using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -42,7 +49,14 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal static CacheSerializationContract FromJsonString(string json)
         {
-            JObject root = JObject.Parse(json);
+#if NET6_0_OR_GREATER
+            var root = JsonNode.Parse(json, documentOptions: new JsonDocumentOptions
+            {
+                AllowTrailingCommas = true
+            }).AsObject();
+#else
+            var root = JObject.Parse(json);
+#endif
             var unknownNodes = ExtractUnknownNodes(root);
 
             var contract = new CacheSerializationContract(unknownNodes);
@@ -50,10 +64,15 @@ namespace Microsoft.Identity.Client.Cache.Items
             // Access Tokens
             if (root.ContainsKey(StorageJsonValues.CredentialTypeAccessToken))
             {
-                foreach (var token in root[StorageJsonValues.CredentialTypeAccessToken]
-                    .Values())
+#if NET6_0_OR_GREATER
+                foreach (var token in root[StorageJsonValues.CredentialTypeAccessToken].AsObject())
+                {
+                    if (token.Value is JObject j)
+#else
+                foreach (var token in root[StorageJsonValues.CredentialTypeAccessToken].Values())
                 {
                     if (token is JObject j)
+#endif
                     {
                         var item = MsalAccessTokenCacheItem.FromJObject(j);
                         contract.AccessTokens[item.GetKey().ToString()] = item;
@@ -64,10 +83,15 @@ namespace Microsoft.Identity.Client.Cache.Items
             // Refresh Tokens
             if (root.ContainsKey(StorageJsonValues.CredentialTypeRefreshToken))
             {
-                foreach (var token in root[StorageJsonValues.CredentialTypeRefreshToken]
-                    .Values())
+#if NET6_0_OR_GREATER
+                foreach (var token in root[StorageJsonValues.CredentialTypeRefreshToken].AsObject())
+                {
+                    if (token.Value is JObject j)
+#else
+                foreach (var token in root[StorageJsonValues.CredentialTypeRefreshToken].Values())
                 {
                     if (token is JObject j)
+#endif
                     {
                         var item = MsalRefreshTokenCacheItem.FromJObject(j);
                         contract.RefreshTokens[item.GetKey().ToString()] = item;
@@ -78,10 +102,15 @@ namespace Microsoft.Identity.Client.Cache.Items
             // Id Tokens
             if (root.ContainsKey(StorageJsonValues.CredentialTypeIdToken))
             {
-                foreach (var token in root[StorageJsonValues.CredentialTypeIdToken]
-                    .Values())
+#if NET6_0_OR_GREATER
+                foreach (var token in root[StorageJsonValues.CredentialTypeIdToken].AsObject())
+                {
+                    if (token.Value is JObject j)
+#else
+                foreach (var token in root[StorageJsonValues.CredentialTypeIdToken].Values())
                 {
                     if (token is JObject j)
+#endif
                     {
                         var item = MsalIdTokenCacheItem.FromJObject(j);
                         contract.IdTokens[item.GetKey().ToString()] = item;
@@ -92,10 +121,15 @@ namespace Microsoft.Identity.Client.Cache.Items
             // Accounts
             if (root.ContainsKey(StorageJsonValues.AccountRootKey))
             {
-                foreach (var token in root[StorageJsonValues.AccountRootKey]
-                    .Values())
+#if NET6_0_OR_GREATER
+                foreach (var token in root[StorageJsonValues.AccountRootKey].AsObject())
+                {
+                    if (token.Value is JObject j)
+#else
+                foreach (var token in root[StorageJsonValues.AccountRootKey].Values())
                 {
                     if (token is JObject j)
+#endif
                     {
                         var item = MsalAccountCacheItem.FromJObject(j);
                         contract.Accounts[item.GetKey().ToString()] = item;
@@ -106,10 +140,15 @@ namespace Microsoft.Identity.Client.Cache.Items
             // App Metadata
             if (root.ContainsKey(StorageJsonValues.AppMetadata))
             {
-                foreach (var token in root[StorageJsonValues.AppMetadata]
-                    .Values())
+#if NET6_0_OR_GREATER
+                foreach (var token in root[StorageJsonValues.AppMetadata].AsObject())
+                {
+                    if (token.Value is JObject j)
+#else
+                foreach (var token in root[StorageJsonValues.AppMetadata].Values())
                 {
                     if (token is JObject j)
+#endif
                     {
                         var item = MsalAppMetadataCacheItem.FromJObject(j);
                         contract.AppMetadata[item.GetKey().ToString()] = item;
@@ -122,7 +161,11 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         private static IDictionary<string, JToken> ExtractUnknownNodes(JObject root)
         {
+#if NET6_0_OR_GREATER
+            return root
+#else
             return (root as IDictionary<string, JToken>)
+#endif
                 .Where(kvp => !s_knownPropertyNames.Any(p => string.Equals(kvp.Key, p, StringComparison.OrdinalIgnoreCase)))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
@@ -179,9 +222,19 @@ namespace Microsoft.Identity.Client.Cache.Items
             // Anything else
             foreach (var kvp in UnknownNodes)
             {
+#if NET6_0_OR_GREATER
+                root[kvp.Key] = kvp.Value != null ? JToken.Parse(kvp.Value.ToJsonString()) : null;
+#else
                 root[kvp.Key] = kvp.Value;
+#endif
             }
-
+#if NET6_0_OR_GREATER
+            return root.ToJsonString(
+                new JsonSerializerOptions
+                {
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never
+                });
+#else
             return JsonConvert.SerializeObject(
                 root,
                 Formatting.None,
@@ -189,6 +242,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 {
                     NullValueHandling = NullValueHandling.Include
                 });
+#endif
         }
     }
 }

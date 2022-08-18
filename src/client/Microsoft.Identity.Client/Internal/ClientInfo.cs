@@ -4,19 +4,25 @@
 using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Utils;
+#if NET6_0_OR_GREATER
+using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+#else
 using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client.Internal
 {
 
+#if !NET6_0_OR_GREATER
     [JsonObject]
+#endif
     [Preserve(AllMembers = true)]
     internal class ClientInfo
     {
-        [JsonProperty(PropertyName = ClientInfoClaim.UniqueIdentifier)]
+        [JsonProperty(ClientInfoClaim.UniqueIdentifier)]
         public string UniqueObjectIdentifier { get; set; }
 
-        [JsonProperty(PropertyName = ClientInfoClaim.UniqueTenantIdentifier)]
+        [JsonProperty(ClientInfoClaim.UniqueTenantIdentifier)]
         public string UniqueTenantIdentifier { get; set; }
 
         public static ClientInfo CreateFromJson(string clientInfo)

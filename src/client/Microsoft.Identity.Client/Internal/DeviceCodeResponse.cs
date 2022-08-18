@@ -4,35 +4,63 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
+#if NET6_0_OR_GREATER
+using System.Text.Json.Serialization;
+using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+#else
 using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client.Internal
 {
+#if !NET6_0_OR_GREATER
     [JsonObject]
+#endif
     [Preserve(AllMembers = true)]
     internal class DeviceCodeResponse : OAuth2ResponseBase
     {
-        [JsonProperty(PropertyName = "user_code")]
+        [JsonProperty("user_code")]
+#if NET6_0_OR_GREATER
+        [JsonInclude]
+#endif
         public string UserCode { get; internal set; }
 
-        [JsonProperty(PropertyName = "device_code")]
+        [JsonProperty("device_code")]
+#if NET6_0_OR_GREATER
+        [JsonInclude]
+#endif
         public string DeviceCode { get; internal set; }
 
-        [JsonProperty(PropertyName = "verification_url")]
+        [JsonProperty("verification_url")]
+#if NET6_0_OR_GREATER
+        [JsonInclude]
+#endif
         public string VerificationUrl { get; internal set; }
 
         // This is the OAuth2 standards compliant value.
         // It should be used if it's present, if it's not then fallback to VerificationUrl
-        [JsonProperty(PropertyName = "verification_uri")]
+        [JsonProperty("verification_uri")]
+#if NET6_0_OR_GREATER
+        [JsonInclude]
+#endif
         public string VerificationUri { get; internal set; }
 
-        [JsonProperty(PropertyName = "expires_in")]
+        [JsonProperty("expires_in")]
+#if NET6_0_OR_GREATER
+        [JsonInclude]
+#endif
         public long ExpiresIn { get; internal set; }
 
-        [JsonProperty(PropertyName = "interval")]
+        [JsonProperty("interval")]
+#if NET6_0_OR_GREATER
+        [JsonInclude]
+#endif
         public long Interval { get; internal set; }
 
-        [JsonProperty(PropertyName = "message")]
+        [JsonProperty("message")]
+#if NET6_0_OR_GREATER
+        [JsonInclude]
+#endif
         public string Message { get; internal set; }
 
         public DeviceCodeResult GetResult(string clientId, ISet<string> scopes)

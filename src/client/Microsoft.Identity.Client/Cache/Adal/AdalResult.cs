@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Cache
     [Preserve(AllMembers = true)]
     internal sealed class AdalResult
     {
-        internal AdalResult()
+        public AdalResult()
         {
             // for serialization
         }

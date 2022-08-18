@@ -3,13 +3,19 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
+using System.Text.Json.Serialization;
+#if NET6_0_OR_GREATER
+using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+using JObject = System.Text.Json.Nodes.JsonObject;
+#else
 using Microsoft.Identity.Json;
-using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -95,17 +101,24 @@ namespace Microsoft.Identity.Client.Internal
             // Payload segment
             if (ClaimsToSign != null && ClaimsToSign.Any())
             {
+                var json = new JObject();
+
                 if (_appendDefaultClaims)
                 {
-                    JObject json = JObject.FromObject(Payload);
-                    json.Merge(JObject.FromObject(ClaimsToSign));
-                    jsonPayload = json.ToString();
+                    json[JsonWebTokenConstants.ReservedClaims.Audience] = Payload.Audience;
+                    json[JsonWebTokenConstants.ReservedClaims.Issuer] = Payload.Issuer;
+                    json[JsonWebTokenConstants.ReservedClaims.NotBefore] = Payload.ValidFrom;
+                    json[JsonWebTokenConstants.ReservedClaims.ExpiresOn] = Payload.ValidTo;
+                    json[JsonWebTokenConstants.ReservedClaims.Subject] = Payload.Subject;
+                    json[JsonWebTokenConstants.ReservedClaims.JwtIdentifier] = Payload.JwtIdentifier;
                 }
-                else
+
+                foreach (var claim in ClaimsToSign)
                 {
-                    JObject json = JObject.FromObject(ClaimsToSign);
-                    jsonPayload = json.ToString();
+                    json[claim.Key] = claim.Value;
                 }
+
+                jsonPayload = JsonHelper.JsonObjectToString(json);
             }
             else
             {
@@ -117,7 +130,9 @@ namespace Microsoft.Identity.Client.Internal
             return string.Concat(encodedHeader, ".", encodedPayload);
         }
 
+#if !NET6_0_OR_GREATER
         [JsonObject]
+#endif
         [Preserve(AllMembers = true)]
         internal class JWTHeader
         {
@@ -128,7 +143,7 @@ namespace Microsoft.Identity.Client.Internal
 
             protected X509Certificate2 Certificate { get; }
 
-            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.Type)]
+            [JsonProperty(JsonWebTokenConstants.ReservedHeaderParameters.Type)]
             public static string Type
             {
                 get { return JsonWebTokenConstants.JWTHeaderType; }
@@ -139,7 +154,7 @@ namespace Microsoft.Identity.Client.Internal
                 }
             }
 
-            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.Algorithm)]
+            [JsonProperty(JsonWebTokenConstants.ReservedHeaderParameters.Algorithm)]
             public string Algorithm
             {
                 get
@@ -156,34 +171,40 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
+#if !NET6_0_OR_GREATER
         [JsonObject]
+#endif
         [Preserve(AllMembers = true)]
         internal class JWTPayload
         {
-            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedClaims.Audience)]
+            [JsonProperty(JsonWebTokenConstants.ReservedClaims.Audience)]
             public string Audience { get; set; }
 
-            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedClaims.Issuer)]
+            [JsonProperty(JsonWebTokenConstants.ReservedClaims.Issuer)]
             public string Issuer { get; set; }
 
-            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedClaims.NotBefore)]
+            [JsonProperty(JsonWebTokenConstants.ReservedClaims.NotBefore)]
             public long ValidFrom { get; set; }
 
-            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedClaims.ExpiresOn)]
+            [JsonProperty(JsonWebTokenConstants.ReservedClaims.ExpiresOn)]
             public long ValidTo { get; set; }
 
-            [JsonProperty(
-                PropertyName = JsonWebTokenConstants.ReservedClaims.Subject, 
-                DefaultValueHandling = DefaultValueHandling.Ignore)]
+            [JsonProperty(JsonWebTokenConstants.ReservedClaims.Subject)]
+#if NET6_0_OR_GREATER
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+#endif
             public string Subject { get; set; }
 
-            [JsonProperty(
-                PropertyName = JsonWebTokenConstants.ReservedClaims.JwtIdentifier,
-                DefaultValueHandling = DefaultValueHandling.Ignore)]
+            [JsonProperty(JsonWebTokenConstants.ReservedClaims.JwtIdentifier)]
+#if NET6_0_OR_GREATER
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+#endif
             public string JwtIdentifier { get; set; }
         }
 
+#if !NET6_0_OR_GREATER
         [JsonObject]
+#endif
         [Preserve(AllMembers = true)]
         internal sealed class JWTHeaderWithCertificate : JWTHeader
         {
@@ -191,7 +212,7 @@ namespace Microsoft.Identity.Client.Internal
                 : base(certificate)
             {
                 // this is just Base64UrlHelpers.Encode(certificate.GetCertHash()) but computed higher up so that it can be cached
-                X509CertificateThumbprint = base64EncodedThumbprint; 
+                X509CertificateThumbprint = base64EncodedThumbprint;
                 X509CertificateKeyId = certificate.Thumbprint;
 
                 X509CertificatePublicCertValue = null;
@@ -212,7 +233,7 @@ namespace Microsoft.Identity.Client.Internal
             /// <remarks>
             /// Mandatory for ADFS 2019
             /// </remarks>
-            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.X509CertificateThumbprint)]
+            [JsonProperty(JsonWebTokenConstants.ReservedHeaderParameters.X509CertificateThumbprint)]
             public string X509CertificateThumbprint { get; set; }
 
             /// <summary>
@@ -221,13 +242,17 @@ namespace Microsoft.Identity.Client.Internal
             /// <remarks>
             /// Key Id is an optional param, but recommended. Wilson adds both kid and x5t to JWT header
             /// </remarks>
-            [JsonProperty(PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.KeyId, 
-                DefaultValueHandling = DefaultValueHandling.Ignore)]
+            [JsonProperty(JsonWebTokenConstants.ReservedHeaderParameters.KeyId)]
+#if NET6_0_OR_GREATER
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+#endif
             public string X509CertificateKeyId { get; set; }
 
             [JsonProperty(
-                PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.X509CertificatePublicCertValue, 
-                DefaultValueHandling = DefaultValueHandling.Ignore)]
+                JsonWebTokenConstants.ReservedHeaderParameters.X509CertificatePublicCertValue)]
+#if NET6_0_OR_GREATER
+            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+#endif
             public string X509CertificatePublicCertValue { get; set; }
         }
     }
