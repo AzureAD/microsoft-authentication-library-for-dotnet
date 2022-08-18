@@ -7,8 +7,17 @@ using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+#if NET6_0_OR_GREATER
+using System.Text.Json;
+using System.Text.Json.Nodes;
+#else
 using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
+#endif
+
+#if NET6_0_OR_GREATER
+#else
+#endif
 
 namespace Microsoft.Identity.Client.Utils
 {
@@ -61,7 +70,7 @@ namespace Microsoft.Identity.Client.Utils
                 return (T)JsonSerializer.Create().Deserialize(reader, typeof(T));
         }
 
-        public static string GetExistingOrEmptyString(JObject json, string key)
+        internal static string GetExistingOrEmptyString(JObject json, string key)
         {
             if (json.TryGetValue(key, out var val))
             {
@@ -71,7 +80,7 @@ namespace Microsoft.Identity.Client.Utils
             return string.Empty;
         }
 
-        public static string ExtractExistingOrEmptyString(JObject json, string key)
+        internal static string ExtractExistingOrEmptyString(JObject json, string key)
         {
             if (json.TryGetValue(key, out var val))
             {
@@ -83,7 +92,7 @@ namespace Microsoft.Identity.Client.Utils
             return string.Empty;
         }
 
-        public static IDictionary<string, string> ExtractInnerJsonAsDictionary(JObject json, string key)
+        internal static IDictionary<string, string> ExtractInnerJsonAsDictionary(JObject json, string key)
         {
             if (json.TryGetValue(key, out JToken val))
             {
@@ -98,7 +107,7 @@ namespace Microsoft.Identity.Client.Utils
             return null;
         }
 
-        public static T ExtractExistingOrDefault<T>(JObject json, string key)
+        internal static T ExtractExistingOrDefault<T>(JObject json, string key)
         {
             if (json.TryGetValue(key, out var val))
             {
@@ -110,7 +119,7 @@ namespace Microsoft.Identity.Client.Utils
             return default;
         }
 
-        public static long ExtractParsedIntOrZero(JObject json, string key)
+        internal static long ExtractParsedIntOrZero(JObject json, string key)
         {
             string strVal = ExtractExistingOrEmptyString(json, key);
             if (!string.IsNullOrWhiteSpace(strVal) && long.TryParse(strVal, out long result))
@@ -120,5 +129,31 @@ namespace Microsoft.Identity.Client.Utils
 
             return 0;
         }
+
+#if NET6_0_OR_GREATER
+        //internal static JsonObject CreateJsonObject() => new();
+
+        internal static string JsonObjectToString(JsonObject jsonObject) => jsonObject.ToJsonString();
+
+        //internal static JsonNode ParseIntoJsonNode(string json) => JsonNode.Parse(json);
+
+        internal static JsonObject ParseIntoJsonObject(string json) => JsonNode.Parse(json).AsObject();
+
+        internal static bool TryGetValue(JsonObject json, string propertyName, out JsonNode value) => json.TryGetPropertyValue(propertyName, out value);
+
+        internal static T GetValue<T>(JsonNode json) => json.GetValue<T>();
+#else
+        //internal static JObject CreateJsonObject() => new();
+
+        internal static string JsonObjectToString(JObject jsonObject) => jsonObject.ToString(Formatting.None);
+
+        //internal static JToken ParseIntoJsonNode(string json) => JToken.Parse(json);
+
+        internal static JObject ParseIntoJsonObject(string json) => JObject.Parse(json);
+
+        internal static bool TryGetValue(JObject json, string propertyName, out JToken value) => json.TryGetValue(propertyName, out value);
+
+        internal static T GetValue<T>(JToken json) => json.Value<T>();
+#endif
     }
 }

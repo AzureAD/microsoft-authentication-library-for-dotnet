@@ -5,11 +5,17 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Utils;
+#if NET6_0_OR_GREATER
+using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+#else
 using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client.OAuth2
 {
+#if !NET6_0_OR_GREATER
     [JsonObject]
+#endif
     [Preserve(AllMembers = true)]
     internal class DeviceAuthHeader
     {
@@ -31,12 +37,14 @@ namespace Microsoft.Identity.Client.OAuth2
         public string Alg { get; private set; }
     }
 
+#if !NET6_0_OR_GREATER
     [JsonObject]
+#endif
     [Preserve(AllMembers = true)]
     internal class DeviceAuthPayload
     {
-        private Lazy<long> _defaultDeviceAuthJWTTimeSpan = new Lazy<long>(() => (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
-        
+        private readonly Lazy<long> _defaultDeviceAuthJWTTimeSpan = new Lazy<long>(() => (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
+
         public DeviceAuthPayload(string audience, string nonce)
         {
             Nonce = nonce;

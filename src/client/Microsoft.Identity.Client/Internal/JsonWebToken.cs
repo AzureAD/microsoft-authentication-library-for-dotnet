@@ -8,7 +8,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
-using System.Text.Json.Serialization;
 #if NET6_0_OR_GREATER
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 using JObject = System.Text.Json.Nodes.JsonObject;

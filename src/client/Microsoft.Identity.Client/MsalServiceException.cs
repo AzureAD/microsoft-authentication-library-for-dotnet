@@ -4,7 +4,6 @@
 using System;
 using System.Globalization;
 using System.Net.Http.Headers;
-using System.Text.Json.Serialization;
 using Microsoft.Identity.Client.Utils;
 #if NET6_0_OR_GREATER
 using JObject = System.Text.Json.Nodes.JsonObject;
