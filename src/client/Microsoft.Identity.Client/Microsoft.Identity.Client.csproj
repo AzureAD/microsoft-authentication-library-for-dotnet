@@ -156,8 +156,6 @@
     <Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />
     <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
     <Compile Remove="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
-    <Compile Remove="$(PathToMsalSources)\Utils\JsonStringConverter.cs" />
-    <Compile Remove="$(PathToMsalSources)\Utils\MsalJsonSerializerContext.cs" />
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>
 
@@ -178,8 +176,6 @@
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Utils\JsonStringConverter.cs" />
-    <Compile Include="$(PathToMsalSources)\Utils\MsalJsonSerializerContext.cs" />
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
 
     <PackageReference Include="System.Text.Json" Version="6.0.5" />

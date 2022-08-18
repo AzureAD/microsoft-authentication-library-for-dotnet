@@ -9,6 +9,7 @@ using System.Text;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 #if NET6_0_OR_GREATER
+using System.Text.Json.Serialization;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 using JObject = System.Text.Json.Nodes.JsonObject;
 #else

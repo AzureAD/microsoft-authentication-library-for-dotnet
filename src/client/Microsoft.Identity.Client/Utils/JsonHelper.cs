@@ -10,13 +10,11 @@ using Microsoft.Identity.Client.Internal;
 #if NET6_0_OR_GREATER
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using JObject = System.Text.Json.Nodes.JsonObject;
+using JToken = System.Text.Json.Nodes.JsonNode;
 #else
 using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
-#endif
-
-#if NET6_0_OR_GREATER
-#else
 #endif
 
 namespace Microsoft.Identity.Client.Utils
@@ -25,7 +23,11 @@ namespace Microsoft.Identity.Client.Utils
     {
         internal static string SerializeToJson<T>(T toEncode)
         {
+#if NET6_0_OR_GREATER
+            return JsonSerializer.Serialize(toEncode, typeof(T), MsalJsonSerializerContext.Custom);
+#else
             return JsonConvert.SerializeObject(toEncode);
+#endif
         }
 
         internal static T DeserializeFromJson<T>(string json)
@@ -34,8 +36,11 @@ namespace Microsoft.Identity.Client.Utils
             {
                 return default;
             }
-
+#if NET6_0_OR_GREATER
+            return (T)JsonSerializer.Deserialize(json, typeof(T), MsalJsonSerializerContext.Custom);
+#else
             return JsonConvert.DeserializeObject<T>(json);
+#endif
         }
 
         internal static T TryToDeserializeFromJson<T>(string json, RequestContext requestContext = null)
@@ -67,14 +72,20 @@ namespace Microsoft.Identity.Client.Utils
 
             using (var stream = new MemoryStream(jsonByteArray))
             using (var reader = new StreamReader(stream, Encoding.UTF8))
+            {
+#if NET6_0_OR_GREATER
+                return (T)JsonSerializer.Deserialize(stream, typeof(T), MsalJsonSerializerContext.Custom);
+#else
                 return (T)JsonSerializer.Create().Deserialize(reader, typeof(T));
+#endif
+            }
         }
 
         internal static string GetExistingOrEmptyString(JObject json, string key)
         {
-            if (json.TryGetValue(key, out var val))
+            if (TryGetValue(json, key, out var val))
             {
-                return val.ToObject<string>();
+                return GetValue<string>(val);
             }
 
             return string.Empty;
@@ -82,9 +93,9 @@ namespace Microsoft.Identity.Client.Utils
 
         internal static string ExtractExistingOrEmptyString(JObject json, string key)
         {
-            if (json.TryGetValue(key, out var val))
+            if (TryGetValue(json, key, out var val))
             {
-                string strVal = val.ToObject<string>();
+                string strVal = GetValue<string>(val);
                 json.Remove(key);
                 return strVal;
             }
@@ -94,9 +105,9 @@ namespace Microsoft.Identity.Client.Utils
 
         internal static IDictionary<string, string> ExtractInnerJsonAsDictionary(JObject json, string key)
         {
-            if (json.TryGetValue(key, out JToken val))
+            if (TryGetValue(json, key, out JToken val))
             {
-                IDictionary<string, JToken> valueAsDict = (JObject)val;
+                IDictionary<string, JToken> valueAsDict = ToJsonObject(val);
                 Dictionary<string, string> dictionary =
                     valueAsDict.ToDictionary(pair => pair.Key, pair => (string)pair.Value);
 
@@ -109,9 +120,9 @@ namespace Microsoft.Identity.Client.Utils
 
         internal static T ExtractExistingOrDefault<T>(JObject json, string key)
         {
-            if (json.TryGetValue(key, out var val))
+            if (TryGetValue(json, key, out var val))
             {
-                T obj = val.ToObject<T>();
+                T obj = GetValue<T>(val);
                 json.Remove(key);
                 return obj;
             }
@@ -131,25 +142,21 @@ namespace Microsoft.Identity.Client.Utils
         }
 
 #if NET6_0_OR_GREATER
-        //internal static JsonObject CreateJsonObject() => new();
-
         internal static string JsonObjectToString(JsonObject jsonObject) => jsonObject.ToJsonString();
 
-        //internal static JsonNode ParseIntoJsonNode(string json) => JsonNode.Parse(json);
-
         internal static JsonObject ParseIntoJsonObject(string json) => JsonNode.Parse(json).AsObject();
+
+        internal static JsonObject ToJsonObject(JsonNode jsonNode) => jsonNode.AsObject();
 
         internal static bool TryGetValue(JsonObject json, string propertyName, out JsonNode value) => json.TryGetPropertyValue(propertyName, out value);
 
         internal static T GetValue<T>(JsonNode json) => json.GetValue<T>();
 #else
-        //internal static JObject CreateJsonObject() => new();
-
         internal static string JsonObjectToString(JObject jsonObject) => jsonObject.ToString(Formatting.None);
 
-        //internal static JToken ParseIntoJsonNode(string json) => JToken.Parse(json);
-
         internal static JObject ParseIntoJsonObject(string json) => JObject.Parse(json);
+
+        internal static JObject ToJsonObject(JToken jsonNode) => (JObject)jsonNode;
 
         internal static bool TryGetValue(JObject json, string propertyName, out JToken value) => json.TryGetValue(propertyName, out value);
 

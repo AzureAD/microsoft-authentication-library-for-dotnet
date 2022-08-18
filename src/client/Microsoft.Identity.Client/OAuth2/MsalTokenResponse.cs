@@ -5,13 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
-using System.Text.Json;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Utils;
 #if NET6_0_OR_GREATER
+using System.Text.Json;
 using JObject = System.Text.Json.Nodes.JsonObject;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
