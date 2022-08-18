@@ -5,8 +5,9 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
+#if !NET6_0_OR_GREATER
 using Microsoft.Identity.Json;
-
+#endif
 namespace Microsoft.Identity.Client.UI
 {
     internal enum AuthorizationStatus
@@ -18,7 +19,9 @@ namespace Microsoft.Identity.Client.UI
         UnknownError
     }
 
+#if !NET6_0_OR_GREATER
     [JsonObject]
+#endif
     [Preserve(AllMembers = true)]
     internal class AuthorizationResult
     {
@@ -166,16 +169,24 @@ namespace Microsoft.Identity.Client.UI
 
         public AuthorizationStatus Status { get; private set; }
 
+#if !NET6_0_OR_GREATER
         [JsonProperty]
+#endif
         public string Code { get; set; }
 
+#if !NET6_0_OR_GREATER
         [JsonProperty]
+#endif
         public string Error { get; set; }
 
+#if !NET6_0_OR_GREATER
         [JsonProperty]
+#endif
         public string ErrorDescription { get; set; }
 
+#if !NET6_0_OR_GREATER
         [JsonProperty]
+#endif
         public string CloudInstanceHost { get; set; }
 
         public string ClientInfo { get; set; }

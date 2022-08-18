@@ -3,7 +3,11 @@
 
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Json.Linq;
+#if NET6_0_OR_GREATER
+using JToken = System.Text.Json.Nodes.JsonNode;
+#else
+using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client
 {
