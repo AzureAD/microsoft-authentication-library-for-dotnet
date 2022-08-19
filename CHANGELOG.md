@@ -1,3 +1,14 @@
+4.46.1
+==========
+
+### New Features
+- Added Explicit .net 461 support to new WAM Preview broker. See [3550](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3550).  
+- Added MSALRuntime TelemetryData to verbose logging when a broker exception is thrown. See [3585](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3585)
+
+### Bug Fixes
+- Minor clarifications in caching logs. See [3582](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3582)
+
+
 4.46.0
 ==========
 
