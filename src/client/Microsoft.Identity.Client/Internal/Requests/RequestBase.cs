@@ -21,6 +21,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
+using System.Net.Http;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -107,6 +108,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 catch (Exception ex)
                 {
+                    apiEvent.ApiErrorCode = ex.GetType().Name;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     throw;
                 }
