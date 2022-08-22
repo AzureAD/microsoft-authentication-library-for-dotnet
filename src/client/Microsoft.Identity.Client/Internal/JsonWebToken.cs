@@ -189,15 +189,23 @@ namespace Microsoft.Identity.Client.Internal
             [JsonProperty(JsonWebTokenConstants.ReservedClaims.ExpiresOn)]
             public long ValidTo { get; set; }
 
-            [JsonProperty(JsonWebTokenConstants.ReservedClaims.Subject)]
 #if NET6_0_OR_GREATER
+            [JsonProperty(JsonWebTokenConstants.ReservedClaims.Subject)]
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+#else
+            [JsonProperty(
+                PropertyName = JsonWebTokenConstants.ReservedClaims.Subject,
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
 #endif
             public string Subject { get; set; }
 
-            [JsonProperty(JsonWebTokenConstants.ReservedClaims.JwtIdentifier)]
 #if NET6_0_OR_GREATER
+            [JsonProperty(JsonWebTokenConstants.ReservedClaims.JwtIdentifier)]
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+#else
+            [JsonProperty(
+                PropertyName = JsonWebTokenConstants.ReservedClaims.JwtIdentifier,
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
 #endif
             public string JwtIdentifier { get; set; }
         }
@@ -242,16 +250,23 @@ namespace Microsoft.Identity.Client.Internal
             /// <remarks>
             /// Key Id is an optional param, but recommended. Wilson adds both kid and x5t to JWT header
             /// </remarks>
-            [JsonProperty(JsonWebTokenConstants.ReservedHeaderParameters.KeyId)]
 #if NET6_0_OR_GREATER
+            [JsonProperty(JsonWebTokenConstants.ReservedHeaderParameters.KeyId)]
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+#else
+            [JsonProperty(
+                PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.KeyId,
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
 #endif
             public string X509CertificateKeyId { get; set; }
 
-            [JsonProperty(
-                JsonWebTokenConstants.ReservedHeaderParameters.X509CertificatePublicCertValue)]
 #if NET6_0_OR_GREATER
+            [JsonProperty(JsonWebTokenConstants.ReservedHeaderParameters.X509CertificatePublicCertValue)]
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+#else
+            [JsonProperty(
+                PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.X509CertificatePublicCertValue,
+                DefaultValueHandling = DefaultValueHandling.Ignore)]
 #endif
             public string X509CertificatePublicCertValue { get; set; }
         }
