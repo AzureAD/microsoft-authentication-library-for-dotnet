@@ -22,6 +22,11 @@ steps:
     msbuildInstallationPath: c:\.vs
     includeReferenceAssemblies: 'true'
 
+- task: CmdLine@2
+  displayName: 'Dir'
+  inputs:
+    script: 'dir /S /A:D' 
+
 - task: DotNetCoreCLI@2
   displayName: 'dotnet workload restore for Identity.Client'
   inputs:
