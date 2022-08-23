@@ -27,20 +27,6 @@ steps:
   inputs:
     script: 'dir /S /A:D' 
 
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet workload restore for Identity.Client'
-  inputs:
-    command: 'custom'
-    custom: 'workload'
-    arguments: 'restore $(MsalSourceDir)src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
-
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet workload restore'
-  inputs:
-    command: 'custom'
-    custom: 'workload'
-    arguments: 'restore $(MsalSourceDir)src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
-
 # Unit tests require .NET 3.x
 - task: UseDotNet@2
   displayName: 'Use .Net Core SDK 3.x'
@@ -91,6 +77,20 @@ steps:
 #       dotnet nuget locals all --clear 
 #       dotnet workload install maui --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
 #       dotnet workload install android ios maccatalyst tvos macos maui wasm-tools --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet workload restore for Identity.Client'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore $(MsalSourceDir)src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet workload restore'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore $(MsalSourceDir)src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
 
 - task: MSBuild@1
   displayName: 'Restore using MSBuild'
