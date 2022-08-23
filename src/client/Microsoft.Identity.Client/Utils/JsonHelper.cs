@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Client.Utils
 
         internal static bool TryGetValue(JsonObject json, string propertyName, out JsonNode value) => json.TryGetPropertyValue(propertyName, out value);
 
-        internal static T GetValue<T>(JsonNode json) => json.GetValue<T>();
+        internal static T GetValue<T>(JsonNode json) => json != null ? json.GetValue<T>() : default;
 #else
         internal static string JsonObjectToString(JObject jsonObject) => jsonObject.ToString(Formatting.None);
 

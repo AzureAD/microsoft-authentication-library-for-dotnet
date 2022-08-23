@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Client.Internal
             protected X509Certificate2 Certificate { get; }
 
             [JsonProperty(JsonWebTokenConstants.ReservedHeaderParameters.Type)]
-            public static string Type
+            public string Type
             {
                 get { return JsonWebTokenConstants.JWTHeaderType; }
 
