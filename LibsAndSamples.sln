@@ -79,7 +79,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "all", "all", "{C44AADC0-1E9B-427F-AC02-642BDF8D936B}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		changelog.txt = changelog.txt
+		changelog.md = changelog.md
 		Directory.Build.props = Directory.Build.props
 		global.json = global.json
 		build\platform_and_feature_flags.props = build\platform_and_feature_flags.props

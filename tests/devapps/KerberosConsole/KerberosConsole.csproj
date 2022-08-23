@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kerberos.NET" Version="4.5.50" />
+    <PackageReference Include="Kerberos.NET" Version="4.5.174" />
   </ItemGroup>
 
   <ItemGroup>
