@@ -87,7 +87,7 @@
     <PathToMsalSources>$(MSBuildThisFileDirectory)</PathToMsalSources>
     <!-- Need to include / exclude / remove cs files manually so that they are present in both assemblies -->
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <NoWarn>$(NoWarn);CS8002;NU5131;</NoWarn>
+    <NoWarn>$(NoWarn);CS8002;NU5131;NETSDK1138</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
