@@ -78,7 +78,7 @@ jobs: #Build and stage projects
     parameters:
       BuildPlatform: '$(BuildPlatform)'
       BuildConfiguration: '$(BuildConfiguration)'
-      BuildSolution: 'LibsAndSamples.sln'
+      BuildSolution: 'Libs.sln'
 
   #Desktop Unit + Integration Tests
 - job: 'RunDesktopTests'
