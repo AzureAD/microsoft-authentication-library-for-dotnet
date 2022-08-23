@@ -1,16 +1,14 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static Microsoft.Identity.Client.Internal.JsonWebToken;
@@ -25,7 +23,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         public void Deserialize_AdalResultWrapper()
         {
             DateTimeOffset dateTimeOffset = DateTimeOffset.MinValue;
-            string s= JsonHelper.SerializeToJson(dateTimeOffset);
+            string s = JsonHelper.SerializeToJson(dateTimeOffset);
 
             string json = @"{
                            ""RawClientInfo"": ""eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"",
@@ -58,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
                            ""UserAssertionHash"": null
                         }";
 
-            
+
             AdalResultWrapper result = JsonHelper.DeserializeFromJson<AdalResultWrapper>(json);
             Assert.AreEqual("idlab@msidlab4.onmicrosoft.com", result.Result.UserInfo.DisplayableId);
             Assert.AreEqual("rt_secret", result.RefreshToken);
@@ -81,7 +79,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         [TestMethod]
         public void Serialize_ClientInfo_WithNull()
         {
-            ClientInfo clientInfo = new ClientInfo() { UniqueObjectIdentifier = "some_uid"};
+            ClientInfo clientInfo = new ClientInfo() { UniqueObjectIdentifier = "some_uid" };
 
             string actualJson = JsonHelper.SerializeToJson(clientInfo);
             string expectedJson = @"{

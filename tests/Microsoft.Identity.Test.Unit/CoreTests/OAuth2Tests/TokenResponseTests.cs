@@ -2,15 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -40,7 +35,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
         public void AndroidBrokerTokenResponseParseTest()
         {
             string unixTimestamp = DateTimeHelpers.DateTimeToUnixTimestamp(DateTimeOffset.UtcNow + TimeSpan.FromMinutes(40));
-            string androidBrokerResponse = TestConstants.AndroidBrokerResponse.Replace("1591196764", unixTimestamp); 
+            string androidBrokerResponse = TestConstants.AndroidBrokerResponse.Replace("1591196764", unixTimestamp);
             string correlationId = Guid.NewGuid().ToString();
             // Act
             var msalTokenResponse = MsalTokenResponse.CreateFromAndroidBrokerResponse(androidBrokerResponse, correlationId);
@@ -59,6 +54,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             Assert.AreEqual("https://login.microsoftonline.com/common", msalTokenResponse.AuthorityUrl);
 
             Assert.IsNull(msalTokenResponse.RefreshToken);
-        }       
+        }
     }
 }

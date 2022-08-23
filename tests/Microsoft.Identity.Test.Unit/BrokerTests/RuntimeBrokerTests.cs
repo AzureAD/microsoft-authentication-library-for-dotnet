@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if NET_CORE
+#if NET_CORE && !NET6_0
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
