@@ -211,6 +211,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 {
                     Error = errorCode,
                     ErrorDescription = authResult[BrokerResponseConst.BrokerErrorMessage]?.ToString(),
+                    SubError = authResult.ContainsKey(BrokerResponseConst.BrokerSubError) ? authResult[BrokerResponseConst.BrokerSubError].ToString() : string.Empty,
                     AuthorityUrl = authResult[BrokerResponseConst.Authority]?.ToString(),
                     TenantId = authResult[BrokerResponseConst.TenantId]?.ToString(),
                     Upn = authResult[BrokerResponseConst.UserName]?.ToString(),
