@@ -8,8 +8,8 @@ using System.Text;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.Unit
 {

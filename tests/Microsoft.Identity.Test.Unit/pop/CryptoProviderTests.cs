@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.AuthScheme.PoP;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.Unit.Pop
 {
