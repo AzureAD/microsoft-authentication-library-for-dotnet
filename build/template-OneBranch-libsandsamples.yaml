@@ -112,13 +112,13 @@ steps:
 #     configuration: ${{ parameters.BuildConfiguration }}
 #     maximumCpuCount: true
 
-# - task: VSBuild@1
-#   displayName: 'NuGet restore ${{ parameters.Solution }}'
-#   inputs:
-#     solution: ${{ parameters.Solution }}
-#     msbuildArgs: '-restore'
-#     platform: ${{ parameters.BuildPlatform }}
-#     configuration: ${{ parameters.BuildConfiguration }}
+- task: VSBuild@1
+  displayName: 'NuGet restore ${{ parameters.Solution }}'
+  inputs:
+    solution: ${{ parameters.Solution }}
+    msbuildArgs: '-restore'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
 
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
