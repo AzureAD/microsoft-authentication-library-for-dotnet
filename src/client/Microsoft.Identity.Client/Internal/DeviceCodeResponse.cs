@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
 #if NET6_0_OR_GREATER
-using System.Text.Json.Serialization;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
 using Microsoft.Identity.Json;
@@ -20,48 +19,27 @@ namespace Microsoft.Identity.Client.Internal
     internal class DeviceCodeResponse : OAuth2ResponseBase
     {
         [JsonProperty("user_code")]
-#if NET6_0_OR_GREATER
-        [JsonInclude]
-#endif
-        public string UserCode { get; internal set; }
+        public string UserCode { get; set; }
 
         [JsonProperty("device_code")]
-#if NET6_0_OR_GREATER
-        [JsonInclude]
-#endif
-        public string DeviceCode { get; internal set; }
+        public string DeviceCode { get; set; }
 
         [JsonProperty("verification_url")]
-#if NET6_0_OR_GREATER
-        [JsonInclude]
-#endif
-        public string VerificationUrl { get; internal set; }
+        public string VerificationUrl { get; set; }
 
         // This is the OAuth2 standards compliant value.
         // It should be used if it's present, if it's not then fallback to VerificationUrl
         [JsonProperty("verification_uri")]
-#if NET6_0_OR_GREATER
-        [JsonInclude]
-#endif
-        public string VerificationUri { get; internal set; }
+        public string VerificationUri { get; set; }
 
         [JsonProperty("expires_in")]
-#if NET6_0_OR_GREATER
-        [JsonInclude]
-#endif
-        public long ExpiresIn { get; internal set; }
+        public long ExpiresIn { get; set; }
 
         [JsonProperty("interval")]
-#if NET6_0_OR_GREATER
-        [JsonInclude]
-#endif
-        public long Interval { get; internal set; }
+        public long Interval { get; set; }
 
         [JsonProperty("message")]
-#if NET6_0_OR_GREATER
-        [JsonInclude]
-#endif
-        public string Message { get; internal set; }
+        public string Message { get; set; }
 
         public DeviceCodeResult GetResult(string clientId, ISet<string> scopes)
         {
