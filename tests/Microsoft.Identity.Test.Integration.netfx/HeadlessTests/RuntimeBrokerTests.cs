@@ -3,26 +3,26 @@
 
 #if NET_CORE
 
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Broker;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Diagnostics;
-using System.IO;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Broker;
-using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Client.OAuth2;
-using System.Runtime.InteropServices;
-using System;
 using NSubstitute;
-using System.Linq;
 
 namespace Microsoft.Identity.Test.Integration.Broker
 {
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Act
             try
             {
-                var result = await pca.AcquireTokenSilent(scopes,PublicClientApplication.OperatingSystemAccount).ExecuteAsync().ConfigureAwait(false);
+                var result = await pca.AcquireTokenSilent(scopes, PublicClientApplication.OperatingSystemAccount).ExecuteAsync().ConfigureAwait(false);
 
             }
             catch (MsalUiRequiredException ex)
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
         }
 
-        [RunOn( TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WamSilentAuthLoginHintNoAccontInCacheAsync()
         {
             string[] scopes = new[]
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 Assert.IsTrue(ex.Message.Contains("You are trying to acquire a token silently using a login hint. " +
                     "No account was found in the token cache having this login hint"));
             }
-        }      
+        }
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
         public async Task WamUsernamePasswordRequestAsync()
@@ -121,9 +121,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
             MsalAssert.AssertAuthResult(result, TokenSource.Cache, labResponse.Lab.TenantId, expectedScopes);
 
             // Acquire token interactively WithAccount
-            result = await pca.AcquireTokenInteractive(scopes).WithAccount(account).ExecuteAsync().ConfigureAwait(false);
+            //result = await pca.AcquireTokenInteractive(scopes).WithAccount(account).ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            //MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
 
             // Remove Account
             await pca.RemoveAsync(account).ConfigureAwait(false);
