@@ -18,6 +18,13 @@ namespace Microsoft.Identity.Client.Cache.Items
 {
     internal class CacheSerializationContract
     {
+#if NET6_0_OR_GREATER
+        private static readonly JsonSerializerOptions NeverIgnoreJsonOptions = new()
+        {
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never
+        };
+#endif
+
         private static readonly IEnumerable<string> s_knownPropertyNames = new[] {
                 StorageJsonValues.CredentialTypeAccessToken,
                 StorageJsonValues.CredentialTypeRefreshToken,
@@ -229,11 +236,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 #endif
             }
 #if NET6_0_OR_GREATER
-            return root.ToJsonString(
-                new JsonSerializerOptions
-                {
-                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never
-                });
+            return root.ToJsonString(NeverIgnoreJsonOptions);
 #else
             return JsonConvert.SerializeObject(
                 root,
