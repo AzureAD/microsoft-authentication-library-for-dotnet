@@ -87,17 +87,17 @@ steps:
     custom: 'workload'
     arguments: 'restore $(MsalSourceDir)src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
 
-# - task: MSBuild@1
-#   displayName: 'Restore using MSBuild'
-#   inputs:
-#     solution: '${{ parameters.Solution }}'
-#     msbuildVersion: 17.0
-#     msbuildLocationMethod: 'location'
-#     msbuildLocation: '$(MSBuildPath)'
-#     msbuildArguments: '-restore'
-#     platform: ${{ parameters.BuildPlatform }}
-#     configuration: ${{ parameters.BuildConfiguration }}
-#     maximumCpuCount: true
+- task: MSBuild@1
+  displayName: 'Restore using MSBuild'
+  inputs:
+    solution: '${{ parameters.Solution }}'
+    msbuildVersion: 17.3
+    msbuildLocationMethod: 'location'
+    msbuildLocation: '$(MSBuildPath)'
+    msbuildArguments: '-restore'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
+    maximumCpuCount: true
 
 
 # - task: MSBuild@1
@@ -112,13 +112,14 @@ steps:
 #     configuration: ${{ parameters.BuildConfiguration }}
 #     maximumCpuCount: true
 
-- task: VSBuild@1
-  displayName: 'NuGet restore ${{ parameters.Solution }}'
-  inputs:
-    solution: ${{ parameters.Solution }}
-    msbuildArgs: '-restore'
-    platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
+# this cannot find iOS
+# - task: VSBuild@1
+#   displayName: 'NuGet restore ${{ parameters.Solution }}'
+#   inputs:
+#     solution: ${{ parameters.Solution }}
+#     msbuildArgs: '-restore'
+#     platform: ${{ parameters.BuildPlatform }}
+#     configuration: ${{ parameters.BuildConfiguration }}
 
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
