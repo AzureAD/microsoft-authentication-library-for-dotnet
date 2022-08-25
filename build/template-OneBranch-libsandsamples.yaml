@@ -91,7 +91,7 @@ steps:
   displayName: 'Restore using MSBuild'
   inputs:
     solution: '${{ parameters.Solution }}'
-    msbuildVersion: 17.3
+    msbuildVersion: 17.0
     msbuildLocationMethod: 'location'
     msbuildLocation: '$(MSBuildPath)'
     msbuildArguments: '-restore'
