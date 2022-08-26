@@ -2,7 +2,7 @@
 ==========
 
 ### New Features
-- Added .NET 4.5 support for new MSAL WAM preview. See [#3539](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3539)
+- WAM Authentication Library now explicitly supports .NET 4.6.2. See [#3539](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3539)
 
 ### Bug Fixes
 - Fixed 'Authenticator Factory has already been started` exception in new MSAL WAM preview. See [#3604](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3604)
