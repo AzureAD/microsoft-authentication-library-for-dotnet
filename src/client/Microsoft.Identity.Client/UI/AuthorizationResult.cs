@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
 using Microsoft.Identity.Client.Platforms.net6;
 #else
 using Microsoft.Identity.Json;
@@ -169,22 +169,22 @@ namespace Microsoft.Identity.Client.UI
 
         public AuthorizationStatus Status { get; private set; }
 
-#if !NET6_0_OR_GREATER
+#if !SUPPORTS_SYSTEM_TEXT_JSON
         [JsonProperty]
 #endif
         public string Code { get; set; }
 
-#if !NET6_0_OR_GREATER
+#if !SUPPORTS_SYSTEM_TEXT_JSON
         [JsonProperty]
 #endif
         public string Error { get; set; }
 
-#if !NET6_0_OR_GREATER
+#if !SUPPORTS_SYSTEM_TEXT_JSON
         [JsonProperty]
 #endif
         public string ErrorDescription { get; set; }
 
-#if !NET6_0_OR_GREATER
+#if !SUPPORTS_SYSTEM_TEXT_JSON
         [JsonProperty]
 #endif
         public string CloudInstanceHost { get; set; }

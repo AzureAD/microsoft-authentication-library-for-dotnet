@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
 using Microsoft.Identity.Client.Utils;
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
 using Microsoft.Identity.Json;
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Internal
         public ClaimsPrincipal ClaimsPrincipal { get; private set; }
 
         #region Using Newtonsoft
-#if !NET6_0_OR_GREATER
+#if !SUPPORTS_SYSTEM_TEXT_JSON
         // There are quite a bit of API differences, so duplicated code, ideally will need to be refactored.
 
         public static IdToken Parse(string idToken)
@@ -307,7 +307,7 @@ namespace Microsoft.Identity.Client.Internal
         #endregion
 
         #region Using System.Text.Json
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
         // There are quite a bit of API differences, so duplicated code, ideally will need to be refactored.
         public static IdToken Parse(string idToken)
         {

@@ -8,7 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
 using Microsoft.Identity.Client.Platforms.net6;
 using System.Text.Json.Serialization;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Client.Internal
             [JsonProperty(JsonWebTokenConstants.ReservedClaims.ExpiresOn)]
             public long ValidTo { get; set; }
 
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
             [JsonProperty(JsonWebTokenConstants.ReservedClaims.Subject)]
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
 #else
@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Client.Internal
 #endif
             public string Subject { get; set; }
 
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
             [JsonProperty(JsonWebTokenConstants.ReservedClaims.JwtIdentifier)]
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
 #else
@@ -245,7 +245,7 @@ namespace Microsoft.Identity.Client.Internal
             /// <remarks>
             /// Key Id is an optional param, but recommended. Wilson adds both kid and x5t to JWT header
             /// </remarks>
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
             [JsonProperty(JsonWebTokenConstants.ReservedHeaderParameters.KeyId)]
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
 #else
@@ -255,7 +255,7 @@ namespace Microsoft.Identity.Client.Internal
 #endif
             public string X509CertificateKeyId { get; set; }
 
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
             [JsonProperty(JsonWebTokenConstants.ReservedHeaderParameters.X509CertificatePublicCertValue)]
             [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
 #else

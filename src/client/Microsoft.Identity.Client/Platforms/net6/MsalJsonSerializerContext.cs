@@ -1,12 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if NET6_0_OR_GREATER
-using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Validation;
@@ -15,9 +12,8 @@ using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.WsTrust;
-using static System.Net.WebRequestMethods;
 
-namespace Microsoft.Identity.Client.Utils
+namespace Microsoft.Identity.Client.Platforms.net6
 {
     /// <summary>
     /// This class specifies metadata for System.Text.Json source generation.
@@ -39,12 +35,6 @@ namespace Microsoft.Identity.Client.Utils
     [JsonSerializable(typeof(JsonWebToken.JWTPayload))]
     [JsonSerializable(typeof(DeviceAuthHeader))]
     [JsonSerializable(typeof(DeviceAuthPayload))]
-#if ANDROID
-    [JsonSerializable(typeof(Microsoft.Identity.Client.Platforms.Android.Broker.BrokerRequest))]
-#endif
-#if iOS
-    [JsonSerializable(typeof(Platforms.iOS.IntuneEnrollmentIdHelper.EnrollmentIDs))]
-#endif
     [JsonSourceGenerationOptions]
     internal partial class MsalJsonSerializerContext : JsonSerializerContext
     {
@@ -68,4 +58,3 @@ namespace Microsoft.Identity.Client.Utils
         }
     }
 }
-#endif

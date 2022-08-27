@@ -10,7 +10,7 @@ using Microsoft.Identity.Client.Utils;
 using System.ComponentModel;
 using System.Globalization;
 using System.Text;
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
 using JObject = System.Text.Json.Nodes.JsonObject;
 using JToken = System.Text.Json.Nodes.JsonNode;
 #else

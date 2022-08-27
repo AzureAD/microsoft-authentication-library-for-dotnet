@@ -11,7 +11,7 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
 using JObject = System.Text.Json.Nodes.JsonObject;
 using JToken = System.Text.Json.Nodes.JsonNode;
 #else

@@ -7,7 +7,8 @@ using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using Microsoft.Identity.Client.Platforms.net6;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using JObject = System.Text.Json.Nodes.JsonObject;
@@ -23,7 +24,7 @@ namespace Microsoft.Identity.Client.Utils
     {
         internal static string SerializeToJson<T>(T toEncode)
         {
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
             return JsonSerializer.Serialize(toEncode, typeof(T), MsalJsonSerializerContext.Custom);
 #else
             return JsonConvert.SerializeObject(toEncode);
@@ -36,7 +37,7 @@ namespace Microsoft.Identity.Client.Utils
             {
                 return default;
             }
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
             return (T)JsonSerializer.Deserialize(json, typeof(T), MsalJsonSerializerContext.Custom);
 #else
             return JsonConvert.DeserializeObject<T>(json);
@@ -73,7 +74,7 @@ namespace Microsoft.Identity.Client.Utils
             using (var stream = new MemoryStream(jsonByteArray))
             using (var reader = new StreamReader(stream, Encoding.UTF8))
             {
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
                 return (T)JsonSerializer.Deserialize(stream, typeof(T), MsalJsonSerializerContext.Custom);
 #else
                 return (T)JsonSerializer.Create().Deserialize(reader, typeof(T));
@@ -141,7 +142,7 @@ namespace Microsoft.Identity.Client.Utils
             return 0;
         }
 
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
         internal static string JsonObjectToString(JsonObject jsonObject) => jsonObject.ToJsonString();
 
         internal static JsonObject ParseIntoJsonObject(string json) => JsonNode.Parse(json).AsObject();

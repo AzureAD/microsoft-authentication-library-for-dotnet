@@ -1,12 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if NET6_0_OR_GREATER
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Microsoft.Identity.Client.Utils
+namespace Microsoft.Identity.Client.Platforms.net6
 {
     internal class JsonStringConverter : JsonConverter<string>
     {
@@ -41,4 +40,3 @@ namespace Microsoft.Identity.Client.Utils
         }
     }
 }
-#endif

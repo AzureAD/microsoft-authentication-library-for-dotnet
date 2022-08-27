@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.Utils;
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using JObject = System.Text.Json.Nodes.JsonObject;
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal
                         MsalErrorMessage.InvalidJsonClaimsFormat(claims),
                         ex);
                 }
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
                 foreach (var claim in claimsJson)
                 {
                     capabilitiesJson[claim.Key] = claim.Value != null ? JsonNode.Parse(claim.Value.ToJsonString()) : null;
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Internal
                 {
                     [XmsClientCapability] = new JObject
                     {
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
                         ["values"] = new JsonArray(clientCapabilities.Select(c => JsonValue.Create(c)).ToArray())
 #else
                         ["values"] = new JArray(clientCapabilities)

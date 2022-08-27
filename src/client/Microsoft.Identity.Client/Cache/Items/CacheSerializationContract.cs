@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using JObject = System.Text.Json.Nodes.JsonObject;
@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 {
     internal class CacheSerializationContract
     {
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
         private static readonly JsonSerializerOptions NeverIgnoreJsonOptions = new()
         {
             DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal static CacheSerializationContract FromJsonString(string json)
         {
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
             var root = JsonNode.Parse(json, documentOptions: new JsonDocumentOptions
             {
                 AllowTrailingCommas = true
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             return contract;
 
             // private method for enumerating collection
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
             static IEnumerable<JsonObject> GetElement(JsonObject root, string key)
             {
                 foreach (var token in root[key].AsObject())
@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         private static IDictionary<string, JToken> ExtractUnknownNodes(JObject root)
         {
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
             return root
 #else
             return (root as IDictionary<string, JToken>)
@@ -218,13 +218,13 @@ namespace Microsoft.Identity.Client.Cache.Items
             // Anything else
             foreach (var kvp in UnknownNodes)
             {
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
                 root[kvp.Key] = kvp.Value != null ? JToken.Parse(kvp.Value.ToJsonString()) : null;
 #else
                 root[kvp.Key] = kvp.Value;
 #endif
             }
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
             return root.ToJsonString(NeverIgnoreJsonOptions);
 #else
             return JsonConvert.SerializeObject(

@@ -13,7 +13,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
 using Microsoft.Identity.Json;

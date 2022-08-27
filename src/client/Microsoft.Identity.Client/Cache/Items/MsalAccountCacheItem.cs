@@ -7,7 +7,7 @@ using System.Linq;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json.Nodes;
 using JObject = System.Text.Json.Nodes.JsonObject;
 #else
@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);
             if (WamAccountIds != null && WamAccountIds.Any())
             {
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
                 var obj = new JsonObject();
 
                 foreach (KeyValuePair<string, string> accId in WamAccountIds)

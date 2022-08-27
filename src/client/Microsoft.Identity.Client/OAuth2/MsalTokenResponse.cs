@@ -10,7 +10,7 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Utils;
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 using Microsoft.Identity.Client.Platforms.net6;
 using JObject = System.Text.Json.Nodes.JsonObject;
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 if (metadataOriginal != null)
                 {
                     string brokerMetadataJson = Uri.UnescapeDataString(metadataOriginal);
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
                     metadataDictionary = new Dictionary<string, string>();
                     foreach (var item in JsonDocument.Parse(brokerMetadataJson).RootElement.EnumerateObject())
                     {

@@ -3,7 +3,7 @@
 
 using System;
 using Microsoft.Identity.Client.Utils;
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json.Nodes;
 using JObject = System.Text.Json.Nodes.JsonObject;
 using JToken = System.Text.Json.Nodes.JsonNode;
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             bool shouldSetValue = true;
 
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
             var asObj = value as JsonValue;
 #else
             object asObj = value.ToObject<object>();
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
             else
             {
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
                 string asString = asObj.GetValue<string>();
 #else
                 string asString = asObj as string;

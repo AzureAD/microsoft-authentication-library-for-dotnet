@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.OAuth2;
-#if NET6_0_OR_GREATER
+#if SUPPORTS_SYSTEM_TEXT_JSON
 using Microsoft.Identity.Client.Platforms.net6;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
