@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
 #if NET6_0_OR_GREATER
+using Microsoft.Identity.Client.Platforms.net6;
 using System.Text.Json.Nodes;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
@@ -20,9 +21,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
         public const string Href = "href";
     }
 
-#if !NET6_0_OR_GREATER
     [JsonObject(Title = AdfsWebFingerResponseClaim.Links)]
-#endif
     [Preserve(AllMembers = true)]
     internal class LinksList
     {
@@ -33,9 +32,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
         public string Href { get; set; }
     }
 
-#if !NET6_0_OR_GREATER
     [JsonObject]
-#endif
     [Preserve(AllMembers = true)]
     internal class AdfsWebFingerResponse : OAuth2ResponseBase
     {

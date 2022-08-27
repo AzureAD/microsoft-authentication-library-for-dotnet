@@ -2,15 +2,15 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.Utils;
-#if !NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
+using Microsoft.Identity.Client.Platforms.net6;
+#else
 using Microsoft.Identity.Json;
 #endif
 
 namespace Microsoft.Identity.Client.Cache
 {
-#if !NET6_0_OR_GREATER
     [JsonObject]
-#endif
     [Preserve(AllMembers = true)]
     internal class AdalResultWrapper
     {

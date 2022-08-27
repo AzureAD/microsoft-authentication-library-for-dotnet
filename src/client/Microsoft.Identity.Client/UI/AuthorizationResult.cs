@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-#if !NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
+using Microsoft.Identity.Client.Platforms.net6;
+#else
 using Microsoft.Identity.Json;
 #endif
 namespace Microsoft.Identity.Client.UI
@@ -19,9 +21,7 @@ namespace Microsoft.Identity.Client.UI
         UnknownError
     }
 
-#if !NET6_0_OR_GREATER
     [JsonObject]
-#endif
     [Preserve(AllMembers = true)]
     internal class AuthorizationResult
     {

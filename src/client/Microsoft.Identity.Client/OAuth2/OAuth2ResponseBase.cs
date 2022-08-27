@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 #if NET6_0_OR_GREATER
+using Microsoft.Identity.Client.Platforms.net6;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
 using Microsoft.Identity.Json;
@@ -19,9 +20,7 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string CorrelationId = "correlation_id";
     }
 
-#if !NET6_0_OR_GREATER
     [JsonObject]
-#endif
     [Preserve(AllMembers = true)]
     internal class OAuth2ResponseBase
     {

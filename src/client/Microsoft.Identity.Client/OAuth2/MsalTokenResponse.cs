@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Utils;
 #if NET6_0_OR_GREATER
 using System.Text.Json;
+using Microsoft.Identity.Client.Platforms.net6;
 using JObject = System.Text.Json.Nodes.JsonObject;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
@@ -45,9 +46,7 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string LocalAccountId = "local_account_id";
     }
 
-#if !NET6_0_OR_GREATER
     [JsonObject]
-#endif
     [Preserve(AllMembers = true)]
     internal class MsalTokenResponse : OAuth2ResponseBase
     {

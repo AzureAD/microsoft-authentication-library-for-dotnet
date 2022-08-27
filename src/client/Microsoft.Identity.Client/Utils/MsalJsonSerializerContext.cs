@@ -15,9 +15,15 @@ using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.WsTrust;
+using static System.Net.WebRequestMethods;
 
 namespace Microsoft.Identity.Client.Utils
 {
+    /// <summary>
+    /// This class specifies metadata for System.Text.Json source generation.
+    /// See <see href="https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-source-generation-modes?pivots=dotnet-6-0">https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-source-generation-modes?pivots=dotnet-6-0</see>
+    /// and <see href="https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-source-generation?pivots=dotnet-6-0">How to use source generation in System.Text.Json </see> for official docs.
+    /// </summary>
     [JsonSerializable(typeof(KerberosSupplementalTicket))]
     [JsonSerializable(typeof(InstanceDiscoveryResponse))]
     [JsonSerializable(typeof(LocalImdsErrorResponse))]

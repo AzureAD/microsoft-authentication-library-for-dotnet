@@ -9,6 +9,7 @@ using System.Text;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 #if NET6_0_OR_GREATER
+using Microsoft.Identity.Client.Platforms.net6;
 using System.Text.Json.Serialization;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 using JObject = System.Text.Json.Nodes.JsonObject;
@@ -130,9 +131,7 @@ namespace Microsoft.Identity.Client.Internal
             return string.Concat(encodedHeader, ".", encodedPayload);
         }
 
-#if !NET6_0_OR_GREATER
         [JsonObject]
-#endif
         [Preserve(AllMembers = true)]
         internal class JWTHeader
         {
@@ -171,9 +170,7 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-#if !NET6_0_OR_GREATER
         [JsonObject]
-#endif
         [Preserve(AllMembers = true)]
         internal class JWTPayload
         {
@@ -210,9 +207,7 @@ namespace Microsoft.Identity.Client.Internal
             public string JwtIdentifier { get; set; }
         }
 
-#if !NET6_0_OR_GREATER
         [JsonObject]
-#endif
         [Preserve(AllMembers = true)]
         internal sealed class JWTHeaderWithCertificate : JWTHeader
         {

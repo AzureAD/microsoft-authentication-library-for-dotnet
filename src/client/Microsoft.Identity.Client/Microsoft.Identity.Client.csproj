@@ -174,10 +174,12 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)'">
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
+    <Compile Include="$(PathToMsalSources)\Platforms\net6\**\*.cs" LinkBase="Platforms\net6" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
+    
+    <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
-
     <PackageReference Include="System.Text.Json" Version="6.0.5" />
   </ItemGroup>
 

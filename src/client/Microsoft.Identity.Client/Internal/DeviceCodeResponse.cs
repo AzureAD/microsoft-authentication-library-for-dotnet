@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
 #if NET6_0_OR_GREATER
+using Microsoft.Identity.Client.Platforms.net6;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
 using Microsoft.Identity.Json;
@@ -12,9 +13,7 @@ using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Internal
 {
-#if !NET6_0_OR_GREATER
     [JsonObject]
-#endif
     [Preserve(AllMembers = true)]
     internal class DeviceCodeResponse : OAuth2ResponseBase
     {

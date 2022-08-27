@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 #if NET6_0_OR_GREATER
+using Microsoft.Identity.Client.Platforms.net6;
 using JsonProperty = System.Text.Json.Serialization.JsonIncludeAttribute;
 #else
 using Microsoft.Identity.Json;
@@ -13,9 +14,7 @@ namespace Microsoft.Identity.Client.Cache
     /// Contains the results of an ADAL token acquisition. Access Tokens from ADAL are not compatible 
     /// with MSAL, only Refresh Tokens are.
     /// </summary>
-#if !NET6_0_OR_GREATER
     [JsonObject]
-#endif
     [Preserve(AllMembers = true)]
     internal sealed class AdalResult
     {
