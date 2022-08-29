@@ -696,11 +696,5 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsTrue(builder1.IsBrokerAvailable());
 #endif
         }
-
-        [TestMethod]
-        public void RetryOn5xxApiTest()
-        {
-            //WithRetryOnServerErrors
-        }
     }
 }
