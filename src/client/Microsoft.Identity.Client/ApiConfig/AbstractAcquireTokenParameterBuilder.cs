@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -133,6 +134,8 @@ namespace Microsoft.Identity.Client
         /// the application registration portal.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [Obsolete("Use WithTenantId or WithTenantIdFromAuthority instead, or WithB2CAuthority for B2C authorities.", error: false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithAuthority(string authorityUri, bool validateAuthority = true)
         {
             if (string.IsNullOrWhiteSpace(authorityUri))
@@ -151,6 +154,8 @@ namespace Microsoft.Identity.Client
         /// <param name="tenantId">GUID of the tenant from which to sign-in users.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [Obsolete("Use WithTenantId or WithTenantIdFromAuthority instead, or WithB2CAuthority for B2C authorities.", error: false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithAuthority(
             string cloudInstanceUri,
             Guid tenantId,
@@ -179,6 +184,8 @@ namespace Microsoft.Identity.Client
         /// and <see cref="WithAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </remarks>
         /// <returns>The builder to chain the .With methods.</returns>
+        [Obsolete("Use WithTenantId or WithTenantIdFromAuthority instead, or WithB2CAuthority for B2C authorities.", error: false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithAuthority(
             string cloudInstanceUri,
             string tenant,
@@ -202,6 +209,8 @@ namespace Microsoft.Identity.Client
         /// <param name="tenantId">Tenant Id of the tenant from which to sign-in users.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [Obsolete("Use WithTenantId or WithTenantIdFromAuthority instead, or WithB2CAuthority for B2C authorities.", error: false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithAuthority(
             AzureCloudInstance azureCloudInstance,
             Guid tenantId,
@@ -221,6 +230,8 @@ namespace Microsoft.Identity.Client
         /// <param name="tenant">Tenant Id of the tenant from which to sign-in users. This can also be a GUID.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [Obsolete("Use WithTenantId or WithTenantIdFromAuthority instead, or WithB2CAuthority for B2C authorities.", error: false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithAuthority(
             AzureCloudInstance azureCloudInstance,
             string tenant,
@@ -241,6 +252,8 @@ namespace Microsoft.Identity.Client
         /// accounts.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [Obsolete("Use WithTenantId or WithTenantIdFromAuthority instead, or WithB2CAuthority for B2C authorities.", error: false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(azureCloudInstance, authorityAudience, validateAuthority);
@@ -256,6 +269,8 @@ namespace Microsoft.Identity.Client
         /// accounts.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [Obsolete("Use WithTenantId or WithTenantIdFromAuthority instead, or WithB2CAuthority for B2C authorities.", error: false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(authorityAudience, validateAuthority);

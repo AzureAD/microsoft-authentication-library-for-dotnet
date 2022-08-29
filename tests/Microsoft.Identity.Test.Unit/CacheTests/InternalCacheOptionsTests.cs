@@ -164,9 +164,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private async Task ClientCredsAcquireAndAssertTokenSourceAsync(IConfidentialClientApplication app, string scope, TokenSource expectedSource)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             var result = await app.AcquireTokenForClient(new[] { scope })
                  .WithAuthority(TestConstants.AuthorityUtidTenant)
                  .ExecuteAsync().ConfigureAwait(false);
+#pragma warning restore CS0618 // Type or member is obsolete
             Assert.AreEqual(
                expectedSource,
                result.AuthenticationResultMetadata.TokenSource);

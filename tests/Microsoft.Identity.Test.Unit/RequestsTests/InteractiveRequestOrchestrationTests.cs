@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Arrange - important for test
                 requestParams.AppConfig.IsBrokerEnabled = false;
-                var authCodeResult = new Tuple<AuthorizationResult, string>(new AuthorizationResult() { Code= "some_auth_code" }, "pkce_verifier");
+                var authCodeResult = new Tuple<AuthorizationResult, string>(new AuthorizationResult() { Code = "some_auth_code" }, "pkce_verifier");
                 _authCodeRequestComponentOverride.FetchAuthCodeAndPkceVerifierAsync(CancellationToken.None)
                     .Returns(Task.FromResult(authCodeResult));
 
@@ -83,16 +83,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count);
 
                 // Assert - orchestration
-#pragma warning disable VSTHRD101 // Avoid unsupported async delegates
-                Received.InOrder(async () =>
+                Received.InOrder(() =>
                 {
-                    await _authCodeRequestComponentOverride
-                        .FetchAuthCodeAndPkceVerifierAsync(default)
-                        .ConfigureAwait(false);
+                    _authCodeRequestComponentOverride
+                        .FetchAuthCodeAndPkceVerifierAsync(default);
 
-                    await _authCodeExchangeComponentOverride
-                       .FetchTokensAsync(default)
-                       .ConfigureAwait(false);
+                    _authCodeExchangeComponentOverride
+                       .FetchTokensAsync(default);
+                    
                 });
 #pragma warning restore VSTHRD101 // Avoid unsupported async delegates
 
@@ -189,7 +187,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 _brokerExchangeComponentOverride
                     .FetchTokensAsync(default)
                     .Returns((MsalTokenResponse)null);
-                
+
                 // web UI can deal with this
                 var authCodeResult = new Tuple<AuthorizationResult, string>(new AuthorizationResult() { Code = "some_auth_code" }, "pkce_verifier");
                 _authCodeRequestComponentOverride.FetchAuthCodeAndPkceVerifierAsync(CancellationToken.None)
@@ -215,22 +213,17 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Assert - orchestration
 
                 // Assert - orchestration
-#pragma warning disable VSTHRD101 // Avoid unsupported async delegates
-                Received.InOrder(async () =>
+                Received.InOrder(() =>
                 {
-                    await _brokerExchangeComponentOverride
-                        .FetchTokensAsync(default)
-                        .ConfigureAwait(false);
+                    _brokerExchangeComponentOverride
+                       .FetchTokensAsync(default);
 
-                    await _authCodeRequestComponentOverride
-                        .FetchAuthCodeAndPkceVerifierAsync(default)
-                        .ConfigureAwait(false);
+                    _authCodeRequestComponentOverride
+                       .FetchAuthCodeAndPkceVerifierAsync(default);
 
-                    await _authCodeExchangeComponentOverride
-                       .FetchTokensAsync(default)
-                       .ConfigureAwait(false);
+                    _authCodeExchangeComponentOverride
+                      .FetchTokensAsync(default);
                 });
-#pragma warning restore VSTHRD101 // Avoid unsupported async delegates
             }
         }
 
@@ -282,17 +275,15 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count);
 
                 // Assert - orchestration
-#pragma warning disable VSTHRD101 // Avoid unsupported async delegates
-                Received.InOrder(async () =>
+
+                Received.InOrder(() =>
                 {
-                    await _authCodeRequestComponentOverride
-                        .FetchAuthCodeAndPkceVerifierAsync(default)
-                        .ConfigureAwait(false);
-                    await _brokerExchangeComponentOverride
-                        .FetchTokensAsync(default)
-                        .ConfigureAwait(false);
+                    _authCodeRequestComponentOverride
+                        .FetchAuthCodeAndPkceVerifierAsync(default);
+
+                    _brokerExchangeComponentOverride
+                        .FetchTokensAsync(default);
                 });
-#pragma warning restore VSTHRD101 // Avoid unsupported async delegates
 
                 await _authCodeExchangeComponentOverride
                        .DidNotReceiveWithAnyArgs()

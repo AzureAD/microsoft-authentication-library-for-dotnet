@@ -241,15 +241,13 @@ namespace NetDesktopWinForms
                     string msaTenantIdPublicCloud = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
 
                     if (acc.HomeAccountId.TenantId == PersonalTenantIdV2AAD)
-                    {
-                        var msaAuthority = $"{publicCloudEnv}{msaTenantIdPublicCloud}";
-
-                        builder = builder.WithAuthority(msaAuthority);
+                    {                        
+                        builder = builder.WithTenantId(msaTenantIdPublicCloud);
                     }
                 }
                 else
                 {
-                    builder = builder.WithAuthority(reqAuthority);
+                    builder = builder.WithTenantIdFromAuthority(new Uri(reqAuthority));
                 }
 
                 if (cbxPOP.Checked)
@@ -367,6 +365,9 @@ namespace NetDesktopWinForms
                 .WithUseEmbeddedWebView(true)
                 //.WithExtraQueryParameters("domain_hint=live.com") -- will force AAD login with browser
                 //.WithExtraQueryParameters("msafed=0")             -- will force MSA login with browser
+                .WithExtraQueryParameters(new Dictionary<string, string>()
+{{"instance_aware", "true" }
+})
                 .WithEmbeddedWebViewOptions(
                 new EmbeddedWebViewOptions()
                 {

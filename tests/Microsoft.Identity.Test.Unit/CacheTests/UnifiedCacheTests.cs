@@ -96,8 +96,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 // Using RT from Adal cache for silent call
                 AuthenticationResult result1 = app
-                    .AcquireTokenSilent(TestConstants.s_scope, result.Account)
-                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .AcquireTokenSilent(TestConstants.s_scope, result.Account)                    
                     .WithForceRefresh(false)
                     .ExecuteAsync(CancellationToken.None)
                     .Result;

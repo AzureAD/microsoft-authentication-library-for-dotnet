@@ -82,11 +82,13 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 cache.Bind(app2.UserTokenCache);
 
                 IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+#pragma warning disable CS0618 // Type or member is obsolete
                 result = await app2.AcquireTokenSilent(TestConstants.s_scope, accounts.First())
                                    .WithAuthority(string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, TestConstants.Utid))
                                    .WithForceRefresh(false)
                                    .ExecuteAsync(CancellationToken.None)
                                    .ConfigureAwait(false);
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 Assert.IsNotNull(result);
             }
@@ -121,6 +123,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 
                     cache.Bind(app3.UserTokenCache);
 
+#pragma warning disable CS0618 // Type or member is obsolete
                     result = await app3
                         .AcquireTokenSilent(
                             TestConstants.s_scopeForAnotherResource,
@@ -128,6 +131,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                         .WithAuthority(string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, TestConstants.Utid))
                         .WithForceRefresh(false)
                         .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+#pragma warning restore CS0618 // Type or member is obsolete
                 }
                 catch (MsalUiRequiredException)
                 {

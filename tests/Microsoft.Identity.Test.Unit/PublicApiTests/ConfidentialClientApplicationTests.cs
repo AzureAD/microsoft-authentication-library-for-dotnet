@@ -171,9 +171,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
                 string partitionKey = CacheKeyFactory.GetClientCredentialKey(TestConstants.ClientId, TestConstants.Utid, null);
@@ -183,9 +185,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithAuthority(TestConstants.AuthorityUtid2Tenant)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 Assert.IsNotNull(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(at => at.TenantId == TestConstants.Utid2));
                 Assert.AreEqual(2, ((InMemoryPartitionedAppTokenCacheAccessor)app.AppTokenCacheInternal.Accessor).AccessTokenCacheDictionary.Count);
@@ -211,9 +215,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 var result = await app.AcquireTokenForClient(new[] { "scope1" })
                     .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 // One tenant partition with one token
                 Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
@@ -226,8 +232,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 result = await app.AcquireTokenForClient(new[] { "scope2" })
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
-                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                    .WithTenantIdFromAuthority(new Uri(TestConstants.AuthorityUtidTenant))
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
 
                 // One tenant partition with two tokens
                 Assert.AreEqual(2, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
@@ -238,8 +245,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 result = await app.AcquireTokenForClient(new[] { "scope1" })
-                    .WithAuthority(TestConstants.AuthorityUtid2Tenant)
-                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                        .WithTenantIdFromAuthority(new Uri(TestConstants.AuthorityUtidTenant))
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(false);
 
                 // Two tenant partitions with three tokens total
                 Assert.AreEqual(3, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
@@ -273,7 +281,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 };
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
@@ -1069,7 +1077,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithLoginHint(TestConstants.DisplayableId)
                     .WithExtraQueryParameters("extra=qp")
                     .WithExtraScopesToConsent(TestConstants.s_scopeForAnotherResource)
-                    .WithAuthority(TestConstants.AuthorityGuestTenant)
+                    .WithTenantId(TestConstants.Guest)
                     .ExecuteAsync(CancellationToken.None);
 
                 var uri = task.Result;
@@ -1648,20 +1656,24 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithLogging((LogLevel level, string message, bool containsPii) => log = log + message)
                     .BuildConcrete();
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 var result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
                     .WithAuthority(TestConstants.AuthorityCommonTenant, true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 Assert.IsTrue(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
 
                 log = string.Empty;
+#pragma warning disable CS0618 // Type or member is obsolete
                 result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
                     .WithAuthority(TestConstants.AuthorityOrganizationsTenant, true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 Assert.IsTrue(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
             }

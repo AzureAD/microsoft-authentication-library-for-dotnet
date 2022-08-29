@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantIdFromAuthority(new Uri(TestConstants.AuthorityUtidTenant))
                     .WithProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantIdFromAuthority(new Uri(TestConstants.AuthorityUtidTenant))
                     .WithProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantIdFromAuthority(new Uri(TestConstants.AuthorityUtidTenant))
                     .WithProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -167,14 +167,14 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
                                     app.AcquireTokenInteractive(TestConstants.s_scope.ToArray())
-                                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                                    .WithTenantIdFromAuthority(new Uri(TestConstants.AuthorityUtidTenant))
                                     .WithProofOfPossession(null, HttpMethod.Get, new Uri(app.Authority))
                                     .ExecuteAsync())
                                     .ConfigureAwait(false);
 
                 await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
                                     app.AcquireTokenSilent(TestConstants.s_scope.ToArray(), "loginHint")
-                                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                                    .WithTenantIdFromAuthority(new Uri(TestConstants.AuthorityUtidTenant))
                                     .WithProofOfPossession(null, HttpMethod.Get, new Uri(app.Authority))
                                     .ExecuteAsync())
                                     .ConfigureAwait(false);
@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 // Act
                 Trace.WriteLine("1. AcquireTokenForClient ");
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantIdFromAuthority(new Uri(TestConstants.AuthorityUtidTenant))
                     .WithProofOfPossession(popConfig)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
@@ -250,7 +250,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 // Act
                 Trace.WriteLine("1. AcquireTokenForClient again, after time passes - expect POP key rotation");
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                   .WithAuthority(TestConstants.AuthorityUtidTenant)
+                   .WithTenantIdFromAuthority(new Uri(TestConstants.AuthorityUtidTenant))
                    .WithProofOfPossession(popConfig)
                    .ExecuteAsync()
                    .ConfigureAwait(false);

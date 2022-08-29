@@ -205,18 +205,16 @@ namespace NetDesktopWinForms
                     const string PersonalTenantIdV2AAD = "9188040d-6c67-4c5b-b112-36a304b66dad";
 
                     // these are per cloud
-                    string publicCloudEnv = "https://login.microsoftonline.com/";
                     string msaTenantIdPublicCloud = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
 
                     if (acc.HomeAccountId.TenantId == PersonalTenantIdV2AAD)
                     {
-                        var msaAuthority = $"{publicCloudEnv}{msaTenantIdPublicCloud}";
-                        builder = builder.WithAuthority(msaAuthority);
+                        builder = builder.WithTenantId(msaTenantIdPublicCloud);
                     }
                 }
                 else
                 {
-                    builder = builder.WithAuthority(reqAuthority);
+                    builder = builder.WithTenantIdFromAuthority(new Uri(reqAuthority));
                 }
 
                 Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
