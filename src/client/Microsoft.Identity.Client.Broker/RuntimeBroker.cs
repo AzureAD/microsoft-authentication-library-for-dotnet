@@ -408,14 +408,14 @@ namespace Microsoft.Identity.Client.Broker
             {
                 if (discoverAccountsResult.IsSuccess)
                 {
-                    IEnumerable<NativeInterop.Account> wamAccounts = discoverAccountsResult.Accounts;
+                    List<NativeInterop.Account> wamAccounts = discoverAccountsResult.Accounts;
 
                     _logger.Verbose($"[WamBroker] Broker returned {wamAccounts.Count()} account(s).");
 
                     //If "multi-cloud" is enabled, we do not have to do instanceMetadata matching
                     if (!requestContext.ServiceBundle.Config.MultiCloudSupportEnabled)
                     {
-                        var environmentList = discoverAccountsResult.Accounts.Select(acc => acc.Environment).ToList();
+                        var environmentList = discoverAccountsResult.Accounts.Select(acc => acc.Environment).Distinct().ToList();
 
                         var instanceMetadata = await instanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
                                 authorityInfo,
@@ -424,9 +424,9 @@ namespace Microsoft.Identity.Client.Broker
 
                         _logger.Verbose($"[WamBroker] Filtering WAM accounts based on Environment.");
 
-                        wamAccounts = wamAccounts.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
+                        wamAccounts.RemoveAll(acc => !instanceMetadata.Aliases.Contains(acc.Environment));
 
-                        _logger.Verbose($"[WamBroker] {wamAccounts.Count()} account(s) returned after filtering.");
+                        _logger.Verbose($"[WamBroker] {wamAccounts.Count} account(s) returned after filtering.");
                     }
                     
                     foreach (var acc in wamAccounts)
