@@ -1,21 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using System.Linq;
-using Microsoft.Identity.Client.Http;
 using System.Net;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 #if SUPPORTS_BROKER
-using Microsoft.Identity.Client.Platforms.Features.WamBroker;
 #endif
 
 namespace Microsoft.Identity.Test.Unit.CoreTests
@@ -80,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 client1.MaxResponseContentBufferSize);
         }
 
-#if NET_CORE || NET5_WIN
+#if NET_CORE || NET5_WIN || DESKTOP
         [TestMethod]
         public void PlatformProxy_HttpClient_NetCore()
         {
@@ -96,19 +90,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsTrue(factory is SimpleHttpClientFactory);
             Assert.AreSame(client1, client2, "On NetDesktop and NetCore, the HttpClient should be static");
 
-        }
-#endif
-#if DESKTOP
- [TestMethod]
-        public void PlatformProxy_HttpClient_NetDesktop()
-        {
-            // Arrange
-            var factory = PlatformProxyFactory.CreatePlatformProxy(null)
-                .CreateDefaultHttpClientFactory();          
-
-            // Assert
-            Assert.IsTrue(factory is 
-                Client.Platforms.net45.Http.NetDesktopHttpClientFactory);
         }
 #endif
 
@@ -157,7 +138,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 proxy.GetDefaultRedirectUri("cid", false));
 
 #if DESKTOP || NET5_WIN
-            
+
             Assert.AreSame(
                 Constants.NativeClientRedirectUri,
                 proxy.GetDefaultRedirectUri("cid", true));
