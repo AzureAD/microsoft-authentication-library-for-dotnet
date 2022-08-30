@@ -424,7 +424,7 @@ namespace Microsoft.Identity.Client.Broker
 
                         _logger.Verbose($"[WamBroker] Filtering WAM accounts based on Environment.");
 
-                        wamAccounts.RemoveAll(acc => !instanceMetadata.Aliases.Contains(acc.Environment));
+                        wamAccounts.RemoveAll(acc => !instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
 
                         _logger.Verbose($"[WamBroker] {wamAccounts.Count} account(s) returned after filtering.");
                     }
