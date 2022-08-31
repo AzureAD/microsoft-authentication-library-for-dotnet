@@ -132,6 +132,9 @@ namespace Microsoft.Identity.Client
             "Check logs for more details and see https://aka.ms/msal-net-pop. ";
         public const string BrokerDoesNotSupportPop = "The broker does not support Proof-of-Possession on the current platform.";
         public const string BrokerRequiredForPop = "The request has Proof-of-Possession configured but does not have broker enabled. Broker is required for Proof-of-Possession on public clients. Please use IPublicCleintApplication.IsProofOfPosessionSupportedByClient to ensure Proof-of-Possession can be performed before using WithProofOfPossession.";
+        public const string AdfsOrB2cConfiguredForBrokerPop = "The request has Proof-of-Possession configured but ADFS or B2C is configured. Broker is required for Proof-of-Possession but it does not support ADFS or B2C. Please use IPublicCleintApplication.IsProofOfPosessionSupportedByClient to ensure Proof-of-Possession can be performed before using WithProofOfPossession.";
+        //Not a supported operating system.
+        public const string BrokerUsedOnNonWindowsOsPop = "The request has Proof-of-Possession configured but is not running on a broker supported OS. Broker is required for Proof-of-Possession. Please use IPublicCleintApplication.IsProofOfPosessionSupportedByClient to ensure Proof-of-Possession can be performed before using WithProofOfPossession.";
         public const string NonceRequiredForPop = "The request has Proof-of-Possession configured for public clients but does not have a nonce provided. A nonce is required for Proof-of-Possession on public clients.";
         public const string AdfsNotSupportedWithBroker = "Broker does not support ADFS environments.";
 

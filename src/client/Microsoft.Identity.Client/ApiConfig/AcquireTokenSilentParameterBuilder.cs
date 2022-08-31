@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
@@ -182,10 +183,22 @@ namespace Microsoft.Identity.Client
 
             if (ServiceBundle.Config.IsBrokerEnabled)
             {
-                if(string.IsNullOrEmpty(nonce))
+                if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Adfs ||
+                    ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C)
+                {
+                    throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.AdfsOrB2cConfiguredForBrokerPop);
+                }
+
+                if (!DesktopOsHelper.IsWin10OrServerEquivalent())
+                {
+                    throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerUsedOnNonWindowsOsPop);
+                }
+
+                if (string.IsNullOrEmpty(nonce))
                 {
                     throw new ArgumentNullException(nameof(nonce));
                 }
+
                 if (!broker.IsPopSupported)
                 {
                     throw new MsalClientException(MsalError.BrokerDoesNotSupportPop, MsalErrorMessage.BrokerDoesNotSupportPop);

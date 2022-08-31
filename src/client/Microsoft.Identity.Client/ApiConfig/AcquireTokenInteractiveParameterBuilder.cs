@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.AppConfig;
 using System.Net.Http;
 using System.ComponentModel;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 #if iOS
 using UIKit;
@@ -359,6 +360,17 @@ namespace Microsoft.Identity.Client
         {
             ValidateUseOfExperimentalFeature();
             ClientApplicationBase.GuardMobileFrameworks();
+
+            if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Adfs ||
+                ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C)
+            {
+                throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.AdfsOrB2cConfiguredForBrokerPop);
+            }
+
+            if (!DesktopOsHelper.IsWin10OrServerEquivalent())
+            {
+                throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerUsedOnNonWindowsOsPop);
+            }
 
             if (!ServiceBundle.Config.IsBrokerEnabled)
             {

@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
@@ -78,6 +79,17 @@ namespace Microsoft.Identity.Client
         {
             ValidateUseOfExperimentalFeature();
             ClientApplicationBase.GuardMobileFrameworks();
+
+            if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Adfs ||
+                ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C)
+            {
+                throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.AdfsOrB2cConfiguredForBrokerPop);
+            }
+
+            if(!DesktopOsHelper.IsWin10OrServerEquivalent())
+            {
+                throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerUsedOnNonWindowsOsPop);
+            }
 
             if (!ServiceBundle.Config.IsBrokerEnabled)
             {
