@@ -361,10 +361,9 @@ namespace Microsoft.Identity.Client
             ValidateUseOfExperimentalFeature();
             ClientApplicationBase.GuardMobileFrameworks();
 
-            if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Adfs ||
-                ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C)
+            if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C)
             {
-                throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.AdfsOrB2cConfiguredForBrokerPop);
+                throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.B2cConfiguredForBrokerPop);
             }
 
             if (!DesktopOsHelper.IsWin10OrServerEquivalent())
