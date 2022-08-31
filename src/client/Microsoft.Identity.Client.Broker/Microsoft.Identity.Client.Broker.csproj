@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  
   <PropertyGroup>
-
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
+    <TargetFrameworkNetDesktop Condition="$([MSBuild]::IsOsPlatform('Windows')) and '$(MSAL_DESKTOP_ONLY_DEV)' == ''">net461</TargetFrameworkNetDesktop>
 
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <TargetFramework>$(TargetFrameworkNetStandard)</TargetFramework>
-
+    <TargetFramework Condition="'$(TargetFrameworkNetDesktop)' == ''">$(TargetFrameworkNetStandard)</TargetFramework>
+    <TargetFrameworks Condition="'$(TargetFrameworkNetDesktop)' != ''">$(TargetFrameworkNetStandard);$(TargetFrameworkNetDesktop)</TargetFrameworks>
+    <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
@@ -50,15 +52,13 @@
   <ItemGroup>
     <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.9.0" />
+    <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
-
-
   <ItemGroup>
+    <PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.12.3" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
-
   <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>

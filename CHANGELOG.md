@@ -1,3 +1,26 @@
+4.46.2
+==========
+
+### New Features
+- WAM Authentication Library now explicitly supports .NET 4.6.2. See [#3539](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3539)
+
+### Bug Fixes
+- Fixed 'Authenticator Factory has already been started` exception in new MSAL WAM preview. See [#3604](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3604)
+- Added back missing .NET Standard 2.0 target to MSAL.NativeInterop package. See [#3612](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3612)
+- [Resilience] Changed to an improved implementation of HTTP client factory on .NET Framework to improve resiliency (for ex. by reducing the amount of request timeouts). See [#3546](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3546)
+- Logging additional exceptions to telemetry. See [#3547](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3547)
+
+4.46.1
+==========
+
+### New Features
+- Added Explicit .net 461 support to new WAM Preview broker. See [3550](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3550).  
+- Added MSALRuntime TelemetryData to verbose logging when a broker exception is thrown. See [3585](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3585)
+
+### Bug Fixes
+- Minor clarifications in caching logs. See [3582](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3582)
+
+
 4.46.0
 ==========
 

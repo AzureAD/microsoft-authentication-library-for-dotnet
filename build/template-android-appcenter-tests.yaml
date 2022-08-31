@@ -1,19 +1,21 @@
 parameters:
-  DataFileDirectory: 'Debug'
+  DataFileDirectory: 'Release'
 
 steps:
 
-- task: DownloadBuildArtifacts@0
-  displayName: 'Download Drop'
-  inputs:
-    artifactName: drop
-    itemPattern: '**/*'
-
-- task: DownloadBuildArtifacts@0
+- task: DownloadPipelineArtifact@2
   displayName: 'Download Xamarin.Android'
   inputs:
-    artifactName: Xamarin.Android
-    itemPattern: '**/*'
+    artifact: Xamarin.Android
+    patterns: '**/*'
+    path: $(System.ArtifactsDirectory)/Xamarin.Android
+
+- task: DownloadPipelineArtifact@2
+  displayName: 'Download Drop'
+  inputs:
+    artifact: drop
+    patterns: '**/*'
+    path: $(System.ArtifactsDirectory)/drop
 
 - powershell: '$Import = $(ConsolidateAppCenterTests)'
   errorActionPreference: silentlyContinue
