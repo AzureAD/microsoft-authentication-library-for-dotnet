@@ -398,6 +398,41 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 HttpMethod.Get,
                 result).ConfigureAwait(false);
         }
+
+        [TestMethod]
+        public void CheckPopRuntimeBrokerSupportTest()
+        {
+            //Broker enabled
+            IPublicClientApplication app = PublicClientApplicationBuilder
+                                            .Create(TestConstants.ClientId)
+                                            .WithBrokerPreview()
+                                            .Build();
+
+            Assert.IsTrue(app.IsProofOfPosessionSupportedByClient());
+
+            //Broker disabled
+            app = PublicClientApplicationBuilder
+                                .Create(TestConstants.ClientId)
+                                .WithBrokerPreview(false)
+                                .Build();
+
+            Assert.IsFalse(app.IsProofOfPosessionSupportedByClient());
+
+            //Broker not configured
+            app = PublicClientApplicationBuilder
+                                .Create(TestConstants.ClientId)
+                                .Build();
+
+            Assert.IsFalse(app.IsProofOfPosessionSupportedByClient());
+
+            //App configured for desktop Broker
+            app = PublicClientApplicationBuilder
+                                .Create(TestConstants.ClientId)
+                                .WithBroker()
+                                .Build();
+
+            Assert.IsFalse(app.IsProofOfPosessionSupportedByClient());
+        }
 #endif
 
         private static X509Certificate2 GetCertificate()

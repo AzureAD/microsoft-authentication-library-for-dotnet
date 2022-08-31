@@ -1266,43 +1266,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-#if NET_CORE
-        [TestMethod]
-        public void CheckPopRuntimeBrokerSupportTest()
-        {
-            //Broker enabled
-            IPublicClientApplication app = PublicClientApplicationBuilder
-                                            .Create(TestConstants.ClientId)
-                                            .WithBrokerPreview()
-                                            .Build();
-
-            Assert.IsTrue(app.IsProofOfPosessionSupportedByClient());
-
-            //Broker disabled
-            app = PublicClientApplicationBuilder
-                                .Create(TestConstants.ClientId)
-                                .WithBrokerPreview(false)
-                                .Build();
-
-            Assert.IsFalse(app.IsProofOfPosessionSupportedByClient());
-
-            //Broker not configured
-            app = PublicClientApplicationBuilder
-                                .Create(TestConstants.ClientId)
-                                .Build();
-
-            Assert.IsFalse(app.IsProofOfPosessionSupportedByClient());
-
-            //App configured for desktop Broker
-            app = PublicClientApplicationBuilder
-                                .Create(TestConstants.ClientId)
-                                .WithBroker()
-                                .Build();
-
-            Assert.IsFalse(app.IsProofOfPosessionSupportedByClient());
-        }
-#endif
-
         public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>
         {
             builder.WithAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true)
