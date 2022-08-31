@@ -295,8 +295,6 @@ namespace Microsoft.Identity.Client
             IIdentityLogger identityLogger,
             bool enablePiiLogging = false)
         {
-            ValidateUseOfExperimentalFeature("IIdentityLogger");
-
             Config.IdentityLogger = identityLogger;
             Config.EnablePiiLogging = enablePiiLogging;
             return (T)this;
