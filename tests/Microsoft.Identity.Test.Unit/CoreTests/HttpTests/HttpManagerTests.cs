@@ -307,7 +307,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         [DataRow(false)]
         public async Task TestRetryConfigWithHttp500TypeFailureAsync(bool retry)
         {
-            using (var httpManager = new MockHttpManager(null, retry))
+            using (var httpManager = new MockHttpManager(retry, null))
             {
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.ServiceUnavailable);
 
