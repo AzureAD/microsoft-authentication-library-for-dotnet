@@ -380,10 +380,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .WithExperimentalFeatures()
                .WithBrokerPreview().Build();
 
-            if (!pca.IsProofOfPosessionSupportedByClient())
-            {
-                Assert.Fail("Either the broker is not configured or it does not support POP.");
-            }
+            Assert.IsTrue(pca.IsProofOfPosessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");
 
             var result = await pca
                 .AcquireTokenByUsernamePassword(
