@@ -31,6 +31,7 @@ namespace Microsoft.Identity.Client
 
         internal ApplicationConfiguration Config { get; }
 
+
         /// <summary>
         /// Uses a specific <see cref="IMsalHttpClientFactory"/> to communicate
         /// with the IdP. This enables advanced scenarios such as setting a proxy,
@@ -47,6 +48,29 @@ namespace Microsoft.Identity.Client
         public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory)
         {
             Config.HttpClientFactory = httpClientFactory;
+            return (T)this;
+        }
+
+        /// <summary>
+        /// Uses a specific <see cref="IMsalHttpClientFactory"/> to communicate
+        /// with the IdP. This enables advanced scenarios such as setting a proxy,
+        /// or setting the Agent.
+        /// </summary>
+        /// <param name="httpClientFactory">HTTP client factory</param>
+        /// <param name="retryOnceOn5xx">Configures MSAL to retry on 5xx server errors. When enabled (on by default), MSAL will wait 1 second after recieving
+        /// a 5xx error and then retry the http request again.</param>
+        /// <remarks>MSAL does not guarantee that it will not modify the HttpClient, for example by adding new headers.
+        /// Prior to the changes needed in order to make MSAL's httpClients thread safe (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2046/files),
+        /// the httpClient had the possibility of throwing an exception stating "Properties can only be modified before sending the first request".
+        /// MSAL's httpClient will no longer throw this exception after 4.19.0 (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases/tag/4.19.0)
+        /// see (https://aka.ms/msal-httpclient-info) for more information.
+        /// If you only want to configure the retryOnceOn5xx parameter, set httpClientFactory to null and MSAL will use the default http client.
+        /// </remarks>
+        /// <returns>The builder to chain the .With methods</returns>
+        public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory, bool retryOnceOn5xx)
+        {
+            Config.HttpClientFactory = httpClientFactory;
+            Config.RetryOnServerErrors = retryOnceOn5xx;
             return (T)this;
         }
 
