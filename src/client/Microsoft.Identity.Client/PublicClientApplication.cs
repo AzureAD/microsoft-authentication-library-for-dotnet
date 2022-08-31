@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Boolean indicating Proof-of-Possesion is supported</returns>
         public bool IsProofOfPosessionSupportedByClient()
         {
-            if (!ServiceBundle.Config.IsBrokerEnabled)
+            if (ServiceBundle.Config.IsBrokerEnabled)
             {
                 var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
 

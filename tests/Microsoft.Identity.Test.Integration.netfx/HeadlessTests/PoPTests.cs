@@ -424,14 +424,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                 .Build();
 
             Assert.IsFalse(app.IsProofOfPosessionSupportedByClient());
-
-            //App configured for desktop Broker
-            app = PublicClientApplicationBuilder
-                                .Create(TestConstants.ClientId)
-                                .WithBroker()
-                                .Build();
-
-            Assert.IsFalse(app.IsProofOfPosessionSupportedByClient());
         }
 #endif
 
