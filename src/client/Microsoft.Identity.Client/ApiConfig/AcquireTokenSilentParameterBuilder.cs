@@ -183,16 +183,6 @@ namespace Microsoft.Identity.Client
 
             if (ServiceBundle.Config.IsBrokerEnabled)
             {
-                if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C)
-                {
-                    throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.B2cConfiguredForBrokerPop);
-                }
-
-                if (!DesktopOsHelper.IsWin10OrServerEquivalent())
-                {
-                    throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerUsedOnNonWindowsOsPop);
-                }
-
                 if (string.IsNullOrEmpty(nonce))
                 {
                     throw new ArgumentNullException(nameof(nonce));
@@ -201,6 +191,12 @@ namespace Microsoft.Identity.Client
                 if (!broker.IsPopSupported)
                 {
                     throw new MsalClientException(MsalError.BrokerDoesNotSupportPop, MsalErrorMessage.BrokerDoesNotSupportPop);
+                }
+
+                if (!broker.IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType) ||
+                    ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C)
+                {
+                    throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerConfiguredForPopButIsNotAvailable);
                 }
             }
 
