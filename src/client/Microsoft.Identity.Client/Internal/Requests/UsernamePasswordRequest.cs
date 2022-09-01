@@ -73,6 +73,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         Metrics.IncrementTotalAccessTokensFromBroker();
                         return brokerTokenResponse;
                     }
+
+                    if (string.Equals(_requestParameters.AuthenticationScheme.AccessTokenType, Constants.PoPTokenType))
+                    {
+                        _logger.Error("A broker application is required for Proof-of-Possesion, but one could not be found or communicated with. See https://aka.ms/msal-net-pop");
+                        throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.CannotInvokeBrokerForPop);
+                    }
                 }
 
                 _logger.Info("Broker request not attempted because the broker is not available.");

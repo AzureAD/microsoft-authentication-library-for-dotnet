@@ -369,8 +369,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     .ConfigureAwait(false)).ConfigureAwait(false);
 
                 //Assert
-                Assert.AreEqual(MsalError.AdfsNotSupportedWithBroker, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.AdfsNotSupportedWithBroker, ex.Message);
+                Assert.AreEqual(MsalError.BrokerApplicationRequired, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.CannotInvokeBrokerForPop, ex.Message);
             }
         }
 

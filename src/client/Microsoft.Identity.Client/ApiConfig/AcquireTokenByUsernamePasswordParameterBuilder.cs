@@ -92,12 +92,6 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.BrokerDoesNotSupportPop, MsalErrorMessage.BrokerDoesNotSupportPop);
             }
 
-            if (!broker.IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType) ||
-                ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C)
-            {
-                throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerConfiguredForPopButIsNotAvailable);
-            }
-
             if (string.IsNullOrEmpty(nonce))
             {
                 throw new ArgumentNullException(nameof(nonce));
