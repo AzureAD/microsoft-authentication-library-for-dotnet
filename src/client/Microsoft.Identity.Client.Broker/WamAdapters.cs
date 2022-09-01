@@ -245,7 +245,7 @@ namespace Microsoft.Identity.Client.Broker
                     ExpiresIn = (long)(DateTime.SpecifyKind(authResult.ExpiresOn, DateTimeKind.Utc) - DateTimeOffset.UtcNow).TotalSeconds,
                     ClientInfo = authResult.Account.ClientInfo.ToString(),
                     TokenType = authResult.IsPopAuthorization ? Constants.PoPAuthHeaderPrefix : BrokerResponseConst.Bearer,
-                    WamAccountId = authResult.Account.Id,
+                    WamAccountId = authResult.Account.AccountId,
                     TokenSource = TokenSource.Broker
                 };
 
