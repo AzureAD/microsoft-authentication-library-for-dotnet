@@ -25,12 +25,16 @@ namespace Microsoft.Identity.Client.Http
     internal class HttpManager : IHttpManager
     {
         private readonly IMsalHttpClientFactory _httpClientFactory;
+        //Determines whether or not to retry on 5xx errors. Configurable on application creation. default is true;
+        private readonly bool _retryConfig;
         public long LastRequestDurationInMs { get; private set; }
 
-        public HttpManager(IMsalHttpClientFactory httpClientFactory)
+        public HttpManager(IMsalHttpClientFactory httpClientFactory, bool retry = true)
         {
             _httpClientFactory = httpClientFactory ?? 
                 throw new ArgumentNullException(nameof(httpClientFactory));
+
+            _retryConfig = retry;
         }
 
         protected virtual HttpClient GetHttpClient()
@@ -139,7 +143,7 @@ namespace Microsoft.Identity.Client.Http
                     (int)response.StatusCode, response.StatusCode));
 
                 is5xxError = (int)response.StatusCode >= 500 && (int)response.StatusCode < 600;
-                isRetryable = is5xxError && !HasRetryAfterHeader(response);
+                isRetryable = is5xxError && _retryConfig && !HasRetryAfterHeader(response);
             }
             catch (TaskCanceledException exception)
             {
