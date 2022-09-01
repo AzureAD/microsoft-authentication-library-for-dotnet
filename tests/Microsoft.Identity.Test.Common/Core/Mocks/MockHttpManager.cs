@@ -30,6 +30,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             _testContext = testContext;
         }
 
+        public MockHttpManager(bool retry, TestContext testContext = null) :
+            base(new SimpleHttpClientFactory(), retry)
+        {
+            _testContext = testContext;
+        }
+
         private ConcurrentQueue<HttpMessageHandler> _httpMessageHandlerQueue
         {
             get;
