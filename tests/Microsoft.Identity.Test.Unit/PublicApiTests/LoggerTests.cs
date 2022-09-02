@@ -221,7 +221,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithClientSecret("secret")
-                    .WithExperimentalFeatures()
                     .WithLogging(testLogger, false)
                     .WithLogging((level, message, containsPii) => { Assert.Fail("MSAL should not use the logging callback"); })
                     .WithHttpManager(httpManager)
@@ -333,22 +332,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             args.IdentityLogger.Log(entry);
         }
-
-        [TestMethod]
-        public void IdentityLoggerExperimental()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                TestIdentityLogger testLogger = new TestIdentityLogger();
-
-                var e = AssertException.Throws<MsalClientException>(() => ConfidentialClientApplicationBuilder
-                   .Create(TestConstants.ClientId)
-                   .WithClientSecret("secret")
-                   .WithLogging(testLogger, false)
-                   .Build());
-
-                Assert.AreEqual(MsalError.ExperimentalFeature, e.ErrorCode);
-            }
-        }
+      
     }
 }
