@@ -1,19 +1,23 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Core;
 using System.Text;
-using Microsoft.Identity.Client.Internal;
-using System.Diagnostics.Tracing;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Utils;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using System.Text.Json;
+using Microsoft.Identity.Client.Platforms.net6;
+using JObject = System.Text.Json.Nodes.JsonObject;
+using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+#else
+using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -48,43 +52,43 @@ namespace Microsoft.Identity.Client.OAuth2
     {
         private const string iOSBrokerErrorMetadata = "error_metadata";
         private const string iOSBrokerHomeAccountId = "home_account_id";
-        [JsonProperty(PropertyName = TokenResponseClaim.TokenType)]
+        [JsonProperty(TokenResponseClaim.TokenType)]
         public string TokenType { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.AccessToken)]
+        [JsonProperty(TokenResponseClaim.AccessToken)]
         public string AccessToken { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.RefreshToken)]
+        [JsonProperty(TokenResponseClaim.RefreshToken)]
         public string RefreshToken { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.Scope)]
+        [JsonProperty(TokenResponseClaim.Scope)]
         public string Scope { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.ClientInfo)]
+        [JsonProperty(TokenResponseClaim.ClientInfo)]
         public string ClientInfo { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.IdToken)]
+        [JsonProperty(TokenResponseClaim.IdToken)]
         public string IdToken { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.ExpiresIn)]
+        [JsonProperty(TokenResponseClaim.ExpiresIn)]
         public long ExpiresIn { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.ExtendedExpiresIn)]
+        [JsonProperty(TokenResponseClaim.ExtendedExpiresIn)]
         public long ExtendedExpiresIn { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.RefreshIn)]
+        [JsonProperty(TokenResponseClaim.RefreshIn)]
         public long? RefreshIn { get; set; }
 
         /// <summary>
         /// Optional field, FOCI support.
         /// </summary>
-        [JsonProperty(PropertyName = TokenResponseClaim.FamilyId)]
+        [JsonProperty(TokenResponseClaim.FamilyId)]
         public string FamilyId { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.SpaCode)]
+        [JsonProperty(TokenResponseClaim.SpaCode)]
         public string SpaAuthCode { get; set; }
 
-        [JsonProperty(PropertyName = TokenResponseClaim.Authority)]
+        [JsonProperty(TokenResponseClaim.Authority)]
         public string AuthorityUrl { get; set; }
 
         public string TenantId { get; set; }
@@ -105,11 +109,19 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 string metadataOriginal = responseDictionary.ContainsKey(MsalTokenResponse.iOSBrokerErrorMetadata) ? responseDictionary[MsalTokenResponse.iOSBrokerErrorMetadata] : null;
                 Dictionary<string, string> metadataDictionary = null;
-                
+
                 if (metadataOriginal != null)
                 {
                     string brokerMetadataJson = Uri.UnescapeDataString(metadataOriginal);
-                    metadataDictionary = Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(brokerMetadataJson); 
+#if SUPPORTS_SYSTEM_TEXT_JSON
+                    metadataDictionary = new Dictionary<string, string>();
+                    foreach (var item in JsonDocument.Parse(brokerMetadataJson).RootElement.EnumerateObject())
+                    {
+                        metadataDictionary.Add(item.Name, item.Value.GetString());
+                    }
+#else
+                    metadataDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(brokerMetadataJson);
+#endif
                 }
 
                 string homeAcctId = null;
@@ -120,7 +132,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     ErrorDescription = responseDictionary.ContainsKey(BrokerResponseConst.BrokerErrorDescription) ? CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.BrokerErrorDescription]) : string.Empty,
                     SubError = responseDictionary.ContainsKey(OAuth2ResponseBaseClaim.SubError) ? responseDictionary[OAuth2ResponseBaseClaim.SubError] : string.Empty,
                     AccountUserId = homeAcctId != null ? AccountId.ParseFromString(homeAcctId).ObjectId : null,
-                    TenantId = homeAcctId != null ?  AccountId.ParseFromString(homeAcctId).TenantId : null,
+                    TenantId = homeAcctId != null ? AccountId.ParseFromString(homeAcctId).TenantId : null,
                     Upn = (metadataDictionary?.ContainsKey(TokenResponseClaim.Upn) ?? false) ? metadataDictionary[TokenResponseClaim.Upn] : null,
                     CorrelationId = responseDictionary.ContainsKey(BrokerResponseConst.CorrelationId) ? responseDictionary[BrokerResponseConst.CorrelationId] : null,
                 };
@@ -202,7 +214,7 @@ namespace Microsoft.Identity.Client.OAuth2
         /// </remarks>
         internal static MsalTokenResponse CreateFromAndroidBrokerResponse(string jsonResponse, string correlationId)
         {
-            JObject authResult = JObject.Parse(jsonResponse);
+            var authResult = JsonHelper.ParseIntoJsonObject(jsonResponse);
             var errorCode = authResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
 
             if (!string.IsNullOrEmpty(errorCode))

@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
-using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -845,6 +844,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .ConfigureAwait(false);
         }
 
+#if !NET6_0
         /// <summary>
         /// Cache state:
         ///
@@ -886,7 +886,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 AssertTenantProfiles(response.Account.GetTenantProfiles(), tenant1, tenant2);
                 Assert.AreEqual(tenant1, response.ClaimsPrincipal.FindFirst("tid").Value);
 
-
                 // Act
                 accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
                 account = accounts.Single(a => a.HomeAccountId.TenantId == tenant2);
@@ -902,7 +901,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(tenant2, response.ClaimsPrincipal.FindFirst("tid").Value);
             }
         }
-
+#endif
         /// <summary>
         /// Cache state:
         ///

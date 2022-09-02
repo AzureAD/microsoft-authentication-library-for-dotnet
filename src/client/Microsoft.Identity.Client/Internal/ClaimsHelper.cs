@@ -3,8 +3,15 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Identity.Client.Utils;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using JObject = System.Text.Json.Nodes.JsonObject;
+#else
 using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -22,7 +29,7 @@ namespace Microsoft.Identity.Client.Internal
                 JObject capabilitiesJson = CreateClientCapabilitiesRequestJson(clientCapabilities);
                 JObject mergedClaimsAndCapabilities = MergeClaimsIntoCapabilityJson(claims, capabilitiesJson);
 
-                return mergedClaimsAndCapabilities.ToString(Formatting.None);
+                return JsonHelper.JsonObjectToString(mergedClaimsAndCapabilities);
             }
 
             return claims;
@@ -35,21 +42,27 @@ namespace Microsoft.Identity.Client.Internal
                 JObject claimsJson;
                 try
                 {
-                    claimsJson = JObject.Parse(claims);
+                    claimsJson = JsonHelper.ParseIntoJsonObject(claims);
                 }
-                catch (JsonReaderException ex)
+                catch (JsonException ex)
                 {
                     throw new MsalClientException(
                         MsalError.InvalidJsonClaimsFormat,
                         MsalErrorMessage.InvalidJsonClaimsFormat(claims),
                         ex);
                 }
-
+#if SUPPORTS_SYSTEM_TEXT_JSON
+                foreach (var claim in claimsJson)
+                {
+                    capabilitiesJson[claim.Key] = claim.Value != null ? JsonNode.Parse(claim.Value.ToJsonString()) : null;
+                }
+#else
                 capabilitiesJson.Merge(claimsJson, new JsonMergeSettings
                 {
                     // union array values together to avoid duplicates
                     MergeArrayHandling = MergeArrayHandling.Union
                 });
+#endif
             }
 
             return capabilitiesJson;
@@ -64,10 +77,18 @@ namespace Microsoft.Identity.Client.Internal
             //  }
             return new JObject
             {
-                new JProperty(AccessTokenClaim, new JObject(
-                    new JObject(new JProperty(XmsClientCapability,
-                            new JObject(new JProperty("values",
-                                new JArray(clientCapabilities)))))))            };
+                [AccessTokenClaim] = new JObject
+                {
+                    [XmsClientCapability] = new JObject
+                    {
+#if SUPPORTS_SYSTEM_TEXT_JSON
+                        ["values"] = new JsonArray(clientCapabilities.Select(c => JsonValue.Create(c)).ToArray())
+#else
+                        ["values"] = new JArray(clientCapabilities)
+#endif
+                    }
+                }
+            };
         }
     }
 }

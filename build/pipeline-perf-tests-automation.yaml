@@ -16,7 +16,7 @@ pool:
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'release'
-  MSAL_DESKTOP_ONLY_DEV: 'false' # skips building mobile and legacy targets
+  MSAL_DESKTOP_ONLY_DEV: 'true' # skips building mobile and legacy targets
 
 jobs:
   - job: 'BuildJob'

@@ -2,7 +2,11 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.Utils;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using JObject = System.Text.Json.Nodes.JsonObject;
+#else
 using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -14,9 +18,9 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal override void PopulateFieldsFromJObject(JObject j)
         {
-            CredentialType = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.CredentialType);
-            ClientId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.ClientId);
-            Secret = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Secret);
+            CredentialType = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.CredentialType);
+            ClientId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.ClientId);
+            Secret = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Secret);
 
             // Important: this MUST be last, since it will extract the AdditionalFieldsJson
             // after all other fields are read.

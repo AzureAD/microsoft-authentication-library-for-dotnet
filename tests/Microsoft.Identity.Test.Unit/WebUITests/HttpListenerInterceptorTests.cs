@@ -1,18 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
-using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -22,8 +18,6 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
     [TestClass]
     public class HttpListenerInterceptorTests
     {
-        private readonly RequestContext _requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid());
-
         [TestMethod]
         public async Task HttpListenerCompletesAsync()
         {
@@ -37,14 +31,14 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             Task<Uri> listenTask = listenerInterceptor.ListenToSingleRequestAndRespondAsync(
                 port,
                 string.Empty,
-                (u) => { return new MessageAndHttpCode(HttpStatusCode.OK, "ok"); },
+                (u) => { return new MessageAndHttpCode(HttpStatusCode.OK, "OK"); },
                 CancellationToken.None);
 
-            // Issue an http request on the main thread
+            // Issue an HTTP request on the main thread
             await SendMessageToPortAsync(port, string.Empty).ConfigureAwait(false);
 
-            // Wait for the listner to do its stuff
-            listenTask.Wait(1000 /* 1s timeout */);
+            // Wait for the listener to do its stuff
+            listenTask.Wait(2000 /* 2s timeout */);
 
             // Assert
             Assert.IsTrue(listenTask.IsCompleted);
@@ -67,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 () => listenerInterceptor.ListenToSingleRequestAndRespondAsync(
                     port,
                     string.Empty,
-                    (u) => { return new MessageAndHttpCode(HttpStatusCode.OK, "ok"); },
+                    (u) => { return new MessageAndHttpCode(HttpStatusCode.OK, "OK"); },
                     cts.Token))
                 .ConfigureAwait(false);
         }
@@ -88,7 +82,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 () => listenerInterceptor.ListenToSingleRequestAndRespondAsync(
                     port,
                     string.Empty,
-                    (u) => { return new MessageAndHttpCode(HttpStatusCode.OK, "ok"); },
+                    (u) => { return new MessageAndHttpCode(HttpStatusCode.OK, "OK"); },
                     cts.Token))
                 .ConfigureAwait(false);
         }
@@ -107,14 +101,14 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             Task<Uri> listenTask = listenerInterceptor.ListenToSingleRequestAndRespondAsync(
                 port,
                 "/TestPath/",
-                (u) => { return new MessageAndHttpCode(HttpStatusCode.OK, "ok"); },
+                (u) => { return new MessageAndHttpCode(HttpStatusCode.OK, "OK"); },
                 CancellationToken.None);
 
-            // Issue an http request on the main thread
+            // Issue an HTTP request on the main thread
             await SendMessageToPortAsync(port, "TestPath").ConfigureAwait(false);
 
-            // Wait for the listner to do its stuff
-            listenTask.Wait(1000 /* 1s timeout */);
+            // Wait for the listener to do its stuff
+            listenTask.Wait(2000 /* 2s timeout */);
 
             // Assert
             Assert.IsTrue(listenTask.IsCompleted);
@@ -137,7 +131,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 () => listenerInterceptor.ListenToSingleRequestAndRespondAsync(
                     port,
                     string.Empty,
-                    (u) => { return new MessageAndHttpCode(HttpStatusCode.OK, "ok"); },
+                    (u) => { return new MessageAndHttpCode(HttpStatusCode.OK, "OK"); },
                     cts.Token))
                 .ConfigureAwait(false);
         }

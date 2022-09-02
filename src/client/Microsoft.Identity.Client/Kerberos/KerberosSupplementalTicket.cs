@@ -1,7 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+#else
 using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client.Kerberos
 {
@@ -28,7 +32,7 @@ namespace Microsoft.Identity.Client.Kerberos
         /// <summary>
         /// Get or Sets the Base64 encoded KERB_MESSAGE_BUFFER
         /// </summary>
-        [JsonProperty("messageBuffer", Required = Required.Always)]
+        [JsonProperty("messageBuffer")]
         public string KerberosMessageBuffer { get; set; }
 
         /// <summary>
@@ -46,7 +50,7 @@ namespace Microsoft.Identity.Client.Kerberos
         /// <summary>
         /// Get or Sets the target service principal name (SPN).
         /// </summary>
-        [JsonProperty("sn", Required = Required.Always)]
+        [JsonProperty("sn")]
         public string ServicePrincipalName { get; set; }
 
         /// <summary>

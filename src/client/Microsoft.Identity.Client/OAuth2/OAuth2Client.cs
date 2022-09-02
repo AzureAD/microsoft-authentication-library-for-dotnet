@@ -14,7 +14,11 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using System.Text.Json;
+#else
 using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -72,25 +76,25 @@ namespace Microsoft.Identity.Client.OAuth2
         }
 
         internal async Task<MsalTokenResponse> GetTokenAsync(
-            Uri endPoint, 
-            RequestContext requestContext, 
-            bool addCommonHeaders, 
+            Uri endPoint,
+            RequestContext requestContext,
+            bool addCommonHeaders,
             Func<OnBeforeTokenRequestData, Task> onBeforePostRequestHandler)
         {
             return await ExecuteRequestAsync<MsalTokenResponse>(
-                endPoint, 
-                HttpMethod.Post, 
-                requestContext, 
-                false, 
+                endPoint,
+                HttpMethod.Post,
+                requestContext,
+                false,
                 addCommonHeaders,
                 onBeforePostRequestHandler).ConfigureAwait(false);
         }
 
         internal async Task<T> ExecuteRequestAsync<T>(
-            Uri endPoint, 
-            HttpMethod method, 
-            RequestContext requestContext, 
-            bool expectErrorsOn200OK = false, 
+            Uri endPoint,
+            HttpMethod method,
+            RequestContext requestContext,
+            bool expectErrorsOn200OK = false,
             bool addCommonHeaders = true,
             Func<OnBeforeTokenRequestData, Task> onBeforePostRequestData = null)
         {
@@ -133,7 +137,7 @@ namespace Microsoft.Identity.Client.OAuth2
                                 .ConfigureAwait(false);
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     if (ex is TaskCanceledException && requestContext.UserCancellationToken.IsCancellationRequested)
                     {
@@ -253,15 +257,12 @@ namespace Microsoft.Identity.Client.OAuth2
                     ex);
             }
 
-            if (exceptionToThrow == null)
-            {
-                exceptionToThrow = MsalServiceExceptionFactory.FromHttpResponse(
+            exceptionToThrow ??= MsalServiceExceptionFactory.FromHttpResponse(
                     response.StatusCode == HttpStatusCode.NotFound
                         ? MsalError.HttpStatusNotFound
                         : MsalError.HttpStatusCodeNotOk,
                     httpErrorCodeMessage,
                     response);
-            }
 
             if (shouldLogAsError)
             {
@@ -269,7 +270,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     string.Format(MsalErrorMessage.RequestFailureErrorMessagePii,
                         requestContext.ApiEvent?.ApiIdString,
                         requestContext.ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority,
-                        requestContext.ServiceBundle.Config.ClientId), 
+                        requestContext.ServiceBundle.Config.ClientId),
                     string.Format(MsalErrorMessage.RequestFailureErrorMessage,
                         requestContext.ApiEvent?.ApiIdString,
                         requestContext.ServiceBundle.Config.Authority.AuthorityInfo.Host));

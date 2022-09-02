@@ -4,7 +4,12 @@
 using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Utils;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using Microsoft.Identity.Client.Platforms.net6;
+using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+#else
 using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -13,10 +18,10 @@ namespace Microsoft.Identity.Client.Internal
     [Preserve(AllMembers = true)]
     internal class ClientInfo
     {
-        [JsonProperty(PropertyName = ClientInfoClaim.UniqueIdentifier)]
+        [JsonProperty(ClientInfoClaim.UniqueIdentifier)]
         public string UniqueObjectIdentifier { get; set; }
 
-        [JsonProperty(PropertyName = ClientInfoClaim.UniqueTenantIdentifier)]
+        [JsonProperty(ClientInfoClaim.UniqueTenantIdentifier)]
         public string UniqueTenantIdentifier { get; set; }
 
         public static ClientInfo CreateFromJson(string clientInfo)

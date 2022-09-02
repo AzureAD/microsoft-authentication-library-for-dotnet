@@ -6,13 +6,9 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -25,7 +21,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly TokenClient _tokenClient;
         private readonly string _clientInfo;
 
-        public AuthCodeExchangeComponent( 
+        public AuthCodeExchangeComponent(
             AuthenticationRequestParameters requestParams,
             AcquireTokenInteractiveParameters interactiveParameters,
             string authorizationCode,

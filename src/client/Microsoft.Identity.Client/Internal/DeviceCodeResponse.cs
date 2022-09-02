@@ -4,7 +4,12 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using Microsoft.Identity.Client.Platforms.net6;
+using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+#else
 using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -12,28 +17,28 @@ namespace Microsoft.Identity.Client.Internal
     [Preserve(AllMembers = true)]
     internal class DeviceCodeResponse : OAuth2ResponseBase
     {
-        [JsonProperty(PropertyName = "user_code")]
-        public string UserCode { get; internal set; }
+        [JsonProperty("user_code")]
+        public string UserCode { get; set; }
 
-        [JsonProperty(PropertyName = "device_code")]
-        public string DeviceCode { get; internal set; }
+        [JsonProperty("device_code")]
+        public string DeviceCode { get; set; }
 
-        [JsonProperty(PropertyName = "verification_url")]
-        public string VerificationUrl { get; internal set; }
+        [JsonProperty("verification_url")]
+        public string VerificationUrl { get; set; }
 
         // This is the OAuth2 standards compliant value.
         // It should be used if it's present, if it's not then fallback to VerificationUrl
-        [JsonProperty(PropertyName = "verification_uri")]
-        public string VerificationUri { get; internal set; }
+        [JsonProperty("verification_uri")]
+        public string VerificationUri { get; set; }
 
-        [JsonProperty(PropertyName = "expires_in")]
-        public long ExpiresIn { get; internal set; }
+        [JsonProperty("expires_in")]
+        public long ExpiresIn { get; set; }
 
-        [JsonProperty(PropertyName = "interval")]
-        public long Interval { get; internal set; }
+        [JsonProperty("interval")]
+        public long Interval { get; set; }
 
-        [JsonProperty(PropertyName = "message")]
-        public string Message { get; internal set; }
+        [JsonProperty("message")]
+        public string Message { get; set; }
 
         public DeviceCodeResult GetResult(string clientId, ISet<string> scopes)
         {

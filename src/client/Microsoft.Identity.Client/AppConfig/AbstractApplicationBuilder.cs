@@ -10,11 +10,14 @@ using System.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
 using Microsoft.IdentityModel.Abstractions;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using System.Text.Json;
+#else
+using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client
 {
@@ -609,18 +612,17 @@ namespace Microsoft.Identity.Client
             }
         }
 
-
         #region Authority
         private void ResolveAuthority()
         {
             if (Config.Authority?.AuthorityInfo != null)
             {
                 var isB2C = Config.Authority is B2CAuthority;
-                
+
                 AadAuthority aadAuthority = Config.Authority as AadAuthority;
-                if (!string.IsNullOrEmpty(Config.TenantId) 
+                if (!string.IsNullOrEmpty(Config.TenantId)
                     && !isB2C
-                    && aadAuthority != null )
+                    && aadAuthority != null)
                 {
                     if (!aadAuthority.IsCommonOrganizationsOrConsumersTenant() &&
                         !string.Equals(aadAuthority.TenantId, Config.TenantId))
@@ -908,7 +910,7 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
-#endregion
+        #endregion
 
         private static string GetValueIfNotEmpty(string original, string value)
         {

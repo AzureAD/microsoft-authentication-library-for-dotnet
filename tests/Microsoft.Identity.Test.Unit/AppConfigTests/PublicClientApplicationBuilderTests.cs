@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Identity.Client;
-#if !NET5_WIN
+#if !NET5_WIN && !NET6_0
 using Microsoft.Identity.Client.Desktop;
 #endif
 using Microsoft.Identity.Client.Internal;
@@ -492,7 +492,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             AssertException.Throws<ArgumentNullException>(() =>
                PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                 .WithAuthority((string)null, "tid"));
+                                 .WithAuthority(null, "tid"));
 
             AssertException.Throws<ArgumentNullException>(() =>
              PublicClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -636,7 +636,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 #endif
 
-#if DESKTOP || NET_CORE
+#if (DESKTOP || NET_CORE) && !NET6_0
         [TestMethod]
         public void IsBrokerAvailable_OldDotNet()
         {

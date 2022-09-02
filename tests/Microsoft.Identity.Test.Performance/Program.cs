@@ -22,6 +22,7 @@ namespace Microsoft.Identity.Test.Performance
                     typeof(AcquireTokenForOboCacheTests),
                     typeof(TokenCacheTests),
                     typeof(AcquireTokenNoCacheTests),
+                    typeof(JsonTests),
             }).RunAll(
 #if DEBUG
                     new DebugInProcessConfig()
