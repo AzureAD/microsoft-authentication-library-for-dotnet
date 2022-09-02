@@ -27,19 +27,19 @@ jobs: #Build and stage projects
   # Bootstrap the build
   - template: template-build-and-prep-automation.yaml
 
-
+# Disabled because mono is unable to restore/build .NET 6 target in MSAL project
 # BUILD IOS APPCENTER APP PHASE
-- job: 'BuildiOSAppCenterApp'
-  dependsOn:
-    - 'PreBuildCheck'
-  pool:
-      name: Azure Pipelines
-      vmImage: macos-latest
-  variables:
-      runCodesignValidationInjection: false
+#- job: 'BuildiOSAppCenterApp'
+#  dependsOn:
+#    - 'PreBuildCheck'
+#  pool:
+#      name: Azure Pipelines
+#      vmImage: macos-latest
+#  variables:
+#      runCodesignValidationInjection: false
 
-  steps:
-  - template: template-build-ios-automation.yaml
+#  steps:
+#  - template: template-build-ios-automation.yaml
 
   # BUILD ANDROID APPCENTER APP PHASE
 - job: 'BuildAndroidAppCenterApp'
@@ -107,20 +107,21 @@ jobs: #Build and stage projects
     parameters:
       DataFileDirectory: ${{ parameters.DataFileDirectory }}
 
+# Disabled because mono is unable to restore/build .NET 6 target in MSAL project
 # APP CENTER IOS MSAL TESTS PHASE
-- job: 'RunAppCenterIosMsalTests'
-  dependsOn:
-  - 'BuildAndStageProjects'
-  - 'BuildiOSAppCenterApp'
-  pool:
-    vmImage: 'windows-2022'
-  variables:
-    runCodesignValidationInjection: false
+#- job: 'RunAppCenterIosMsalTests'
+#  dependsOn:
+#  - 'BuildAndStageProjects'
+#  - 'BuildiOSAppCenterApp'
+#  pool:
+#    vmImage: 'windows-2022'
+#  variables:
+#    runCodesignValidationInjection: false
 
-  steps:
-  - template: template-ios-appcenter-tests.yaml
-    parameters:
-      DataFileDirectory: ${{ parameters.DataFileDirectory }}
+#  steps:
+#  - template: template-ios-appcenter-tests.yaml
+#    parameters:
+#      DataFileDirectory: ${{ parameters.DataFileDirectory }}
 
 
 # Disabled as the build agent is not compliant. Tracking issue https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3066
