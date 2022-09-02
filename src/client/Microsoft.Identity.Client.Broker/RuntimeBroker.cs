@@ -413,7 +413,7 @@ namespace Microsoft.Identity.Client.Broker
             // WAM does not work on pure ADFS environments
             if (authorityType == AuthorityType.Adfs)
             {
-                _logger.Warning("[WAM Broker] WAM does not work in pure ADFS environments. Falling back to browser for an ADFS authority. ");
+                _logger.Warning("[WAM Broker] WAM does not work in pure ADFS environments. Falling back to browser for an ADFS authority unless Proof-of-Posession is configured. ");
                 return false;
             }
 

@@ -14,6 +14,9 @@ using Microsoft.Identity.Client.Advanced;
 #if !NET5_0_OR_GREATER
 using Microsoft.Identity.Client.Desktop;
 #endif
+#if NET_CORE
+using Microsoft.Identity.Client.Broker;
+#endif
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;

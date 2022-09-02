@@ -3,6 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.3.32708.82
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9B0B5396-4D95-4C15-82ED-DC22B5A3123F}"
+	ProjectSection(SolutionItems) = preProject
+		tests\Directory.Build.props = tests\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client", "src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj", "{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}"
 EndProject
@@ -79,9 +82,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "all", "all", "{C44AADC0-1E9B-427F-AC02-642BDF8D936B}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		changelog.md = changelog.md
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		build\CodeCoverage.runsettings = build\CodeCoverage.runsettings
+		build\credscan-exclusion.json = build\credscan-exclusion.json
 		Directory.Build.props = Directory.Build.props
 		global.json = global.json
+		build\MSAL.CodeCoverage.runsettings = build\MSAL.CodeCoverage.runsettings
+		NuGet.Config = NuGet.Config
 		build\platform_and_feature_flags.props = build\platform_and_feature_flags.props
 	EndProjectSection
 EndProject
@@ -108,11 +116,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\template-build-and-run-all-tests.yaml = build\template-build-and-run-all-tests.yaml
 		build\template-build-android-automation.yaml = build\template-build-android-automation.yaml
 		build\template-build-ios-automation.yaml = build\template-build-ios-automation.yaml
+		build\template-ci-and-pr.yaml = build\template-ci-and-pr.yaml
 		build\template-cachecompat-automation.yaml = build\template-cachecompat-automation.yaml
 		build\template-desktop-unit-and-automation.yaml = build\template-desktop-unit-and-automation.yaml
+		build\template-install-dotnet-core.yaml = build\template-install-dotnet-core.yaml
 		build\template-install-keyvault-secrets.yaml = build\template-install-keyvault-secrets.yaml
 		build\template-ios-appcenter-tests.yaml = build\template-ios-appcenter-tests.yaml
 		build\template-nuget-pack.yaml = build\template-nuget-pack.yaml
+		build\template-OneBranch-libsandsamples.yaml = build\template-OneBranch-libsandsamples.yaml
 		build\template-pack-and-sign-all-nugets.yaml = build\template-pack-and-sign-all-nugets.yaml
 		build\template-pack-and-sign-nuget.yaml = build\template-pack-and-sign-nuget.yaml
 		build\template-pack-and-sign-packages.yaml = build\template-pack-and-sign-packages.yaml
@@ -187,7 +198,27 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntuneMAMSampleiOS", "tests
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TrueMam", "TrueMam", "{660867D0-956C-4AF2-8627-03AADF4FCEAA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.UIAutomation.Infrastructure", "tests\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.UIAutomation.Infrastructure.csproj", "{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{259B5734-1D43-43F7-8107-32F602A99019}"
+	ProjectSection(SolutionItems) = preProject
+		build\install-common.ps1 = build\install-common.ps1
+		build\install-from-msi-sample.ps1 = build\install-from-msi-sample.ps1
+		build\install-from-zip-sample.ps1 = build\install-from-zip-sample.ps1
+		build\InstallAndroid.ps1 = build\InstallAndroid.ps1
+		build\win-installer-helper.psm1 = build\win-installer-helper.psm1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{38B77C31-B57F-463A-8E76-8DD28A197195}"
+	ProjectSection(SolutionItems) = preProject
+		CHANGELOG.md = CHANGELOG.md
+		changelog.txt = changelog.txt
+		CONTRIBUTING.md = CONTRIBUTING.md
+		LICENSE = LICENSE
+		MauiStatus.md = MauiStatus.md
+		README.md = README.md
+		RELEASES.md = RELEASES.md
+		SECURITY.md = SECURITY.md
+		ThirdPartyNotice.txt = ThirdPartyNotice.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -2312,48 +2343,6 @@ Global
 		{034A5B86-A8AE-449D-B561-46F811329E6D}.Release|x64.Build.0 = Release|iPhoneSimulator
 		{034A5B86-A8AE-449D-B561-46F811329E6D}.Release|x86.ActiveCfg = Release|iPhoneSimulator
 		{034A5B86-A8AE-449D-B561-46F811329E6D}.Release|x86.Build.0 = Release|iPhoneSimulator
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug + MobileApps|Any CPU.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug + MobileApps|Any CPU.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug + MobileApps|ARM.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug + MobileApps|ARM.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug + MobileApps|ARM64.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug + MobileApps|ARM64.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug + MobileApps|iPhone.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug + MobileApps|iPhone.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug + MobileApps|iPhoneSimulator.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug + MobileApps|iPhoneSimulator.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug + MobileApps|x64.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug + MobileApps|x64.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug + MobileApps|x86.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug + MobileApps|x86.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|ARM.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|ARM64.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|ARM64.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|iPhone.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|iPhone.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|x64.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|x86.Build.0 = Debug|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|ARM.ActiveCfg = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|ARM.Build.0 = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|ARM64.Build.0 = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|iPhone.ActiveCfg = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|iPhone.Build.0 = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|x64.ActiveCfg = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|x64.Build.0 = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|x86.ActiveCfg = Release|Any CPU
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -2417,7 +2406,8 @@ Global
 		{69CE42A2-44DD-4740-856B-607C3BB5A92E} = {9B0B5396-4D95-4C15-82ED-DC22B5A3123F}
 		{034A5B86-A8AE-449D-B561-46F811329E6D} = {660867D0-956C-4AF2-8627-03AADF4FCEAA}
 		{660867D0-956C-4AF2-8627-03AADF4FCEAA} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
-		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4} = {45EBC624-6277-4EA2-A89C-A730A3214503}
+		{034A5B86-A8AE-449D-B561-46F811329E6D} = {34BE693E-3496-45A4-B1D2-D3A0E068EEDB}
+		{259B5734-1D43-43F7-8107-32F602A99019} = {EA983957-DC2F-4D9E-A2E3-79ADEB5CEB26}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {020399A9-DC27-4B82-9CAA-EF488665AC27}

@@ -371,8 +371,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     .ConfigureAwait(false)).ConfigureAwait(false);
 
                 //Assert
-                Assert.AreEqual(MsalError.AdfsNotSupportedWithBroker, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.AdfsNotSupportedWithBroker, ex.Message);
+                Assert.AreEqual(MsalError.BrokerApplicationRequired, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.CannotInvokeBrokerForPop, ex.Message);
             }
         }
 
@@ -492,6 +492,35 @@ namespace Microsoft.Identity.Test.Unit.Pop
             Assert.AreEqual(MsalError.BrokerRequiredForPop, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.BrokerRequiredForPop, ex.Message);
         }
+
+#if NET_CORE
+        [TestMethod]
+        public void CheckPopRuntimeBrokerSupportTest()
+        {
+            //Broker enabled
+            IPublicClientApplication app = PublicClientApplicationBuilder
+                                            .Create(TestConstants.ClientId)
+                                            .WithBrokerPreview()
+                                            .Build();
+
+            Assert.IsTrue(app.IsProofOfPosessionSupportedByClient());
+
+            //Broker disabled
+            app = PublicClientApplicationBuilder
+                                .Create(TestConstants.ClientId)
+                                .WithBrokerPreview(false)
+                                .Build();
+
+            Assert.IsFalse(app.IsProofOfPosessionSupportedByClient());
+
+            //Broker not configured
+            app = PublicClientApplicationBuilder
+                                .Create(TestConstants.ClientId)
+                                .Build();
+
+            Assert.IsFalse(app.IsProofOfPosessionSupportedByClient());
+        }
+#endif
 
         /// <summary>
         /// A key ID that uniquely describes a public / private key pair. While KeyID is not normally
