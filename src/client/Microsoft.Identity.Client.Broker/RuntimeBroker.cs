@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Security;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
@@ -16,7 +15,6 @@ using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client.Broker
 {
@@ -37,12 +35,12 @@ namespace Microsoft.Identity.Client.Broker
         private static Lazy<NativeInterop.Core> s_lazyCore = new Lazy<NativeInterop.Core>(() =>
         {
             try
-            {                
+            {
                 AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
 
                 return new NativeInterop.Core();
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 s_initException = ex;
 
@@ -51,13 +49,13 @@ namespace Microsoft.Identity.Client.Broker
             }
 
         });
-        
+
         /// <summary>
         /// Do not execute too much logic here. All "on process" handlers should execute in under 2s on Windows.
         /// </summary>
         private static void OnProcessExit(object sender, EventArgs e)
         {
-            if (s_lazyCore.IsValueCreated )
+            if (s_lazyCore.IsValueCreated)
             {
                 s_lazyCore.Value?.Dispose();
             }
@@ -106,11 +104,11 @@ namespace Microsoft.Identity.Client.Broker
             }
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
-                
+
             _logger.Verbose("[WamBroker] Using Windows account picker.");
 
             if (authenticationRequestParameters?.Account?.HomeAccountId?.ObjectId != null)
-            {                
+            {
                 using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
                 {
                     using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
@@ -138,9 +136,9 @@ namespace Microsoft.Identity.Client.Broker
                             _logger.Info(
                                 $"[WamBroker] Calling SignInInteractivelyAsync this will show the account picker.");
 
-                           msalTokenResponse = await SignInInteractivelyAsync(
-                               authenticationRequestParameters, acquireTokenInteractiveParameters)
-                                .ConfigureAwait(false);
+                            msalTokenResponse = await SignInInteractivelyAsync(
+                                authenticationRequestParameters, acquireTokenInteractiveParameters)
+                                 .ConfigureAwait(false);
                         }
                     }
                 }
@@ -168,7 +166,7 @@ namespace Microsoft.Identity.Client.Broker
                 //Login Hint
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
                 _logger.Verbose("[WamBroker] AcquireTokenInteractive - login hint provided? " + string.IsNullOrEmpty(loginHint));
-                
+
                 using (var result = await s_lazyCore.Value.SignInInteractivelyAsync(
                     _parentHandle,
                     authParams,
@@ -195,7 +193,6 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WamBroker] Signing in with the default user account.");
 
-            
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
                 using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInAsync(
@@ -233,7 +230,6 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WamBroker] Acquiring token silently.");
 
-            
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
                 using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
@@ -278,7 +274,6 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WamBroker] Acquiring token silently for default account.");
 
-            
             using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
                 using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInSilentlyAsync(
@@ -305,7 +300,6 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WamBroker] Acquiring token with Username Password flow.");
 
-            
             using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
             {
                 authParams.Properties["MSALRuntime_Username"] = acquireTokenByUsernamePasswordParameters.Username;
@@ -345,7 +339,6 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Info($"Removing WAM Account. Correlation ID : {correlationId} ");
 
-            
             {
                 using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
                     account.HomeAccountId.ObjectId,
@@ -366,7 +359,7 @@ namespace Microsoft.Identity.Client.Broker
                         string errorMessage = $"{readAccountResult.Error} (error code : {readAccountResult.Error.ErrorCode})";
                         throw new MsalServiceException("wam_no_account_found", errorMessage);
                     }
-                    
+
                     using (NativeInterop.SignOutResult result = await s_lazyCore.Value.SignOutSilentlyAsync(
                         appConfig.ClientId,
                         correlationId,
@@ -413,7 +406,7 @@ namespace Microsoft.Identity.Client.Broker
             // WAM does not work on pure ADFS environments
             if (authorityType == AuthorityType.Adfs)
             {
-                _logger.Warning("[WAM Broker] WAM does not work in pure ADFS environments. Falling back to browser for an ADFS authority unless Proof-of-Posession is configured. ");
+                _logger.Warning("[WAM Broker] WAM does not work in pure ADFS environments. Falling back to browser for an ADFS authority unless Proof-of-Possession is configured. ");
                 return false;
             }
 

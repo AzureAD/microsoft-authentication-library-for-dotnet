@@ -7,7 +7,6 @@ using System.ComponentModel;
 using System.Security;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client
@@ -274,10 +273,10 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Used to determine if the currently available broker is able to perform Proof-of-Possesion.
+        /// Used to determine if the currently available broker is able to perform Proof-of-Possession.
         /// </summary>
-        /// <returns>Boolean indicating Proof-of-Possesion is supported</returns>
-        public bool IsProofOfPosessionSupportedByClient()
+        /// <returns>Boolean indicating if Proof-of-Possession is supported</returns>
+        public bool IsProofOfPossessionSupportedByClient()
         {
             if (ServiceBundle.Config.IsBrokerEnabled)
             {
