@@ -123,11 +123,11 @@ namespace NetDesktopWinForms
                     builder = builder.WithBrokerPreview().WithExperimentalFeatures();
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder = builder.WithBrokerPreview(false);
+                    builder = builder.WithExperimentalFeatures().WithBrokerPreview(false);
                     builder = ToggleOldBroker(builder, false);
                     break;
                 case AuthMethod.EmbeddedBrowser:
-                    builder = builder.WithBrokerPreview(false);
+                    builder = builder.WithExperimentalFeatures().WithBrokerPreview(false);
                     builder = ToggleOldBroker(builder, false);
 
                     break;

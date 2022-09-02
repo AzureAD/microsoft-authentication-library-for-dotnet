@@ -90,17 +90,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl));
             popConfig.HttpMethod = HttpMethod.Get;
 
-            var pca = ConfidentialClientApplicationBuilder
+            var cca = ConfidentialClientApplicationBuilder
                 .Create(PublicCloudConfidentialClientID)
                 .WithExperimentalFeatures()
                 .WithClientSecret(s_publicCloudCcaSecret)
                 .WithTestLogging()
                 .WithAuthority(PublicCloudTestAuthority).Build();
-            ConfigureInMemoryCache(pca);
+            ConfigureInMemoryCache(cca);
 
             // Act - acquire both a PoP and a Bearer token
             Trace.WriteLine("Getting a PoP token");
-            AuthenticationResult result = await pca
+            AuthenticationResult result = await cca
                 .AcquireTokenForClient(s_keyvaultScope)
                 .WithProofOfPossession(popConfig)
                 .ExecuteAsync()
@@ -114,14 +114,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                        result).ConfigureAwait(false);
 
             Trace.WriteLine("Getting a Bearer token");
-            result = await pca
+            result = await cca
                 .AcquireTokenForClient(s_keyvaultScope)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
             Assert.AreEqual("Bearer", result.TokenType);
             Assert.AreEqual(
                 2,
-                (pca as ConfidentialClientApplication).AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                (cca as ConfidentialClientApplication).AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
         }
 
         private async Task MultipleKeys_Async()
@@ -379,6 +379,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithExperimentalFeatures()
                .WithBrokerPreview().Build();
+
+            Assert.IsTrue(pca.IsProofOfPosessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");
 
             var result = await pca
                 .AcquireTokenByUsernamePassword(
