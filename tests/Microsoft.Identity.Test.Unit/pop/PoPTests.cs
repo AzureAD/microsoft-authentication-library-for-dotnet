@@ -503,7 +503,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                                             .WithBrokerPreview()
                                             .Build();
 
-            Assert.IsTrue(app.IsProofOfPosessionSupportedByClient());
+            Assert.IsTrue(app.IsProofOfPossessionSupportedByClient());
 
             //Broker disabled
             app = PublicClientApplicationBuilder
@@ -511,14 +511,14 @@ namespace Microsoft.Identity.Test.Unit.Pop
                                 .WithBrokerPreview(false)
                                 .Build();
 
-            Assert.IsFalse(app.IsProofOfPosessionSupportedByClient());
+            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
 
             //Broker not configured
             app = PublicClientApplicationBuilder
                                 .Create(TestConstants.ClientId)
                                 .Build();
 
-            Assert.IsFalse(app.IsProofOfPosessionSupportedByClient());
+            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
         }
 #endif
 
