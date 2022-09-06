@@ -877,11 +877,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 // Act - interactive flow logs-in Arlighton user
                 var result = await globalPca.AcquireTokenInteractive(TestConstants.s_graphScopes).ExecuteAsync().ConfigureAwait(false);
                 Assert.AreEqual("login.microsoftonline.us", result.Account.Environment);
-                Assert.AreEqual(TestConstants.Organizations, result.TenantId);
+                Assert.AreEqual(TestConstants.Utid, result.TenantId);
                 
                 var account = (await globalPca.GetAccountsAsync().ConfigureAwait(false)).Single();
                 Assert.AreEqual("login.microsoftonline.us", account.Environment);
-                Assert.AreEqual(TestConstants.Organizations, result.TenantId);
+                Assert.AreEqual(TestConstants.Utid, result.TenantId);
             }
         }
 
