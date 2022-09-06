@@ -10,6 +10,7 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
+    [System.Diagnostics.DebuggerDisplay("env: {Environment} accountId: {HomeAccountId}")]
     internal abstract class MsalCacheItemBase : MsalItemWithAdditionalFields
     {
         internal string HomeAccountId { get; set; }

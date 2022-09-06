@@ -50,6 +50,11 @@ namespace Microsoft.Identity.Client.OAuth2
     [Preserve(AllMembers = true)]
     internal class MsalTokenResponse : OAuth2ResponseBase
     {
+        public MsalTokenResponse()
+        {
+
+        }
+
         private const string iOSBrokerErrorMetadata = "error_metadata";
         private const string iOSBrokerHomeAccountId = "home_account_id";
         [JsonProperty(TokenResponseClaim.TokenType)]
