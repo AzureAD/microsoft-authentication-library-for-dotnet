@@ -57,6 +57,15 @@ namespace Microsoft.Identity.Client
             string homeAccountId = TokenResponseHelper.GetHomeAccountId(requestParams, response, idToken);
             string suggestedWebCacheKey = CacheKeyFactory.GetExternalCacheKeyFromResponse(requestParams, homeAccountId);
 
+            // token could be comming from a different cloud than the one configured
+            if (requestParams.AppConfig.MultiCloudSupportEnabled && !string.IsNullOrEmpty(response.AuthorityUrl))
+            {
+                var url = new Uri(response.AuthorityUrl);                
+                requestParams.AuthorityManager = new AuthorityManager(
+                    requestParams.RequestContext,
+                    Authority.CreateAuthorityWithEnvironment(requestParams.Authority.AuthorityInfo, url.Host));
+            }
+
             // Do a full instance discovery when saving tokens (if not cached),
             // so that the PreferredNetwork environment is up to date.
             InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata =
@@ -985,7 +994,7 @@ namespace Microsoft.Identity.Client
                         var wamAccount = new Account(
                             cachedAccount.HomeAccountId,
                             cachedAccount.PreferredUsername,
-                            environment,
+                            cachedAccount.Environment,
                             cachedAccount.WamAccountIds,
                             tenantProfiles?.Values);
 

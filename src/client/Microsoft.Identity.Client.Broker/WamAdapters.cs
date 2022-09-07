@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.Broker
                         $" Is Retryable: false \n" +
                         $" Possible causes: \n" +
                         $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: " +
-                        $"{WamAdapters.GetExpectedRedirectUri(authenticationRequestParameters.AppConfig.ClientId)} \n" +
+                        $"{GetExpectedRedirectUri(authenticationRequestParameters.AppConfig.ClientId)} \n" +
                         $"- No Internet connection \n" +
                         $"Please see https://aka.ms/msal-net-wam for details about Windows Broker integration";
                     logger.Error($"[WamBroker] WAM_provider_error_{errorCode} {errorMessage}");
@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Client.Broker
 
             if (authenticationRequestParameters.AppConfig.MultiCloudSupportEnabled)
             {
-                authParams.Properties["discover"] = "home";
+                authParams.Properties["instance_aware"] = "true";
             }
 
             //pass extra query parameters if there are any
@@ -199,13 +199,13 @@ namespace Microsoft.Identity.Client.Broker
 
             if (authResult.IsSuccess)
             {
-                msalTokenResponse = WamAdapters.ParseRuntimeResponse(authResult, authenticationRequestParameters, logger);
+                msalTokenResponse = ParseRuntimeResponse(authResult, authenticationRequestParameters, logger);
                 logger.Verbose("[WamBroker] Successfully retrieved token.");
             }
             else
             {
                 logger.Error($"[WamBroker] {errorMessage} {authResult.Error}");
-                WamAdapters.ThrowExceptionFromWamError(authResult, authenticationRequestParameters, logger);
+                ThrowExceptionFromWamError(authResult, authenticationRequestParameters, logger);
             }
 
             return msalTokenResponse;
@@ -236,8 +236,21 @@ namespace Microsoft.Identity.Client.Broker
                 //parsing Pop token from auth header if pop was performed. Otherwise use access token field.
                 var token = authResult.IsPopAuthorization ? authResult.AuthorizationHeader.Split(' ')[1] : authResult.AccessToken;
 
-                MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
+                string authorityUrl = null;
+
+                // workaround for bug https://identitydivision.visualstudio.com/Engineering/_workitems/edit/2047936
+                // i.e. environment is not set correctly in multi-cloud apps and home_enviroment is not set
+                if (authenticationRequestParameters.AppConfig.MultiCloudSupportEnabled && string.IsNullOrEmpty(authorityUrl))
                 {
+                    IdToken idToken = IdToken.Parse(authResult.RawIdToken);
+                    authorityUrl = idToken.ClaimsPrincipal.FindFirst("iss")?.Value;
+                    if (authorityUrl.EndsWith("v2.0"))
+                        authorityUrl = authorityUrl.Substring(0, authorityUrl.Length - "v2.0".Length);
+                }
+
+                MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
+                {                    
+                    AuthorityUrl = authorityUrl,
                     AccessToken = token,
                     IdToken = authResult.RawIdToken,
                     CorrelationId = correlationId,
