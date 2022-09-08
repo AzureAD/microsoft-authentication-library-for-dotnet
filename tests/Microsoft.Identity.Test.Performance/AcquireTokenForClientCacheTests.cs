@@ -23,7 +23,6 @@ namespace Microsoft.Identity.Test.Performance
     /// <remarks>
     /// For app cache, the number of partitions is the number of tenants.
     /// </remarks>
-    [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class AcquireTokenForClientCacheTests
     {
         private readonly string _tenantPrefix = "l6a331n5-4fh7-7788-a78a-96f19f5d7a73";

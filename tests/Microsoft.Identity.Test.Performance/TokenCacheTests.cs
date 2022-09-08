@@ -18,7 +18,6 @@ namespace Microsoft.Identity.Test.Performance
     /// <remarks>
     /// For non-OBO user cache, the partition key is home account ID.
     /// </remarks>
-    [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
     public class TokenCacheTests
     {
         private readonly string _tenantPrefix = "l6a331n5-4fh7-7788-a78a-96f19f5d7a73";
