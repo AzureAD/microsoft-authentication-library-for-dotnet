@@ -327,6 +327,12 @@ namespace Microsoft.Identity.Client.Broker
         public async Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
+            
+            if (account == null)
+            {
+                _logger.Verbose("[WamBroker] No valid account was passed to RemoveAccountAsync. ");
+                throw new MsalClientException("wam_remove_account_failed", "No valid account was passed.");
+            }
 
             string correlationId = Guid.NewGuid().ToString();
 
