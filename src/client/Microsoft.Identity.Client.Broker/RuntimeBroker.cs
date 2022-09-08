@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
+using System.Globalization;
 
 namespace Microsoft.Identity.Client.Broker
 {
