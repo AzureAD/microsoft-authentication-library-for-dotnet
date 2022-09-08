@@ -371,6 +371,16 @@ namespace Microsoft.Identity.Client.Broker
                         }
                         else
                         {
+                            _logger.Info("[WamBroker] Processing WAM exception");
+                            _logger.Verbose($"[WamBroker] TelemetryData: {result.TelemetryData}");
+
+                            string errorMessage =
+                                $" [WamBroker] \n" +
+                                $" Error Code: {result.Error.ErrorCode} \n" +
+                                $" Error Message: {result.Error.Context} \n" +
+                                $" Internal Error Code: {result.Error.Tag.ToString(CultureInfo.InvariantCulture)} \n";
+
+                            _logger.Error($"[WamBroker] Failed to sign out account. { errorMessage}");
                             throw new MsalServiceException("wam_failed_to_signout", $"Failed to sign out account. {result.Error}");
                         }
                     }
