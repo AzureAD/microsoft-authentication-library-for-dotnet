@@ -416,10 +416,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal async Task<AuthenticationResult> HandleTokenRefreshErrorAsync(MsalServiceException e, MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
-            bool isAadUnavailable = e.IsAadUnavailable();
-            logger.Warning($"Fetching a new AT failed. Is AAD down? {isAadUnavailable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
+            
+            logger.Warning($"Fetching a new AT failed. Is exception retry-able? {e.IsRetryable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
 
-            if (cachedAccessTokenItem != null && isAadUnavailable)
+            if (cachedAccessTokenItem != null && e.IsRetryable)
             {
                 logger.Info("Returning existing access token. It is not expired, but should be refreshed. ");
 
