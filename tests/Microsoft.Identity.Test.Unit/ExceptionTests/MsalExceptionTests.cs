@@ -195,13 +195,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual("some_suberror", msalServiceException.SubError);
 
             ValidateExceptionProductInformation(msalException);
-        }
-
-        [TestMethod]
-        public void IsRetriable()
-        {
-
-        }
+        }      
 
         [TestMethod]
         public void InvalidClientException_IsRepackaged()
