@@ -254,7 +254,7 @@ namespace NetDesktopWpf
             DisplayMessage("Done clearing the cache.");
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Clear_Button_Click(object sender, RoutedEventArgs e)
         {
             DisplayMessage("");
         }
