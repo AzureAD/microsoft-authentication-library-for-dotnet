@@ -376,7 +376,6 @@ namespace Microsoft.Identity.Client.Broker
                             _logger.Verbose($"[WamBroker] TelemetryData: {result.TelemetryData}");
 
                             string errorMessage =
-                                $" [WamBroker] \n" +
                                 $" Error Code: {result.Error.ErrorCode} \n" +
                                 $" Error Message: {result.Error.Context} \n" +
                                 $" Internal Error Code: {result.Error.Tag.ToString(CultureInfo.InvariantCulture)} \n";
