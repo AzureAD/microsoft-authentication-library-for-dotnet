@@ -114,14 +114,14 @@ namespace NetDesktopWpf
                 }
                 catch (Exception ex3)
                 {
-                    DisplayMessage(ex3.ToString());
+                    DisplayMessage(ex3.Message.ToString());
                     return;
                 }
 
             }
             catch (Exception ex2)
             {
-                DisplayMessage(ex2.ToString());
+                DisplayMessage(ex2.Message.ToString());
                 return;
             }
 
@@ -134,7 +134,13 @@ namespace NetDesktopWpf
             var upnPrefix = UpnTbx.Text;
 
             IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
-            var acc = accounts.First();
+            var acc = accounts.FirstOrDefault();
+
+            if (acc == null)
+            {
+                DisplayMessage($"No accounts to remove!!!");
+                return;
+            }
 
             try
             {
@@ -144,13 +150,13 @@ namespace NetDesktopWpf
             {
                 try
                 {
-                    DisplayMessage(ex1.ToString());
+                    DisplayMessage(ex1.Message.ToString());
                     return;
 
                 }
                 catch (Exception ex3)
                 {
-                    DisplayMessage(ex3.ToString());
+                    DisplayMessage(ex3.Message.ToString());
                     return;
                 }
 
@@ -203,14 +209,14 @@ namespace NetDesktopWpf
                 }
                 catch (Exception ex3)
                 {
-                    DisplayMessage(ex3.ToString());
+                    DisplayMessage(ex3.Message.ToString());
                     return;
                 }
 
             }
             catch (Exception ex2)
             {
-                DisplayMessage(ex2.ToString());
+                DisplayMessage(ex2.Message.ToString());
                 return;
             }
 
