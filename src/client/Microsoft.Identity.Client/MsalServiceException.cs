@@ -224,8 +224,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         private void UpdateIsRetryable()
         {
-            IsRetryable = 
-                HttpManager.IsRetryableStatusCode(StatusCode) ||
+            IsRetryable =
+                (StatusCode >= 500 && StatusCode < 600) ||
+                StatusCode == 429 || // too many requests
+                StatusCode == (int)HttpStatusCode.RequestTimeout ||
                 string.Equals(ErrorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(ErrorCode, "temporarily_unavailable", StringComparison.OrdinalIgnoreCase); // as per https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes#handling-error-codes-in-your-application
         }
@@ -243,6 +245,8 @@ namespace Microsoft.Identity.Client
                 ResponseBody,
                 Headers);
         }
+
+
 
         #region Serialization
 

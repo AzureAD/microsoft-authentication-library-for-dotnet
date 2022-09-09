@@ -186,6 +186,7 @@ namespace Microsoft.Identity.Client.Http
                 return response;
             }
 
+            // package 500 errors in a "service not available" exception
             if (isRetryableStatusCode)
             {
                 throw MsalServiceExceptionFactory.FromHttpResponse(
@@ -279,11 +280,13 @@ namespace Microsoft.Identity.Client.Http
             return clone;
         }
 
-        public static bool IsRetryableStatusCode(int statusCode)
+        /// <summary>
+        /// In HttpManager, the retry policy is based on this simple condition.
+        /// Avoid changing this, as it's breaking change.
+        /// </summary>
+        private static bool IsRetryableStatusCode(int statusCode)
         {
-            return statusCode >= 500 && statusCode < 600 ||
-                statusCode == 429 || // too many requests
-                statusCode == (int)HttpStatusCode.RequestTimeout;
+            return statusCode >= 500 && statusCode < 600;                
         }
     }
 }
