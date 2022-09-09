@@ -338,7 +338,7 @@ namespace Microsoft.Identity.Client
 
         public const string ScopesRequired = "At least one scope needs to be requested for this authentication flow. ";
         public const string WamScopesRequired = "At least one resource based scope (For example, scope=User.Read or https://graph.microsoft.com/User.Read) " +
-            "is required to be passed in addition to any OpenID Connect scopes (openid,  profile, and offline_access)";
+            "is required to be passed, in addition to any OpenID Connect scopes (openid,  profile, and offline_access)";
         public const string InvalidAdalCacheMultipleRTs = "The ADAL cache is invalid as it contains multiple refresh token entries for one user. Deleting invalid ADAL cache. ";
 
         public const string CryptoNet45 =
