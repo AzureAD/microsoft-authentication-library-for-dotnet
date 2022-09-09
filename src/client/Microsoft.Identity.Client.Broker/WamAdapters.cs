@@ -299,16 +299,18 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             ILoggerAdapter logger)
         {
+            string[] oidcScopes = { "offline_access", "openid", "profile" };
+
             //MSAL Runtime throws an ApiContractViolation Exception with Tag: 0x2039c1cb (InvalidArg)
             //When no scopes are passed, this will check if user is passing scopes
-            if (!authenticationRequestParameters.HasScopes)
+            if (!authenticationRequestParameters.HasScopes || authenticationRequestParameters.Scope.All(oidcScopes.Contains))
             {
                 logger.Error($"[WamBroker] {MsalError.WamScopesRequired} " +
-                    $"{MsalErrorMessage.ScopesRequired}");
+                    $"{MsalErrorMessage.WamScopesRequired}");
 
                 throw new MsalClientException(
                     MsalError.WamScopesRequired,
-                    MsalErrorMessage.ScopesRequired);
+                    MsalErrorMessage.WamScopesRequired);
             }
         }
     }
