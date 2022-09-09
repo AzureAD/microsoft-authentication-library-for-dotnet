@@ -117,7 +117,6 @@ namespace NetDesktopWpf
                     DisplayMessage(ex3.Message.ToString());
                     return;
                 }
-
             }
             catch (Exception ex2)
             {
@@ -152,14 +151,12 @@ namespace NetDesktopWpf
                 {
                     DisplayMessage(ex1.Message.ToString());
                     return;
-
                 }
                 catch (Exception ex3)
                 {
                     DisplayMessage(ex3.Message.ToString());
                     return;
                 }
-
             }
             catch (Exception ex2)
             {
@@ -212,7 +209,6 @@ namespace NetDesktopWpf
                     DisplayMessage(ex3.Message.ToString());
                     return;
                 }
-
             }
             catch (Exception ex2)
             {
