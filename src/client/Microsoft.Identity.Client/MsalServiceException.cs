@@ -3,7 +3,9 @@
 
 using System;
 using System.Globalization;
+using System.Net;
 using System.Net.Http.Headers;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json.Serialization;
@@ -24,6 +26,9 @@ namespace Microsoft.Identity.Client
         private const string ResponseBodyKey = "response_body";
         private const string CorrelationIdKey = "correlation_id";
         private const string SubErrorKey = "sub_error";
+        private int _statusCode = 0;
+        private string _responseBody;
+        private HttpResponseHeaders _headers;
 
         #region Constructors
         /// <summary>
@@ -43,7 +48,7 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentNullException(nameof(errorMessage));
             }
-            IsRetryable = IsAadUnavailable();
+            UpdateIsRetryable();
         }
 
         /// <summary>
@@ -81,7 +86,6 @@ namespace Microsoft.Identity.Client
             Exception innerException)
             : base(errorCode, errorMessage, innerException)
         {
-            IsRetryable = IsAadUnavailable();
         }
 
         /// <summary>
@@ -105,7 +109,7 @@ namespace Microsoft.Identity.Client
                 errorCode, errorMessage, innerException)
         {
             StatusCode = statusCode;
-            IsRetryable = IsAadUnavailable();
+            UpdateIsRetryable();
         }
 
         /// <summary>
@@ -147,10 +151,15 @@ namespace Microsoft.Identity.Client
         /// http://msdn.microsoft.com/en-us/library/bb268233(v=vs.85).aspx).
         /// You can use this code for purposes such as implementing retry logic or error investigation.
         /// </summary>
-        public int StatusCode { get; internal set; } = 0;
-
-#if !DESKTOP
-#endif
+        public int StatusCode
+        {
+            get { return _statusCode; }
+            set
+            {
+                _statusCode = value;
+                UpdateIsRetryable();
+            }
+        }
         /// <summary>
         /// Additional claims requested by the service. When this property is not null or empty, this means that the service requires the user to
         /// provide additional claims, such as doing two factor authentication. The are two cases:
@@ -172,7 +181,15 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Raw response body received from the server.
         /// </summary>
-        public string ResponseBody { get; set; }
+        public string ResponseBody
+        {
+            get => _responseBody;
+            set
+            {
+                _responseBody = value;
+                UpdateIsRetryable();
+            }
+        }
 
         /// <summary>
         /// Contains the HTTP headers from the server response that indicated an error.
@@ -181,7 +198,14 @@ namespace Microsoft.Identity.Client
         /// When the server returns a 429 Too Many Requests error, a Retry-After should be set. It is important to read and respect the
         /// time specified in the Retry-After header to avoid a retry storm.
         /// </remarks>
-        public HttpResponseHeaders Headers { get; set; }
+        public HttpResponseHeaders Headers { 
+            get => _headers; 
+            set 
+            {
+                _headers = value;
+                UpdateIsRetryable();
+            }
+        }
 
         /// <summary>
         /// An ID that can used to piece up a single authentication flow.
@@ -198,12 +222,12 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// As per discussion with Evo, AAD 
         /// </summary>
-        internal bool IsAadUnavailable()
+        private void UpdateIsRetryable()
         {
-            return
-                StatusCode == 429 || // "Too Many Requests", does not mean AAD is down
-                StatusCode >= 500 ||
-                string.Equals(ErrorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase);
+            IsRetryable = 
+                HttpManager.IsRetryableStatusCode(StatusCode) ||
+                string.Equals(ErrorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(ErrorCode, "temporarily_unavailable", StringComparison.OrdinalIgnoreCase); // as per https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes#handling-error-codes-in-your-application
         }
 
         /// <summary>
