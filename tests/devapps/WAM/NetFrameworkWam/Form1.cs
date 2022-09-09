@@ -93,7 +93,8 @@ namespace NetDesktopWinForms
 
             var builder = PublicClientApplicationBuilder
                 .Create(clientId)
-                .WithAuthority(this.authorityCbx.Text);
+                .WithAuthority(this.authorityCbx.Text)
+                .WithMultiCloudSupport(true);
 
             var authMethod = GetAuthMethod();
 

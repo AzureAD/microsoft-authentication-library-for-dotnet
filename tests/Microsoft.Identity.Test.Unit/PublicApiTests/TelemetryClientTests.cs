@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -20,7 +21,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     public class TelemetryClientTests : TestBase
     {
         private MockHttpAndServiceBundle _harness;
-        private PublicClientApplication _pca;
+        private ConfidentialClientApplication _cca;
         private TelemetryClient _telemetryClient;
 
         [TestInitialize]
@@ -95,23 +96,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 
                 CreateApplication();
-                _pca.ServiceBundle.ConfigureMockWebUI();
-                _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 // Acquire token interactively
-                var result = await _pca
-                    .AcquireTokenInteractive(TestConstants.s_scope)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
+                var result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
 
                 MsalTelemetryEventDetails eventDetails = _telemetryClient.TestTelemetryEventDetails;
-                AssertLoggedTelemetry(result, eventDetails, TokenSource.IdentityProvider, CacheRefreshReason.NotApplicable);
+                AssertLoggedTelemetry(result, eventDetails, TokenSource.IdentityProvider, CacheRefreshReason.NoCachedAccessToken);
 
                 // Acquire token silently
-                var account = (await _pca.GetAccountsAsync().ConfigureAwait(false)).Single();
-                result = await _pca.AcquireTokenSilent(TestConstants.s_scope, account).ExecuteAsync().ConfigureAwait(false);
+                var account = (await _cca.GetAccountsAsync().ConfigureAwait(false)).Single();
+                result = await _cca.AcquireTokenSilent(TestConstants.s_scope, account)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .ExecuteAsync().ConfigureAwait(false);
                 Assert.IsNotNull(result);
 
                 eventDetails = _telemetryClient.TestTelemetryEventDetails;
@@ -132,14 +133,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private void CreateApplication()
         {
-            _pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithHttpManager(_harness.HttpManager)
-                    .WithDefaultRedirectUri()
-                    .WithExperimentalFeatures()
-                    .WithTelemetryClient(_telemetryClient)
-                    .BuildConcrete();
+            _cca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithHttpManager(_harness.HttpManager)
+                .WithExperimentalFeatures()
+                .WithTelemetryClient(_telemetryClient)
+                .BuildConcrete();
 
-            TokenCacheHelper.PopulateCache(_pca.UserTokenCacheInternal.Accessor);
+            TokenCacheHelper.PopulateCache(_cca.UserTokenCacheInternal.Accessor);
         }
     }
 
