@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Performance
             _tenantId = IsMultiTenant ? $"{_tenantPrefix}0" : _tenantPrefix;
         }
 
-        [Benchmark(Description = "AcquireTokenForOBO")]
+        [Benchmark(Description = PerfConstants.AcquireTokenForObo)]
         [BenchmarkCategory("With cache")]
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOf_TestAsync()
         {

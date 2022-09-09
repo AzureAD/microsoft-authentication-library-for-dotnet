@@ -8,6 +8,7 @@ using BenchmarkDotNet.Attributes;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Performance.Helpers;
 using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Performance
@@ -60,7 +61,7 @@ namespace Microsoft.Identity.Test.Performance
             _tenantId = IsMultiTenant ? $"{_tenantPrefix}0" : _tenantPrefix;
         }
 
-        [Benchmark(Description = "AcquireTokenSilent")]
+        [Benchmark(Description = PerfConstants.AcquireTokenSilent)]
         [BenchmarkCategory("With cache")]
         public async Task<AuthenticationResult> AcquireTokenSilent_TestAsync()
         {
@@ -70,7 +71,7 @@ namespace Microsoft.Identity.Test.Performance
                 .ConfigureAwait(false);
         }
 
-        [Benchmark(Description = "GetAccount")]
+        [Benchmark(Description = PerfConstants.GetAccount)]
         [BenchmarkCategory("With cache")]
         public async Task<IAccount> GetAccountAsync_TestAsync()
         {
@@ -87,7 +88,7 @@ namespace Microsoft.Identity.Test.Performance
                 .ConfigureAwait(false)).FirstOrDefault();
         }
 
-        [Benchmark(Description = "RemoveAccount")]
+        [Benchmark(Description = PerfConstants.RemoveAccount)]
         [BenchmarkCategory("With cache")]
         public async Task RemoveAccountAsync_TestAsync()
         {

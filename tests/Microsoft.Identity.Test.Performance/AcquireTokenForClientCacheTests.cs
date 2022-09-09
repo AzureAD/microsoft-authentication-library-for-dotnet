@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Performance
             _scope = $"{_scopePrefix}0";
         }
 
-        [Benchmark(Description = "AcquireTokenForClient")]
+        [Benchmark(Description = PerfConstants.AcquireTokenForClient)]
         [BenchmarkCategory("With cache")]
         public async Task<AuthenticationResult> AcquireTokenForClient_TestAsync()
         {
