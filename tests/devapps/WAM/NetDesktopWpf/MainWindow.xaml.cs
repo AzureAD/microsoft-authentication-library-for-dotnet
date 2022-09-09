@@ -89,7 +89,7 @@ namespace NetDesktopWpf
 
             IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
             var acc = accounts.SingleOrDefault(
-                a => !String.IsNullOrEmpty(upnPrefix) && 
+                a => !String.IsNullOrEmpty(upnPrefix) &&
                 a.Username.StartsWith(upnPrefix));
 
             AuthenticationResult result = null;
@@ -110,20 +110,58 @@ namespace NetDesktopWpf
                                      .ExecuteAsync());
 
                     result = await task.ConfigureAwait(false);
-                                     
+
                 }
                 catch (Exception ex3)
                 {
                     DisplayMessage(ex3.ToString());
+                    return;
                 }
 
             }
             catch (Exception ex2)
             {
                 DisplayMessage(ex2.ToString());
+                return;
             }
 
             DisplayMessage($"Success! We have a token for {result.Account.Username} valid until {result.ExpiresOn}");
+        }
+
+        private async void SignOut_Click(object sender, RoutedEventArgs e)
+        {
+            var pca = CreatePublicClient();
+            var upnPrefix = UpnTbx.Text;
+
+            IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
+            var acc = accounts.First();
+
+            try
+            {
+                await pca.RemoveAsync(acc).ConfigureAwait(false);
+            }
+            catch (MsalException ex1)
+            {
+                try
+                {
+                    DisplayMessage(ex1.ToString());
+                    return;
+
+                }
+                catch (Exception ex3)
+                {
+                    DisplayMessage(ex3.ToString());
+                    return;
+                }
+
+            }
+            catch (Exception ex2)
+            {
+                DisplayMessage(ex2.ToString());
+                return;
+            }
+
+            DisplayMessage($"Success! Account removed!!!");
         }
 
         private async void AtsAti_Runtime_Click(object sender, RoutedEventArgs e)
@@ -158,15 +196,22 @@ namespace NetDesktopWpf
                     result = await task.ConfigureAwait(false);
 
                 }
+                catch (MsalClientException ex1)
+                {
+                    DisplayMessage(ex1.Message.ToString());
+                    return;
+                }
                 catch (Exception ex3)
                 {
                     DisplayMessage(ex3.ToString());
+                    return;
                 }
 
             }
             catch (Exception ex2)
             {
                 DisplayMessage(ex2.ToString());
+                return;
             }
 
             DisplayMessage($"Success! We have a token for {result.Account.Username} valid until {result.ExpiresOn}");
@@ -197,9 +242,21 @@ namespace NetDesktopWpf
                    });
         }
 
-        private void ClearCache(object sender, RoutedEventArgs e)
+        private async void ClearCache(object sender, RoutedEventArgs e)
         {
+            DisplayMessage("Clearing the cache ...");
+            var pca = CreatePublicClient();
+            foreach (var acc in (await pca.GetAccountsAsync().ConfigureAwait(false)))
+            {
+                await pca.RemoveAsync(acc).ConfigureAwait(false);
+            }
 
+            DisplayMessage("Done clearing the cache.");
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            DisplayMessage("");
         }
     }
 }
