@@ -109,7 +109,10 @@ namespace Microsoft.Identity.Client.Broker
 
             if (authenticationRequestParameters?.Account?.HomeAccountId?.ObjectId != null)
             {
-                using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+                using (var authParams = WamAdapters.GetCommonAuthParameters(
+                    authenticationRequestParameters, 
+                    _wamOptions.MsaPassthrough, 
+                    _logger))
                 {
                     using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
                     authenticationRequestParameters.Account.HomeAccountId.ObjectId,
@@ -161,7 +164,10 @@ namespace Microsoft.Identity.Client.Broker
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
-            using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            using (var authParams = WamAdapters.GetCommonAuthParameters(
+                authenticationRequestParameters, 
+                _wamOptions.MsaPassthrough,
+                _logger))
             {
                 //Login Hint
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
@@ -193,7 +199,10 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WamBroker] Signing in with the default user account.");
 
-            using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            using (var authParams = WamAdapters.GetCommonAuthParameters(
+                authenticationRequestParameters, 
+                _wamOptions.MsaPassthrough,
+                _logger))
             {
                 using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInAsync(
                         _parentHandle,
@@ -230,7 +239,10 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WamBroker] Acquiring token silently.");
 
-            using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            using (var authParams = WamAdapters.GetCommonAuthParameters(
+                authenticationRequestParameters, 
+                _wamOptions.MsaPassthrough,
+                _logger))
             {
                 using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
                     acquireTokenSilentParameters.Account.HomeAccountId.ObjectId,
@@ -274,7 +286,10 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WamBroker] Acquiring token silently for default account.");
 
-            using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            using (var authParams = WamAdapters.GetCommonAuthParameters(
+                authenticationRequestParameters, 
+                _wamOptions.MsaPassthrough,
+                _logger))
             {
                 using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInSilentlyAsync(
                         authParams,
@@ -300,7 +315,10 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WamBroker] Acquiring token with Username Password flow.");
 
-            using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(
+                authenticationRequestParameters, 
+                _wamOptions.MsaPassthrough,
+                _logger))
             {
                 authParams.Properties["MSALRuntime_Username"] = acquireTokenByUsernamePasswordParameters.Username;
                 authParams.Properties["MSALRuntime_Password"] = acquireTokenByUsernamePasswordParameters.Password;
@@ -424,7 +442,7 @@ namespace Microsoft.Identity.Client.Broker
                 return false;
             }
 
-            _logger.Verbose($"[WAM Broker] MsalRuntime init succesful.");
+            _logger.Verbose($"[WAM Broker] MsalRuntime init successful.");
             return true;
         }
     }
