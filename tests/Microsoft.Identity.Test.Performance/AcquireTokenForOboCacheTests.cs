@@ -24,6 +24,7 @@ namespace Microsoft.Identity.Test.Performance
     /// AT, RT: user assertion hash.
     /// IDT, Accounts: home account ID.
     /// </remarks>
+    [MinColumn, MaxColumn]
     public class AcquireTokenForOboCacheTests
     {
         private readonly string _tenantPrefix = "l6a331n5-4fh7-7788-a78a-96f19f5d7a73";
