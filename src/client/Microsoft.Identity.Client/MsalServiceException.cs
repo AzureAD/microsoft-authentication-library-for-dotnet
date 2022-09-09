@@ -86,6 +86,7 @@ namespace Microsoft.Identity.Client
             Exception innerException)
             : base(errorCode, errorMessage, innerException)
         {
+            UpdateIsRetryable();            
         }
 
         /// <summary>
