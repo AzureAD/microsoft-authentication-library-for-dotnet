@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Client.Broker
             bool isMsaPassthrough,
             ILoggerAdapter logger)
         {
-            logger.Info("[WamBroker] Validating Common Auth Parameters.");
+            logger.Verbose("[WamBroker] Validating Common Auth Parameters.");
             ValidateAuthParams(authenticationRequestParameters, logger);
 
             var authParams = new NativeInterop.AuthParameters
@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Client.Broker
 
             AddPopParams(authenticationRequestParameters, authParams);
 
-            logger.Info("[WamBroker] Acquired Common Auth Parameters.");
+            logger.Verbose("[WamBroker] Acquired Common Auth Parameters.");
 
             return authParams;
         }
