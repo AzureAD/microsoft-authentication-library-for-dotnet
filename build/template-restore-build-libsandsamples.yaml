@@ -43,6 +43,7 @@ steps:
     command: 'restore'
     projects: '${{ parameters.Solution }}'
     configuration: ${{ parameters.BuildConfiguration }}
+    arguments: '/p:MAUI_SUPPORT=${{ parameters.Net6_Support }}'
 
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
