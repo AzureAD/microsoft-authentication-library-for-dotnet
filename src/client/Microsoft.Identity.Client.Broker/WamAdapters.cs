@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Broker
         };
 
         /// <summary>
-        /// Create WAM Error Response
+        /// Create WAM AuthResult Error Response
         /// </summary>
         /// <param name="authResult"></param>
         /// <param name="authenticationRequestParameters"></param>
@@ -123,6 +123,27 @@ namespace Microsoft.Identity.Client.Broker
                     logger.Verbose($"[WamBroker] {MsalError.UnknownBrokerError} {errorMessage}");
                     throw new MsalServiceException(MsalError.UnknownBrokerError, errorMessage);
             }
+        }
+
+        /// <summary>
+        /// Create WAM SignOutResult Error Response
+        /// </summary>
+        /// <param name="signoutResult"></param>
+        /// <param name="logger"></param>
+        /// <exception cref="MsalServiceException"></exception>
+        internal static void ThrowExceptionFromWamError(
+            NativeInterop.SignOutResult signoutResult,
+            ILoggerAdapter logger)
+        {
+            logger.Verbose("[WamBroker] Processing WAM exception");
+            logger.Verbose($"[WamBroker] TelemetryData: {signoutResult.TelemetryData}");
+
+            string internalErrorCode = signoutResult.Error.Tag.ToString(CultureInfo.InvariantCulture);
+            long errorCode = signoutResult.Error.ErrorCode;
+            string errorMessage = $"{signoutResult.Error} (error code {errorCode}) (internal error code {internalErrorCode})";
+
+            logger.Verbose($"[WamBroker] {MsalError.WamFailedToSignout} {errorMessage}");
+            throw new MsalServiceException(MsalError.WamFailedToSignout, errorMessage);
         }
 
         /// <summary>
