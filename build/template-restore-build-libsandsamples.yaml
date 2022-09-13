@@ -8,13 +8,6 @@ parameters:
 
 steps:
 
-- task: Bash@3
-  displayName: 'Enable NET 6 support'
-  inputs:
-    targetType: 'inline'
-    script: 'echo "##vso[task.setvariable variable=MAUI_SUPPORT;]true"'
-    condition: eq(variables['Net6_Support'], 'true')
-
 - task: CmdLine@2
   displayName: 'Clear local NuGet cache'
   inputs:
@@ -39,7 +32,7 @@ steps:
   displayName: 'NuGet restore ${{ parameters.Solution }}'
   inputs:
     solution: ${{ parameters.Solution }}
-    msbuildArgs: '/t:restore'
+    msbuildArgs: '/t:restore /p:MAUI_SUPPORT=${{ Net6_Support }}'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
@@ -47,7 +40,7 @@ steps:
   displayName: 'Build solution ${{ parameters.Solution }}'
   inputs:
     solution: ${{ parameters.Solution }}
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
+    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true /p:MAUI_SUPPORT=${{ Net6_Support }}'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
     maximumCpuCount: true
