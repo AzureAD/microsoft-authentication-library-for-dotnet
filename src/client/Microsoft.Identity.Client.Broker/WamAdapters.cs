@@ -130,10 +130,15 @@ namespace Microsoft.Identity.Client.Broker
         /// </summary>
         /// <param name="authenticationRequestParameters"></param>
         /// <param name="isMsaPassthrough"></param>
+        /// <param name="logger"></param>
         public static NativeInterop.AuthParameters GetCommonAuthParameters(
             AuthenticationRequestParameters authenticationRequestParameters, 
-            bool isMsaPassthrough)
+            bool isMsaPassthrough,
+            ILoggerAdapter logger)
         {
+            logger.Verbose("[WamBroker] Validating Common Auth Parameters.");
+            ValidateAuthParams(authenticationRequestParameters, logger);
+
             var authParams = new NativeInterop.AuthParameters
                 (authenticationRequestParameters.AppConfig.ClientId,
                 authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
@@ -170,6 +175,8 @@ namespace Microsoft.Identity.Client.Broker
             }
 
             AddPopParams(authenticationRequestParameters, authParams);
+
+            logger.Verbose("[WamBroker] Acquired Common Auth Parameters.");
 
             return authParams;
         }
@@ -280,6 +287,29 @@ namespace Microsoft.Identity.Client.Broker
         private static string GetExpectedRedirectUri(string clientId)
         {
             return $"ms-appx-web://microsoft.aad.brokerplugin/{clientId}";
+        }
+
+        /// <summary>
+        /// Validate common auth params
+        /// </summary>
+        /// <param name="authenticationRequestParameters"></param>
+        /// <param name="logger"></param>
+        /// <exception cref="MsalClientException"></exception>
+        public static void ValidateAuthParams(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            ILoggerAdapter logger)
+        {
+            //MSAL Runtime throws an ApiContractViolation Exception with Tag: 0x2039c1cb (InvalidArg)
+            //When no scopes are passed, this will check if user is passing scopes
+            if (!authenticationRequestParameters.HasScopes)
+            {
+                logger.Error($"[WamBroker] {MsalError.WamScopesRequired} " +
+                    $"{MsalErrorMessage.ScopesRequired}");
+
+                throw new MsalClientException(
+                    MsalError.WamScopesRequired,
+                    MsalErrorMessage.ScopesRequired);
+            }
         }
     }
 }

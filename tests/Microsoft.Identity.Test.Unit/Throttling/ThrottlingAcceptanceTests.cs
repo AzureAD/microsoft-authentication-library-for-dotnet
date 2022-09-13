@@ -458,7 +458,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 await app.AcquireTokenSilent(singleScope, account).WithForceRefresh(true).ExecuteAsync()
                       .ConfigureAwait(false);
 
-                // there will still be an entry here because the refresh token written by the first succesful ATS
+                // there will still be an entry here because the refresh token written by the first successful ATS
                 // is different from the initial RT
                 AssertThrottlingCacheEntryCount(throttlingManager, uiRequiredEntryCount: 1);
             }

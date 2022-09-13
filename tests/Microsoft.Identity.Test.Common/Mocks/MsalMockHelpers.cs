@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Test.Common.Mocks
         }
 
         /// <summary>
-        /// Configures a web ui that returns a succesfull result
+        /// Configures a web ui that returns a successfull result
         /// </summary>
         public static void ConfigureMockWebUI(
             this IServiceBundle serviceBundle, 
