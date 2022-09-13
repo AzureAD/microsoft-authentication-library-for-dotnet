@@ -25,6 +25,7 @@ steps:
     BuildPlatform: '$(BuildPlatform)'
     BuildConfiguration: '$(BuildConfiguration)'
     Solution: 'LibsAndSamples.sln'
+    Net6_Support: '$(Net6_Support)'
 
 # Run All Tests
 - template: template-run-all-tests.yaml

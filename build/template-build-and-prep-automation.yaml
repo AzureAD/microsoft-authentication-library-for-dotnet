@@ -48,6 +48,7 @@ steps:
     BuildConfiguration: '$(BuildConfiguration)'
     MsalClientSemVer: $(MsalClientSemVer)
     Solution: 'LibsAndSamples.sln'
+    Net6_Support: '$(Net6_Support)'
 
 - task: DownloadSecureFile@1
   displayName: 'Download Xamarin Ui Test Tools'
