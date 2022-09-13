@@ -135,14 +135,13 @@ namespace Microsoft.Identity.Client.Broker
             NativeInterop.SignOutResult signoutResult,
             ILoggerAdapter logger)
         {
-            string internalErrorCode = signoutResult.Error.Tag.ToString(CultureInfo.InvariantCulture);
-            long errorCode = signoutResult.Error.ErrorCode;
-            string errorMessage;
-
-            logger.Info("[WamBroker] Processing WAM exception");
+            logger.Verbose("[WamBroker] Processing WAM exception");
             logger.Verbose($"[WamBroker] TelemetryData: {signoutResult.TelemetryData}");
 
-            errorMessage = $"{signoutResult.Error} (error code {errorCode}) (internal error code {internalErrorCode})";
+            string internalErrorCode = signoutResult.Error.Tag.ToString(CultureInfo.InvariantCulture);
+            long errorCode = signoutResult.Error.ErrorCode;
+            string errorMessage = $"{signoutResult.Error} (error code {errorCode}) (internal error code {internalErrorCode})";
+
             logger.Verbose($"[WamBroker] {MsalError.WamFailedToSignout} {errorMessage}");
             throw new MsalServiceException(MsalError.WamFailedToSignout, errorMessage);
         }
