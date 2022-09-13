@@ -6,7 +6,10 @@ parameters:
   BuildConfiguration: 'Release'
   MsalClientSemVer: '4.0.0-devopsbuild'
 
+steps:
+
 - task: Bash@3
+  displayName: 'Enable NET 6 support'
   inputs:
     targetType: 'inline'
     script: 'echo "##vso[task.setvariable variable=MAUI_SUPPORT;]true"'
