@@ -14,13 +14,13 @@ steps:
   inputs:
     script: 'nuget locals all -clear'
 
-#Restore workload with the .NET Core CLI 
+#Restore workload with the .NET Core CLI task
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet workload restore'
+  displayName: 'dotnet workload restore for Desktop project'
   inputs:
     command: 'custom'
     custom: 'workload'
-    arguments: 'restore ${{ parameters.Solution }}'
+    arguments: 'restore .\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet workload restore'
@@ -29,13 +29,6 @@ steps:
     custom: 'workload'
     arguments: 'restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
 
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet workload restore for Desktop project'
-  inputs:
-    command: 'custom'
-    custom: 'workload'
-    arguments: 'restore .\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
-
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
   inputs:
@@ -43,14 +36,6 @@ steps:
     msbuildArgs: '/t:restore /p:MAUI_SUPPORT=${{ parameters.Net6_Support }}'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
-
-#- task: DotNetCoreCLI@2
-#  displayName: 'Restore solution ${{ parameters.Solution }}'
-#  inputs:
-#    command: 'restore'
-#    projects: '${{ parameters.Solution }}'
-#    configuration: ${{ parameters.BuildConfiguration }}
-#    arguments: '/p:MAUI_SUPPORT=${{ parameters.Net6_Support }}'
 
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
