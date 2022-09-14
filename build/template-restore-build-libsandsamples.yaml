@@ -29,21 +29,21 @@ steps:
     custom: 'workload'
     arguments: 'restore .\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
 
-#- task: VSBuild@1
-#  displayName: 'NuGet restore ${{ parameters.Solution }}'
-#  inputs:
-#    solution: ${{ parameters.Solution }}
-#    msbuildArgs: '/t:restore /p:MAUI_SUPPORT=${{ parameters.Net6_Support }}'
-#    platform: ${{ parameters.BuildPlatform }}
-#    configuration: ${{ parameters.BuildConfiguration }}
-
-- task: DotNetCoreCLI@2
-  displayName: 'Restore solution ${{ parameters.Solution }}'
+- task: VSBuild@1
+  displayName: 'NuGet restore ${{ parameters.Solution }}'
   inputs:
-    command: 'restore'
-    projects: '${{ parameters.Solution }}'
+    solution: ${{ parameters.Solution }}
+    msbuildArgs: '/t:restore /p:MAUI_SUPPORT=${{ parameters.Net6_Support }}'
+    platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
-    arguments: '/p:MAUI_SUPPORT=${{ parameters.Net6_Support }}'
+
+#- task: DotNetCoreCLI@2
+#  displayName: 'Restore solution ${{ parameters.Solution }}'
+#  inputs:
+#    command: 'restore'
+#    projects: '${{ parameters.Solution }}'
+#    configuration: ${{ parameters.BuildConfiguration }}
+#    arguments: '/p:MAUI_SUPPORT=${{ parameters.Net6_Support }}'
 
 - task: VSBuild@1
   displayName: 'Build solution ${{ parameters.Solution }}'
