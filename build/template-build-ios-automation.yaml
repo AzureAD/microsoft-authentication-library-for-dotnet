@@ -17,16 +17,16 @@ steps:
     secureFile: 'TestFile.mobileprovision'
 
 - task: UseDotNet@2
-  displayName: 'Install .NET 6 SDK'
+  displayName: 'Install .NET 5 SDK'
   inputs:
-    version: 6.x
+    version: 5.x
     performMultiLevelLookup: true
 
 - task: UseDotNet@2
-  displayName: Use .NET 6.0
+  displayName: Use .NET 5.0
   inputs:
     packageType: 'sdk'
-    version: '6.0.x'
+    version: '5.x'
 
 - task: Bash@3
   displayName: Install MAUI
