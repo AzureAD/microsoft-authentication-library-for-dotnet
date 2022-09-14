@@ -14,7 +14,14 @@ steps:
   inputs:
     script: 'nuget locals all -clear'
 
-#Restore workload with the .NET Core CLI task
+#Restore workload with the .NET Core CLI 
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet workload restore'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore ${{ parameters.Solution }}'
+
 - task: DotNetCoreCLI@2
   displayName: 'dotnet workload restore'
   inputs:
