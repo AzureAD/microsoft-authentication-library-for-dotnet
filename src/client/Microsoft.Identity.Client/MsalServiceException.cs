@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Client
         public int StatusCode
         {
             get { return _statusCode; }
-            set
+            internal set
             {
                 _statusCode = value;
                 UpdateIsRetryable();
