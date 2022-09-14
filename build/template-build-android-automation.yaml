@@ -26,7 +26,7 @@ steps:
     flattenFolders: true
 
 - task: DotNetCoreCLI@2
-  displayName: 'Tmp dotnet workload restore for Desktop project'
+  displayName: 'dotnet workload restore for Desktop project'
   inputs:
     command: 'custom'
     custom: 'workload'
