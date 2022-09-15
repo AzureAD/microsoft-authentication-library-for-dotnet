@@ -24,7 +24,7 @@ steps:
   condition: and(succeeded(), eq(variables['RunTests'], 'true'))
   inputs:
     testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\netcore3.1\Microsoft.Identity.Test.Unit.dll'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\netcoreapp3.1\Microsoft.Identity.Test.Unit.dll'
     searchFolder: '$(System.DefaultWorkingDirectory)'
     runInParallel: true
     codeCoverageEnabled: true
