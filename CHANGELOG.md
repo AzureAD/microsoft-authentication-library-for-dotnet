@@ -1,3 +1,17 @@
+4.47.0
+==========
+
+### New Features
+- The new MSAL logging feature is now generally available. `WithExperimentalFeatures()` is no longer required when calling `WithLogging()`. See [3548](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3548)
+
+### Bug Fixes
+- Check if scopes are passed when new preview broker is invoked. See [#3654](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3654)
+- Minor fixes to perf test project. See [#3662](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3662)
+- Update logic that calculates if exception is retry-able. See [#3661](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3661)
+- Add logging for Preview Broker `RemoveAccountAsync` API. See [#3658](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3658)
+- Adding Null account check on Preview Broker `RemoveAccountAsync` API. See [#3657](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3657)
+- Use correct authority in multi-cloud + WAM scenario. See [#3637](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3637)
+
 4.46.2
 ==========
 
