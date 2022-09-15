@@ -296,13 +296,30 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        void MyLoggingMethod(LogLevel level, string message, bool containsPii)
+        [TestMethod]
+        public async Task NullExternalMsalLoggerTestAsync()
         {
-            Console.WriteLine($"MSAL {level} {containsPii} {message}");
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithClientSecret("secret")
+                .WithExperimentalFeatures()
+                .BuildConcrete();
+
+            TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+
+            app.UserTokenCache.SetBeforeAccess(BeforeCacheAccessWithLogging);
+            app.UserTokenCache.SetAfterAccess(AfterCacheAccessWithLogging);
+
+            var result = await app.GetAccountsAsync().ConfigureAwait(false);
+
+            Assert.IsNotNull(result);
+
         }
 
         private void BeforeCacheAccessWithLogging(TokenCacheNotificationArgs args)
         {
+            Assert.IsNotNull(args.IdentityLogger);
+
             LogEntry entry = new LogEntry();
 
             if (args.PiiLoggingEnabled)
@@ -319,6 +336,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private void AfterCacheAccessWithLogging(TokenCacheNotificationArgs args)
         {
+            Assert.IsNotNull(args.IdentityLogger);
+
             LogEntry entry = new LogEntry();
 
             if (args.PiiLoggingEnabled)
