@@ -2,6 +2,7 @@
 ==========
 
 ### New Features
+- Support for .NET MAUI is now generally available. Starting from this release, MSAL .Net will add support for .NET 6 iOS, MAC and Android targets. The package also works with UWP. Refer to [`MauiStatus.md`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/MauiStatus.md) for details.
 - The new MSAL logging feature is now generally available. `WithExperimentalFeatures()` is no longer required when calling `WithLogging()`. See [3548](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3548), [wiki](https://aka.ms/msal-net-logging).
 - Adding IsProofOfPosessionSupportedByClient api to be used to determine if the current broker is able to support Proof-of-Posession. See [3496](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3496) 
 - Adding ability to turn off the default retry-once policy on 5xx errors. See [2877](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2877)
