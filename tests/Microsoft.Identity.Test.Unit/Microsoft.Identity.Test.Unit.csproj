@@ -4,9 +4,8 @@
     <TargetFrameworkNetDesktop461>net48</TargetFrameworkNetDesktop461>
     <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
     <TargetFrameworkNet5Win>net5.0-windows10.0.17763.0</TargetFrameworkNet5Win>
-    <TargetFrameworkNet6>net6.0</TargetFrameworkNet6>
 
-    <TargetFrameworks>$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetCore);$(TargetFrameworkNet5Win);$(TargetFrameworkNet6)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetCore);$(TargetFrameworkNet5Win);</TargetFrameworks>
     <IsPackable>false</IsPackable>
 
     <LangVersion>latest</LangVersion>
