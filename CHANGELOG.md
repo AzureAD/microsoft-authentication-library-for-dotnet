@@ -11,10 +11,10 @@
 ### Bug Fixes
 - MSAL will now throw an exception if no scopes are passed when the new preview broker is invoked. See [#3654](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3654)
 - Minor fixes to perf test project. See [#3662](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3662)
-- Update logic that calculates if exception is retry-able. See [#3661](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3661)
-- Add logging for Preview Broker `RemoveAccountAsync` API. See [#3658](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3658)
-- Adding Null account check on Preview Broker `RemoveAccountAsync` API. See [#3657](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3657)
-- Use correct authority in multi-cloud + WAM scenario. See [#3637](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3637)
+- `MsalServiceException.IsRetryable` is now correctly set. See [#3661](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3661)
+- Added extra logging in Preview Broker `RemoveAccountAsync` API. See [#3658](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3658)
+- Added a check for null account in Preview Broker `RemoveAccountAsync` API. See [#3657](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3657)
+- `AuthenticationResult` now shows correct authority for multi-cloud requests using WAM. See [#3637](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3637)
 
 4.46.2
 ==========
