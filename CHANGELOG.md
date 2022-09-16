@@ -9,7 +9,7 @@
 - Added logic to log some acquire token data via the new telemetry pipeline. See [3534](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3534).
 
 ### Bug Fixes
-- Check if scopes are passed when new preview broker is invoked. See [#3654](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3654)
+- MSAL will now throw an exception if no scopes are passed when the new preview broker is invoked. See [#3654](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3654)
 - Minor fixes to perf test project. See [#3662](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3662)
 - Update logic that calculates if exception is retry-able. See [#3661](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3661)
 - Add logging for Preview Broker `RemoveAccountAsync` API. See [#3658](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3658)
