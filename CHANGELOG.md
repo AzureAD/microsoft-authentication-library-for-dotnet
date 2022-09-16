@@ -3,6 +3,8 @@
 
 ### New Features
 - The new MSAL logging feature is now generally available. `WithExperimentalFeatures()` is no longer required when calling `WithLogging()`. See [3548](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3548)
+- Adding IsProofOfPosessionSupportedByClient api to be used to determine if the current broker is able to support Proof-of-Posession. See [3496](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3496) 
+- Adding ability to turn off the default retry-once policy on 5xx errors. See [2877](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2877)
 
 ### Bug Fixes
 - Check if scopes are passed when new preview broker is invoked. See [#3654](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3654)
