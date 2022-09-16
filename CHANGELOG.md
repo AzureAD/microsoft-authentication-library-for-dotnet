@@ -1,3 +1,22 @@
+4.47.0
+==========
+
+### New Features
+- Support for .NET MAUI is now generally available for iOS, Windows and Android targets. The package also works with UWP. Refer to [`MauiStatus.md`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/MauiStatus.md) for details.
+- The new MSAL logging feature is now generally available. `WithExperimentalFeatures()` is no longer required when calling `WithLogging()`. See [3548](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3548), [wiki](https://aka.ms/msal-net-logging).
+- Adding IsProofOfPosessionSupportedByClient api to be used to determine if the current broker is able to support Proof-of-Posession. See [3496](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3496) 
+- Adding ability to turn off the default retry-once policy on 5xx errors. See [2877](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2877)
+- Adds new public builder API accepting instances of `ITelemetryClient`. See [3533](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3533).
+- Added logic to log some acquire token data via the new telemetry pipeline. See [3534](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3534).
+
+### Bug Fixes
+- MSAL will now throw an exception if no scopes are passed when the new preview broker is invoked. See [#3654](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3654) and [#3677](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3677)
+- `MsalServiceException.IsRetryable` is now correctly set. See [#3661](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3661)
+- Added extra logging in Preview Broker `RemoveAccountAsync` API. See [#3658](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3658)
+- Added a check for null account in Preview Broker `RemoveAccountAsync` API. See [#3657](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3657)
+- `AuthenticationResult` now shows correct authority for multi-cloud requests using WAM. See [#3637](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3637)
+- Adding null IdentityLogger to prevent null reference exception when using cache logger. See [#3678](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3678)
+
 4.46.2
 ==========
 
