@@ -322,7 +322,7 @@ namespace Microsoft.Identity.Client.Broker
         {
             //MSAL Runtime throws an ApiContractViolation Exception with Tag: 0x2039c1cb (InvalidArg)
             //When no scopes are passed, this will check if user is passing scopes
-            var scopes = authenticationRequestParameters.Scope.ElementAtOrDefault(0);
+            var scopes = authenticationRequestParameters.Scope?.ElementAtOrDefault(0);
 
             if (string.IsNullOrWhiteSpace(scopes))
             {
