@@ -207,7 +207,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public virtual List<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             var logger = requestlogger ?? _logger;
-            logger.Always($"[Internal cache] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}");
+            logger.Info($"[Internal cache] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}. ");
             if (string.IsNullOrEmpty(partitionKey))
             {
                 return AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
@@ -224,7 +224,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public virtual List<MsalRefreshTokenCacheItem> GetAllRefreshTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             var logger = requestlogger ?? _logger;
-            logger.Always($"[Internal cache] Total number of cache partitions found while getting refresh tokens: {RefreshTokenCacheDictionary.Count}");
+            logger.Info($"[Internal cache] Total number of cache partitions found while getting refresh tokens: {RefreshTokenCacheDictionary.Count}. ");
             if (string.IsNullOrEmpty(partitionKey))
             {
                 return RefreshTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public virtual void Clear(ILoggerAdapter requestlogger = null)
         {
             var logger = requestlogger ?? _logger;
-            logger.Always("[Internal cache] Clearing user token cache accessor.");
+            logger.Info("[Internal cache] Clearing user token cache accessor. ");
             AccessTokenCacheDictionary.Clear();
             RefreshTokenCacheDictionary.Clear();
             IdTokenCacheDictionary.Clear();

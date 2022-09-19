@@ -147,9 +147,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             sb.AppendLine(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs.ToString());
             sb.Append("[LogMetricsFromAuthResult] DurationInHttpInMs: ");
             sb.AppendLine(authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs.ToString());
-            logger.Always(sb.ToString());
-            logger.AlwaysPii($"[LogMetricsFromAuthResult] TokenEndpoint: {authenticationResult.AuthenticationResultMetadata.TokenEndpoint ?? ""}",
-                                "TokenEndpoint: ****");
+            logger.Info(sb.ToString());
+            logger.InfoPii($"[LogMetricsFromAuthResult] TokenEndpoint: {authenticationResult.AuthenticationResultMetadata.TokenEndpoint ?? ""}",
+                                "TokenEndpoint: ****. ");
         }
 
         private static void UpdateTelemetry(Stopwatch sw, ApiEvent apiEvent, AuthenticationResult authenticationResult)

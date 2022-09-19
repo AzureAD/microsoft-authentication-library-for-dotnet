@@ -427,7 +427,7 @@ namespace Microsoft.Identity.Client
 
             var accessTokens = Accessor.GetAllAccessTokens(partitionKey, logger);
 
-            requestParams.RequestContext.Logger.Always($"[FindAccessTokenAsync] Discovered {accessTokens.Count} access tokens in cache using partition key: {partitionKey}");
+            requestParams.RequestContext.Logger.Info($"[FindAccessTokenAsync] Discovered {accessTokens.Count} access tokens in cache using partition key: {partitionKey}. ");
 
             if (accessTokens.Count == 0)
             {
@@ -756,7 +756,7 @@ namespace Microsoft.Identity.Client
 
             var requestKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
             var refreshTokens = Accessor.GetAllRefreshTokens(requestKey);
-            requestParams.RequestContext.Logger.Always($"[FindRefreshTokenAsync] Discovered {refreshTokens.Count} refresh tokens in cache using key: {requestKey}");
+            requestParams.RequestContext.Logger.Info($"[FindRefreshTokenAsync] Discovered {refreshTokens.Count} refresh tokens in cache using key: {requestKey}. ");
 
             if (refreshTokens.Count != 0)
             {

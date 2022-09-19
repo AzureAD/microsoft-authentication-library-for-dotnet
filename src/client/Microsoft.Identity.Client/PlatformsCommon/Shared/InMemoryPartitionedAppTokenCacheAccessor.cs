@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public virtual List<MsalAccessTokenCacheItem> GetAllAccessTokens(string partitionKey = null, ILoggerAdapter requestlogger = null)
         {
             ILoggerAdapter logger = requestlogger ?? _logger;
-            logger.Always($"[Internal cache] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}");
+            logger.Info($"[Internal cache] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}. ");
             if (string.IsNullOrEmpty(partitionKey))
             {
                 return AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
@@ -220,7 +220,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             var logger = requestlogger ?? _logger;
             AccessTokenCacheDictionary.Clear();
-            logger.Always("[Internal cache] Clearing app token cache accessor.");
+            logger.Info("[Internal cache] Clearing app token cache accessor. ");
             // app metadata isn't removable
         }
 
