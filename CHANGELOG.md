@@ -1,3 +1,9 @@
+4.47.1
+==========
+
+### Supportability
+- Fixes an internal (Microsoft 1P only) NuGet feed issue. See [#3689](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3689)
+
 4.47.0
 ==========
 
