@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ComponentModel;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
@@ -174,13 +175,13 @@ namespace Microsoft.Identity.Client
             if (Config.BrokerCreatorFunc == null && DesktopOsHelper.IsWindows())
             {
                 throw new PlatformNotSupportedException(
-                    "If you have a Windows application which targets net5.0 or net5.0-windows, change the target to net5.0-windows10.0.17763.0. \nYour app can still run on earlier versions of Windows such as Windows 7 if you add <SupportedOSPlatformVersion>7</SupportedOSPlatformVersion> in the csproj.\n The Windows broker (WAM) is available only on Windows 10 and this library will fallback to a browser on older systems. " +
-
-                    "\n\r\n\rIf you have a .NET 5 cross-platform (Windows, Mac, Linux) application, dual target net5.0 and net5.0-windows10.0.17763.0. Your installer should deploy the net5.0 version on Mac and Linux and the net5.0-window10.0.17763.0 on Windows." +
+                    "If your application targets .NET 6, install the NuGet package Microsoft.Identity.Client.Broker and call the extension method .WithBrokerPreview() first. " +
 
                     "\n\r\n\rIf you have a .NET Core 3.1 application, install the NuGet package Microsoft.Identity.Client.Desktop and call the extension method .WithWindowsBroker() first. " +
 
-                    "\n\r\n\rIf your application targets .NET 6, install the NuGet package Microsoft.Identity.Client.Broker and call the extension method .WithBrokerPreview() first. " +
+                    "\n\r\n\rIf you have a Windows application which targets net5.0 or net5.0-windows, change the target to net5.0-windows10.0.17763.0. \nYour app can still run on earlier versions of Windows such as Windows 7 if you add <SupportedOSPlatformVersion>7</SupportedOSPlatformVersion> in the csproj.\n The Windows broker (WAM) is available only on Windows 10 and this library will fallback to a browser on older systems. " +
+
+                    "\n\r\n\rIf you have a .NET 5 cross-platform (Windows, Mac, Linux) application, dual target net5.0 and net5.0-windows10.0.17763.0. Your installer should deploy the net5.0 version on Mac and Linux and the net5.0-window10.0.17763.0 on Windows." +
 
                     "\n\r\n\rIf you want to try the new broker preview, install the NuGet package Microsoft.Identity.Client.Broker and call the extension method .WithBrokerPreview(). " +
                     "\n\rFor details, see https://aka.ms/msal-net-wam and https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md ");
