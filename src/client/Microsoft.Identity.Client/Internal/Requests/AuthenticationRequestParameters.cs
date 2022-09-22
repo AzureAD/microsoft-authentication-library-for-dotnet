@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
@@ -93,7 +94,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public ICacheSessionManager CacheSessionManager { get; }
         public HashSet<string> Scope { get; }
 
-        public bool HasScopes => Scope != null && Scope.Count > 0;
+        public bool HasScopes => Scope != null && Scope.Count > 0 && Scope.Any(s => s != string.Empty);
 
         public Uri RedirectUri { get; set; }
 

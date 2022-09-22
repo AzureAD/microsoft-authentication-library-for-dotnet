@@ -28,6 +28,9 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -85,11 +88,56 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
+        public async Task ThrowOnNoHandleAsync()
+        {
+            var pca = PublicClientApplicationBuilder
+               .Create(TestConstants.ClientId)
+               .WithBrokerPreview()
+               .Build();
+
+            // no window handle - throw
+            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                () => pca.AcquireTokenInteractive(new[] { "" }).ExecuteAsync()).ConfigureAwait(false);
+
+            Assert.AreEqual("window_handle_required", ex.ErrorCode);
+           
+        }
+       
+        [TestMethod]
+        public async Task ThrowOnNoScopesAsync()
+        {
+            var pca = PublicClientApplicationBuilder
+               .Create(TestConstants.ClientId)
+               .WithBrokerPreview()
+               .Build();
+
+            // empty scopes
+            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                () => pca
+                .AcquireTokenInteractive(new[] { "" })
+                .WithParentActivityOrWindow(new IntPtr(123456))
+                .ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("scopes_required_wam", ex.ErrorCode);
+
+            // empty scopes
+            var ex2 = await AssertException.TaskThrowsAsync<MsalClientException>(
+                () => pca
+                .AcquireTokenSilent(null, new Account("123.123", "user", "env"))                
+                .ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("scopes_required_wam", ex2.ErrorCode);
+
+        }
+
+        [TestMethod]
         public void HandleInstallUrl_Throws()
         {
             AssertException.Throws<NotImplementedException>(() => _wamBroker.HandleInstallUrl("http://app"));
         }
-    }    
+    }
 }
 
 #endif
