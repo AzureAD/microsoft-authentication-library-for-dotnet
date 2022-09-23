@@ -31,6 +31,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using System.Runtime.InteropServices;
+using System.Linq;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -103,9 +104,23 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
            
         }
        
-        [TestMethod]
-        public async Task ThrowOnNoScopesAsync()
+        [DataTestMethod]
+        [DataRow("")]
+        [DataRow(null)]
+        [DataRow("openid")]
+        [DataRow("profile")]
+        [DataRow("offline_access")]
+        [DataRow("openid offline_access")]
+        [DataRow("profile offline_access")]        
+        [DataRow("profile offline_access openid")]        
+        public async Task ThrowOnNoScopesAsync(string scopes)
         {
+            var scopeArray = new List<string>();
+            if (scopes != null)
+            {
+                scopeArray = scopes.Split(" ").ToList();
+            }
+
             var pca = PublicClientApplicationBuilder
                .Create(TestConstants.ClientId)
                .WithBrokerPreview()
@@ -114,21 +129,21 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // empty scopes
             var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
                 () => pca
-                .AcquireTokenInteractive(new[] { "" })
+                .AcquireTokenInteractive(scopeArray)
                 .WithParentActivityOrWindow(new IntPtr(123456))
                 .ExecuteAsync())
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("scopes_required_wam", ex.ErrorCode);
+            Assert.AreEqual(MsalError.WamScopesRequired, ex.ErrorCode);
 
             // empty scopes
             var ex2 = await AssertException.TaskThrowsAsync<MsalClientException>(
                 () => pca
-                .AcquireTokenSilent(null, new Account("123.123", "user", "env"))                
+                .AcquireTokenSilent(scopeArray, new Account("123.123", "user", "env"))                
                 .ExecuteAsync())
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("scopes_required_wam", ex2.ErrorCode);
+            Assert.AreEqual(MsalError.WamScopesRequired, ex2.ErrorCode);
 
         }
 
