@@ -316,15 +316,13 @@ namespace Microsoft.Identity.Client.Broker
         /// <param name="authenticationRequestParameters"></param>
         /// <param name="logger"></param>
         /// <exception cref="MsalClientException"></exception>
-        public static void ValidateAuthParams(
+        private static void ValidateAuthParams(
             AuthenticationRequestParameters authenticationRequestParameters,
             ILoggerAdapter logger)
         {
             //MSAL Runtime throws an ApiContractViolation Exception with Tag: 0x2039c1cb (InvalidArg)
             //When no scopes are passed, this will check if user is passing scopes
-            var scopes = authenticationRequestParameters.Scope?.ElementAtOrDefault(0);
-
-            if (string.IsNullOrWhiteSpace(scopes))
+            if (!ScopeHelper.HasNonMsalScopes(authenticationRequestParameters.Scope))                
             {
                 logger.Error($"[WamBroker] {MsalError.WamScopesRequired} " +
                     $"{MsalErrorMessage.ScopesRequired}");

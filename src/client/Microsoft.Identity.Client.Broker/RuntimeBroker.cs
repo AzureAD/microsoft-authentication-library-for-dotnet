@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.Broker
             {
                 throw new MsalClientException(
                     "window_handle_required",
-                    "Public Client applications wanting to use WAM need to provide their window handle. Console applications can use GetConsoleWindow Windows API for this.");
+                    "Desktop applications wanting to use the broker need to provide their window handle. See https://aka.ms/msal-net-wam#parent-window-handles");
             }
 
             //if OperatingSystemAccount is passed then we use the user signed-in on the machine

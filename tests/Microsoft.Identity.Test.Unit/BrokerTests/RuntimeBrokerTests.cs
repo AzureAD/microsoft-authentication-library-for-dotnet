@@ -3,7 +3,10 @@
 
 #if NET_CORE
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Core;
@@ -68,6 +71,66 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             pcaBuilder = pcaBuilder.WithBrokerPreview();
 
             Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
+
+        }
+
+        [TestMethod]
+        public async Task ThrowOnNoHandleAsync()
+        {
+            var pca = PublicClientApplicationBuilder
+               .Create(TestConstants.ClientId)
+               .WithBrokerPreview()
+               .Build();
+
+            // no window handle - throw
+            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                () => pca.AcquireTokenInteractive(new[] { "" }).ExecuteAsync()).ConfigureAwait(false);
+
+            Assert.AreEqual("window_handle_required", ex.ErrorCode);
+
+        }
+
+        [DataTestMethod]
+        [DataRow("")]
+        [DataRow(" ")]
+        [DataRow(null)]
+        [DataRow("openid")]
+        [DataRow("profile")]
+        [DataRow("offline_access")]
+        [DataRow("openid offline_access")]
+        [DataRow("profile offline_access")]
+        [DataRow("profile offline_access openid")]
+        public async Task ThrowOnNoScopesAsync(string scopes)
+        {
+            var scopeArray = new List<string>();
+            if (scopes != null)
+            {
+                scopeArray = scopes.Split(" ").ToList();
+            }
+
+            var pca = PublicClientApplicationBuilder
+               .Create(TestConstants.ClientId)
+               .WithBrokerPreview()
+               .Build();
+
+            // empty scopes
+            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                () => pca
+                .AcquireTokenInteractive(scopeArray)
+                .WithParentActivityOrWindow(new IntPtr(123456))
+                .ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.WamScopesRequired, ex.ErrorCode);
+
+            // empty scopes
+            var ex2 = await AssertException.TaskThrowsAsync<MsalClientException>(
+                () => pca
+                .AcquireTokenSilent(scopeArray, new Account("123.123", "user", "env"))
+                .ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.WamScopesRequired, ex2.ErrorCode);
 
         }
 
