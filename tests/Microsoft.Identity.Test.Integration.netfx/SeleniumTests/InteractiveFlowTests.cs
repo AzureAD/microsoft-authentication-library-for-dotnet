@@ -250,6 +250,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             userCacheAccess.AssertAccessCounts(0, 1);
             IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+
             userCacheAccess.AssertAccessCounts(1, 1); // the assert calls GetAccounts
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
 
