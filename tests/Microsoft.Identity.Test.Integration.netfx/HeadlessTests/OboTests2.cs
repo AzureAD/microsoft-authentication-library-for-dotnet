@@ -4,24 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Security;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
-using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Json.Utilities;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -30,10 +18,7 @@ using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -59,19 +44,25 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string PublicCloudHost = "https://login.microsoftonline.com/";
         private const string ArlingtonCloudHost = "https://login.microsoftonline.us/";
 
-        private KeyVaultSecretsProvider _keyVault;
+        private KeyVaultSecretsProvider _keyVaultMsidLab;
+        private KeyVaultSecretsProvider _keyVaultMsalTeam;
 
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();
 
-            if (_keyVault == null)
+            if (_keyVaultMsidLab == null)
             {
-                _keyVault = new KeyVaultSecretsProvider();
+                _keyVaultMsidLab = new KeyVaultSecretsProvider(KeyVaultInstance.MSIDLab);
+            }
+
+            if (_keyVaultMsalTeam == null)
+            {
+                _keyVaultMsalTeam = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
             }
         }
-        
+
         /// <summary>
         /// Client -> Middletier -> RP
         /// This is OBO for SP without RT support.
@@ -81,7 +72,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// For details see https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO, which explains
         /// the structure of the access token received from OBO.
         /// </remarks>
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore | TargetFrameworks.NetFx | TargetFrameworks.NetStandard)]
         public async Task ServicePrincipal_OBO_PPE_Async()
         {
             //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
@@ -144,8 +135,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 "The cache expiry is not set because the node did not change");
         }
 
-
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ServicePrincipal_OBO_LongRunningProcess_PPE_Async()
         {
             //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
@@ -221,13 +211,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 "The cache expiry is not set because there is an RT in the cache");
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WebAPIAccessingGraphOnBehalfOfUserTestAsync()
         {
             await RunOnBehalfOfTestAsync(await LabUserHelper.GetSpecificUserAsync("IDLAB@msidlab4.onmicrosoft.com").ConfigureAwait(false)).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.Arlington)]
         public async Task ArlingtonWebAPIAccessingGraphOnBehalfOfUserTestAsync()
         {
@@ -235,13 +225,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunOnBehalfOfTestAsync(labResponse).ConfigureAwait(false);
         }
 
+        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.ADFS)]
         public async Task WebAPIAccessingGraphOnBehalfOfADFS2019UserTestAsync()
         {
             await RunOnBehalfOfTestAsync(await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false)).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WebAPIAccessingGraphOnBehalfOfUserWithCacheTestAsync()
         {
             await RunOnBehalfOfTestWithTokenCacheAsync(await LabUserHelper.GetSpecificUserAsync("IDLAB@msidlab4.onmicrosoft.com").ConfigureAwait(false)).ConfigureAwait(false);
@@ -259,15 +250,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string[] oboScope;
 
             oboHost = PublicCloudHost;
-            secret = _keyVault.GetSecret(TestConstants.MsalOBOKeyVaultUri).Value;
+            secret = _keyVaultMsalTeam.GetSecretByName(TestConstants.MsalOBOKeyVaultSecretName).Value;
             authority = TestConstants.AuthorityOrganizationsTenant;
             publicClientID = PublicCloudPublicClientIDOBO;
             confidentialClientID = PublicCloudConfidentialClientIDOBO;
             oboScope = s_publicCloudOBOServiceScope;
 
             //TODO: acquire scenario specific client ids from the lab response
-
-            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
             var factory = new HttpSnifferClientFactory();
 
             var msalPublicClient = PublicClientApplicationBuilder.Create(publicClientID)
@@ -277,7 +266,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                                                  .WithHttpClientFactory(factory)
                                                                  .Build();
 
-            var authResult = await msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, securePassword)
+            var authResult = await msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -396,7 +385,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             {
                 case AzureEnvironment.azureusgovernment:
                     oboHost = ArlingtonCloudHost;
-                    secret = _keyVault.GetSecret(TestConstants.MsalArlingtonOBOKeyVaultUri).Value;
+                    secret = _keyVaultMsidLab.GetSecretByName(TestConstants.MsalArlingtonOBOKeyVaultSecretName).Value;
                     authority = labResponse.Lab.Authority + "organizations";
                     publicClientID = ArlingtonPublicClientIDOBO;
                     confidentialClientID = ArlingtonConfidentialClientIDOBO;
@@ -404,7 +393,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     break;
                 default:
                     oboHost = PublicCloudHost;
-                    secret = _keyVault.GetSecret(TestConstants.MsalOBOKeyVaultUri).Value;
+                    secret = _keyVaultMsalTeam.GetSecretByName(TestConstants.MsalOBOKeyVaultSecretName).Value;
                     authority = TestConstants.AuthorityOrganizationsTenant;
                     publicClientID = PublicCloudPublicClientIDOBO;
                     confidentialClientID = PublicCloudConfidentialClientIDOBO;
@@ -414,15 +403,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             //TODO: acquire scenario specific client ids from the lab response
 
-            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
-
             var msalPublicClient = PublicClientApplicationBuilder.Create(publicClientID)
                                                                  .WithAuthority(authority)
                                                                  .WithRedirectUri(TestConstants.RedirectUri)                                                                 
                                                                  .WithTestLogging()
                                                                  .Build();
 
-            var authResult = await msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, securePassword)
+            var authResult = await msalPublicClient.AcquireTokenByUsernamePassword(oboScope, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 

@@ -32,6 +32,8 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         public IIdentityLogger CacheLogger => null;
 
+        public IIdentityLogger IdentityLogger => throw new NotImplementedException();
+
         public void Always(string messageScrubbed)
         {
             Trace.WriteLine($"{_prefix}[Always] {messageScrubbed}");

@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                     $"throttling for {s_uiRequiredExpiration.TotalSeconds} seconds. ");
 
                 var thumbprint = GetRequestStrictThumbprint(bodyParams,
-                    requestParams.AuthorityInfo.CanonicalAuthority,
+                    requestParams.AuthorityInfo.CanonicalAuthority.ToString(),
                     requestParams.RequestContext.ServiceBundle.PlatformProxy.CryptographyManager);
                 var entry = new ThrottlingCacheEntry(ex, s_uiRequiredExpiration);
                 ThrottlingCache.AddAndCleanup(thumbprint, entry, logger);
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
                 string fullThumbprint = GetRequestStrictThumbprint(
                     bodyParams,
-                    requestParams.AuthorityInfo.CanonicalAuthority,
+                    requestParams.AuthorityInfo.CanonicalAuthority.ToString(),
                     requestParams.RequestContext.ServiceBundle.PlatformProxy.CryptographyManager);
 
                 TryThrowException(fullThumbprint, logger);

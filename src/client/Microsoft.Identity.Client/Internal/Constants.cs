@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.Internal
         public const string MsAppScheme = "ms-app";
         public const int ExpirationMarginInMinutes = 5;
         public const int CodeVerifierLength = 128;
-        public const int CodeVerifierByteSize = 32;
+        public const int CodeVerifierByteSize = 96;
 
         public const string UapWEBRedirectUri = "https://sso"; // for WEB
         public const string DefaultRedirectUri = "urn:ietf:wg:oauth:2.0:oob";

@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Json.Utilities
                 : base.BindDeleteIndex(binder, indexes);
         }
 
-        private delegate DynamicMetaObject Fallback(DynamicMetaObject errorSuggestion);
+        private delegate DynamicMetaObject Fallback(DynamicMetaObject? errorSuggestion);
 
         private static Expression[] NoArgs => CollectionUtils.ArrayEmpty<Expression>();
 
@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Json.Utilities
         /// Helper method for generating a MetaObject which calls a
         /// specific method on Dynamic that returns a result
         /// </summary>
-        private DynamicMetaObject CallMethodWithResult(string methodName, DynamicMetaObjectBinder binder, IEnumerable<Expression> args, Fallback fallback, Fallback fallbackInvoke = null)
+        private DynamicMetaObject CallMethodWithResult(string methodName, DynamicMetaObjectBinder binder, IEnumerable<Expression> args, Fallback fallback, Fallback? fallbackInvoke = null)
         {
             //
             // First, call fallback to do default binding
@@ -217,7 +217,7 @@ namespace Microsoft.Identity.Json.Utilities
             return BuildCallMethodWithResult(methodName, binder, args, fallbackResult, fallbackInvoke);
         }
 
-        private DynamicMetaObject BuildCallMethodWithResult(string methodName, DynamicMetaObjectBinder binder, IEnumerable<Expression> args, DynamicMetaObject fallbackResult, Fallback fallbackInvoke)
+        private DynamicMetaObject BuildCallMethodWithResult(string methodName, DynamicMetaObjectBinder binder, IEnumerable<Expression> args, DynamicMetaObject fallbackResult, Fallback? fallbackInvoke)
         {
             //
             // Build a new expression like:
@@ -228,11 +228,9 @@ namespace Microsoft.Identity.Json.Utilities
             //
             ParameterExpression result = Expression.Parameter(typeof(object), null);
 
-            IList<Expression> callArgs = new List<Expression>
-            {
-                Expression.Convert(Expression, typeof(T)),
-                Constant(binder)
-            };
+            IList<Expression> callArgs = new List<Expression>();
+            callArgs.Add(Expression.Convert(Expression, typeof(T)));
+            callArgs.Add(Constant(binder));
             callArgs.AddRange(args);
             callArgs.Add(result);
 
@@ -294,11 +292,9 @@ namespace Microsoft.Identity.Json.Utilities
             //
             ParameterExpression result = Expression.Parameter(typeof(object), null);
 
-            IList<Expression> callArgs = new List<Expression>
-            {
-                Expression.Convert(Expression, typeof(T)),
-                Constant(binder)
-            };
+            IList<Expression> callArgs = new List<Expression>();
+            callArgs.Add(Expression.Convert(Expression, typeof(T)));
+            callArgs.Add(Constant(binder));
             callArgs.AddRange(args);
             callArgs[callArgs.Count - 1] = Expression.Assign(result, callArgs[callArgs.Count - 1]);
 
@@ -333,11 +329,9 @@ namespace Microsoft.Identity.Json.Utilities
             //
             DynamicMetaObject fallbackResult = fallback(null);
 
-            IList<Expression> callArgs = new List<Expression>
-            {
-                Expression.Convert(Expression, typeof(T)),
-                Constant(binder)
-            };
+            IList<Expression> callArgs = new List<Expression>();
+            callArgs.Add(Expression.Convert(Expression, typeof(T)));
+            callArgs.Add(Constant(binder));
             callArgs.AddRange(args);
 
             //

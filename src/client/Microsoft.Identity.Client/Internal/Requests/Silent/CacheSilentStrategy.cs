@@ -101,12 +101,10 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 return authResult;
             }
             catch (MsalServiceException e)
-            {
-                bool isAadUnavailable = e.IsAadUnavailable();
+            {                
+                logger.Warning($"Refreshing the RT failed. Is the exception retryable? {e.IsRetryable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null} ");
 
-                logger.Warning($"Refreshing the RT failed. Is AAD down? {isAadUnavailable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null} ");
-
-                if (cachedAccessTokenItem != null && isAadUnavailable)
+                if (cachedAccessTokenItem != null && e.IsRetryable)
                 {
                     logger.Info("Returning existing access token. It is not expired, but should be refreshed. ");
                     return await CreateAuthenticationResultAsync(cachedAccessTokenItem).ConfigureAwait(false);

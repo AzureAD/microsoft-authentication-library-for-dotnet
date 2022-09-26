@@ -33,11 +33,13 @@ using Microsoft.Identity.Json.Utilities;
 using System.Collections;
 using System.Globalization;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
 using Microsoft.Identity.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
-
 #endif
 
 namespace Microsoft.Identity.Json.Linq
@@ -55,8 +57,8 @@ namespace Microsoft.Identity.Json.Linq
 #endif
     {
 #if HAVE_COMPONENT_MODEL
-        internal ListChangedEventHandler _listChanged;
-        internal AddingNewEventHandler _addingNew;
+        internal ListChangedEventHandler? _listChanged;
+        internal AddingNewEventHandler? _addingNew;
 
         /// <summary>
         /// Occurs when the list changes or an item in the list changes.
@@ -77,7 +79,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 #endif
 #if HAVE_INOTIFY_COLLECTION_CHANGED
-        internal NotifyCollectionChangedEventHandler _collectionChanged;
+        internal NotifyCollectionChangedEventHandler? _collectionChanged;
 
         /// <summary>
         /// Occurs when the items list of the collection has changed, or the collection is reset.
@@ -95,8 +97,8 @@ namespace Microsoft.Identity.Json.Linq
         /// <value>The container's children tokens.</value>
         protected abstract IList<JToken> ChildrenTokens { get; }
 
-        private object _syncRoot;
-#if HAVE_COMPONENT_MODEL || HAVE_INOTIFY_COLLECTION_CHANGED
+        private object? _syncRoot;
+#if (HAVE_COMPONENT_MODEL || HAVE_INOTIFY_COLLECTION_CHANGED)
         private bool _busy;
 #endif
 
@@ -112,14 +114,16 @@ namespace Microsoft.Identity.Json.Linq
             int i = 0;
             foreach (JToken child in other)
             {
-                AddInternal(i, child, false);
+                TryAddInternal(i, child, false);
                 i++;
             }
+
+            CopyAnnotations(this, other);
         }
 
         internal void CheckReentrancy()
         {
-#if HAVE_COMPONENT_MODEL || HAVE_INOTIFY_COLLECTION_CHANGED
+#if (HAVE_COMPONENT_MODEL || HAVE_INOTIFY_COLLECTION_CHANGED)
             if (_busy)
             {
                 throw new InvalidOperationException("Cannot change {0} during a collection change event.".FormatWith(CultureInfo.InvariantCulture, GetType()));
@@ -148,7 +152,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <param name="e">The <see cref="ListChangedEventArgs"/> instance containing the event data.</param>
         protected virtual void OnListChanged(ListChangedEventArgs e)
         {
-            ListChangedEventHandler handler = _listChanged;
+            ListChangedEventHandler? handler = _listChanged;
 
             if (handler != null)
             {
@@ -171,7 +175,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <param name="e">The <see cref="NotifyCollectionChangedEventArgs"/> instance containing the event data.</param>
         protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
-            NotifyCollectionChangedEventHandler handler = _collectionChanged;
+            NotifyCollectionChangedEventHandler? handler = _collectionChanged;
 
             if (handler != null)
             {
@@ -228,7 +232,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <value>
         /// A <see cref="JToken"/> containing the first child token of the <see cref="JToken"/>.
         /// </value>
-        public override JToken First
+        public override JToken? First
         {
             get
             {
@@ -243,7 +247,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <value>
         /// A <see cref="JToken"/> containing the last child token of the <see cref="JToken"/>.
         /// </value>
-        public override JToken Last
+        public override JToken? Last
         {
             get
             {
@@ -271,7 +275,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <returns>
         /// A <see cref="IEnumerable{T}"/> containing the child values of this <see cref="JToken"/>, in document order.
         /// </returns>
-        public override IEnumerable<T> Values<T>()
+        public override IEnumerable<T?> Values<T>() where T : default
         {
             return ChildrenTokens.Convert<JToken, T>();
         }
@@ -314,12 +318,12 @@ namespace Microsoft.Identity.Json.Linq
             }
         }
 
-        internal bool IsMultiContent(object content)
+        internal bool IsMultiContent([NotNullWhen(true)]object? content)
         {
-            return content is IEnumerable && !(content is string) && !(content is JToken) && !(content is byte[]);
+            return (content is IEnumerable && !(content is string) && !(content is JToken) && !(content is byte[]));
         }
 
-        internal JToken EnsureParentToken(JToken item, bool skipParentCheck)
+        internal JToken EnsureParentToken(JToken? item, bool skipParentCheck)
         {
             if (item == null)
             {
@@ -343,9 +347,9 @@ namespace Microsoft.Identity.Json.Linq
             return item;
         }
 
-        internal abstract int IndexOfItem(JToken item);
+        internal abstract int IndexOfItem(JToken? item);
 
-        internal virtual void InsertItem(int index, JToken item, bool skipParentCheck)
+        internal virtual bool InsertItem(int index, JToken? item, bool skipParentCheck)
         {
             IList<JToken> children = ChildrenTokens;
 
@@ -358,9 +362,9 @@ namespace Microsoft.Identity.Json.Linq
 
             item = EnsureParentToken(item, skipParentCheck);
 
-            JToken previous = (index == 0) ? null : children[index - 1];
+            JToken? previous = (index == 0) ? null : children[index - 1];
             // haven't inserted new token yet so next token is still at the inserting index
-            JToken next = (index == children.Count) ? null : children[index];
+            JToken? next = (index == children.Count) ? null : children[index];
 
             ValidateToken(item, null);
 
@@ -392,6 +396,8 @@ namespace Microsoft.Identity.Json.Linq
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index));
             }
 #endif
+
+            return true;
         }
 
         internal virtual void RemoveItemAt(int index)
@@ -410,8 +416,8 @@ namespace Microsoft.Identity.Json.Linq
             CheckReentrancy();
 
             JToken item = children[index];
-            JToken previous = (index == 0) ? null : children[index - 1];
-            JToken next = (index == children.Count - 1) ? null : children[index + 1];
+            JToken? previous = (index == 0) ? null : children[index - 1];
+            JToken? next = (index == children.Count - 1) ? null : children[index + 1];
 
             if (previous != null)
             {
@@ -442,13 +448,16 @@ namespace Microsoft.Identity.Json.Linq
 #endif
         }
 
-        internal virtual bool RemoveItem(JToken item)
+        internal virtual bool RemoveItem(JToken? item)
         {
-            int index = IndexOfItem(item);
-            if (index >= 0)
+            if (item != null)
             {
-                RemoveItemAt(index);
-                return true;
+                int index = IndexOfItem(item);
+                if (index >= 0)
+                {
+                    RemoveItemAt(index);
+                    return true;
+                }
             }
 
             return false;
@@ -459,7 +468,7 @@ namespace Microsoft.Identity.Json.Linq
             return ChildrenTokens[index];
         }
 
-        internal virtual void SetItem(int index, JToken item)
+        internal virtual void SetItem(int index, JToken? item)
         {
             IList<JToken> children = ChildrenTokens;
 
@@ -485,8 +494,8 @@ namespace Microsoft.Identity.Json.Linq
 
             ValidateToken(item, existing);
 
-            JToken previous = (index == 0) ? null : children[index - 1];
-            JToken next = (index == children.Count - 1) ? null : children[index + 1];
+            JToken? previous = (index == 0) ? null : children[index - 1];
+            JToken? next = (index == children.Count - 1) ? null : children[index + 1];
 
             item.Parent = this;
 
@@ -562,9 +571,9 @@ namespace Microsoft.Identity.Json.Linq
             SetItem(index, replacement);
         }
 
-        internal virtual bool ContainsItem(JToken item)
+        internal virtual bool ContainsItem(JToken? item)
         {
-            return IndexOfItem(item) != -1;
+            return (IndexOfItem(item) != -1);
         }
 
         internal virtual void CopyItemsTo(Array array, int arrayIndex)
@@ -594,14 +603,14 @@ namespace Microsoft.Identity.Json.Linq
             }
         }
 
-        internal static bool IsTokenUnchanged(JToken currentValue, JToken newValue)
+        internal static bool IsTokenUnchanged(JToken currentValue, JToken? newValue)
         {
             if (currentValue is JValue v1)
             {
-                // null will get turned into a JValue of type null
-                if (v1.Type == JTokenType.Null && newValue == null)
+                if (newValue == null)
                 {
-                    return true;
+                    // null will get turned into a JValue of type null
+                    return v1.Type == JTokenType.Null;
                 }
 
                 return v1.Equals(newValue);
@@ -610,7 +619,7 @@ namespace Microsoft.Identity.Json.Linq
             return false;
         }
 
-        internal virtual void ValidateToken(JToken o, JToken existing)
+        internal virtual void ValidateToken(JToken o, JToken? existing)
         {
             ValidationUtils.ArgumentNotNull(o, nameof(o));
 
@@ -624,26 +633,31 @@ namespace Microsoft.Identity.Json.Linq
         /// Adds the specified content as children of this <see cref="JToken"/>.
         /// </summary>
         /// <param name="content">The content to be added.</param>
-        public virtual void Add(object content)
+        public virtual void Add(object? content)
         {
-            AddInternal(ChildrenTokens.Count, content, false);
+            TryAddInternal(ChildrenTokens.Count, content, false);
+        }
+
+        internal bool TryAdd(object? content)
+        {
+            return TryAddInternal(ChildrenTokens.Count, content, false);
         }
 
         internal void AddAndSkipParentCheck(JToken token)
         {
-            AddInternal(ChildrenTokens.Count, token, true);
+            TryAddInternal(ChildrenTokens.Count, token, true);
         }
 
         /// <summary>
         /// Adds the specified content as the first children of this <see cref="JToken"/>.
         /// </summary>
         /// <param name="content">The content to be added.</param>
-        public void AddFirst(object content)
+        public void AddFirst(object? content)
         {
-            AddInternal(0, content, false);
+            TryAddInternal(0, content, false);
         }
 
-        internal void AddInternal(int index, object content, bool skipParentCheck)
+        internal bool TryAddInternal(int index, object? content, bool skipParentCheck)
         {
             if (IsMultiContent(content))
             {
@@ -652,19 +666,21 @@ namespace Microsoft.Identity.Json.Linq
                 int multiIndex = index;
                 foreach (object c in enumerable)
                 {
-                    AddInternal(multiIndex, c, skipParentCheck);
+                    TryAddInternal(multiIndex, c, skipParentCheck);
                     multiIndex++;
                 }
+
+                return true;
             }
             else
             {
                 JToken item = CreateFromContent(content);
 
-                InsertItem(index, item, skipParentCheck);
+                return InsertItem(index, item, skipParentCheck);
             }
         }
 
-        internal static JToken CreateFromContent(object content)
+        internal static JToken CreateFromContent(object? content)
         {
             if (content is JToken token)
             {
@@ -701,7 +717,7 @@ namespace Microsoft.Identity.Json.Linq
             ClearItems();
         }
 
-        internal abstract void MergeItem(object content, JsonMergeSettings settings);
+        internal abstract void MergeItem(object content, JsonMergeSettings? settings);
 
         /// <summary>
         /// Merge the specified content into this <see cref="JToken"/>.
@@ -709,7 +725,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <param name="content">The content to be merged.</param>
         public void Merge(object content)
         {
-            MergeItem(content, new JsonMergeSettings());
+            MergeItem(content, null);
         }
 
         /// <summary>
@@ -717,12 +733,12 @@ namespace Microsoft.Identity.Json.Linq
         /// </summary>
         /// <param name="content">The content to be merged.</param>
         /// <param name="settings">The <see cref="JsonMergeSettings"/> used to merge the content.</param>
-        public void Merge(object content, JsonMergeSettings settings)
+        public void Merge(object content, JsonMergeSettings? settings)
         {
             MergeItem(content, settings);
         }
 
-        internal void ReadTokenFrom(JsonReader reader, JsonLoadSettings options)
+        internal void ReadTokenFrom(JsonReader reader, JsonLoadSettings? options)
         {
             int startDepth = reader.Depth;
 
@@ -741,12 +757,12 @@ namespace Microsoft.Identity.Json.Linq
             }
         }
 
-        internal void ReadContentFrom(JsonReader r, JsonLoadSettings settings)
+        internal void ReadContentFrom(JsonReader r, JsonLoadSettings? settings)
         {
             ValidationUtils.ArgumentNotNull(r, nameof(r));
-            IJsonLineInfo lineInfo = r as IJsonLineInfo;
+            IJsonLineInfo? lineInfo = r as IJsonLineInfo;
 
-            JContainer parent = this;
+            JContainer? parent = this;
 
             do
             {
@@ -759,6 +775,8 @@ namespace Microsoft.Identity.Json.Linq
 
                     parent = parent.Parent;
                 }
+
+                MiscellaneousUtils.Assert(parent != null);
 
                 switch (r.TokenType)
                 {
@@ -795,7 +813,7 @@ namespace Microsoft.Identity.Json.Linq
                         parent = parent.Parent;
                         break;
                     case JsonToken.StartConstructor:
-                        JConstructor constructor = new JConstructor(r.Value.ToString());
+                        JConstructor constructor = new JConstructor(r.Value!.ToString());
                         constructor.SetLineInfo(lineInfo, settings);
                         parent.Add(constructor);
                         parent = constructor;
@@ -821,7 +839,7 @@ namespace Microsoft.Identity.Json.Linq
                     case JsonToken.Comment:
                         if (settings != null && settings.CommentHandling == CommentHandling.Load)
                         {
-                            v = JValue.CreateComment(r.Value.ToString());
+                            v = JValue.CreateComment(r.Value!.ToString());
                             v.SetLineInfo(lineInfo, settings);
                             parent.Add(v);
                         }
@@ -837,26 +855,54 @@ namespace Microsoft.Identity.Json.Linq
                         parent.Add(v);
                         break;
                     case JsonToken.PropertyName:
-                        string propertyName = r.Value.ToString();
-                        JProperty property = new JProperty(propertyName);
-                        property.SetLineInfo(lineInfo, settings);
-                        JObject parentObject = (JObject)parent;
-                        // handle multiple properties with the same name in JSON
-                        JProperty existingPropertyWithName = parentObject.Property(propertyName, StringComparison.OrdinalIgnoreCase);
-                        if (existingPropertyWithName == null)
+                        JProperty? property = ReadProperty(r, settings, lineInfo, parent);
+                        if (property != null)
                         {
-                            parent.Add(property);
+                            parent = property;
                         }
                         else
                         {
-                            existingPropertyWithName.Replace(property);
+                            r.Skip();
                         }
-                        parent = property;
                         break;
                     default:
                         throw new InvalidOperationException("The JsonReader should not be on a token of type {0}.".FormatWith(CultureInfo.InvariantCulture, r.TokenType));
                 }
             } while (r.Read());
+        }
+
+        private static JProperty? ReadProperty(JsonReader r, JsonLoadSettings? settings, IJsonLineInfo? lineInfo, JContainer parent)
+        {
+            DuplicatePropertyNameHandling duplicatePropertyNameHandling = settings?.DuplicatePropertyNameHandling ?? DuplicatePropertyNameHandling.Replace;
+
+            JObject parentObject = (JObject)parent;
+            string propertyName = r.Value!.ToString();
+            JProperty? existingPropertyWithName = parentObject.Property(propertyName, StringComparison.Ordinal);
+            if (existingPropertyWithName != null)
+            {
+                if (duplicatePropertyNameHandling == DuplicatePropertyNameHandling.Ignore)
+                {
+                    return null;
+                }
+                else if (duplicatePropertyNameHandling == DuplicatePropertyNameHandling.Error)
+                {
+                    throw JsonReaderException.Create(r, "Property with the name '{0}' already exists in the current JSON object.".FormatWith(CultureInfo.InvariantCulture, propertyName));
+                }
+            }
+
+            JProperty property = new JProperty(propertyName);
+            property.SetLineInfo(lineInfo, settings);
+            // handle multiple properties with the same name in JSON
+            if (existingPropertyWithName == null)
+            {
+                parent.Add(property);
+            }
+            else
+            {
+                existingPropertyWithName.Replace(property);
+            }
+
+            return property;
         }
 
         internal int ContentsHashCode()
@@ -875,9 +921,9 @@ namespace Microsoft.Identity.Json.Linq
             return string.Empty;
         }
 
-        PropertyDescriptorCollection ITypedList.GetItemProperties(PropertyDescriptor[] listAccessors)
+        PropertyDescriptorCollection? ITypedList.GetItemProperties(PropertyDescriptor[] listAccessors)
         {
-            ICustomTypeDescriptor d = First as ICustomTypeDescriptor;
+            ICustomTypeDescriptor? d = First as ICustomTypeDescriptor;
             return d?.GetProperties();
         }
 #endif
@@ -934,7 +980,7 @@ namespace Microsoft.Identity.Json.Linq
         }
         #endregion
 
-        private JToken EnsureValue(object value)
+        private JToken? EnsureValue(object value)
         {
             if (value == null)
             {
@@ -1080,7 +1126,7 @@ namespace Microsoft.Identity.Json.Linq
 
         ListSortDirection IBindingList.SortDirection => ListSortDirection.Ascending;
 
-        PropertyDescriptor IBindingList.SortProperty => null;
+        PropertyDescriptor? IBindingList.SortProperty => null;
 
         bool IBindingList.SupportsChangeNotification => true;
 
@@ -1090,9 +1136,9 @@ namespace Microsoft.Identity.Json.Linq
 #endif
         #endregion
 
-        internal static void MergeEnumerableContent(JContainer target, IEnumerable content, JsonMergeSettings settings)
+        internal static void MergeEnumerableContent(JContainer target, IEnumerable content, JsonMergeSettings? settings)
         {
-            switch (settings.MergeArrayHandling)
+            switch (settings?.MergeArrayHandling ?? MergeArrayHandling.Concat)
             {
                 case MergeArrayHandling.Concat:
                     foreach (JToken item in content)
@@ -1129,6 +1175,10 @@ namespace Microsoft.Identity.Json.Linq
 #endif
                     break;
                 case MergeArrayHandling.Replace:
+                    if (target == content)
+                    {
+                        break;
+                    }
                     target.ClearItems();
                     foreach (JToken item in content)
                     {
@@ -1141,7 +1191,7 @@ namespace Microsoft.Identity.Json.Linq
                     {
                         if (i < target.Count)
                         {
-                            JToken sourceItem = target[i];
+                            JToken? sourceItem = target[i];
 
                             if (sourceItem is JContainer existingContainer)
                             {

@@ -220,7 +220,7 @@ namespace Microsoft.Identity.Client.OAuth2
             }
             catch (MsalServiceException ex)
             {
-                if (!ex.IsAadUnavailable())
+                if (!ex.IsRetryable)
                 {
                     // Clear failed telemetry data as we've just sent it ... 
                     // even if we received an error from the server, 

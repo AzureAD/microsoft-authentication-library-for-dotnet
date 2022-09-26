@@ -2,11 +2,12 @@ parameters:
   PublishArtifacts: 'false'
 
 steps:
-- task: DownloadBuildArtifacts@0
+- task: DownloadPipelineArtifact@2
   displayName: 'Download Drop'
   inputs:
-    artifactName: drop
-    itemPattern: '**/*'
+    artifact: drop
+    patterns: '**/*'
+    path: $(Build.artifactstagingdirectory)/drop
 
 - task: CopyFiles@2
   displayName: 'Get MSAL src'
@@ -17,9 +18,43 @@ steps:
 
 # Use the latest .NET SDK
 - task: UseDotNet@2
-  displayName: 'Use .Net Core sdk 5.x'
+  displayName: 'Use .Net Core sdk 6.x'
   inputs:
-    version: 5.x
+    version: 6.x
+    includePreviewVersions: true
+
+#Workaround for Xamarin iOS/MAC build issue. See https://github.com/actions/runner-images/issues/6082
+- task: PowerShell@2
+  displayName: 'Installing Xamarin iOS/macOS components'
+  inputs:
+    targetType: 'inline'
+    script: |
+      Set-Location "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
+      $InstallPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
+      $componentsToAdd = @(
+          "Component.Xamarin"
+      )
+      [string]$workloadArgs = $componentsToAdd | ForEach-Object {" --add " +  $_}
+      $Arguments = ('/c', "vs_installer.exe", 'modify', '--installPath', "`"$InstallPath`"",$workloadArgs, '--quiet', '--norestart', '--nocache')
+      $process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
+      if ($process.ExitCode -eq 0)
+      {
+          Write-Host "components have been successfully added"
+      }
+      else
+      {
+          Write-Host "components were not installed"
+          exit 1
+      }
+
+- task: Bash@3
+  displayName: Install MAUI
+  inputs:
+    targetType: 'inline'
+    script: |
+      dotnet nuget locals all --clear 
+      dotnet workload install maui --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
+      dotnet workload install android ios maccatalyst tvos macos maui wasm-tools --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
 
 - task: VSBuild@1
   displayName: 'NuGet restore'
@@ -27,7 +62,7 @@ steps:
     solution: 'LibsAndSamples.sln'
     msbuildArgs: '/t:restore'
     platform: 'any cpu'
-    configuration: 'debug'
+    configuration: 'Release'
 
 # Run Post-build code analysis (e.g. Roslyn)
 - template: template-postbuild-code-analysis.yaml

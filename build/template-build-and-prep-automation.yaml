@@ -1,6 +1,9 @@
 steps:
-# Bootstrap the build
-- template: template-bootstrap-build.yaml
+# Install NuGet
+- task: NuGetToolInstaller@0
+  displayName: 'Use latest NuGet'
+  inputs:
+    versionSpec: 6.x
 
 # Unit tests require .NET 3.x
 - task: UseDotNet@2
@@ -10,9 +13,33 @@ steps:
     
 # Use the latest .NET SDK
 - task: UseDotNet@2
-  displayName: 'Use .Net Core sdk 5.x'
+  displayName: 'Use .Net Core sdk 6.x'
   inputs:
-    version: 5.x
+    version: 6.x
+
+#Workaround for Xamarin iOS/MAC build issue. See https://github.com/actions/runner-images/issues/6082
+- task: PowerShell@2
+  displayName: 'Installing Xamarin iOS/macOS components'
+  inputs:
+    targetType: 'inline'
+    script: |
+      Set-Location "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
+      $InstallPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
+      $componentsToAdd = @(
+          "Component.Xamarin"
+      )
+      [string]$workloadArgs = $componentsToAdd | ForEach-Object {" --add " +  $_}
+      $Arguments = ('/c', "vs_installer.exe", 'modify', '--installPath', "`"$InstallPath`"",$workloadArgs, '--quiet', '--norestart', '--nocache')
+      $process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
+      if ($process.ExitCode -eq 0)
+      {
+          Write-Host "components have been successfully added"
+      }
+      else
+      {
+          Write-Host "components were not installed"
+          exit 1
+      }
 
 # Nuget Restore and Build 
 - template: template-restore-build-libsandsamples.yaml
@@ -56,5 +83,22 @@ steps:
     Contents: 'Microsoft.Identity**\bin\**\**'
     TargetFolder: '$(build.artifactstagingdirectory)/msalTests'
 
-- task: PublishBuildArtifacts@1
+- task: CopyFiles@2
+  displayName: 'Stage CacheCompat tests'
+  inputs:
+    SourceFolder: tests\CacheCompat
+    Contents: '**\bin\**\**'
+    TargetFolder: '$(build.artifactstagingdirectory)/cacheCompatTests'
+
+- task: CopyFiles@2
+  displayName: 'Stage Device Authentication Tests'
+  inputs:
+    SourceFolder: tests/Microsoft.Identity.Test.Integration.Win8
+    Contents: '**/bin/**/*'
+    TargetFolder: '$(build.artifactstagingdirectory)/DeviceAuth'
+
+- task: PublishPipelineArtifact@1
   displayName: 'Publish Artifact: drop'
+  inputs:
+    targetPath: $(Build.artifactstagingdirectory)
+    artifactName: drop

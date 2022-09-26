@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             AuthorizationResult result = null;
             var sendAuthorizeRequest = new Action(() =>
             {
-                result = InvokeEmbeddedWebview(authorizationUri, redirectUri);
+                result = InvokeEmbeddedWebview(authorizationUri, redirectUri, cancellationToken);
             });
 
             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                     {
                         try
                         {
-                            result = InvokeEmbeddedWebview(authorizationUri, redirectUri);
+                            result = InvokeEmbeddedWebview(authorizationUri, redirectUri, cancellationToken);
                             ((TaskCompletionSource<object>)tcs).TrySetResult(null);
                         }
                         catch (Exception e)
@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             return redirectUri;
         }
 
-        private AuthorizationResult InvokeEmbeddedWebview(Uri startUri, Uri endUri)
+        private AuthorizationResult InvokeEmbeddedWebview(Uri startUri, Uri endUri, CancellationToken cancellationToken)
         {
             using (var form = new WinFormsPanelWithWebView2(
                 _parent.OwnerWindow, 
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                 startUri, 
                 endUri))
             {
-                return form.DisplayDialogAndInterceptUri();
+                return form.DisplayDialogAndInterceptUri(cancellationToken);
             }
         }
 

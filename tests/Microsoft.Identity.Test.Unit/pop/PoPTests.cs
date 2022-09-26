@@ -10,22 +10,22 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Client.Broker;
-using NSubstitute;
-using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Test.Unit.BrokerTests;
 using Microsoft.Identity.Test.Common.Mocks;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Test.Unit.BrokerTests;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json.Linq;
+using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.Pop
 {
@@ -283,7 +283,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 var mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(false);
-                mockBroker.IsPopSupported.Returns(true);            
+                mockBroker.IsPopSupported.Returns(true);
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithExperimentalFeatures(true)
@@ -297,11 +297,13 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 pca.ServiceBundle.ConfigureMockWebUI();
 
                 // Act
-                var exception = await AssertException.TaskThrowsAsync<MsalClientException>(async ()=> { await pca.AcquireTokenInteractive(TestConstants.s_graphScopes)
+                var exception = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
+                {
+                    await pca.AcquireTokenInteractive(TestConstants.s_graphScopes)
                              .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
                              .ExecuteAsync()
                              .ConfigureAwait(false);
-                            }).ConfigureAwait(false);
+                }).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.BrokerApplicationRequired, exception.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.CannotInvokeBrokerForPop, exception.Message);
@@ -369,8 +371,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     .ConfigureAwait(false)).ConfigureAwait(false);
 
                 //Assert
-                Assert.AreEqual(MsalError.AdfsNotSupportedWithBroker, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.AdfsNotSupportedWithBroker, ex.Message);
+                Assert.AreEqual(MsalError.BrokerApplicationRequired, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.CannotInvokeBrokerForPop, ex.Message);
             }
         }
 
@@ -386,7 +388,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
                 mockBroker.IsPopSupported.Returns(true);
                 mockBroker.AcquireTokenSilentAsync(
-                    Arg.Any<AuthenticationRequestParameters>(), 
+                    Arg.Any<AuthenticationRequestParameters>(),
                     Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -414,7 +416,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Assert.AreEqual(TokenSource.Broker, result.AuthenticationResultMetadata.TokenSource);
             }
         }
-        
+
         [TestMethod]
         public async Task EnsurePopTokenIsNotretrievedFromLocalCache_Async()
         {
@@ -490,6 +492,35 @@ namespace Microsoft.Identity.Test.Unit.Pop
             Assert.AreEqual(MsalError.BrokerRequiredForPop, ex.ErrorCode);
             Assert.AreEqual(MsalErrorMessage.BrokerRequiredForPop, ex.Message);
         }
+
+#if NET_CORE
+        [TestMethod]
+        public void CheckPopRuntimeBrokerSupportTest()
+        {
+            //Broker enabled
+            IPublicClientApplication app = PublicClientApplicationBuilder
+                                            .Create(TestConstants.ClientId)
+                                            .WithBrokerPreview()
+                                            .Build();
+
+            Assert.IsTrue(app.IsProofOfPossessionSupportedByClient());
+
+            //Broker disabled
+            app = PublicClientApplicationBuilder
+                                .Create(TestConstants.ClientId)
+                                .WithBrokerPreview(false)
+                                .Build();
+
+            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
+
+            //Broker not configured
+            app = PublicClientApplicationBuilder
+                                .Create(TestConstants.ClientId)
+                                .Build();
+
+            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
+        }
+#endif
 
         /// <summary>
         /// A key ID that uniquely describes a public / private key pair. While KeyID is not normally

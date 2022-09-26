@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     return s_nullLogger.Value;
                 }
 
-                return LegacyIdentityLoggerAdapter.Create(correlationId, config);
+                return CallbackIdentityLoggerAdapter.Create(correlationId, config);
             }
 
 #if XAMARINMAC20
@@ -78,17 +78,12 @@ namespace Microsoft.Identity.Client.Internal.Logger
             return "Unknown SKU";
         });
 
-        public static string FormatLogMessage(string messageWithPii, string messageScrubbed, bool piiEnabled, string correlationId, string clientInformation)
+        public static string FormatLogMessage(string message, bool piiEnabled, string correlationId, string clientInformation)
         {
-            bool messageWithPiiExists = !string.IsNullOrWhiteSpace(messageWithPii);
-            // If we have a message with PII, and PII logging is enabled, use the PII message, else use the scrubbed message.
-            bool isLoggingPii = messageWithPiiExists && piiEnabled;
-            string messageToLog = isLoggingPii ? messageWithPii : messageScrubbed;
-
             return string.Format(
                 CultureInfo.InvariantCulture,
                 "{0} MSAL {1} {2} {3} {4} [{5}{6}]{7} {8}",
-                isLoggingPii,
+                piiEnabled,
                 s_msalVersionLazy.Value,
                 s_skuLazy.Value,
                 s_runtimeVersionLazy.Value,
@@ -96,7 +91,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 DateTime.UtcNow.ToString("u"),
                 correlationId,
                 clientInformation,
-                messageToLog);
+                message);
         }
 
         internal static string GetPiiScrubbedExceptionDetails(Exception ex)
@@ -153,6 +148,14 @@ namespace Microsoft.Identity.Client.Internal.Logger
             }
 
             return (EventLogLevel)((int)logLevel + 2);
+        }
+
+        public static string GetMessageToLog(string messageWithPii, string messageScrubbed, bool piiLoggingEnabled)
+        {
+            bool messageWithPiiExists = !string.IsNullOrWhiteSpace(messageWithPii);
+            // If we have a message with PII, and PII logging is enabled, use the PII message, else use the scrubbed message.
+            bool isLoggingPii = messageWithPiiExists && piiLoggingEnabled;
+            return isLoggingPii ? messageWithPii : messageScrubbed;
         }
     }
 }

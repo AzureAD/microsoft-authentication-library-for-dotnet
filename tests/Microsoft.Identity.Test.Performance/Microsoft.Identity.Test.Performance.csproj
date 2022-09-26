@@ -2,11 +2,15 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Configurations>Debug;Release;Debug + MobileApps</Configurations>
     <!-- Uncomment only when running EtwProfiler diagnoser on Release-->
     <!-- https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/code-generation#debugtype -->
     <!--<DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>-->
+    <LangVersion>latest</LangVersion>
+    <IsPackable>false</IsPackable>
+    <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseIdentityWeb)' == 'true'">
@@ -25,12 +29,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
-    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.1" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.2" />
+    <PackageReference Include="System.CodeDom" Version="6.0.0" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.Net.Http" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
   </ItemGroup>
-
 </Project>

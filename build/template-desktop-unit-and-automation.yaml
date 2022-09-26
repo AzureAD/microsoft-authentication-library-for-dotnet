@@ -1,4 +1,3 @@
-# Unit tests require .NET 3.x
 steps:
 - task: UseDotNet@2
   displayName: 'Use .Net Core SDK 3.x'
@@ -8,13 +7,20 @@ steps:
 - task: UseDotNet@2
   displayName: 'Use .Net Core SDK 5.x'
   inputs:
-    version: 5.x
+    version: 5.x    
 
-- task: DownloadBuildArtifacts@0
+- task: UseDotNet@2
+  displayName: 'Use .Net Core SDK 6.x'
+  inputs:
+    version: 6.x
+    includePreviewVersions: true
+
+- task: DownloadPipelineArtifact@2
   displayName: 'Download Drop'
   inputs:
-    artifactName: drop
-    itemPattern: '**/*'
+    artifact: drop
+    patterns: '**/*'
+    path: $(Build.artifactstagingdirectory)/drop
 
 - task: CopyFiles@2
   displayName: 'Get MSAL tests'

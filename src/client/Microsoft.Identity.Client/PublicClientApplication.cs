@@ -3,9 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Security;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
+using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client
 {
@@ -227,7 +229,10 @@ namespace Microsoft.Identity.Client
         /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
+        /// .NET no longer recommends using SecureString and MSAL puts the plaintext value of the password on the wire, as required by the OAuth protocol. See <see href="https://docs.microsoft.com/en-us/dotnet/api/system.security.securestring?view=net-6.0#remarks">SecureString documentation</see>.
         /// </remarks>
+        [Obsolete("Using SecureString is not recommended. Use AcquireTokenByUsernamePassword(IEnumerable<string> scopes, string username, string password) instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
             IEnumerable<string> scopes,
             string username,
@@ -237,7 +242,53 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreatePublicClientExecutor(this),
                 scopes,
                 username,
+                new string(password.PasswordToCharArray()));
+        }
+
+        /// <summary>
+        /// Non-interactive request to acquire a security token from the authority, via Username/Password Authentication.
+        /// See https://aka.ms/msal-net-up for details.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="username">Identifier of the user application requests token on behalf.
+        /// Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
+        /// <param name="password">User password as a string.</param>
+        /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
+        /// <remarks>You can also pass optional parameters by chaining the builder with:
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
+        /// additional query parameters to the Azure AD, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
+        /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
+        /// of the known authorities added to the application construction.
+        /// </remarks>
+        public AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
+            IEnumerable<string> scopes,
+            string username,
+            string password)
+        {
+            return AcquireTokenByUsernamePasswordParameterBuilder.Create(
+                ClientExecutorFactory.CreatePublicClientExecutor(this),
+                scopes,
+                username,
                 password);
+        }
+
+        /// <summary>
+        /// Used to determine if the currently available broker is able to perform Proof-of-Possession.
+        /// </summary>
+        /// <returns>Boolean indicating if Proof-of-Possession is supported</returns>
+        public bool IsProofOfPossessionSupportedByClient()
+        {
+            if (ServiceBundle.Config.IsBrokerEnabled)
+            {
+                var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+
+                if (broker.IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType))
+                {
+                    return broker.IsPopSupported;
+                }
+            }
+
+            return false;
         }
     }
 }

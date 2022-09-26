@@ -3,7 +3,13 @@
 
 using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using Microsoft.Identity.Client.Platforms.net6;
+using System.Text.Json.Nodes;
+using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+#else
 using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client.Instance.Validation
 {
@@ -19,10 +25,10 @@ namespace Microsoft.Identity.Client.Instance.Validation
     [Preserve(AllMembers = true)]
     internal class LinksList
     {
-        [JsonProperty(PropertyName = AdfsWebFingerResponseClaim.Rel)]
+        [JsonProperty(AdfsWebFingerResponseClaim.Rel)]
         public string Rel { get; set; }
 
-        [JsonProperty(PropertyName = AdfsWebFingerResponseClaim.Href)]
+        [JsonProperty(AdfsWebFingerResponseClaim.Href)]
         public string Href { get; set; }
     }
 
@@ -30,10 +36,10 @@ namespace Microsoft.Identity.Client.Instance.Validation
     [Preserve(AllMembers = true)]
     internal class AdfsWebFingerResponse : OAuth2ResponseBase
     {
-        [JsonProperty(PropertyName = AdfsWebFingerResponseClaim.Subject)]
+        [JsonProperty(AdfsWebFingerResponseClaim.Subject)]
         public string Subject { get; set; }
 
-        [JsonProperty(PropertyName = AdfsWebFingerResponseClaim.Links)]
+        [JsonProperty(AdfsWebFingerResponseClaim.Links)]
         public List<LinksList> Links { get; set; }
     }
 }

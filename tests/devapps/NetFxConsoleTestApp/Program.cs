@@ -225,7 +225,7 @@ namespace NetFx
                         case '2': // acquire token u/p
                             Console.WriteLine("Enter username:");
                             string username = Console.ReadLine();
-                            SecureString password = GetPasswordFromConsole();
+                            string password = GetPasswordFromConsole();
                             var upBuilder = pca.AcquireTokenByUsernamePassword(s_scopes, username, password);
 
                             result = await upBuilder.ExecuteAsync().ConfigureAwait(false);
@@ -459,7 +459,7 @@ namespace NetFx
         //        var popConfig = new PopAuthenticationConfiguration(new Uri(PoPUri)) { HttpMethod = s_popMethod };
         //        builder = builder
         //            .WithExtraQueryParameters(GetTestSliceParams())
-        //            .WithProofOfPosession(popConfig);
+        //            .WithProofOfPossession(popConfig);
         //    }
 
         //    return builder as T;
@@ -590,10 +590,11 @@ namespace NetFx
             Console.ResetColor();
         }
 
-        private static SecureString GetPasswordFromConsole()
+        private static string GetPasswordFromConsole()
         {
             Console.Write("Password: ");
-            var pwd = new SecureString();
+            string pwd = "";
+
             while (true)
             {
                 ConsoleKeyInfo i = Console.ReadKey(true);
@@ -605,16 +606,17 @@ namespace NetFx
                 {
                     if (pwd.Length > 0)
                     {
-                        pwd.RemoveAt(pwd.Length - 1);
+                        pwd.Remove(pwd.Length - 1);
                         Console.Write("\b \b");
                     }
                 }
                 else if (i.KeyChar != '\u0000') // KeyChar == '\u0000' if the key pressed does not correspond to a printable character, e.g. F1, Pause-Break, etc
                 {
-                    pwd.AppendChar(i.KeyChar);
+                    pwd += i.KeyChar;
                     Console.Write("*");
                 }
             }
+
             return pwd;
         }
 

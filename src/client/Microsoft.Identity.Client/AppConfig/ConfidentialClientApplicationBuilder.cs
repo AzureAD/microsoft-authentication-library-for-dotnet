@@ -7,8 +7,10 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
 {
@@ -313,18 +315,34 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Allows setting a callback which returns an access token, based on the passed-in parameters.
-        /// MSAL will pass in its authentication parameters to the callback and it is expected that the callback
-        /// will construct a <see cref="TokenProviderResult"/> and return it to MSAL.
-        /// MSAL will cache the token response the same way it does for other authentication results.
-        /// Note: This is only for client credential flows.
+        /// Sets telemetry client for the application.
         /// </summary>
-        /// <param name="appTokenProvider">Authentication callback which returns an access token.</param>
+        /// <param name="telemetryClients">List of telemetry clients to add telemetry logs.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public ConfidentialClientApplicationBuilder WithAppTokenProvider(Func<AppTokenProviderParameters, Task<TokenProviderResult>> appTokenProvider)
-
+        public ConfidentialClientApplicationBuilder WithTelemetryClient(params ITelemetryClient[] telemetryClients)
         {
-            Config.AppTokenProvider = appTokenProvider ?? throw new ArgumentNullException(nameof(appTokenProvider));
+            ValidateUseOfExperimentalFeature("ITelemetryClient");
+
+            if (telemetryClients == null)
+            {
+                throw new ArgumentNullException(nameof(telemetryClients));
+            }
+
+            if (telemetryClients.Length > 0)
+            {
+                foreach (var telemetryClient in telemetryClients)
+                {
+                    if (telemetryClient == null)
+                    {
+                        throw new ArgumentNullException(nameof(telemetryClient));
+                    }
+
+                    telemetryClient.Initialize();
+                }
+
+                Config.TelemetryClients = telemetryClients;
+            }
+
             return this;
         }
 

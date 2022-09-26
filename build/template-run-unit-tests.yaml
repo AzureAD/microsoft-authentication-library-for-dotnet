@@ -2,7 +2,7 @@
 # Run all unit tests across the LibsAndSamples.sln project
 
 parameters:
-  BuildConfiguration: 'debug'
+  BuildConfiguration: 'Release'
 
 steps:
 
@@ -17,6 +17,7 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
+    pathtoCustomTestAdapters: 'C:\temp' # Workaround for test failure, as NUnit Test Adapter that gets detected seems to screw something up
 
 - task: VSTest@2
   displayName: 'Run unit tests (.NET CORE)'

@@ -93,7 +93,8 @@ namespace NetDesktopWinForms
 
             var builder = PublicClientApplicationBuilder
                 .Create(clientId)
-                .WithAuthority(this.authorityCbx.Text);
+                .WithAuthority(this.authorityCbx.Text)
+                .WithMultiCloudSupport(true);
 
             var authMethod = GetAuthMethod();
 
@@ -158,7 +159,7 @@ namespace NetDesktopWinForms
             try
             {
                 var pca = CreatePca();
-                AuthenticationResult result = await RunAtsAsync(pca).ConfigureAwait(false);
+                AuthenticationResult result = await RunAtsAsync(pca, GetAutocancelToken()).ConfigureAwait(false);
 
                 await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
             }
@@ -169,7 +170,7 @@ namespace NetDesktopWinForms
 
         }
 
-        private async Task<AuthenticationResult> RunAtsAsync(IPublicClientApplication pca)
+        private async Task<AuthenticationResult> RunAtsAsync(IPublicClientApplication pca, CancellationToken cancellationToken)
         {
             string reqAuthority = pca.Authority;
             string loginHint = GetLoginHint();
@@ -189,7 +190,7 @@ namespace NetDesktopWinForms
 
                 Log($"ATS with login hint: " + loginHint);
                 return await pca.AcquireTokenSilent(GetScopes(), loginHint)
-                        .ExecuteAsync()
+                        .ExecuteAsync(cancellationToken)
                         .ConfigureAwait(false);
             }
 
@@ -221,13 +222,13 @@ namespace NetDesktopWinForms
 
                 Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
                 return await builder
-                    .ExecuteAsync()
+                    .ExecuteAsync(cancellationToken)
                     .ConfigureAwait(false);
             }
 
             Log($"ATS with no account or login hint ... will fail with UiRequiredEx");
             return await pca.AcquireTokenSilent(GetScopes(), (IAccount)null)
-                .ExecuteAsync()
+                .ExecuteAsync(cancellationToken)
                 .ConfigureAwait(false);
         }
 
@@ -236,7 +237,8 @@ namespace NetDesktopWinForms
             string[] result = null;
             cbxScopes.Invoke((MethodInvoker)delegate
             {
-                result = cbxScopes.Text.Split(' ');
+                if (!string.IsNullOrWhiteSpace(cbxScopes.Text))
+                    result = cbxScopes.Text.Split(' ');
             });
 
             return result;
@@ -289,7 +291,7 @@ namespace NetDesktopWinForms
             try
             {
                 var pca = CreatePca();
-                AuthenticationResult result = await RunAtiAsync(pca).ConfigureAwait(false);
+                AuthenticationResult result = await RunAtiAsync(pca, GetAutocancelToken()).ConfigureAwait(false);
 
                 await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
@@ -300,7 +302,7 @@ namespace NetDesktopWinForms
             }
         }
 
-        private async Task<AuthenticationResult> RunAtiAsync(IPublicClientApplication pca)
+        private async Task<AuthenticationResult> RunAtiAsync(IPublicClientApplication pca, CancellationToken cancellationToken)
         {
             string loginHint = GetLoginHint();
             if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
@@ -348,7 +350,7 @@ namespace NetDesktopWinForms
             {
                 await Task.Delay(500).ConfigureAwait(false);
             }
-            result = await builder.ExecuteAsync().ConfigureAwait(false);
+            result = await builder.ExecuteAsync(cancellationToken).ConfigureAwait(false);
 
             return result;
         }
@@ -449,7 +451,7 @@ namespace NetDesktopWinForms
 
             try
             {
-                var result = await RunAtsAsync(pca).ConfigureAwait(false);
+                var result = await RunAtsAsync(pca, GetAutocancelToken()).ConfigureAwait(false);
 
                 await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
 
@@ -461,7 +463,7 @@ namespace NetDesktopWinForms
                 Log("UI required Exception! " + ex.ErrorCode + " " + ex.Message);
                 try
                 {
-                    var result = await RunAtiAsync(pca).ConfigureAwait(false);
+                    var result = await RunAtiAsync(pca, GetAutocancelToken()).ConfigureAwait(false);
                     await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
                 }
                 catch (Exception ex3)
@@ -574,6 +576,18 @@ namespace NetDesktopWinForms
         private void useBrokerChk_CheckedChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private CancellationToken GetAutocancelToken()
+        {
+            CancellationToken cancellationToken = CancellationToken.None;
+            if (nudAutocancelSeconds.Value > 0)
+            {
+                var cts = new CancellationTokenSource(TimeSpan.FromSeconds((int)nudAutocancelSeconds.Value));
+                cancellationToken = cts.Token;
+            }
+
+            return cancellationToken;
         }
     }
 

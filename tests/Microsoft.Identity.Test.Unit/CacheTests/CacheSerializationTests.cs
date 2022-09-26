@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
@@ -15,7 +14,13 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using JObject = System.Text.Json.Nodes.JsonObject;
+#else
 using Microsoft.Identity.Json.Linq;
+#endif
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -40,14 +45,21 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             StorageJsonKeys.FamilyId
         };
 
+#if SUPPORTS_SYSTEM_TEXT_JSON
+        private static readonly JsonDocumentOptions _documentOptions = new JsonDocumentOptions
+        {
+            AllowTrailingCommas = true
+        };
+#endif
+
         private MsalAccessTokenCacheItem CreateAccessTokenItem(
-            string kid = null, 
-            string tokenType = "Bearer", 
+            string kid = null,
+            string tokenType = "Bearer",
             DateTimeOffset? cachedAt = null,
             DateTimeOffset? expiresOn = null,
             DateTimeOffset? extendedExpiresOn = null)
         {
-            var item =  new MsalAccessTokenCacheItem(
+            var item = new MsalAccessTokenCacheItem(
                 preferredCacheEnv: "env",
                 clientId: TestConstants.ClientId,
                 scopes: TestConstants.ScopeStr,
@@ -57,9 +69,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 expiresOn: expiresOn.HasValue ? expiresOn.Value : DateTimeOffset.UtcNow + TimeSpan.FromHours(1),
                 extendedExpiresOn: extendedExpiresOn.HasValue ? extendedExpiresOn.Value : DateTimeOffset.UtcNow + TimeSpan.FromHours(1),
                 rawClientInfo: string.Empty,
-                homeAccountId: TestConstants.HomeAccountId, 
+                homeAccountId: TestConstants.HomeAccountId,
                 keyId: kid,
-                tokenType: tokenType, 
+                tokenType: tokenType,
                 oboCacheKey: "assertion_hash");
 
             return item;
@@ -151,14 +163,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     expiresOn: DateTimeHelpers.UnixTimestampToDateTime(12345),
                     extendedExpiresOn: DateTimeHelpers.UnixTimestampToDateTime(23456));
 
-                item.Environment = item.Environment + $"_{keyPrefix}{i}"; // ensure we get unique cache keys
+                item.Environment += $"_{keyPrefix}{i}"; // ensure we get unique cache keys
                 accessor.SaveAccessToken(item);
             }
 
             for (int i = 1; i <= numRefreshTokens; i++)
             {
                 var item = CreateRefreshTokenItem();
-                item.Environment = item.Environment + $"_{keyPrefix}{i}"; // ensure we get unique cache keys
+                item.Environment += $"_{keyPrefix}{i}"; // ensure we get unique cache keys
                 accessor.SaveRefreshToken(item);
             }
 
@@ -170,14 +182,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             for (int i = 1; i <= numIdTokens; i++)
             {
                 var item = CreateIdTokenItem();
-                item.Environment = item.Environment + $"_{keyPrefix}{i}"; // ensure we get unique cache keys
+                item.Environment += $"_{keyPrefix}{i}"; // ensure we get unique cache keys
                 accessor.SaveIdToken(item);
             }
 
             for (int i = 1; i <= numAccounts; i++)
             {
                 var item = CreateAccountItem();
-                item.Environment = item.Environment + $"_{keyPrefix}{i}"; // ensure we get unique cache keys
+                item.Environment += $"_{keyPrefix}{i}"; // ensure we get unique cache keys
                 accessor.SaveAccount(item);
             }
 
@@ -229,7 +241,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public void TestSerializeMsalAccessTokenCacheItem_WithRefreshOn()
         {
             var item = CreateAccessTokenItem();
-            
+
             item.WithRefreshOn(DateTimeOffset.UtcNow + TimeSpan.FromMinutes(30));
             string asJson = item.ToJsonString();
             var item2 = MsalAccessTokenCacheItem.FromJsonString(asJson);
@@ -243,7 +255,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var item = CreateAccessTokenItem();
             Assert.AreEqual(StorageJsonValues.TokenTypeBearer, item.TokenType);
 
-            var item2 = CreateAccessTokenItem("kid","pop" );
+            var item2 = CreateAccessTokenItem("kid", "pop");
 
             string asJson = item2.ToJsonString();
             var item3 = MsalAccessTokenCacheItem.FromJsonString(asJson);
@@ -514,7 +526,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 cache = notificationArgs.TokenCache.SerializeMsalV3();
             });
 
-            var notification = new TokenCacheNotificationArgs(tokenCache, null, null, false, false, null, false, null, default, default, default, default);
+            var notification = new TokenCacheNotificationArgs(tokenCache, null, null, false, false, null, false, null, default, default, default, default, null, default);
 
             await (tokenCache as ITokenCacheInternal).OnBeforeAccessAsync(notification).ConfigureAwait(false);
             await (tokenCache as ITokenCacheInternal).OnAfterAccessAsync(notification).ConfigureAwait(false);
@@ -526,10 +538,17 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             await (tokenCache as ITokenCacheInternal).OnAfterAccessAsync(notification).ConfigureAwait(false);
             (tokenCache as ITokenCacheInternal).Accessor.AssertItemCount(5, 4, 3, 3, 3);
 
+#if SUPPORTS_SYSTEM_TEXT_JSON
+            var finalJson = JsonNode.Parse(Encoding.UTF8.GetString(cache), documentOptions: _documentOptions).AsObject();
+
+            var originalJson = JsonNode.Parse(jsonContent, documentOptions: _documentOptions).AsObject();
+            Assert.IsTrue(DeepEquals(originalJson, finalJson));
+#else
             var finalJson = JObject.Parse(Encoding.UTF8.GetString(cache));
-            
+
             var originalJson = JObject.Parse(jsonContent);
             Assert.IsTrue(JToken.DeepEquals(originalJson, finalJson));
+#endif
         }
 
         [TestMethod]
@@ -543,8 +562,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes = s1.Serialize(null);
             string actualJson = new UTF8Encoding().GetString(bytes);
 
+#if SUPPORTS_SYSTEM_TEXT_JSON
+            Assert.IsTrue(DeepEquals(
+                JsonNode.Parse(actualJson, documentOptions: _documentOptions).AsObject(),
+                JsonNode.Parse(expectedJson, documentOptions: _documentOptions).AsObject()));
+#else
             Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson), JObject.Parse(expectedJson)));
-
+#endif
             var otherAccessor = new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ILoggerAdapter>(), null);
             var s2 = new TokenCacheJsonSerializer(otherAccessor);
             s2.Deserialize(bytes, false);
@@ -554,7 +578,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // serialize again to detect errors that come from deserialization
             byte[] bytes2 = s2.Serialize(null);
             string actualJson2 = new UTF8Encoding().GetString(bytes2);
+#if SUPPORTS_SYSTEM_TEXT_JSON
+            Assert.IsTrue(DeepEquals(
+                    JsonNode.Parse(actualJson2, documentOptions: _documentOptions).AsObject(),
+                JsonNode.Parse(expectedJson, documentOptions: _documentOptions).AsObject()));
+#else
             Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson2), JObject.Parse(expectedJson)));
+#endif
         }
 
         [TestMethod]
@@ -565,7 +595,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // Create a refresh token with a null family id in it
             var item = CreateRefreshTokenItem();
             item.FamilyId = null;
-            item.Environment = item.Environment + $"_SOMERANDOMPREFIX"; // ensure we get unique cache keys
+            item.Environment += $"_SOMERANDOMPREFIX"; // ensure we get unique cache keys
             accessor.SaveRefreshToken(item);
 
             var s1 = new TokenCacheJsonSerializer(accessor);
@@ -606,7 +636,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // serialize again to detect errors that come from deserialization
             byte[] bytes2 = s1.Serialize(null);
             string actualJson2 = new UTF8Encoding().GetString(bytes2);
+#if SUPPORTS_SYSTEM_TEXT_JSON
+            Assert.IsTrue(DeepEquals(
+                JsonNode.Parse(actualJson2, documentOptions: _documentOptions).AsObject(),
+                JsonNode.Parse(expectedJson, documentOptions: _documentOptions).AsObject()));
+#else
             Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson2), JObject.Parse(expectedJson)));
+#endif
         }
 
         [TestMethod]
@@ -648,7 +684,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         #endregion // JSON SERIALIZATION TESTS
-       
 
         [TestMethod]
         [DeploymentItem(@"Resources\cachecompat_dotnet_dictionary.bin")]
@@ -831,8 +866,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         private void AssertAccessTokenCacheItemsAreEqual(
-            MsalAccessTokenCacheItem expected, 
-            MsalAccessTokenCacheItem actual, 
+            MsalAccessTokenCacheItem expected,
+            MsalAccessTokenCacheItem actual,
             string refreshOnTimeStamp = "")
         {
             AssertCredentialCacheItemBaseItemsAreEqual(expected, actual);
@@ -902,5 +937,65 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(expected.TenantId, actual.TenantId, nameof(actual.TenantId));
             CoreAssert.AssertDictionariesAreEqual(expected.WamAccountIds, actual.WamAccountIds, StringComparer.Ordinal);
         }
+
+#if SUPPORTS_SYSTEM_TEXT_JSON
+        private bool DeepEquals(JsonNode a, JsonNode b)
+        {
+            if (a == null && b == null)
+            {
+                return true;
+            }
+            else if (a is JsonValue aVal && b is JsonValue bVal)
+            {
+                return aVal.ToJsonString() == bVal.ToJsonString();
+            }
+            else if (a is JsonObject aObj && b is JsonObject bObj)
+            {
+                return ObjectEquals(aObj, bObj);
+            }
+            else if (a is JsonArray aArray && b is JsonArray bArray)
+            {
+                return ArrayEquals(aArray, bArray);
+            }
+
+            return false;
+        }
+
+        private bool ArrayEquals(JsonArray arr1, JsonArray arr2)
+        {
+            if (arr1.Count != arr2.Count)
+                return false;
+
+            for (int i = 0; i < arr1.Count; i++)
+            {
+                var item1 = arr1[i];
+                var item2 = arr2[i];
+                if (!DeepEquals(item1, item2))
+                    return false;
+            }
+            return true;
+        }
+
+        private bool ObjectEquals(JsonObject obj1, JsonObject obj2)
+        {
+            if (obj1.Count != obj2.Count)
+                return false;
+
+            for (int i = 0; i < obj1.Count; i++)
+            {
+                var keyPair = obj1.ElementAt(i);
+                var item1 = obj1[keyPair.Key];
+                if (!obj2.ContainsKey(keyPair.Key))
+                {
+                    return false;
+                }
+
+                var item2 = obj2[keyPair.Key];
+                if (!DeepEquals(item1, item2))
+                    return false;
+            }
+            return true;
+        }
+#endif
     }
 }

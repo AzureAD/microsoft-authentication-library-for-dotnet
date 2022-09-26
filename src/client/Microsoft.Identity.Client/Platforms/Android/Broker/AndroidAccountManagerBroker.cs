@@ -27,7 +27,11 @@ using Microsoft.Identity.Client.Instance.Discovery;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
+#if MAUI
+    [Preserve(AllMembers = true)]
+#else
     [AndroidNative.Runtime.Preserve(AllMembers = true)]
+#endif
     internal class AndroidAccountManagerBroker : IBroker
     {
         private long AccountManagerTimeoutSeconds { get; } = 5 * 60;
@@ -447,6 +451,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                        MsalErrorMessage.MsalUiRequiredMessage,
                        null,
                        UiRequiredExceptionClassification.AcquireTokenSilentFailed);
+        }
+
+        public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
+        {
+            return Task.FromResult<MsalTokenResponse>(null); // nop
         }
     }
 }

@@ -24,6 +24,7 @@
 #endregion
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 #if HAVE_BIG_INTEGER
 using System.Numerics;
@@ -37,22 +38,22 @@ namespace Microsoft.Identity.Json.Linq
     /// </summary>
     internal partial class JTokenWriter : JsonWriter
     {
-        private JContainer _token;
-        private JContainer _parent;
+        private JContainer? _token;
+        private JContainer? _parent;
         // used when writer is writing single value and the value has no containing parent
-        private JValue _value;
-        private JToken _current;
+        private JValue? _value;
+        private JToken? _current;
 
         /// <summary>
         /// Gets the <see cref="JToken"/> at the writer's current position.
         /// </summary>
-        public JToken CurrentToken => _current;
+        public JToken? CurrentToken => _current;
 
         /// <summary>
         /// Gets the token being written.
         /// </summary>
         /// <value>The token being written.</value>
-        public JToken Token
+        public JToken? Token
         {
             get
             {
@@ -131,7 +132,7 @@ namespace Microsoft.Identity.Json.Linq
         private void RemoveParent()
         {
             _current = _parent;
-            _parent = _parent.Parent;
+            _parent = _parent!.Parent;
 
             if (_parent != null && _parent.Type == JTokenType.Property)
             {
@@ -186,21 +187,26 @@ namespace Microsoft.Identity.Json.Linq
             base.WritePropertyName(name);
         }
 
-        private void AddValue(object value, JsonToken token)
+        private void AddValue(object? value, JsonToken token)
         {
             AddValue(new JValue(value), token);
         }
 
-        internal void AddValue(JValue value, JsonToken token)
+        internal void AddValue(JValue? value, JsonToken token)
         {
             if (_parent != null)
             {
-                _parent.Add(value);
-                _current = _parent.Last;
-
-                if (_parent.Type == JTokenType.Property)
+                // TryAdd will return false if an invalid JToken type is added.
+                // For example, a JComment can't be added to a JObject.
+                // If there is an invalid JToken type then skip it.
+                if (_parent.TryAdd(value))
                 {
-                    _parent = _parent.Parent;
+                    _current = _parent.Last;
+
+                    if (_parent.Type == JTokenType.Property)
+                    {
+                        _parent = _parent.Parent;
+                    }
                 }
             }
             else
@@ -212,11 +218,11 @@ namespace Microsoft.Identity.Json.Linq
 
         #region WriteValue methods
         /// <summary>
-        /// Writes a <see cref="object"/> value.
+        /// Writes a <see cref="Object"/> value.
         /// An error will be raised if the value cannot be written as a single JSON token.
         /// </summary>
-        /// <param name="value">The <see cref="object"/> value to write.</param>
-        public override void WriteValue(object value)
+        /// <param name="value">The <see cref="Object"/> value to write.</param>
+        public override void WriteValue(object? value)
         {
 #if HAVE_BIG_INTEGER
             if (value is BigInteger)
@@ -253,7 +259,7 @@ namespace Microsoft.Identity.Json.Linq
         /// Writes raw JSON.
         /// </summary>
         /// <param name="json">The raw JSON to write.</param>
-        public override void WriteRaw(string json)
+        public override void WriteRaw(string? json)
         {
             base.WriteRaw(json);
             AddValue(new JRaw(json), JsonToken.Raw);
@@ -263,26 +269,26 @@ namespace Microsoft.Identity.Json.Linq
         /// Writes a comment <c>/*...*/</c> containing the specified text.
         /// </summary>
         /// <param name="text">Text to place inside the comment.</param>
-        public override void WriteComment(string text)
+        public override void WriteComment(string? text)
         {
             base.WriteComment(text);
             AddValue(JValue.CreateComment(text), JsonToken.Comment);
         }
 
         /// <summary>
-        /// Writes a <see cref="string"/> value.
+        /// Writes a <see cref="String"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="string"/> value to write.</param>
-        public override void WriteValue(string value)
+        /// <param name="value">The <see cref="String"/> value to write.</param>
+        public override void WriteValue(string? value)
         {
             base.WriteValue(value);
             AddValue(value, JsonToken.String);
         }
 
         /// <summary>
-        /// Writes a <see cref="int"/> value.
+        /// Writes a <see cref="Int32"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="int"/> value to write.</param>
+        /// <param name="value">The <see cref="Int32"/> value to write.</param>
         public override void WriteValue(int value)
         {
             base.WriteValue(value);
@@ -290,10 +296,10 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Writes a <see cref="uint"/> value.
+        /// Writes a <see cref="UInt32"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="uint"/> value to write.</param>
-        // [ClsCompliant(false)]
+        /// <param name="value">The <see cref="UInt32"/> value to write.</param>
+        [CLSCompliant(false)]
         public override void WriteValue(uint value)
         {
             base.WriteValue(value);
@@ -301,9 +307,9 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Writes a <see cref="long"/> value.
+        /// Writes a <see cref="Int64"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="long"/> value to write.</param>
+        /// <param name="value">The <see cref="Int64"/> value to write.</param>
         public override void WriteValue(long value)
         {
             base.WriteValue(value);
@@ -311,10 +317,10 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Writes a <see cref="ulong"/> value.
+        /// Writes a <see cref="UInt64"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="ulong"/> value to write.</param>
-        // [ClsCompliant(false)]
+        /// <param name="value">The <see cref="UInt64"/> value to write.</param>
+        [CLSCompliant(false)]
         public override void WriteValue(ulong value)
         {
             base.WriteValue(value);
@@ -322,9 +328,9 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Writes a <see cref="float"/> value.
+        /// Writes a <see cref="Single"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="float"/> value to write.</param>
+        /// <param name="value">The <see cref="Single"/> value to write.</param>
         public override void WriteValue(float value)
         {
             base.WriteValue(value);
@@ -332,9 +338,9 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Writes a <see cref="double"/> value.
+        /// Writes a <see cref="Double"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="double"/> value to write.</param>
+        /// <param name="value">The <see cref="Double"/> value to write.</param>
         public override void WriteValue(double value)
         {
             base.WriteValue(value);
@@ -342,9 +348,9 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Writes a <see cref="bool"/> value.
+        /// Writes a <see cref="Boolean"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="bool"/> value to write.</param>
+        /// <param name="value">The <see cref="Boolean"/> value to write.</param>
         public override void WriteValue(bool value)
         {
             base.WriteValue(value);
@@ -352,9 +358,9 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Writes a <see cref="short"/> value.
+        /// Writes a <see cref="Int16"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="short"/> value to write.</param>
+        /// <param name="value">The <see cref="Int16"/> value to write.</param>
         public override void WriteValue(short value)
         {
             base.WriteValue(value);
@@ -362,10 +368,10 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Writes a <see cref="ushort"/> value.
+        /// Writes a <see cref="UInt16"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="ushort"/> value to write.</param>
-        // [ClsCompliant(false)]
+        /// <param name="value">The <see cref="UInt16"/> value to write.</param>
+        [CLSCompliant(false)]
         public override void WriteValue(ushort value)
         {
             base.WriteValue(value);
@@ -373,9 +379,9 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Writes a <see cref="char"/> value.
+        /// Writes a <see cref="Char"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="char"/> value to write.</param>
+        /// <param name="value">The <see cref="Char"/> value to write.</param>
         public override void WriteValue(char value)
         {
             base.WriteValue(value);
@@ -383,17 +389,15 @@ namespace Microsoft.Identity.Json.Linq
 #if HAVE_CHAR_TO_STRING_WITH_CULTURE
             s = value.ToString(CultureInfo.InvariantCulture);
 #else
-#pragma warning disable CA1305 // Specify IFormatProvider
             s = value.ToString();
-#pragma warning restore CA1305 // Specify IFormatProvider
 #endif
             AddValue(s, JsonToken.String);
         }
 
         /// <summary>
-        /// Writes a <see cref="byte"/> value.
+        /// Writes a <see cref="Byte"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="byte"/> value to write.</param>
+        /// <param name="value">The <see cref="Byte"/> value to write.</param>
         public override void WriteValue(byte value)
         {
             base.WriteValue(value);
@@ -401,10 +405,10 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Writes a <see cref="sbyte"/> value.
+        /// Writes a <see cref="SByte"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="sbyte"/> value to write.</param>
-        // [ClsCompliant(false)]
+        /// <param name="value">The <see cref="SByte"/> value to write.</param>
+        [CLSCompliant(false)]
         public override void WriteValue(sbyte value)
         {
             base.WriteValue(value);
@@ -412,9 +416,9 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Writes a <see cref="decimal"/> value.
+        /// Writes a <see cref="Decimal"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="decimal"/> value to write.</param>
+        /// <param name="value">The <see cref="Decimal"/> value to write.</param>
         public override void WriteValue(decimal value)
         {
             base.WriteValue(value);
@@ -445,10 +449,10 @@ namespace Microsoft.Identity.Json.Linq
 #endif
 
         /// <summary>
-        /// Writes a <see cref="byte"/>[] value.
+        /// Writes a <see cref="Byte"/>[] value.
         /// </summary>
-        /// <param name="value">The <see cref="byte"/>[] value to write.</param>
-        public override void WriteValue(byte[] value)
+        /// <param name="value">The <see cref="Byte"/>[] value to write.</param>
+        public override void WriteValue(byte[]? value)
         {
             base.WriteValue(value);
             AddValue(value, JsonToken.Bytes);
@@ -478,7 +482,7 @@ namespace Microsoft.Identity.Json.Linq
         /// Writes a <see cref="Uri"/> value.
         /// </summary>
         /// <param name="value">The <see cref="Uri"/> value to write.</param>
-        public override void WriteValue(Uri value)
+        public override void WriteValue(Uri? value)
         {
             base.WriteValue(value);
             AddValue(value, JsonToken.String);
@@ -498,7 +502,7 @@ namespace Microsoft.Identity.Json.Linq
                     }
                 }
 
-                JToken value = tokenReader.CurrentToken.CloneToken();
+                JToken value = tokenReader.CurrentToken!.CloneToken();
 
                 if (_parent != null)
                 {

@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Security;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 
@@ -13,14 +11,13 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public static class LabAuthenticationHelper
     {
-        private static InMemoryTokenCache s_staticCache = new InMemoryTokenCache();
         private const string LabAccessConfidentialClientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
         private const string LabAccessPublicClientId = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
         private const string LabAccessThumbPrint = "4E87313FD450985A10BC0F14A292859F2DCD6CD3";
-        private const string DataFileName = "data.txt";
         private static LabAccessAuthenticationType s_defaultAuthType = LabAccessAuthenticationType.ClientCertificate;
         private static string s_secret;
-
+        private const string DataFileName = "data.txt";
+        
         static LabAuthenticationHelper()
         {
             //The data.txt is a place holder for the keyvault secret. It will only be written to during build time when testing appcenter.
@@ -37,8 +34,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 }
             }
         }
-
-        public static async Task<string> GetAccessTokenForLabAPIAsync(string labAccessClientId, string labAccessSecret)
+        
+        public static async Task<AccessToken> GetAccessTokenForLabAPIAsync(string labAccessClientId, string labAccessSecret)
         {
             string[] scopes = new string[] { "https://msidlab.com/.default" };
 
@@ -51,7 +48,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 labAccessSecret).ConfigureAwait(false);
         }
 
-        public static async Task<string> GetLabAccessTokenAsync(string authority, string[] scopes)
+        public static async Task<AccessToken> GetLabAccessTokenAsync(string authority, string[] scopes)
         {
             return await GetLabAccessTokenAsync(
                 authority,
@@ -62,7 +59,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 String.Empty).ConfigureAwait(false);
         }
 
-        public static async Task<string> GetLabAccessTokenAsync(string authority, string[] scopes, LabAccessAuthenticationType authType, string clientId, string certThumbprint, string clientSecret)
+        public static async Task<AccessToken> GetLabAccessTokenAsync(string authority, string[] scopes, LabAccessAuthenticationType authType, string clientId, string certThumbprint, string clientSecret)
         {
             AuthenticationResult authResult;
             IConfidentialClientApplication confidentialApp;
@@ -84,10 +81,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                     confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientIdForCertAuth)
                         .WithAuthority(new Uri(authority), true)
+                        .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                         .WithCertificate(cert)
                         .Build();
-
-                    s_staticCache.Bind(confidentialApp.AppTokenCache);
 
                     authResult = await confidentialApp
                         .AcquireTokenForClient(scopes)
@@ -95,15 +91,15 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                         .ConfigureAwait(false);
                     break;
                 case LabAccessAuthenticationType.ClientSecret:
-                    var clientIdForSecretAuth = String.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
+                    var clientIdForSecretAuth = string.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
                     var clientSecretForLab = String.IsNullOrEmpty(clientId) ? s_secret : clientSecret;
 
                     confidentialApp = ConfidentialClientApplicationBuilder
                         .Create(clientIdForSecretAuth)
                         .WithAuthority(new Uri(authority), true)
+                        .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                         .WithClientSecret(clientSecretForLab)
                         .Build();
-                    s_staticCache.Bind(confidentialApp.AppTokenCache);
 
                     authResult = await confidentialApp
                         .AcquireTokenForClient(scopes)
@@ -115,8 +111,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                     var publicApp = PublicClientApplicationBuilder
                         .Create(clientIdForPublicClientAuth)
                         .WithAuthority(new Uri(authority), true)
+                        .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                         .Build();
-                    s_staticCache.Bind(publicApp.UserTokenCache);
 
                     authResult = await publicApp
                         .AcquireTokenByIntegratedWindowsAuth(scopes)
@@ -128,7 +124,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                     throw new ArgumentOutOfRangeException();
             }
 
-            return authResult?.AccessToken;
+            return new AccessToken(authResult.AccessToken, authResult.ExpiresOn);
         }
     }
 

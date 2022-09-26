@@ -29,7 +29,6 @@ using System.Reflection;
 using System.Globalization;
 using Microsoft.Identity.Json.Utilities;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Identity.Json.Serialization
 {
@@ -44,32 +43,31 @@ namespace Microsoft.Identity.Json.Serialization
     {
         internal static readonly DefaultSerializationBinder Instance = new DefaultSerializationBinder();
 
-        private readonly ThreadSafeStore<StructMultiKey<string, string>, Type> _typeCache;
+        private readonly ThreadSafeStore<StructMultiKey<string?, string>, Type> _typeCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultSerializationBinder"/> class.
         /// </summary>
         public DefaultSerializationBinder()
         {
-            _typeCache = new ThreadSafeStore<StructMultiKey<string, string>, Type>(GetTypeFromTypeNameKey);
+            _typeCache = new ThreadSafeStore<StructMultiKey<string?, string>, Type>(GetTypeFromTypeNameKey);
         }
 
-        [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId="Assembly.LoadWithPartialName")]
-        private Type GetTypeFromTypeNameKey(StructMultiKey<string, string> typeNameKey)
+        private Type GetTypeFromTypeNameKey(StructMultiKey<string?, string> typeNameKey)
         {
-            string assemblyName = typeNameKey.Value1;
+            string? assemblyName = typeNameKey.Value1;
             string typeName = typeNameKey.Value2;
 
             if (assemblyName != null)
             {
-                Assembly assembly = null;
+                Assembly assembly;
 
 #if !(DOTNET || PORTABLE40 || PORTABLE)
                 // look, I don't like using obsolete methods as much as you do but this is the only way
                 // Assembly.Load won't check the GAC for a partial name
-#pragma warning disable 618,612,2001
-                // assembly = Assembly.LoadWithPartialName(assemblyName);
-#pragma warning restore 618,612,2001
+#pragma warning disable 618,612
+                assembly = Assembly.LoadWithPartialName(assemblyName);
+#pragma warning restore 618,612
 #elif DOTNET || PORTABLE
                 assembly = Assembly.Load(new AssemblyName(assemblyName));
 #else
@@ -98,7 +96,7 @@ namespace Microsoft.Identity.Json.Serialization
                     throw new JsonSerializationException("Could not load assembly '{0}'.".FormatWith(CultureInfo.InvariantCulture, assemblyName));
                 }
 
-                Type type = assembly.GetType(typeName);
+                Type? type = assembly.GetType(typeName);
                 if (type == null)
                 {
                     // if generic type, try manually parsing the type arguments for the case of dynamically loaded assemblies
@@ -129,9 +127,9 @@ namespace Microsoft.Identity.Json.Serialization
             }
         }
 
-        private Type GetGenericTypeFromTypeName(string typeName, Assembly assembly)
+        private Type? GetGenericTypeFromTypeName(string typeName, Assembly assembly)
         {
-            Type type = null;
+            Type? type = null;
             int openBracketIndex = typeName.IndexOf('[');
             if (openBracketIndex >= 0)
             {
@@ -161,7 +159,7 @@ namespace Microsoft.Identity.Json.Serialization
                                 {
                                     string typeArgAssemblyQualifiedName = typeName.Substring(typeArgStartIndex, i - typeArgStartIndex);
 
-                                    StructMultiKey<string, string> typeNameKey = ReflectionUtils.SplitFullyQualifiedTypeName(typeArgAssemblyQualifiedName);
+                                    StructMultiKey<string?, string> typeNameKey = ReflectionUtils.SplitFullyQualifiedTypeName(typeArgAssemblyQualifiedName);
                                     genericTypeArguments.Add(GetTypeByName(typeNameKey));
                                 }
                                 break;
@@ -175,7 +173,7 @@ namespace Microsoft.Identity.Json.Serialization
             return type;
         }
 
-        private Type GetTypeByName(StructMultiKey<string, string> typeNameKey)
+        private Type GetTypeByName(StructMultiKey<string?, string> typeNameKey)
         {
             return _typeCache.Get(typeNameKey);
         }
@@ -188,9 +186,9 @@ namespace Microsoft.Identity.Json.Serialization
         /// <returns>
         /// The type of the object the formatter creates a new instance of.
         /// </returns>
-        public override Type BindToType(string assemblyName, string typeName)
+        public override Type BindToType(string? assemblyName, string typeName)
         {
-            return GetTypeByName(new StructMultiKey<string, string>(assemblyName, typeName));
+            return GetTypeByName(new StructMultiKey<string?, string>(assemblyName, typeName));
         }
 
         /// <summary>
@@ -203,7 +201,7 @@ namespace Microsoft.Identity.Json.Serialization
 #if HAVE_SERIALIZATION_BINDER_BIND_TO_NAME
         override
 #endif
-        void BindToName(Type serializedType, out string assemblyName, out string typeName)
+        void BindToName(Type serializedType, out string? assemblyName, out string? typeName)
         {
 #if !HAVE_FULL_REFLECTION
             assemblyName = serializedType.GetTypeInfo().Assembly.FullName;

@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
@@ -67,7 +68,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.Arlington)]
         public async Task ARLINGTON_ROPC_AAD_Async()
         {
@@ -75,7 +76,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.Arlington)]
         public async Task ARLINGTON_ROPC_ADFS_Async()
         {
@@ -83,14 +84,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ROPC_ADFSv4Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ROPC_ADFSv4Federated_WithMetadata_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
@@ -98,14 +99,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunHappyPathTestAsync(labResponse, federationMetadata).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ROPC_ADFSv3Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, true).ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.ADFS)]
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {
@@ -113,14 +114,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var user = labResponse.User;
 
-            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(Adfs2019LabConstants.PublicClientId)
                 .WithAdfsAuthority(Adfs2019LabConstants.Authority)
                 .WithTestLogging()
                 .Build();
             AuthenticationResult authResult = await msalPublicClient
-                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, securePassword)
+                .AcquireTokenByUsernamePassword(s_scopes, user.Upn, user.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -137,13 +137,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// ROPC does not support MSA accounts
         /// </summary>
         /// <returns></returns>
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.MSA)]
         public async Task ROPC_MSA_Async()
         {
             var labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
-
-            SecureString securePassword = new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword;
 
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
@@ -152,7 +150,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var result = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
                 msalPublicClient
-                    .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, securePassword)
+                    .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                     .ExecuteAsync(CancellationToken.None))
                     .ConfigureAwait(false);
 
@@ -161,7 +159,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ROPC_B2C_Async()
         {
             var labResponse = await LabUserHelper.GetB2CLocalAccountAsync().ConfigureAwait(false);
@@ -186,9 +184,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             var user = labResponse.User;
 
-            SecureString incorrectSecurePassword = new SecureString();
-            incorrectSecurePassword.AppendChar('x');
-            incorrectSecurePassword.MakeReadOnly();
+            string incorrectPassword = "x";
 
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
@@ -197,7 +193,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var result = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
                 msalPublicClient
-                    .AcquireTokenByUsernamePassword(s_scopes, user.Upn, incorrectSecurePassword)
+                    .AcquireTokenByUsernamePassword(s_scopes, user.Upn, incorrectPassword)
                     .ExecuteAsync(CancellationToken.None)
                     )
                 .ConfigureAwait(false);
@@ -226,7 +222,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunAcquireTokenWithUsernameIncorrectPasswordAsync(msalPublicClient, labResponse.User.Upn).ConfigureAwait(false);
 
             AuthenticationResult authResult = await msalPublicClient
-                    .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
+                    .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                     .WithCorrelationId(CorrelationId)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
@@ -243,14 +239,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IPublicClientApplication msalPublicClient,
             string userName)
         {
-            SecureString incorrectSecurePassword = new SecureString();
-            incorrectSecurePassword.AppendChar('x');
-            incorrectSecurePassword.MakeReadOnly();
-
             try
             {
                 var result = await msalPublicClient
-                    .AcquireTokenByUsernamePassword(s_scopes, userName, incorrectSecurePassword)
+                    .AcquireTokenByUsernamePassword(s_scopes, userName, "incorrectPass")
+
                     .WithCorrelationId(CorrelationId)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
@@ -298,7 +291,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following:
-            // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
+            // 1) Add in code to pull the user's password, and put a breakpoint there.
             // string password = ((LabUser)user).GetPassword();
             // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
             // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
@@ -310,8 +303,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var factory = new HttpSnifferClientFactory();
             var user = labResponse.User;
 
-            SecureString securePassword = new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword;
-
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
                 .WithB2CAuthority(B2CROPCAuthority)
@@ -320,7 +311,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             AuthenticationResult authResult = await msalPublicClient
-                .AcquireTokenByUsernamePassword(s_b2cScopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
+                .AcquireTokenByUsernamePassword(s_b2cScopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .WithCorrelationId(CorrelationId)
                 .WithFederationMetadata(federationMetadata)
                 .ExecuteAsync(CancellationToken.None)
@@ -334,7 +325,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following: 
-            // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
+            // 1) Add in code to pull the user's password, and put a breakpoint there.
             // string password = ((LabUser)user).GetPassword();
             // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
             // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
@@ -349,7 +340,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Guid testCorrelationId)
         {
             AuthenticationResult authResult = await msalPublicClient
-                .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
+                .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .WithCorrelationId(testCorrelationId)
                 .WithFederationMetadata(federationMetadata)
                 .ExecuteAsync(CancellationToken.None)

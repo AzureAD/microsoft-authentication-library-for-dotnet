@@ -11,8 +11,13 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using JObject = System.Text.Json.Nodes.JsonObject;
+using JToken = System.Text.Json.Nodes.JsonNode;
+#else
 using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
@@ -20,7 +25,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     {
         private static readonly DateTime s_jwtBaselineTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private readonly PoPAuthenticationConfiguration _popAuthenticationConfiguration;
-        private IPoPCryptoProvider _popCryptoProvider;
+        private readonly IPoPCryptoProvider _popCryptoProvider;
 
         /// <summary>
         /// Creates POP tokens, i.e. tokens that are bound to an HTTP request and are digitally signed.
@@ -68,54 +73,54 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
                 return msalAccessTokenCacheItem.Secret;
             }
 
-            JObject header = new JObject
-            {
-                { JsonWebTokenConstants.ReservedHeaderParameters.Algorithm, _popCryptoProvider.CryptographicAlgorithm },
-                { JsonWebTokenConstants.ReservedHeaderParameters.KeyId, KeyId },
-                { JsonWebTokenConstants.ReservedHeaderParameters.Type, Constants.PoPTokenType}
-            };
+            var header = new JObject();
+            header[JsonWebTokenConstants.ReservedHeaderParameters.Algorithm] = _popCryptoProvider.CryptographicAlgorithm;
+            header[JsonWebTokenConstants.ReservedHeaderParameters.KeyId] = KeyId;
+            header[JsonWebTokenConstants.ReservedHeaderParameters.Type] = Constants.PoPTokenType;
 
-            JObject body = CreateBody(msalAccessTokenCacheItem);
+            var body = CreateBody(msalAccessTokenCacheItem);
 
-            string popToken = CreateJWS(body.ToString(Formatting.None), header.ToString(Formatting.None));
+            string popToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header));
             return popToken;
         }
 
         private JObject CreateBody(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            JToken publicKeyJWK = JToken.Parse(_popCryptoProvider.CannonicalPublicKeyJwk);
-            List<JProperty> properties = new List<JProperty>(8);
-            
-            // Mandatory parameters
-            properties.Add(new JProperty(PoPClaimTypes.Cnf, new JObject(new JProperty(PoPClaimTypes.JWK, publicKeyJWK))));
-            properties.Add(new JProperty(PoPClaimTypes.Ts, DateTimeHelpers.CurrDateTimeInUnixTimestamp()));
-            properties.Add(new JProperty(PoPClaimTypes.At, msalAccessTokenCacheItem.Secret));
-            properties.Add(new JProperty(PoPClaimTypes.Nonce, _popAuthenticationConfiguration.Nonce ?? CreateSimpleNonce()));
+            var publicKeyJwk = JToken.Parse(_popCryptoProvider.CannonicalPublicKeyJwk);
+            var body = new JObject
+            {
+                // Mandatory parameters
+                [PoPClaimTypes.Cnf] = new JObject
+                {
+                    [PoPClaimTypes.JWK] = publicKeyJwk
+                },
+                [PoPClaimTypes.Ts] = DateTimeHelpers.CurrDateTimeInUnixTimestamp(),
+                [PoPClaimTypes.At] = msalAccessTokenCacheItem.Secret,
+                [PoPClaimTypes.Nonce] = _popAuthenticationConfiguration.Nonce ?? CreateSimpleNonce(),
+            };
 
             if (_popAuthenticationConfiguration.HttpMethod != null)
             {
-                properties.Add(new JProperty(PoPClaimTypes.HttpMethod, _popAuthenticationConfiguration.HttpMethod?.ToString()));
+                body[PoPClaimTypes.HttpMethod] = _popAuthenticationConfiguration.HttpMethod?.ToString();
             }
 
             if (!string.IsNullOrEmpty(_popAuthenticationConfiguration.HttpHost))
             {
-                properties.Add(new JProperty(PoPClaimTypes.Host, _popAuthenticationConfiguration.HttpHost));
+                body[PoPClaimTypes.Host] = _popAuthenticationConfiguration.HttpHost;
             }
 
             if (!string.IsNullOrEmpty(_popAuthenticationConfiguration.HttpPath))
             {
-                properties.Add(new JProperty(PoPClaimTypes.Path, _popAuthenticationConfiguration.HttpPath));
+                body[PoPClaimTypes.Path] = _popAuthenticationConfiguration.HttpPath;
             }
 
-            var payload = new JObject(properties);
-
-            return payload;
+            return body;
         }
 
         private static string CreateSimpleNonce()
         {
             // Guid with no hyphens
-#if NETSTANDARD || WINDOWS_APP
+#if WINDOWS_APP
             return Guid.NewGuid().ToString("N");
 #else
             return Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);

@@ -3,12 +3,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using JObject = System.Text.Json.Nodes.JsonObject;
+#else
 using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -155,28 +158,28 @@ namespace Microsoft.Identity.Client.Cache.Items
                 return null;
             }
 
-            return FromJObject(JObject.Parse(json));
+            return FromJObject(JsonHelper.ParseIntoJsonObject(json));
         }
 
         internal static MsalAccessTokenCacheItem FromJObject(JObject j)
         {
-            long cachedAtUnixTimestamp = JsonUtils.ExtractParsedIntOrZero(j, StorageJsonKeys.CachedAt);
-            long expiresOnUnixTimestamp = JsonUtils.ExtractParsedIntOrZero(j, StorageJsonKeys.ExpiresOn);
-            long refreshOnUnixTimestamp = JsonUtils.ExtractParsedIntOrZero(j, StorageJsonKeys.RefreshOn);
+            long cachedAtUnixTimestamp = JsonHelper.ExtractParsedIntOrZero(j, StorageJsonKeys.CachedAt);
+            long expiresOnUnixTimestamp = JsonHelper.ExtractParsedIntOrZero(j, StorageJsonKeys.ExpiresOn);
+            long refreshOnUnixTimestamp = JsonHelper.ExtractParsedIntOrZero(j, StorageJsonKeys.RefreshOn);
 
             // This handles a bug with the name in previous MSAL.  It used "ext_expires_on" instead of
             // "extended_expires_on" per spec, so this works around that.
-            long ext_expires_on = JsonUtils.ExtractParsedIntOrZero(j, StorageJsonKeys.ExtendedExpiresOn_MsalCompat);
-            long extendedExpiresOnUnixTimestamp = JsonUtils.ExtractParsedIntOrZero(j, StorageJsonKeys.ExtendedExpiresOn);
+            long ext_expires_on = JsonHelper.ExtractParsedIntOrZero(j, StorageJsonKeys.ExtendedExpiresOn_MsalCompat);
+            long extendedExpiresOnUnixTimestamp = JsonHelper.ExtractParsedIntOrZero(j, StorageJsonKeys.ExtendedExpiresOn);
             if (extendedExpiresOnUnixTimestamp == 0 && ext_expires_on > 0)
             {
                 extendedExpiresOnUnixTimestamp = ext_expires_on;
             }
-            string tenantId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm);
-            string oboCacheKey = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.UserAssertionHash);
-            string keyId = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.KeyId);
-            string tokenType = JsonUtils.ExtractExistingOrDefault<string>(j, StorageJsonKeys.TokenType) ?? StorageJsonValues.TokenTypeBearer;
-            string scopes = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target);
+            string tenantId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm);
+            string oboCacheKey = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.UserAssertionHash);
+            string keyId = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.KeyId);
+            string tokenType = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.TokenType) ?? StorageJsonValues.TokenTypeBearer;
+            string scopes = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target);
 
             var item = new MsalAccessTokenCacheItem(
                 scopes: scopes,
@@ -211,7 +214,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 json,
                 StorageJsonKeys.RefreshOn,
                 RefreshOn.HasValue ? DateTimeHelpers.DateTimeToUnixTimestamp(RefreshOn.Value) : null);
-            
+
             // previous versions of MSAL used "ext_expires_on" instead of the correct "extended_expires_on".
             // this is here for back compatibility
             SetItemIfValueNotNull(json, StorageJsonKeys.ExtendedExpiresOn_MsalCompat, extExpiresUnixTimestamp);
@@ -231,7 +234,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 TenantId,
                 HomeAccountId,
                 ClientId,
-                ScopeString, 
+                ScopeString,
                 TokenType);
         }
 

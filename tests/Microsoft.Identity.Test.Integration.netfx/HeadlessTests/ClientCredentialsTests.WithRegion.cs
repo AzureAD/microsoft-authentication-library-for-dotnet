@@ -12,6 +12,10 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
+#if NET_CORE
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
+#endif
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
@@ -189,11 +193,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static string GetSignedClientAssertionUsingMsalInternal(string clientId, IDictionary<string, string> claims)
         {
-#if NET_CORE
-            var manager = new Client.Platforms.netcore.NetCoreCryptographyManager();
-#else
-                    var manager = new Client.Platforms.net45.NetDesktopCryptographyManager();
-#endif
+            var manager = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
+
             var jwtToken = new Client.Internal.JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
             var cert = ConfidentialAppSettings.GetSettings(Cloud.Public).GetCertificate();
             

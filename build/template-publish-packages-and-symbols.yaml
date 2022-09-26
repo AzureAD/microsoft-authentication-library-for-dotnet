@@ -10,11 +10,11 @@ parameters:
   PublishArtifacts: 'false'
 
 steps:
-- task: PublishBuildArtifacts@1
+- task: PublishPipelineArtifact@1
   displayName: 'Publish Artifact: packages'
   inputs:
-    PathtoPublish: '${{ parameters.ArtifactPublishPath }}'
-    ArtifactName: '${{ parameters.DropArtifactName }}'
+    targetPath: '${{ parameters.ArtifactPublishPath }}'
+    artifactName: '${{ parameters.DropArtifactName }}'
   condition: eq(${{ parameters.PublishArtifacts }}, 'true')
 
 - task: NuGetCommand@2
@@ -25,11 +25,11 @@ steps:
     publishVstsFeed: '46419298-b96c-437f-bd4c-12c8df7f868d'
     allowPackageConflicts: true
   continueOnError: true
-  condition: eq(${{ parameters.PublishArtifacts }}, 'true')
+  condition: eq(variables['PublishToVSTSFeed'], 'true')
 
 - task: PublishSymbols@2
   displayName: 'Publish symbols'
   inputs:
     SearchPattern: '${{ parameters.SymbolPublishWildcard }}'
     SymbolServerType: TeamServices
-  condition: eq(${{ parameters.PublishArtifacts }}, 'true')
+  condition: eq(variables['PublishSymbols'], 'true')

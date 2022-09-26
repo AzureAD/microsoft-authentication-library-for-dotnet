@@ -93,10 +93,6 @@
     <Prefer32Bit>true</Prefer32Bit>
     <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
   </PropertyGroup>
-  <!-- Set this env variable locally to enable Telemetry on developer applications-->
-  <PropertyGroup Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''">
-    <DefineConstants>$(DefineConstants);ARIA_TELEMETRY_ENABLED</DefineConstants>
-  </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
     <None Include="project.json" />
@@ -162,22 +158,18 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="StrongNamer">
-      <Version>0.0.8</Version>
+      <Version>0.2.5</Version>
     </PackageReference>
     <PackageReference Include="System.Reflection.TypeExtensions">
       <Version>4.7.0</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="4.7.0.1351" />
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.1.7" />
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.12" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>
-    </ProjectReference>
-    <ProjectReference Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''" Include="..\..\AriaTelemetryProvider\AriaTelemetryProvider.csproj">
-      <Project>{2ae44538-8e72-4d43-9cd1-b26c3a657814}</Project>
-      <Name>AriaTelemetryProvider</Name>
     </ProjectReference>
     <ProjectReference Include="..\XForms\XForms.csproj">
       <Project>{a00ac06a-694f-4fea-999f-81e753fa7c28}</Project>
@@ -186,6 +178,45 @@
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug + MobileApps|ARM'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\ARM\Debug + MobileApps\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP;CODE_ANALYSIS</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <NoStdLib>true</NoStdLib>
+    <DebugType>full</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug + MobileApps|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug + MobileApps\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP;CODE_ANALYSIS</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <NoStdLib>true</NoStdLib>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug + MobileApps|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug + MobileApps\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP;CODE_ANALYSIS</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <NoStdLib>true</NoStdLib>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
 </Project>

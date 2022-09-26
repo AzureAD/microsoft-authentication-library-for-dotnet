@@ -29,6 +29,8 @@ using System.IO;
 using System.Text;
 using Microsoft.Identity.Json.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Identity.Json.Bson
 {
     internal class BsonBinaryWriter
@@ -231,7 +233,7 @@ namespace Microsoft.Identity.Json.Bson
 
         private int CalculateSizeWithLength(int stringByteCount, bool includeSize)
         {
-            int baseSize = includeSize
+            int baseSize = (includeSize)
                 ? 5 // size bytes + terminator
                 : 1; // terminator
 

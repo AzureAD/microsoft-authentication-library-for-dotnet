@@ -70,7 +70,7 @@ namespace CommonCache.Test.MsalV2
                     catch (MsalUiRequiredException)
                     {
                         var result = await app
-                            .AcquireTokenByUsernamePassword(scopes, labUserData.Upn, labUserData.Password.ToSecureString())
+                            .AcquireTokenByUsernamePassword(scopes, labUserData.Upn, labUserData.Password)
                             .ExecuteAsync(CancellationToken.None)
                             .ConfigureAwait(false);
 

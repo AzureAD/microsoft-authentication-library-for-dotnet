@@ -1,4 +1,7 @@
-﻿#if SUPPORTS_BROKER
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+#if SUPPORTS_BROKER
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,6 +24,7 @@ using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Test.Common;
 
 #if !NET5_WIN
 using Microsoft.Identity.Client.Desktop;
@@ -29,7 +33,7 @@ using Microsoft.Identity.Client.Desktop;
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
     [TestClass]
-    [TestCategory("Broker")]
+    [TestCategory(TestCategories.Broker)]
     public class WamTests : TestBase
     {
         private CoreUIParent _coreUIParent;
@@ -360,7 +364,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-
         [TestMethod]
         public async Task ATS_NoAccountMatching_ThrowsUiRequiredException_Async()
         {
@@ -501,7 +504,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-
         [TestMethod]
         public async Task ATS_DefaultAccount_NoTransferToken_ThrowsException_Async()
         {
@@ -558,7 +560,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.AreEqual(MsalError.InteractionRequired, ex.ErrorCode);
             }
         }
-
 
         [TestMethod]
         public async Task ATI_WithoutPicker_AccountMatch_Async()
@@ -869,8 +870,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-
-
         [TestMethod]
         public async Task ATI_WithAadPlugin_LoginHint_Async()
         {
@@ -1039,7 +1038,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 var atsParams = new AcquireTokenSilentParameters();
                 _webAccountProviderFactory.GetAccountProviderAsync("organizations").ReturnsForAnyArgs(Task.FromResult(wamAccountProvider));
-
 
                 // This assertion ensures that WebAccount.SignOutAsync() is called. Since the WebAccount is fake, it throws a specific exception.
                 // This can be improved with a extra layer of abstraction over WebAccount, but it is sufficient for testing
@@ -1352,7 +1350,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 _webAccountProviderFactory.IsConsumerProvider(aadProvider).Returns(false);
                 _webAccountProviderFactory.IsOrganizationsProvider(aadProvider).Returns(true);
 
-
                 // make sure the final request is done with the AAD provider
                 var webTokenRequest = new WebTokenRequest(aadProvider);
                 _aadPlugin.CreateWebTokenRequestAsync(
@@ -1390,8 +1387,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-
-
         [TestMethod]
         public async Task ATS_MsaPt_Async()
         {
@@ -1401,7 +1396,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 _webAccountProviderFactory.ClearReceivedCalls();
-
 
                 var requestParams = harness.CreateAuthenticationRequestParameters(
                     $"https://login.microsoftonline.com/{TestConstants.MsaTenantId}", // this is how MSAL displays the tenant id                

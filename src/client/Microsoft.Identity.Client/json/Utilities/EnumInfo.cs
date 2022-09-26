@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Json.Utilities
 {
     internal class EnumInfo
     {
-        public EnumInfo(bool isFlags, ulong[] values, string[] names, string[] resolvedNames)
+        internal EnumInfo(bool isFlags, ulong[] values, string[] names, string[] resolvedNames)
         {
             IsFlags = isFlags;
             Values = values;

@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
@@ -182,10 +183,11 @@ namespace Microsoft.Identity.Client
 
             if (ServiceBundle.Config.IsBrokerEnabled)
             {
-                if(string.IsNullOrEmpty(nonce))
+                if (string.IsNullOrEmpty(nonce))
                 {
                     throw new ArgumentNullException(nameof(nonce));
                 }
+
                 if (!broker.IsPopSupported)
                 {
                     throw new MsalClientException(MsalError.BrokerDoesNotSupportPop, MsalErrorMessage.BrokerDoesNotSupportPop);

@@ -110,6 +110,8 @@ namespace Microsoft.Identity.Client
         /// <param name="enableMultiCloudSupport">Enable or disable multi cloud support.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
+        /// <remarks>This feature is available to Microsoft applications, which have the same client id across all clouds</remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public PublicClientApplicationBuilder WithMultiCloudSupport(bool enableMultiCloudSupport)
         {
             Config.MultiCloudSupportEnabled = enableMultiCloudSupport;
@@ -297,7 +299,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if DESKTOP || NET5_WIN || NET_CORE
+#if DESKTOP || NET5_WIN || NET_CORE || NETSTANDARD         
         /// <summary>
         /// Sets a reference to the IntPtr to a window that triggers the browser to be shown.
         /// Used to center the browser that pop-up onto this window.
@@ -375,13 +377,14 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
             }
 
+#if IS_XAMARIN_OR_UWP
             if (Config.IsBrokerEnabled && Config.MultiCloudSupportEnabled)
             {
                 // TODO: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3139
                 throw new NotSupportedException(MsalErrorMessage.MultiCloudSupportUnavailable);
             }
-
-            if (string.IsNullOrWhiteSpace(Config.RedirectUri))
+#endif
+                if (string.IsNullOrWhiteSpace(Config.RedirectUri))
             {
                 Config.RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null)
                                                          .GetDefaultRedirectUri(Config.ClientId, Config.UseRecommendedDefaultRedirectUri);

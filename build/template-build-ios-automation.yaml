@@ -12,12 +12,33 @@ steps:
     secureFile: AppCenteriOSBuildCert.p12
 
 - task: DownloadSecureFile@1
-  displayName: 'Download Provisioning Provile'
+  displayName: 'Download Provisioning Profile'
   inputs:
     secureFile: 'TestFile.mobileprovision'
 
+- task: UseDotNet@2
+  displayName: 'Install .NET 6 SDK'
+  inputs:
+    version: 6.x
+    performMultiLevelLookup: true
+
+- task: UseDotNet@2
+  displayName: Use .NET 6.0
+  inputs:
+    packageType: 'sdk'
+    version: '6.0.x'
+
+- task: Bash@3
+  displayName: Install MAUI
+  inputs:
+    targetType: 'inline'
+    script: |
+      dotnet nuget locals all --clear 
+      dotnet workload install maui --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
+      dotnet workload install android ios maccatalyst tvos macos maui wasm-tools --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
+
 - task: NuGetCommand@2
-  displayName: 'NuGet restore'
+  displayName: 'NuGet restore for LibMacOS.sln'
   inputs:
     restoreSolution: LibsMacOS.sln
 
@@ -25,7 +46,7 @@ steps:
   displayName: 'Build Xamarin.iOS solution LibsMacOS.sln'
   inputs:
     solutionFile: LibsMacOS.sln
-    configuration: Debug
+    configuration: Release
     clean: true
     runNugetRestore: false
     args: '/p:APPCENTER_BUILD=1 /p:RunCodeAnalysis=false'
@@ -35,15 +56,16 @@ steps:
     signingProvisioningProfileFile: '$(Agent.TempDirectory)/TestFile.mobileprovision'
 
 - task: CopyFiles@2
-  displayName: 'Copy ipa to staging directory'
+  displayName: 'Copy artifacts to staging directory'
   inputs:
-    SourceFolder: tests/devapps/XForms/XForms.iOS/bin/iPhone/Debug
+    SourceFolder: tests/devapps/XForms/XForms.iOS/bin/iPhone/Release
     Contents: '**/*.ipa'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
     CleanTargetFolder: true
     OverWrite: true
 
-- task: PublishBuildArtifacts@1
+- task: PublishPipelineArtifact@1
   displayName: 'Publish Artifact: Xamarin.iOS'
   inputs:
-    ArtifactName: Xamarin.iOS
+    targetPath: $(build.artifactstagingdirectory)
+    artifactName: Xamarin.iOS

@@ -142,7 +142,7 @@ namespace NetCoreTestApp
                             break;
 
                         case 2: // acquire token u/p
-                            SecureString password = GetPasswordFromConsole();
+                            string password = GetPasswordFromConsole();
                             authTask = pca.AcquireTokenByUsernamePassword(s_scopes, s_username, password).ExecuteAsync(CancellationToken.None);
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
@@ -365,10 +365,11 @@ namespace NetCoreTestApp
             Console.ResetColor();
         }
 
-        private static SecureString GetPasswordFromConsole()
+        private static string GetPasswordFromConsole()
         {
             Console.Write("Password: ");
-            var pwd = new SecureString();
+            string pwd = "";
+
             while (true)
             {
                 ConsoleKeyInfo i = Console.ReadKey(true);
@@ -380,16 +381,17 @@ namespace NetCoreTestApp
                 {
                     if (pwd.Length > 0)
                     {
-                        pwd.RemoveAt(pwd.Length - 1);
+                        pwd.Remove(pwd.Length - 1, 1);
                         Console.Write("\b \b");
                     }
                 }
                 else if (i.KeyChar != '\u0000') // KeyChar == '\u0000' if the key pressed does not correspond to a printable character, e.g. F1, Pause-Break, etc
                 {
-                    pwd.AppendChar(i.KeyChar);
+                    pwd += i.KeyChar;
                     Console.Write("*");
                 }
             }
+
             return pwd;
         }
 

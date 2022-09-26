@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 if(_authenticationRequestParameters.PopAuthenticationConfiguration != null)
                 {
-                    throw new MsalClientException(MsalError.AdfsNotSupportedWithBroker, MsalErrorMessage.AdfsNotSupportedWithBroker);
+                    throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.CannotInvokeBrokerForPop);
                 }
 
                 _logger.Warning("Broker is not installed or authority type is incorrecr. Cannot respond to silent request.");

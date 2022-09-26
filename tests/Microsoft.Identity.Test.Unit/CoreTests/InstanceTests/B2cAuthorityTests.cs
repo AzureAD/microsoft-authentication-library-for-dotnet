@@ -70,12 +70,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public void CanonicalAuthorityInitTest()
         {
             string UriNoPort = TestConstants.B2CAuthority;
-            string UriNoPortTailSlash = TestConstants.B2CAuthority;
+            Uri UriNoPortTailSlash = new Uri(TestConstants.B2CAuthority);
 
             string UriDefaultPort = $"https://login.microsoftonline.in:443/tfp/tenant/{TestConstants.B2CSignUpSignIn}";
 
             string UriCustomPort = $"https://login.microsoftonline.in:444/tfp/tenant/{TestConstants.B2CSignUpSignIn}";
-            string UriCustomPortTailSlash = $"https://login.microsoftonline.in:444/tfp/tenant/{TestConstants.B2CSignUpSignIn}/";
+            Uri UriCustomPortTailSlash = new Uri($"https://login.microsoftonline.in:444/tfp/tenant/{TestConstants.B2CSignUpSignIn}/");
             string UriVanityPort = TestConstants.B2CLoginAuthority;
 
             var authority = new B2CAuthority(new AuthorityInfo(AuthorityType.B2C, UriNoPort, true));
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(UriCustomPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
 
             authority = new B2CAuthority(new AuthorityInfo(AuthorityType.B2C, UriVanityPort, true));
-            Assert.AreEqual(UriVanityPort, authority.AuthorityInfo.CanonicalAuthority);
+            Assert.AreEqual(new Uri(UriVanityPort), authority.AuthorityInfo.CanonicalAuthority);
         }
     }
 }
