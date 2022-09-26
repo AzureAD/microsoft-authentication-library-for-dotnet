@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if !NET6_0
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +33,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         private ICacheSessionManager _cacheSessionManager;
         private IInstanceDiscoveryManager _instanceDiscoveryManager;
 
-        private MsalTokenResponse _msalTokenResponse = new MsalTokenResponse
+        private readonly MsalTokenResponse _msalTokenResponse = new MsalTokenResponse
         {
             IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
             AccessToken = "access-token",
@@ -140,7 +139,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     _instanceDiscoveryManager).ConfigureAwait(false);
 
                 // Assert
-                Assert.AreEqual(0, accounts.Count(), "The only WAM account has an authority which is not in the aliases of the input authority, so it is not returned."); 
+                Assert.AreEqual(0, accounts.Count(), "The only WAM account has an authority which is not in the aliases of the input authority, so it is not returned.");
             }
         }
 
@@ -273,7 +272,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     _instanceDiscoveryManager).ConfigureAwait(false);
 
                 // Assert
-                Assert.AreEqual(0, accounts.Count(), "If silent web request fails, do not return WAM accoutn as the home account id cannot be trusted");                
+                Assert.AreEqual(0, accounts.Count(), "If silent web request fails, do not return WAM accoutn as the home account id cannot be trusted");
             }
         }
 
@@ -331,7 +330,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.Success);
             var webTokenResponse = new WebTokenResponse("at", account);
             webTokenResponseWrapper.ResponseData.Returns(new List<WebTokenResponse>() { webTokenResponse });
-            
+
             webTokenResponse.Properties.Add("Authority", TestConstants.AuthorityHomeTenant);
             webTokenResponse.Properties.Add("wamcompat_client_info", MockHelpers.CreateClientInfo());
             webTokenResponse.Properties.Add("wamcompat_id_token", MockHelpers.CreateIdToken("oid", "upn", "tid"));
@@ -351,4 +350,3 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
     }
 }
-#endif

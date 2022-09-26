@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if !NET6_0
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -38,12 +37,12 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             wamPlugin.MapTokenRequestError(Windows.Security.Authentication.Web.Core.WebTokenRequestStatus.ProviderError, 0, true)
                 .Returns(Tuple.Create("some_provider_error", "", false));
 
-            var exception = AssertException.Throws<MsalServiceException> (
+            var exception = AssertException.Throws<MsalServiceException>(
                 () => WamAdapters.CreateMsalResponseFromWamResponse(
-                wamResponse, 
-                wamPlugin, 
-                TestConstants.ClientId, 
-                logger, 
+                wamResponse,
+                wamPlugin,
+                TestConstants.ClientId,
+                logger,
                 true));
 
             Assert.IsTrue(exception.Message.Contains($"ms-appx-web://microsoft.aad.brokerplugin/{TestConstants.ClientId}"));
@@ -51,4 +50,3 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
     }
 }
-#endif

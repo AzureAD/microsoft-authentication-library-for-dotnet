@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if !NET6_0
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,7 +70,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         validateAuthority: true);
                 requestParams.AppConfig.WindowsBrokerOptions = new WindowsBrokerOptions() { MsaPassthrough = true };
                 var msaRequest = new WebTokenRequest(msaProvider);
-              
+
                 _msaPlugin.CreateWebTokenRequestAsync(msaProvider, requestParams, false, false, true, MsaPassthroughHandler.TransferTokenScopes)
                     .Returns(Task.FromResult(msaRequest));
 
@@ -205,7 +204,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .Returns(Tuple.Create("some_provider_error", "", false));
 
                 var webTokenResponseWrapper = Substitute.For<IWebTokenRequestResultWrapper>();
-                
+
                 webTokenResponseWrapper.ResponseStatus.Returns(WebTokenRequestStatus.ProviderError);
                 _wamProxy.RequestTokenForWindowAsync(IntPtr.Zero, msaRequest).Returns(webTokenResponseWrapper);
 
@@ -219,4 +218,3 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
     }
 }
-#endif
