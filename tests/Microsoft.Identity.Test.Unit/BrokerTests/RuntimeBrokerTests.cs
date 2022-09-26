@@ -106,6 +106,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
        
         [DataTestMethod]
         [DataRow("")]
+        [DataRow(" ")]
         [DataRow(null)]
         [DataRow("openid")]
         [DataRow("profile")]
