@@ -172,7 +172,7 @@ namespace Microsoft.Identity.Client.Broker
             {
                 //Login Hint
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
-                _logger.Verbose("[WamBroker] AcquireTokenInteractive - login hint provided? " + string.IsNullOrEmpty(loginHint));
+                _logger.Verbose("[WamBroker] AcquireTokenInteractive - login hint provided? " + !string.IsNullOrEmpty(loginHint));
 
                 using (var result = await s_lazyCore.Value.SignInInteractivelyAsync(
                     _parentHandle,
