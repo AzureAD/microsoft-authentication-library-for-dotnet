@@ -3,9 +3,12 @@
 
 using System;
 using System.Linq;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -63,15 +66,56 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task ExtractNonceFromHeaderAsync()
+        public async Task ExtractNonceFromWwwAuthHeadersAsync()
         {
             //Arrange & Act
+            //Test for nonce in WWW-Authenticate header
             var parameterList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(
                                                          "https://testingsts.azurewebsites.net/servernonce/invalidsignature").ConfigureAwait(false);
 
             //Assert
-            Assert.IsTrue(parameterList[Constants.PoPAuthHeaderPrefix].AuthScheme == Constants.PoPAuthHeaderPrefix);
-            Assert.IsNotNull(parameterList[Constants.PoPAuthHeaderPrefix].ServerNonce);
+            Assert.IsTrue(parameterList.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
+            Assert.IsNotNull(parameterList.Where(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix).Single().ServerNonce);
+        }
+
+        [TestMethod]
+        public async Task ExtractNonceFromAuthInfoHeadersAsync()
+        {
+            //Arrange & Act
+            var httpClientFactory = PlatformProxyFactory.CreatePlatformProxy(null).CreateDefaultHttpClientFactory();
+            var httpClient = httpClientFactory.GetHttpClient();
+
+            HttpResponseMessage httpResponseMessage = await httpClient.GetAsync("https://testingsts.azurewebsites.net/servernonce/authinfo", new CancellationToken()).ConfigureAwait(false);
+
+            //Assert
+            var authInfoParameters = AuthenticationInfoParameters.CreateFromHeaders(httpResponseMessage.Headers);
+            Assert.IsNotNull(authInfoParameters);
+            Assert.IsNotNull(authInfoParameters.NextNonce);
+        }
+
+        [TestMethod]
+        public async Task ExtractNonceWithAuthParserAsync()
+        {
+            //Arrange & Act
+            //Test for nonce in WWW-Authenticate header
+            var parsedHeaders = await AuthenticationHeaderParser.ParseAuthenticationHeadersAsync("https://testingsts.azurewebsites.net/servernonce/invalidsignature").ConfigureAwait(false);
+
+            //Assert
+            Assert.IsTrue(parsedHeaders.ParsedWwwAuthenticateParameters.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
+            var serverNonce = parsedHeaders.ParsedWwwAuthenticateParameters.Where(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix).Single().ServerNonce;
+            Assert.IsNotNull(serverNonce);
+            Assert.AreEqual(parsedHeaders.Nonce, serverNonce);
+            Assert.IsNull(parsedHeaders.ParsedAuthenticationInfoParameters.NextNonce);
+
+            //Arrange & Act
+            //Test for nonce in Authentication-Info header
+            parsedHeaders = await AuthenticationHeaderParser.ParseAuthenticationHeadersAsync("https://testingsts.azurewebsites.net/servernonce/authinfo").ConfigureAwait(false);
+
+            //Assert
+            Assert.IsNotNull(parsedHeaders.ParsedAuthenticationInfoParameters.NextNonce);
+            Assert.AreEqual(parsedHeaders.Nonce, parsedHeaders.ParsedAuthenticationInfoParameters.NextNonce);
+
+            Assert.IsFalse(parsedHeaders.ParsedWwwAuthenticateParameters.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
         }
     }
 }

@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client
 {
@@ -58,6 +59,11 @@ namespace Microsoft.Identity.Client
         /// Error.
         /// </summary>
         public string Error { get; set; }
+
+        /// <summary>
+        /// Error indicating that parsing failed.
+        /// </summary>
+        public bool ParsingError { get; private set; }
 
         /// <summary>
         /// AuthScheme.
@@ -119,7 +125,7 @@ namespace Microsoft.Identity.Client
         [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
         public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
         {
-            return CreateFromResourceResponseAsync(GetHttpClient(), resourceUri, cancellationToken);
+            return CreateFromResourceResponseAsync(AuthenticationHeaderParser.GetHttpClient(), resourceUri, cancellationToken);
         }
 
         /// <summary>
@@ -170,38 +176,6 @@ namespace Microsoft.Identity.Client
 
             return CreateWwwAuthenticateParameters(new Dictionary<string, string>());
         }
-
-        /// <summary>
-        /// Creates parameters from the WWW-Authenticate string.
-        /// </summary>
-        /// <param name="wwwAuthenticateValue">String contained in a WWW-Authenticate header.</param>
-        /// <returns>The parameters requested by the web API.</returns>
-        public static WwwAuthenticateParameters CreateFromWwwAuthenticateHeaderValue(string wwwAuthenticateValue)
-        {
-            if (string.IsNullOrWhiteSpace(wwwAuthenticateValue))
-            {
-                throw new ArgumentNullException(nameof(wwwAuthenticateValue));
-            }
-            IDictionary<string, string> parameters;
-
-            var AuthValuesSplit = wwwAuthenticateValue.Split(new char[] { ' ' }, 2);
-
-            if (s_knownAuthenticationSchemes.Contains(AuthValuesSplit[0]))
-            {
-                parameters = CoreHelpers.SplitWithQuotes(AuthValuesSplit[1], ',')
-                    .Select(v => ExtractKeyValuePair(v.Trim()))
-                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
-
-            }
-            else
-            {
-                parameters = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ',')
-                    .Select(v => ExtractKeyValuePair(v.Trim()))
-                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
-            }
-
-            return CreateWwwAuthenticateParameters(parameters);
-        }
         #endregion Obsolete Api
 
         #region Single Scheme Api
@@ -225,7 +199,7 @@ namespace Microsoft.Identity.Client
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
         public static Task<WwwAuthenticateParameters> CreateFromAuthenticationResponseAsync(string resourceUri, string scheme, CancellationToken cancellationToken = default)
         {
-            return CreateFromAuthenticationResponseAsync(GetHttpClient(), resourceUri, scheme, cancellationToken);
+            return CreateFromAuthenticationResponseAsync(AuthenticationHeaderParser.GetHttpClient(), resourceUri, scheme, cancellationToken);
         }
 
         /// <summary>
@@ -259,7 +233,6 @@ namespace Microsoft.Identity.Client
         /// <param name="httpResponseHeaders">HttpResponseHeaders.</param>
         /// <param name="scheme">Authentication scheme.</param>
         /// <returns>The parameters requested by the web API.</returns>
-        /// <remarks>Currently it only supports the Bearer scheme</remarks>
         public static WwwAuthenticateParameters CreateFromAuthenticateHeaders(
             HttpResponseHeaders httpResponseHeaders,
             string scheme)
@@ -284,7 +257,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="httpResponseHeaders">The HTTP response headers.</param>
         /// <param name="scheme">Authentication scheme. Default is Bearer.</param>
-        /// <returns></returns>
+        /// <returns>The claims challenge</returns>
         public static string GetClaimChallengeFromResponseHeaders(
             HttpResponseHeaders httpResponseHeaders,
             string scheme = "Bearer")
@@ -311,7 +284,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="resourceUri">URI of the resource.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        public static Task<Dictionary<string, WwwAuthenticateParameters>> CreateFromAuthenticationResponseAsync(string resourceUri)
+        public static Task<IReadOnlyList<WwwAuthenticateParameters>> CreateFromAuthenticationResponseAsync(string resourceUri)
         {
             return CreateFromAuthenticationResponseAsync(resourceUri, new CancellationToken());
         }
@@ -322,9 +295,9 @@ namespace Microsoft.Identity.Client
         /// <param name="resourceUri">URI of the resource.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        public static Task<Dictionary<string, WwwAuthenticateParameters>> CreateFromAuthenticationResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
+        public static Task<IReadOnlyList<WwwAuthenticateParameters>> CreateFromAuthenticationResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
         {
-            return CreateFromAuthenticationResponseAsync(GetHttpClient(), resourceUri, cancellationToken);
+            return CreateFromAuthenticationResponseAsync(AuthenticationHeaderParser.GetHttpClient(), resourceUri, cancellationToken);
         }
 
         /// <summary>
@@ -334,7 +307,7 @@ namespace Microsoft.Identity.Client
         /// <param name="resourceUri">URI of the resource.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        public static async Task<Dictionary<string, WwwAuthenticateParameters>> CreateFromAuthenticationResponseAsync(HttpClient httpClient, string resourceUri, CancellationToken cancellationToken = default)
+        public static async Task<IReadOnlyList<WwwAuthenticateParameters>> CreateFromAuthenticationResponseAsync(HttpClient httpClient, string resourceUri, CancellationToken cancellationToken = default)
         {
             if (httpClient is null)
             {
@@ -357,26 +330,52 @@ namespace Microsoft.Identity.Client
         /// <param name="httpResponseHeaders">HttpResponseHeaders.</param>
         /// <returns>The parameters requested by the web API.</returns>
         /// <remarks>Currently it only supports the Bearer scheme</remarks>
-        public static Dictionary<string, WwwAuthenticateParameters> CreateFromAuthenticateHeaders(
+        public static IReadOnlyList<WwwAuthenticateParameters> CreateFromAuthenticateHeaders(
             HttpResponseHeaders httpResponseHeaders)
         {
-            Dictionary<string, WwwAuthenticateParameters> parameterList = new Dictionary<string, WwwAuthenticateParameters>();
+            List<WwwAuthenticateParameters> parameterList = new List<WwwAuthenticateParameters>();
 
             foreach (AuthenticationHeaderValue wwwAuthenticateHeaderValue in httpResponseHeaders.WwwAuthenticate)
             {
                 var parameters = CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateHeaderValue.Parameter);
                 parameters.AuthScheme = wwwAuthenticateHeaderValue.Scheme;
-                parameterList.Add(wwwAuthenticateHeaderValue.Scheme, parameters);
+                parameterList.Add(parameters);
             }
 
             return parameterList;
         }
         #endregion Multi Scheme Api
 
-        private static HttpClient GetHttpClient()
+        /// <summary>
+        /// Creates parameters from the WWW-Authenticate string.
+        /// </summary>
+        /// <param name="wwwAuthenticateValue">String contained in a WWW-Authenticate header.</param>
+        /// <returns>The parameters requested by the web API.</returns>
+        public static WwwAuthenticateParameters CreateFromWwwAuthenticateHeaderValue(string wwwAuthenticateValue)
         {
-            var httpClientFactory = PlatformProxyFactory.CreatePlatformProxy(null).CreateDefaultHttpClientFactory();
-            return httpClientFactory.GetHttpClient();
+            if (string.IsNullOrWhiteSpace(wwwAuthenticateValue))
+            {
+                throw new ArgumentNullException(nameof(wwwAuthenticateValue));
+            }
+            IDictionary<string, string> parameters;
+
+            var AuthValuesSplit = wwwAuthenticateValue.Split(new char[] { ' ' }, 2);
+
+            if (s_knownAuthenticationSchemes.Contains(AuthValuesSplit[0]))
+            {
+                parameters = CoreHelpers.SplitWithQuotes(AuthValuesSplit[1], ',')
+                    .Select(v => AuthenticationHeaderParser.ExtractKeyValuePair(v.Trim()))
+                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+
+            }
+            else
+            {
+                parameters = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ',')
+                    .Select(v => AuthenticationHeaderParser.ExtractKeyValuePair(v.Trim()))
+                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+            }
+
+            return CreateWwwAuthenticateParameters(parameters);
         }
 
         internal static WwwAuthenticateParameters CreateWwwAuthenticateParameters(IDictionary<string, string> values)
@@ -386,7 +385,14 @@ namespace Microsoft.Identity.Client
                 RawParameters = values
             };
 
+            if (values.Count == 0)
+            {
+                //unable to parse auth header values
+                wwwAuthenticateParameters.ParsingError = true;
+            }
+
             string value;
+
             if (values.TryGetValue("authorization_uri", out value))
             {
                 wwwAuthenticateParameters.Authority = value.Replace("/oauth2/authorize", string.Empty);
@@ -424,25 +430,6 @@ namespace Microsoft.Identity.Client
             }
 
             return wwwAuthenticateParameters;
-        }
-
-        /// <summary>
-        /// Extracts a key value pair from an expression of the form a=b
-        /// </summary>
-        /// <param name="assignment">assignment</param>
-        /// <returns>Key Value pair</returns>
-        private static KeyValuePair<string, string> ExtractKeyValuePair(string assignment)
-        {
-            string[] segments = CoreHelpers.SplitWithQuotes(assignment, '=')
-                .Select(s => s.Trim().Trim('"'))
-                .ToArray();
-
-            if (segments.Length != 2)
-            {
-                throw new ArgumentException(nameof(assignment), $"{assignment} isn't of the form a=b");
-            }
-
-            return new KeyValuePair<string, string>(segments[0], segments[1]);
         }
 
         /// <summary>

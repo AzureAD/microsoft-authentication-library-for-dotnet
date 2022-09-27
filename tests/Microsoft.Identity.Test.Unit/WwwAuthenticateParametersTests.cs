@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Test.Unit
 
             var authParamList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
-            Assert.AreEqual(authParamList.FirstOrDefault().Value.GetTenantId(), tenantId);
+            Assert.AreEqual(authParamList.FirstOrDefault().GetTenantId(), tenantId);
         }
 
         [TestMethod]
@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Test.Unit
 
             var authParamList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
-            Assert.AreEqual(authParamList.FirstOrDefault().Value.GetTenantId(), tenantId);
+            Assert.AreEqual(authParamList.FirstOrDefault().GetTenantId(), tenantId);
         }
 
         [TestMethod]
@@ -218,7 +218,7 @@ namespace Microsoft.Identity.Test.Unit
 
             var authParamList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
-            Assert.IsNull(authParamList.FirstOrDefault().Value.GetTenantId());
+            Assert.IsNull(authParamList.FirstOrDefault().GetTenantId());
         }
 
         [DataRow(null)]
@@ -302,8 +302,8 @@ namespace Microsoft.Identity.Test.Unit
             var httpClient = new HttpClient(handler);
             var headers = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
 
-            var bearerHeader = headers["Bearer"];
-            var popHeader = headers["PoP"];
+            var bearerHeader = headers.Where(header => header.AuthScheme == "Bearer").Single();
+            var popHeader = headers.Where(header => header.AuthScheme == "PoP").Single();
 
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
@@ -319,8 +319,8 @@ namespace Microsoft.Identity.Test.Unit
 
             // Act & Assert
             var headers = WwwAuthenticateParameters.CreateFromAuthenticateHeaders(httpResponse.Headers);
-            var bearerHeader = headers["Bearer"];
-            var popHeader = headers["PoP"];
+            var bearerHeader = headers.Where(header => header.AuthScheme == "Bearer").Single();
+            var popHeader = headers.Where(header => header.AuthScheme == "PoP").Single();
 
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
