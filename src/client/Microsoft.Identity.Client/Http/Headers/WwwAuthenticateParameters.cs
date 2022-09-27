@@ -167,11 +167,15 @@ namespace Microsoft.Identity.Client
         {
             if (httpResponseHeaders.WwwAuthenticate.Any())
             {
-                AuthenticationHeaderValue bearer = httpResponseHeaders.WwwAuthenticate.First(v => string.Equals(v.Scheme, Constants.BearerAuthHeaderPrefix, StringComparison.OrdinalIgnoreCase));
-                string wwwAuthenticateValue = bearer.Parameter;
-                var parameters = CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateValue);
-                parameters.AuthScheme = Constants.BearerAuthHeaderPrefix;
-                return parameters;
+                AuthenticationHeaderValue headerValue = httpResponseHeaders.WwwAuthenticate.FirstOrDefault(v => string.Equals(v.Scheme, Constants.BearerAuthHeaderPrefix, StringComparison.OrdinalIgnoreCase));
+
+                if (headerValue != null)
+                {
+                    string wwwAuthenticateValue = headerValue.Parameter;
+                    var parameters = CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateValue);
+                    parameters.AuthScheme = scheme;
+                    return parameters;
+                }
             }
 
             return CreateWwwAuthenticateParameters(new Dictionary<string, string>());
@@ -359,11 +363,11 @@ namespace Microsoft.Identity.Client
             }
             IDictionary<string, string> parameters;
 
-            var AuthValuesSplit = wwwAuthenticateValue.Split(new char[] { ' ' }, 2);
+            var authValuesSplit = wwwAuthenticateValue.Split(new char[] { ' ' }, 2);
 
-            if (s_knownAuthenticationSchemes.Contains(AuthValuesSplit[0]))
+            if (s_knownAuthenticationSchemes.Contains(authValuesSplit[0]))
             {
-                parameters = CoreHelpers.SplitWithQuotes(AuthValuesSplit[1], ',')
+                parameters = CoreHelpers.SplitWithQuotes(authValuesSplit[1], ',')
                     .Select(v => AuthenticationHeaderParser.ExtractKeyValuePair(v.Trim()))
                     .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
 
