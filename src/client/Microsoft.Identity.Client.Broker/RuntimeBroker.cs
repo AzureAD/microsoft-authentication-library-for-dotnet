@@ -41,8 +41,9 @@ namespace Microsoft.Identity.Client.Broker
 
                 return new NativeInterop.Core();
             }
-            catch (Exception ex)
+            catch (MsalRuntimeException ex) when (ex.Status == ResponseStatus.ApiContractViolation)
             {
+                // failed to initialize msal runtime - can happen on older versions of Windows. Means broker is not available.
                 s_initException = ex;
 
                 // ignored
@@ -440,7 +441,6 @@ namespace Microsoft.Identity.Client.Broker
                 _logger.Info("[WAM Broker] MsalRuntime init failed...");
                 _logger.InfoPii(s_initException);
 
-                throw new MsalServiceException("wam_runtime_init_failed", "MsalRuntime init failed.");
             }
 
             _logger.Verbose($"[WAM Broker] MsalRuntime init successful.");
