@@ -448,12 +448,12 @@ namespace Microsoft.Identity.Client.Broker
 
             if (s_lazyCore.Value == null)
             {
-                _logger.Info("[WAM Broker] MsalRuntime init failed...");
+                _logger.Info("[WAM Broker] MsalRuntime initialization failed. See https://aka.ms/msal-net-wam#wam-limitations");
                 _logger.InfoPii(s_initException);
                 return false;
             }
 
-            _logger.Verbose($"[WAM Broker] MsalRuntime init successful.");
+            _logger.Verbose($"[WAM Broker] MsalRuntime initialization successful.");
             return true;
         }
     }
