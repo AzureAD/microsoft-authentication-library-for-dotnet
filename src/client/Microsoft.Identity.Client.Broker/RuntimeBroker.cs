@@ -440,7 +440,7 @@ namespace Microsoft.Identity.Client.Broker
             {
                 _logger.Info("[WAM Broker] MsalRuntime init failed...");
                 _logger.InfoPii(s_initException);
-
+                return false;
             }
 
             _logger.Verbose($"[WAM Broker] MsalRuntime init successful.");
