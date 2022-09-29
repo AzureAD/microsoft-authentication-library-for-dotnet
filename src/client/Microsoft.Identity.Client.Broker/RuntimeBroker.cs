@@ -44,12 +44,22 @@ namespace Microsoft.Identity.Client.Broker
             catch (MsalRuntimeException ex) when (ex.Status == ResponseStatus.ApiContractViolation)
             {
                 // failed to initialize msal runtime - can happen on older versions of Windows. Means broker is not available.
+                // We will never get here with our current OS version check. Instead in this scenario we will fallback to the browser
+                // but MSALRuntime does it's internal check for OS compatibility and throws an ApiContractViolation MsalRuntimeException.
+                // For any reason, if our OS check fails then this will catch the MsalRuntimeException and 
+                // log but we will not fallback to the browser in this case. 
                 s_initException = ex;
 
                 // ignored
                 return null;
             }
-
+            catch (Exception ex)
+            {
+                // When MSAL Runtime dlls fails to load then we catch the exception and throw with a meaningful
+                // message with information on how to troubleshoot
+                throw new MsalClientException(
+                    "wam_runtime_init_failed", ex.Message + " See https://aka.ms/msal-net-wam#troubleshooting");
+            }
         });
 
         /// <summary>
@@ -438,7 +448,7 @@ namespace Microsoft.Identity.Client.Broker
 
             if (s_lazyCore.Value == null)
             {
-                _logger.Info("[WAM Broker] MsalRuntime init failed...");
+                _logger.Info("[WAM Broker] MsalRuntime initialization failed. See https://aka.ms/msal-net-wam##wam-limitations");
                 _logger.InfoPii(s_initException);
                 return false;
             }
