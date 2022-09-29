@@ -40,15 +40,17 @@ namespace Microsoft.Identity.Client.Broker
                 AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
 
                 return new NativeInterop.Core();
-            }
-            catch (Exception ex)
+            }                  
+            catch (MsalRuntimeException ex) when (ex.Status == ResponseStatus.ApiContractViolation)
             {
+                // failed to initialize msal runtime - can happen on older versions of Windows. Means broker is not available.
                 s_initException = ex;
 
                 // ignored
                 return null;
             }
 
+            // any other exceptions are not expected and should bubble up to the app developer, so that they can log bugs.
         });
 
         /// <summary>
