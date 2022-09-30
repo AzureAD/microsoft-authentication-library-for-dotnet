@@ -25,12 +25,16 @@ namespace Microsoft.Identity.Client.Http
     internal class HttpManager : IHttpManager
     {
         private readonly IMsalHttpClientFactory _httpClientFactory;
+        //Determines whether or not to retry on 5xx errors. Configurable on application creation. default is true;
+        private readonly bool _retryConfig;
         public long LastRequestDurationInMs { get; private set; }
 
-        public HttpManager(IMsalHttpClientFactory httpClientFactory)
+        public HttpManager(IMsalHttpClientFactory httpClientFactory, bool retry = true)
         {
             _httpClientFactory = httpClientFactory ?? 
                 throw new ArgumentNullException(nameof(httpClientFactory));
+
+            _retryConfig = retry;
         }
 
         protected virtual HttpClient GetHttpClient()
@@ -110,10 +114,10 @@ namespace Microsoft.Identity.Client.Http
             CancellationToken cancellationToken = default)
         {
             Exception timeoutException = null;
-            bool isRetryable = false;
-            bool is5xxError = false;
+            bool isRetryableStatusCode = false;
             HttpResponse response = null;
-
+            bool isRetryable;
+            
             try
             {
                 HttpContent clonedBody = body;
@@ -138,8 +142,8 @@ namespace Microsoft.Identity.Client.Http
                     MsalErrorMessage.HttpRequestUnsuccessful,
                     (int)response.StatusCode, response.StatusCode));
 
-                is5xxError = (int)response.StatusCode >= 500 && (int)response.StatusCode < 600;
-                isRetryable = is5xxError && !HasRetryAfterHeader(response);
+                isRetryableStatusCode = IsRetryableStatusCode((int)response.StatusCode);
+                isRetryable = isRetryableStatusCode && _retryConfig && !HasRetryAfterHeader(response);
             }
             catch (TaskCanceledException exception)
             {
@@ -182,7 +186,8 @@ namespace Microsoft.Identity.Client.Http
                 return response;
             }
 
-            if (is5xxError)
+            // package 500 errors in a "service not available" exception
+            if (isRetryableStatusCode)
             {
                 throw MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.ServiceNotAvailable,
@@ -273,6 +278,15 @@ namespace Microsoft.Identity.Client.Http
 #endif
 
             return clone;
+        }
+
+        /// <summary>
+        /// In HttpManager, the retry policy is based on this simple condition.
+        /// Avoid changing this, as it's breaking change.
+        /// </summary>
+        private static bool IsRetryableStatusCode(int statusCode)
+        {
+            return statusCode >= 500 && statusCode < 600;                
         }
     }
 }

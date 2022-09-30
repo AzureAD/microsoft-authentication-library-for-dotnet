@@ -3,6 +3,7 @@
 
 using System.Runtime.CompilerServices;
 using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Core
 {
@@ -12,6 +13,7 @@ namespace Microsoft.Identity.Client.Core
         bool IsDefaultPlatformLoggingEnabled { get; }
         string ClientName { get; }
         string ClientVersion { get; }
+        IIdentityLogger IdentityLogger { get; }
 
         /// <summary>
         /// For expensive logging messages (e.g. when the log message evaluates a variable), 

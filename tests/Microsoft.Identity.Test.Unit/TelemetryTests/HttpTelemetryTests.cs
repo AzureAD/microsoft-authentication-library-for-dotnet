@@ -291,6 +291,34 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             }
         }
 
+        [TestMethod]
+        public async Task TelemetryTestExceptionLogAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                _app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                            .WithHttpManager(_harness.HttpManager)
+                            .WithDefaultRedirectUri()
+                            .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
+                            .BuildConcrete();
+
+                Trace.WriteLine("Acquire token Interactive with OperationCanceledException.");
+                var result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.TaskCanceledException).ConfigureAwait(false);
+                var previousCorrelationId = result.Correlationid;
+
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                Trace.WriteLine("Acquire token interactive successful.");
+                result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheRefreshReason.NotApplicable);
+                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0, 
+                    expectedFailedApiIds: new ApiIds[] { ApiIds.AcquireTokenInteractive }, 
+                    expectedCorrelationIds: new Guid[] { previousCorrelationId }, 
+                    expectedErrors: new string[] { "TaskCanceledException" });
+            }
+        }
+
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
@@ -336,7 +364,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             /// An error occurs at the /token endpoint. HTTP 5xx errors and 429 denote that AAD is down.
             /// In this case the telemetry will not have been recorded and MSAL needs to keep it around.
             /// </summary>
-            AADUnavailableError
+            AADUnavailableError,
+
+            TaskCanceledException
         }
 
         private async Task<(HttpRequestMessage HttpRequest, Guid Correlationid)> RunAcquireTokenInteractiveAsync(
@@ -402,6 +432,22 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                         .AcquireTokenInteractive(TestConstants.s_scope)
                         .WithCorrelationId(correlationId)
                         .ExecuteAsync())
+                        .ConfigureAwait(false);
+
+                    break;
+
+                case AcquireTokenInteractiveOutcome.TaskCanceledException:
+                    correlationId = Guid.NewGuid();
+
+                    CancellationTokenSource cts = new CancellationTokenSource();
+                    cts.Cancel(true);
+                    CancellationToken token = cts.Token;
+                    
+                    var operationCanceledException = await AssertException.TaskThrowsAsync<TaskCanceledException>(() =>
+                        _app
+                        .AcquireTokenInteractive(TestConstants.s_scope)
+                        .WithCorrelationId(correlationId)
+                        .ExecuteAsync(token))
                         .ConfigureAwait(false);
 
                     break;

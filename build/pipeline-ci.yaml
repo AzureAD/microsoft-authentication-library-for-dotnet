@@ -1,14 +1,14 @@
-# CI builds should be triggered on the master branch only
+# CI builds should be triggered on the main branch only
 trigger:
   branches:
     include:
-    - 'master'
+    - 'main'
 
 pr: none
 
 variables:
   BuildPlatform: 'any cpu'
-  BuildConfiguration: 'debug'
+  BuildConfiguration: 'Release'
   #intended for running all ui automation tests as one to reduce time
   ConsolidateAppCenterTests: true
 

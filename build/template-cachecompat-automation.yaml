@@ -1,0 +1,23 @@
+# Unit tests require .NET 3.x
+steps:
+- task: DownloadPipelineArtifact@2
+  displayName: 'Download Drop'
+  inputs:
+    artifact: drop
+    patterns: '**/*'
+    path: $(Build.artifactstagingdirectory)/drop
+
+- task: CopyFiles@2
+  displayName: 'Get MSAL tests'
+  inputs:
+    SourceFolder: '$(build.artifactstagingdirectory)\drop\cacheCompatTests' 
+    Contents: '**\*'
+    TargetFolder: $(Build.SourcesDirectory)\tests\CacheCompat
+
+# install python for cache tests
+- template: template-python-config.yaml
+
+  # Run All CacheCompat Tests
+- template: template-run-cachecompat-tests.yaml
+  parameters:
+    BuildConfiguration: '$(BuildConfiguration)'

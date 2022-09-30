@@ -31,7 +31,11 @@ using System.Linq;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
+#if MAUI
+    [Preserve(AllMembers = true)]
+#else
     [global::Android.Runtime.Preserve(AllMembers = true)]
+#endif
     internal class AndroidBrokerHelper
     {
         private const string RedirectUriScheme = "msauth";

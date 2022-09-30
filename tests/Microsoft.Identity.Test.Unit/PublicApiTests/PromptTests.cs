@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod()]
-        [TestCategory("PromptTests")]
+        [TestCategory(TestCategories.PromptTests)]
         public void EqualityTest()
         {
             Prompt ub1 = Prompt.Consent;

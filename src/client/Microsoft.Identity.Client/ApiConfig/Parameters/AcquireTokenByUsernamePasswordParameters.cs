@@ -8,7 +8,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
     internal class AcquireTokenByUsernamePasswordParameters : AbstractAcquireTokenByUsernameParameters, IAcquireTokenParameters
     {
-        public SecureString Password { get; set; }
+        public string Password { get; set; }
 
         /// <inheritdoc />
         public void LogParameters(ILoggerAdapter logger)

@@ -46,13 +46,13 @@ namespace Microsoft.Identity.Json.Serialization
         /// Gets or sets the property name resolver.
         /// </summary>
         /// <value>The property name resolver.</value>
-        public Func<string, string> PropertyNameResolver { get; set; }
+        public Func<string, string>? PropertyNameResolver { get; set; }
 
         private readonly ThreadSafeStore<string, CallSite<Func<CallSite, object, object>>> _callSiteGetters =
             new ThreadSafeStore<string, CallSite<Func<CallSite, object, object>>>(CreateCallSiteGetter);
 
-        private readonly ThreadSafeStore<string, CallSite<Func<CallSite, object, object, object>>> _callSiteSetters =
-            new ThreadSafeStore<string, CallSite<Func<CallSite, object, object, object>>>(CreateCallSiteSetter);
+        private readonly ThreadSafeStore<string, CallSite<Func<CallSite, object, object?, object>>> _callSiteSetters =
+            new ThreadSafeStore<string, CallSite<Func<CallSite, object, object?, object>>>(CreateCallSiteSetter);
 
         private static CallSite<Func<CallSite, object, object>> CreateCallSiteGetter(string name)
         {
@@ -61,11 +61,11 @@ namespace Microsoft.Identity.Json.Serialization
             return CallSite<Func<CallSite, object, object>>.Create(new NoThrowGetBinderMember(getMemberBinder));
         }
 
-        private static CallSite<Func<CallSite, object, object, object>> CreateCallSiteSetter(string name)
+        private static CallSite<Func<CallSite, object, object?, object>> CreateCallSiteSetter(string name)
         {
             SetMemberBinder binder = (SetMemberBinder)DynamicUtils.BinderWrapper.SetMember(name, typeof(DynamicUtils));
 
-            return CallSite<Func<CallSite, object, object, object>>.Create(new NoThrowSetBinderMember(binder));
+            return CallSite<Func<CallSite, object, object?, object>>.Create(new NoThrowSetBinderMember(binder));
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Json.Serialization
             Properties = new JsonPropertyCollection(UnderlyingType);
         }
 
-        internal bool TryGetMember(IDynamicMetaObjectProvider dynamicProvider, string name, out object value)
+        internal bool TryGetMember(IDynamicMetaObjectProvider dynamicProvider, string name, out object? value)
         {
             ValidationUtils.ArgumentNotNull(dynamicProvider, nameof(dynamicProvider));
 
@@ -100,11 +100,11 @@ namespace Microsoft.Identity.Json.Serialization
             }
         }
 
-        internal bool TrySetMember(IDynamicMetaObjectProvider dynamicProvider, string name, object value)
+        internal bool TrySetMember(IDynamicMetaObjectProvider dynamicProvider, string name, object? value)
         {
             ValidationUtils.ArgumentNotNull(dynamicProvider, nameof(dynamicProvider));
 
-            CallSite<Func<CallSite, object, object, object>> callSite = _callSiteSetters.Get(name);
+            CallSite<Func<CallSite, object, object?, object>> callSite = _callSiteSetters.Get(name);
 
             object result = callSite.Target(callSite, dynamicProvider, value);
 

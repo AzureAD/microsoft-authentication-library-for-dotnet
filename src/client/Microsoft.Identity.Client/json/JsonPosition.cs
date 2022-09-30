@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Json
 
         internal JsonContainerType Type;
         internal int Position;
-        internal string PropertyName;
+        internal string? PropertyName;
         internal bool HasIndex;
 
         public JsonPosition(JsonContainerType type)
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Json
             switch (Type)
             {
                 case JsonContainerType.Object:
-                    return PropertyName.Length + 5;
+                    return PropertyName!.Length + 5;
                 case JsonContainerType.Array:
                 case JsonContainerType.Constructor:
                     return MathUtils.IntLength((ulong)Position) + 2;
@@ -71,19 +71,19 @@ namespace Microsoft.Identity.Json
             }
         }
 
-        internal void WriteTo(StringBuilder sb, ref StringWriter writer, ref char[] buffer)
+        internal void WriteTo(StringBuilder sb, ref StringWriter? writer, ref char[]? buffer)
         {
             switch (Type)
             {
                 case JsonContainerType.Object:
-                    string propertyName = PropertyName;
+                    string propertyName = PropertyName!;
                     if (propertyName.IndexOfAny(SpecialCharacters) != -1)
                     {
                         sb.Append(@"['");
 
                         if (writer == null)
                         {
-                            writer = new StringWriter(sb, CultureInfo.InvariantCulture);
+                            writer = new StringWriter(sb);
                         }
 
                         JavaScriptUtils.WriteEscapedJavaScriptString(writer, propertyName, '\'', false, JavaScriptUtils.SingleQuoteCharEscapeFlags, StringEscapeHandling.Default, null, ref buffer);
@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Json
 
         internal static bool TypeHasIndex(JsonContainerType type)
         {
-            return type == JsonContainerType.Array || type == JsonContainerType.Constructor;
+            return (type == JsonContainerType.Array || type == JsonContainerType.Constructor);
         }
 
         internal static string BuildPath(List<JsonPosition> positions, JsonPosition? currentPosition)
@@ -130,8 +130,8 @@ namespace Microsoft.Identity.Json
             }
 
             StringBuilder sb = new StringBuilder(capacity);
-            StringWriter writer = null;
-            char[] buffer = null;
+            StringWriter? writer = null;
+            char[]? buffer = null;
             if (positions != null)
             {
                 foreach (JsonPosition state in positions)
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Json
             return sb.ToString();
         }
 
-        internal static string FormatMessage(IJsonLineInfo lineInfo, string path, string message)
+        internal static string FormatMessage(IJsonLineInfo? lineInfo, string path, string message)
         {
             // don't add a fullstop and space when message ends with a new line
             if (!message.EndsWith(Environment.NewLine, StringComparison.Ordinal))

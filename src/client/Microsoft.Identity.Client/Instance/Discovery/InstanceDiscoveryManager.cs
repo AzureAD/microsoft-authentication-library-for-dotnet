@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             {
                 return
                     _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
-                    await _regionDiscoveryProvider.GetMetadataAsync(new Uri(authorityInfo.CanonicalAuthority), requestContext).ConfigureAwait(false) ??
+                    await _regionDiscoveryProvider.GetMetadataAsync(authorityInfo.CanonicalAuthority, requestContext).ConfigureAwait(false) ??
                     _networkCacheMetadataProvider.GetMetadata(environment, requestContext.Logger) ??
                     _knownMetadataProvider.GetMetadata(environment, existingEnvironmentsInCache, requestContext.Logger) ??
                     await GetMetadataEntryAsync(authorityInfo, requestContext).ConfigureAwait(false);
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             bool forceValidation = false)
         {
 
-            Uri authorityUri = new Uri(authorityInfo.CanonicalAuthority);
+            Uri authorityUri = authorityInfo.CanonicalAuthority;
             string environment = authorityInfo.Host;
 
             if (authorityInfo.IsInstanceDiscoverySupported)

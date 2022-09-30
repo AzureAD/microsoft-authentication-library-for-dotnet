@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.Internal
                 }
                 catch (MsalServiceException ex)
                 {
-                    string logMsg = $"Background fetch failed with MsalServiceException. Is AAD down? { ex.IsAadUnavailable()}";
+                    string logMsg = $"Background fetch failed with MsalServiceException. Is exception retryable? { ex.IsRetryable}";
                     if (ex.StatusCode == 400)
                     {
                         logger.ErrorPiiWithPrefix(ex, logMsg);

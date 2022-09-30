@@ -301,5 +301,35 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 }
             }
         }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task TestRetryConfigWithHttp500TypeFailureAsync(bool retry)
+        {
+            using (var httpManager = new MockHttpManager(retry, null))
+            {
+                httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.ServiceUnavailable);
+
+                if (retry)
+                {
+                    //Adding second response for retry
+                    httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.ServiceUnavailable);
+                }
+                var msalHttpResponse = await httpManager.SendPostForceResponseAsync(
+                                                        new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                                                        null,
+                                                        new StringContent("body"),
+                                                        Substitute.For<ILoggerAdapter>())
+                                                        .ConfigureAwait(false);
+
+                Assert.IsNotNull(msalHttpResponse);
+                Assert.AreEqual(HttpStatusCode.ServiceUnavailable, msalHttpResponse.StatusCode);
+                //If a second request is sent when retry is configured to false, the test will fail since
+                //the MockHttpManager will not be able to serve another response.
+                //The MockHttpManager will also check for unused responses which will check if the retry did not occur when it should have.
+
+            }
+        }
     }
 }

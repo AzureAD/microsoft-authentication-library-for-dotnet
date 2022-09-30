@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("Regression")]
+        [TestCategory(TestCategories.Regression)]
         [WorkItem(1365)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1365
         public async Task ClientCreds_MustFilterByTenantId_Async()
         {
@@ -441,7 +441,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.IsNull(app.Certificate);
                     break;
                 case CredentialType.SignedAssertionWithAssertionRequestOptionsAsyncDelegate:
-                    builder = builder.WithClientAssertion((options) => {
+                    builder = builder.WithClientAssertion((options) =>
+                    {
                         Assert.IsNotNull(options.ClientID);
                         Assert.IsNotNull(options.TokenEndpoint);
                         return Task.FromResult(TestConstants.DefaultClientAssertion);
@@ -642,8 +643,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var cert = new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"));
-                (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup 
-                    = CreateConfidentialClient(httpManager, cert,  CredentialType.SignedAssertion);
+                (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup
+                    = CreateConfidentialClient(httpManager, cert, CredentialType.SignedAssertion);
                 var app = setup.App;
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -708,7 +709,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup = 
+                (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup =
                     CreateConfidentialClient(httpManager, null, CredentialType.SignedAssertionAsyncDelegate);
 
                 var result = await setup.App.AcquireTokenForClient(TestConstants.s_scope.ToArray())
@@ -718,7 +719,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
 
                 Assert.AreEqual(
-                    TestConstants.DefaultClientAssertion, 
+                    TestConstants.DefaultClientAssertion,
                     setup.Handler.ActualRequestPostData["client_assertion"]);
 
                 Assert.AreEqual(
@@ -734,7 +735,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup = 
+                (ConfidentialClientApplication App, MockHttpMessageHandler Handler) setup =
                     CreateConfidentialClient(httpManager, null, CredentialType.SignedAssertionWithAssertionRequestOptionsAsyncDelegate);
 
                 var result = await setup.App.AcquireTokenForClient(TestConstants.s_scope.ToArray())
@@ -744,7 +745,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
 
                 Assert.AreEqual(
-                    TestConstants.DefaultClientAssertion, 
+                    TestConstants.DefaultClientAssertion,
                     setup.Handler.ActualRequestPostData["client_assertion"]);
 
                 Assert.AreEqual(
@@ -1517,12 +1518,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                oboCacheKey);
             PublicClientApplicationTests.CheckBuilderCommonMethods(longRunningOboBuilder);
 
-            var silentBuilder = app.AcquireTokenSilent(TestConstants.s_scope, "user@contoso.com")
-                .WithForceRefresh(false);
-
-            PublicClientApplicationTests.CheckBuilderCommonMethods(silentBuilder);
-
-            silentBuilder = app.AcquireTokenSilent(TestConstants.s_scope, TestConstants.s_user)
+            var silentBuilder = app.AcquireTokenSilent(TestConstants.s_scope, TestConstants.s_user)
                .WithForceRefresh(true);
             PublicClientApplicationTests.CheckBuilderCommonMethods(silentBuilder);
 
@@ -1701,8 +1697,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             bool usingClaims = false;
             string differentScopesForAt = string.Empty;
+            int callbackInvoked = 0;
             var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                          .WithAppTokenProvider(async (AppTokenProviderParameters parameters) =>
+                                                          .WithAppTokenProvider((AppTokenProviderParameters parameters) =>
                                                           {
                                                               Assert.IsNotNull(parameters.Scopes);
                                                               Assert.IsNotNull(parameters.CorrelationId);
@@ -1713,18 +1710,21 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               {
                                                                   Assert.IsNotNull(parameters.Claims);
                                                               }
-                                                              return await Task.Run(() => GetAppTokenProviderResult(differentScopesForAt)).ConfigureAwait(false);
+
+                                                              Interlocked.Increment(ref callbackInvoked);
+
+                                                              return Task.FromResult(GetAppTokenProviderResult(differentScopesForAt));
                                                           })
                                                           .BuildConcrete();
 
-            //AcquireToken from app provider
-            AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
-                                                    .WithClaims(TestConstants.Claims)
+            // AcquireToken from app provider
+            AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)                                                    
                                                     .ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
 
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(TestConstants.DefaultAccessToken, result.AccessToken);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(1, callbackInvoked);
 
             var tokens = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens();
 
@@ -1734,28 +1734,31 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNotNull(token);
             Assert.AreEqual(TestConstants.DefaultAccessToken, token.Secret);
 
-            //AcquireToken from cache
+            // AcquireToken from cache
             result = await app.AcquireTokenForClient(TestConstants.s_scope)
                                                     .ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
 
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(TestConstants.DefaultAccessToken, result.AccessToken);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(1, callbackInvoked);
 
-            //expire token
+            // Expire token
             TokenCacheHelper.ExpireAllAccessTokens(app.AppTokenCacheInternal);
 
-            //acquire token from app provider with expired token
+            // Acquire token from app provider with expired token
             result = await app.AcquireTokenForClient(TestConstants.s_scope)
                                                     .ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
 
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(TestConstants.DefaultAccessToken, result.AccessToken);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(2, callbackInvoked);
+
 
             differentScopesForAt = "new scope";
 
-            //acquire token from app provider with new scopes
+            // Acquire token from app provider with new scopes
             result = await app.AcquireTokenForClient(new[] { differentScopesForAt })
                                                     .ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
 
@@ -1763,8 +1766,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TestConstants.DefaultAccessToken + differentScopesForAt, result.AccessToken);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count, 2);
+            Assert.AreEqual(3, callbackInvoked);
 
-            //acquire token from app provider with claims. Should not use cache
+            // Acquire token from app provider with claims. Should not use cache
             result = await app.AcquireTokenForClient(TestConstants.s_scope)
                                                     .WithClaims(TestConstants.Claims)
                                                     .ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
@@ -1772,15 +1776,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(TestConstants.DefaultAccessToken + differentScopesForAt, result.AccessToken);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(4, callbackInvoked);
         }
 
-        private TokenProviderResult GetAppTokenProviderResult(string differentScopesForAt)
+       
+
+        private AppTokenProviderResult GetAppTokenProviderResult(string differentScopesForAt = "", long? refreshIn = 1000)
         {
-            TokenProviderResult token = new TokenProviderResult();
+            var token = new AppTokenProviderResult();
             token.AccessToken = TestConstants.DefaultAccessToken + differentScopesForAt; //Used to indicate that there is a new access token for a different set of scopes
-            token.TenantId = TestConstants.TenantId;
             token.ExpiresInSeconds = 3600;
-            token.RefreshInSeconds = 1000;
+            token.RefreshInSeconds = refreshIn;
 
             return token;
         }

@@ -1,14 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworkNetDesktop461>net472</TargetFrameworkNetDesktop461>
+    <TargetFrameworkNetDesktop461>net48</TargetFrameworkNetDesktop461>
     <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
     <TargetFrameworkNet5Win>net5.0-windows10.0.17763.0</TargetFrameworkNet5Win>
 
-    <TargetFrameworks>$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetCore);$(TargetFrameworkNet5Win)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetCore);$(TargetFrameworkNet5Win);</TargetFrameworks>
     <IsPackable>false</IsPackable>
 
     <LangVersion>latest</LangVersion>
+
+    <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,18 +20,27 @@
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
-    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
-    <PackageReference Include="NSubstitute" Version="4.2.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="2.1.0" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.1.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.4.0" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
+    <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.22.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="NSubstitute" Version="4.4.0" />
+    <PackageReference Include="NSubstitute.Analyzers.CSharp" Version="1.0.15">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.22.0" />
     <!-- This reference is a workaround for a bug in .net46
     https://stackoverflow.com/questions/45563560/could-not-load-file-or-assembly-system-net-http-version-4-1-1-1-net-standard-->
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
+    <PackageReference Include="Selenium.WebDriver" Version="4.4.0" />
 
-    <PackageReference Include="coverlet.collector" Version="1.2.0" />
+    <PackageReference Include="coverlet.collector" Version="3.1.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
 
     <Compile Remove="Resources\**" />
     <EmbeddedResource Remove="Resources\**" />
@@ -37,27 +48,27 @@
     <None Update="Resources\**\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    
- 
+
+
   </ItemGroup>
 
   <Import Project="../../build/platform_and_feature_flags.props" />
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)'">
     <PackageReference Include="System.Windows.Forms" Version="4.0.0" />
   </ItemGroup>
-  
-  <ItemGroup Condition="'$(TargetFramework)' == 'net472' or '$(TargetFramework)' == 'netcoreapp3.1' ">
+
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' or '$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
     <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj" />
   </ItemGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' ">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' or '$(TargetFramework)' == '$(TargetFrameworkNet6)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net472' ">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
     <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
   </PropertyGroup>
-   <PropertyGroup Condition="'$(TargetFramework)' == 'net5.0-windows10.0.17763.0' ">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet5Win)'">
     <DefineConstants>$(DefineConstants);NET5_WIN</DefineConstants>
   </PropertyGroup>
 

@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                       $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync resolved account {webAccount.UserName} via web call? {tuple?.Item3 != null}",
                       $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync resolved account via web call? {tuple?.Item3 != null}");
 
-                return tuple.Item3; // Account
+                return tuple?.Item3; // Account
             }
 
             return null;
@@ -351,6 +351,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
             {
+                AuthorityUrl = authority,
                 AccessToken = webTokenResponse.Token,
                 IdToken = idToken,
                 CorrelationId = correlationId,

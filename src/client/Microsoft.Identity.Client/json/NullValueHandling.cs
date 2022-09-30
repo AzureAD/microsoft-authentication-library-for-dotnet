@@ -29,8 +29,8 @@ namespace Microsoft.Identity.Json
     /// Specifies null value handling options for the <see cref="JsonSerializer"/>.
     /// </summary>
     /// <example>
-    ///   <code lang="cs" source="..\Src\Microsoft.Identity.Json.Tests\Documentation\SerializationTests.cs" region="ReducingSerializedJsonSizeNullValueHandlingObject" title="NullValueHandling Class" />
-    ///   <code lang="cs" source="..\Src\Microsoft.Identity.Json.Tests\Documentation\SerializationTests.cs" region="ReducingSerializedJsonSizeNullValueHandlingExample" title="NullValueHandling Ignore Example" />
+    ///   <code lang="cs" source="..\Src\Newtonsoft.Json.Tests\Documentation\SerializationTests.cs" region="ReducingSerializedJsonSizeNullValueHandlingObject" title="NullValueHandling Class" />
+    ///   <code lang="cs" source="..\Src\Newtonsoft.Json.Tests\Documentation\SerializationTests.cs" region="ReducingSerializedJsonSizeNullValueHandlingExample" title="NullValueHandling Ignore Example" />
     /// </example>
     internal enum NullValueHandling
     {

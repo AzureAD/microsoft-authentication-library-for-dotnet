@@ -2,9 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
+using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
+using BenchmarkDotNet.Order;
 using BenchmarkDotNet.Running;
 
 namespace Microsoft.Identity.Test.Performance
@@ -30,7 +32,9 @@ namespace Microsoft.Identity.Test.Performance
 #endif
                 .WithOptions(ConfigOptions.DisableLogFile)
                 .WithOptions(ConfigOptions.JoinSummary)
-                //.WithOptions(ConfigOptions.DontOverwriteResults) // Uncomment when running manually
+                .WithOrderer(new DefaultOrderer(SummaryOrderPolicy.Method))
+                //.WithOptions(ConfigOptions.DontOverwriteResults) // Uncomment when running manually locally
+                .HideColumns(Column.UnrollFactor, Column.Type, Column.InvocationCount, Column.Error, Column.StdDev, Column.Median, Column.Job)
                 .AddDiagnoser(MemoryDiagnoser.Default) // https://benchmarkdotnet.org/articles/configs/diagnosers.html
                                                        //.AddDiagnoser(new EtwProfiler()) // https://adamsitnik.com/ETW-Profiler/
                 .AddJob(

@@ -18,6 +18,10 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.IdentityModel.Abstractions;
+using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
+using System.Net.Http;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -78,6 +82,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
             AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
+            MsalTelemetryEventDetails telemetryEventDetails = new MsalTelemetryEventDetails();
+            ITelemetryClient[] telemetryClients = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.TelemetryClients;
 
             using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
             {
@@ -88,22 +94,54 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                     AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
                     LogReturnedToken(authenticationResult);
-
                     UpdateTelemetry(sw, apiEvent, authenticationResult);
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
+                    LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails, telemetryClients);
+
                     return authenticationResult;
                 }
                 catch (MsalException ex)
                 {
                     apiEvent.ApiErrorCode = ex.ErrorCode;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
+                    LogErrorTelemetryToClient(ex.ErrorCode, telemetryEventDetails, telemetryClients);
                     throw;
                 }
                 catch (Exception ex)
                 {
+                    apiEvent.ApiErrorCode = ex.GetType().Name;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     throw;
                 }
+                finally
+                {
+                    telemetryClients.TrackEvent(telemetryEventDetails);
+                }
+            }
+        }
+
+        private void LogErrorTelemetryToClient(string errorCode, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
+        {
+            if (telemetryClients.HasEnabledClients(TelemetryConstants.AcquireTokenEventName))
+            {
+                telemetryEventDetails.SetProperty(TelemetryConstants.Succeeded, false);
+                telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, errorCode);
+            }
+        }
+
+        private void LogSuccessfulTelemetryToClient(AuthenticationResult authenticationResult, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
+        {
+            if (telemetryClients.HasEnabledClients(TelemetryConstants.AcquireTokenEventName))
+            {
+                telemetryEventDetails.SetProperty(TelemetryConstants.CacheInfoTelemetry, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason));
+                telemetryEventDetails.SetProperty(TelemetryConstants.TokenSource, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.TokenSource));
+                telemetryEventDetails.SetProperty(TelemetryConstants.Duration, authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
+                telemetryEventDetails.SetProperty(TelemetryConstants.DurationInCache, authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs);
+                telemetryEventDetails.SetProperty(TelemetryConstants.DurationInHttp, authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs);
+                telemetryEventDetails.SetProperty(TelemetryConstants.Succeeded, true);
+                telemetryEventDetails.SetProperty(TelemetryConstants.PopToken, authenticationResult.TokenType.Equals(Constants.PoPTokenType));
+                telemetryEventDetails.SetProperty(TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds);
+                telemetryEventDetails.SetProperty(TelemetryConstants.ActivityId, authenticationResult.CorrelationId);
             }
         }
 
@@ -376,7 +414,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (result.AuthenticationResultMetadata.TokenSource != TokenSource.Cache)
                 {
-                    Uri canonicalAuthority = new Uri(AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority);
+                    Uri canonicalAuthority = AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority;
 
                     AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
                         $"Fetched access token from host {canonicalAuthority.Host}. Endpoint: {canonicalAuthority}. ",
@@ -388,10 +426,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal async Task<AuthenticationResult> HandleTokenRefreshErrorAsync(MsalServiceException e, MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
-            bool isAadUnavailable = e.IsAadUnavailable();
-            logger.Warning($"Fetching a new AT failed. Is AAD down? {isAadUnavailable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
+            
+            logger.Warning($"Fetching a new AT failed. Is exception retry-able? {e.IsRetryable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
 
-            if (cachedAccessTokenItem != null && isAadUnavailable)
+            if (cachedAccessTokenItem != null && e.IsRetryable)
             {
                 logger.Info("Returning existing access token. It is not expired, but should be refreshed. ");
 

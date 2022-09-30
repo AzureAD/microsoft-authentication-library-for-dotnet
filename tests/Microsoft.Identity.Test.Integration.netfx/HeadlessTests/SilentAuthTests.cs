@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Trace.WriteLine("Part 1 - Acquire a token with U/P");
             AuthenticationResult authResult = await pca
-                .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, new NetworkCredential("", labResponse.User.GetOrFetchPassword()).SecurePassword)
+                .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .ExecuteAsync(new CancellationTokenSource().Token)
                 .ConfigureAwait(false);
 
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 SetCacheSerializationToFile(pca1, cacheFilePath);
 
                 AuthenticationResult authResult = await pca1
-                    .AcquireTokenByUsernamePassword(s_scopes, user.Upn, new NetworkCredential("", user.GetOrFetchPassword()).SecurePassword)
+                    .AcquireTokenByUsernamePassword(s_scopes, user.Upn, user.GetOrFetchPassword())
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 

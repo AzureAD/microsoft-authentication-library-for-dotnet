@@ -59,8 +59,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var result = await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
-#if DESKTOP // no point in running these tests on NetCore - the code path is similar
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.Arlington)]
         public async Task Arlington_Interactive_AADAsync()
         {
@@ -69,7 +68,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(labResponse, false).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.MSA)]
         public async Task Interactive_MsaUser_Async()
         {
@@ -78,28 +77,28 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task Interactive_AdfsV3_FederatedAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, true).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task Interactive_AdfsV2_FederatedAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV2, true).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task Interactive_AdfsV4_FederatedAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task InteractiveConsentPromptAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -108,14 +107,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunPromptTestForUserAsync(labResponse, Prompt.Consent, false).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task Interactive_AdfsV2019_FederatedAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.Arlington)]
         public async Task Arlington_Interactive_AdfsV2019_FederatedAsync()
         {
@@ -123,7 +122,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(labResponse, false).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task Interactive_Arlington_MultiCloudSupport_AADAsync()
         {
             // Arrange
@@ -176,67 +175,15 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsTrue(labResponse.Lab.Authority.Contains(result.Account.Environment));
         }
 
-#endif
-
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.ADFS)]
         public async Task Interactive_AdfsV2019_DirectAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
             await RunTestForUserAsync(labResponse, true).ConfigureAwait(false);
-        }
+        }      
 
-        [TestMethod]
-        [Ignore("Lab needs a way to provide multiple account types(AAD, ADFS, MSA) that can sign into the same client id")]
-        public async Task MultiUserCacheCompatabilityTestAsync()
-        {
-            // Arrange
-
-            //Acquire AT for default lab account
-            LabResponse labResponseDefault = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            AuthenticationResult defaultAccountResult = await RunTestForUserAsync(labResponseDefault).ConfigureAwait(false);
-
-            //Acquire AT for ADFS 2019 account
-            LabResponse labResponseFederated = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
-            var federatedAccountResult = await RunTestForUserAsync(labResponseFederated, false).ConfigureAwait(false);
-
-            //Acquire AT for MSA account
-            LabResponse labResponseMsa = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
-            labResponseMsa.App.AppId = LabApiConstants.MSAOutlookAccountClientID;
-            var msaAccountResult = await RunTestForUserAsync(labResponseMsa).ConfigureAwait(false);
-
-            PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponseDefault.App.AppId).BuildConcrete();
-
-            AuthenticationResult authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, defaultAccountResult.Account)
-                                                       .ExecuteAsync()
-                                                       .ConfigureAwait(false);
-            Assert.IsNotNull(authResult);
-            Assert.IsNotNull(authResult.AccessToken);
-            Assert.IsNotNull(authResult.IdToken);
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
-
-            pca = PublicClientApplicationBuilder.Create(labResponseFederated.App.AppId).BuildConcrete();
-
-            authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, federatedAccountResult.Account)
-                                  .ExecuteAsync()
-                                  .ConfigureAwait(false);
-            Assert.IsNotNull(authResult);
-            Assert.IsNotNull(authResult.AccessToken);
-            Assert.IsNull(authResult.IdToken);
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
-
-            pca = PublicClientApplicationBuilder.Create(LabApiConstants.MSAOutlookAccountClientID).BuildConcrete();
-
-            authResult = await pca.AcquireTokenSilent(new[] { CoreUiTestConstants.DefaultScope }, msaAccountResult.Account)
-                                  .ExecuteAsync()
-                                  .ConfigureAwait(false);
-            Assert.IsNotNull(authResult);
-            Assert.IsNotNull(authResult.AccessToken);
-            Assert.IsNull(authResult.IdToken);
-            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
-        }
-
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ValidateCcsHeadersForInteractiveAuthCodeFlowAsync()
         {
             HttpSnifferClientFactory factory = null;

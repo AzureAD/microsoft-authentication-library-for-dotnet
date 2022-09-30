@@ -13,14 +13,12 @@ namespace Microsoft.Identity.Client.Internal.Logger
 #if !XAMARINMAC20
     internal class IdentityLoggerAdapter : ILoggerAdapter
     {
-        private readonly IIdentityLogger _identityLogger;
-        private string _clientInfo;
         private string _correlationId;
-
         public bool PiiLoggingEnabled { get; }
         public bool IsDefaultPlatformLoggingEnabled { get; } = false;
         public string ClientName { get; }
         public string ClientVersion { get; }
+        public IIdentityLogger IdentityLogger { get; }
 
         internal IdentityLoggerAdapter(
             IIdentityLogger identityLogger,
@@ -31,12 +29,10 @@ namespace Microsoft.Identity.Client.Internal.Logger
         {
             ClientName = clientName;
             ClientVersion = clientVersion;
-            _identityLogger = identityLogger;
+            IdentityLogger = new IdentityLogger(identityLogger, correlationId, clientName, clientVersion, enablePiiLogging);
             _correlationId = correlationId.Equals(Guid.Empty)
                     ? string.Empty
                     : " - " + correlationId;
-
-            _clientInfo = LoggerHelper.GetClientInfo(clientName, clientVersion);
             
             PiiLoggingEnabled = enablePiiLogging;
         }
@@ -57,17 +53,19 @@ namespace Microsoft.Identity.Client.Internal.Logger
         {
             if (IsLoggingEnabled(logLevel))
             {
+                string messageToLog = LoggerHelper.GetMessageToLog(messageWithPii, messageScrubbed, PiiLoggingEnabled);
+
                 LogEntry entry = new LogEntry();
                 entry.EventLogLevel = LoggerHelper.GetEventLogLevel(logLevel);
                 entry.CorrelationId = _correlationId;
-                entry.Message = LoggerHelper.FormatLogMessage(messageWithPii, messageScrubbed, PiiLoggingEnabled, _correlationId, _clientInfo);
-                _identityLogger.Log(entry);
+                entry.Message = messageToLog;
+                IdentityLogger.Log(entry);
             }
         }
 
         public bool IsLoggingEnabled(LogLevel logLevel)
         {
-            return _identityLogger.IsEnabled(LoggerHelper.GetEventLogLevel(logLevel));
+            return IdentityLogger.IsEnabled(LoggerHelper.GetEventLogLevel(logLevel));
         }
 
         public DurationLogHelper LogBlockDuration(string measuredBlockName, LogLevel logLevel = LogLevel.Verbose)

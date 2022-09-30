@@ -74,5 +74,11 @@ namespace Microsoft.Identity.Client.Internal.Broker
             _logger.Info("NullBroker - returning empty list on GetAccounts request.");
             return Task.FromResult(CollectionHelpers.GetEmptyReadOnlyList<IAccount>()); // nop
         }
+
+        public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
+        {
+            _logger.Info("NullBroker - returning null on ROPC request.");
+            return Task.FromResult<MsalTokenResponse>(null);
+        }
     }
 }

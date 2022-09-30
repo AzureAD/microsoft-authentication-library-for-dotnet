@@ -19,11 +19,15 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
+#if NET45
     internal class NetDesktopCryptographyManager : ICryptographyManager
+#else
+    internal class NetDesktopCryptographyManager : CommonCryptographyManager
+#endif
     {
         private static readonly ConcurrentDictionary<string, RSACryptoServiceProvider> s_certificateToRsaCspMap = new ConcurrentDictionary<string, RSACryptoServiceProvider>();
         private static readonly int s_maximumMapSize = 1000;
-
+#if NET45
         public string CreateBase64UrlEncodedSha256Hash(string input)
         {
             return string.IsNullOrEmpty(input) ? null : Base64UrlHelpers.Encode(CreateSha256HashBytes(input));
@@ -52,10 +56,9 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 return sha.ComputeHash(Encoding.UTF8.GetBytes(input));
             }
         }
-      
+
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
-#if NET45
             var rsaCryptoProvider = GetCryptoProviderForSha256_Net45(certificate);
             using (var sha = new SHA256Cng())
             {
@@ -64,10 +67,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 s_certificateToRsaCspMap[certificate.Thumbprint] = rsaCryptoProvider;
                 return signedData;
             }
-#else
-            return CryptographyManager.SignWithCertificate(message, certificate);
-#endif
         }
+#endif
 
         /// <summary>
         /// Create a <see cref="RSACryptoServiceProvider"/> using the private key from the given <see cref="X509Certificate2"/>.

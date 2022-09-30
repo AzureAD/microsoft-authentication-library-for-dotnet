@@ -1,0 +1,20 @@
+# Code files
+[*.{cs,vb}]
+
+#### Diagnostic configuration ####
+
+# IDE0073: File header
+dotnet_diagnostic.IDE0073.severity = none
+
+# CS8632: Nullable Annotation
+dotnet_diagnostic.CS8632.severity = none
+
+# CS3019: ClsCompliant attribute on internal types
+dotnet_diagnostic.CS3019.severity = none
+
+# CS0436: type conflicts
+dotnet_diagnostic.CS0436.severity = none
+
+# CS0108: hide inherited member
+dotnet_diagnostic.CS0108.severity = none
+

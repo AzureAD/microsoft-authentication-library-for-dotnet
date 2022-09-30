@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client
         /// The return value of this property is either the value provided by the developer in the constructor of the application, or otherwise
         /// the value of the <see cref="DefaultAuthority"/> static member (that is <c>https://login.microsoftonline.com/common/</c>)
         /// </summary>
-        public string Authority => ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority; // Do not use in MSAL, use AuthorityInfo instead to avoid re-parsing
+        public string Authority => ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority?.ToString(); // Do not use in MSAL, use AuthorityInfo instead to avoid re-parsing
 
         internal AuthorityInfo AuthorityInfo => ServiceBundle.Config.Authority.AuthorityInfo;
 

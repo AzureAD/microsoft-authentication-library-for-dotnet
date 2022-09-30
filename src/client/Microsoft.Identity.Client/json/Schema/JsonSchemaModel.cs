@@ -28,6 +28,8 @@ using System.Collections.Generic;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Json.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Identity.Json.Schema
 {
     [Obsolete("JSON Schema validation has been moved to its own package. See https://www.newtonsoft.com/jsonschema for more details.")]

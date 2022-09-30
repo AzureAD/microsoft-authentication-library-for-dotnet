@@ -3,7 +3,7 @@
 
 parameters:
   BuildPlatform: 'any cpu'
-  BuildConfiguration: 'debug'
+  BuildConfiguration: 'Release'
   MsalClientSemVer: '4.0.0-devopsbuild'
 
 steps:
@@ -11,6 +11,21 @@ steps:
   displayName: 'Clear local NuGet cache'
   inputs:
     script: 'nuget locals all -clear'
+
+#Restore workload with the .NET Core CLI task
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet workload restore for Desktop project'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore .\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet workload restore'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
 
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
@@ -27,13 +42,4 @@ steps:
     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
-
-- task: CopyFiles@2
-  displayName: 'Stage Device Authentication Tests'
-  inputs:
-    SourceFolder: tests/Microsoft.Identity.Test.Integration.Win8
-    Contents: '**/*'
-    TargetFolder: '$(build.artifactstagingdirectory)/DeviceAuth'
-
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: DeviceAuth'
+    maximumCpuCount: true

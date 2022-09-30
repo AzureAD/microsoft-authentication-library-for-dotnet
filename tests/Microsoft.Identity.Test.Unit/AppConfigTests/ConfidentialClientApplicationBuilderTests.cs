@@ -16,7 +16,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
 {
     [TestClass]
-    [TestCategory("BuilderTests")]
+    [TestCategory(TestCategories.BuilderTests)]
     public class ConfidentialClientApplicationBuilderTests
     {
         [TestInitialize]
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             options.ClientSecret = "cats";
             var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
             var authorityInfo = ((ConfidentialClientApplication)app).ServiceBundle.Config.Authority.AuthorityInfo;
-            Assert.AreEqual("https://login.microsoftonline.com/the_tenant_id/", authorityInfo.CanonicalAuthority);
+            Assert.AreEqual(new Uri("https://login.microsoftonline.com/the_tenant_id/"), authorityInfo.CanonicalAuthority);
         }
 
         [TestMethod]
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                           .WithCertificate(cert)
                                                           .Build();
             var authority = ((ConfidentialClientApplication)app).ServiceBundle.Config.Authority;
-            Assert.AreEqual("https://login.microsoftonline.com/the_tenant_id/", authority.AuthorityInfo.CanonicalAuthority);
+            Assert.AreEqual(new Uri("https://login.microsoftonline.com/the_tenant_id/"), authority.AuthorityInfo.CanonicalAuthority);
         }
 
         [TestMethod]

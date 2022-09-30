@@ -3,11 +3,17 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <AssemblyName>Microsoft.Identity.Test.Common</AssemblyName>
+    <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.1.0" />
-    <PackageReference Include="NSubstitute" Version="4.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="NSubstitute" Version="4.4.0" />
+    <PackageReference Include="NSubstitute.Analyzers.CSharp" Version="1.0.15">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.7.0" />
     <PackageReference Include="System.Threading" Version="4.3.0" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
@@ -17,8 +23,5 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3" />
   </ItemGroup>
 </Project>

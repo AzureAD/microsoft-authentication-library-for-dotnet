@@ -9,6 +9,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Performance.Helpers;
 using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Performance
@@ -16,7 +17,7 @@ namespace Microsoft.Identity.Test.Performance
     /// <summary>
     /// Used to test the performance of acquiring tokens without cache and mocked network calls.
     /// </summary>
-    [MeanColumn, StdDevColumn, MedianColumn, MinColumn, MaxColumn]
+    [MinColumn, MaxColumn]
     public class AcquireTokenNoCacheTests
     {
         private ConfidentialClientApplication _cca;
@@ -49,7 +50,7 @@ namespace Microsoft.Identity.Test.Performance
             _cca.UserTokenCacheInternal.Accessor.Clear();
         }
 
-        [Benchmark(Description = "AcquireTokenForClient")]
+        [Benchmark(Description = PerfConstants.AcquireTokenForClient)]
         [BenchmarkCategory("No cache")]
         public async Task<AuthenticationResult> AcquireTokenForClient_TestAsync()
         {
@@ -58,7 +59,7 @@ namespace Microsoft.Identity.Test.Performance
               .ConfigureAwait(false);
         }
 
-        [Benchmark(Description = "AcquireTokenOBO")]
+        [Benchmark(Description = PerfConstants.AcquireTokenForObo)]
         [BenchmarkCategory("No cache")]
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOf_TestAsync()
         {

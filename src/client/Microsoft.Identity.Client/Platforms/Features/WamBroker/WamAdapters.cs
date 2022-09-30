@@ -26,12 +26,18 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
           ILoggerAdapter logger,
           string overriddenAuthority = null)
         {
+            // AAD plugin uses different parameters for intance_aware
+            if (authenticationRequestParameters.AppConfig.MultiCloudSupportEnabled)
+            {
+                webTokenRequest.Properties["discover"] = "home";
+            }
+
             AddExtraParamsToRequest(webTokenRequest, authenticationRequestParameters.ExtraQueryParameters);
+
             string authority = overriddenAuthority ??
-                 authenticationRequestParameters.AuthorityManager.OriginalAuthority.AuthorityInfo.CanonicalAuthority;
+                 authenticationRequestParameters.AuthorityManager.OriginalAuthority.AuthorityInfo.CanonicalAuthority.ToString();
             bool validate = authenticationRequestParameters.AuthorityInfo.ValidateAuthority;
             AddAuthorityParamToRequest(authority, validate, webTokenRequest);
-
             AddTelemetryPropertiesToRequest(webTokenRequest, logger);
         }
 

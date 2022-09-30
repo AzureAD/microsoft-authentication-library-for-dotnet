@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.IsNotNull(instance);
             Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
 
-            TestCommon.CreateServiceBundleWithCustomHttpManager(harness.HttpManager, authority: instance.AuthorityInfo.CanonicalAuthority, validateAuthority: true);
+            TestCommon.CreateServiceBundleWithCustomHttpManager(harness.HttpManager, authority: instance.AuthorityInfo.CanonicalAuthority.ToString(), validateAuthority: true);
             try
             {
                 AuthorityManager am = new AuthorityManager(new RequestContext(harness.ServiceBundle, Guid.NewGuid()), instance);
@@ -94,26 +94,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        public void CanonicalAuthorityInitTest()
+        [DataRow("https://login.microsoftonline.in/mytenant.com/", "https://login.microsoftonline.in/mytenant.com", DisplayName = "UriNoPort")]
+        [DataRow("https://login.microsoftonline.in/mytenant.com/", "https://login.microsoftonline.in:443/mytenant.com", DisplayName = "UriDefaultPort")]
+        [DataRow("https://login.microsoftonline.in:444/mytenant.com/", "https://login.microsoftonline.in:444/mytenant.com", DisplayName = "UriCustomPort")]
+        public void CanonicalAuthorityInitTest(string expected, string input)
         {
-            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-
-            const string UriNoPort = "https://login.microsoftonline.in/mytenant.com";
-            const string UriNoPortTailSlash = "https://login.microsoftonline.in/mytenant.com/";
-
-            const string UriDefaultPort = "https://login.microsoftonline.in:443/mytenant.com";
-
-            const string UriCustomPort = "https://login.microsoftonline.in:444/mytenant.com";
-            const string UriCustomPortTailSlash = "https://login.microsoftonline.in:444/mytenant.com/";
-
-            var authority = Authority.CreateAuthority(UriNoPort);
-            Assert.AreEqual(UriNoPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
-
-            authority = Authority.CreateAuthority(UriDefaultPort);
-            Assert.AreEqual(UriNoPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
-
-            authority = Authority.CreateAuthority(UriCustomPort);
-            Assert.AreEqual(UriCustomPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
+            var authority = Authority.CreateAuthority(input);
+            Assert.AreEqual(new Uri(expected), authority.AuthorityInfo.CanonicalAuthority);
         }
 
         [TestMethod]

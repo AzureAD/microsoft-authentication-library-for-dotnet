@@ -46,6 +46,21 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     instanceMetadataContent ?? TestConstants.DiscoveryJsonResponse));
         }
 
+        public static MockHttpMessageHandler AddWsTrustMockHandler(this MockHttpManager httpManager)
+        {
+            MockHttpMessageHandler wsTrustHandler = new MockHttpMessageHandler()
+            {
+                ExpectedUrl = "https://login.microsoftonline.com/common/userrealm/username",
+                ExpectedMethod = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{ \"ver\":\"1.0\",\"account_type\":\"Managed\",\"domain_name\":\"domain.onmicrosoft.com\",\"cloud_instance_name\":\"microsoftonline.com\",\"cloud_audience_urn\":\"urn:federation:MicrosoftOnline\"}")
+                }
+            };
+
+            return httpManager.AddMockHandler(wsTrustHandler);
+        }
+
         public static MockHttpMessageHandler AddResponseMockHandlerForPost(
             this MockHttpManager httpManager,
             HttpResponseMessage responseMessage,

@@ -16,12 +16,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
     [TestClass]
     public class DstsAuthorityTests : TestBase
-
     {
-        private const string TenantlessDstsAuthority = "https://foo.bar.test.core.azure-test.net/dstsv2/";
-        private const string TenantedDstsAuthority = "https://foo.bar.dsts.core.azure-test.net/dstsv2/tenantid";
-        private const string CommonAuthority = "https://foo.bar.dsts.core.azure-test.net/dstsv2/common";
-
         [TestInitialize]
         public override void TestInitialize()
         {
@@ -46,8 +41,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [DataTestMethod]
-        [DataRow(CommonAuthority)]
-        [DataRow(TenantedDstsAuthority)]
+        [DataRow(TestConstants.DstsAuthorityCommon)]
+        [DataRow(TestConstants.DstsAuthorityTenanted)]
         public async Task DstsClientCredentialSuccessfulTestAsync(string authority)
         {
             using (var httpManager = new MockHttpManager())
@@ -85,14 +80,17 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             }
         }
 
-        [TestMethod]
-        public void DstsEndpointsTest()
+        [DataTestMethod]
+        [DataRow(TestConstants.DstsAuthorityCommon)]
+        [DataRow(TestConstants.DstsAuthorityTenanted)]
+        public void DstsEndpointsTest(string authority)
         {
-            var instance = Authority.CreateAuthority(TenantedDstsAuthority);
+            var instance = Authority.CreateAuthority(authority);
 
-            Assert.AreEqual($"{TenantedDstsAuthority}/oauth2/v2.0/token", instance.GetTokenEndpoint());
-            Assert.AreEqual($"{TenantedDstsAuthority}/oauth2/v2.0/authorize", instance.GetAuthorizationEndpoint());
-            Assert.AreEqual($"{TenantedDstsAuthority}/oauth2/v2.0/devicecode", instance.GetDeviceCodeEndpoint());
+            Assert.AreEqual($"{authority}/oauth2/v2.0/token", instance.GetTokenEndpoint());
+            Assert.AreEqual($"{authority}/oauth2/v2.0/authorize", instance.GetAuthorizationEndpoint());
+            Assert.AreEqual($"{authority}/oauth2/v2.0/devicecode", instance.GetDeviceCodeEndpoint());
+            Assert.AreEqual($"https://some.url.dsts.core.azure-test.net/dstsv2/common/userrealm/", instance.AuthorityInfo.UserRealmUriPrefix);
         }
 
         [TestMethod]
@@ -100,7 +98,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             try
             {
-                var instance = Authority.CreateAuthority(TenantlessDstsAuthority);
+                var instance = Authority.CreateAuthority(TestConstants.DstsAuthorityTenantless);
 
                 Assert.Fail("test should have failed");
             }
@@ -114,20 +112,27 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void CreateAuthorityFromTenantedWithTenantTest()
         {
-            string tenantedAuth = TenantlessDstsAuthority + Guid.NewGuid().ToString() + "/";
-            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(tenantedAuth);
+            
+            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(TestConstants.DstsAuthorityTenanted);
+            Assert.AreEqual("tenantid", authority.TenantId);
+            
+            string updatedAuthority = authority.GetTenantedAuthority("tenant2");            
 
-            string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id");
-            Assert.AreEqual(tenantedAuth, updatedAuthority, "Not changed, original authority already has tenant id");
+            Assert.AreEqual(
+                TestConstants.DstsAuthorityTenanted,
+                updatedAuthority.TrimEnd('/'),
+                "Not changed, original authority already has tenant id");
 
-            string updatedAuthority2 = authority.GetTenantedAuthority("other_tenant_id", true);
-            Assert.AreEqual("https://foo.bar.test.core.azure-test.net/other_tenant_id/", updatedAuthority2, "Not changed with forced flag");
+            string updatedAuthority2 = authority.GetTenantedAuthority("tenant2", true);
+            Assert.AreEqual(
+                "https://some.url.dsts.core.azure-test.net/dstsv2/tenant2/",
+                updatedAuthority2);
         }
 
         [TestMethod]
         public void TenantlessAuthorityChanges()
         {
-            string commonAuth = TenantlessDstsAuthority + "common/";
+            string commonAuth = TestConstants.DstsAuthorityTenantless + "common/";
             Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(
                 commonAuth);
 

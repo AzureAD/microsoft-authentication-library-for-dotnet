@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Data.SqlClient;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -65,6 +66,49 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 "The pii message should contain the exception type");
             Assert.IsTrue(piiMessage.Contains(ExCode));
             Assert.IsFalse(piiMessage.Contains(ExMessage));
+        }
+
+        [TestMethod]        
+        public void IsRetryable()
+        {
+            MsalClientException msalClientException = new MsalClientException("code");
+            Assert.IsFalse(msalClientException.IsRetryable);
+
+            foreach (var code in new[] { 429, 408, 500, 501, 502, 503, 504, 505 })
+            {
+                HttpResponse httpResponse1 = new HttpResponse()
+                {
+                    Body = "body",
+                    StatusCode = (HttpStatusCode)code
+                };
+
+                var msalException = MsalServiceExceptionFactory.FromHttpResponse(ExCode, ExMessage, httpResponse1);
+
+                Assert.IsTrue(msalException.IsRetryable);
+            }
+
+
+            foreach (var code in new[] { 200, 300, 400, 401 })
+            {
+                HttpResponse httpResponse2 = new HttpResponse()
+                {
+                    Body = "body",
+                    StatusCode = (HttpStatusCode)code
+                };
+
+                var msalException = MsalServiceExceptionFactory.FromHttpResponse(ExCode, ExMessage, httpResponse2);
+
+                Assert.IsFalse(msalException.IsRetryable);
+            }
+
+            var ex = new MsalServiceException("request_timeout", "message");
+            Assert.IsTrue(ex.IsRetryable);
+            ex = new MsalServiceException("temporarily_unavailable", "message");
+            Assert.IsTrue(ex.IsRetryable);
+
+            ex = new MsalServiceException("other_error", "message");
+            Assert.IsFalse(ex.IsRetryable);
+
         }
 
         [TestMethod]
@@ -151,7 +195,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual("some_suberror", msalServiceException.SubError);
 
             ValidateExceptionProductInformation(msalException);
-        }
+        }      
 
         [TestMethod]
         public void InvalidClientException_IsRepackaged()

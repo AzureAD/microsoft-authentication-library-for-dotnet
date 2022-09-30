@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.WsTrust;
@@ -21,6 +23,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
         private readonly AcquireTokenByUsernamePasswordParameters _usernamePasswordParameters;
+        private readonly AuthenticationRequestParameters _requestParameters;
+        private readonly ILoggerAdapter _logger;
 
         public UsernamePasswordRequest(
             IServiceBundle serviceBundle,
@@ -29,19 +33,61 @@ namespace Microsoft.Identity.Client.Internal.Requests
             : base(serviceBundle, authenticationRequestParameters, usernamePasswordParameters)
         {
             _usernamePasswordParameters = usernamePasswordParameters;
+            _requestParameters = authenticationRequestParameters;
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(
                 authenticationRequestParameters.RequestContext,
                 serviceBundle);
+            _logger = _requestParameters.RequestContext.Logger;
         }
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
             await UpdateUsernameAsync().ConfigureAwait(false);
-            var userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
-            var msalTokenResponse =
-                await SendTokenRequestAsync(GetAdditionalBodyParameters(userAssertion), cancellationToken).ConfigureAwait(false);
+
+            MsalTokenResponse msalTokenResponse = await GetTokenResponseAsync(cancellationToken).ConfigureAwait(false);
+            
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+        }
+
+        private async Task<MsalTokenResponse> GetTokenResponseAsync(CancellationToken cancellationToken)
+        {
+            if (_requestParameters.AppConfig.IsBrokerEnabled)
+            {
+                _logger.Info("Broker is configured. Starting broker flow. ");
+
+                IBroker broker = _requestParameters.RequestContext.ServiceBundle.PlatformProxy.CreateBroker(_requestParameters.RequestContext.ServiceBundle.Config, null);
+
+                if (broker.IsBrokerInstalledAndInvokable(_requestParameters.AuthorityInfo.AuthorityType))
+                {
+                    _logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
+
+                    MsalTokenResponse brokerTokenResponse = await broker.AcquireTokenByUsernamePasswordAsync(
+                        _requestParameters,
+                        _usernamePasswordParameters)
+                        .ConfigureAwait(false);
+
+                    if (brokerTokenResponse != null)
+                    {
+                        _logger.Info("Broker attempt completed successfully. ");
+                        Metrics.IncrementTotalAccessTokensFromBroker();
+                        return brokerTokenResponse;
+                    }
+
+                    if (string.Equals(_requestParameters.AuthenticationScheme.AccessTokenType, Constants.PoPTokenType))
+                    {
+                        _logger.Error("A broker application is required for Proof-of-Possesion, but one could not be found or communicated with. See https://aka.ms/msal-net-pop");
+                        throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.CannotInvokeBrokerForPop);
+                    }
+                }
+
+                _logger.Info("Broker request not attempted because the broker is not available.");
+
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
+            var userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
+            return await SendTokenRequestAsync(GetAdditionalBodyParameters(userAssertion), cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<UserAssertion> FetchAssertionFromWsTrustAsync()
@@ -116,7 +162,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 dict[OAuth2Parameter.GrantType] = OAuth2GrantType.Password;
                 dict[OAuth2Parameter.Username] = _usernamePasswordParameters.Username;
-                dict[OAuth2Parameter.Password] = new string(_usernamePasswordParameters.Password.PasswordToCharArray());
+                dict[OAuth2Parameter.Password] = _usernamePasswordParameters.Password;
             }
 
             ISet<string> unionScope = new HashSet<string>()

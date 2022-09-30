@@ -23,7 +23,11 @@ using AndroidUri = Android.Net.Uri;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
+#if MAUI
+    [Preserve(AllMembers = true)]
+#else
     [AndroidNative.Runtime.Preserve(AllMembers = true)]
+#endif
     internal class AndroidContentProviderBroker : IBroker
     {
         private readonly AndroidBrokerHelper _brokerHelper;
@@ -336,7 +340,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             if (resultBundle != null)
             {
-                _logger.Verbose($"[Android broker] Content resolver operation completed succesfully. Operation: {operation} URI: {contentResolverUri}");
+                _logger.Verbose($"[Android broker] Content resolver operation completed successfully. Operation: {operation} URI: {contentResolverUri}");
             }
 
             return resultBundle;
@@ -388,6 +392,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                        MsalErrorMessage.MsalUiRequiredMessage,
                        null,
                        UiRequiredExceptionClassification.AcquireTokenSilentFailed);
+        }
+
+        public Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(AuthenticationRequestParameters authenticationRequestParameters, AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
+        {
+            return Task.FromResult<MsalTokenResponse>(null); // nop
         }
     }
 }

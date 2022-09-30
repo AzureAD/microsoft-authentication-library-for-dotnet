@@ -5,7 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Utils;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using Microsoft.Identity.Client.Platforms.net6;
+using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+#else
 using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -35,8 +40,8 @@ namespace Microsoft.Identity.Client.OAuth2
     [Preserve(AllMembers = true)]
     internal class DeviceAuthPayload
     {
-        private Lazy<long> _defaultDeviceAuthJWTTimeSpan = new Lazy<long>(() => (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
-        
+        private readonly Lazy<long> _defaultDeviceAuthJWTTimeSpan = new Lazy<long>(() => (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
+
         public DeviceAuthPayload(string audience, string nonce)
         {
             Nonce = nonce;

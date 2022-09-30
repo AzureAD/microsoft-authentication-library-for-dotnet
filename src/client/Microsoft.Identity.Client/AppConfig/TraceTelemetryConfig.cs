@@ -6,8 +6,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using JObject = System.Text.Json.Nodes.JsonObject;
+#else
 using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client
 {
@@ -46,29 +49,29 @@ namespace Microsoft.Identity.Client
         /// <remarks>This API is experimental and it may change in future versions of the library without an major version increment</remarks>
         public Action<ITelemetryEventPayload> DispatchAction => payload =>
         {
-            var j = new JObject();
+            var jsonObject = new JObject();
             foreach (var kvp in payload.BoolValues)
             {
-                j[kvp.Key] = kvp.Value;
+                jsonObject[kvp.Key] = kvp.Value;
             }
             foreach (var kvp in payload.IntValues)
             {
-                j[kvp.Key] = kvp.Value;
+                jsonObject[kvp.Key] = kvp.Value;
             }
             foreach (var kvp in payload.Int64Values)
             {
-                j[kvp.Key] = kvp.Value;
+                jsonObject[kvp.Key] = kvp.Value;
             }
             foreach (var kvp in payload.StringValues)
             {
-                j[kvp.Key] = kvp.Value;
+                jsonObject[kvp.Key] = kvp.Value;
             }
 
-            string msg = JsonConvert.SerializeObject(j, Formatting.None);
-#if WINDOWS_APP || NETSTANDARD2_0
-            Debug.WriteLine(msg);
+            string message = JsonHelper.JsonObjectToString(jsonObject);
+#if WINDOWS_APP
+            Debug.WriteLine(message);
 #else
-            Trace.TraceInformation(msg);
+            Trace.TraceInformation(message);
             Trace.Flush();
 #endif
         };

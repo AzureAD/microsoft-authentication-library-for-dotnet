@@ -1,5 +1,5 @@
 parameters:
-  DataFileDirectory: 'Debug'
+  DataFileDirectory: 'Release'
 
 jobs: #Build and stage projects
 
@@ -17,8 +17,6 @@ jobs: #Build and stage projects
   - template: template-prebuild-code-analysis.yaml
 
 - job: 'BuildAndStageProjects'
-  dependsOn:
-    - 'PreBuildCheck'
   pool:
       vmImage: 'windows-2022'
       demands:
@@ -29,18 +27,19 @@ jobs: #Build and stage projects
   # Bootstrap the build
   - template: template-build-and-prep-automation.yaml
 
-  # BUILD IOS APPCENTER APP PHASE
-- job: 'BuildiOSAppCenterApp'
-  dependsOn:
-    - 'PreBuildCheck'
-  pool:
-      name: Azure Pipelines
-      vmImage: macos-latest
-  variables:
-      runCodesignValidationInjection: false
+# Disabled because mono is unable to restore/build .NET 6 target in MSAL project
+# BUILD IOS APPCENTER APP PHASE
+#- job: 'BuildiOSAppCenterApp'
+#  dependsOn:
+#    - 'PreBuildCheck'
+#  pool:
+#      name: Azure Pipelines
+#      vmImage: macos-latest
+#  variables:
+#      runCodesignValidationInjection: false
 
-  steps:
-  - template: template-build-ios-automation.yaml
+#  steps:
+#  - template: template-build-ios-automation.yaml
 
   # BUILD ANDROID APPCENTER APP PHASE
 - job: 'BuildAndroidAppCenterApp'
@@ -60,7 +59,7 @@ jobs: #Build and stage projects
 # BUILD AND RUN CACHE COMPAT TESTS
 - job: 'BuildAndRunCacheCompatTests'
   dependsOn:
-    - 'PreBuildCheck'
+    - 'BuildAndStageProjects'
   pool:
       vmImage: 'windows-2022'
       demands:
@@ -70,7 +69,7 @@ jobs: #Build and stage projects
       runCodesignValidationInjection: false
 
   steps:
-  - template: template-build-and-run-cachecompat-tests.yaml
+  - template: template-cachecompat-automation.yaml
     parameters:
       BuildPlatform: '$(BuildPlatform)'
       BuildConfiguration: '$(BuildConfiguration)'
@@ -78,6 +77,8 @@ jobs: #Build and stage projects
 
   #Desktop Unit + Integration Tests
 - job: 'RunDesktopTests'
+  #strategy:
+  #  parallel: 5
   dependsOn:
   - 'BuildAndStageProjects'
   pool:
@@ -107,19 +108,19 @@ jobs: #Build and stage projects
       DataFileDirectory: ${{ parameters.DataFileDirectory }}
 
 # APP CENTER IOS MSAL TESTS PHASE
-- job: 'RunAppCenterIosMsalTests'
-  dependsOn:
-  - 'BuildAndStageProjects'
-  - 'BuildiOSAppCenterApp'
-  pool:
-    vmImage: 'windows-2022'
-  variables:
-    runCodesignValidationInjection: false
+# - job: 'RunAppCenterIosMsalTests'
+#   dependsOn:
+#   - 'BuildAndStageProjects'
+#   - 'BuildiOSAppCenterApp'
+#   pool:
+#     vmImage: 'windows-2022'
+#   variables:
+#     runCodesignValidationInjection: false
 
-  steps:
-  - template: template-ios-appcenter-tests.yaml
-    parameters:
-      DataFileDirectory: ${{ parameters.DataFileDirectory }}
+#   steps:
+#   - template: template-ios-appcenter-tests.yaml
+#     parameters:
+#       DataFileDirectory: ${{ parameters.DataFileDirectory }}
 
 
 # Disabled as the build agent is not compliant. Tracking issue https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3066

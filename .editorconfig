@@ -176,6 +176,8 @@ end_of_line = crlf
 # Code files
 [*.{cs,vb}]
 
+end_of_line = crlf
+
 # Async Threading Rules
 
 # Use Async suffix for async methods

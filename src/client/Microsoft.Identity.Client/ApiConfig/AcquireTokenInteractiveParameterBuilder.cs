@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.AppConfig;
 using System.Net.Http;
 using System.ComponentModel;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 #if iOS
 using UIKit;
@@ -103,7 +104,7 @@ namespace Microsoft.Identity.Client
         /// <param name="options">Data object with options</param>
         /// <returns>The builder to chain the .With methods</returns>
 #if WINDOWS_APP
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)] // hide everywhere but NetStandard and iOS
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)] 
 #endif
         public AcquireTokenInteractiveParameterBuilder WithSystemWebViewOptions(SystemWebViewOptions options)
         {

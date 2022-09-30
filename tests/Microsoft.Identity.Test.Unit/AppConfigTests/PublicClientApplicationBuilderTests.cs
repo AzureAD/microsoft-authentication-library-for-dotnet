@@ -5,19 +5,20 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Identity.Client;
-#if !NET5_WIN
+#if !NET5_WIN && !NET6_0
 using Microsoft.Identity.Client.Desktop;
 #endif
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
 {
     [TestClass]
-    [TestCategory("BuilderTests")]
+    [TestCategory(TestCategories.BuilderTests)]
     public class PublicClientApplicationBuilderTests
     {
         [TestMethod]
@@ -462,7 +463,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        [TestCategory("Regression")]
+        [TestCategory(TestCategories.Regression)]
         [WorkItem(1320)]
         public void TestAuthorityWithTenant()
         {
@@ -491,7 +492,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             AssertException.Throws<ArgumentNullException>(() =>
                PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                 .WithAuthority((string)null, "tid"));
+                                 .WithAuthority(null, "tid"));
 
             AssertException.Throws<ArgumentNullException>(() =>
              PublicClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -635,7 +636,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 #endif
 
-#if DESKTOP || NET_CORE
+#if (DESKTOP || NET_CORE) && !NET6_0
         [TestMethod]
         public void IsBrokerAvailable_OldDotNet()
         {

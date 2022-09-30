@@ -32,6 +32,8 @@ using System.Reflection;
 using System.Collections;
 using System.Globalization;
 using System.Text;
+using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
 using Microsoft.Identity.Json.Utilities.LinqBridge;
 #else
@@ -41,7 +43,7 @@ using Microsoft.Identity.Json.Serialization;
 
 namespace Microsoft.Identity.Json.Utilities
 {
-#if (DOTNET || PORTABLE || PORTABLE40) && !ANDROID && !NET_CORE
+#if (DOTNET || PORTABLE || PORTABLE40) && !NETSTANDARD2_0
     [Flags]
     internal enum MemberTypes
     {
@@ -52,7 +54,7 @@ namespace Microsoft.Identity.Json.Utilities
     }
 #endif
 
-#if PORTABLE && !ANDROID && !NET_CORE && !WINDOWS_APP
+#if PORTABLE && !NETSTANDARD2_0
     [Flags]
     internal enum BindingFlags
     {
@@ -96,7 +98,7 @@ namespace Microsoft.Identity.Json.Utilities
         {
             ValidationUtils.ArgumentNotNull(propertyInfo, nameof(propertyInfo));
 
-            MethodInfo m = propertyInfo.GetGetMethod(true);
+            MethodInfo? m = propertyInfo.GetGetMethod(true);
             if (m != null && m.IsVirtual)
             {
                 return true;
@@ -111,11 +113,11 @@ namespace Microsoft.Identity.Json.Utilities
             return false;
         }
 
-        public static MethodInfo GetBaseDefinition(this PropertyInfo propertyInfo)
+        public static MethodInfo? GetBaseDefinition(this PropertyInfo propertyInfo)
         {
             ValidationUtils.ArgumentNotNull(propertyInfo, nameof(propertyInfo));
 
-            MethodInfo m = propertyInfo.GetGetMethod(true);
+            MethodInfo? m = propertyInfo.GetGetMethod(true);
             if (m != null)
             {
                 return m.GetBaseDefinition();
@@ -126,11 +128,13 @@ namespace Microsoft.Identity.Json.Utilities
 
         public static bool IsPublic(PropertyInfo property)
         {
-            if (property.GetGetMethod() != null && property.GetGetMethod().IsPublic)
+            var getMethod = property.GetGetMethod();
+            if (getMethod != null && getMethod.IsPublic)
             {
                 return true;
             }
-            if (property.GetSetMethod() != null && property.GetSetMethod().IsPublic)
+            var setMethod = property.GetSetMethod();
+            if (setMethod != null && setMethod.IsPublic)
             {
                 return true;
             }
@@ -138,12 +142,12 @@ namespace Microsoft.Identity.Json.Utilities
             return false;
         }
 
-        public static Type GetObjectType(object v)
+        public static Type? GetObjectType(object? v)
         {
             return v?.GetType();
         }
 
-        public static string GetTypeName(Type t, TypeNameAssemblyFormatHandling assemblyFormat, ISerializationBinder binder)
+        public static string GetTypeName(Type t, TypeNameAssemblyFormatHandling assemblyFormat, ISerializationBinder? binder)
         {
             string fullyQualifiedTypeName = GetFullyQualifiedTypeName(t, binder);
 
@@ -158,12 +162,12 @@ namespace Microsoft.Identity.Json.Utilities
             }
         }
 
-        private static string GetFullyQualifiedTypeName(Type t, ISerializationBinder binder)
+        private static string GetFullyQualifiedTypeName(Type t, ISerializationBinder? binder)
         {
             if (binder != null)
             {
-                binder.BindToName(t, out string assemblyName, out string typeName);
-#if NET20 || NET35
+                binder.BindToName(t, out string? assemblyName, out string? typeName);
+#if (NET20 || NET35)
                 // for older SerializationBinder implementations that didn't have BindToName
                 if (assemblyName == null & typeName == null)
                 {
@@ -189,10 +193,6 @@ namespace Microsoft.Identity.Json.Utilities
                 switch (current)
                 {
                     case '[':
-                        writingAssemblyName = false;
-                        skippingAssemblyDetails = false;
-                        builder.Append(current);
-                        break;
                     case ']':
                         writingAssemblyName = false;
                         skippingAssemblyDetails = false;
@@ -230,7 +230,7 @@ namespace Microsoft.Identity.Json.Utilities
                 return true;
             }
 
-            return GetDefaultConstructor(t, nonPublic) != null;
+            return (GetDefaultConstructor(t, nonPublic) != null);
         }
 
         public static ConstructorInfo GetDefaultConstructor(Type t)
@@ -265,12 +265,12 @@ namespace Microsoft.Identity.Json.Utilities
         {
             ValidationUtils.ArgumentNotNull(t, nameof(t));
 
-            return t.IsGenericType() && t.GetGenericTypeDefinition() == typeof(Nullable<>);
+            return (t.IsGenericType() && t.GetGenericTypeDefinition() == typeof(Nullable<>));
         }
 
         public static Type EnsureNotNullableType(Type t)
         {
-            return IsNullableType(t)
+            return (IsNullableType(t))
                 ? Nullable.GetUnderlyingType(t)
                 : t;
         }
@@ -290,7 +290,7 @@ namespace Microsoft.Identity.Json.Utilities
             }
 
             Type t = type.GetGenericTypeDefinition();
-            return t == genericInterfaceDefinition;
+            return (t == genericInterfaceDefinition);
         }
 
         public static bool ImplementsGenericDefinition(Type type, Type genericInterfaceDefinition)
@@ -298,7 +298,7 @@ namespace Microsoft.Identity.Json.Utilities
             return ImplementsGenericDefinition(type, genericInterfaceDefinition, out _);
         }
 
-        public static bool ImplementsGenericDefinition(Type type, Type genericInterfaceDefinition, out Type implementingType)
+        public static bool ImplementsGenericDefinition(Type type, Type genericInterfaceDefinition, [NotNullWhen(true)]out Type? implementingType)
         {
             ValidationUtils.ArgumentNotNull(type, nameof(type));
             ValidationUtils.ArgumentNotNull(genericInterfaceDefinition, nameof(genericInterfaceDefinition));
@@ -345,7 +345,7 @@ namespace Microsoft.Identity.Json.Utilities
             return InheritsGenericDefinition(type, genericClassDefinition, out _);
         }
 
-        public static bool InheritsGenericDefinition(Type type, Type genericClassDefinition, out Type implementingType)
+        public static bool InheritsGenericDefinition(Type type, Type genericClassDefinition, out Type? implementingType)
         {
             ValidationUtils.ArgumentNotNull(type, nameof(type));
             ValidationUtils.ArgumentNotNull(genericClassDefinition, nameof(genericClassDefinition));
@@ -358,7 +358,7 @@ namespace Microsoft.Identity.Json.Utilities
             return InheritsGenericDefinitionInternal(type, genericClassDefinition, out implementingType);
         }
 
-        private static bool InheritsGenericDefinitionInternal(Type currentType, Type genericClassDefinition, out Type implementingType)
+        private static bool InheritsGenericDefinitionInternal(Type currentType, Type genericClassDefinition, out Type? implementingType)
         {
             do
             {
@@ -381,7 +381,7 @@ namespace Microsoft.Identity.Json.Utilities
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns>The type of the typed collection's items.</returns>
-        public static Type GetCollectionItemType(Type type)
+        public static Type? GetCollectionItemType(Type type)
         {
             ValidationUtils.ArgumentNotNull(type, nameof(type));
 
@@ -389,41 +389,35 @@ namespace Microsoft.Identity.Json.Utilities
             {
                 return type.GetElementType();
             }
-            if (ImplementsGenericDefinition(type, typeof(IEnumerable<>), out Type genericListType))
+            if (ImplementsGenericDefinition(type, typeof(IEnumerable<>), out Type? genericListType))
             {
-                if (genericListType.IsGenericTypeDefinition())
+                if (genericListType!.IsGenericTypeDefinition())
                 {
-#pragma warning disable CA2201 // Do not raise reserved exception types
                     throw new Exception("Type {0} is not a collection.".FormatWith(CultureInfo.InvariantCulture, type));
-#pragma warning restore CA2201 // Do not raise reserved exception types
                 }
 
-                return genericListType.GetGenericArguments()[0];
+                return genericListType!.GetGenericArguments()[0];
             }
             if (typeof(IEnumerable).IsAssignableFrom(type))
             {
                 return null;
             }
 
-#pragma warning disable CA2201 // Do not raise reserved exception types
             throw new Exception("Type {0} is not a collection.".FormatWith(CultureInfo.InvariantCulture, type));
-#pragma warning restore CA2201 // Do not raise reserved exception types
         }
 
-        public static void GetDictionaryKeyValueTypes(Type dictionaryType, out Type keyType, out Type valueType)
+        public static void GetDictionaryKeyValueTypes(Type dictionaryType, out Type? keyType, out Type? valueType)
         {
             ValidationUtils.ArgumentNotNull(dictionaryType, nameof(dictionaryType));
 
-            if (ImplementsGenericDefinition(dictionaryType, typeof(IDictionary<,>), out Type genericDictionaryType))
+            if (ImplementsGenericDefinition(dictionaryType, typeof(IDictionary<,>), out Type? genericDictionaryType))
             {
-                if (genericDictionaryType.IsGenericTypeDefinition())
+                if (genericDictionaryType!.IsGenericTypeDefinition())
                 {
-#pragma warning disable CA2201 // Do not raise reserved exception types
                     throw new Exception("Type {0} is not a dictionary.".FormatWith(CultureInfo.InvariantCulture, dictionaryType));
-#pragma warning restore CA2201 // Do not raise reserved exception types
                 }
 
-                Type[] dictionaryGenericArguments = genericDictionaryType.GetGenericArguments();
+                Type[] dictionaryGenericArguments = genericDictionaryType!.GetGenericArguments();
 
                 keyType = dictionaryGenericArguments[0];
                 valueType = dictionaryGenericArguments[1];
@@ -436,9 +430,7 @@ namespace Microsoft.Identity.Json.Utilities
                 return;
             }
 
-#pragma warning disable CA2201 // Do not raise reserved exception types
             throw new Exception("Type {0} is not a dictionary.".FormatWith(CultureInfo.InvariantCulture, dictionaryType));
-#pragma warning restore CA2201 // Do not raise reserved exception types
         }
 
         /// <summary>
@@ -465,25 +457,24 @@ namespace Microsoft.Identity.Json.Utilities
             }
         }
 
-        /// <summary>
-        /// Determines whether the member is an indexed property.
-        /// </summary>
-        /// <param name="member">The member.</param>
-        /// <returns>
-        /// 	<c>true</c> if the member is an indexed property; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool IsIndexedProperty(MemberInfo member)
+        public static bool IsByRefLikeType(Type type)
         {
-            ValidationUtils.ArgumentNotNull(member, nameof(member));
-
-            if (member is PropertyInfo propertyInfo)
-            {
-                return IsIndexedProperty(propertyInfo);
-            }
-            else
+            if (!type.IsValueType())
             {
                 return false;
             }
+
+            // IsByRefLike flag on type is not available in netstandard2.0
+            Attribute[] attributes = GetAttributes(type, null, false);
+            for (int i = 0; i < attributes.Length; i++)
+            {
+                if (string.Equals(attributes[i].GetType().FullName, "System.Runtime.CompilerServices.IsByRefLikeAttribute", StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -497,7 +488,7 @@ namespace Microsoft.Identity.Json.Utilities
         {
             ValidationUtils.ArgumentNotNull(property, nameof(property));
 
-            return property.GetIndexParameters().Length > 0;
+            return (property.GetIndexParameters().Length > 0);
         }
 
         /// <summary>
@@ -535,7 +526,7 @@ namespace Microsoft.Identity.Json.Utilities
         /// <param name="member">The member.</param>
         /// <param name="target">The target.</param>
         /// <param name="value">The value.</param>
-        public static void SetMemberValue(MemberInfo member, object target, object value)
+        public static void SetMemberValue(MemberInfo member, object target, object? value)
         {
             ValidationUtils.ArgumentNotNull(member, nameof(member));
             ValidationUtils.ArgumentNotNull(target, nameof(target));
@@ -588,7 +579,7 @@ namespace Microsoft.Identity.Json.Utilities
                     {
                         return true;
                     }
-                    return propertyInfo.GetGetMethod(nonPublic) != null;
+                    return (propertyInfo.GetGetMethod(nonPublic) != null);
                 default:
                     return false;
             }
@@ -638,7 +629,7 @@ namespace Microsoft.Identity.Json.Utilities
                     {
                         return true;
                     }
-                    return propertyInfo.GetSetMethod(nonPublic) != null;
+                    return (propertyInfo.GetSetMethod(nonPublic) != null);
                 default:
                     return false;
             }
@@ -734,19 +725,19 @@ namespace Microsoft.Identity.Json.Utilities
             return true;
         }
 
-        public static T GetAttribute<T>(object attributeProvider) where T : Attribute
+        public static T? GetAttribute<T>(object attributeProvider) where T : Attribute
         {
             return GetAttribute<T>(attributeProvider, true);
         }
 
-        public static T GetAttribute<T>(object attributeProvider, bool inherit) where T : Attribute
+        public static T? GetAttribute<T>(object attributeProvider, bool inherit) where T : Attribute
         {
             T[] attributes = GetAttributes<T>(attributeProvider, inherit);
 
             return attributes?.FirstOrDefault();
         }
 
-#if !(DOTNET || PORTABLE) || ANDROID
+#if !(DOTNET || PORTABLE) || NETSTANDARD2_0
         public static T[] GetAttributes<T>(object attributeProvider, bool inherit) where T : Attribute
         {
             Attribute[] a = GetAttributes(attributeProvider, typeof(T), inherit);
@@ -759,7 +750,7 @@ namespace Microsoft.Identity.Json.Utilities
             return a.Cast<T>().ToArray();
         }
 
-        public static Attribute[] GetAttributes(object attributeProvider, Type attributeType, bool inherit)
+        public static Attribute[] GetAttributes(object attributeProvider, Type? attributeType, bool inherit)
         {
             ValidationUtils.ArgumentNotNull(attributeProvider, nameof(attributeProvider));
 
@@ -774,7 +765,7 @@ namespace Microsoft.Identity.Json.Utilities
                     object[] array = attributeType != null ? t.GetCustomAttributes(attributeType, inherit) : t.GetCustomAttributes(inherit);
                     Attribute[] attributes = array.Cast<Attribute>().ToArray();
 
-#if NET20 || NET35
+#if (NET20 || NET35)
                     // ye olde .NET GetCustomAttributes doesn't respect the inherit argument
                     if (inherit && t.BaseType != null)
                     {
@@ -810,14 +801,14 @@ namespace Microsoft.Identity.Json.Utilities
             return GetAttributes(attributeProvider, typeof(T), inherit).Cast<T>().ToArray();
         }
 
-        public static Attribute[] GetAttributes(object provider, Type attributeType, bool inherit)
+        public static Attribute[] GetAttributes(object provider, Type? attributeType, bool inherit)
         {
             switch (provider)
             {
                 case Type t:
                     return (Attribute[])((attributeType != null)
                         ? t.GetTypeInfo().GetCustomAttributes(attributeType, inherit).ToArray()
-                        : t.GetTypeInfo().GetCustomAttributes(inherit).ToArray());
+                        : t.GetTypeInfo().GetCustomAttributes(inherit).ToArray();
                 case Assembly a:
                     return (attributeType != null) ? a.GetCustomAttributes(attributeType).ToArray() : a.GetCustomAttributes().ToArray();
                 case MemberInfo memberInfo:
@@ -828,18 +819,16 @@ namespace Microsoft.Identity.Json.Utilities
                     return (Attribute[])((attributeType != null) ? parameterInfo.GetCustomAttributes(attributeType, inherit).ToArray() : parameterInfo.GetCustomAttributes(inherit).ToArray());
             }
 
-#pragma warning disable CA2201 // Do not raise reserved exception types
             throw new Exception("Cannot get attributes from '{0}'.".FormatWith(CultureInfo.InvariantCulture, provider));
-#pragma warning restore CA2201 // Do not raise reserved exception types
         }
 #endif
 
-        public static StructMultiKey<string, string> SplitFullyQualifiedTypeName(string fullyQualifiedTypeName)
+        public static StructMultiKey<string?, string> SplitFullyQualifiedTypeName(string fullyQualifiedTypeName)
         {
             int? assemblyDelimiterIndex = GetAssemblyDelimiterIndex(fullyQualifiedTypeName);
 
             string typeName;
-            string assemblyName;
+            string? assemblyName;
 
             if (assemblyDelimiterIndex != null)
             {
@@ -852,7 +841,7 @@ namespace Microsoft.Identity.Json.Utilities
                 assemblyName = null;
             }
 
-            return new StructMultiKey<string, string>(assemblyName, typeName);
+            return new StructMultiKey<string?, string>(assemblyName, typeName);
         }
 
         private static int? GetAssemblyDelimiterIndex(string fullyQualifiedTypeName)
@@ -1053,7 +1042,7 @@ namespace Microsoft.Identity.Json.Utilities
             return isMethodOverriden;
         }
 
-        public static object GetDefaultValue(Type type)
+        public static object? GetDefaultValue(Type type)
         {
             if (!type.IsValueType())
             {

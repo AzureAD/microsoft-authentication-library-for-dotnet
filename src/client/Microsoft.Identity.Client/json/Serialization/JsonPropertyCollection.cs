@@ -29,6 +29,9 @@ using System.Text;
 using System.Collections.ObjectModel;
 using Microsoft.Identity.Json.Utilities;
 using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Identity.Json.Serialization
 {
@@ -61,7 +64,7 @@ namespace Microsoft.Identity.Json.Serialization
         /// <returns>The key for the specified element.</returns>
         protected override string GetKeyForItem(JsonProperty item)
         {
-            return item.PropertyName;
+            return item.PropertyName!;
         }
 
         /// <summary>
@@ -70,6 +73,8 @@ namespace Microsoft.Identity.Json.Serialization
         /// <param name="property">The property to add to the collection.</param>
         public void AddProperty(JsonProperty property)
         {
+            MiscellaneousUtils.Assert(property.PropertyName != null);
+
             if (Contains(property.PropertyName))
             {
                 // don't overwrite existing property with ignored property
@@ -104,7 +109,7 @@ namespace Microsoft.Identity.Json.Serialization
                             // current property is hidden by the existing so don't add it
                             return;
                         }
-
+                        
                         if (_type.ImplementInterface(existingProperty.DeclaringType) && _type.ImplementInterface(property.DeclaringType))
                         {
                             // current property was already defined on another interface
@@ -129,9 +134,9 @@ namespace Microsoft.Identity.Json.Serialization
         /// </summary>
         /// <param name="propertyName">Name of the property.</param>
         /// <returns>A matching property if found.</returns>
-        public JsonProperty GetClosestMatchProperty(string propertyName)
+        public JsonProperty? GetClosestMatchProperty(string propertyName)
         {
-            JsonProperty property = GetProperty(propertyName, StringComparison.Ordinal);
+            JsonProperty? property = GetProperty(propertyName, StringComparison.Ordinal);
             if (property == null)
             {
                 property = GetProperty(propertyName, StringComparison.OrdinalIgnoreCase);
@@ -140,9 +145,7 @@ namespace Microsoft.Identity.Json.Serialization
             return property;
         }
 
-#pragma warning disable CS0108 // Member hides inherited member; missing new keyword
-        private bool TryGetValue(string key, out JsonProperty item)
-#pragma warning restore CS0108 // Member hides inherited member; missing new keyword
+        private bool TryGetValue(string key, [NotNullWhen(true)]out JsonProperty? item)
         {
             if (Dictionary == null)
             {
@@ -159,12 +162,12 @@ namespace Microsoft.Identity.Json.Serialization
         /// <param name="propertyName">The name of the property to get.</param>
         /// <param name="comparisonType">Type property name string comparison.</param>
         /// <returns>A matching property if found.</returns>
-        public JsonProperty GetProperty(string propertyName, StringComparison comparisonType)
+        public JsonProperty? GetProperty(string propertyName, StringComparison comparisonType)
         {
             // KeyedCollection has an ordinal comparer
             if (comparisonType == StringComparison.Ordinal)
             {
-                if (TryGetValue(propertyName, out JsonProperty property))
+                if (TryGetValue(propertyName, out JsonProperty? property))
                 {
                     return property;
                 }

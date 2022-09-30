@@ -15,5 +15,22 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string Zero = "0";
         public const string CommaDelimiter = ",";
         public const string PlatformFields = "platform_fields";
+
+#region Telemetry Client Constants
+
+        public const string AcquireTokenEventName = "acquire_token";
+        public const string RemainingLifetime = "RemainingLifetime";
+        public const string PopToken = "PopToken";
+        public const string TokenSource = "TokenSource";
+        public const string CacheInfoTelemetry = "CacheInfoTelemetry";
+        public const string ErrorCode = "ErrorCode";
+        public const string Duration = "Duration";
+        public const string Succeeded = "Succeeded";
+        public const string DurationInCache = "DurationInCache";
+        public const string DurationInHttp = "DurationInHttp";
+        public const string ActivityId = "ActivityId";
+        public const string Resource = "Resource";
+
+#endregion
     }
 }

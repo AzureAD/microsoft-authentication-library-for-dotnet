@@ -40,11 +40,20 @@ namespace Microsoft.Identity.Test.Unit
         public const string Utid2 = "my-utid2";
 
         public const string Common = "common";
+        public const string Organizations = "organizations";
+        public const string Consumers = "consumers";
+        public const string Guest = "guest";
+        public const string Home = "home";
         public const string TenantId = "751a212b-4003-416e-b600-e1f48e40db9f";
         public const string TenantId2 = "aaaaaaab-aaaa-aaaa-bbbb-aaaaaaaaaaaa";
         public const string AadTenantId = "751a212b-4003-416e-b600-e1f48e40db9f";
         public const string MsaTenantId = "9188040d-6c67-4c5b-b112-36a304b66dad";
-        public const string AadAuthorityWithTestTenantId = "https://login.microsoftonline.com/751a212b-4003-416e-b600-e1f48e40db9f/";
+        public const string SomeTenantId = "sometenantid";
+        public const string CatsAreAwesome = "catsareawesome";
+        public const string TenantIdNumber1 = "12345679";
+        public const string TenantIdNumber2 = "987654321";
+        public const string TenantIdString = "tenantid";
+        public const string AadAuthorityWithTestTenantId = "https://login.microsoftonline.com/" + AadTenantId + "/";
         public static readonly IDictionary<string, string> s_clientAssertionClaims = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { { "client_ip", "some_ip" }, { "aud", "some_audience" } };
         public const string RTSecret = "someRT";
         public const string ATSecret = "some-access-token";
@@ -58,51 +67,65 @@ namespace Microsoft.Identity.Test.Unit
         public const string ProductionPrefRegionalEnvironment = "centralus.r.login.microsoftonline.com";
         public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.r.login.microsoftonline.com";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
+        public const string SovereignNetworkEnvironmentDE = "login.microsoftonline.de";
+        public const string SovereignNetworkEnvironmentCN = "login.partner.microsoftonline.cn";
         public const string PpeEnvironment = "login.windows-ppe.net";
         public const string PpeOrgEnvironment = "login.windows-ppe.org"; //This environment is not known to MSAL or AAD
 
-        public const string AuthorityNotKnownCommon = "https://sts.access.edu/common/";
+        public const string AuthorityNotKnownCommon = "https://sts.access.edu/" + Common + "/";
         public const string AuthorityNotKnownTenanted = "https://sts.access.edu/" + Utid + "/";
 
-        public const string SovereignNetworkEnvironment = "login.microsoftonline.de";
-        public const string AuthorityHomeTenant = "https://" + ProductionPrefNetworkEnvironment + "/home/";
+        public const string AuthorityHomeTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Home + "/";
         public const string AuthorityUtidTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
         public const string AuthorityUtid2Tenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid2 + "/";
-        public const string AuthorityGuestTenant = "https://" + ProductionPrefNetworkEnvironment + "/guest/";
-        public const string AuthorityCommonTenant = "https://" + ProductionPrefNetworkEnvironment + "/common/";
+        public const string AuthorityGuestTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Guest + "/";
+        public const string AuthorityCommonTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Common + "/";
         public const string AuthorityRegional = "https://" + ProductionPrefRegionalEnvironment + "/" + TenantId + "/";
         public const string AuthorityRegionalInvalidRegion = "https://" + ProductionPrefInvalidRegionEnvironment + "/" + TenantId + "/";
         public const string AuthorityTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + TenantId + "/";
-        public const string AuthorityCommonTenantNotPrefAlias = "https://" + ProductionNotPrefEnvironmentAlias + "/common/";
-        public const string AuthorityCommonPpeAuthority = "https://" + PpeEnvironment + "/common/";
-
-        public const string PrefCacheAuthorityCommonTenant = "https://" + ProductionPrefCacheEnvironment + "/common/";
-        public const string AuthorityOrganizationsTenant = "https://" + ProductionPrefNetworkEnvironment + "/organizations/";
-        public const string AuthorityConsumersTenant = "https://" + ProductionPrefNetworkEnvironment + "/consumers/";
-        public const string AuthorityConsumerTidTenant = "https://" + ProductionPrefNetworkEnvironment + "/9188040d-6c67-4c5b-b112-36a304b66dad/";
-        public const string AuthorityGuidTenant = "https://" + ProductionPrefNetworkEnvironment + "/12345679/";
-        public const string AuthorityGuidTenant2 = "https://" + ProductionPrefNetworkEnvironment + "/987654321/";
+        public const string AuthorityCommonTenantNotPrefAlias = "https://" + ProductionNotPrefEnvironmentAlias + "/" + Common + "/";
+        public const string AuthorityCommonPpeAuthority = "https://" + PpeEnvironment + "/" + Common + "/";
+        public const string AuthoritySovereignDETenant = "https://" + SovereignNetworkEnvironmentDE + "/" + TenantId + "/";
+        public const string AuthoritySovereignCNTenant = "https://" + SovereignNetworkEnvironmentCN + "/" + TenantId + "/";
+        public const string AuthoritySovereignDECommon = "https://" + SovereignNetworkEnvironmentDE + "/" + Common + "/";
+        public const string AuthoritySovereignCNCommon = "https://" + SovereignNetworkEnvironmentCN + "/" + Common + "/";
+        
+        public const string PrefCacheAuthorityCommonTenant = "https://" + ProductionPrefCacheEnvironment + "/" + Common + "/";
+        public const string AuthorityOrganizationsTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Organizations + "/";
+        public const string AuthorityConsumersTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Consumers + "/";
+        public const string AuthorityConsumerTidTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + MsaTenantId + "/";
+        public const string AuthorityGuidTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + TenantIdNumber1 + "/";
+        public const string AuthorityGuidTenant2 = "https://" + ProductionPrefNetworkEnvironment + "/" + TenantIdNumber2 + "/";
         public const string AuthorityWindowsNet = "https://" + ProductionPrefCacheEnvironment + "/" + Utid + "/";
         public const string ADFSAuthority = "https://fs.msidlab8.com/adfs/";
         public const string ADFSAuthority2 = "https://someAdfs.com/adfs/";
 
+        public const string DstsAuthorityTenantless = "https://some.url.dsts.core.azure-test.net/dstsv2/";
+        public const string DstsAuthorityTenanted = "https://some.url.dsts.core.azure-test.net/dstsv2/" + TenantIdString;
+        public const string DstsAuthorityCommon = "https://some.url.dsts.core.azure-test.net/dstsv2/" + Common;
+
+        public const string B2CLoginGlobal = ".b2clogin.com";
+        public const string B2CLoginUSGov = ".b2clogin.us";
+        public const string B2CLoginMoonCake = ".b2clogin.cn";
+        public const string B2CLoginBlackforest = ".b2clogin.de";
+        public const string B2CLoginCustomDomain = CatsAreAwesome + ".com";
         public const string B2CSignUpSignIn = "b2c_1_susi";
         public const string B2CProfileWithDot = "b2c.someprofile";
         public const string B2CEditProfile = "b2c_1_editprofile";
-        public const string B2CEnvironment = "sometenantid.b2clogin.com";
-        public static readonly string B2CAuthority = $"https://login.microsoftonline.in/tfp/tenant/{B2CSignUpSignIn}/";
-        public static readonly string B2CLoginAuthority = $"https://sometenantid.b2clogin.com/tfp/sometenantid/{B2CSignUpSignIn}/";
-        public static readonly string B2CLoginAuthorityWrongHost = $"https://anothertenantid.b2clogin.com/tfp/sometenantid/{B2CSignUpSignIn}/";
-        public static readonly string B2CCustomDomain = $"https://catsareamazing.com/tfp/catsareamazing/{B2CSignUpSignIn}/";
-        public static readonly string B2CLoginAuthorityUsGov = $"https://sometenantid.b2clogin.us/tfp/sometenantid/{B2CSignUpSignIn}/";
-        public static readonly string B2CLoginAuthorityMoonCake = $"https://sometenantid.b2clogin.cn/tfp/sometenantid/{B2CSignUpSignIn}/";
-        public static readonly string B2CLoginAuthorityBlackforest = $"https://sometenantid.b2clogin.de/tfp/sometenantid/{B2CSignUpSignIn}/";
-        public static readonly string B2CSuSiHomeAccountIdentifer = $"{Uid}-{B2CSignUpSignIn}.{Utid}";
-        public static readonly string B2CSuSiHomeAccountObjectId = $"{Uid}-{B2CSignUpSignIn}";
-        public static readonly string B2CProfileWithDotHomeAccountIdentifer = $"{Uid}-{B2CProfileWithDot}.{Utid}";
-        public static readonly string B2CProfileWithDotHomeAccountObjectId = $"{Uid}-{B2CProfileWithDot}";
-        public static readonly string B2CEditProfileHomeAccountIdentifer = $"{Uid}-{B2CEditProfile}.{Utid}";
-        public static readonly string B2CEditProfileHomeAccountObjectId = $"{Uid}-{B2CEditProfile}";
+        public const string B2CEnvironment = SomeTenantId + ".b2clogin.com";
+        public const string B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/" + B2CSignUpSignIn + "/";
+        public const string B2CLoginAuthority = "https://" + B2CEnvironment + "/tfp/" +  SomeTenantId + "/" + B2CSignUpSignIn + "/";
+        public const string B2CLoginAuthorityWrongHost = "https://anothertenantid.b2clogin.com/tfp/" + SomeTenantId + "/" + B2CSignUpSignIn + "/";
+        public const string B2CCustomDomain = "https://" + B2CLoginCustomDomain + "/tfp/" + CatsAreAwesome + "/" + B2CSignUpSignIn + "/";
+        public const string B2CLoginAuthorityUsGov = "https://" + SomeTenantId + B2CLoginUSGov + "/tfp/" + SomeTenantId + "/" + B2CSignUpSignIn + "/";
+        public const string B2CLoginAuthorityMoonCake = "https://" + SomeTenantId + B2CLoginMoonCake + "/tfp/" + SomeTenantId + "/" + B2CSignUpSignIn + "/";
+        public const string B2CLoginAuthorityBlackforest = "https://" + SomeTenantId + B2CLoginBlackforest + "/tfp/" + SomeTenantId + "/" + B2CSignUpSignIn + "/";
+        public const string B2CSuSiHomeAccountIdentifer = Uid + "-" + B2CSignUpSignIn + "." + Utid;
+        public const string B2CSuSiHomeAccountObjectId = Uid + "-" + B2CSignUpSignIn;
+        public const string B2CProfileWithDotHomeAccountIdentifer = Uid + "-" + B2CProfileWithDot + "." + Utid;
+        public const string B2CProfileWithDotHomeAccountObjectId = Uid + "-" + B2CProfileWithDot;
+        public const string B2CEditProfileHomeAccountIdentifer = Uid + "-" + B2CEditProfile + "." + Utid;
+        public const string B2CEditProfileHomeAccountObjectId = Uid + "-" + B2CEditProfile;
 
         public const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
         public const string ClientId2 = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
@@ -179,6 +202,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         }
 
         public const string Bearer = "Bearer";
+        public const string Pop = "PoP";
 
         public static IDictionary<string, string> ExtraQueryParameters
         {
@@ -194,11 +218,17 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         }
 
         public const string MsalCCAKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/";
+        public const string MsalCCAKeyVaultSecretName = "AzureADIdentityDivisionTestAgentSecret";
         public const string MsalOBOKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/";
+        public const string MsalOBOKeyVaultSecretName = "IdentityDivisionDotNetOBOServiceSecret";
         public const string MsalArlingtonOBOKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
+        public const string MsalArlingtonOBOKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret";
         public const string FociApp1 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app1/";
+        public const string FociApp1KeyVaultSecretName = "automation-foci-app1";
         public const string FociApp2 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app2/";
+        public const string FociApp2KeyVaultSecretName = "automation-foci-app2";
         public const string MsalArlingtonCCAKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
+        public const string MsalArlingtonCCAKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret";
 
         public enum AuthorityType { B2C };
         public static string[] s_prodEnvAliases = new[] {
@@ -427,5 +457,6 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         public const string ClientRedirectUri = "http://localhost:8080";
         public static readonly SortedSet<string> s_supportedScopes = new SortedSet<string>(new[] { "openid", "email", "profile" }, StringComparer.OrdinalIgnoreCase);
         public const string ADFS2019ClientSecretURL = "https://buildautomation.vault.azure.net/secrets/ADFS2019ClientCredSecret/";
+        public const string ADFS2019ClientSecretName = "ADFS2019ClientCredSecret";
     }
 }

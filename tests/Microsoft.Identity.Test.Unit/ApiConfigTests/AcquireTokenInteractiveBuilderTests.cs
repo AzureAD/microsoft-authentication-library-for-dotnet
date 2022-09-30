@@ -18,7 +18,7 @@ using NSubstitute;
 namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 {
     [TestClass]
-    [TestCategory("BuilderTests")]
+    [TestCategory(TestCategories.BuilderTests)]
     public class AcquireTokenInteractiveBuilderTests
     {
         private AcquireTokenInteractiveBuilderHarness _harness;
