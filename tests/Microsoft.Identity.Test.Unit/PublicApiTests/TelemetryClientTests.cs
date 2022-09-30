@@ -120,6 +120,30 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        [TestMethod]
+        public async Task AcquireTokenUnSuccessfulTelemetryTestAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                CreateApplication();
+                _harness.HttpManager.AddTokenResponse(TokenResponseType.InvalidClient);
+
+                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.IsNotNull(ex.ErrorCode);
+
+                MsalTelemetryEventDetails eventDetails = _telemetryClient.TestTelemetryEventDetails;
+                Assert.AreEqual(ex.ErrorCode, eventDetails.Properties[TelemetryConstants.ErrorCode]);
+                Assert.IsFalse((bool?)eventDetails.Properties[TelemetryConstants.Succeeded]);
+            }
+        }
+
         private void AssertLoggedTelemetry(AuthenticationResult authenticationResult, MsalTelemetryEventDetails eventDetails, TokenSource tokenSource, CacheRefreshReason cacheRefreshReason)
         {
             Assert.IsNotNull(eventDetails);

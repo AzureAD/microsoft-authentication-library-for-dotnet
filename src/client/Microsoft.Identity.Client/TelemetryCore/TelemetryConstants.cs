@@ -31,6 +31,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string ActivityId = "ActivityId";
         public const string Resource = "Resource";
 
-        #endregion
+#endregion
     }
 }
