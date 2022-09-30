@@ -410,6 +410,19 @@ namespace NetDesktopWinForms
 
             result = await builder.ExecuteAsync(GetAutocancelToken()).ConfigureAwait(false);
 
+
+            HttpClient client = new HttpClient();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://testingsts.azurewebsites.net/servernonce/validateshr");
+            var content = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("shr", result.AccessToken)
+            });
+
+            HttpResponseMessage response;
+
+            response = await client.PostAsync("https://testingsts.azurewebsites.net/servernonce/validateshr", content).ConfigureAwait(false);
+            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
             return result;
         }
 
