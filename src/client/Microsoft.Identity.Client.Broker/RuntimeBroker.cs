@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Broker
                 // When MSAL Runtime dlls fails to load then we catch the exception and throw with a meaningful
                 // message with information on how to troubleshoot
                 throw new MsalClientException(
-                    "wam_runtime_init_failed", ex.Message + " See https://aka.ms/msal-net-wam#troubleshooting");
+                    "wam_runtime_init_failed", ex.Message + " See https://aka.ms/msal-net-wam#troubleshooting", ex);
             }
         });
 
