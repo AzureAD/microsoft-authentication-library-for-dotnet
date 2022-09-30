@@ -104,6 +104,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     apiEvent.ApiErrorCode = ex.ErrorCode;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
+                    LogErrorTelemetryToClient(ex.ErrorCode, telemetryEventDetails, telemetryClients);
                     throw;
                 }
                 catch (Exception ex)
@@ -116,6 +117,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     telemetryClients.TrackEvent(telemetryEventDetails);
                 }
+            }
+        }
+
+        private void LogErrorTelemetryToClient(string errorCode, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
+        {
+            if (telemetryClients.HasEnabledClients(TelemetryConstants.AcquireTokenEventName))
+            {
+                telemetryEventDetails.SetProperty(TelemetryConstants.Succeeded, false);
+                telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, errorCode);
             }
         }
 

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
@@ -92,6 +94,20 @@ namespace Microsoft.Identity.Client
             if (Parameters.SendX5C == null)
             {
                 Parameters.SendX5C = this.ServiceBundle.Config.SendX5C;
+            }
+
+            // During AT Silent with no scopes, Unlike AAD, B2C will not issue an access token if no scopes are requested
+            // And we don't want to refresh the RT on every ATS call
+            // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/715 for details
+            if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C &&
+                (CommonParameters.Scopes == null ||
+                 CommonParameters.Scopes.All(s => string.IsNullOrWhiteSpace(s))))
+            {
+                throw new MsalUiRequiredException(
+                   MsalError.ScopesRequired,
+                   MsalErrorMessage.ScopesRequired,
+                   null,
+                   UiRequiredExceptionClassification.AcquireTokenSilentFailed);
             }
         }
 
