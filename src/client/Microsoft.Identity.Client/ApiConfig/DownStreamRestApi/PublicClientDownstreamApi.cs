@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
 {
@@ -18,10 +20,14 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public class PublicClientDownstreamApi
     {
+        private readonly int _maximumAuthenticationAttempts = 3;
         string _resourceName;
         DownstreamRestApiOptions _options;
         IPublicClientApplication _pca;
         private string _currentNonce = null;
+        //TODO, grab identity logger from application.
+        IIdentityLogger _logger = NullIdentityModelLogger.Instance;
+        private int _currentAuthetnicatinonAttempts = 0;
 
         /// <summary>
         /// Constructor
@@ -33,6 +39,7 @@ namespace Microsoft.Identity.Client
             _resourceName = resourceName;
             _options = options;
             _pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(_options).Build();
+            //_logger = options.logger.
         }
 
         /// <summary>
@@ -43,24 +50,34 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public async Task<HttpResponseMessage> CallGetApiAsync(Uri targetUrl, CancellationToken cancellationToken = default)
         {
-            WwwAuthenticateParameters parameters = null;
-            try
+            bool isPopSupportedByResource = false;
+
+            if (_pca.IsProofOfPossessionSupportedByClient())
             {
-                parameters = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(targetUrl.AbsoluteUri).ConfigureAwait(false);
-            }
-            catch(MsalClientException ex)
-            {
-                throw;
+                AuthenticationHeaderParser parsedHeaders = null;
+                try
+                {
+                    parsedHeaders = await AuthenticationHeaderParser.ParseAuthenticationHeadersAsync(targetUrl.AbsoluteUri).ConfigureAwait(false);
+                }
+                catch (MsalClientException)
+                {
+                    throw;
+                }
+
+                //Resource returned a pop header containing a nonce.
+                isPopSupportedByResource = parsedHeaders.Nonce != null;
+
+                if (!isPopSupportedByResource)
+                {
+                    _logger.Log(new LogEntry() { Message = "Proof-of-Possesion is not supported by resource." });
+                }
+                else
+                {
+                    _currentNonce = parsedHeaders.Nonce;
+                }
             }
 
-            if (!parameters.IsBearerSupported && !parameters.IsPopSupported)
-            {
-                throw new MsalClientException("Neither bearer nor pop are supported");
-            }
-
-            _currentNonce = parameters.ServerNonce;
-
-            var result = await GetAuthResultAsync(parameters.IsPopSupported, targetUrl, _currentNonce).ConfigureAwait(false);
+            var result = await GetAuthResultAsync(targetUrl, _currentNonce).ConfigureAwait(false);
 
             // At this point, we have either a POP or a Bearer token
 
@@ -69,31 +86,28 @@ namespace Microsoft.Identity.Client
             // If we get 401 Unauthorized -> the nonce was probably expired, get the new one from the headers                
             HttpResponseMessage response = await TryGetResponseFromResourceAsync(targetUrl.AbsoluteUri, result).ConfigureAwait(false);
 
+            _currentAuthetnicatinonAttempts++;
+
             // old nonce probably expired, try again with newly acquired nonce
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
-                // TODO: more error handling and give up after a few failed attempts to not freeze apps.
+                if (_currentAuthetnicatinonAttempts == _maximumAuthenticationAttempts)
+                {
+                    _currentAuthetnicatinonAttempts = 0;
+                    throw new MsalClientException($"Failed to communicate with resource successfully. Responce reason: {response.ReasonPhrase}");
+                }
+                // TODO: more error handling
                 await CallGetApiAsync(targetUrl, cancellationToken).ConfigureAwait(false);
             }
 
             return response;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="targetUrl"></param>
-        /// <param name="content"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public Task<HttpResponseMessage> CallPostApiAsync(Uri targetUrl, FormUrlEncodedContent content, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
         // Returns an AuthenticationResult for either Bearer or POP.
-        private async Task<AuthenticationResult> GetAuthResultAsync(bool isPopSupported, Uri targetUrl, string serverNonce)
+        private async Task<AuthenticationResult> GetAuthResultAsync(Uri targetUrl, string serverNonce)
         {
+            bool isPopSupported = !string.IsNullOrEmpty(serverNonce);
+
             try
             {
                 var accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
@@ -132,41 +146,25 @@ namespace Microsoft.Identity.Client
             {
                 if (usingPop)
                 {
-                    _currentNonce = ParseAuthHeaderForNextNonce(response.Headers);
+                    _currentNonce = AuthenticationHeaderParser.ParseAuthenticationHeaders(response.Headers).Nonce;
                 }
             }
 
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
-                var parameters = WwwAuthenticateParameters.CreateFromResponseHeaders(response.Headers, Constants.PoPAuthHeaderPrefix);
+                var parsedHeaders = AuthenticationHeaderParser.ParseAuthenticationHeaders(response.Headers);
 
-                if (!parameters.IsPopSupported)
+                bool isPopSupportedByResource = parsedHeaders.Nonce != null;
+
+                if (!isPopSupportedByResource)
                 {
-                    throw new MsalClientException("RP no longer supports POP tokens. Please try authenticating again");
+                    throw new MsalClientException("RP no longer supports POP tokens. Please try authenticating again.");
                 }
 
-                _currentNonce = parameters.ServerNonce;
+                _currentNonce = parsedHeaders.Nonce;
             }
 
             return response;
-        }
-
-        private string ParseAuthHeaderForNextNonce(HttpResponseHeaders headers)
-        {
-            var authInfoHeaders = headers.Where(x => x.Key == "Authentication-Info");
-
-            if (authInfoHeaders != null)
-            {
-                var authInfoHeader = authInfoHeaders.FirstOrDefault().Value;
-
-                var PopHeaders = headers.Where(x => x.Key == Constants.PoPAuthHeaderPrefix);
-
-                if (PopHeaders != null)
-                {
-                    return PopHeaders.FirstOrDefault().Value.ToString();
-                }
-            }
-            return null;
         }
     }
 }
