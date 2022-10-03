@@ -1,3 +1,23 @@
+
+4.47.2
+==========
+
+### New Features
+- Hide legacy API's that are available only to internal Microsoft only (1P) applications. See [3670](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3670).
+- Soft deprecate `WithAuthority` API, instead use `WithTenantId` or `WithTenantIdFromAuthority`, or `WithB2CAuthority` for B2C authorities.. See [#3716](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3716)
+- Logging error codes to MSAL Telemetry. See [3595](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3595)
+- Add more logging around client creds and claims. See [3707](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3707).
+- Improve extensibility APIs to support new POP
+
+### Bug Fixes
+- Improved error messages when new preview broker exceptions are thrown. [#3696](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3696)
+- MSAL will now throw an exception if no scopes are passed for the new preview Broker or for B2C scenarios. See [#3675](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3675)
+- Remove MacCatalyst from MSAL. See [#3693](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3693)
+- Throw an exception when Runtime dll's are not loaded when invoking the new WAM broker. See [#3699](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3699)
+
+### Supportability
+- Updated Microsoft.Identity.Client Package description to include MAUI. See [#3672](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3672)
+
 4.47.1
 ==========
 
