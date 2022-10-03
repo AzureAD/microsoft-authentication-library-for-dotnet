@@ -23,7 +23,7 @@
   <!-- MAUI -->
   <PropertyGroup Condition="'$(MAUI_SUPPORT)' != ''">
     <TargetFrameworkNet6Android>net6.0-android</TargetFrameworkNet6Android>
-    <TargetFrameworkNet6Ios>net6.0-ios</TargetFrameworkNet6Ios>
+    <TargetFrameworkNet6Ios>net6.0-ios15.4</TargetFrameworkNet6Ios>
   </PropertyGroup>
 
   <!-- net6.0 (MAUI) -->
