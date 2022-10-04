@@ -15,9 +15,6 @@
 - Removed .NET 6 MacCatalyst target because MSAL.NET doesn't currently support it. See [#3693](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3693)
 - Throw an exception when new WAM DLLs are not loaded when invoking the new WAM preview broker. See [#3699](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3699)
 
-### Supportability
-- Updated Microsoft.Identity.Client Package description to include MAUI. See [#3672](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3672)
-
 4.47.1
 ==========
 
