@@ -4,7 +4,7 @@
 
 ### New Features
 - Hide legacy API's that are available only to internal Microsoft only (1P) applications. See [3670](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3670).
-- Soft deprecate `WithAuthority` API, instead use `WithTenantId` or `WithTenantIdFromAuthority`, or `WithB2CAuthority` for B2C authorities. See [#3716](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3716)
+- Soft deprecate `WithAuthority` API on AcquireTokenXXX methods. Instead use `WithTenantId` or `WithTenantIdFromAuthority`, or `WithB2CAuthority` for B2C authorities. See [#3716](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3716)
 - Logging error codes to MSAL Telemetry. See [3595](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3595)
 - Add more logging around client creds and claims. See [3707](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3707).
 - Improve extensibility APIs to support new POP
