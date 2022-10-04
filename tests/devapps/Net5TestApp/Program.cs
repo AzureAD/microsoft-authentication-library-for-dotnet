@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.LabInfrastructure;
@@ -7,8 +10,8 @@ namespace Net5TestApp
 {
     class Program
     {
-        private const string clientIdCCA = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
-        private const string thumbprint = "4E87313FD450985A10BC0F14A292859F2DCD6CD3";
+        private const string clientIdCCA = "";
+        private const string thumbprint = "";
         private static readonly string authorityA = $"https://login.microsoftonline.com/organizations";
         private const string scopeGraphDefault = "https://graph.microsoft.com//.default";
 
