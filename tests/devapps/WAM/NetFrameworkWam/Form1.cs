@@ -93,7 +93,8 @@ namespace NetDesktopWinForms
 
             var builder = PublicClientApplicationBuilder
                 .Create(clientId)
-                .WithAuthority(this.authorityCbx.Text);
+                .WithAuthority(this.authorityCbx.Text)
+                .WithMultiCloudSupport(true);
 
             var authMethod = GetAuthMethod();
 
@@ -236,7 +237,8 @@ namespace NetDesktopWinForms
             string[] result = null;
             cbxScopes.Invoke((MethodInvoker)delegate
             {
-                result = cbxScopes.Text.Split(' ');
+                if (!string.IsNullOrWhiteSpace(cbxScopes.Text))
+                    result = cbxScopes.Text.Split(' ');
             });
 
             return result;

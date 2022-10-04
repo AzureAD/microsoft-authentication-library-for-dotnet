@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
                     case '(':
                         if (_currentIndex > currentPartStartIndex)
                         {
-                            string member = _expression.Substring(currentPartStartIndex, _currentIndex - currentPartStartIndex);
+                            string? member = _expression.Substring(currentPartStartIndex, _currentIndex - currentPartStartIndex);
                             if (member == "*")
                             {
                                 member = null;
@@ -118,6 +118,8 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
                         }
 
                         filters.Add(ParseIndexer(currentChar, scan));
+                        scan = false;
+
                         _currentIndex++;
                         currentPartStartIndex = _currentIndex;
                         followingIndexer = true;
@@ -136,7 +138,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
                     case '.':
                         if (_currentIndex > currentPartStartIndex)
                         {
-                            string member = _expression.Substring(currentPartStartIndex, _currentIndex - currentPartStartIndex);
+                            string? member = _expression.Substring(currentPartStartIndex, _currentIndex - currentPartStartIndex);
                             if (member == "*")
                             {
                                 member = null;
@@ -173,11 +175,11 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
                 }
             }
 
-            bool atPathEnd = _currentIndex == _expression.Length;
+            bool atPathEnd = (_currentIndex == _expression.Length);
 
             if (_currentIndex > currentPartStartIndex)
             {
-                string member = _expression.Substring(currentPartStartIndex, _currentIndex - currentPartStartIndex).TrimEnd();
+                string? member = _expression.Substring(currentPartStartIndex, _currentIndex - currentPartStartIndex).TrimEnd();
                 if (member == "*")
                 {
                     member = null;
@@ -196,9 +198,9 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
             return atPathEnd;
         }
 
-        private static PathFilter CreatePathFilter(string member, bool scan)
+        private static PathFilter CreatePathFilter(string? member, bool scan)
         {
-            PathFilter filter = scan ? (PathFilter)new ScanFilter {Name = member} : new FieldFilter {Name = member};
+            PathFilter filter = (scan) ? (PathFilter)new ScanFilter(member) : new FieldFilter(member);
             return filter;
         }
 
@@ -230,7 +232,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
         {
             int start = _currentIndex;
             int? end = null;
-            List<int> indexes = null;
+            List<int>? indexes = null;
             int colonCount = 0;
             int? startIndex = null;
             int? endIndex = null;
@@ -262,7 +264,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
                         int index = Convert.ToInt32(indexer, CultureInfo.InvariantCulture);
 
                         indexes.Add(index);
-                        return new ArrayMultipleIndexFilter { Indexes = indexes };
+                        return new ArrayMultipleIndexFilter(indexes);
                     }
                     else if (colonCount > 0)
                     {
@@ -421,28 +423,19 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
 
             if (!scan)
             {
-                return new QueryFilter
-                {
-                    Expression = expression
-                };
+                return new QueryFilter(expression);
             }
             else
             {
-                return new QueryScanFilter
-                {
-                    Expression = expression
-                };
+                return new QueryScanFilter(expression);
             }
         }
 
-        private bool TryParseExpression(out List<PathFilter> expressionPath)
+        private bool TryParseExpression(out List<PathFilter>? expressionPath)
         {
             if (_expression[_currentIndex] == '$')
             {
-                expressionPath = new List<PathFilter>
-                {
-                    RootFilter.Instance
-                };
+                expressionPath = new List<PathFilter> { RootFilter.Instance };
             }
             else if (_expression[_currentIndex] == '@')
             {
@@ -456,7 +449,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
 
             _currentIndex++;
 
-            if (ParsePath(expressionPath, _currentIndex, true))
+            if (ParsePath(expressionPath!, _currentIndex, true))
             {
                 throw new JsonException("Path ended with open query.");
             }
@@ -473,12 +466,12 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
         {
             EatWhitespace();
 
-            if (TryParseExpression(out var expressionPath))
+            if (TryParseExpression(out List<PathFilter>? expressionPath))
             {
                 EatWhitespace();
                 EnsureLength("Path ended with open query.");
 
-                return expressionPath;
+                return expressionPath!;
             }
 
             if (TryParseValue(out var value))
@@ -494,13 +487,13 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
 
         private QueryExpression ParseExpression()
         {
-            QueryExpression rootExpression = null;
-            CompositeExpression parentExpression = null;
+            QueryExpression? rootExpression = null;
+            CompositeExpression? parentExpression = null;
 
             while (_currentIndex < _expression.Length)
             {
                 object left = ParseSide();
-                object right = null;
+                object? right = null;
 
                 QueryOperator op;
                 if (_expression[_currentIndex] == ')'
@@ -516,19 +509,14 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
                     right = ParseSide();
                 }
 
-                BooleanQueryExpression booleanExpression = new BooleanQueryExpression
-                {
-                    Left = left,
-                    Operator = op,
-                    Right = right
-                };
+                BooleanQueryExpression booleanExpression = new BooleanQueryExpression(op, left, right);
 
                 if (_expression[_currentIndex] == ')')
                 {
                     if (parentExpression != null)
                     {
                         parentExpression.Expressions.Add(booleanExpression);
-                        return rootExpression;
+                        return rootExpression!;
                     }
 
                     return booleanExpression;
@@ -542,7 +530,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
 
                     if (parentExpression == null || parentExpression.Operator != QueryOperator.And)
                     {
-                        CompositeExpression andExpression = new CompositeExpression { Operator = QueryOperator.And };
+                        CompositeExpression andExpression = new CompositeExpression(QueryOperator.And);
 
                         parentExpression?.Expressions.Add(andExpression);
 
@@ -565,7 +553,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
 
                     if (parentExpression == null || parentExpression.Operator != QueryOperator.Or)
                     {
-                        CompositeExpression orExpression = new CompositeExpression { Operator = QueryOperator.Or };
+                        CompositeExpression orExpression = new CompositeExpression(QueryOperator.Or);
 
                         parentExpression?.Expressions.Add(orExpression);
 
@@ -584,7 +572,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
             throw new JsonException("Path ended with open query.");
         }
 
-        private bool TryParseValue(out object value)
+        private bool TryParseValue(out object? value)
         {
             char currentChar = _expression[_currentIndex];
             if (currentChar == '\'')
@@ -765,9 +753,9 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
         private bool Match(string s)
         {
             int currentPosition = _currentIndex;
-            foreach (char c in s)
+            for (int i = 0; i < s.Length; i++)
             {
-                if (currentPosition < _expression.Length && _expression[currentPosition] == c)
+                if (currentPosition < _expression.Length && _expression[currentPosition] == s[i])
                 {
                     currentPosition++;
                 }
@@ -834,7 +822,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
 
         private PathFilter ParseQuotedField(char indexerCloseChar, bool scan)
         {
-            List<string> fields = null;
+            List<string>? fields = null;
 
             while (_currentIndex < _expression.Length)
             {
@@ -848,9 +836,9 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
                     if (fields != null)
                     {
                         fields.Add(field);
-                        return scan
-                            ? (PathFilter)new ScanMultipleFilter { Names = fields }
-                            : (PathFilter)new FieldMultipleFilter { Names = fields };
+                        return (scan)
+                            ? (PathFilter)new ScanMultipleFilter(fields)
+                            : (PathFilter)new FieldMultipleFilter(fields);
                     }
                     else
                     {
@@ -886,17 +874,17 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
             }
         }
 
-        internal IEnumerable<JToken> Evaluate(JToken root, JToken t, bool errorWhenNoMatch)
+        internal IEnumerable<JToken> Evaluate(JToken root, JToken t, JsonSelectSettings? settings)
         {
-            return Evaluate(Filters, root, t, errorWhenNoMatch);
+            return Evaluate(Filters, root, t, settings);
         }
 
-        internal static IEnumerable<JToken> Evaluate(List<PathFilter> filters, JToken root, JToken t, bool errorWhenNoMatch)
+        internal static IEnumerable<JToken> Evaluate(List<PathFilter> filters, JToken root, JToken t, JsonSelectSettings? settings)
         {
             IEnumerable<JToken> current = new[] { t };
             foreach (PathFilter filter in filters)
             {
-                current = filter.ExecuteFilter(root, current, errorWhenNoMatch);
+                current = filter.ExecuteFilter(root, current, settings);
             }
 
             return current;

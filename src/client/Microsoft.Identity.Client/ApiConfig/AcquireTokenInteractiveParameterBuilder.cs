@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.AppConfig;
 using System.Net.Http;
 using System.ComponentModel;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 #if iOS
 using UIKit;

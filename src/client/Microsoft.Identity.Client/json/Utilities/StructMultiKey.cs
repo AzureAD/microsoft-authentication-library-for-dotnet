@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Json.Utilities
 
         public bool Equals(StructMultiKey<T1, T2> other)
         {
-            return Equals(Value1, other.Value1) && Equals(Value2, other.Value2);
+            return (Equals(Value1, other.Value1) && Equals(Value2, other.Value2));
         }
     }
 }

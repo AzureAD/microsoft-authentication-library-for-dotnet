@@ -459,7 +459,7 @@ namespace NetFx
         //        var popConfig = new PopAuthenticationConfiguration(new Uri(PoPUri)) { HttpMethod = s_popMethod };
         //        builder = builder
         //            .WithExtraQueryParameters(GetTestSliceParams())
-        //            .WithProofOfPosession(popConfig);
+        //            .WithProofOfPossession(popConfig);
         //    }
 
         //    return builder as T;

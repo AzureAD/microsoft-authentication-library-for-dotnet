@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 logger,
                 legacyCachePersistence,
                 TestConstants.ClientId,
-                TestConstants.SovereignNetworkEnvironment, // different env
+                TestConstants.SovereignNetworkEnvironmentDE, // different env
                 "uid4",
                 "tenantId4",
                 "sovereign_user5");
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 logger,
                 legacyCachePersistence,
                 "other_client_id", // different client id
-                TestConstants.SovereignNetworkEnvironment,
+                TestConstants.SovereignNetworkEnvironmentDE,
                 "uid5",
                 "tenantId5",
                 "user6");

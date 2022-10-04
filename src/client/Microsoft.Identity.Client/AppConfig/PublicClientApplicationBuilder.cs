@@ -110,6 +110,8 @@ namespace Microsoft.Identity.Client
         /// <param name="enableMultiCloudSupport">Enable or disable multi cloud support.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
+        /// <remarks>This feature is available to Microsoft applications, which have the same client id across all clouds</remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public PublicClientApplicationBuilder WithMultiCloudSupport(bool enableMultiCloudSupport)
         {
             Config.MultiCloudSupportEnabled = enableMultiCloudSupport;
@@ -381,8 +383,8 @@ namespace Microsoft.Identity.Client
                 // TODO: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3139
                 throw new NotSupportedException(MsalErrorMessage.MultiCloudSupportUnavailable);
             }
-#endif            
-            if (string.IsNullOrWhiteSpace(Config.RedirectUri))
+#endif
+                if (string.IsNullOrWhiteSpace(Config.RedirectUri))
             {
                 Config.RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null)
                                                          .GetDefaultRedirectUri(Config.ClientId, Config.UseRecommendedDefaultRedirectUri);

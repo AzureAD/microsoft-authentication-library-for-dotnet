@@ -1,19 +1,22 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+using System;
 
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
-
-using System;
 using System.ComponentModel;
 using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Text;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using JObject = System.Text.Json.Nodes.JsonObject;
+using JToken = System.Text.Json.Nodes.JsonNode;
+#else
+using Microsoft.Identity.Json;
+using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.Kerberos
 {
@@ -57,17 +60,17 @@ namespace Microsoft.Identity.Client.Kerberos
             }
 
             // parse the JSON data and find the included Kerberos Ticket claim.
-            JObject payloadJson = JObject.Parse(payload);
+            JObject payloadJson = JsonHelper.ParseIntoJsonObject(payload);
             JToken claimValue;
-            if (!payloadJson.TryGetValue(KerberosClaimType, out claimValue))
+            if (!JsonHelper.TryGetValue(payloadJson, KerberosClaimType, out claimValue))
             {
                 return null;
             }
 
             // Kerberos Ticket claim found.
             // Parse the json and construct the KerberosSupplementalTicket object.
-            string kerberosAsRep = claimValue.Value<string>();
-            return (KerberosSupplementalTicket)JsonConvert.DeserializeObject(kerberosAsRep, typeof(KerberosSupplementalTicket));
+            string kerberosAsRep = JsonHelper.GetValue<string>(claimValue);
+            return JsonHelper.DeserializeFromJson<KerberosSupplementalTicket>(kerberosAsRep);
         }
 
         /// <summary>
@@ -173,38 +176,7 @@ namespace Microsoft.Identity.Client.Kerberos
 
             return null;
         }
-
-        /// <summary>
-        /// Add Claims to body parameter for POST request.
-        /// </summary>
-        /// <param name="oAuth2Client"><see cref="OAuth2Client"/> object for Token request.</param>
-        /// <param name="requestParams"><see cref="AuthenticationRequestParameters"/> containing request parameters.</param>
-        internal static void AddKerberosTicketClaim(
-            OAuth2Client oAuth2Client,
-            AuthenticationRequestParameters requestParams)
-        {
-            string kerberosClaim = GetKerberosTicketClaim(
-                requestParams.RequestContext.ServiceBundle.Config.KerberosServicePrincipalName,
-                requestParams.RequestContext.ServiceBundle.Config.TicketContainer);
-
-            if (string.IsNullOrEmpty(kerberosClaim))
-            {
-                oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, requestParams.ClaimsAndClientCapabilities);
-            }
-            else if (string.IsNullOrEmpty(requestParams.ClaimsAndClientCapabilities))
-            {
-                oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, kerberosClaim);
-            }
-            else
-            {
-                JObject existingClaims = JObject.Parse(requestParams.ClaimsAndClientCapabilities);
-                JObject mergedClaims
-                    = ClaimsHelper.MergeClaimsIntoCapabilityJson(kerberosClaim, existingClaims);
-
-                oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, mergedClaims.ToString(Formatting.None));
-            }
-        }
-
+        
         /// <summary>
         /// Generate a Kerberos Ticket Claim string.
         /// </summary>

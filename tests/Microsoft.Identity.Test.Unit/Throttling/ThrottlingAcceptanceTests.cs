@@ -70,6 +70,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         /// 429 and 503 with Retry After with 15 seconds, the entry should stay in cache for 15 seconds
         /// </summary>
         [TestMethod]
+        [Ignore] // Unstable test, fails on the CI build but passes on local or PR build. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3587
         [DataRow(429)]
         [DataRow(503)]
         public async Task Http429_RetryAfter_ThrottleForDuration_Async(int httpStatusCode)
@@ -235,6 +236,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         /// 429 and 503 with Retry After with 15 seconds, the entry should stay in cache for 15 seconds
         /// </summary>
         [TestMethod]
+        [Ignore] // Unstable test, fails on the CI build but passes on local or PR build. https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3587
         [DataRow(429)]
         [DataRow(503)]
         public async Task Http429_And503_WithoutRetryAfter_AreThrottled_ByDefaultTimeout_Async(int httpStatusCode)
@@ -456,7 +458,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                 await app.AcquireTokenSilent(singleScope, account).WithForceRefresh(true).ExecuteAsync()
                       .ConfigureAwait(false);
 
-                // there will still be an entry here because the refresh token written by the first succesful ATS
+                // there will still be an entry here because the refresh token written by the first successful ATS
                 // is different from the initial RT
                 AssertThrottlingCacheEntryCount(throttlingManager, uiRequiredEntryCount: 1);
             }

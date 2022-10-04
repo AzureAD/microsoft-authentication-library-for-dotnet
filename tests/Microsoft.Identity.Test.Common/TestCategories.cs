@@ -15,9 +15,16 @@ namespace Microsoft.Identity.Test.Common
 
         public const string ADFS = "ADFS";
         public const string MSA = "MSA";
+        public const string B2C = "B2C";
 
         public const string Regression = "Regression";
 
         public const string Arlington = "Arlington";
+
+        public const string Broker = "Broker";
+        public const string TokenCacheTests = "TokenCacheTests";
+        public const string PromptTests = "PromptTests";
+        public const string BuilderTests = "BuilderTests";
+        public const string UnifiedSchemaValidation = "UnifiedSchema_Validation";
     }
 }

@@ -11,11 +11,11 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json.Linq;
 using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 string homeAccountId3 = ClientInfo.CreateFromJson(clientInfo3).ToAccountIdentifier();
 
                 rtItem = new MsalRefreshTokenCacheItem(
-                    TestConstants.SovereignNetworkEnvironment,
+                    TestConstants.SovereignNetworkEnvironmentDE,
                     TestConstants.ClientId,
                     "someRT",
                     clientInfo3,

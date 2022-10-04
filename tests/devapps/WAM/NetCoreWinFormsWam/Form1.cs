@@ -120,14 +120,14 @@ namespace NetDesktopWinForms
                     builder = ToggleOldBroker(builder, true);
                     break;
                 case AuthMethod.WAMRuntime:
-                    builder = builder.WithBrokerPreview();
+                    builder = builder.WithBrokerPreview().WithExperimentalFeatures();
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder = builder.WithBrokerPreview(false);
+                    builder = builder.WithExperimentalFeatures().WithBrokerPreview(false);
                     builder = ToggleOldBroker(builder, false);
                     break;
                 case AuthMethod.EmbeddedBrowser:
-                    builder = builder.WithBrokerPreview(false);
+                    builder = builder.WithExperimentalFeatures().WithBrokerPreview(false);
                     builder = ToggleOldBroker(builder, false);
 
                     break;
@@ -273,9 +273,11 @@ namespace NetDesktopWinForms
         private string[] GetScopes()
         {
             string[] result = null;
+
             cbxScopes.Invoke((MethodInvoker)delegate
             {
-                result = cbxScopes.Text.Split(' ');
+                if(!string.IsNullOrWhiteSpace(cbxScopes.Text))
+                    result = cbxScopes.Text.Split(' ');
             });
 
             return result;

@@ -13,6 +13,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             Func<Task<T>> func, CoreDispatcherPriority priority = CoreDispatcherPriority.High)
         {
             var taskCompletionSource = new TaskCompletionSource<T>();
+#pragma warning disable VSTHRD101 // Avoid using async lambda for a void returning delegate type, because any exceptions not handled by the delegate will crash the process
             await dispatcher.RunAsync(priority, async () =>
             {
                 try
@@ -24,6 +25,8 @@ namespace Microsoft.Identity.Client.Platforms.uap
                     taskCompletionSource.SetException(ex);
                 }
             });
+#pragma warning restore VSTHRD101 // Avoid using async lambda for a void returning delegate type, because any exceptions not handled by the delegate will crash the process
+
             return await taskCompletionSource.Task.ConfigureAwait(false);
         }
     }

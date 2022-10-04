@@ -18,7 +18,7 @@ namespace MauiAppWithBroker.MSALClient
         /// <summary>
         /// This is the singleton used by consumers
         /// </summary>
-        static public PCAWrapper Instance { get; } = new PCAWrapper();
+        public static PCAWrapper Instance { get; } = new PCAWrapper();
 
         internal IPublicClientApplication PCA { get; }
 
@@ -42,29 +42,16 @@ namespace MauiAppWithBroker.MSALClient
             PCA = PublicClientApplicationBuilder
                                         .Create(ClientId)
                                         .WithBroker()
-                                        .WithRedirectUri(PlatformConfigImpl.Instance.RedirectUri)
+                                        .WithRedirectUri(PlatformConfig.Instance.RedirectUri)
                                         .WithIosKeychainSecurityGroup("com.microsoft.adalcache")
                                         .Build();
-        }
-
-        /// <summary>
-        /// Perform the intractive acquistion of the token for the given scope
-        /// </summary>
-        /// <param name="scopes">desired scopes</param>
-        /// <returns></returns>
-        internal async Task<AuthenticationResult> AcquireTokenInteractiveAsync(string[] scopes)
-        {
-            return await PCA.AcquireTokenInteractive(scopes)
-                                    .WithParentActivityOrWindow(PlatformConfigImpl.Instance.ParentWindow)
-                                    .ExecuteAsync()
-                                    .ConfigureAwait(false);
         }
 
         /// <summary>
         /// Acquire the token silently
         /// </summary>
         /// <param name="scopes">desired scopes</param>
-        /// <returns>Authenticaiton result</returns>
+        /// <returns>Authentication result</returns>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scopes)
         {
             var accts = await PCA.GetAccountsAsync().ConfigureAwait(false);
@@ -78,11 +65,24 @@ namespace MauiAppWithBroker.MSALClient
         }
 
         /// <summary>
+        /// Perform the interactive acquisition of the token for the given scope
+        /// </summary>
+        /// <param name="scopes">desired scopes</param>
+        /// <returns></returns>
+        internal async Task<AuthenticationResult> AcquireTokenInteractiveAsync(string[] scopes)
+        {
+            return await PCA.AcquireTokenInteractive(scopes)
+                                    .WithParentActivityOrWindow(PlatformConfig.Instance.ParentWindow)
+                                    .ExecuteAsync()
+                                    .ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Signout may not perform the complete signout as company portal may hold
         /// the token.
         /// </summary>
         /// <returns></returns>
-        internal async Task SignOut()
+        internal async Task SignOutAsync()
         {
             var accounts = await PCA.GetAccountsAsync().ConfigureAwait(false);
             foreach (var acct in accounts)

@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Json.Serialization
         /// <param name="level">The <see cref="TraceLevel"/> at which to write this trace.</param>
         /// <param name="message">The trace message.</param>
         /// <param name="ex">The trace exception. This parameter is optional.</param>
-        public void Trace(TraceLevel level, string message, Exception ex)
+        public void Trace(TraceLevel level, string message, Exception? ex)
         {
             if (level == TraceLevel.Off)
             {
@@ -59,12 +59,12 @@ namespace Microsoft.Identity.Json.Serialization
                 {
                     lock (listener)
                     {
-                        listener.TraceEvent(eventCache, "Microsoft.Identity.Json", traceEventType, 0, message);
+                        listener.TraceEvent(eventCache, "Newtonsoft.Json", traceEventType, 0, message);
                     }
                 }
                 else
                 {
-                    listener.TraceEvent(eventCache, "Microsoft.Identity.Json", traceEventType, 0, message);
+                    listener.TraceEvent(eventCache, "Newtonsoft.Json", traceEventType, 0, message);
                 }
 
                 if (DiagnosticsTrace.AutoFlush)

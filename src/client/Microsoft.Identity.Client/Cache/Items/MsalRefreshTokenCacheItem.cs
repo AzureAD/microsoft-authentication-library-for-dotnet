@@ -4,7 +4,11 @@
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using JObject = System.Text.Json.Nodes.JsonObject;
+#else
 using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -75,14 +79,14 @@ namespace Microsoft.Identity.Client.Cache.Items
                 return null;
             }
 
-            return FromJObject(JObject.Parse(json));
+            return FromJObject(JsonHelper.ParseIntoJsonObject(json));
         }
 
         internal static MsalRefreshTokenCacheItem FromJObject(JObject j)
         {
             var item = new MsalRefreshTokenCacheItem();
-            item.FamilyId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyId);
-            item.OboCacheKey = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash);
+            item.FamilyId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyId);
+            item.OboCacheKey = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash);
 
             item.PopulateFieldsFromJObject(j);
 

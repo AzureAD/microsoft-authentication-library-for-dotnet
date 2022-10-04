@@ -351,6 +351,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
             {
+                AuthorityUrl = authority,
                 AccessToken = webTokenResponse.Token,
                 IdToken = idToken,
                 CorrelationId = correlationId,

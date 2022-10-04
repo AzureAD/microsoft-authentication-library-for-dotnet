@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
         public int? End { get; set; }
         public int? Step { get; set; }
 
-        public override IEnumerable<JToken> ExecuteFilter(JToken root, IEnumerable<JToken> current, bool errorWhenNoMatch)
+        public override IEnumerable<JToken> ExecuteFilter(JToken root, IEnumerable<JToken> current, JsonSelectSettings? settings)
         {
             if (Step == 0)
             {
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
                     stopIndex = Math.Max(stopIndex, -1);
                     stopIndex = Math.Min(stopIndex, a.Count);
 
-                    bool positiveStep = stepCount > 0;
+                    bool positiveStep = (stepCount > 0);
 
                     if (IsValid(startIndex, stopIndex, positiveStep))
                     {
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
                     }
                     else
                     {
-                        if (errorWhenNoMatch)
+                        if (settings?.ErrorWhenNoMatch ?? false)
                         {
                             throw new JsonException("Array slice of {0} to {1} returned no results.".FormatWith(CultureInfo.InvariantCulture,
                                 Start != null ? Start.GetValueOrDefault().ToString(CultureInfo.InvariantCulture) : "*",
@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
                 }
                 else
                 {
-                    if (errorWhenNoMatch)
+                    if (settings?.ErrorWhenNoMatch ?? false)
                     {
                         throw new JsonException("Array slice is not valid on {0}.".FormatWith(CultureInfo.InvariantCulture, t.GetType().Name));
                     }
@@ -78,10 +78,10 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
         {
             if (positiveStep)
             {
-                return index < stopIndex;
+                return (index < stopIndex);
             }
 
-            return index > stopIndex;
+            return (index > stopIndex);
         }
     }
 }

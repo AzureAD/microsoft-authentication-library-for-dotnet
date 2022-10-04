@@ -313,7 +313,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("Regression")]
+        [TestCategory(TestCategories.Regression)]
         [WorkItem(695)] // Fix for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/695
         public void AcquireTokenSilentForceRefreshTest()
         {
@@ -359,7 +359,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("Regression")]
+        [TestCategory(TestCategories.Regression)]
         [WorkItem(695)] // Fix for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/695
         public void AcquireTokenSilentForceRefreshMultipleTenantsTest()
         {
@@ -488,7 +488,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("Regression")]
+        [TestCategory(TestCategories.Regression)]
         [WorkItem(695)] // Fix for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/695
         public void AcquireTokenSilentForceRefreshFalseMultipleTenantsTest()
         {

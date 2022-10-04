@@ -7,8 +7,12 @@ using System.Linq;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using System.Text.Json.Nodes;
+using JObject = System.Text.Json.Nodes.JsonObject;
+#else
 using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -56,7 +60,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 preferredUsername,
                 tenantId,
                 idToken?.GivenName,
-                idToken?.FamilyName, 
+                idToken?.FamilyName,
                 wamAccountIds);
         }
 
@@ -69,7 +73,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string preferredUsername,
             string tenantId,
             string givenName,
-            string familyName, 
+            string familyName,
             IDictionary<string, string> wamAccountIds)
             : this()
         {
@@ -111,7 +115,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string preferredUsername,
             string tenantId,
             string givenName,
-            string familyName, 
+            string familyName,
             IDictionary<string, string> wamAccountIds)
         {
             Environment = environment;
@@ -138,21 +142,21 @@ namespace Microsoft.Identity.Client.Cache.Items
                 return null;
             }
 
-            return FromJObject(JObject.Parse(json));
+            return FromJObject(JsonHelper.ParseIntoJsonObject(json));
         }
 
         internal static MsalAccountCacheItem FromJObject(JObject j)
         {
             var item = new MsalAccountCacheItem
             {
-                PreferredUsername = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Username),
-                Name = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Name),
-                GivenName = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.GivenName),
-                FamilyName = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyName),
-                LocalAccountId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.LocalAccountId),
-                AuthorityType = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.AuthorityType),
-                TenantId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),
-                WamAccountIds = JsonUtils.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.WamAccountIds)
+                PreferredUsername = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Username),
+                Name = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Name),
+                GivenName = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.GivenName),
+                FamilyName = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyName),
+                LocalAccountId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.LocalAccountId),
+                AuthorityType = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.AuthorityType),
+                TenantId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),
+                WamAccountIds = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.WamAccountIds)
             };
 
             item.PopulateFieldsFromJObject(j);
@@ -173,7 +177,18 @@ namespace Microsoft.Identity.Client.Cache.Items
             SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);
             if (WamAccountIds != null && WamAccountIds.Any())
             {
-                json[StorageJsonKeys.WamAccountIds] = JObject.FromObject(WamAccountIds);                
+#if SUPPORTS_SYSTEM_TEXT_JSON
+                var obj = new JsonObject();
+
+                foreach (KeyValuePair<string, string> accId in WamAccountIds)
+                {
+                    obj[accId.Key] = accId.Value;
+                }
+
+                json[StorageJsonKeys.WamAccountIds] = obj;
+#else
+                json[StorageJsonKeys.WamAccountIds] = JObject.FromObject(WamAccountIds);
+#endif
             }
 
             return json;

@@ -23,6 +23,8 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 #endregion
 
+#nullable disable
+
 namespace Microsoft.Identity.Json.Bson
 {
     internal enum BsonType : sbyte

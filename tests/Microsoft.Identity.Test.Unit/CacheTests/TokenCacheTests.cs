@@ -447,7 +447,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public void GetAccessTokenExpiryInRangeTest()
         {
             using (var harness = CreateTestHarness())
@@ -554,7 +554,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public void GetRefreshTokenTest()
         {
             using (var harness = CreateTestHarness())
@@ -599,7 +599,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle, false);
                 var rtItem = new MsalRefreshTokenCacheItem(
-                    TestConstants.SovereignNetworkEnvironment,
+                    TestConstants.SovereignNetworkEnvironmentDE,
                     TestConstants.ClientId,
                     "someRT",
                     _clientInfo,
@@ -621,7 +621,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public async Task GetAppTokenFromCacheTestAsync()
         {
             using (var harness = CreateTestHarness())
@@ -659,7 +659,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public async Task DoNotSaveRefreshTokenInAdalCacheForMsalB2CAuthorityTestAsync()
         {
             var appConfig = new ApplicationConfiguration()
@@ -699,7 +699,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public void GetAccessAndRefreshTokenNoUserAssertionInCacheTest()
         {
             using (var harness = CreateTestHarness())
@@ -754,7 +754,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public void GetAccessAndRefreshTokenUserAssertionMismatchInCacheTest()
         {
             using (var harness = CreateTestHarness())
@@ -808,7 +808,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public void GetAccessAndRefreshTokenMatchedUserAssertionInCacheTest()
         {
             using (var harness = CreateTestHarness())
@@ -859,7 +859,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public async Task SaveAccessAndRefreshTokenWithEmptyCacheTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
@@ -982,7 +982,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public async Task SaveAccessAndRefreshTokenWithMoreScopesTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
@@ -1019,7 +1019,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public async Task SaveAccessAndRefreshTokenWithLessScopesTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
@@ -1050,7 +1050,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public async Task SaveAccessAndRefreshTokenWithIntersectingScopesTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
@@ -1079,7 +1079,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public void CacheAdfsTokenTest()
         {
             using (var harness = CreateTestHarness())
@@ -1120,7 +1120,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public async Task SaveAccessAndRefreshTokenWithDifferentAuthoritySameUserTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
@@ -1156,7 +1156,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public void CanDeserializeTokenCacheInNet462()
         {
             var tokenCache = new TokenCache(TestCommon.CreateDefaultServiceBundle(), false)
@@ -1170,7 +1170,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public async Task SerializeDeserializeCacheTestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
@@ -1225,7 +1225,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public async Task SerializeDeserializeCache_ClearCacheTrueWithNoSerializedCache_TestAsync()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
@@ -1259,7 +1259,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public void FindAccessToken_ScopeCaseInsensitive()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
@@ -1285,7 +1285,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public void CacheB2CTokenTest()
         {
             using (var harness = CreateTestHarness())
@@ -1377,7 +1377,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
-        [TestCategory("TokenCacheTests")]
+        [TestCategory(TestCategories.TokenCacheTests)]
         public async Task ValidateTokenCacheIsDumpedToLogsTestAsync()
         {
             using (MockHttpAndServiceBundle harness = CreateTestHarness())

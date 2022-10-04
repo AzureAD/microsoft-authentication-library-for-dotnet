@@ -16,16 +16,16 @@ pool:
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'release'
-  MSAL_DESKTOP_ONLY_DEV: 'false' # skips building mobile and legacy targets
+  MSAL_DESKTOP_ONLY_DEV: 'true' # skips building mobile and legacy targets
 
 jobs:
   - job: 'BuildJob'
     displayName: 'Build and run tests'
     steps:
     - task: NuGetToolInstaller@1
-      displayName: 'Use NuGet 5.x'
+      displayName: 'Use latest NuGet 6.x'
       inputs:
-        versionSpec: 5.x
+        versionSpec: 6.x
 
     - task: NuGetCommand@2
       displayName: 'NuGet restore'

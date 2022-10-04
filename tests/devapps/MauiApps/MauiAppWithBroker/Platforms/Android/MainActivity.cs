@@ -20,8 +20,8 @@ namespace MauiAppWithBroker
         {
             base.OnCreate(savedInstanceState);
             // configure platform specific params
-            PlatformConfigImpl.Instance.RedirectUri = AndroidRedirectURI;
-            PlatformConfigImpl.Instance.ParentWindow = this;
+            PlatformConfig.Instance.RedirectUri = AndroidRedirectURI;
+            PlatformConfig.Instance.ParentWindow = this;
         }
 
         /// <summary>

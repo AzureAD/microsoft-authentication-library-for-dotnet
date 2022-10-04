@@ -5,6 +5,7 @@
     <!--<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>-->
     <TargetFrameworks>net5.0-windows10.0.17763.0;netcoreapp3.1</TargetFrameworks>
     <UseWindowsForms>true</UseWindowsForms>
+    <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

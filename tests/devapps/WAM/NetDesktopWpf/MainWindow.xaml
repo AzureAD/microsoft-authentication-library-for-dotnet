@@ -10,11 +10,12 @@
         <Button Content="ATS ATI" HorizontalAlignment="Left" Margin="41,24,0,0" VerticalAlignment="Top" Width="75" Click="AtsAti_Click"/>
         <TextBox x:Name="Log" HorizontalAlignment="Left" Height="313" Margin="41,61,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="741"/>
         <Button Content="Get Accounts" HorizontalAlignment="Left" Margin="244,24,0,0" VerticalAlignment="Top" Width="75" Click="GetAccounts_Click"/>
-        <Button Content="Clear" HorizontalAlignment="Left" Margin="707,389,0,0" VerticalAlignment="Top" Width="75"/>
-        <TextBox x:Name="UpnTbx" HorizontalAlignment="Left" Height="23" Margin="662,25,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
-        <Label Content="Account Starting with:" HorizontalAlignment="Left" Margin="536,24,0,0" VerticalAlignment="Top"/>
+        <Button Content="Clear" HorizontalAlignment="Left" Margin="707,389,0,0" VerticalAlignment="Top" Width="75" Click="Clear_Button_Click"/>
+        <TextBox x:Name="UpnTbx" HorizontalAlignment="Left" Height="23" Margin="662,22,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <Label Content="Account Starting with:" HorizontalAlignment="Left" Margin="536,21,0,0" VerticalAlignment="Top"/>
         <Button Content="Clear Token Cache" HorizontalAlignment="Left" Margin="333,24,0,0" VerticalAlignment="Top" Width="106" Click="ClearCache"/>
         <Button Content="ATS ATI Runtime" HorizontalAlignment="Left" Margin="129,24,0,0" VerticalAlignment="Top" Width="100" Click="AtsAti_Runtime_Click"/>
+        <Button Content="SignOut" HorizontalAlignment="Left" Margin="456,24,0,0" VerticalAlignment="Top" Width="75" Click="SignOut_Click"/>
 
     </Grid>
 </Window>

@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Json.Converters
         /// <param name="writer">The <see cref="JsonWriter"/> to write to.</param>
         /// <param name="value">The value.</param>
         /// <param name="serializer">The calling serializer.</param>
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             if (value == null)
             {
@@ -71,20 +71,20 @@ namespace Microsoft.Identity.Json.Converters
 
         private bool HasFlag(RegexOptions options, RegexOptions flag)
         {
-            return (options & flag) == flag;
+            return ((options & flag) == flag);
         }
 
 #pragma warning disable 618
         private void WriteBson(BsonWriter writer, Regex regex)
         {
             // Regular expression - The first cstring is the regex pattern, the second
-            // is the regex options string. Options are identified by characters, which
-            // must be stored in alphabetical order. Valid options are 'i' for case
-            // insensitive matching, 'm' for multiline matching, 'x' for verbose mode,
-            // 'l' to make \w, \W, etc. locale dependent, 's' for dotall mode
+            // is the regex options string. Options are identified by characters, which 
+            // must be stored in alphabetical order. Valid options are 'i' for case 
+            // insensitive matching, 'm' for multiline matching, 'x' for verbose mode, 
+            // 'l' to make \w, \W, etc. locale dependent, 's' for dotall mode 
             // ('.' matches everything), and 'u' to make \w, \W, etc. match unicode.
 
-            string options = null;
+            string? options = null;
 
             if (HasFlag(regex.Options, RegexOptions.IgnoreCase))
             {
@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Json.Converters
 
         private void WriteJson(JsonWriter writer, Regex regex, JsonSerializer serializer)
         {
-            DefaultContractResolver resolver = serializer.ContractResolver as DefaultContractResolver;
+            DefaultContractResolver? resolver = serializer.ContractResolver as DefaultContractResolver;
 
             writer.WriteStartObject();
             writer.WritePropertyName((resolver != null) ? resolver.GetResolvedPropertyName(PatternName) : PatternName);
@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Json.Converters
         /// <param name="existingValue">The existing value of object being read.</param>
         /// <param name="serializer">The calling serializer.</param>
         /// <returns>The object value.</returns>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             switch (reader.TokenType)
             {
@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Json.Converters
 
         private object ReadRegexString(JsonReader reader)
         {
-            string regexText = (string)reader.Value;
+            string regexText = (string)reader.Value!;
 
             if (regexText.Length > 0 && regexText[0] == '/')
             {
@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Json.Converters
 
         private Regex ReadRegexObject(JsonReader reader, JsonSerializer serializer)
         {
-            string pattern = null;
+            string? pattern = null;
             RegexOptions? options = null;
 
             while (reader.Read())
@@ -179,7 +179,7 @@ namespace Microsoft.Identity.Json.Converters
                 switch (reader.TokenType)
                 {
                     case JsonToken.PropertyName:
-                        string propertyName = reader.Value.ToString();
+                        string propertyName = reader.Value!.ToString();
 
                         if (!reader.Read())
                         {
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Json.Converters
 
                         if (string.Equals(propertyName, PatternName, StringComparison.OrdinalIgnoreCase))
                         {
-                            pattern = (string)reader.Value;
+                            pattern = (string?)reader.Value;
                         }
                         else if (string.Equals(propertyName, OptionsName, StringComparison.OrdinalIgnoreCase))
                         {
@@ -229,7 +229,7 @@ namespace Microsoft.Identity.Json.Converters
         [MethodImpl(MethodImplOptions.NoInlining)]
         private bool IsRegex(Type objectType)
         {
-            return objectType == typeof(Regex);
+            return (objectType == typeof(Regex));
         }
     }
 }

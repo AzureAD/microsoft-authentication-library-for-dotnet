@@ -11,17 +11,19 @@ namespace Microsoft.Identity.Client.Extensibility
     internal class ExternalBoundTokenScheme : IAuthenticationScheme
     {
         private readonly string _keyId;
+        private readonly string _tokenType;
 
-        public ExternalBoundTokenScheme(string keyId)
+        public ExternalBoundTokenScheme(string keyId, string expectedTokenTypeFromEsts = "Bearer")
         {
             _keyId = keyId;
+            _tokenType = expectedTokenTypeFromEsts;
         }
 
-        public string AuthorizationHeaderPrefix => "Bearer";
+        public string AuthorizationHeaderPrefix => _tokenType;
 
         public string KeyId => _keyId;
 
-        public string AccessTokenType => "Bearer";
+        public string AccessTokenType => _tokenType;
 
         public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {

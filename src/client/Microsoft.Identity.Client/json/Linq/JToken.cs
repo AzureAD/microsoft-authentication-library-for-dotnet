@@ -38,11 +38,12 @@ using Microsoft.Identity.Json.Utilities;
 using System.Diagnostics;
 using System.Globalization;
 using System.Collections;
+using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
 using Microsoft.Identity.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
-
 #endif
 
 namespace Microsoft.Identity.Json.Linq
@@ -58,12 +59,12 @@ namespace Microsoft.Identity.Json.Linq
         , IDynamicMetaObjectProvider
 #endif
     {
-        private static JTokenEqualityComparer _equalityComparer;
+        private static JTokenEqualityComparer? _equalityComparer;
 
-        private JContainer _parent;
-        private JToken _previous;
-        private JToken _next;
-        private object _annotations;
+        private JContainer? _parent;
+        private JToken? _previous;
+        private JToken? _next;
+        private object? _annotations;
 
         private static readonly JTokenType[] BooleanTypes = new[] { JTokenType.Integer, JTokenType.Float, JTokenType.String, JTokenType.Comment, JTokenType.Raw, JTokenType.Boolean };
         private static readonly JTokenType[] NumberTypes = new[] { JTokenType.Integer, JTokenType.Float, JTokenType.String, JTokenType.Comment, JTokenType.Raw, JTokenType.Boolean };
@@ -99,7 +100,7 @@ namespace Microsoft.Identity.Json.Linq
         /// Gets or sets the parent.
         /// </summary>
         /// <value>The parent.</value>
-        public JContainer Parent
+        public JContainer? Parent
         {
             [DebuggerStepThrough]
             get { return _parent; }
@@ -114,7 +115,7 @@ namespace Microsoft.Identity.Json.Linq
         {
             get
             {
-                JContainer parent = Parent;
+                JContainer? parent = Parent;
                 if (parent == null)
                 {
                     return this;
@@ -152,16 +153,16 @@ namespace Microsoft.Identity.Json.Linq
         /// <param name="t1">The first <see cref="JToken"/> to compare.</param>
         /// <param name="t2">The second <see cref="JToken"/> to compare.</param>
         /// <returns><c>true</c> if the tokens are equal; otherwise <c>false</c>.</returns>
-        public static bool DeepEquals(JToken t1, JToken t2)
+        public static bool DeepEquals(JToken? t1, JToken? t2)
         {
-            return t1 == t2 || (t1 != null && t2 != null && t1.DeepEquals(t2));
+            return (t1 == t2 || (t1 != null && t2 != null && t1.DeepEquals(t2)));
         }
 
         /// <summary>
         /// Gets the next sibling token of this node.
         /// </summary>
         /// <value>The <see cref="JToken"/> that contains the next sibling token.</value>
-        public JToken Next
+        public JToken? Next
         {
             get => _next;
             internal set => _next = value;
@@ -171,14 +172,14 @@ namespace Microsoft.Identity.Json.Linq
         /// Gets the previous sibling token of this node.
         /// </summary>
         /// <value>The <see cref="JToken"/> that contains the previous sibling token.</value>
-        public JToken Previous
+        public JToken? Previous
         {
             get => _previous;
             internal set => _previous = value;
         }
 
         /// <summary>
-        /// Gets the path of the JSON token.
+        /// Gets the path of the JSON token. 
         /// </summary>
         public string Path
         {
@@ -190,8 +191,8 @@ namespace Microsoft.Identity.Json.Linq
                 }
 
                 List<JsonPosition> positions = new List<JsonPosition>();
-                JToken previous = null;
-                for (JToken current = this; current != null; current = current.Parent)
+                JToken? previous = null;
+                for (JToken? current = this; current != null; current = current.Parent)
                 {
                     switch (current.Type)
                     {
@@ -231,7 +232,7 @@ namespace Microsoft.Identity.Json.Linq
         /// Adds the specified content immediately after this token.
         /// </summary>
         /// <param name="content">A content object that contains simple content or a collection of content objects to be added after this token.</param>
-        public void AddAfterSelf(object content)
+        public void AddAfterSelf(object? content)
         {
             if (_parent == null)
             {
@@ -239,14 +240,14 @@ namespace Microsoft.Identity.Json.Linq
             }
 
             int index = _parent.IndexOfItem(this);
-            _parent.AddInternal(index + 1, content, false);
+            _parent.TryAddInternal(index + 1, content, false);
         }
 
         /// <summary>
         /// Adds the specified content immediately before this token.
         /// </summary>
         /// <param name="content">A content object that contains simple content or a collection of content objects to be added before this token.</param>
-        public void AddBeforeSelf(object content)
+        public void AddBeforeSelf(object? content)
         {
             if (_parent == null)
             {
@@ -254,7 +255,7 @@ namespace Microsoft.Identity.Json.Linq
             }
 
             int index = _parent.IndexOfItem(this);
-            _parent.AddInternal(index, content, false);
+            _parent.TryAddInternal(index, content, false);
         }
 
         /// <summary>
@@ -277,7 +278,7 @@ namespace Microsoft.Identity.Json.Linq
 
         internal IEnumerable<JToken> GetAncestors(bool self)
         {
-            for (JToken current = self ? this : Parent; current != null; current = current.Parent)
+            for (JToken? current = self ? this : Parent; current != null; current = current.Parent)
             {
                 yield return current;
             }
@@ -294,7 +295,7 @@ namespace Microsoft.Identity.Json.Linq
                 yield break;
             }
 
-            for (JToken o = Next; o != null; o = o.Next)
+            for (JToken? o = Next; o != null; o = o.Next)
             {
                 yield return o;
             }
@@ -306,7 +307,12 @@ namespace Microsoft.Identity.Json.Linq
         /// <returns>A collection of the sibling tokens before this token, in document order.</returns>
         public IEnumerable<JToken> BeforeSelf()
         {
-            for (JToken o = Parent.First; o != this; o = o.Next)
+            if (Parent == null)
+            {
+                yield break;
+            }
+
+            for (JToken? o = Parent.First; o != this && o != null; o = o.Next)
             {
                 yield return o;
             }
@@ -316,7 +322,7 @@ namespace Microsoft.Identity.Json.Linq
         /// Gets the <see cref="JToken"/> with the specified key.
         /// </summary>
         /// <value>The <see cref="JToken"/> with the specified key.</value>
-        public virtual JToken this[object key]
+        public virtual JToken? this[object key]
         {
             get => throw new InvalidOperationException("Cannot access child value on {0}.".FormatWith(CultureInfo.InvariantCulture, GetType()));
             set => throw new InvalidOperationException("Cannot set child value on {0}.".FormatWith(CultureInfo.InvariantCulture, GetType()));
@@ -328,11 +334,11 @@ namespace Microsoft.Identity.Json.Linq
         /// <typeparam name="T">The type to convert the token to.</typeparam>
         /// <param name="key">The token key.</param>
         /// <returns>The converted token value.</returns>
-        public virtual T Value<T>(object key)
+        public virtual T? Value<T>(object key)
         {
-            JToken token = this[key];
+            JToken? token = this[key];
 
-            // null check to fix MonoTouch issue - https://github.com/dolbz/Microsoft.Identity.Json/commit/a24e3062846b30ee505f3271ac08862bb471b822
+            // null check to fix MonoTouch issue - https://github.com/dolbz/Newtonsoft.Json/commit/a24e3062846b30ee505f3271ac08862bb471b822
             return token == null ? default : Extensions.Convert<JToken, T>(token);
         }
 
@@ -340,13 +346,13 @@ namespace Microsoft.Identity.Json.Linq
         /// Get the first child token of this token.
         /// </summary>
         /// <value>A <see cref="JToken"/> containing the first child token of the <see cref="JToken"/>.</value>
-        public virtual JToken First => throw new InvalidOperationException("Cannot access child value on {0}.".FormatWith(CultureInfo.InvariantCulture, GetType()));
+        public virtual JToken? First => throw new InvalidOperationException("Cannot access child value on {0}.".FormatWith(CultureInfo.InvariantCulture, GetType()));
 
         /// <summary>
         /// Get the last child token of this token.
         /// </summary>
         /// <value>A <see cref="JToken"/> containing the last child token of the <see cref="JToken"/>.</value>
-        public virtual JToken Last => throw new InvalidOperationException("Cannot access child value on {0}.".FormatWith(CultureInfo.InvariantCulture, GetType()));
+        public virtual JToken? Last => throw new InvalidOperationException("Cannot access child value on {0}.".FormatWith(CultureInfo.InvariantCulture, GetType()));
 
         /// <summary>
         /// Returns a collection of the child tokens of this token, in document order.
@@ -372,7 +378,7 @@ namespace Microsoft.Identity.Json.Linq
         /// </summary>
         /// <typeparam name="T">The type to convert the values to.</typeparam>
         /// <returns>A <see cref="IEnumerable{T}"/> containing the child values of this <see cref="JToken"/>, in document order.</returns>
-        public virtual IEnumerable<T> Values<T>()
+        public virtual IEnumerable<T?> Values<T>()
         {
             throw new InvalidOperationException("Cannot access child value on {0}.".FormatWith(CultureInfo.InvariantCulture, GetType()));
         }
@@ -414,6 +420,10 @@ namespace Microsoft.Identity.Json.Linq
         /// <summary>
         /// Returns the indented JSON for this token.
         /// </summary>
+        /// <remarks>
+        /// <c>ToString()</c> returns a non-JSON string value for tokens with a type of <see cref="JTokenType.String"/>.
+        /// If you want the JSON for all token types then you should use <see cref="WriteTo(JsonWriter, JsonConverter[])"/>.
+        /// </remarks>
         /// <returns>
         /// The indented JSON for this token.
         /// </returns>
@@ -432,10 +442,8 @@ namespace Microsoft.Identity.Json.Linq
         {
             using (StringWriter sw = new StringWriter(CultureInfo.InvariantCulture))
             {
-                JsonTextWriter jw = new JsonTextWriter(sw)
-                {
-                    Formatting = formatting
-                };
+                JsonTextWriter jw = new JsonTextWriter(sw);
+                jw.Formatting = formatting;
 
                 WriteTo(jw, converters);
 
@@ -443,7 +451,7 @@ namespace Microsoft.Identity.Json.Linq
             }
         }
 
-        private static JValue EnsureValue(JToken value)
+        private static JValue? EnsureValue(JToken value)
         {
             if (value == null)
             {
@@ -455,7 +463,7 @@ namespace Microsoft.Identity.Json.Linq
                 value = property.Value;
             }
 
-            JValue v = value as JValue;
+            JValue? v = value as JValue;
 
             return v;
         }
@@ -477,15 +485,15 @@ namespace Microsoft.Identity.Json.Linq
             return (Array.IndexOf(validTypes, o.Type) != -1) || (nullable && (o.Type == JTokenType.Null || o.Type == JTokenType.Undefined));
         }
 
-#region Cast from operators
+        #region Cast from operators
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Microsoft.Identity.Json.Linq.JToken"/> to <see cref="System.Boolean"/>.
+        /// Performs an explicit conversion from <see cref="Linq.JToken"/> to <see cref="System.Boolean"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
         public static explicit operator bool(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, BooleanTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to Boolean.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -503,13 +511,13 @@ namespace Microsoft.Identity.Json.Linq
 
 #if HAVE_DATE_TIME_OFFSET
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Microsoft.Identity.Json.Linq.JToken"/> to <see cref="System.DateTimeOffset"/>.
+        /// Performs an explicit conversion from <see cref="Linq.JToken"/> to <see cref="System.DateTimeOffset"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
         public static explicit operator DateTimeOffset(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, DateTimeTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to DateTimeOffset.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -530,18 +538,18 @@ namespace Microsoft.Identity.Json.Linq
 #endif
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="bool"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Boolean"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator bool?(JToken value)
+        public static explicit operator bool?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, BooleanTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to Boolean.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -558,13 +566,13 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="long"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Int64"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
         public static explicit operator long(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to Int64.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -585,14 +593,14 @@ namespace Microsoft.Identity.Json.Linq
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator DateTime?(JToken value)
+        public static explicit operator DateTime?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, DateTimeTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to DateTime.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -614,14 +622,14 @@ namespace Microsoft.Identity.Json.Linq
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator DateTimeOffset?(JToken value)
+        public static explicit operator DateTimeOffset?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, DateTimeTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to DateTimeOffset.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -646,18 +654,18 @@ namespace Microsoft.Identity.Json.Linq
 #endif
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="decimal"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Decimal"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator decimal?(JToken value)
+        public static explicit operator decimal?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to Decimal.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -674,18 +682,18 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="double"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Double"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator double?(JToken value)
+        public static explicit operator double?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to Double.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -702,18 +710,18 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="char"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Char"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator char?(JToken value)
+        public static explicit operator char?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, CharTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to Char.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -730,13 +738,13 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="int"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Int32"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
         public static explicit operator int(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to Int32.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -753,13 +761,13 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="short"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Int16"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
         public static explicit operator short(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to Int16.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -776,14 +784,14 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="ushort"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="UInt16"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public static explicit operator ushort(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to UInt16.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -800,14 +808,14 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="char"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Char"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public static explicit operator char(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, CharTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to Char.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -824,13 +832,13 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="byte"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Byte"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
         public static explicit operator byte(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to Byte.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -847,14 +855,14 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Microsoft.Identity.Json.Linq.JToken"/> to <see cref="System.SByte"/>.
+        /// Performs an explicit conversion from <see cref="Linq.JToken"/> to <see cref="System.SByte"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public static explicit operator sbyte(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to SByte.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -871,18 +879,18 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="int"/> .
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Int32"/> .
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator int?(JToken value)
+        public static explicit operator int?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to Int32.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -899,18 +907,18 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="short"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Int16"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator short?(JToken value)
+        public static explicit operator short?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to Int16.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -927,19 +935,19 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="ushort"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="UInt16"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        // [ClsCompliant(false)]
-        public static explicit operator ushort?(JToken value)
+        [CLSCompliant(false)]
+        public static explicit operator ushort?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to UInt16.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -956,18 +964,18 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="byte"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Byte"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator byte?(JToken value)
+        public static explicit operator byte?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to Byte.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -984,19 +992,19 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="sbyte"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="SByte"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        // [ClsCompliant(false)]
-        public static explicit operator sbyte?(JToken value)
+        [CLSCompliant(false)]
+        public static explicit operator sbyte?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to SByte.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1019,7 +1027,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <returns>The result of the conversion.</returns>
         public static explicit operator DateTime(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, DateTimeTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to DateTime.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1036,18 +1044,18 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="long"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Int64"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator long?(JToken value)
+        public static explicit operator long?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to Int64.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1064,18 +1072,18 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="float"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Single"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator float?(JToken value)
+        public static explicit operator float?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to Single.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1092,13 +1100,13 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="decimal"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Decimal"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
         public static explicit operator decimal(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to Decimal.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1115,19 +1123,19 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="uint"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="UInt32"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        // [ClsCompliant(false)]
-        public static explicit operator uint?(JToken value)
+        [CLSCompliant(false)]
+        public static explicit operator uint?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to UInt32.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1144,19 +1152,19 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="ulong"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="UInt64"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        // [ClsCompliant(false)]
-        public static explicit operator ulong?(JToken value)
+        [CLSCompliant(false)]
+        public static explicit operator ulong?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to UInt64.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1173,13 +1181,13 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="double"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Double"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
         public static explicit operator double(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to Double.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1196,13 +1204,13 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="float"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Single"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
         public static explicit operator float(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to Single.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1219,18 +1227,18 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="string"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="String"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator string(JToken value)
+        public static explicit operator string?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, StringTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to String.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1257,14 +1265,14 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="uint"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="UInt32"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public static explicit operator uint(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to UInt32.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1281,14 +1289,14 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Microsoft.Identity.Json.Linq.JToken"/> to <see cref="System.UInt64"/>.
+        /// Performs an explicit conversion from <see cref="Linq.JToken"/> to <see cref="System.UInt64"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public static explicit operator ulong(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, NumberTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to UInt64.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1305,18 +1313,18 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="byte"/>[].
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Byte"/>[].
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator byte[](JToken value)
+        public static explicit operator byte[]?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, BytesTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to byte array.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1348,7 +1356,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <returns>The result of the conversion.</returns>
         public static explicit operator Guid(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, GuidTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to Guid.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1367,14 +1375,14 @@ namespace Microsoft.Identity.Json.Linq
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator Guid?(JToken value)
+        public static explicit operator Guid?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, GuidTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to Guid.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1400,7 +1408,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <returns>The result of the conversion.</returns>
         public static explicit operator TimeSpan(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, TimeSpanTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to TimeSpan.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1414,14 +1422,14 @@ namespace Microsoft.Identity.Json.Linq
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator TimeSpan?(JToken value)
+        public static explicit operator TimeSpan?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, TimeSpanTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to TimeSpan.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1440,14 +1448,14 @@ namespace Microsoft.Identity.Json.Linq
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
-        public static explicit operator Uri(JToken value)
+        public static explicit operator Uri?(JToken? value)
         {
             if (value == null)
             {
                 return null;
             }
 
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, UriTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to Uri.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1464,18 +1472,18 @@ namespace Microsoft.Identity.Json.Linq
 #if HAVE_BIG_INTEGER
         private static BigInteger ToBigInteger(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, BigIntegerTypes, false))
             {
                 throw new ArgumentException("Can not convert {0} to BigInteger.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
             }
 
-            return ConvertUtils.ToBigInteger(v.Value);
+            return ConvertUtils.ToBigInteger(v.Value!);
         }
 
         private static BigInteger? ToBigIntegerNullable(JToken value)
         {
-            JValue v = EnsureValue(value);
+            JValue? v = EnsureValue(value);
             if (v == null || !ValidateToken(v, BigIntegerTypes, true))
             {
                 throw new ArgumentException("Can not convert {0} to BigInteger.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
@@ -1493,7 +1501,7 @@ namespace Microsoft.Identity.Json.Linq
 
         #region Cast to operators
         /// <summary>
-        /// Performs an implicit conversion from <see cref="bool"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Boolean"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1515,7 +1523,7 @@ namespace Microsoft.Identity.Json.Linq
 #endif
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="byte"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Byte"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1525,7 +1533,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="byte"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Byte"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1535,29 +1543,29 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="sbyte"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="SByte"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public static implicit operator JToken(sbyte value)
         {
             return new JValue(value);
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="sbyte"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="SByte"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public static implicit operator JToken(sbyte? value)
         {
             return new JValue(value);
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="bool"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Boolean"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1567,7 +1575,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="long"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Int64"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1599,7 +1607,7 @@ namespace Microsoft.Identity.Json.Linq
 #endif
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="decimal"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Decimal"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1609,7 +1617,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="double"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Double"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1619,29 +1627,29 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="short"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Int16"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public static implicit operator JToken(short value)
         {
             return new JValue(value);
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="ushort"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="UInt16"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public static implicit operator JToken(ushort value)
         {
             return new JValue(value);
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="int"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Int32"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1651,7 +1659,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="int"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Int32"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1671,7 +1679,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="long"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Int64"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1681,7 +1689,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="float"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Single"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1691,7 +1699,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="decimal"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Decimal"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1701,51 +1709,51 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="short"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Int16"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public static implicit operator JToken(short? value)
         {
             return new JValue(value);
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="ushort"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="UInt16"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public static implicit operator JToken(ushort? value)
         {
             return new JValue(value);
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="uint"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="UInt32"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public static implicit operator JToken(uint? value)
         {
             return new JValue(value);
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="ulong"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="UInt64"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public static implicit operator JToken(ulong? value)
         {
             return new JValue(value);
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="double"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Double"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1755,7 +1763,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="float"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Single"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1765,39 +1773,39 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="string"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="String"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
-        public static implicit operator JToken(string value)
+        public static implicit operator JToken(string? value)
         {
             return new JValue(value);
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="uint"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="UInt32"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public static implicit operator JToken(uint value)
         {
             return new JValue(value);
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="ulong"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="UInt64"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public static implicit operator JToken(ulong value)
         {
             return new JValue(value);
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="byte"/>[] to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Byte"/>[] to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1811,7 +1819,7 @@ namespace Microsoft.Identity.Json.Linq
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
-        public static implicit operator JToken(Uri value)
+        public static implicit operator JToken(Uri? value)
         {
             return new JValue(value);
         }
@@ -1855,7 +1863,7 @@ namespace Microsoft.Identity.Json.Linq
         {
             return new JValue(value);
         }
-#endregion
+        #endregion
 
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -1869,7 +1877,7 @@ namespace Microsoft.Identity.Json.Linq
 
         internal abstract int GetDeepHashCode();
 
-        IJEnumerable<JToken> IJEnumerable<JToken>.this[object key] => this[key];
+        IJEnumerable<JToken> IJEnumerable<JToken>.this[object key] => this[key]!;
 
         /// <summary>
         /// Creates a <see cref="JsonReader"/> for this token.
@@ -1889,7 +1897,7 @@ namespace Microsoft.Identity.Json.Linq
             using (JTokenWriter jsonWriter = new JTokenWriter())
             {
                 jsonSerializer.Serialize(jsonWriter, o);
-                token = jsonWriter.Token;
+                token = jsonWriter.Token!;
             }
 
             return token;
@@ -1921,9 +1929,9 @@ namespace Microsoft.Identity.Json.Linq
         /// </summary>
         /// <typeparam name="T">The object type that the token will be deserialized to.</typeparam>
         /// <returns>The new object created from the JSON value.</returns>
-        public T ToObject<T>()
+        public T? ToObject<T>()
         {
-            return (T)ToObject(typeof(T));
+            return (T?)ToObject(typeof(T));
         }
 
         /// <summary>
@@ -1931,7 +1939,7 @@ namespace Microsoft.Identity.Json.Linq
         /// </summary>
         /// <param name="objectType">The object type that the token will be deserialized to.</param>
         /// <returns>The new object created from the JSON value.</returns>
-        public object ToObject(Type objectType)
+        public object? ToObject(Type objectType)
         {
             if (JsonConvert.DefaultSettings == null)
             {
@@ -1949,7 +1957,7 @@ namespace Microsoft.Identity.Json.Linq
                         catch (Exception ex)
                         {
                             Type enumType = objectType.IsEnum() ? objectType : Nullable.GetUnderlyingType(objectType);
-                            throw new ArgumentException("Could not convert '{0}' to {1}.".FormatWith(CultureInfo.InvariantCulture, (string)this, enumType.Name), ex);
+                            throw new ArgumentException("Could not convert '{0}' to {1}.".FormatWith(CultureInfo.InvariantCulture, (string?)this, enumType.Name), ex);
                         }
                     }
 
@@ -2025,13 +2033,13 @@ namespace Microsoft.Identity.Json.Linq
                         return (DateTimeOffset)this;
 #endif
                     case PrimitiveTypeCode.String:
-                        return (string)this;
+                        return (string?)this;
                     case PrimitiveTypeCode.GuidNullable:
                         return (Guid?)this;
                     case PrimitiveTypeCode.Guid:
                         return (Guid)this;
                     case PrimitiveTypeCode.Uri:
-                        return (Uri)this;
+                        return (Uri?)this;
                     case PrimitiveTypeCode.TimeSpanNullable:
                         return (TimeSpan?)this;
                     case PrimitiveTypeCode.TimeSpan:
@@ -2054,9 +2062,9 @@ namespace Microsoft.Identity.Json.Linq
         /// <typeparam name="T">The object type that the token will be deserialized to.</typeparam>
         /// <param name="jsonSerializer">The <see cref="JsonSerializer"/> that will be used when creating the object.</param>
         /// <returns>The new object created from the JSON value.</returns>
-        public T ToObject<T>(JsonSerializer jsonSerializer)
+        public T? ToObject<T>(JsonSerializer jsonSerializer)
         {
-            return (T)ToObject(typeof(T), jsonSerializer);
+            return (T?)ToObject(typeof(T), jsonSerializer);
         }
 
         /// <summary>
@@ -2065,7 +2073,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <param name="objectType">The object type that the token will be deserialized to.</param>
         /// <param name="jsonSerializer">The <see cref="JsonSerializer"/> that will be used when creating the object.</param>
         /// <returns>The new object created from the JSON value.</returns>
-        public object ToObject(Type objectType, JsonSerializer jsonSerializer)
+        public object? ToObject(Type objectType, JsonSerializer jsonSerializer)
         {
             ValidationUtils.ArgumentNotNull(jsonSerializer, nameof(jsonSerializer));
 
@@ -2100,7 +2108,7 @@ namespace Microsoft.Identity.Json.Linq
         /// that were read from the reader. The runtime type of the token is determined
         /// by the token type of the first token encountered in the reader.
         /// </returns>
-        public static JToken ReadFrom(JsonReader reader, JsonLoadSettings settings)
+        public static JToken ReadFrom(JsonReader reader, JsonLoadSettings? settings)
         {
             ValidationUtils.ArgumentNotNull(reader, nameof(reader));
 
@@ -2125,7 +2133,7 @@ namespace Microsoft.Identity.Json.Linq
                 throw JsonReaderException.Create(reader, "Error reading JToken from JsonReader.");
             }
 
-            IJsonLineInfo lineInfo = reader as IJsonLineInfo;
+            IJsonLineInfo? lineInfo = reader as IJsonLineInfo;
 
             switch (reader.TokenType)
             {
@@ -2147,7 +2155,7 @@ namespace Microsoft.Identity.Json.Linq
                     v.SetLineInfo(lineInfo, settings);
                     return v;
                 case JsonToken.Comment:
-                    v = JValue.CreateComment(reader.Value.ToString());
+                    v = JValue.CreateComment(reader.Value!.ToString());
                     v.SetLineInfo(lineInfo, settings);
                     return v;
                 case JsonToken.Null:
@@ -2166,7 +2174,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <summary>
         /// Load a <see cref="JToken"/> from a string that contains JSON.
         /// </summary>
-        /// <param name="json">A <see cref="string"/> that contains JSON.</param>
+        /// <param name="json">A <see cref="String"/> that contains JSON.</param>
         /// <returns>A <see cref="JToken"/> populated from the string that contains JSON.</returns>
         public static JToken Parse(string json)
         {
@@ -2176,11 +2184,11 @@ namespace Microsoft.Identity.Json.Linq
         /// <summary>
         /// Load a <see cref="JToken"/> from a string that contains JSON.
         /// </summary>
-        /// <param name="json">A <see cref="string"/> that contains JSON.</param>
+        /// <param name="json">A <see cref="String"/> that contains JSON.</param>
         /// <param name="settings">The <see cref="JsonLoadSettings"/> used to load the JSON.
         /// If this is <c>null</c>, default load settings will be used.</param>
         /// <returns>A <see cref="JToken"/> populated from the string that contains JSON.</returns>
-        public static JToken Parse(string json, JsonLoadSettings settings)
+        public static JToken Parse(string json, JsonLoadSettings? settings)
         {
             using (JsonReader reader = new JsonTextReader(new StringReader(json)))
             {
@@ -2206,7 +2214,7 @@ namespace Microsoft.Identity.Json.Linq
         /// that were read from the reader. The runtime type of the token is determined
         /// by the token type of the first token encountered in the reader.
         /// </returns>
-        public static JToken Load(JsonReader reader, JsonLoadSettings settings)
+        public static JToken Load(JsonReader reader, JsonLoadSettings? settings)
         {
             return ReadFrom(reader, settings);
         }
@@ -2225,7 +2233,7 @@ namespace Microsoft.Identity.Json.Linq
             return Load(reader, null);
         }
 
-        internal void SetLineInfo(IJsonLineInfo lineInfo, JsonLoadSettings settings)
+        internal void SetLineInfo(IJsonLineInfo? lineInfo, JsonLoadSettings? settings)
         {
             if (settings != null && settings.LineInfoHandling != LineInfoHandling.Load)
             {
@@ -2259,14 +2267,14 @@ namespace Microsoft.Identity.Json.Linq
 
         bool IJsonLineInfo.HasLineInfo()
         {
-            return Annotation<LineInfoAnnotation>() != null;
+            return (Annotation<LineInfoAnnotation>() != null);
         }
 
         int IJsonLineInfo.LineNumber
         {
             get
             {
-                LineInfoAnnotation annotation = Annotation<LineInfoAnnotation>();
+                LineInfoAnnotation? annotation = Annotation<LineInfoAnnotation>();
                 if (annotation != null)
                 {
                     return annotation.LineNumber;
@@ -2280,7 +2288,7 @@ namespace Microsoft.Identity.Json.Linq
         {
             get
             {
-                LineInfoAnnotation annotation = Annotation<LineInfoAnnotation>();
+                LineInfoAnnotation? annotation = Annotation<LineInfoAnnotation>();
                 if (annotation != null)
                 {
                     return annotation.LinePosition;
@@ -2291,31 +2299,48 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Selects a <see cref="JToken"/> using a JPath expression. Selects the token that matches the object path.
+        /// Selects a <see cref="JToken"/> using a JSONPath expression. Selects the token that matches the object path.
         /// </summary>
         /// <param name="path">
-        /// A <see cref="string"/> that contains a JPath expression.
+        /// A <see cref="String"/> that contains a JSONPath expression.
         /// </param>
         /// <returns>A <see cref="JToken"/>, or <c>null</c>.</returns>
-        public JToken SelectToken(string path)
+        public JToken? SelectToken(string path)
         {
-            return SelectToken(path, false);
+            return SelectToken(path, settings: null);
         }
 
         /// <summary>
-        /// Selects a <see cref="JToken"/> using a JPath expression. Selects the token that matches the object path.
+        /// Selects a <see cref="JToken"/> using a JSONPath expression. Selects the token that matches the object path.
         /// </summary>
         /// <param name="path">
-        /// A <see cref="string"/> that contains a JPath expression.
+        /// A <see cref="String"/> that contains a JSONPath expression.
         /// </param>
         /// <param name="errorWhenNoMatch">A flag to indicate whether an error should be thrown if no tokens are found when evaluating part of the expression.</param>
         /// <returns>A <see cref="JToken"/>.</returns>
-        public JToken SelectToken(string path, bool errorWhenNoMatch)
+        public JToken? SelectToken(string path, bool errorWhenNoMatch)
+        {
+            JsonSelectSettings? settings = errorWhenNoMatch
+                ? new JsonSelectSettings { ErrorWhenNoMatch = true }
+                : null;
+
+            return SelectToken(path, settings);
+        }
+
+        /// <summary>
+        /// Selects a <see cref="JToken"/> using a JSONPath expression. Selects the token that matches the object path.
+        /// </summary>
+        /// <param name="path">
+        /// A <see cref="String"/> that contains a JSONPath expression.
+        /// </param>
+        /// <param name="settings">The <see cref="JsonSelectSettings"/> used to select tokens.</param>
+        /// <returns>A <see cref="JToken"/>.</returns>
+        public JToken? SelectToken(string path, JsonSelectSettings? settings)
         {
             JPath p = new JPath(path);
 
-            JToken token = null;
-            foreach (JToken t in p.Evaluate(this, this, errorWhenNoMatch))
+            JToken? token = null;
+            foreach (JToken t in p.Evaluate(this, this, settings))
             {
                 if (token != null)
                 {
@@ -2329,29 +2354,46 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Selects a collection of elements using a JPath expression.
+        /// Selects a collection of elements using a JSONPath expression.
         /// </summary>
         /// <param name="path">
-        /// A <see cref="string"/> that contains a JPath expression.
+        /// A <see cref="String"/> that contains a JSONPath expression.
         /// </param>
         /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="JToken"/> that contains the selected elements.</returns>
         public IEnumerable<JToken> SelectTokens(string path)
         {
-            return SelectTokens(path, false);
+            return SelectTokens(path, settings: null);
         }
 
         /// <summary>
-        /// Selects a collection of elements using a JPath expression.
+        /// Selects a collection of elements using a JSONPath expression.
         /// </summary>
         /// <param name="path">
-        /// A <see cref="string"/> that contains a JPath expression.
+        /// A <see cref="String"/> that contains a JSONPath expression.
         /// </param>
         /// <param name="errorWhenNoMatch">A flag to indicate whether an error should be thrown if no tokens are found when evaluating part of the expression.</param>
         /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="JToken"/> that contains the selected elements.</returns>
         public IEnumerable<JToken> SelectTokens(string path, bool errorWhenNoMatch)
         {
-            JPath p = new JPath(path);
-            return p.Evaluate(this, this, errorWhenNoMatch);
+            JsonSelectSettings? settings = errorWhenNoMatch
+                ? new JsonSelectSettings { ErrorWhenNoMatch = true }
+                : null;
+
+            return SelectTokens(path, settings);
+        }
+
+        /// <summary>
+        /// Selects a collection of elements using a JSONPath expression.
+        /// </summary>
+        /// <param name="path">
+        /// A <see cref="String"/> that contains a JSONPath expression.
+        /// </param>
+        /// <param name="settings">The <see cref="JsonSelectSettings"/> used to select tokens.</param>
+        /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="JToken"/> that contains the selected elements.</returns>
+        public IEnumerable<JToken> SelectTokens(string path, JsonSelectSettings? settings)
+        {
+            var p = new JPath(path);
+            return p.Evaluate(this, this, settings);
         }
 
 #if HAVE_DYNAMIC
@@ -2439,13 +2481,13 @@ namespace Microsoft.Identity.Json.Linq
         /// </summary>
         /// <typeparam name="T">The type of the annotation to retrieve.</typeparam>
         /// <returns>The first annotation object that matches the specified type, or <c>null</c> if no annotation is of the specified type.</returns>
-        public T Annotation<T>() where T : class
+        public T? Annotation<T>() where T : class
         {
             if (_annotations != null)
             {
                 if (!(_annotations is object[] annotations))
                 {
-                    return _annotations as T;
+                    return (_annotations as T);
                 }
                 for (int i = 0; i < annotations.Length; i++)
                 {
@@ -2470,7 +2512,7 @@ namespace Microsoft.Identity.Json.Linq
         /// </summary>
         /// <param name="type">The <see cref="Type"/> of the annotation to retrieve.</param>
         /// <returns>The first annotation object that matches the specified type, or <c>null</c> if no annotation is of the specified type.</returns>
-        public object Annotation(Type type)
+        public object? Annotation(Type type)
         {
             if (type == null)
             {
@@ -2549,7 +2591,7 @@ namespace Microsoft.Identity.Json.Linq
         /// Gets a collection of annotations of the specified type for this <see cref="JToken"/>.
         /// </summary>
         /// <param name="type">The <see cref="Type"/> of the annotations to retrieve.</param>
-        /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="object"/> that contains the annotations that match the specified type for this <see cref="JToken"/>.</returns>
+        /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="Object"/> that contains the annotations that match the specified type for this <see cref="JToken"/>.</returns>
         public IEnumerable<object> Annotations(Type type)
         {
             if (type == null)
@@ -2596,7 +2638,7 @@ namespace Microsoft.Identity.Json.Linq
         {
             if (_annotations != null)
             {
-                if (!(_annotations is object[] annotations))
+                if (!(_annotations is object?[] annotations))
                 {
                     if (_annotations is T)
                     {
@@ -2609,7 +2651,7 @@ namespace Microsoft.Identity.Json.Linq
                     int keepCount = 0;
                     while (index < annotations.Length)
                     {
-                        object obj2 = annotations[index];
+                        object? obj2 = annotations[index];
                         if (obj2 == null)
                         {
                             break;
@@ -2651,7 +2693,7 @@ namespace Microsoft.Identity.Json.Linq
 
             if (_annotations != null)
             {
-                if (!(_annotations is object[] annotations))
+                if (!(_annotations is object?[] annotations))
                 {
                     if (type.IsInstanceOfType(_annotations))
                     {
@@ -2664,7 +2706,7 @@ namespace Microsoft.Identity.Json.Linq
                     int keepCount = 0;
                     while (index < annotations.Length)
                     {
-                        object o = annotations[index];
+                        object? o = annotations[index];
                         if (o == null)
                         {
                             break;
@@ -2690,6 +2732,18 @@ namespace Microsoft.Identity.Json.Linq
                         _annotations = null;
                     }
                 }
+            }
+        }
+
+        internal void CopyAnnotations(JToken target, JToken source)
+        {
+            if (source._annotations is object[] annotations)
+            {
+                target._annotations = annotations.ToArray();
+            }
+            else
+            {
+                target._annotations = source._annotations;
             }
         }
     }

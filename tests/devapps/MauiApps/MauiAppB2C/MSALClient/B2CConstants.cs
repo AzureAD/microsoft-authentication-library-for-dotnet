@@ -1,4 +1,4 @@
-﻿namespace UserDetailsClient.Core.Features.LogOn
+﻿namespace MauiB2C.MSALClient
 {
     public static class B2CConstants
     {

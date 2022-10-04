@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [TestCategory("Regression")]
+        [TestCategory(TestCategories.Regression)]
         [WorkItem(1365)] // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1365
         public async Task ClientCreds_MustFilterByTenantId_Async()
         {

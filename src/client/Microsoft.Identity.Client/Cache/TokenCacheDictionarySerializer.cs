@@ -6,7 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Utils;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using JToken = System.Text.Json.Nodes.JsonNode;
+#else
 using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -73,7 +77,7 @@ namespace Microsoft.Identity.Client.Cache
 
             try
             {
-                cacheKvpList = JsonHelper.DeserializeFromJson< List<KeyValuePair<string, IEnumerable<string>>>>(bytes);
+                cacheKvpList = JsonHelper.DeserializeFromJson<List<KeyValuePair<string, IEnumerable<string>>>>(bytes);
             }
             catch (Exception ex)
             {

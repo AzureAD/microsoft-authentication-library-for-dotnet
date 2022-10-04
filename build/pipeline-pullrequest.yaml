@@ -10,7 +10,7 @@ pr:
 
 variables:
   BuildPlatform: 'any cpu'
-  BuildConfiguration: 'debug'
+  BuildConfiguration: 'Release'
   #intended for running all ui automation tests as one to reduce time
   ConsolidateAppCenterTests: true
 

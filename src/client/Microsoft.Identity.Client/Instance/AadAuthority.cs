@@ -35,15 +35,19 @@ namespace Microsoft.Identity.Client.Instance
 
         internal bool IsWorkAndSchoolOnly()
         {
-            return !TenantId.Equals(Constants.CommonTenant) &&
-                  !TenantId.Equals(Constants.ConsumerTenant) &&
-                  !TenantId.Equals(Constants.MsaTenantId);
+            return !TenantId.Equals(Constants.CommonTenant, StringComparison.OrdinalIgnoreCase) &&
+                   !IsConsumers(TenantId);
         }
 
         internal bool IsConsumers()
         {
-            return TenantId.Equals(Constants.ConsumerTenant) ||
-                  TenantId.Equals(Constants.MsaTenantId);
+            return IsConsumers(TenantId);
+        }
+
+        internal static bool IsConsumers(string tenantId)
+        {
+            return tenantId.Equals(Constants.ConsumerTenant, StringComparison.OrdinalIgnoreCase) ||
+                   tenantId.Equals(Constants.MsaTenantId, StringComparison.OrdinalIgnoreCase);
         }
 
         internal bool IsCommonOrganizationsOrConsumersTenant()
@@ -54,7 +58,7 @@ namespace Microsoft.Identity.Client.Instance
         internal static bool IsCommonOrganizationsOrConsumersTenant(string tenantId)
         {
             return !string.IsNullOrEmpty(tenantId) &&
-                s_tenantlessTenantNames.Contains(tenantId);
+                (IsCommonOrOrganizationsTenant(tenantId) || IsConsumers(tenantId));
         }
 
         internal bool IsCommonOrOrganizationsTenant()
@@ -65,7 +69,6 @@ namespace Microsoft.Identity.Client.Instance
         internal static bool IsCommonOrOrganizationsTenant(string tenantId)
         {
             return !string.IsNullOrEmpty(tenantId) && 
-                tenantId != Constants.ConsumerTenant &&
                 s_tenantlessTenantNames.Contains(tenantId);
         }
 
