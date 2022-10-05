@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
+using System.Globalization;
 
 namespace Microsoft.Identity.Client.Broker
 {
@@ -40,14 +41,25 @@ namespace Microsoft.Identity.Client.Broker
 
                 return new NativeInterop.Core();
             }
-            catch (Exception ex)
+            catch (MsalRuntimeException ex) when (ex.Status == ResponseStatus.ApiContractViolation)
             {
+                // failed to initialize msal runtime - can happen on older versions of Windows. Means broker is not available.
+                // We will never get here with our current OS version check. Instead in this scenario we will fallback to the browser
+                // but MSALRuntime does it's internal check for OS compatibility and throws an ApiContractViolation MsalRuntimeException.
+                // For any reason, if our OS check fails then this will catch the MsalRuntimeException and 
+                // log but we will not fallback to the browser in this case. 
                 s_initException = ex;
 
                 // ignored
                 return null;
             }
-
+            catch (Exception ex)
+            {
+                // When MSAL Runtime dlls fails to load then we catch the exception and throw with a meaningful
+                // message with information on how to troubleshoot
+                throw new MsalClientException(
+                    "wam_runtime_init_failed", ex.Message + " See https://aka.ms/msal-net-wam#troubleshooting", ex);
+            }
         });
 
         /// <summary>
@@ -94,7 +106,7 @@ namespace Microsoft.Identity.Client.Broker
             {
                 throw new MsalClientException(
                     "window_handle_required",
-                    "Public Client applications wanting to use WAM need to provide their window handle. Console applications can use GetConsoleWindow Windows API for this.");
+                    "Desktop applications wanting to use the broker need to provide their window handle. See https://aka.ms/msal-net-wam#parent-window-handles");
             }
 
             //if OperatingSystemAccount is passed then we use the user signed-in on the machine
@@ -109,7 +121,10 @@ namespace Microsoft.Identity.Client.Broker
 
             if (authenticationRequestParameters?.Account?.HomeAccountId?.ObjectId != null)
             {
-                using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+                using (var authParams = WamAdapters.GetCommonAuthParameters(
+                    authenticationRequestParameters, 
+                    _wamOptions.MsaPassthrough, 
+                    _logger))
                 {
                     using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
                     authenticationRequestParameters.Account.HomeAccountId.ObjectId,
@@ -161,11 +176,14 @@ namespace Microsoft.Identity.Client.Broker
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
-            using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            using (var authParams = WamAdapters.GetCommonAuthParameters(
+                authenticationRequestParameters, 
+                _wamOptions.MsaPassthrough,
+                _logger))
             {
                 //Login Hint
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
-                _logger.Verbose("[WamBroker] AcquireTokenInteractive - login hint provided? " + string.IsNullOrEmpty(loginHint));
+                _logger.Verbose("[WamBroker] AcquireTokenInteractive - login hint provided? " + !string.IsNullOrEmpty(loginHint));
 
                 using (var result = await s_lazyCore.Value.SignInInteractivelyAsync(
                     _parentHandle,
@@ -193,7 +211,10 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WamBroker] Signing in with the default user account.");
 
-            using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            using (var authParams = WamAdapters.GetCommonAuthParameters(
+                authenticationRequestParameters, 
+                _wamOptions.MsaPassthrough,
+                _logger))
             {
                 using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInAsync(
                         _parentHandle,
@@ -230,7 +251,10 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WamBroker] Acquiring token silently.");
 
-            using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            using (var authParams = WamAdapters.GetCommonAuthParameters(
+                authenticationRequestParameters, 
+                _wamOptions.MsaPassthrough,
+                _logger))
             {
                 using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
                     acquireTokenSilentParameters.Account.HomeAccountId.ObjectId,
@@ -274,7 +298,10 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WamBroker] Acquiring token silently for default account.");
 
-            using (var authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            using (var authParams = WamAdapters.GetCommonAuthParameters(
+                authenticationRequestParameters, 
+                _wamOptions.MsaPassthrough,
+                _logger))
             {
                 using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInSilentlyAsync(
                         authParams,
@@ -300,7 +327,10 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose("[WamBroker] Acquiring token with Username Password flow.");
 
-            using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(authenticationRequestParameters, _wamOptions.MsaPassthrough))
+            using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(
+                authenticationRequestParameters, 
+                _wamOptions.MsaPassthrough,
+                _logger))
             {
                 authParams.Properties["MSALRuntime_Username"] = acquireTokenByUsernamePasswordParameters.Username;
                 authParams.Properties["MSALRuntime_Password"] = acquireTokenByUsernamePasswordParameters.Password;
@@ -377,7 +407,7 @@ namespace Microsoft.Identity.Client.Broker
                         }
                         else
                         {
-                            throw new MsalServiceException("wam_failed_to_signout", $"Failed to sign out account. {result.Error}");
+                            WamAdapters.ThrowExceptionFromWamError(result, _logger);
                         }
                     }
                 }
@@ -418,13 +448,12 @@ namespace Microsoft.Identity.Client.Broker
 
             if (s_lazyCore.Value == null)
             {
-                _logger.Info("[WAM Broker] MsalRuntime init failed...");
+                _logger.Info("[WAM Broker] MsalRuntime initialization failed. See https://aka.ms/msal-net-wam#wam-limitations");
                 _logger.InfoPii(s_initException);
-
                 return false;
             }
 
-            _logger.Verbose($"[WAM Broker] MsalRuntime init succesful.");
+            _logger.Verbose($"[WAM Broker] MsalRuntime initialization successful.");
             return true;
         }
     }

@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Extensibility;
 #if NET_CORE
 using Microsoft.Identity.Client.Broker;
 #endif
@@ -47,7 +48,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static string s_publicCloudCcaSecret;
         private KeyVaultSecretsProvider _keyVault;
 
-        private string _popValidationEndpointSecret;     
+        private string _popValidationEndpointSecret;
 
         [TestInitialize]
         public void TestInitialize()
@@ -295,9 +296,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var key = CreateRsaSecurityKey();
             var popCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256);
 
-            var popConfig = new PoPAuthenticationConfiguration() 
-            {                 
-                PopCryptoProvider = new SigningCredentialsToPopCryptoProviderAdapter(popCredentials, true),                
+            var popConfig = new PoPAuthenticationConfiguration()
+            {
+                PopCryptoProvider = new SigningCredentialsToPopCryptoProviderAdapter(popCredentials, true),
                 SignHttpRequest = false,
             };
 
@@ -308,7 +309,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.AreEqual("pop", result.TokenType);
             Assert.AreEqual(
-                TokenSource.IdentityProvider, 
+                TokenSource.IdentityProvider,
                 result.AuthenticationResultMetadata.TokenSource);
 
             SignedHttpRequestDescriptor signedHttpRequestDescriptor =
@@ -334,7 +335,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
              .ExecuteAsync(CancellationToken.None)
              .ConfigureAwait(false);
             Assert.AreEqual(
-                TokenSource.Cache, 
+                TokenSource.Cache,
                 result2.AuthenticationResultMetadata.TokenSource);
         }
 
@@ -364,6 +365,90 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 ProtectedUrl,
                 HttpMethod.Post,
                 result).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task NewPOP_WithKeyIdOnly_Async()
+        {
+            // Arrange - outside MSAL
+
+            // 1.1. Create an RSA key (here using Wilson primitives, but vanialla crypto primitives also work, see ComputeCannonicalJwk bellow for example
+            RsaSecurityKey popKey = CreateRsaSecurityKey();
+            // 1.2. Get the JWK and base64 encode it
+            string base64EncodedJwk = Base64UrlHelpers.Encode(popKey.ComputeJwkThumbprint());
+            // 1.3. Put it in JSON format
+            var reqCnf = $@"{{""kid"":""{base64EncodedJwk}""}}";
+            // 1.4. Base64 encode it again
+            var keyId = Base64UrlHelpers.Encode(reqCnf);
+
+            // Arrange MSALfin
+
+            // 2. Create a normal CCA 
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(PublicCloudConfidentialClientID)
+                .WithExperimentalFeatures()
+                .WithAuthority(PublicCloudTestAuthority)
+                .WithClientSecret(s_publicCloudCcaSecret)
+                .Build();
+
+            // 3. When acquiring a token, use WithPopKeyId and OnBeforeTokenRequest extensiblity methods
+            var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                 .WithProofOfPosessionKeyId(keyId, "pop")       // ensure tokens are bound to the key_id
+                 .OnBeforeTokenRequest((data) =>
+                 {
+                     // add extra data to request
+                     data.BodyParameters.Add("req_cnf", keyId);
+                     data.BodyParameters.Add("token_type", "pop");
+
+                     return Task.CompletedTask;
+                 })
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("pop", result.TokenType);
+            Assert.AreEqual(
+                TokenSource.IdentityProvider,
+                result.AuthenticationResultMetadata.TokenSource);
+
+            // Outside MSAL - Create the SHR (using Wilson)
+
+            var popCredentials = new SigningCredentials(popKey, SecurityAlgorithms.RsaSha256);
+            SignedHttpRequestDescriptor signedHttpRequestDescriptor =
+               new SignedHttpRequestDescriptor(
+                   result.AccessToken,
+                   new IdentityModel.Protocols.HttpRequestData()
+                   {
+                       Uri = new Uri(ProtectedUrl),
+                       Method = HttpMethod.Post.ToString()
+                   },
+                   popCredentials);
+
+            var signedHttpRequestHandler = new SignedHttpRequestHandler();
+            string req = signedHttpRequestHandler.CreateSignedHttpRequest(signedHttpRequestDescriptor);
+
+            // play the POP token against a webservice that accepts POP to validate the keys
+            await VerifyPoPTokenAsync(
+                PublicCloudConfidentialClientID,
+                 ProtectedUrl,
+                 HttpMethod.Post,
+                 req, "pop").ConfigureAwait(false);
+
+            // Additional check - if using the same key, the token should come from the cache
+            var result2 = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                 .WithProofOfPosessionKeyId(keyId, "pop")       // ensure tokens are bound to the key_id
+                 .OnBeforeTokenRequest((data) =>
+                 {
+                     // add extra data to request
+                     data.BodyParameters.Add("req_cnf", keyId);
+                     data.BodyParameters.Add("token_type", "pop");
+
+                     return Task.CompletedTask;
+                 })
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+            Assert.AreEqual(
+                TokenSource.Cache,
+                result2.AuthenticationResultMetadata.TokenSource);
         }
 
 #if NET_CORE
@@ -504,7 +589,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private readonly X509Certificate2 _cert;
 
-       
+
         public RSACertificatePopCryptoProvider(X509Certificate2 cert)
         {
             _cert = cert ?? throw new ArgumentNullException(nameof(cert));

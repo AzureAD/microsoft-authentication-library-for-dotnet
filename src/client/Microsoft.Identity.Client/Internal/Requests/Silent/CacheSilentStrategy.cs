@@ -39,8 +39,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
-
-            ThrowIfNoScopesOnB2C();
+            
             ThrowIfCurrentBrokerAccount();
 
             AuthenticationResult authResult = null;
@@ -120,7 +119,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             if (PublicClientApplication.IsOperatingSystemAccount(AuthenticationRequestParameters.Account))
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose(
-                    "OperatingSystemAccount is only supported by some browsers");
+                    "OperatingSystemAccount is only supported by some brokers");
 
                 throw new MsalUiRequiredException(
                    MsalError.CurrentBrokerAccount,
@@ -162,24 +161,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 TokenSource.Cache,
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
                 account);
-        }
-
-        private void ThrowIfNoScopesOnB2C()
-        {
-            // During AT Silent with no scopes, Unlike AAD, B2C will not issue an access token if no scopes are requested
-            // And we don't want to refresh the RT on every ATS call
-            // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/715 for details
-
-            if (!AuthenticationRequestParameters.HasScopes &&
-                AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AuthorityType.B2C)
-            {
-                throw new MsalUiRequiredException(
-                    MsalError.ScopesRequired,
-                    MsalErrorMessage.ScopesRequired,
-                    null,
-                    UiRequiredExceptionClassification.AcquireTokenSilentFailed);
-            }
-        }
+        }       
 
         private async Task<MsalTokenResponse> TryGetTokenUsingFociAsync(CancellationToken cancellationToken)
         {

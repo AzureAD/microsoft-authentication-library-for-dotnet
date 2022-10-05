@@ -1,3 +1,45 @@
+
+4.47.2
+==========
+
+### New Features
+- Hide legacy API's that are available only to internal Microsoft only (1P) applications. See [3670](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3670).
+- Soft deprecate `WithAuthority` API on AcquireTokenXXX methods. Instead use `WithTenantId` or `WithTenantIdFromAuthority`, or `WithB2CAuthority` for B2C authorities. See [#3716](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3716)
+- Logging error codes to MSAL Telemetry. See [3595](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3595)
+- Add more logging around client creds and claims. See [3707](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3707).
+- Improve extensibility APIs to support new POP
+
+### Bug Fixes
+- Improved error messages when new preview broker exceptions are thrown. [#3696](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3696)
+- MSAL will now throw an exception if no scopes are passed for the new preview Broker or for B2C scenarios. See [#3675](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3675)
+- Removed .NET 6 MacCatalyst target because MSAL.NET doesn't currently support it. See [#3693](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3693)
+- Throw an exception when new WAM DLLs are not loaded when invoking the new WAM preview broker. See [#3699](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3699)
+
+4.47.1
+==========
+
+### Supportability
+- Fixes an internal (Microsoft 1P only) NuGet feed issue. See [#3689](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3689)
+
+4.47.0
+==========
+
+### New Features
+- Support for .NET MAUI is now generally available for iOS, Windows and Android targets. The package also works with UWP. Refer to [`MauiStatus.md`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/MauiStatus.md) for details.
+- The new MSAL logging feature is now generally available. `WithExperimentalFeatures()` is no longer required when calling `WithLogging()`. See [3548](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3548), [wiki](https://aka.ms/msal-net-logging).
+- Adding IsProofOfPosessionSupportedByClient api to be used to determine if the current broker is able to support Proof-of-Posession. See [3496](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3496) 
+- Adding ability to turn off the default retry-once policy on 5xx errors. See [2877](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2877)
+- Adds new public builder API accepting instances of `ITelemetryClient`. See [3533](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3533).
+- Added logic to log some acquire token data via the new telemetry pipeline. See [3534](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3534).
+
+### Bug Fixes
+- MSAL will now throw an exception if no scopes are passed when the new preview broker is invoked. See [#3654](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3654) and [#3677](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3677)
+- `MsalServiceException.IsRetryable` is now correctly set. See [#3661](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3661)
+- Added extra logging in Preview Broker `RemoveAccountAsync` API. See [#3658](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3658)
+- Added a check for null account in Preview Broker `RemoveAccountAsync` API. See [#3657](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3657)
+- `AuthenticationResult` now shows correct authority for multi-cloud requests using WAM. See [#3637](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3637)
+- Adding null IdentityLogger to prevent null reference exception when using cache logger. See [#3678](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3678)
+
 4.46.2
 ==========
 

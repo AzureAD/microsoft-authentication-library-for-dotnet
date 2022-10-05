@@ -36,9 +36,10 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// A legacy option available only to old Microsoft applications. Should be avoided where possible.
+        /// A legacy option available only to Microsoft applications. Should be avoided where possible.
         /// Support is experimental.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)] // 1p feature only, hide it from public API.
         public bool MsaPassthrough { get; set; } = false;
 
         /// <summary>

@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Broker
         };
 
         /// <summary>
-        /// Create WAM Error Response
+        /// Create WAM AuthResult Error Response
         /// </summary>
         /// <param name="authResult"></param>
         /// <param name="authenticationRequestParameters"></param>
@@ -126,14 +126,40 @@ namespace Microsoft.Identity.Client.Broker
         }
 
         /// <summary>
+        /// Create WAM SignOutResult Error Response
+        /// </summary>
+        /// <param name="signoutResult"></param>
+        /// <param name="logger"></param>
+        /// <exception cref="MsalServiceException"></exception>
+        internal static void ThrowExceptionFromWamError(
+            NativeInterop.SignOutResult signoutResult,
+            ILoggerAdapter logger)
+        {
+            logger.Verbose("[WamBroker] Processing WAM exception");
+            logger.Verbose($"[WamBroker] TelemetryData: {signoutResult.TelemetryData}");
+
+            string internalErrorCode = signoutResult.Error.Tag.ToString(CultureInfo.InvariantCulture);
+            long errorCode = signoutResult.Error.ErrorCode;
+            string errorMessage = $"{signoutResult.Error} (error code {errorCode}) (internal error code {internalErrorCode})";
+
+            logger.Verbose($"[WamBroker] {MsalError.WamFailedToSignout} {errorMessage}");
+            throw new MsalServiceException(MsalError.WamFailedToSignout, errorMessage);
+        }
+
+        /// <summary>
         /// Gets the Common Auth Parameters to be passed to Native Interop
         /// </summary>
         /// <param name="authenticationRequestParameters"></param>
         /// <param name="isMsaPassthrough"></param>
+        /// <param name="logger"></param>
         public static NativeInterop.AuthParameters GetCommonAuthParameters(
             AuthenticationRequestParameters authenticationRequestParameters, 
-            bool isMsaPassthrough)
+            bool isMsaPassthrough,
+            ILoggerAdapter logger)
         {
+            logger.Verbose("[WamBroker] Validating Common Auth Parameters.");
+            ValidateAuthParams(authenticationRequestParameters, logger);
+
             var authParams = new NativeInterop.AuthParameters
                 (authenticationRequestParameters.AppConfig.ClientId,
                 authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
@@ -170,6 +196,8 @@ namespace Microsoft.Identity.Client.Broker
             }
 
             AddPopParams(authenticationRequestParameters, authParams);
+
+            logger.Verbose("[WamBroker] Acquired Common Auth Parameters.");
 
             return authParams;
         }
@@ -280,6 +308,29 @@ namespace Microsoft.Identity.Client.Broker
         private static string GetExpectedRedirectUri(string clientId)
         {
             return $"ms-appx-web://microsoft.aad.brokerplugin/{clientId}";
+        }
+
+        /// <summary>
+        /// Validate common auth params
+        /// </summary>
+        /// <param name="authenticationRequestParameters"></param>
+        /// <param name="logger"></param>
+        /// <exception cref="MsalClientException"></exception>
+        private static void ValidateAuthParams(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            ILoggerAdapter logger)
+        {
+            //MSAL Runtime throws an ApiContractViolation Exception with Tag: 0x2039c1cb (InvalidArg)
+            //When no scopes are passed, this will check if user is passing scopes
+            if (!ScopeHelper.HasNonMsalScopes(authenticationRequestParameters.Scope))                
+            {
+                logger.Error($"[WamBroker] {MsalError.WamScopesRequired} " +
+                    $"{MsalErrorMessage.ScopesRequired}");
+
+                throw new MsalClientException(
+                    MsalError.WamScopesRequired,
+                    MsalErrorMessage.ScopesRequired);
+            }
         }
     }
 }

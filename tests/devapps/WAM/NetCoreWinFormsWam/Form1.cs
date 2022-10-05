@@ -273,9 +273,11 @@ namespace NetDesktopWinForms
         private string[] GetScopes()
         {
             string[] result = null;
+
             cbxScopes.Invoke((MethodInvoker)delegate
             {
-                result = cbxScopes.Text.Split(' ');
+                if(!string.IsNullOrWhiteSpace(cbxScopes.Text))
+                    result = cbxScopes.Text.Split(' ');
             });
 
             return result;
