@@ -177,7 +177,8 @@ namespace Microsoft.Identity.Client
                             requestScopes: requestParams.Scope,
                             requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId,
                             identityLogger: requestParams.RequestContext.Logger.IdentityLogger,
-                            piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled);
+                            piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled,
+                            cacheDetails: requestParams.RequestContext.CacheDetails);
 
                         Stopwatch sw = Stopwatch.StartNew();
 
@@ -249,7 +250,8 @@ namespace Microsoft.Identity.Client
                             requestScopes: requestParams.Scope,
                             requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId,
                             identityLogger: requestParams.RequestContext.Logger.IdentityLogger,
-                            piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled);
+                            piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled,
+                            cacheDetails: requestParams.RequestContext.CacheDetails);
 
                         Stopwatch sw = Stopwatch.StartNew();
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
@@ -741,7 +743,8 @@ namespace Microsoft.Identity.Client
                             requestScopes: null,
                             requestTenantId: null,
                             identityLogger: null,
-                            piiLoggingEnabled: false);
+                            piiLoggingEnabled: false,
+                            cacheDetails: new Dictionary<string, object>());
 
                 await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
             }
@@ -1162,7 +1165,8 @@ namespace Microsoft.Identity.Client
                             requestScopes: requestParameters.Scope,
                             requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId,
                             identityLogger: requestParameters.RequestContext.Logger.IdentityLogger,
-                            piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
+                            piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled,
+                            cacheDetails: requestParameters.RequestContext.CacheDetails);
 
 
                         await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
@@ -1198,7 +1202,8 @@ namespace Microsoft.Identity.Client
                            requestScopes: requestParameters.Scope,
                            requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId,
                            identityLogger: requestParameters.RequestContext.Logger.IdentityLogger,
-                            piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
+                           piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled,
+                           cacheDetails: requestParameters.RequestContext.CacheDetails);
 
 
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);

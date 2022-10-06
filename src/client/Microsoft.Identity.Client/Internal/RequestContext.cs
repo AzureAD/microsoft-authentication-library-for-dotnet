@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
@@ -23,6 +24,8 @@ namespace Microsoft.Identity.Client.Internal
         public ApiEvent ApiEvent { get; set; }
 
         public CancellationToken UserCancellationToken { get; }
+
+        public Dictionary<string, object> CacheDetails { get; } = new Dictionary<string, object>();
 
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId, CancellationToken cancellationToken = default)
         {

@@ -147,6 +147,44 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// This constructor is for test purposes only. It allows apps to unit test their MSAL token cache implementation code.
+        /// </summary>
+        public TokenCacheNotificationArgs(    // only use this constructor in product code
+            ITokenCacheSerializer tokenCache,
+            string clientId,
+            IAccount account,
+            bool hasStateChanged,
+            bool isApplicationCache,
+            string suggestedCacheKey,
+            bool hasTokens,
+            DateTimeOffset? suggestedCacheExpiry,
+            CancellationToken cancellationToken,
+            Guid correlationId,
+            IEnumerable<string> requestScopes,
+            string requestTenantId,
+            IIdentityLogger identityLogger,
+            bool piiLoggingEnabled,
+            Dictionary<string, object> cacheDetails)
+
+        {
+            TokenCache = tokenCache;
+            ClientId = clientId;
+            Account = account;
+            HasStateChanged = hasStateChanged;
+            IsApplicationCache = isApplicationCache;
+            SuggestedCacheKey = suggestedCacheKey;
+            HasTokens = hasTokens;
+            CancellationToken = cancellationToken;
+            CorrelationId = correlationId;
+            RequestScopes = requestScopes;
+            RequestTenantId = requestTenantId;
+            SuggestedCacheExpiry = suggestedCacheExpiry;
+            IdentityLogger = identityLogger;
+            PiiLoggingEnabled = piiLoggingEnabled;
+            CacheDetails = cacheDetails;
+        }
+
+        /// <summary>
         /// Gets the <see cref="ITokenCacheSerializer"/> involved in the transaction
         /// </summary>
         /// <remarks><see cref="TokenCache" > objects</see> implement this interface.</remarks>
@@ -248,5 +286,10 @@ namespace Microsoft.Identity.Client
         /// Boolean used to determine if Personally Identifiable Information (PII) logging is enabled.
         /// </summary>
         public bool PiiLoggingEnabled { get; }
+
+        /// <summary>
+        /// Cache Details contains the details of L1/ L2 cache for telemetry logging.
+        /// </summary>
+        public Dictionary<string, object> CacheDetails { get; }
     }
 }

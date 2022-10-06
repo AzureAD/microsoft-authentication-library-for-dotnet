@@ -30,6 +30,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string DurationInHttp = "DurationInHttp";
         public const string ActivityId = "ActivityId";
         public const string Resource = "Resource";
+        public const string RefreshOn = "RefreshOn";
 
 #endregion
     }

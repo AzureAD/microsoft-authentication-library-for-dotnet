@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     LogReturnedToken(authenticationResult);
                     UpdateTelemetry(sw, apiEvent, authenticationResult);
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
-                    LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails, telemetryClients);
+                    LogSuccessfulTelemetryToClient(authenticationResult, AuthenticationRequestParameters.RequestContext.CacheDetails, telemetryEventDetails, telemetryClients);
 
                     return authenticationResult;
                 }
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private void LogSuccessfulTelemetryToClient(AuthenticationResult authenticationResult, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
+        private void LogSuccessfulTelemetryToClient(AuthenticationResult authenticationResult, Dictionary<string, object> cacheDetails, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
         {
             if (telemetryClients.HasEnabledClients(TelemetryConstants.AcquireTokenEventName))
             {
@@ -142,6 +142,39 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 telemetryEventDetails.SetProperty(TelemetryConstants.PopToken, authenticationResult.TokenType.Equals(Constants.PoPTokenType));
                 telemetryEventDetails.SetProperty(TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds);
                 telemetryEventDetails.SetProperty(TelemetryConstants.ActivityId, authenticationResult.CorrelationId);
+                telemetryEventDetails.SetProperty(TelemetryConstants.RefreshOn, 
+                    authenticationResult.AuthenticationResultMetadata.RefreshOn.HasValue ?
+                    DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value)
+                    : 0);
+
+                LogCacheDetailsToTelemetryClient(cacheDetails, telemetryEventDetails);
+            }
+        }
+
+        private void LogCacheDetailsToTelemetryClient(Dictionary<string, object> cacheDetails, MsalTelemetryEventDetails telemetryEventDetails)
+        {
+            if ((cacheDetails == null) || (cacheDetails.Count() == 0)) return;
+
+            object value;
+
+            if (cacheDetails.TryGetValue(TelemetryCacheConstants.CacheUsed, out value))
+            {
+                telemetryEventDetails.SetProperty(TelemetryCacheConstants.CacheUsed, ((CacheUsed)value).ToString());
+            }
+
+            if (cacheDetails.TryGetValue(TelemetryCacheConstants.CacheUsed, out value))
+            {
+                telemetryEventDetails.SetProperty(TelemetryCacheConstants.CacheUsed, ((CacheUsed)value).ToString());
+            }
+
+            if (cacheDetails.TryGetValue(TelemetryCacheConstants.L1Latency, out value))
+            {
+                telemetryEventDetails.SetProperty(TelemetryCacheConstants.L1Latency, (long)value);
+            }
+
+            if (cacheDetails.TryGetValue(TelemetryCacheConstants.L2Latency, out value))
+            {
+                telemetryEventDetails.SetProperty(TelemetryCacheConstants.L2Latency, (long)value);
             }
         }
 
