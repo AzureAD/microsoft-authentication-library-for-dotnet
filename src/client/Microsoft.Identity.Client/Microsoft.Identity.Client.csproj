@@ -8,10 +8,6 @@
     <TargetFrameworkNet5Win>net5.0-windows10.0.17763.0</TargetFrameworkNet5Win>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
-    <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
-    <TargetFrameworkNet6Ios>net6.0-ios</TargetFrameworkNet6Ios>
-    <TargetFrameworkNet6Mac>net6.0-maccatalyst</TargetFrameworkNet6Mac>
-
   </PropertyGroup>
 
   <!-- Mobile and legacy targets - comment these out or set env variable MSAL_DESKTOP_ONLY_DEV to speedup the build -->
