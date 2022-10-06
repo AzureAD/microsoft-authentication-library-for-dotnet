@@ -13,7 +13,7 @@ jobs: #Build and stage projects
       runCodesignValidationInjection: false
 
   #Specified container image to use for build. See: https://hub.docker.com/_/microsoft-windows-servercore
-  container: mcr.microsoft.com/windows/servercore:20H2
+  container: mcr.microsoft.com/windows/servercore:10.0.20348.1006
 
   steps:
   #Pre build analysis
