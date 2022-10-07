@@ -1,5 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup Condition="'$(MAUI_SUPPORT)' != ''">
+    <TargetFrameworkNet6>net6.0</TargetFrameworkNet6>
+  </PropertyGroup>
+  
   <PropertyGroup>
     <TargetFrameworkNetDesktop461>net48</TargetFrameworkNetDesktop461>
     <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
