@@ -37,13 +37,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.TelemetryClient
         None = 0,
 
         /// <summary>
-        /// Token was obtained from L1
+        /// Token was obtained from Memory Cache
         /// </summary>
-        L1 = 1,
+        MemoryCache = 1,
 
         /// <summary>
-        /// Token was obtained from L2
+        /// Token was obtained from Distributed Cache
         /// </summary>
-        L2 = 2
+        DistributedCache = 2
     }
 }
