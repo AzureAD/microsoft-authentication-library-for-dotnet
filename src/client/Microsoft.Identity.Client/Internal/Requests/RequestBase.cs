@@ -153,28 +153,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void LogCacheDetailsToTelemetryClient(Dictionary<string, object> cacheDetails, MsalTelemetryEventDetails telemetryEventDetails)
         {
-            if ((cacheDetails == null) || (cacheDetails.Count() == 0)) return;
-
-            object value;
-
-            if (cacheDetails.TryGetValue(TelemetryCacheConstants.CacheUsed, out value))
+            foreach (var cacheDetail in cacheDetails)
             {
-                telemetryEventDetails.SetProperty(TelemetryCacheConstants.CacheUsed, ((CacheUsed)value).ToString());
-            }
-
-            if (cacheDetails.TryGetValue(TelemetryCacheConstants.CacheUsed, out value))
-            {
-                telemetryEventDetails.SetProperty(TelemetryCacheConstants.CacheUsed, ((CacheUsed)value).ToString());
-            }
-
-            if (cacheDetails.TryGetValue(TelemetryCacheConstants.L1Latency, out value))
-            {
-                telemetryEventDetails.SetProperty(TelemetryCacheConstants.L1Latency, (long)value);
-            }
-
-            if (cacheDetails.TryGetValue(TelemetryCacheConstants.L2Latency, out value))
-            {
-                telemetryEventDetails.SetProperty(TelemetryCacheConstants.L2Latency, (long)value);
+                switch (cacheDetail.Key)
+                {
+                    case TelemetryCacheConstants.CacheUsed:
+                        telemetryEventDetails.SetProperty(TelemetryCacheConstants.CacheUsed, ((CacheUsed)cacheDetail.Value).ToString());
+                        break;
+                    case TelemetryCacheConstants.L1Latency:
+                        telemetryEventDetails.SetProperty(TelemetryCacheConstants.L1Latency, (long)cacheDetail.Value);
+                        break;
+                    case TelemetryCacheConstants.L2Latency:
+                        telemetryEventDetails.SetProperty(TelemetryCacheConstants.L2Latency, (long)cacheDetail.Value);
+                        break;
+                    default:
+                        continue;
+                }
             }
         }
 
