@@ -22,6 +22,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using System.Net.Http;
+using System.Windows.Forms.VisualStyles;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -96,7 +97,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     LogReturnedToken(authenticationResult);
                     UpdateTelemetry(sw, apiEvent, authenticationResult);
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
-                    LogSuccessfulTelemetryToClient(authenticationResult, AuthenticationRequestParameters.RequestContext.CacheDetails, telemetryEventDetails, telemetryClients);
+                    LogSuccessfulTelemetryToClient(authenticationResult, AuthenticationRequestParameters.RequestContext.TelemetryDatapoints, telemetryEventDetails, telemetryClients);
 
                     return authenticationResult;
                 }
@@ -129,7 +130,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private void LogSuccessfulTelemetryToClient(AuthenticationResult authenticationResult, Dictionary<string, object> cacheDetails, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
+        private void LogSuccessfulTelemetryToClient(AuthenticationResult authenticationResult, Dictionary<string, string> telemetryDatapoints, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
         {
             if (telemetryClients.HasEnabledClients(TelemetryConstants.AcquireTokenEventName))
             {
@@ -147,28 +148,35 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value)
                     : 0);
 
-                LogCacheDetailsToTelemetryClient(cacheDetails, telemetryEventDetails);
+                LogDatapointsToTelemetryClient(telemetryDatapoints, telemetryEventDetails);
             }
         }
 
-        private void LogCacheDetailsToTelemetryClient(Dictionary<string, object> cacheDetails, MsalTelemetryEventDetails telemetryEventDetails)
+        private void LogDatapointsToTelemetryClient(Dictionary<string, string> telemetryDatapoints, MsalTelemetryEventDetails telemetryEventDetails)
         {
-            foreach (var cacheDetail in cacheDetails)
+            if ((telemetryDatapoints == null) || (telemetryDatapoints.Count() == 0)) return;
+
+            string value;
+
+            if (telemetryDatapoints.TryGetValue(TelemetryCacheConstants.CacheUsed, out value))
             {
-                switch (cacheDetail.Key)
-                {
-                    case TelemetryCacheConstants.CacheUsed:
-                        telemetryEventDetails.SetProperty(TelemetryCacheConstants.CacheUsed, ((CacheUsed)cacheDetail.Value).ToString());
-                        break;
-                    case TelemetryCacheConstants.L1Latency:
-                        telemetryEventDetails.SetProperty(TelemetryCacheConstants.L1Latency, (long)cacheDetail.Value);
-                        break;
-                    case TelemetryCacheConstants.L2Latency:
-                        telemetryEventDetails.SetProperty(TelemetryCacheConstants.L2Latency, (long)cacheDetail.Value);
-                        break;
-                    default:
-                        continue;
-                }
+                int cacheUsed;
+                int.TryParse(value, out cacheUsed);
+                telemetryEventDetails.SetProperty(TelemetryCacheConstants.CacheUsed, cacheUsed);
+            }
+
+            if (telemetryDatapoints.TryGetValue(TelemetryCacheConstants.L1Latency, out value))
+            {
+                long latency;
+                long.TryParse(value, out latency);
+                telemetryEventDetails.SetProperty(TelemetryCacheConstants.L1Latency, latency);
+            }
+
+            if (telemetryDatapoints.TryGetValue(TelemetryCacheConstants.L2Latency, out value))
+            {
+                long latency;
+                long.TryParse(value, out latency);
+                telemetryEventDetails.SetProperty(TelemetryCacheConstants.L2Latency, latency);
             }
         }
 

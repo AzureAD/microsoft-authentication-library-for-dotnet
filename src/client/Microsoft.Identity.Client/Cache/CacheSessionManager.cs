@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client.Cache
                                   requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId,
                                   identityLogger: _requestParams.RequestContext.Logger.IdentityLogger,
                                   piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled,
-                                  cacheDetails: RequestContext.CacheDetails);
+                                  telemetryDatapoints: RequestContext.TelemetryDatapoints);
 
                                 stopwatch.Start();
                                 await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Client.Cache
                                   requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId,
                                   identityLogger: _requestParams.RequestContext.Logger.IdentityLogger,
                                   piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled,
-                                  cacheDetails: RequestContext.CacheDetails);
+                                  telemetryDatapoints: RequestContext.TelemetryDatapoints);
 
                                 await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                                 RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;

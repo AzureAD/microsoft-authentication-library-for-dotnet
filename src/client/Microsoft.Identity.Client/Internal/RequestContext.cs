@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public CancellationToken UserCancellationToken { get; }
 
-        public Dictionary<string, object> CacheDetails { get; } = new Dictionary<string, object>();
+        public Dictionary<string, string> TelemetryDatapoints { get; } = new Dictionary<string, string>();
 
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId, CancellationToken cancellationToken = default)
         {
