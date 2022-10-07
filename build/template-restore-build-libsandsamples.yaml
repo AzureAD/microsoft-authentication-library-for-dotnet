@@ -5,7 +5,6 @@ parameters:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'Release'
   MsalClientSemVer: '4.0.0-devopsbuild'
-  Net6_Support: ''
 
 steps:
 
@@ -41,7 +40,7 @@ steps:
   displayName: 'Build solution ${{ parameters.Solution }}'
   inputs:
     solution: ${{ parameters.Solution }}
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true /p:MAUI_SUPPORT=${{ parameters.Net6_Support }}'
+    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
     maximumCpuCount: true
