@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#if DO_NOT_COMPILE
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,7 +39,7 @@ namespace Microsoft.Identity.Client.Cache.Prototype
             return Task.FromResult(_memoryCache.Set(key, cacheEntry, memoryCacheOptions));
         }
 
-        #region Not Implemented
+#region Not Implemented
         public Task RemoveAsync(string category, string key, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
@@ -52,6 +53,7 @@ namespace Microsoft.Identity.Client.Cache.Prototype
         {
             throw new NotImplementedException();
         }
-        #endregion
+#endregion
     }
 }
+#endif

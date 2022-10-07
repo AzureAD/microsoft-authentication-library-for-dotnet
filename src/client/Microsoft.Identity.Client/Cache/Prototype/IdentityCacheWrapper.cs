@@ -56,13 +56,13 @@ namespace Microsoft.Identity.Client.Cache.Prototype
             return new IdentityCachePrototype(memoryCacheOptions, _identityLogger, null);
         }
 
-        internal async Task<T> GetAsync<T>(string key) where T : ICacheObject
+        internal async Task<T> GetAsync<T>(string key) where T : ICacheObject, new()
         {
             var entry = await _identityCache.GetAsync<T>(CategoryName, key).ConfigureAwait(false);
             return entry == null ? default : entry.Value;
         }
 
-        internal async Task SetAsync<T>(string key, T value, DateTimeOffset? cacheExpiry) where T : ICacheObject
+        internal async Task SetAsync<T>(string key, T value, DateTimeOffset? cacheExpiry) where T : ICacheObject, new()
         {
             TimeSpan expirationTimeRelativeToNow = cacheExpiry.HasValue ? cacheExpiry.Value - DateTimeOffset.UtcNow : TimeSpan.FromHours(1);
             await _identityCache.SetAsync(CategoryName, key, value, new CacheEntryOptions(expirationTimeRelativeToNow, 1)).ConfigureAwait(false);

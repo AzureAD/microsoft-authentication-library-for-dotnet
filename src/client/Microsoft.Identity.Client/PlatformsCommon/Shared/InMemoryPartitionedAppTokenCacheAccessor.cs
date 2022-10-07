@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.ServiceEssentials;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
@@ -19,7 +20,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     /// App metadata collection is not partitioned.
     /// Refresh token, ID token, and account related methods are no-op.
     /// </summary>
-    internal class InMemoryPartitionedAppTokenCacheAccessor : ITokenCacheAccessor
+    internal class InMemoryPartitionedAppTokenCacheAccessor : ITokenCacheAccessor, ICacheObject
     {
         // perf: do not use ConcurrentDictionary.Values as it takes a lock
         // internal for test only
@@ -34,6 +35,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         protected readonly ILoggerAdapter _logger;
         private readonly CacheOptions _tokenCacheAccessorOptions;
+
+        public InMemoryPartitionedAppTokenCacheAccessor()
+        {
+
+        }
 
         public InMemoryPartitionedAppTokenCacheAccessor(
             ILoggerAdapter logger,
