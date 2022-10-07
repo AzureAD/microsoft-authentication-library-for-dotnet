@@ -4,7 +4,6 @@
 using System;
 using Foundation;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Platforms.Shared.Apple;
 using Microsoft.Identity.Client.UI;
 using UIKit;
 using WebKit;
