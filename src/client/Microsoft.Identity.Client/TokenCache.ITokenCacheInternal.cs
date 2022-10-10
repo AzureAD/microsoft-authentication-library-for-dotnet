@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
                     }
 
-                    var accessor = await GetOrCreateAccessorAsync(suggestedWebCacheKey, requestParams).ConfigureAwait(false);
+                    var accessor = await GetOrCreateAccessorAsync(suggestedWebCacheKey).ConfigureAwait(false);
 
                     // Don't cache PoP access tokens from broker
                     if (msalAccessTokenCacheItem != null && !(response.TokenSource == TokenSource.Broker && response.TokenType == Constants.PoPAuthHeaderPrefix))
@@ -445,7 +445,7 @@ namespace Microsoft.Identity.Client
             string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
             Debug.Assert(partitionKey != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
-            var accessTokens = (await GetOrCreateAccessorAsync(partitionKey, requestParams).ConfigureAwait(false)).GetAllAccessTokens(partitionKey, logger);
+            var accessTokens = (await GetOrCreateAccessorAsync(partitionKey).ConfigureAwait(false)).GetAllAccessTokens(partitionKey, logger);
 
             requestParams.RequestContext.Logger.Always($"[FindAccessTokenAsync] Discovered {accessTokens.Count} access tokens in cache using partition key: {partitionKey}");
 
@@ -777,7 +777,7 @@ namespace Microsoft.Identity.Client
             }
 
             var requestKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
-            var refreshTokens = (await GetOrCreateAccessorAsync(requestKey, requestParams).ConfigureAwait(false)).GetAllRefreshTokens(requestKey);
+            var refreshTokens = (await GetOrCreateAccessorAsync(requestKey).ConfigureAwait(false)).GetAllRefreshTokens(requestKey);
             requestParams.RequestContext.Logger.Always($"[FindRefreshTokenAsync] Discovered {refreshTokens.Count} refresh tokens in cache using key: {requestKey}");
 
             if (refreshTokens.Count != 0)
@@ -1093,7 +1093,7 @@ namespace Microsoft.Identity.Client
 
         async Task<MsalIdTokenCacheItem> ITokenCacheInternal.GetIdTokenCacheItemAsync(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            var idToken = (await GetOrCreateAccessorAsync(CacheKeyFactory.GetIdTokenKeyFromCachedItem(msalAccessTokenCacheItem), null).ConfigureAwait(false)).GetIdToken(msalAccessTokenCacheItem);
+            var idToken = (await GetOrCreateAccessorAsync(CacheKeyFactory.GetIdTokenKeyFromCachedItem(msalAccessTokenCacheItem)).ConfigureAwait(false)).GetIdToken(msalAccessTokenCacheItem);
             return idToken;
         }
 
@@ -1108,7 +1108,7 @@ namespace Microsoft.Identity.Client
 
             Debug.Assert(homeAccountId != null);
 
-            var idTokenCacheItems = (await GetOrCreateAccessorAsync(homeAccountId, requestParameters).ConfigureAwait(false)).GetAllIdTokens(homeAccountId);
+            var idTokenCacheItems = (await GetOrCreateAccessorAsync(homeAccountId).ConfigureAwait(false)).GetAllIdTokens(homeAccountId);
             FilterTokensByClientId(idTokenCacheItems);
 
             if (!requestParameters.AppConfig.MultiCloudSupportEnabled)
@@ -1145,7 +1145,7 @@ namespace Microsoft.Identity.Client
 
             var tenantProfiles = await GetTenantProfilesAsync(requestParameters, msalAccessTokenCacheItem.HomeAccountId).ConfigureAwait(false);
 
-            var accountCacheItem = (await GetOrCreateAccessorAsync(CacheKeyFactory.GetIdTokenKeyFromCachedItem(msalAccessTokenCacheItem), requestParameters).ConfigureAwait(false)).GetAccount(
+            var accountCacheItem = (await GetOrCreateAccessorAsync(CacheKeyFactory.GetIdTokenKeyFromCachedItem(msalAccessTokenCacheItem)).ConfigureAwait(false)).GetAccount(
                 new MsalAccountCacheKey(
                     msalAccessTokenCacheItem.Environment,
                     msalAccessTokenCacheItem.TenantId,
@@ -1256,7 +1256,7 @@ namespace Microsoft.Identity.Client
 
             string partitionKey = account.HomeAccountId.Identifier;
 
-            var accessor = await GetOrCreateAccessorAsync(partitionKey, null).ConfigureAwait(false);
+            var accessor = await GetOrCreateAccessorAsync(partitionKey).ConfigureAwait(false);
 
             var refreshTokens = accessor.GetAllRefreshTokens(partitionKey);
             refreshTokens.RemoveAll(item => !item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase));
@@ -1331,7 +1331,7 @@ namespace Microsoft.Identity.Client
 
         // Cache setup is validated to be mutually exclusive - 
         // Token cache serialization is allowed only when WithCacheOptions is not used.
-        private async Task<ITokenCacheAccessor> GetOrCreateAccessorAsync(string partitionKey, AuthenticationRequestParameters requestParams)
+        internal async Task<ITokenCacheAccessor> GetOrCreateAccessorAsync(string partitionKey)
         {
             // If user set up legacy cache serialization, then use old accessor instance (it would have been populated with tokens)
             // Otherwise, use IIdentityCache instance, either the user-provided or default.
@@ -1341,9 +1341,8 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                ITokenCacheAccessor cachedAccessor = null;
-
-                if (requestParams != null && requestParams.IsClientCredentialRequest)
+                ITokenCacheAccessor cachedAccessor;
+                if (IsAppTokenCache)
                 {
                     cachedAccessor = await IdentityCacheWrapper.GetAsync<InMemoryPartitionedAppTokenCacheAccessor>(partitionKey).ConfigureAwait(false);
                 }

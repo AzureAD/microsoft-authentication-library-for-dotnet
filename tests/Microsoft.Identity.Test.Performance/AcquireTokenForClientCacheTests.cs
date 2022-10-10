@@ -8,6 +8,7 @@ using BenchmarkDotNet.Attributes;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Performance.Helpers;
 using Microsoft.Identity.Test.Unit;
@@ -54,12 +55,18 @@ namespace Microsoft.Identity.Test.Performance
         [GlobalSetup]
         public async Task GlobalSetupAsync()
         {
-            _cca = ConfidentialClientApplicationBuilder
+            var builder = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithRedirectUri(TestConstants.RedirectUri)
                 .WithClientSecret(TestConstants.ClientSecret)
-                .WithLegacyCacheCompatibility(false)
-                .BuildConcrete();
+                .WithLegacyCacheCompatibility(false);
+
+            if (!EnableCacheSerialization)
+            {
+                builder.WithCacheOptions(new CacheOptions(CacheSize.TotalTenants));
+            }
+
+            _cca = builder.BuildConcrete();
 
             if (EnableCacheSerialization)
             {
@@ -102,6 +109,16 @@ namespace Microsoft.Identity.Test.Performance
             {
                 string key = CacheKeyFactory.GetClientCredentialKey(_cca.AppConfig.ClientId, $"{_tenantPrefix}{tenant}", "");
 
+                ITokenCacheAccessor accessor;
+                if (enableCacheSerialization)
+                {
+                    accessor = cca.AppTokenCacheInternal.Accessor;
+                }
+                else
+                {
+                    accessor = await (cca.AppTokenCache as TokenCache).GetOrCreateAccessorAsync(key).ConfigureAwait(false);
+                }
+
                 for (int token = 0; token < tokensPerTenant; token++)
                 {
                     MsalAccessTokenCacheItem atItem = TokenCacheHelper.CreateAccessTokenItem(
@@ -109,7 +126,7 @@ namespace Microsoft.Identity.Test.Performance
                         tenant: $"{_tenantPrefix}{tenant}",
                         accessToken: TestConstants.AppAccessToken);
 
-                    cca.AppTokenCacheInternal.Accessor.SaveAccessToken(atItem);
+                    accessor.SaveAccessToken(atItem);
                 }
 
                 if (enableCacheSerialization)
@@ -126,6 +143,10 @@ namespace Microsoft.Identity.Test.Performance
                          cancellationToken: CancellationToken.None);
                     await cca.AppTokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                     cca.AppTokenCacheInternal.Accessor.Clear();
+                }
+                else
+                {
+                    await (cca.AppTokenCache as TokenCache).IdentityCacheWrapper.SetAsync<InMemoryPartitionedAppTokenCacheAccessor>(key, (InMemoryPartitionedAppTokenCacheAccessor)accessor, null).ConfigureAwait(false);
                 }
             }
         }

@@ -6,7 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Performance.Helpers;
 using Microsoft.Identity.Test.Unit;
@@ -60,12 +62,18 @@ namespace Microsoft.Identity.Test.Performance
         [GlobalSetup]
         public async Task GlobalSetupAsync()
         {
-            _cca = ConfidentialClientApplicationBuilder
+            var builder = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithRedirectUri(TestConstants.RedirectUri)
                 .WithClientSecret(TestConstants.ClientSecret)
-                .WithLegacyCacheCompatibility(false)
-                .BuildConcrete();
+                .WithLegacyCacheCompatibility(false);
+
+            if (!EnableCacheSerialization)
+            {
+                builder.WithCacheOptions(new CacheOptions(CacheSize.TotalUsers));
+            }
+
+            _cca = builder.BuildConcrete();
 
             if (EnableCacheSerialization)
             {
@@ -105,6 +113,16 @@ namespace Microsoft.Identity.Test.Performance
                 string userAssertionHash = new UserAssertion($"{TestConstants.DefaultAccessToken}{user}").AssertionHash;
                 string homeAccountId = $"{user}.{_tenantPrefix}";
 
+                ITokenCacheAccessor accessor;
+                if (enableCacheSerialization)
+                {
+                    accessor = _cca.UserTokenCacheInternal.Accessor;
+                }
+                else
+                {
+                    accessor = await (_cca.UserTokenCache as TokenCache).GetOrCreateAccessorAsync(userAssertionHash).ConfigureAwait(false);
+                }
+
                 for (int token = 0; token < tokensPerUser; token++)
                 {
                     string tenant = IsMultiTenant ? $"{_tenantPrefix}{token}" : _tenantPrefix;
@@ -116,22 +134,22 @@ namespace Microsoft.Identity.Test.Performance
                         homeAccountId,
                         oboCacheKey: userAssertionHash,
                         accessToken: TestConstants.UserAccessToken);
-                    _cca.UserTokenCacheInternal.Accessor.SaveAccessToken(atItem);
+                    accessor.SaveAccessToken(atItem);
 
                     MsalRefreshTokenCacheItem rtItem = TokenCacheHelper.CreateRefreshTokenItem(
                         userAssertionHash,
                         homeAccountId,
                         refreshToken: TestConstants.RefreshToken);
-                    _cca.UserTokenCacheInternal.Accessor.SaveRefreshToken(rtItem);
+                    accessor.SaveRefreshToken(rtItem);
 
                     MsalIdTokenCacheItem idtItem = TokenCacheHelper.CreateIdTokenCacheItem(
                         tenant,
                         homeAccountId,
                         uid: user.ToString());
-                    _cca.UserTokenCacheInternal.Accessor.SaveIdToken(idtItem);
+                    accessor.SaveIdToken(idtItem);
 
                     MsalAccountCacheItem accItem = TokenCacheHelper.CreateAccountItem(tenant, homeAccountId);
-                    _cca.UserTokenCacheInternal.Accessor.SaveAccount(accItem);
+                    accessor.SaveAccount(accItem);
                 }
 
                 if (enableCacheSerialization)
@@ -148,6 +166,10 @@ namespace Microsoft.Identity.Test.Performance
                          cancellationToken: CancellationToken.None);
                     await _cca.UserTokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                     _cca.UserTokenCacheInternal.Accessor.Clear();
+                }
+                else
+                {
+                    await (_cca.UserTokenCache as TokenCache).IdentityCacheWrapper.SetAsync<InMemoryPartitionedUserTokenCacheAccessor>(userAssertionHash, (InMemoryPartitionedUserTokenCacheAccessor)accessor, null).ConfigureAwait(false);
                 }
             }
         }
