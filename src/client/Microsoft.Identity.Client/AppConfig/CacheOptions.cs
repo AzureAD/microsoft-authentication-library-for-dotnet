@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Identity.ServiceEssentials;
 
 namespace Microsoft.Identity.Client
@@ -47,16 +48,18 @@ namespace Microsoft.Identity.Client
         /// <param name="identityCache"></param>
         public CacheOptions(IIdentityCache identityCache)
         {
-            IdentityCache = identityCache;
+            IdentityCache = identityCache ?? throw new ArgumentNullException(nameof(identityCache));
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="identityCache"></param>
-        public CacheOptions(int sizeLimit)
+        /// <param name="appTokenCacheSizeLimit"></param>
+        /// <param name="userTokenCacheSizeLimit"></param>
+        public CacheOptions(int appTokenCacheSizeLimit, int userTokenCacheSizeLimit)
         {
-            SizeLimit = sizeLimit;
+            AppTokenCacheSizeLimit = appTokenCacheSizeLimit > 0 ? appTokenCacheSizeLimit : 0;
+            UserTokenCacheSizeLimit = userTokenCacheSizeLimit > 0 ? userTokenCacheSizeLimit : 0;
         }
 
         /// <summary>
@@ -76,8 +79,13 @@ namespace Microsoft.Identity.Client
         public IIdentityCache IdentityCache { get; }
 
         /// <summary>
-        /// Max count of items in the default in-memory cache with eviction
+        /// Max count of cache items (by tenant for client credential flows) in the default in-memory cache with eviction
         /// </summary>
-        public int SizeLimit { get; }
+        public int AppTokenCacheSizeLimit { get; }
+
+        /// <summary>
+        /// Max count of cache items (by incoming token assertion cache for OBO and home account ID for other user flows) in the default in-memory cache with eviction
+        /// </summary>
+        public int UserTokenCacheSizeLimit { get; }
     }
 }

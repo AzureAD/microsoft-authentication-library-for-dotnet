@@ -17,7 +17,8 @@ namespace Microsoft.Identity.Client.Cache.Prototype
         private static IIdentityLogger _identityLogger;
         private static readonly Lazy<IIdentityCache> s_defaultIIdentityCache = new Lazy<IIdentityCache>(
             () => CreateDefaultCache());
-        private const string CategoryName = "tokens";
+        private const string AppTokensCategory = "app_tokens";
+        private const string UserTokensCategory = "user_tokens";
 
         // This cache instance (whether provided by the user or default one) will only ever be called/used if cache serialization is not enabled.
         // There are three options for this cache: user-provided, static default, non-static default.
@@ -49,23 +50,44 @@ namespace Microsoft.Identity.Client.Cache.Prototype
             {
                 MaxNumberOfItemsForCategory = new Dictionary<string, int>()
                 {
-                    { CategoryName, s_cacheOptions.SizeLimit },
+                    { AppTokensCategory, s_cacheOptions.AppTokenCacheSizeLimit },
+                    { UserTokensCategory, s_cacheOptions.UserTokenCacheSizeLimit },
                 }
             };
 
             return new IdentityCachePrototype(memoryCacheOptions, _identityLogger, null);
         }
 
-        internal async Task<T> GetAsync<T>(string key) where T : ICacheObject, new()
+        internal async Task<T> GetAppCacheAsync<T>(string key) where T : ICacheObject, new()
         {
-            var entry = await _identityCache.GetAsync<T>(CategoryName, key).ConfigureAwait(false);
+            return await GetAsync<T>(AppTokensCategory, key).ConfigureAwait(false);
+        }
+
+        internal async Task<T> GetUserCacheAsync<T>(string key) where T : ICacheObject, new()
+        {
+            return await GetAsync<T>(UserTokensCategory, key).ConfigureAwait(false);
+        }
+
+        private async Task<T> GetAsync<T>(string category, string key) where T : ICacheObject, new()
+        {
+            var entry = await _identityCache.GetAsync<T>(category, key).ConfigureAwait(false);
             return entry == null ? default : entry.Value;
         }
 
-        internal async Task SetAsync<T>(string key, T value, DateTimeOffset? cacheExpiry) where T : ICacheObject, new()
+        internal async Task SetAppCacheAsync<T>(string key, T value, DateTimeOffset? cacheExpiry) where T : ICacheObject, new()
+        {
+            await SetAsync<T>(AppTokensCategory, key, value, cacheExpiry).ConfigureAwait(false);
+        }
+
+        internal async Task SetUserCacheAsync<T>(string key, T value, DateTimeOffset? cacheExpiry) where T : ICacheObject, new()
+        {
+            await SetAsync<T>(UserTokensCategory, key, value, cacheExpiry).ConfigureAwait(false);
+        }
+
+        private async Task SetAsync<T>(string category, string key, T value, DateTimeOffset? cacheExpiry) where T : ICacheObject, new()
         {
             TimeSpan expirationTimeRelativeToNow = cacheExpiry.HasValue ? cacheExpiry.Value - DateTimeOffset.UtcNow : TimeSpan.FromHours(1);
-            await _identityCache.SetAsync(CategoryName, key, value, new CacheEntryOptions(expirationTimeRelativeToNow, 1)).ConfigureAwait(false);
+            await _identityCache.SetAsync(category, key, value, new CacheEntryOptions(expirationTimeRelativeToNow, 1)).ConfigureAwait(false);
         }
     }
 }

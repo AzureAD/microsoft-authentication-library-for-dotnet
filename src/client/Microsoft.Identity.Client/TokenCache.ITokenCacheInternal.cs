@@ -232,11 +232,11 @@ namespace Microsoft.Identity.Client
                         DateTimeOffset? cacheExpiry = CalculateSuggestedCacheExpiry(accessor, logger);
                         if (accessor is InMemoryPartitionedAppTokenCacheAccessor)
                         {
-                            await IdentityCacheWrapper.SetAsync<InMemoryPartitionedAppTokenCacheAccessor>(suggestedWebCacheKey, (InMemoryPartitionedAppTokenCacheAccessor)accessor, cacheExpiry).ConfigureAwait(false);
+                            await IdentityCacheWrapper.SetAppCacheAsync(suggestedWebCacheKey, (InMemoryPartitionedAppTokenCacheAccessor)accessor, cacheExpiry).ConfigureAwait(false);
                         }
                         else if (accessor is InMemoryPartitionedUserTokenCacheAccessor)
                         {
-                            await IdentityCacheWrapper.SetAsync<InMemoryPartitionedUserTokenCacheAccessor>(suggestedWebCacheKey, (InMemoryPartitionedUserTokenCacheAccessor)accessor, cacheExpiry).ConfigureAwait(false);
+                            await IdentityCacheWrapper.SetUserCacheAsync(suggestedWebCacheKey, (InMemoryPartitionedUserTokenCacheAccessor)accessor, cacheExpiry).ConfigureAwait(false);
                         }
                     }
 
@@ -1320,11 +1320,11 @@ namespace Microsoft.Identity.Client
                 DateTimeOffset? cacheExpiry = CalculateSuggestedCacheExpiry(accessor, requestContext.Logger);
                 if (accessor is InMemoryPartitionedAppTokenCacheAccessor)
                 {
-                    await IdentityCacheWrapper.SetAsync<InMemoryPartitionedAppTokenCacheAccessor>(partitionKey, (InMemoryPartitionedAppTokenCacheAccessor)accessor, cacheExpiry).ConfigureAwait(false);
+                    await IdentityCacheWrapper.SetAppCacheAsync(partitionKey, (InMemoryPartitionedAppTokenCacheAccessor)accessor, cacheExpiry).ConfigureAwait(false);
                 }
                 else if (accessor is InMemoryPartitionedUserTokenCacheAccessor)
                 {
-                    await IdentityCacheWrapper.SetAsync<InMemoryPartitionedUserTokenCacheAccessor>(partitionKey, (InMemoryPartitionedUserTokenCacheAccessor)accessor, cacheExpiry).ConfigureAwait(false);
+                    await IdentityCacheWrapper.SetUserCacheAsync(partitionKey, (InMemoryPartitionedUserTokenCacheAccessor)accessor, cacheExpiry).ConfigureAwait(false);
                 }
             }
         }
@@ -1344,11 +1344,11 @@ namespace Microsoft.Identity.Client
                 ITokenCacheAccessor cachedAccessor;
                 if (IsAppTokenCache)
                 {
-                    cachedAccessor = await IdentityCacheWrapper.GetAsync<InMemoryPartitionedAppTokenCacheAccessor>(partitionKey).ConfigureAwait(false);
+                    cachedAccessor = await IdentityCacheWrapper.GetAppCacheAsync<InMemoryPartitionedAppTokenCacheAccessor>(partitionKey).ConfigureAwait(false);
                 }
                 else
                 {
-                    cachedAccessor = await IdentityCacheWrapper.GetAsync<InMemoryPartitionedUserTokenCacheAccessor>(partitionKey).ConfigureAwait(false);
+                    cachedAccessor = await IdentityCacheWrapper.GetUserCacheAsync<InMemoryPartitionedUserTokenCacheAccessor>(partitionKey).ConfigureAwait(false);
                 }
 
                 if (cachedAccessor == null)

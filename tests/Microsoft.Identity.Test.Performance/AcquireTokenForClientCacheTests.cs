@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Performance
 
             if (!EnableCacheSerialization)
             {
-                builder.WithCacheOptions(new CacheOptions(CacheSize.TotalTenants));
+                builder.WithCacheOptions(new CacheOptions(CacheSize.TotalTenants, 0));
             }
 
             _cca = builder.BuildConcrete();
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Test.Performance
                 }
                 else
                 {
-                    await (cca.AppTokenCache as TokenCache).IdentityCacheWrapper.SetAsync<InMemoryPartitionedAppTokenCacheAccessor>(key, (InMemoryPartitionedAppTokenCacheAccessor)accessor, null).ConfigureAwait(false);
+                    await (cca.AppTokenCache as TokenCache).IdentityCacheWrapper.SetAppCacheAsync(key, (InMemoryPartitionedAppTokenCacheAccessor)accessor, null).ConfigureAwait(false);
                 }
             }
         }
