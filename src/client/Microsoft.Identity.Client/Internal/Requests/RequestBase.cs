@@ -22,7 +22,6 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using System.Net.Http;
-using System.Windows.Forms.VisualStyles;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
