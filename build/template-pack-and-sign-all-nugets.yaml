@@ -80,7 +80,7 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      dotnet nuget verify all --clear ${{ parameters.NugetPackagesWildcard }}
+      dotnet nuget verify ${{ parameters.NugetPackagesWildcard }}
   continueOnError: true
 
 - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
