@@ -16,12 +16,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.TelemetryClient
         public CacheUsed CacheUsed { get; set; }
 
         /// <summary>
-        /// Total latency of L1 cache access.
+        /// Total latency of L1 cache access. This data is captured in MSAL when accessing the internal cache or Microsoft.Identity.Web when accessing the memory cache.
         /// </summary>
         public long L1Latency { get; set; }
 
         /// <summary>
-        /// Total latency of L2 cache access.
+        /// Total latency of L2 cache access. This data is captured in Microsoft.Identity.Web when accessing the distributed cache.
         /// </summary>
         public long L2Latency { get; set; }
     }
@@ -32,18 +32,28 @@ namespace Microsoft.Identity.Client.TelemetryCore.TelemetryClient
     public enum CacheUsed
     {
         /// <summary>
-        /// Indicates that the token was not cached
+        /// Indicates that the token was not found in the cache.
         /// </summary>
-        None = 0,
+        CacheMiss = 0,
 
         /// <summary>
-        /// Token was obtained from Memory Cache
+        /// Token was obtained from MSAL's internal cache.
         /// </summary>
-        MemoryCache = 1,
+        MsalInternalCache = 1,
 
         /// <summary>
-        /// Token was obtained from Distributed Cache
+        /// Token was obtained from Memory Cache.
         /// </summary>
-        DistributedCache = 2
+        MemoryCache = 2,
+
+        /// <summary>
+        /// Token was obtained from Distributed Cache.
+        /// </summary>
+        DistributedCache = 3,
+
+        /// <summary>
+        /// Some other cache was used but no metrics were logged.
+        /// </summary>
+        ExternalCache = 4
     }
 }
