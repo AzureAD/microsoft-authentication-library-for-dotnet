@@ -744,7 +744,7 @@ namespace Microsoft.Identity.Client
                             requestTenantId: null,
                             identityLogger: null,
                             piiLoggingEnabled: false,
-                            telemetryDatapoints: new Dictionary<string, string>());
+                            telemetryDatapoints: new TelemetryCore.TelemetryClient.TelemetryDatapoints());
 
                 await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
             }

@@ -31,7 +31,10 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string ActivityId = "ActivityId";
         public const string Resource = "Resource";
         public const string RefreshOn = "RefreshOn";
+        public const string CacheUsed = "CacheUsed";
+        public const string L1Latency = "L1Latency";
+        public const string L2Latency = "L2Latency";
 
-#endregion
+        #endregion
     }
 }

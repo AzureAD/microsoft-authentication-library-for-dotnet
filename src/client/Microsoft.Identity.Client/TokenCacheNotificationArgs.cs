@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
@@ -164,7 +165,7 @@ namespace Microsoft.Identity.Client
             string requestTenantId,
             IIdentityLogger identityLogger,
             bool piiLoggingEnabled,
-            Dictionary<string, string> telemetryDatapoints)
+            TelemetryDatapoints telemetryDatapoints)
 
         {
             TokenCache = tokenCache;
@@ -290,6 +291,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Cache Details contains the details of L1/ L2 cache for telemetry logging.
         /// </summary>
-        public Dictionary<string, string> TelemetryDatapoints { get; }
+        public TelemetryDatapoints TelemetryDatapoints { get; }
     }
 }

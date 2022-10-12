@@ -6,24 +6,24 @@ using Microsoft.IdentityModel.Abstractions;
 namespace Microsoft.Identity.Client.TelemetryCore.TelemetryClient
 {
     /// <summary>
-    /// Contains the parameters of cache to log to telemetry.
+    /// Stores the cache details to log to <see cref="ITelemetryClient"/>.
     /// </summary>
-    public class TelemetryCacheConstants
+    public class TelemetryDatapoints
     {
         /// <summary>
-        /// Constant to use as key to Cache Details dictionary.
+        /// Cache used to fetch the token.
         /// </summary>
-        public const string CacheUsed = "CacheUsed";
+        public CacheUsed CacheUsed { get; set; }
 
         /// <summary>
-        /// Constant to use as key to Cache Details dictionary.
+        /// Total latency of L1 cache access.
         /// </summary>
-        public const string L1Latency = "L1Latency";
+        public long L1Latency { get; set; }
 
         /// <summary>
-        /// Constant to use as key to Cache Details dictionary.
+        /// Total latency of L2 cache access.
         /// </summary>
-        public const string L2Latency = "L2Latency";
+        public long L2Latency { get; set; }
     }
 
     /// <summary>
