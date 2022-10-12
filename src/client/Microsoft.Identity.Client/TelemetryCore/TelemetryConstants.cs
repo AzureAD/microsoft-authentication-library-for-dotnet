@@ -16,9 +16,10 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string CommaDelimiter = ",";
         public const string PlatformFields = "platform_fields";
 
-#region Telemetry Client Constants
+        #region Telemetry Client Constants
 
         public const string AcquireTokenEventName = "acquire_token";
+        public const string MsalVersion = "MsalVersion";
         public const string RemainingLifetime = "RemainingLifetime";
         public const string PopToken = "PopToken";
         public const string TokenSource = "TokenSource";
