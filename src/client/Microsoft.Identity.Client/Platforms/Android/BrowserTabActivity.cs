@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client
     /// uri (redirect_uri has to be unique across apps), the os will fire an intent with the redirect,
     /// and the BrowserTabActivity will be launched.
     /// </summary>
-    //[Activity(Name = "microsoft.identity.client.BrowserTabActivity")]
+    [Activity(Exported =true)]
     [CLSCompliant(false)]
     [Preserve(AllMembers = true)]
     public class BrowserTabActivity : Activity
