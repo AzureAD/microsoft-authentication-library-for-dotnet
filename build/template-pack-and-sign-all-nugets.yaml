@@ -68,23 +68,6 @@ steps:
     VerboseLogin: true
   timeoutInMinutes: 5
 
-# - task: NuGetCommand@2
-#   displayName: 'Verify packages are signed'
-#   inputs:
-#     command: custom
-#     arguments: 'verify -Signature ${{ parameters.NugetPackagesWildcard }}'
-#   continueOnError: true
-
-# - task: Bash@3
-#   displayName: 'Verify packages are signed'
-#   inputs:
-#     targetType: 'inline'
-#     script: |
-#       declare pkgPath="${parameters.NugetPackagesWildcard//\\//}"
-#       echo "${pkgPath}"
-#       dotnet nuget verify ${{ pkgPath }}
-#   continueOnError: true
-
 - task: CmdLine@2
   displayName: 'Verify packages are signed'
   inputs:
