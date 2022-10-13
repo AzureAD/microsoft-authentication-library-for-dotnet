@@ -80,7 +80,8 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      pkgPath = "${parameters.NugetPackagesWildcard//\\//}"
+      declare pkgPath="${parameters.NugetPackagesWildcard//\\//}"
+      echo "${pkgPath}"
       dotnet nuget verify ${{ pkgPath }}
   continueOnError: true
 
