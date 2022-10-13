@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client
         public IReadOnlyList<WwwAuthenticateParameters> ParsedWwwAuthenticateParameters { get; private set; }
 
         /// <summary>
-        /// Parameters returned by the Authenticatin-Info header. 
+        /// Parameters returned by the Authentication-Info header. 
         /// This allows for authentication scenarios such as Proof-Of-Posession.
         /// </summary>
         public AuthenticationInfoParameters ParsedAuthenticationInfoParameters { get; private set; }
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public static async Task<AuthenticationHeaderParser> ParseAuthenticationHeadersAsync(string resourceUri)
         {
-            return await ParseAuthenticationHeadersAsync(resourceUri, new CancellationToken()).ConfigureAwait(false);
+            return await ParseAuthenticationHeadersAsync(resourceUri, default).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client
         /// <param name="httpClient">Instance of <see cref="HttpClient"/> to make the request with.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static async Task<AuthenticationHeaderParser> ParseAuthenticationHeadersAsync(string resourceUri, CancellationToken cancellationToken, HttpClient httpClient)
+        public static async Task<AuthenticationHeaderParser> ParseAuthenticationHeadersAsync(string resourceUri, HttpClient httpClient, CancellationToken cancellationToken)
         {
             if (httpClient is null)
             {
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client
         /// Creates a parsed set of parameters from the provided HttpResponseHeaders.
         /// </summary>
         /// <param name="httpResponseHeaders"></param>
-        /// <remarks>For known values, such as the nonce used for Proof-of-Possession, the parser will first chack for in the WWW-Authenticate headers
+        /// <remarks>For known values, such as the nonce used for Proof-of-Possession, the parser will first check for it in the WWW-Authenticate headers
         /// If it cannot find it, it will then check the Authentication-Info parameters for the value.</remarks>
         /// <returns></returns>
         public static AuthenticationHeaderParser ParseAuthenticationHeaders(HttpResponseHeaders httpResponseHeaders)

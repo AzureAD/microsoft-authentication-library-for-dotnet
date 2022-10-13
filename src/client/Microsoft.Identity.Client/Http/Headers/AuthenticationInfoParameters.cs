@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client
         {
             AuthenticationInfoParameters parameters = new AuthenticationInfoParameters();
 
-            if (respnseHeaders.Any(header => header.Key == _authenticationInfoKey))
+            if (respnseHeaders.Contains(_authenticationInfoKey))
             {
                 var authInfoValue = respnseHeaders.Where(header => header.Key == _authenticationInfoKey).Single().Value.FirstOrDefault();
 
@@ -42,9 +42,7 @@ namespace Microsoft.Identity.Client
                         .Select(v => AuthenticationHeaderParser.ExtractKeyValuePair(v.Trim()))
                         .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
 
-                string value;
-
-                if (paramValues.TryGetValue("nextnonce", out value))
+                if (paramValues.TryGetValue("nextnonce", out string value))
                 {
                     parameters.NextNonce = value;
                 }
