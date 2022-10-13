@@ -25,6 +25,11 @@ namespace Microsoft.Identity.Client
 {
     internal sealed class ApplicationConfiguration : IAppConfig
     {
+        public ApplicationConfiguration(bool isConfidentialClient) 
+        {
+            IsConfidentialClient = isConfidentialClient;
+        }
+        
         public const string DefaultClientName = "UnknownClient";
         public const string DefaultClientVersion = "0.0.0.0";
 
@@ -183,7 +188,8 @@ namespace Microsoft.Identity.Client
         public ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
-#endregion
+        public bool IsConfidentialClient { get; }
+        #endregion
 
     }
 }

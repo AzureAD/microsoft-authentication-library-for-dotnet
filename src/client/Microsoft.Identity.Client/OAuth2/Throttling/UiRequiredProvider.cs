@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         /// </summary>
         private static bool IsRequestSupported(AuthenticationRequestParameters requestParams)
         {            
-            return !requestParams.IsConfidentialClient &&
+            return !requestParams.AppConfig.IsConfidentialClient &&
                 requestParams.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenSilent;
         }
 

@@ -662,7 +662,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory(TestCategories.TokenCacheTests)]
         public async Task DoNotSaveRefreshTokenInAdalCacheForMsalB2CAuthorityTestAsync()
         {
-            var appConfig = new ApplicationConfiguration()
+            var appConfig = new ApplicationConfiguration(isConfidentialClient: true)
             {
                 ClientId = TestConstants.ClientId,
                 RedirectUri = TestConstants.RedirectUri,

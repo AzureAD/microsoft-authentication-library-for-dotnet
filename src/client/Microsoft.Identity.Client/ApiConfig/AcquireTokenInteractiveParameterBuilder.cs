@@ -358,7 +358,6 @@ namespace Microsoft.Identity.Client
 #endif
         public AcquireTokenInteractiveParameterBuilder WithProofOfPossession(string nonce, HttpMethod httpMethod, Uri requestUri)
         {
-            ValidateUseOfExperimentalFeature();
             ClientApplicationBase.GuardMobileFrameworks();
 
             if (!ServiceBundle.Config.IsBrokerEnabled)
