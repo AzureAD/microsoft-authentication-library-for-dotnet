@@ -80,7 +80,8 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      dotnet nuget verify ${{ parameters.NugetPackagesWildcard//\\// }}
+      pkgPath = "${parameters.NugetPackagesWildcard//\\//}"
+      dotnet nuget verify ${{ pkgPath }}
   continueOnError: true
 
 - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
