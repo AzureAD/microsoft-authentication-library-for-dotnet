@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddResiliencyMessageMockHandler(
                     HttpMethod.Post,
-                    HttpStatusCode.InternalServerError, retryAfter: 3);
+                    HttpStatusCode.InternalServerError, retryAfter: 1);
                 httpManager.AddResiliencyMessageMockHandler(
                     HttpMethod.Post,
                     HttpStatusCode.InternalServerError);
@@ -47,13 +47,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     return IsMsalRetryableException(ex, out retryAfter);
                 }).RetryAsync(5,
-                    (exception, retryCount, context) =>
+                    async (exception, retryCount, context) =>
                     {
                         IsMsalRetryableException(exception, out retryAfter);
                         switch (retryCount)
                         {
                             case 1:
-                                Assert.AreEqual(3, retryAfter.TotalSeconds);
+                                Assert.AreEqual(1, retryAfter.TotalSeconds);
+                                // MSAL enforces Retry-After via throttling, so the test must wait 
+                                await Task.Delay(1 * 1000).ConfigureAwait(false); 
                                 break;
                             case 2:
                                 Assert.AreEqual(0, retryAfter.TotalSeconds);
