@@ -68,11 +68,10 @@ steps:
     VerboseLogin: true
   timeoutInMinutes: 5
 
-- task: NuGetCommand@2
+- task: CmdLine@2
   displayName: 'Verify packages are signed'
   inputs:
-    command: custom
-    arguments: 'verify -Signature ${{ parameters.NugetPackagesWildcard }}'
+    script: 'dotnet nuget verify ${{ parameters.NugetPackagesWildcard }}'
   continueOnError: true
 
 - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
