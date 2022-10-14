@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client
             }
 
             var tenantId = TokenResponseHelper.GetTenantId(idToken, requestParams);
-            string username = TokenResponseHelper.GetPreferredUsernameFromIdToken(idToken);
+            string username = TokenResponseHelper.GetUsernameFromIdToken(idToken);
             string homeAccountId = TokenResponseHelper.GetHomeAccountId(requestParams, response, idToken);
 
             string suggestedWebCacheKey = CacheKeyFactory.GetExternalCacheKeyFromResponse(requestParams, homeAccountId);

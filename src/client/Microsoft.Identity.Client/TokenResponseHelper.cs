@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client
                 idToken?.TenantId).TenantId;
         }
 
-        public static string GetPreferredUsernameFromIdToken(IdToken idToken)
+        public static string GetUsernameFromIdToken(IdToken idToken)
         {
             // The preferred_username value cannot be null or empty in order to comply with the ADAL/MSAL Unified cache schema.
             // It will be set to "Missing from the token response"
