@@ -155,7 +155,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (telemetryDatapoints == null) return;
 
-            telemetryEventDetails.SetProperty(TelemetryConstants.CacheUsed, telemetryDatapoints.CacheUsed.ToString());
             telemetryEventDetails.SetProperty(TelemetryConstants.L1Latency, telemetryDatapoints.L1Latency);
             telemetryEventDetails.SetProperty(TelemetryConstants.L2Latency, telemetryDatapoints.L2Latency);
         }
