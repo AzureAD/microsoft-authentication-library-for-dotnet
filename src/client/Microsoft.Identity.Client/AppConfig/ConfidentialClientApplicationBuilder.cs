@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
@@ -343,7 +345,23 @@ namespace Microsoft.Identity.Client
                 Config.TelemetryClients = telemetryClients;
             }
 
+            TelemetryClientLogMsalVersion();
+
             return this;
+        }
+
+        private void TelemetryClientLogMsalVersion()
+        {
+            MsalTelemetryEventDetails telemetryEventDetails = new MsalTelemetryEventDetails(TelemetryConstants.ConfigurationUpdateEventName);
+            telemetryEventDetails.SetProperty(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion());
+
+            foreach (var telemetryClient in Config.TelemetryClients)
+            {
+                if (telemetryClient.IsEnabled(TelemetryConstants.ConfigurationUpdateEventName))
+                {
+                    telemetryClient.TrackEvent(telemetryEventDetails);
+                }
+            }
         }
 
         internal ConfidentialClientApplicationBuilder WithAppTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)
