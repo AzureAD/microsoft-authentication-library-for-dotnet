@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Parameters returned by the Authentication-Info header. This allows for
     /// scenarios such as proof-of-possession, etc.
-    /// See https://learn.microsoft.com/en-us/openspecs/office_protocols/ms-sipae/b3ac8451-ee93-43a8-a51a-baedfdd3bed5.
+    /// See https://www.rfc-editor.org/rfc/rfc7615
     /// </summary>
     public class AuthenticationInfoParameters
     {
@@ -24,6 +24,28 @@ namespace Microsoft.Identity.Client
         /// The next nonce to be used in the preceding authentication request.
         /// </summary>
         public string NextNonce { get; private set; }
+
+        /// <summary>
+        /// Return the <see cref="RawParameters"/> of key <paramref name="key"/>.
+        /// </summary>
+        /// <param name="key">Name of the raw parameter to retrieve.</param>
+        /// <returns>The raw parameter if it exists,
+        /// or throws a <see cref="System.Collections.Generic.KeyNotFoundException"/> otherwise.
+        /// </returns>
+        public string this[string key]
+        {
+            get
+            {
+                return RawParameters[key];
+            }
+        }
+
+        /// <summary>
+        /// Dictionary of raw parameters in the Authentication-Info header (extracted from the Authentication-Info header
+        /// string value, without any processing). This allows support for APIs which are not mappable easily to the standard
+        /// or framework specific (Microsoft.Identity.Model, Microsoft.Identity.Web).
+        /// </summary>
+        internal IDictionary<string, string> RawParameters { get; private set; }
 
         /// <summary>
         /// Create Authentication-Info parameters from the HttpResponseHeaders for each auth scheme.
@@ -40,24 +62,38 @@ namespace Microsoft.Identity.Client
                 {
                     var authInfoValue = httpResponseHeaders.Where(header => header.Key == AuthenticationInfoKey).Single().Value.FirstOrDefault();
 
-                    var AuthValuesSplit = authInfoValue.Split(new char[] { ' ' }, 2);
-
-                    var paramValues = CoreHelpers.SplitWithQuotes(AuthValuesSplit[1], ',')
-                            .Select(v => AuthenticationHeaderParser.ExtractKeyValuePair(v.Trim()))
-                            .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
-
-                    if (paramValues.TryGetValue("nextnonce", out string value))
+                    if (authInfoValue != null)
                     {
-                        parameters.NextNonce = value;
+                        var AuthValuesSplit = authInfoValue.Split(new char[] { ' ' }, 2);
+
+                        var paramValues = CoreHelpers.SplitWithQuotes(AuthValuesSplit[1], ',')
+                                .Select(v => AuthenticationHeaderParser.ExtractKeyValuePair(v.Trim()))
+                                .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+
+                        parameters.RawParameters = paramValues;
+
+                        if (paramValues.TryGetValue("nextnonce", out string value))
+                        {
+                            parameters.NextNonce = value;
+                        }
+
+                        return parameters;
                     }
+
+                    //Could not get Auth info parameters
+                    throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader);
                 }
+
+                return parameters;
             }
             catch(Exception ex)
             {
+                if (ex is MsalClientException)
+                {
+                    throw;
+                }
                 throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader, ex);
             }
-
-            return parameters;
         }
     }
 }

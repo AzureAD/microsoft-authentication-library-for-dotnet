@@ -175,6 +175,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string CodeVerifier = "someCodeVerifier";
 
         public const string Nonce = "someNonce";
+        public const string Realm = "someRealm";
         
         public const string TestErrCode = "TestErrCode";
         public const string iOSBrokerSuberrCode = "TestSuberrCode";

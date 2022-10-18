@@ -59,6 +59,25 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        [DataRow("WLID1.0", "realm=WindowsLive, policy=MBI_SSL, siteId=\"ssl.live-tst.net\"")]
+        //[DataRow("NTLM", "dG9rZW42OA==")] TODO: Investigate NTLM support. Since the parameter value is not in the format of a=b, an exception is thrown.
+        public void CreateWwwAuthenticateResponseForUnknownChallenges(string scheme, string values)
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"{scheme} {values}");
+
+            // Act
+            var authParams = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers, scheme);
+
+            // Assert
+            Assert.AreEqual(3, authParams.RawParameters.Count);
+            Assert.AreEqual("WindowsLive", authParams.RawParameters["realm"]);
+            Assert.AreEqual("MBI_SSL", authParams.RawParameters["policy"]);
+            Assert.AreEqual("ssl.live-tst.net", authParams.RawParameters["siteId"]);
+        }
+
+        [TestMethod]
         [DataRow("Bearer","")]
         [DataRow("Bearer", "Bearer Malformed String  Malformed String\", \"Malformed String, Malformed String")]
         [DataRow("Bearer", "Malformed String  Malformed StringMalformed String, Malformed String")]
@@ -80,19 +99,12 @@ namespace Microsoft.Identity.Test.Unit
             //Assert
             Assert.AreEqual(ex.ErrorCode, MsalError.UnableToParseAuthenticationHeader);
             Assert.AreEqual(ex.Message, MsalErrorMessage.UnableToParseAuthenticationHeader);
-
-            if (ex.InnerException != null)
-            {
-                //Expected inner exceptions from parsing errors
-                string innerExceptionType = ex.InnerException.GetType().ToString();
-                Assert.IsTrue(innerExceptionType == "System.ArgumentException" || innerExceptionType == "System.ArgumentNullException");
-            }
         }
 
         [TestMethod]
         [DataRow("nextnonce", "")]
         [DataRow("nextnonce", "Some, Malformed, Nonce")]
-        [DataRow("", "SomeNonce")]
+        [DataRow("", TestConstants.Nonce)]
         [DataRow("", "Some, Malformed, Nonce")]
         public void CreateFromMalformedAuthInfoResponse(string paramName, string value)
         {
@@ -360,7 +372,7 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
             Assert.IsNotNull(popHeader);
-            Assert.AreEqual("someNonce", popHeader.ServerNonce);
+            Assert.AreEqual(TestConstants.Nonce, popHeader.Nonce);
         }
 
         [TestMethod]
@@ -380,7 +392,7 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
             Assert.IsNotNull(popHeader);
-            Assert.AreEqual("someNonce", popHeader.ServerNonce);
+            Assert.AreEqual(TestConstants.Nonce, popHeader.Nonce);
         }
 
         [TestMethod]
@@ -400,7 +412,21 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
             Assert.IsNotNull(popHeader);
-            Assert.AreEqual("someNonce", popHeader.ServerNonce);
+            Assert.AreEqual(TestConstants.Nonce, popHeader.Nonce);
+        }
+
+        [TestMethod]
+        public void ExtractAuthenticationInfoParametersFromResponse()
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = CreateAuthInfoHttpResponse();
+
+            // Act
+            var header = AuthenticationInfoParameters.CreateFromHeaders(httpResponse.Headers);
+
+            // Assert
+            Assert.IsNotNull(header);
+            Assert.AreEqual(TestConstants.Nonce, header.NextNonce);
         }
 
         [TestMethod]
@@ -411,10 +437,13 @@ namespace Microsoft.Identity.Test.Unit
 
             // Act
             var header = AuthenticationInfoParameters.CreateFromHeaders(httpResponse.Headers);
+            var nextNonce = header.RawParameters["nextnonce"];
+            var realm = header.RawParameters["realm"];
 
             // Assert
             Assert.IsNotNull(header);
-            Assert.AreEqual("someNonce", header.NextNonce);
+            Assert.AreEqual(TestConstants.Nonce, nextNonce);
+            Assert.AreEqual(TestConstants.Realm, realm);
         }
 
         [TestMethod]
@@ -430,7 +459,7 @@ namespace Microsoft.Identity.Test.Unit
 
             // Assert
             Assert.IsNotNull(headers.AuthenticationInfoParameters);
-            Assert.AreEqual("someNonce", headers.AuthenticationInfoParameters.NextNonce);
+            Assert.AreEqual(TestConstants.Nonce, headers.AuthenticationInfoParameters.NextNonce);
             Assert.AreEqual(0, headers.WwwAuthenticateParameters.Count);
         }
 
@@ -509,13 +538,13 @@ namespace Microsoft.Identity.Test.Unit
             };
         }
 
-        private static HttpResponseMessage CreateAuthInfoHttpResponse(bool combinedChallenge = false)
+        private static HttpResponseMessage CreateAuthInfoHttpResponse()
         {
             return new HttpResponseMessage(HttpStatusCode.Unauthorized)
             {
                 Headers =
                 {
-                    { AuthenticationInfoName, $"Authentication-Info nextnonce=\"someNonce\"" }
+                    { AuthenticationInfoName, $"PoP nextnonce=\"{TestConstants.Nonce}\", realm = \"{TestConstants.Realm}\"" }
                 }
             };
         }

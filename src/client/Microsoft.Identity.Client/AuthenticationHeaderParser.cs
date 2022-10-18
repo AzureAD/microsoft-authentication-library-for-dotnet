@@ -99,14 +99,14 @@ namespace Microsoft.Identity.Client
             //Check for WWW-AuthenticateHeaders
             if (httpResponseHeaders.WwwAuthenticate.Count != 0)
             {
-                var WwwParameters = Client.WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponseHeaders);
+                var wwwParameters = Client.WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponseHeaders);
 
-                if (WwwParameters.Any(parameter => parameter.AuthScheme == "PoP"))
+                if (wwwParameters.Any(parameter => parameter.AuthScheme == "PoP"))
                 {
-                    serverNonce = WwwParameters.Where(parameter => parameter.AuthScheme == "PoP").Single().ServerNonce;
+                    serverNonce = wwwParameters.Where(parameter => parameter.AuthScheme == "PoP").Single().Nonce;
                 }
 
-                authenticationHeaderParser.WwwAuthenticateParameters = WwwParameters;
+                authenticationHeaderParser.WwwAuthenticateParameters = wwwParameters;
             }
             else
             {

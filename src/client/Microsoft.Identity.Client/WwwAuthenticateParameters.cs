@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Server Nonce.
         /// </summary>
-        public string ServerNonce { get; private set; }
+        public string Nonce { get; private set; }
 
         /// <summary>
         /// Return the <see cref="RawParameters"/> of key <paramref name="key"/>.
@@ -462,7 +462,7 @@ namespace Microsoft.Identity.Client
 
             if (values.TryGetValue("nonce", out value))
             {
-                wwwAuthenticateParameters.ServerNonce = value.Replace("\"", string.Empty);
+                wwwAuthenticateParameters.Nonce = value.Replace("\"", string.Empty);
             }
 
             return wwwAuthenticateParameters;
