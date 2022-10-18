@@ -1096,5 +1096,10 @@ namespace Microsoft.Identity.Client
         /// A required value is missing from the token providerresponse
         /// </summary>
         public const string InvalidTokenProviderResponseValue = "invalid_token_provider_response_value";
+
+        /// <summary>
+        /// Msal is unable to parse the authentication reader returned from the endpoint
+        /// </summary>
+        public const string UnableToParseAuthenticationHeader = "unable_to_parse_authenticationh_header";
     }
 }

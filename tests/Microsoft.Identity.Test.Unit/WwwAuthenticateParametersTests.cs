@@ -18,6 +18,7 @@ namespace Microsoft.Identity.Test.Unit
     public class WwwAuthenticateParametersTests
     {
         private const string WwwAuthenticateHeaderName = "WWW-Authenticate";
+        private const string AuthenticationInfoName = "Authentication-Info";
         private const string ClientIdKey = "client_id";
         private const string ResourceIdKey = "resource_id";
         private const string ResourceKey = "resource";
@@ -48,13 +49,64 @@ namespace Microsoft.Identity.Test.Unit
             httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"Bearer realm=\"\", {resource}, {authorizationUri}");
 
             // Act
-            var authParams = WwwAuthenticateParameters.CreateFromResponseHeaders(httpResponse.Headers);
+            var authParams = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers, "Bearer");
 
             // Assert
             Assert.AreEqual(TestConstants.AuthorityCommonTenant.TrimEnd('/'), authParams.Authority);
             Assert.AreEqual(3, authParams.RawParameters.Count);
             Assert.IsNull(authParams.Claims);
             Assert.IsNull(authParams.Error);
+        }
+
+        [TestMethod]
+        [DataRow("Bearer","")]
+        [DataRow("Bearer", "Bearer Malformed String  Malformed String\", \"Malformed String, Malformed String")]
+        [DataRow("Bearer", "Malformed String  Malformed StringMalformed String, Malformed String")]
+        [DataRow("Pop", "Malformed String  Malformed StringMalformed String, Malformed String")]
+        [DataRow("", "Malformed String  Malformed StringMalformed String, Malformed String")]
+        [DataRow("SomeAuthScheme", "Malformed String  Malformed StringMalformed String, Malformed String")]
+        [DataRow("\'SomeAuthScheme\'", "\'Malformed String  Malformed StringMalformed String, Malformed String\'")]
+        [DataRow("&SomeAuthScheme&", "Malformed String  Malformed StringMalformed String, Malformed String")]
+        public void CreateFromMalformedWwwAuthenticateResponse(string scheme, string value)
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"{scheme} {value}");
+
+            // Act
+            var ex = Assert.ThrowsException<MsalClientException>(() => 
+                                    WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers, scheme));
+
+            //Assert
+            Assert.AreEqual(ex.ErrorCode, MsalError.UnableToParseAuthenticationHeader);
+            Assert.AreEqual(ex.Message, MsalErrorMessage.UnableToParseAuthenticationHeader);
+
+            if (ex.InnerException != null)
+            {
+                //Expected inner exceptions from parsing errors
+                string innerExceptionType = ex.InnerException.GetType().ToString();
+                Assert.IsTrue(innerExceptionType == "System.ArgumentException" || innerExceptionType == "System.ArgumentNullException");
+            }
+        }
+
+        [TestMethod]
+        [DataRow("nextnonce", "")]
+        [DataRow("nextnonce", "Some, Malformed, Nonce")]
+        [DataRow("", "SomeNonce")]
+        [DataRow("", "Some, Malformed, Nonce")]
+        public void CreateFromMalformedAuthInfoResponse(string paramName, string value)
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            httpResponse.Headers.Add(AuthenticationInfoName, $"{paramName}={value}");
+
+            // Act
+            var ex = Assert.ThrowsException<MsalClientException>(() =>
+                                    AuthenticationInfoParameters.CreateFromHeaders(httpResponse.Headers));
+
+            //Assert
+            Assert.AreEqual(ex.ErrorCode, MsalError.UnableToParseAuthenticationHeader);
+            Assert.AreEqual(ex.Message, MsalErrorMessage.UnableToParseAuthenticationHeader);
         }
 
         [TestMethod]
@@ -158,11 +210,11 @@ namespace Microsoft.Identity.Test.Unit
 
             Assert.AreEqual(authParams.GetTenantId(), tenantId);
 
-            authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri, "Bearer").ConfigureAwait(false);
+            authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, "Bearer", httpClient, default).ConfigureAwait(false);
 
             Assert.AreEqual(authParams.GetTenantId(), tenantId);
 
-            var authParamList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
+            var authParamList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, httpClient, default).ConfigureAwait(false);
 
             Assert.AreEqual(authParamList.FirstOrDefault().GetTenantId(), tenantId);
         }
@@ -184,11 +236,11 @@ namespace Microsoft.Identity.Test.Unit
 
             Assert.AreEqual(authParams.GetTenantId(), tenantId);
 
-            authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri, "Bearer").ConfigureAwait(false);
+            authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, "Bearer", httpClient, default).ConfigureAwait(false);
 
             Assert.AreEqual(authParams.GetTenantId(), tenantId);
 
-            var authParamList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
+            var authParamList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, httpClient, default).ConfigureAwait(false);
 
             Assert.AreEqual(authParamList.FirstOrDefault().GetTenantId(), tenantId);
         }
@@ -212,11 +264,11 @@ namespace Microsoft.Identity.Test.Unit
 
             Assert.IsNull(authParams.GetTenantId());
 
-            authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri, "Bearer").ConfigureAwait(false);
+            authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, "Bearer", httpClient, default).ConfigureAwait(false);
 
             Assert.IsNull(authParams.GetTenantId());
 
-            var authParamList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
+            var authParamList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, httpClient, default).ConfigureAwait(false);
 
             Assert.IsNull(authParamList.FirstOrDefault().GetTenantId());
         }
@@ -231,11 +283,11 @@ namespace Microsoft.Identity.Test.Unit
 
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
 
-            action = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri, "Bearer");
+            action = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, "Bearer", httpClient, default);
 
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
 
-            action = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri);
+            action = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, httpClient, default);
 
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
         }
@@ -300,7 +352,7 @@ namespace Microsoft.Identity.Test.Unit
             };
 
             var httpClient = new HttpClient(handler);
-            var headers = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(httpClient, resourceUri).ConfigureAwait(false);
+            var headers = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, httpClient, default).ConfigureAwait(false);
 
             var bearerHeader = headers.Where(header => header.AuthScheme == "Bearer").Single();
             var popHeader = headers.Where(header => header.AuthScheme == "PoP").Single();
@@ -312,20 +364,74 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public void ExtractAllParametersFromResponse()
+        [DataRow(false)]
+        [DataRow(true)]
+        public void ExtractAllWWWAuthenticateParametersFromResponse(bool combineHeaders)
         {
             // Arrange
-            HttpResponseMessage httpResponse = CreateBearerAndPopHttpResponse();
+            HttpResponseMessage httpResponse = CreateBearerAndPopHttpResponse(combineHeaders);
 
-            // Act & Assert
-            var headers = WwwAuthenticateParameters.CreateFromAuthenticateHeaders(httpResponse.Headers);
+            // Act
+            var headers = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers);
             var bearerHeader = headers.Where(header => header.AuthScheme == "Bearer").Single();
             var popHeader = headers.Where(header => header.AuthScheme == "PoP").Single();
 
+            // Assert
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
             Assert.IsNotNull(popHeader);
             Assert.AreEqual("someNonce", popHeader.ServerNonce);
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public void ExtractAllParametersFromResponseWithAuthParser(bool combineHeaders)
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = CreateBearerAndPopHttpResponse(combineHeaders);
+
+            // Act
+            var headers = AuthenticationHeaderParser.ParseAuthenticationHeaders(httpResponse.Headers);
+            var bearerHeader = headers.WwwAuthenticateParameters.Where(header => header.AuthScheme == "Bearer").Single();
+            var popHeader = headers.WwwAuthenticateParameters.Where(header => header.AuthScheme == "PoP").Single();
+
+            // Assert
+            Assert.IsNotNull(bearerHeader);
+            Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
+            Assert.IsNotNull(popHeader);
+            Assert.AreEqual("someNonce", popHeader.ServerNonce);
+        }
+
+        [TestMethod]
+        public void ExtractAllAuthenticationInfoParametersFromResponse()
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = CreateAuthInfoHttpResponse();
+
+            // Act
+            var header = AuthenticationInfoParameters.CreateFromHeaders(httpResponse.Headers);
+
+            // Assert
+            Assert.IsNotNull(header);
+            Assert.AreEqual("someNonce", header.NextNonce);
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public void ExtractAllAuthinfoParametersFromResponseWithAuthParser(bool combineHeaders)
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = CreateAuthInfoHttpResponse();
+
+            // Act
+            var headers = AuthenticationHeaderParser.ParseAuthenticationHeaders(httpResponse.Headers);
+
+            // Assert
+            Assert.IsNotNull(headers.AuthenticationInfoParameters);
+            Assert.AreEqual("someNonce", headers.AuthenticationInfoParameters.NextNonce);
+            Assert.AreEqual(0, headers.WwwAuthenticateParameters.Count);
         }
 
         [TestMethod]
@@ -380,14 +486,36 @@ namespace Microsoft.Identity.Test.Unit
             };
         }
 
-        private static HttpResponseMessage CreateBearerAndPopHttpResponse()
+        private static HttpResponseMessage CreateBearerAndPopHttpResponse(bool combinedChallenge = false)
         {
+            if (combinedChallenge)
+            {
+                return new HttpResponseMessage(HttpStatusCode.Unauthorized)
+                {
+                    Headers =
+                {
+                    { WwwAuthenticateHeaderName, $"Bearer authorization_uri=\"https://login.microsoftonline.com/TenantId/oauth2/authorize\", resource_id=\"https://endpoint/\", PoP nonce=\"someNonce\"" }
+                }
+                };
+            }
+
             return new HttpResponseMessage(HttpStatusCode.Unauthorized)
             {
                 Headers =
                 {
                     { WwwAuthenticateHeaderName, $"Bearer authorization_uri=\"https://login.microsoftonline.com/TenantId/oauth2/authorize\", resource_id=\"https://endpoint/\"" },
                     { WwwAuthenticateHeaderName, $"PoP nonce=\"someNonce\""}
+                }
+            };
+        }
+
+        private static HttpResponseMessage CreateAuthInfoHttpResponse(bool combinedChallenge = false)
+        {
+            return new HttpResponseMessage(HttpStatusCode.Unauthorized)
+            {
+                Headers =
+                {
+                    { AuthenticationInfoName, $"Authentication-Info nextnonce=\"someNonce\"" }
                 }
             };
         }

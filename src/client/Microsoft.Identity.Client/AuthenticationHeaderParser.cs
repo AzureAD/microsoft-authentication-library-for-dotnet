@@ -24,13 +24,13 @@ namespace Microsoft.Identity.Client
         /// scenarios such as claim challenge, CAE, CA auth context.
         /// See https://aka.ms/msal-net/wwwAuthenticate.
         /// </summary>
-        public IReadOnlyList<WwwAuthenticateParameters> ParsedWwwAuthenticateParameters { get; private set; }
+        public IReadOnlyList<WwwAuthenticateParameters> WwwAuthenticateParameters { get; private set; }
 
         /// <summary>
         /// Parameters returned by the Authentication-Info header. 
         /// This allows for authentication scenarios such as Proof-Of-Posession.
         /// </summary>
-        public AuthenticationInfoParameters ParsedAuthenticationInfoParameters { get; private set; }
+        public AuthenticationInfoParameters AuthenticationInfoParameters { get; private set; }
 
         /// <summary>
         /// Nonce parsed from HttpResponseHeaders
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public static async Task<AuthenticationHeaderParser> ParseAuthenticationHeadersAsync(string resourceUri, CancellationToken cancellationToken)
         {
-            return await ParseAuthenticationHeadersAsync(resourceUri, cancellationToken, GetHttpClient()).ConfigureAwait(false);
+            return await ParseAuthenticationHeadersAsync(resourceUri, GetHttpClient(), cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -93,31 +93,32 @@ namespace Microsoft.Identity.Client
         public static AuthenticationHeaderParser ParseAuthenticationHeaders(HttpResponseHeaders httpResponseHeaders)
         {
             AuthenticationHeaderParser authenticationHeaderParser = new AuthenticationHeaderParser();
+            AuthenticationInfoParameters authenticationInfoParameters = new AuthenticationInfoParameters();
             string serverNonce = null;
 
             //Check for WWW-AuthenticateHeaders
             if (httpResponseHeaders.WwwAuthenticate.Count != 0)
             {
-                var WwwParameters = WwwAuthenticateParameters.CreateFromAuthenticateHeaders(httpResponseHeaders);
+                var WwwParameters = Client.WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponseHeaders);
 
                 if (WwwParameters.Any(parameter => parameter.AuthScheme == "PoP"))
                 {
                     serverNonce = WwwParameters.Where(parameter => parameter.AuthScheme == "PoP").Single().ServerNonce;
                 }
 
-                authenticationHeaderParser.ParsedWwwAuthenticateParameters = WwwParameters;
+                authenticationHeaderParser.WwwAuthenticateParameters = WwwParameters;
             }
             else
             {
-                authenticationHeaderParser.ParsedWwwAuthenticateParameters = new List<WwwAuthenticateParameters>();
+                authenticationHeaderParser.WwwAuthenticateParameters = new List<WwwAuthenticateParameters>();
+
+                //If no WWW-AuthenticateHeaders exist, attempt to parse AuthenticationInfo headers instead
+                authenticationInfoParameters = AuthenticationInfoParameters.CreateFromHeaders(httpResponseHeaders);
+                authenticationHeaderParser.AuthenticationInfoParameters = authenticationInfoParameters;
             }
 
-            //If no WWW-AuthenticateHeaders exist, attempt to parse AuthenticationInfo headers instead
-            AuthenticationInfoParameters authenticationInfoParameters = AuthenticationInfoParameters.CreateFromHeaders(httpResponseHeaders);
-            authenticationHeaderParser.ParsedAuthenticationInfoParameters = authenticationInfoParameters;
-            
             //If server nonce is not acquired from WWW-Authenticate headers, use next nonce from Authentication-Info parameters.
-            authenticationHeaderParser.Nonce = serverNonce?? authenticationInfoParameters.NextNonce;
+            authenticationHeaderParser.Nonce = serverNonce ?? authenticationInfoParameters.NextNonce;
 
             return authenticationHeaderParser;
         }

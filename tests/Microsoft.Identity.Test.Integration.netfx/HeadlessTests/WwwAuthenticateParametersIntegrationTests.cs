@@ -101,21 +101,21 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var parsedHeaders = await AuthenticationHeaderParser.ParseAuthenticationHeadersAsync("https://testingsts.azurewebsites.net/servernonce/invalidsignature").ConfigureAwait(false);
 
             //Assert
-            Assert.IsTrue(parsedHeaders.ParsedWwwAuthenticateParameters.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
-            var serverNonce = parsedHeaders.ParsedWwwAuthenticateParameters.Where(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix).Single().ServerNonce;
+            Assert.IsTrue(parsedHeaders.WwwAuthenticateParameters.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
+            var serverNonce = parsedHeaders.WwwAuthenticateParameters.Where(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix).Single().ServerNonce;
             Assert.IsNotNull(serverNonce);
             Assert.AreEqual(parsedHeaders.Nonce, serverNonce);
-            Assert.IsNull(parsedHeaders.ParsedAuthenticationInfoParameters.NextNonce);
+            Assert.IsNull(parsedHeaders.AuthenticationInfoParameters);
 
             //Arrange & Act
             //Test for nonce in Authentication-Info header
             parsedHeaders = await AuthenticationHeaderParser.ParseAuthenticationHeadersAsync("https://testingsts.azurewebsites.net/servernonce/authinfo").ConfigureAwait(false);
 
             //Assert
-            Assert.IsNotNull(parsedHeaders.ParsedAuthenticationInfoParameters.NextNonce);
-            Assert.AreEqual(parsedHeaders.Nonce, parsedHeaders.ParsedAuthenticationInfoParameters.NextNonce);
+            Assert.IsNotNull(parsedHeaders.AuthenticationInfoParameters.NextNonce);
+            Assert.AreEqual(parsedHeaders.Nonce, parsedHeaders.AuthenticationInfoParameters.NextNonce);
 
-            Assert.IsFalse(parsedHeaders.ParsedWwwAuthenticateParameters.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
+            Assert.IsFalse(parsedHeaders.WwwAuthenticateParameters.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
         }
     }
 }
