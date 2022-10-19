@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Created an HttpClient
+        /// Creates a HttpClient
         /// </summary>
         internal static HttpClient GetHttpClient()
         {

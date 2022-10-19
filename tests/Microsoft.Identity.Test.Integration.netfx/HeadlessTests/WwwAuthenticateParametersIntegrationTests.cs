@@ -7,9 +7,15 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+#if NET_CORE
+using Microsoft.Identity.Client.Broker;
+#endif
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -17,6 +23,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class WwwAuthenticateParametersIntegrationTests
     {
+        private const string ProtectedUrl = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
+
         [TestMethod]
         public async Task CreateWwwAuthenticateResponseFromKeyVaultUrlAsync()
         {
@@ -90,13 +98,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var parameters = parameterList.FirstOrDefault();
 
-            if (parameters.AuthScheme == "Pop" && parameters.RawParameters.Keys.Contains("nonce")) //Check if next nonce for POP is available
+            if (parameters.AuthScheme == "PoP" && parameters.RawParameters.Keys.Contains("nonce")) //Check if next nonce for POP is available
             {
                 popNonce = parameters.RawParameters["nonce"];
             }
 
             //Assert
             Assert.IsTrue(!popNonce.IsNullOrEmpty());
+            await TestCommon.ValidatePopNonceAsync(popNonce).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -112,6 +121,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var authInfoParameters = AuthenticationInfoParameters.CreateFromHeaders(httpResponseMessage.Headers);
             Assert.IsNotNull(authInfoParameters);
             Assert.IsNotNull(authInfoParameters.NextNonce);
+            await TestCommon.ValidatePopNonceAsync(authInfoParameters.NextNonce).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -137,6 +147,42 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(parsedHeaders.Nonce, parsedHeaders.AuthenticationInfoParameters.NextNonce);
 
             Assert.IsFalse(parsedHeaders.WwwAuthenticateParameters.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
+            await TestCommon.ValidatePopNonceAsync(parsedHeaders.Nonce).ConfigureAwait(false);
         }
+
+#if NET_CORE
+        [TestMethod]
+        [Ignore("Pop SHR validation endpoint is currently not functioning")]
+        public async Task WamUsernamePasswordRequestWithPOPAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
+
+            //Arrange & Act
+            //Test for nonce in WWW-Authenticate header
+            var parsedHeaders = await AuthenticationHeaderParser.ParseAuthenticationHeadersAsync("https://testingsts.azurewebsites.net/servernonce/invalidsignature").ConfigureAwait(false);
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithExperimentalFeatures()
+               .WithBrokerPreview().Build();
+
+            Assert.IsTrue(pca.IsProofOfPossessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");
+
+            var result = await pca
+                .AcquireTokenByUsernamePassword(
+                    scopes,
+                    labResponse.User.Upn,
+                    labResponse.User.GetOrFetchPassword())
+                .WithProofOfPossession(parsedHeaders.Nonce, HttpMethod.Get, new Uri(ProtectedUrl))
+                .ExecuteAsync().ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes, true);
+
+            //await TestCommon.ValidatePopShrAsync(result.AccessToken).ConfigureAwait(false);
+        }
+#endif
     }
 }
