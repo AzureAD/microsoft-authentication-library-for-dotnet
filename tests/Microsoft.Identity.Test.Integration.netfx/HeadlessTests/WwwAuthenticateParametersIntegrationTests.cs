@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 #if NET_CORE
         [TestMethod]
         [Ignore("Pop SHR validation endpoint is currently not functioning")]
-        public async Task WamUsernamePasswordRequestWithPOPAsync()
+        public async Task ExtractNonceWithAuthParserAndValidateShrAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             string[] scopes = { "User.Read" };

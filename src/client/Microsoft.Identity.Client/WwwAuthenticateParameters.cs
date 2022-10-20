@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            return CreateWwwAuthenticateParameters(new Dictionary<string, string>());
+            return CreateWwwAuthenticateParameters(new Dictionary<string, string>(), string.Empty);
         }
 
         /// <summary>
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client
         [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
         public static WwwAuthenticateParameters CreateFromWwwAuthenticateHeaderValue(string wwwAuthenticateValue)
         {
-            return CreateFromWwwAuthenticationHeaderValue(wwwAuthenticateValue);
+            return CreateFromWwwAuthenticationHeaderValue(wwwAuthenticateValue, string.Empty);
         }
         #endregion Obsolete Api
 
@@ -255,8 +255,7 @@ namespace Microsoft.Identity.Client
                 WwwAuthenticateParameters parameters;
                 try
                 {
-                    parameters = CreateFromWwwAuthenticationHeaderValue(wwwAuthenticateValue);
-                    parameters.AuthScheme = scheme;
+                    parameters = CreateFromWwwAuthenticationHeaderValue(wwwAuthenticateValue, scheme);
 
                     return parameters;
                 }
@@ -271,7 +270,7 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            return CreateWwwAuthenticateParameters(new Dictionary<string, string>());
+            return CreateWwwAuthenticateParameters(new Dictionary<string, string>(), string.Empty);
         }
 
         /// <summary>
@@ -362,9 +361,7 @@ namespace Microsoft.Identity.Client
             {
                 try
                 {
-                    var parameters = CreateFromWwwAuthenticationHeaderValue(wwwAuthenticateHeaderValue.Parameter);
-                    parameters.AuthScheme = wwwAuthenticateHeaderValue.Scheme;
-
+                    var parameters = CreateFromWwwAuthenticationHeaderValue(wwwAuthenticateHeaderValue.Parameter, wwwAuthenticateHeaderValue.Scheme);
                     parameterList.Add(parameters);
                 }
                 catch (Exception ex)
@@ -386,13 +383,33 @@ namespace Microsoft.Identity.Client
         /// Creates parameters from the WWW-Authenticate string.
         /// </summary>
         /// <param name="wwwAuthenticateValue">String contained in a WWW-Authenticate header.</param>
+        /// <param name="scheme">Auth scheme of the result.</param>
         /// <returns>The parameters requested by the web API.</returns>
-        private static WwwAuthenticateParameters CreateFromWwwAuthenticationHeaderValue(string wwwAuthenticateValue)
+        private static WwwAuthenticateParameters CreateFromWwwAuthenticationHeaderValue(string wwwAuthenticateValue, string scheme)
         {
             if (string.IsNullOrWhiteSpace(wwwAuthenticateValue))
             {
                 throw new ArgumentNullException(nameof(wwwAuthenticateValue));
             }
+
+            if (string.IsNullOrWhiteSpace(scheme))
+            {
+                throw new ArgumentNullException(nameof(scheme));
+            }
+
+            //Special NTLM case does not have an a=b format
+            if (scheme == "NTLM")
+            {
+                return new WwwAuthenticateParameters
+                {
+                    RawParameters = new Dictionary<string, string>()
+                    {
+                        { scheme, wwwAuthenticateValue }
+                    },
+                    AuthScheme = scheme
+                };
+            }
+
             IDictionary<string, string> parameters;
 
             var authValuesSplit = wwwAuthenticateValue.Split(new char[] { ' ' }, 2);
@@ -402,7 +419,6 @@ namespace Microsoft.Identity.Client
                 parameters = CoreHelpers.SplitWithQuotes(authValuesSplit[1], ',')
                     .Select(v => AuthenticationHeaderParser.ExtractKeyValuePair(v.Trim()))
                     .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
-
             }
             else
             {
@@ -411,10 +427,10 @@ namespace Microsoft.Identity.Client
                     .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
             }
 
-            return CreateWwwAuthenticateParameters(parameters);
+            return CreateWwwAuthenticateParameters(parameters, scheme);
         }
 
-        internal static WwwAuthenticateParameters CreateWwwAuthenticateParameters(IDictionary<string, string> values)
+        internal static WwwAuthenticateParameters CreateWwwAuthenticateParameters(IDictionary<string, string> values, string scheme)
         {
             WwwAuthenticateParameters wwwAuthenticateParameters = new WwwAuthenticateParameters
             {
@@ -464,6 +480,8 @@ namespace Microsoft.Identity.Client
             {
                 wwwAuthenticateParameters.Nonce = value.Replace("\"", string.Empty);
             }
+
+            wwwAuthenticateParameters.AuthScheme = scheme;
 
             return wwwAuthenticateParameters;
         }

@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         [DataRow("WLID1.0", "realm=WindowsLive, policy=MBI_SSL, siteId=\"ssl.live-tst.net\"")]
-        //[DataRow("NTLM", "dG9rZW42OA==")] TODO: Investigate NTLM support. Since the parameter value is not in the format of a=b, an exception is thrown.
+        [DataRow("NTLM", "dG9rZW42OA==")]
         public void CreateWwwAuthenticateResponseForUnknownChallenges(string scheme, string values)
         {
             // Arrange
@@ -71,10 +71,18 @@ namespace Microsoft.Identity.Test.Unit
             var authParams = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers, scheme);
 
             // Assert
-            Assert.AreEqual(3, authParams.RawParameters.Count);
-            Assert.AreEqual("WindowsLive", authParams.RawParameters["realm"]);
-            Assert.AreEqual("MBI_SSL", authParams.RawParameters["policy"]);
-            Assert.AreEqual("ssl.live-tst.net", authParams.RawParameters["siteId"]);
+            if (scheme == "NTLM")
+            {
+                Assert.AreEqual(scheme, authParams.AuthScheme);
+                Assert.AreEqual(values, authParams.RawParameters[scheme]);
+            }
+            else
+            {
+                Assert.AreEqual(3, authParams.RawParameters.Count);
+                Assert.AreEqual("WindowsLive", authParams.RawParameters["realm"]);
+                Assert.AreEqual("MBI_SSL", authParams.RawParameters["policy"]);
+                Assert.AreEqual("ssl.live-tst.net", authParams.RawParameters["siteId"]);
+            }
         }
 
         [TestMethod]
