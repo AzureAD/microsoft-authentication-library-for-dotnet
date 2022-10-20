@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -176,6 +177,44 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);            
+        }
+
+        [TestMethod]
+        public async Task ByRefreshTokenTestAsync()
+        {
+            // Arrange
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+
+            var msalPublicClient = PublicClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithTestLogging()
+                .WithAuthority(labResponse.Lab.Authority, "organizations")
+                .BuildConcrete();
+
+            AuthenticationResult authResult = await msalPublicClient
+                .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithAuthority(labResponse.Lab.Authority, labResponse.User.TenantId)
+                .WithTestLogging()
+                .BuildConcrete();
+
+            var rt = msalPublicClient.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().FirstOrDefault();
+
+            // Act
+            authResult = await (confidentialApp as IByRefreshToken).AcquireTokenByRefreshToken(s_scopes, rt.Secret).ExecuteAsync().ConfigureAwait(false);
+
+            var account = authResult.Account;
+            //Validate that the refreshed token can be used
+            authResult = await confidentialApp.AcquireTokenSilent(s_scopes, account).ExecuteAsync().ConfigureAwait(false);
+
+            // Assert
+            Assert.IsNotNull(authResult);
+            Assert.AreEqual(labResponse.User.Upn, authResult.Account.Username);
+            Assert.AreEqual(labResponse.User.ObjectId.ToString(), authResult.Account.HomeAccountId.ObjectId);
         }
 
         private static void ModifyRequest(OnBeforeTokenRequestData data, X509Certificate2 certificate)
