@@ -207,7 +207,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Act
             authResult = await (confidentialApp as IByRefreshToken).AcquireTokenByRefreshToken(s_scopes, rt.Secret).ExecuteAsync().ConfigureAwait(false);
 
-            var account = authResult.Account;
+            //Ensure we can get account from application
+            var account = await confidentialApp.GetAccountAsync(authResult.Account.HomeAccountId.Identifier).ConfigureAwait(false);
+
             //Validate that the refreshed token can be used
             authResult = await confidentialApp.AcquireTokenSilent(s_scopes, account).ExecuteAsync().ConfigureAwait(false);
 
@@ -215,6 +217,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult);
             Assert.AreEqual(labResponse.User.Upn, authResult.Account.Username);
             Assert.AreEqual(labResponse.User.ObjectId.ToString(), authResult.Account.HomeAccountId.ObjectId);
+            Assert.AreEqual(labResponse.User.TenantId, authResult.Account.HomeAccountId.TenantId);
         }
 
         private static void ModifyRequest(OnBeforeTokenRequestData data, X509Certificate2 certificate)
