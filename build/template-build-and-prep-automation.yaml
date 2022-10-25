@@ -17,7 +17,6 @@ steps:
   inputs:
     version: 6.x
 
-#Workaround for Xamarin iOS/MAC build issue. See https://github.com/actions/runner-images/issues/6082
 - task: PowerShell@2
   displayName: 'Installing Xamarin iOS/macOS components'
   inputs:
@@ -48,7 +47,7 @@ steps:
     BuildConfiguration: '$(BuildConfiguration)'
     MsalClientSemVer: $(MsalClientSemVer)
     Solution: 'LibsAndSamples.sln'
-
+    
 - task: DownloadSecureFile@1
   displayName: 'Download Xamarin Ui Test Tools'
   inputs:
