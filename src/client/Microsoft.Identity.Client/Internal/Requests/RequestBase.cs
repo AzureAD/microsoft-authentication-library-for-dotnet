@@ -133,7 +133,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (telemetryClients.HasEnabledClients(TelemetryConstants.AcquireTokenEventName))
             {
-                telemetryEventDetails.SetProperty(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion());
                 telemetryEventDetails.SetProperty(TelemetryConstants.CacheInfoTelemetry, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason));
                 telemetryEventDetails.SetProperty(TelemetryConstants.TokenSource, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.TokenSource));
                 telemetryEventDetails.SetProperty(TelemetryConstants.Duration, authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
