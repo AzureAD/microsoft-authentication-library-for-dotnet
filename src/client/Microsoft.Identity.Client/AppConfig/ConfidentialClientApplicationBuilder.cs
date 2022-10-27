@@ -355,12 +355,9 @@ namespace Microsoft.Identity.Client
             MsalTelemetryEventDetails telemetryEventDetails = new MsalTelemetryEventDetails(TelemetryConstants.ConfigurationUpdateEventName);
             telemetryEventDetails.SetProperty(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion());
 
-            foreach (var telemetryClient in Config.TelemetryClients)
+            if (Config.TelemetryClients.HasEnabledClients(TelemetryConstants.ConfigurationUpdateEventName))
             {
-                if (telemetryClient.IsEnabled(TelemetryConstants.ConfigurationUpdateEventName))
-                {
-                    telemetryClient.TrackEvent(telemetryEventDetails);
-                }
+                Config.TelemetryClients.TrackEvent(telemetryEventDetails);
             }
         }
 
