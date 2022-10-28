@@ -11,7 +11,7 @@ using Windows.Security.Credentials;
 using System.Threading;
 using System.Diagnostics.Tracing;
 
-#if NET5_WIN
+#if NET6_WIN
 using Microsoft.Identity.Client.Platforms.net5win;
 using WebAuthenticationCoreManagerInterop = Microsoft.Identity.Client.Platforms.net5win.WebAuthenticationCoreManagerInterop;
 #elif DESKTOP || NET_CORE
@@ -20,7 +20,7 @@ using Microsoft.Identity.Client.Platforms;
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
-#if NET5_WIN
+#if NET6_WIN
     [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
 #endif
     internal class WamProxy : IWamProxy

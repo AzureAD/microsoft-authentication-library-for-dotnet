@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Platforms.net5win
         {
         }
 
-#if NET5_WIN
+#if NET6_WIN
         [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
 #endif
         public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
