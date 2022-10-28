@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ComponentModel;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
-using System.ComponentModel;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 #if iOS
@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Client
 
 #if NET45
             throw new PlatformNotSupportedException(
-                "The Windows broker is not available on .NET Framework 4.5, please use at least .NET Framework 4.6.2");
+                "The Windows broker is not available on .NET Framework 4.5, use at least .NET Framework 4.6.2");
 #endif
 
 #if NET461
@@ -166,9 +166,9 @@ namespace Microsoft.Identity.Client
             {
                 throw new PlatformNotSupportedException(
                     "The Windows broker is not directly available on MSAL for .NET Framework. " +
-                    "To use it, please install the NuGet package named Microsoft.Identity.Client.Desktop " +
+                    "To use it, install the NuGet package named Microsoft.Identity.Client.Desktop " +
                     "and call the extension method .WithWindowsBroker() first. " +
-                    "If you want to try the new broker preview, please install the NuGet package named Microsoft.Identity.Client.Broker " +
+                    "If you want to try the new broker preview, install the NuGet package named Microsoft.Identity.Client.Broker " +
                     "and call the extension method .WithBrokerPreview(). For details see https://aka.ms/msal-net-wam ");
             }
 #endif
@@ -177,12 +177,14 @@ namespace Microsoft.Identity.Client
             if (Config.BrokerCreatorFunc == null && DesktopOsHelper.IsWindows())
             {
                 throw new PlatformNotSupportedException(
-                    "If you have a Windows application which targets net5 or net5-windows, please change the target to net5-windows10.0.17763.0. \nYour app can still run on earlier versions of Windows such as Win7 if you add <SupportedOSPlatformVersion>7</SupportedOSPlatformVersion> in the csproj.\n The broker (WAM) is available only on Win10 and this library will fallback to a browser on older systems. " +
+                    "If you have a .NET Core 3.1 application, install the NuGet package Microsoft.Identity.Client.Desktop and call the extension method .WithWindowsBroker() first. " +
 
-                    "\n\r\n\rIf you have a NET5 cross-platform (Windows, Mac, Linux) application, please dual target net5 and net5-windows10.0.17763.0. Your installer should deploy the net5 version on Mac and Linux and the net5-window10.0.17763.0 on Windows." +
-                    "\n\r\n\rIf you have a .NET Core 3.1 application, please install the NuGet package named Microsoft.Identity.Client.Desktop and call the extension method .WithWindowsBroker() first. " +
-                    "\n\r\n\rIf you want to try the new broker preview, please install the NuGet package named Microsoft.Identity.Client.Broker and call the extension method .WithBrokerPreview(). " +
-                    "\n\rFor details see https://aka.ms/msal-net-wam and https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md ");
+                    "\n\r\n\rIf you have a Windows application which targets net5.0, net5.0-windows, net6.0, or net6.0-windows, change the target to at least net6.0-windows10.0.17763.0. \nYour app can still run on earlier versions of Windows such as Windows 7 if you add <SupportedOSPlatformVersion>7</SupportedOSPlatformVersion> in the csproj.\n The Windows broker (WAM) is available only on Windows 10 and this library will fallback to a browser on older systems. " +
+
+                    "\n\r\n\rIf you have a .NET 6 cross-platform (Windows, Mac, Linux) application, dual target net6.0 and net6.0-windows10.0.17763.0. Your installer should deploy the net6.0 version on Mac and Linux and the net6.0-window10.0.17763.0 on Windows." +
+
+                    "\n\r\n\rIf you want to try the new broker preview, install the NuGet package Microsoft.Identity.Client.Broker and call the extension method .WithBrokerPreview(). " +
+                    "\n\rFor details, see https://aka.ms/msal-net-wam and https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md ");
             }
 #endif
 
@@ -295,7 +297,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(windowFunc));
             }
 
-            return WithParentFunc(() => (object)windowFunc());
+            return WithParentFunc(() => windowFunc());
         }
 #endif
 
@@ -314,7 +316,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(windowFunc));
             }
 
-            return WithParentFunc(() => (object)windowFunc());
+            return WithParentFunc(() => windowFunc());
         }
 #endif
 
@@ -384,7 +386,7 @@ namespace Microsoft.Identity.Client
                 throw new NotSupportedException(MsalErrorMessage.MultiCloudSupportUnavailable);
             }
 #endif
-                if (string.IsNullOrWhiteSpace(Config.RedirectUri))
+            if (string.IsNullOrWhiteSpace(Config.RedirectUri))
             {
                 Config.RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null)
                                                          .GetDefaultRedirectUri(Config.ClientId, Config.UseRecommendedDefaultRedirectUri);
