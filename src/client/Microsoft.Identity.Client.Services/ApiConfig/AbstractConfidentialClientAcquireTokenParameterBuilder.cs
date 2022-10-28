@@ -48,8 +48,7 @@ namespace Microsoft.Identity.Client
             // Confidential client must have a credential
             if (ServiceBundle?.Config.ClientCredential == null &&
                 CommonParameters.OnBeforeTokenRequestHandler == null &&
-                ServiceBundle?.Config.AppTokenProvider == null
-                ) 
+                ServiceBundle?.Config.AppTokenProvider == null) 
             {
                 throw new MsalClientException(
                     MsalError.ClientCredentialAuthenticationTypeMustBeDefined,

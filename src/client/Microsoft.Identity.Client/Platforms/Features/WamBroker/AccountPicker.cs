@@ -105,8 +105,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 return true;
             }
 
-            WindowsNativeMethods.GetWindowThreadProcessId(_parentHandle, out uint windowProcessId);
-            uint appProcessId = WindowsNativeMethods.GetCurrentProcessId();
+            WindowsNativeMethods2.GetWindowThreadProcessId(_parentHandle, out uint windowProcessId);
+            uint appProcessId = WindowsNativeMethods2.GetCurrentProcessId();
 
             return appProcessId != windowProcessId;
         }

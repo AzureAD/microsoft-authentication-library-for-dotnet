@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Client
         /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.
         /// </summary>
         /// <param name="accountId">Account identifier. The identifier is typically the
-        /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>.
+        /// value of the <see cref="AccountId.Identifier"/> property of <see cref="IAccount"/>.
         /// You typically get the account id from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property>
         /// </param>
         public async Task<IAccount> GetAccountAsync(string accountId)

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
 {
-    internal static class WindowsNativeMethods
+    internal static class WindowsNativeMethods2
     {
         public enum NetJoinStatus
         {

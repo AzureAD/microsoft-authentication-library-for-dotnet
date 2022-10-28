@@ -1,7 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- <Import Project="../../../build/platform_and_feature_flags.props" /> -->
-
   <PropertyGroup>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
     <TargetFrameworkNetDesktop Condition="$([MSBuild]::IsOsPlatform('Windows'))">net461</TargetFrameworkNetDesktop>
@@ -9,9 +7,6 @@
     <TargetFrameworks>$(TargetFrameworkNet6);$(TargetFrameworkNetStandard);$(TargetFrameworkNetDesktop)</TargetFrameworks>
 
     <LangVersion>latest</LangVersion>
-
-    <!-- <Configurations>Debug;Release</Configurations>
-    <PlatformTarget>AnyCPU</PlatformTarget> -->
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
@@ -53,11 +48,6 @@
     <!-- <AllowUnsafeBlocks>true</AllowUnsafeBlocks> -->
   </PropertyGroup>
 
-  <!-- <ItemGroup>
-    <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
-    <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.KeyTokens.cs" Link="Properties\InternalsVisibleTo.KeyTokens.cs" />
-  </ItemGroup> -->
-
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' ">
     <!-- On net6 we use a System.Text.Json for json operations, which is faster and does not use reflection-->
     <IsTrimmable>true</IsTrimmable>
@@ -86,7 +76,6 @@
     <None Include="Platforms\netdesktop\NetDesktopCryptographyManager.cs" />
     <None Include="Platforms\netdesktop\NetDesktopFeatureFlags.cs" />
     <None Include="Platforms\netdesktop\NetDesktopPlatformProxy.cs" />
-    <!--<Compile Remove="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />-->
 
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.22.0" />
   </ItemGroup>
@@ -99,8 +88,6 @@
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)'">
     <Compile Include="$(MSBuildThisFileDirectory)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
     <Compile Include="$(MSBuildThisFileDirectory)\Platforms\net6\**\*.cs" LinkBase="Platforms\net6" />
-    <!--<Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />-->
 
     <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
     <Compile Remove="$(MSBuildThisFileDirectory)\json\**\*.*" />
