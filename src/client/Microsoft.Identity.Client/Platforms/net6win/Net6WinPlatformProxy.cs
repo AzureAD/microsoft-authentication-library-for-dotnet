@@ -9,15 +9,15 @@ using Microsoft.Identity.Client.Platforms.netcore;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Platforms.net5win
+namespace Microsoft.Identity.Client.Platforms.net6win
 {
     /// <summary>
     ///     Platform / OS specific logic.
     /// </summary>
-    internal class Net5WinPlatformProxy : NetCorePlatformProxy
+    internal class Net6WinPlatformProxy : NetCorePlatformProxy
     {
         /// <inheritdoc />
-        public Net5WinPlatformProxy(ILoggerAdapter logger)
+        public Net6WinPlatformProxy(ILoggerAdapter logger)
             : base(logger)
         {
         }
