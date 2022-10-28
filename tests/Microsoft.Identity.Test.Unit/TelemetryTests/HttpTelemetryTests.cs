@@ -555,7 +555,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(3, telemetryCategories.Length);
             Assert.AreEqual(1, telemetryCategories[0].Split(',').Length); // version
             Assert.AreEqual(5, telemetryCategories[1].Split(',').Length); // api_id, cache_info, region_used, region_source, region_outcome
-            Assert.AreEqual(2, telemetryCategories[2].Split(',').Length); // platform_fields
+            Assert.AreEqual(3, telemetryCategories[2].Split(',').Length); // platform_fields
 
             Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion, telemetryCategories[0]); // version
 
@@ -568,6 +568,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(isCacheSerialized ? "1" : "0", telemetryCategories[2].Split(',')[0]); // is_cache_serialized
 
             Assert.AreEqual(isLegacyCacheEnabled ? "1" : "0", telemetryCategories[2].Split(',')[1]); // is_legacy_cache_enabled
+
+            Assert.AreEqual("1", telemetryCategories[2].Split(',')[2]);
         }
 
         private static void AssertPreviousTelemetry(

@@ -107,5 +107,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public long DurationInHttpInMs { get; set; }
 
         public long DurationInCacheInMs { get; set; }
+
+        public int TokenType { get; set; }
     }
 }

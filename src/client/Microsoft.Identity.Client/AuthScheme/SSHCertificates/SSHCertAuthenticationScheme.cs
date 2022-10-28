@@ -29,6 +29,8 @@ namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
             _jwk = jwk;
         }
 
+        public int Id => 3;
+
         public string AuthorizationHeaderPrefix =>
             throw new MsalClientException(
                 MsalError.SSHCertUsedAsHttpHeader,
