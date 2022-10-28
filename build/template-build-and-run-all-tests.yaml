@@ -12,6 +12,9 @@ jobs: #Build and stage projects
   variables:
       runCodesignValidationInjection: false
 
+  #Specified container image to use for build. See: https://hub.docker.com/_/microsoft-windows-servercore
+  container: mcr.microsoft.com/windows/servercore:ltsc2022-KB5017316
+
   steps:
   #Pre build analysis
   - template: template-prebuild-code-analysis.yaml

@@ -304,7 +304,6 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
-#if !XAMARINMAC2_0
         /// <summary>
         /// Sets the Identity Logger. For details see https://aka.ms/msal-net-logging
         /// </summary>
@@ -326,7 +325,6 @@ namespace Microsoft.Identity.Client
             Config.EnablePiiLogging = enablePiiLogging;
             return (T)this;
         }
-#endif
 
         /// <summary>
         /// Sets the Debug logging callback to a default debug method which displays

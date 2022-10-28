@@ -176,37 +176,7 @@ namespace Microsoft.Identity.Client.Kerberos
 
             return null;
         }
-
-        /// <summary>
-        /// Add Claims to body parameter for POST request.
-        /// </summary>
-        /// <param name="oAuth2Client"><see cref="OAuth2Client"/> object for Token request.</param>
-        /// <param name="requestParams"><see cref="AuthenticationRequestParameters"/> containing request parameters.</param>
-        internal static void AddKerberosTicketClaim(
-            OAuth2Client oAuth2Client,
-            AuthenticationRequestParameters requestParams)
-        {
-            string kerberosClaim = GetKerberosTicketClaim(
-                requestParams.RequestContext.ServiceBundle.Config.KerberosServicePrincipalName,
-                requestParams.RequestContext.ServiceBundle.Config.TicketContainer);
-
-            if (string.IsNullOrEmpty(kerberosClaim))
-            {
-                oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, requestParams.ClaimsAndClientCapabilities);
-            }
-            else if (string.IsNullOrEmpty(requestParams.ClaimsAndClientCapabilities))
-            {
-                oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, kerberosClaim);
-            }
-            else
-            {
-                var existingClaims = JsonHelper.ParseIntoJsonObject(requestParams.ClaimsAndClientCapabilities);
-                var mergedClaims = ClaimsHelper.MergeClaimsIntoCapabilityJson(kerberosClaim, existingClaims);
-
-                oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, JsonHelper.JsonObjectToString(mergedClaims));
-            }
-        }
-
+        
         /// <summary>
         /// Generate a Kerberos Ticket Claim string.
         /// </summary>

@@ -1,3 +1,20 @@
+
+4.47.2
+==========
+
+### New Features
+- Hide legacy API's that are available only to internal Microsoft only (1P) applications. See [3670](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3670).
+- Soft deprecate `WithAuthority` API on AcquireTokenXXX methods. Instead use `WithTenantId` or `WithTenantIdFromAuthority`, or `WithB2CAuthority` for B2C authorities. See [#3716](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3716)
+- Logging error codes to MSAL Telemetry. See [3595](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3595)
+- Add more logging around client creds and claims. See [3707](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3707).
+- Improve extensibility APIs to support new POP
+
+### Bug Fixes
+- Improved error messages when new preview broker exceptions are thrown. [#3696](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3696)
+- MSAL will now throw an exception if no scopes are passed for the new preview Broker or for B2C scenarios. See [#3675](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3675)
+- Removed .NET 6 MacCatalyst target because MSAL.NET doesn't currently support it. See [#3693](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3693)
+- Throw an exception when new WAM DLLs are not loaded when invoking the new WAM preview broker. See [#3699](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3699)
+
 4.47.1
 ==========
 

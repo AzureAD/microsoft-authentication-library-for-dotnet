@@ -49,12 +49,9 @@ namespace Microsoft.Identity.Client
             }
 
             var tenantId = TokenResponseHelper.GetTenantId(idToken, requestParams);
-
-            bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
-            bool isAadAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Aad;
-            string preferredUsername = TokenResponseHelper.GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
-            string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
+            string username = TokenResponseHelper.GetUsernameFromIdToken(idToken);
             string homeAccountId = TokenResponseHelper.GetHomeAccountId(requestParams, response, idToken);
+
             string suggestedWebCacheKey = CacheKeyFactory.GetExternalCacheKeyFromResponse(requestParams, homeAccountId);
 
             // token could be comming from a different cloud than the one configured
@@ -126,16 +123,20 @@ namespace Microsoft.Identity.Client
                              response.ClientInfo,
                              homeAccountId,
                              idToken,
-                             preferredUsername,
+                             username,
                              tenantId,
                              wamAccountIds);
 
                 // Add the newly obtained id token to the list of profiles
-                var tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
-                if (isAadAuthority && tenantProfiles != null)
+                IDictionary<string, TenantProfile> tenantProfiles = null;
+                if (msalIdTokenCacheItem.TenantId != null)
                 {
-                    TenantProfile tenantProfile = new TenantProfile(msalIdTokenCacheItem);
-                    tenantProfiles[msalIdTokenCacheItem.TenantId] = tenantProfile;
+                    tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
+                    if (tenantProfiles != null)
+                    {
+                        TenantProfile tenantProfile = new TenantProfile(msalIdTokenCacheItem);
+                        tenantProfiles[msalIdTokenCacheItem.TenantId] = tenantProfile;
+                    }
                 }
 
                 account = new Account(
@@ -1073,12 +1074,16 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParameters,
             string homeAccountId)
         {
-            if (requestParameters.AuthorityInfo.AuthorityType != AuthorityType.Aad)
+            if (!requestParameters.AuthorityInfo.IsMultiTenantSupported)
             {
                 return null;
             }
-
-            Debug.Assert(homeAccountId != null);
+            
+            if (homeAccountId == null)
+            {
+                requestParameters.RequestContext.Logger.Warning("No homeAccountId, skipping tenant profiles");
+                return null;
+            }            
 
             var idTokenCacheItems = Accessor.GetAllIdTokens(homeAccountId);
             FilterTokensByClientId(idTokenCacheItems);
