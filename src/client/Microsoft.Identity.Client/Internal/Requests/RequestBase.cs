@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
             AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
-            MsalTelemetryEventDetails telemetryEventDetails = new MsalTelemetryEventDetails();
+            MsalTelemetryEventDetails telemetryEventDetails = new MsalTelemetryEventDetails(TelemetryConstants.AcquireTokenEventName);
             ITelemetryClient[] telemetryClients = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.TelemetryClients;
 
             using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
