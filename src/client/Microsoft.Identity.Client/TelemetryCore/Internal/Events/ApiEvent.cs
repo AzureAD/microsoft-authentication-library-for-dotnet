@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
@@ -108,6 +109,11 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public long DurationInCacheInMs { get; set; }
 
-        public int TokenType { get; set; }
+        public TokenType? TokenType { get; set; }
+
+        public string TokenTypeString
+        {
+            get => TokenType.HasValue ? TokenType.Value.ToString("D") : null;
+        }
     }
 }

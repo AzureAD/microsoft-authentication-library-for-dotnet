@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             sb.Append(eventInProgress.IsLegacyCacheEnabledString);
             sb.Append(TelemetryConstants.CommaDelimiter);
             // Token type is to indicate 1 - bearer, 2 - pop, 3 - ssh-cert, 4 - external.
-            sb.Append(eventInProgress.TokenType);
+            sb.Append(eventInProgress.TokenTypeString);
 
             return sb.ToString();
         }
