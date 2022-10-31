@@ -135,6 +135,7 @@ namespace Microsoft.Identity.Client
         internal bool IsUserAssertionSupported => (AuthorityType != AuthorityType.Adfs && AuthorityType != AuthorityType.B2C);
 
         internal bool IsTenantOverrideSupported => (AuthorityType == AuthorityType.Aad);
+        internal bool IsMultiTenantSupported => (AuthorityType != AuthorityType.Adfs);
         internal bool IsClientInfoSupported => (AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Dsts || AuthorityType == AuthorityType.B2C);
 
         #region Builders

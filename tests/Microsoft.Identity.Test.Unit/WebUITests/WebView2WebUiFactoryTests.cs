@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if (DESKTOP || NET_CORE || NET5_WIN) && !NET6_0
+#if DESKTOP || NET_CORE || NET6_WIN
 
 using System;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -52,7 +52,6 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             Assert.IsTrue(webUi is InteractiveWebUI);
 
         }
-
 
         [TestMethod]
         public void WebViewTypeNotConfigured_ADFS_WebView1()
