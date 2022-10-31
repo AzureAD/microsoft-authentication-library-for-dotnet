@@ -179,7 +179,7 @@ namespace Microsoft.Identity.Client
                 throw new PlatformNotSupportedException(
                     "If you have a .NET Core 3.1 application, install the NuGet package Microsoft.Identity.Client.Desktop and call the extension method .WithWindowsBroker() first. " +
 
-                    "\n\r\n\rIf you have a Windows application which targets net5.0, net5.0-windows, net6.0, or net6.0-windows, change the target to at least net6.0-windows10.0.17763.0. \nYour app can still run on earlier versions of Windows such as Windows 7 if you add <SupportedOSPlatformVersion>7</SupportedOSPlatformVersion> in the csproj.\n The Windows broker (WAM) is available only on Windows 10 and this library will fallback to a browser on older systems. " +
+                    "\n\r\n\rIf you have a Windows application which targets net5.0, net5.0-windows, net6.0, or net6.0-windows, change the target to at least net6.0-windows10.0.17763.0. \nYour app can still run on earlier versions of Windows such as Windows 7 if you add <SupportedOSPlatformVersion>7</SupportedOSPlatformVersion> in the csproj.\n The Windows broker (WAM) is available only on Windows 10+ and Windows Server 2019+; this library will fallback to a browser on older systems. " +
 
                     "\n\r\n\rIf you have a .NET 6 cross-platform (Windows, Mac, Linux) application, dual target net6.0 and net6.0-windows10.0.17763.0. Your installer should deploy the net6.0 version on Mac and Linux and the net6.0-window10.0.17763.0 on Windows." +
 
