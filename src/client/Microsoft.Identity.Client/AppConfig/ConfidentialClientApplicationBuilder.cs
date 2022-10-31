@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client
         {
             ClientApplicationBase.GuardMobileFrameworks();
 
-            var config = new ApplicationConfiguration();
+            var config = new ApplicationConfiguration(isConfidentialClient: true);
             var builder = new ConfidentialClientApplicationBuilder(config).WithOptions(options);
 
             if (!string.IsNullOrWhiteSpace(options.ClientSecret))
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client
         {
             ClientApplicationBase.GuardMobileFrameworks();
 
-            var config = new ApplicationConfiguration();
+            var config = new ApplicationConfiguration(isConfidentialClient: true);
             return new ConfidentialClientApplicationBuilder(config)
                 .WithClientId(clientId)
                 .WithCacheSynchronization(false);

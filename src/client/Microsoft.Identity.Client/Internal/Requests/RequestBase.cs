@@ -389,7 +389,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authenticationRequestParameters.RequestContext.Logger.InfoPii(messageWithPii, messageWithoutPii);
             }
 
-            if (authenticationRequestParameters.IsConfidentialClient &&
+            if (authenticationRequestParameters.AppConfig.IsConfidentialClient &&
                 !authenticationRequestParameters.IsClientCredentialRequest &&
                 !CacheManager.TokenCacheInternal.IsAppSubscribedToSerializationEvents())
             {

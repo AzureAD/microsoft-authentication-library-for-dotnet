@@ -424,7 +424,7 @@ namespace Microsoft.Identity.Client
             // take a snapshot of the access tokens to avoid problems where the underlying collection is changed,
             // as this method is NOT locked by the semaphore
             string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
-            Debug.Assert(partitionKey != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partitioned.");
+            Debug.Assert(partitionKey != null || !requestParams.AppConfig.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
             var accessTokens = Accessor.GetAllAccessTokens(partitionKey, logger);
 

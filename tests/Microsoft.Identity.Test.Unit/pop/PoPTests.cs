@@ -157,7 +157,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 PublicClientApplication app =
                     PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithBrokerPreview()
-                                                              .WithExperimentalFeatures()
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
@@ -286,7 +285,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 mockBroker.IsPopSupported.Returns(true);
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures(true)
                     .WithBrokerPreview()
                     .WithTestBroker(mockBroker)
                     .WithHttpManager(harness.HttpManager)

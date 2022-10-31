@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             _synchronizationContext = new DedicatedThreadSynchronizationContext();
 
             _coreUIParent = new CoreUIParent() { SynchronizationContext = _synchronizationContext };
-            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
+            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(isConfidentialClient: false);
             _logger = Substitute.For<ILoggerAdapter>();
 
             _wamBroker = new RuntimeBroker(_coreUIParent, applicationConfiguration, _logger);
