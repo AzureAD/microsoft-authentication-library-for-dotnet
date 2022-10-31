@@ -49,6 +49,8 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             KeyId = Base64UrlHelpers.Encode(keyThumbprint);
         }
 
+        public TokenType TelemetryTokenType => TokenType.Pop;
+
         public string AuthorizationHeaderPrefix => Constants.PoPAuthHeaderPrefix;
 
         public string AccessTokenType => Constants.PoPTokenType;

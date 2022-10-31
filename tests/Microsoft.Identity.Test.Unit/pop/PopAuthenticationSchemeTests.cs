@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
@@ -77,6 +78,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 // Assert
                 Assert.AreEqual("PoP", authenticationScheme.AuthorizationHeaderPrefix);
+                Assert.AreEqual(TokenType.Pop, authenticationScheme.TelemetryTokenType);
                 Assert.AreEqual(JWT, authenticationScheme.KeyId);
                 Assert.AreEqual(2, tokenParams.Count);
                 Assert.AreEqual("pop", tokenParams["token_type"]);
