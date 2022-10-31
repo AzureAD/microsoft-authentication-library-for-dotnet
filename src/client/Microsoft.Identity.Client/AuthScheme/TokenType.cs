@@ -6,7 +6,7 @@ namespace Microsoft.Identity.Client.AuthScheme
     /// <summary>
     /// Specifies the token type to log to telemetry.
     /// </summary>
-    public enum TokenType
+    internal enum TokenType
     {
         /// <summary>
         /// Bearer token type.
