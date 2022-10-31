@@ -27,6 +27,16 @@ namespace Microsoft.Identity.Client.Broker
         private readonly WindowsBrokerOptions _wamOptions;
         private static Exception s_initException;
 
+        private readonly Dictionary<NativeInterop.LogLevel, LogLevel> _logLevelMap = new Dictionary<NativeInterop.LogLevel, LogLevel>()
+        {
+            { NativeInterop.LogLevel.Trace, LogLevel.Verbose },
+            { NativeInterop.LogLevel.Debug, LogLevel.Verbose },
+            { NativeInterop.LogLevel.Info, LogLevel.Info },
+            { NativeInterop.LogLevel.Warning, LogLevel.Warning },
+            { NativeInterop.LogLevel.Error, LogLevel.Error },
+            { NativeInterop.LogLevel.Fatal, LogLevel.Error },
+        };
+
         public bool IsPopSupported => true;
 
         /// <summary>
@@ -83,6 +93,11 @@ namespace Microsoft.Identity.Client.Broker
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
+            if (_logger.IsDefaultPlatformLoggingEnabled)
+            {
+                s_lazyCore.Value.LogEvent += LogEventRaised;
+            }
+
             _parentHandle = GetParentWindow(uiParent);
 
             _wamOptions = appConfig.WindowsBrokerOptions ??
@@ -91,6 +106,60 @@ namespace Microsoft.Identity.Client.Broker
             if (_wamOptions.ListWindowsWorkAndSchoolAccounts)
             {
                 throw new NotImplementedException("The new broker implementation does not yet support Windows account discovery (ListWindowsWorkAndSchoolAccounts option)");
+            }
+        }
+
+        private void LogEventRaised(NativeInterop.Core sender, LogEventArgs args)
+        {
+            LogLevel msalLogLevel = _logLevelMap[args.LogLevel];
+            if (_logger.IsLoggingEnabled(msalLogLevel))
+            {
+                if (_logger.PiiLoggingEnabled)
+                {
+                    switch (msalLogLevel)
+                    {
+                        case LogLevel.Always:
+                            _logger.AlwaysPii(args.Message, string.Empty);
+                            break;
+                        case LogLevel.Error:
+                            _logger.ErrorPii(args.Message, string.Empty); // TODO confirm with Sam
+                            break;
+                        case LogLevel.Warning:
+                            _logger.WarningPii(args.Message, string.Empty);
+                            break;
+                        case LogLevel.Info:
+                            _logger.InfoPii(args.Message, string.Empty);
+                            break;
+                        case LogLevel.Verbose:
+                            _logger.VerbosePii(args.Message, string.Empty);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (msalLogLevel)
+                    {
+                        case LogLevel.Always:
+                            _logger.Always(args.Message);
+                            break;
+                        case LogLevel.Error:
+                            _logger.Error(args.Message);
+                            break;
+                        case LogLevel.Warning:
+                            _logger.Warning(args.Message);
+                            break;
+                        case LogLevel.Info:
+                            _logger.Info(args.Message);
+                            break;
+                        case LogLevel.Verbose:
+                            _logger.Verbose(args.Message);
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
         }
 
