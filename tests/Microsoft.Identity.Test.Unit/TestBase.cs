@@ -33,10 +33,12 @@ namespace Microsoft.Identity.Test.Unit
         {
 #if DESKTOP
             Trace.WriteLine("Framework: .NET FX");
+#elif NET6_0
+            Trace.WriteLine("Framework: .NET 6");
 #elif NET_CORE
             Trace.WriteLine("Framework: .NET Core");
-#elif NET5_WIN
-            Trace.WriteLine("Framework: .NET5-Win");
+#elif NET6_WIN
+            Trace.WriteLine("Framework: .NET6-Win");
 #endif
             Trace.WriteLine("Test started " + TestContext.TestName);
             TestCommon.ResetInternalStaticCaches();

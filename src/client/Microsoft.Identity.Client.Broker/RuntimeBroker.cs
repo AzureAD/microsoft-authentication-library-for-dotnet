@@ -257,7 +257,7 @@ namespace Microsoft.Identity.Client.Broker
                 _logger))
             {
                 using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
-                    acquireTokenSilentParameters.Account.HomeAccountId.ObjectId,
+                    authenticationRequestParameters.Account.HomeAccountId.ObjectId,
                     authenticationRequestParameters.CorrelationId.ToString("D"),
                     cancellationToken).ConfigureAwait(false))
                 {
