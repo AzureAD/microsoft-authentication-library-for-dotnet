@@ -3,11 +3,29 @@
 
 namespace Microsoft.Identity.Client.AuthScheme
 {
-    internal enum TokenType
+    /// <summary>
+    /// Specifies the token type to log to telemetry.
+    /// </summary>
+    public enum TokenType
     {
+        /// <summary>
+        /// Bearer token type.
+        /// </summary>
         Bearer = 1,
+
+        /// <summary>
+        /// Pop token type.
+        /// </summary>
         Pop = 2,
+
+        /// <summary>
+        /// Ssh-cert token type.
+        /// </summary>
         SshCert = 3,
+
+        /// <summary>
+        /// External token type.
+        /// </summary>
         External = 4
     }
 }
