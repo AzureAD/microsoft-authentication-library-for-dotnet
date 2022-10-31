@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         private static bool IsRequestSupported(AuthenticationRequestParameters requestParameters)
         {
-            return !requestParameters.IsConfidentialClient;
+            return !requestParameters.AppConfig.IsConfidentialClient;
         }
     }
 }

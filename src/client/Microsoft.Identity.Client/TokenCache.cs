@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client
 
             var accessTokensToDelete = new List<MsalAccessTokenCacheItem>();
             var partitionKeyFromResponse = CacheKeyFactory.GetInternalPartitionKeyFromResponse(requestParams, homeAccountId);
-            Debug.Assert(partitionKeyFromResponse != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partitioned.");
+            Debug.Assert(partitionKeyFromResponse != null || !requestParams.AppConfig.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
             foreach (var accessToken in Accessor.GetAllAccessTokens(partitionKeyFromResponse))
             {

@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             _synchronizationContext = new DedicatedThreadSynchronizationContext();
 
             _coreUIParent = new CoreUIParent() { SynchronizationContext = _synchronizationContext };
-            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
+            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(isConfidentialClient: true);
             _logger = Substitute.For<ILoggerAdapter>();
             _aadPlugin = Substitute.For<IWamPlugin>();
             _msaPlugin = Substitute.For<IWamPlugin>();
