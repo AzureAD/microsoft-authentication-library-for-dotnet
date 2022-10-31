@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.AuthScheme
         /// <summary>
         /// Value to log to telemetry to indicate pop usage.
         /// </summary>
-        int Id { get; }
+        int TelemetryId { get; }
 
         /// <summary>
         /// Prefix for the HTTP header that has the token. E.g. "Bearer" or "POP"

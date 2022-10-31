@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             KeyId = Base64UrlHelpers.Encode(keyThumbprint);
         }
 
-        public int Id => 2;
+        public int TelemetryId => 2;
 
         public string AuthorizationHeaderPrefix => Constants.PoPAuthHeaderPrefix;
 
