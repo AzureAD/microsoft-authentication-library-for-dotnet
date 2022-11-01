@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client
         {
             if (httpResponseHeaders.WwwAuthenticate.Any())
             {
-                AuthenticationHeaderValue headerValue = httpResponseHeaders.WwwAuthenticate.FirstOrDefault(v => string.Equals(v.Scheme, Constants.BearerAuthHeaderPrefix, StringComparison.OrdinalIgnoreCase));
+                AuthenticationHeaderValue headerValue = httpResponseHeaders.WwwAuthenticate.FirstOrDefault(v => string.Equals(v.Scheme, scheme, StringComparison.OrdinalIgnoreCase));
 
                 if (headerValue != null)
                 {
