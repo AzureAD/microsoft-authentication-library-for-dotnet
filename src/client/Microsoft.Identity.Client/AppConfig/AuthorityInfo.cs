@@ -494,7 +494,7 @@ namespace Microsoft.Identity.Client
 
                     case AuthorityType.Aad:
 
-                        bool updateEnvironment = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null && account != PublicClientApplication.OperatingSystemAccount;
+                        bool updateEnvironment = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null && !PublicClientApplication.IsOperatingSystemAccount(account);
 
                         if (requestAuthorityInfo == null)
                         {
