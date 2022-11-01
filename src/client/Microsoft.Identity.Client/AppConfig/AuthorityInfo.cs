@@ -130,13 +130,13 @@ namespace Microsoft.Identity.Client
         public string UserRealmUriPrefix { get; }
         public bool ValidateAuthority { get; }
 
-        internal bool IsInstanceDiscoverySupported => (AuthorityType == AuthorityType.Aad);
+        internal bool IsInstanceDiscoverySupported => AuthorityType == AuthorityType.Aad;
 
-        internal bool IsUserAssertionSupported => (AuthorityType != AuthorityType.Adfs && AuthorityType != AuthorityType.B2C);
+        internal bool IsUserAssertionSupported => AuthorityType != AuthorityType.Adfs && AuthorityType != AuthorityType.B2C;
 
-        internal bool IsTenantOverrideSupported => (AuthorityType == AuthorityType.Aad);
-        internal bool IsMultiTenantSupported => (AuthorityType != AuthorityType.Adfs);
-        internal bool IsClientInfoSupported => (AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Dsts || AuthorityType == AuthorityType.B2C);
+        internal bool IsTenantOverrideSupported => AuthorityType == AuthorityType.Aad;
+        internal bool IsMultiTenantSupported => AuthorityType != AuthorityType.Adfs;
+        internal bool IsClientInfoSupported => AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Dsts || AuthorityType == AuthorityType.B2C;
 
         #region Builders
         internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Client
 
             return new AuthorityInfo(authorityType, canonicalUri, validateAuthority);
         }
-        
+
         internal static AuthorityInfo FromAadAuthority(Uri cloudInstanceUri, Guid tenantId, bool validateAuthority)
         {
 #pragma warning disable CA1305 // Specify IFormatProvider
@@ -272,7 +272,7 @@ namespace Microsoft.Identity.Client
         {
             if (!string.IsNullOrWhiteSpace(uri) && !uri.EndsWith("/", StringComparison.OrdinalIgnoreCase))
             {
-                uri = uri + "/";
+                uri += "/";
             }
 
             return uri?.ToLowerInvariant() ?? string.Empty;
@@ -390,7 +390,7 @@ namespace Microsoft.Identity.Client
             throw new InvalidOperationException(MsalErrorMessage.DstsAuthorityDoesNotHaveThreeSegments);
         }
 
-        private static AuthorityType GetAuthorityType(string authority) 
+        private static AuthorityType GetAuthorityType(string authority)
         {
             string firstPathSegment = GetFirstPathSegment(authority);
 
@@ -411,7 +411,7 @@ namespace Microsoft.Identity.Client
 
             return AuthorityType.Aad;
         }
-        
+
         private static string[] GetPathSegments(string absolutePath)
         {
             string[] pathSegments = absolutePath.Substring(1).Split(
@@ -494,7 +494,7 @@ namespace Microsoft.Identity.Client
 
                     case AuthorityType.Aad:
 
-                        bool updateEnvironment = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null;
+                        bool updateEnvironment = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null && account != PublicClientApplication.OperatingSystemAccount;
 
                         if (requestAuthorityInfo == null)
                         {
