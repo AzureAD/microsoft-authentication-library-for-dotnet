@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Parameters returned by the Authentication-Info header. 
-        /// This allows for authentication scenarios such as Proof-Of-Posession.
+        /// This allows for authentication scenarios such as Proof-Of-Possession.
         /// </summary>
         public AuthenticationInfoParameters AuthenticationInfoParameters { get; private set; }
 
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
         /// Creates the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
         /// </summary>
         /// <param name="resourceUri">URI of the resource.</param>
-        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
         /// <returns></returns>
         public static async Task<AuthenticationHeaderParser> ParseAuthenticationHeadersAsync(string resourceUri, CancellationToken cancellationToken)
         {
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client
 
                 if (wwwParameters.Any(parameter => parameter.AuthScheme == "PoP"))
                 {
-                    serverNonce = wwwParameters.Where(parameter => parameter.AuthScheme == "PoP").Single().Nonce;
+                    serverNonce = wwwParameters.Single(parameter => parameter.AuthScheme == "PoP").Nonce;
                 }
 
                 authenticationHeaderParser.WwwAuthenticateParameters = wwwParameters;

@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client
             {
                 if (httpResponseHeaders.Contains(AuthenticationInfoKey))
                 {
-                    var authInfoValue = httpResponseHeaders.Where(header => header.Key == AuthenticationInfoKey).Single().Value.FirstOrDefault();
+                    var authInfoValue = httpResponseHeaders.Single(header => header.Key == AuthenticationInfoKey).Value.FirstOrDefault();
 
                     if (authInfoValue != null)
                     {

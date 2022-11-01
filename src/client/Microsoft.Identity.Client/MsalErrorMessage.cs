@@ -432,7 +432,8 @@ namespace Microsoft.Identity.Client
 
         public const string RequestFailureErrorMessagePii = "=== Token Acquisition ({0}) failed:\n\tAuthority: {1}\n\tClientId: {2}.";
 
-        public const string UnableToParseAuthenticationHeader = "Msal is unable to parse the authentication reader returned from the endpoint";
+        public const string UnableToParseAuthenticationHeader = "MSAL is unable to parse the authentication header returned from the resource endpoint.";
+
 
         public static string InvalidTokenProviderResponseValue(string invalidValueName)
         {
