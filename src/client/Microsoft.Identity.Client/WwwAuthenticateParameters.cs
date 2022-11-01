@@ -364,13 +364,8 @@ namespace Microsoft.Identity.Client
                     var parameters = CreateFromWwwAuthenticationHeaderValue(wwwAuthenticateHeaderValue.Parameter, wwwAuthenticateHeaderValue.Scheme);
                     parameterList.Add(parameters);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is not MsalException)
                 {
-                    if (ex is MsalException)
-                    {
-                        throw;
-                    }
-
                     throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader, ex);
                 }
             }
