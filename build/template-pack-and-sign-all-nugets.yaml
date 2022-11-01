@@ -4,7 +4,7 @@
 parameters:
   BuildConfiguration: 'release'
   MsalSourceDir: '' #Used to determine default MSAL location
-  NugetPackagesWildcard: '$(Build.ArtifactStagingDirectory)\packages\*.nupkg'
+  NugetPackagesWildcard: '$(Build.ArtifactStagingDirectory)\packages\*.*nupkg'
   ArtifactPublishPath: '$(Build.ArtifactStagingDirectory)\packages'
 
 steps:
