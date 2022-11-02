@@ -1,3 +1,26 @@
+4.48.0
+==========
+
+### New Features
+- Removed support for deprecated `net5.0-windows10.0.17763.0` target. See [3770](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3770) and note below.  
+- Added support for `net6.0` and `net6.0-windows10.0.17763.0` targets. See [3682](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3682) and note below.  
+- Removed support for old `xamarinmac20` target. See [3722](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3722).  
+- `WithProofOfPossession` for public client applications is now generally available. See [3767](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3767).  
+- Added telemetry to log Proof-of-Possession usage. See [3718](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3718).  
+- Exposed tenant profiles for all authorities which are tenanted (B2C and dSTS). See [3703](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3703).  
+- Now logging MSAL version to common telemetry client. See [3745](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3745).  
+- Updated guidance on retry policies. See [Retry Policy wiki](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Retry-Policy) and [3561](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3561).  
+
+### Bug Fixes
+- Fixed a `NullReferenceException` related to authority URLs when calling `AcquireTokenSilent` with an Operating System account in apps using WAM. See [3769](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3769).  
+- Fixed a `NullReferenceException` when using preview broker and calling `AcquireTokenSilent` with MSA account and MSA-PT enabled. See [3743](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3743).  
+- Added an `Exported` attribute to Android activities to be compliant with Android OS 12.1 (API 32) and above requirements. See [3680](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3680).  
+- Fixed incorrect home account details in `AuthenticationResult` of `AcquireTokenByRefreshToken`. See [3736](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3736).  
+
+### .NET 5 and .NET 6 public client applications
+If you have a Windows application which targets `net5.0`, `net5.0-windows`, `net5.0-windowsX`, `net6.0`, or `net6.0-windows` and would like to use either WAM or embedded browser, you must change the app target to at least `net6.0-windows10.0.17763.0`.  System browser works on all of the above targets.  
+The recommendation is to use new Windows broker preview, as it offers better experience than current WAM implementation and will be generally available in the near future. If you want to try the new broker preview, install the NuGet package Microsoft.Identity.Client.Broker and call the `.WithBrokerPreview()` method. For details, see https://aka.ms/msal-net-wam.
+
 
 4.47.2
 ==========
