@@ -4,7 +4,8 @@
 parameters:
   BuildConfiguration: 'release'
   MsalSourceDir: '' #Used to determine default MSAL location
-  NugetPackagesWildcard: '$(Build.ArtifactStagingDirectory)\packages\*.*nupkg'
+  NugetPackagesWildcard: '$(Build.ArtifactStagingDirectory)\packages\*.nupkg'
+  SnugetPackagesWildcard: '$(Build.ArtifactStagingDirectory)\packages\*.snupkg'
   ArtifactPublishPath: '$(Build.ArtifactStagingDirectory)\packages'
 
 steps:
@@ -69,11 +70,17 @@ steps:
   timeoutInMinutes: 5
 
 - task: CmdLine@2
-  displayName: 'Verify packages are signed'
+  displayName: 'Verify nuget packages are signed'
   inputs:
     script: 'dotnet nuget verify ${{ parameters.NugetPackagesWildcard }}'
   continueOnError: true
 
+- task: CmdLine@2
+  displayName: 'Verify snuget packages are signed'
+  inputs:
+    script: 'dotnet nuget verify ${{ parameters.SnugetPackagesWildcard }}'
+  continueOnError: true
+  
 - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
   displayName: 'Get Software Bill Of Materials (SBOM)'
   inputs:
