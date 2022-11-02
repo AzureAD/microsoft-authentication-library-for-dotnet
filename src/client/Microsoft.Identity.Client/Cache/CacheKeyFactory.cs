@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Cache
                 return key;
             }
 
-            if (requestParameters.IsConfidentialClient ||
+            if (requestParameters.AppConfig.IsConfidentialClient ||
                 requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenSilent)
             {
                 return homeAccountIdFromResponse;

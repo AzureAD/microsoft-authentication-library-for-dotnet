@@ -181,13 +181,6 @@ namespace NetDesktopWinForms
 
             if (!string.IsNullOrEmpty(loginHint))
             {
-                if (IsMsaPassthroughConfigured())
-                {
-                    // TODO: bogavril - move this exception in WAM
-                    throw new InvalidOperationException(
-                        "[TEST APP FAILURE] Do not use login hint on AcquireTokenSilent for MSA-Passthrough. Use the IAccount overload.");
-                }
-
                 Log($"ATS with login hint: " + loginHint);
                 return await pca.AcquireTokenSilent(GetScopes(), loginHint)
                         .ExecuteAsync(cancellationToken)

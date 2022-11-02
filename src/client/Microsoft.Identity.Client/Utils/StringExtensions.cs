@@ -18,6 +18,16 @@ namespace Microsoft.Identity.Client.Utils
             return new UTF8Encoding().GetBytes(stringInput);
         }
 
+        public static string NullIfEmpty(this string s)
+        {
+            return string.IsNullOrEmpty(s) ? null : s;
+        }
+        public static string NullIfWhiteSpace(this string s)
+        {
+            return string.IsNullOrWhiteSpace(s) ? null : s;
+        }
+       
+
         /// <summary>
         /// Culture aware String.Replace
         /// </summary>

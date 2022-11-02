@@ -65,10 +65,11 @@ namespace Microsoft.Identity.Test.Common
             bool clearCaches = true,
             bool validateAuthority = true,
             bool isLegacyCacheEnabled = true,
-            bool isMultiCloudSupportEnabled = false)
+            bool isMultiCloudSupportEnabled = false, 
+            bool isConfidentialClient = false)
         {
 
-            var appConfig = new ApplicationConfiguration()
+            var appConfig = new ApplicationConfiguration(isConfidentialClient)
             {
                 ClientId = clientId,
                 HttpManager = httpManager,
