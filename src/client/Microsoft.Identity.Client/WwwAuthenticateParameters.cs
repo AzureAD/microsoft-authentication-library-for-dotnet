@@ -385,11 +385,6 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(wwwAuthenticateValue));
             }
 
-            if (string.IsNullOrWhiteSpace(scheme))
-            {
-                throw new ArgumentNullException(nameof(scheme));
-            }
-
             //Special NTLM case does not have an a=b format
             if (scheme == "NTLM")
             {
