@@ -15,10 +15,13 @@ using Microsoft.Identity.Client.Utils;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Parsed authentication headers to retreve header values from HttpResponseHeaders.
+    /// Parsed authentication headers to retrieve header values from HttpResponseHeaders.
     /// </summary>
     public class AuthenticationHeaderParser
     {
+        private static readonly Lazy<IMsalHttpClientFactory> _httpClientFactory = new Lazy<IMsalHttpClientFactory>(
+                                                                          () => PlatformProxyFactory.CreatePlatformProxy(null).CreateDefaultHttpClientFactory());
+
         /// <summary>
         /// Parameters returned by the WWW-Authenticate header. This allows for dynamic
         /// scenarios such as claim challenge, CAE, CA auth context.
@@ -33,7 +36,7 @@ namespace Microsoft.Identity.Client
         public AuthenticationInfoParameters AuthenticationInfoParameters { get; private set; }
 
         /// <summary>
-        /// Nonce parsed from HttpResponseHeaders
+        /// Nonce parsed from HttpResponseHeaders. This is acquired from with the POP WWW-Authenticate header or the Authetnciation-Info header
         /// </summary>
         public string Nonce { get; private set; }
 
@@ -101,10 +104,7 @@ namespace Microsoft.Identity.Client
             {
                 var wwwParameters = Client.WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponseHeaders);
 
-                if (wwwParameters.Any(parameter => parameter.AuthScheme == "PoP"))
-                {
-                    serverNonce = wwwParameters.Single(parameter => parameter.AuthScheme == "PoP").Nonce;
-                }
+                serverNonce = wwwParameters.SingleOrDefault(parameter => parameter.AuthScheme == "PoP")?.Nonce;
 
                 authenticationHeaderParser.WwwAuthenticateParameters = wwwParameters;
             }
@@ -128,8 +128,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal static HttpClient GetHttpClient()
         {
-            var httpClientFactory = PlatformProxyFactory.CreatePlatformProxy(null).CreateDefaultHttpClientFactory();
-            return httpClientFactory.GetHttpClient();
+            return _httpClientFactory.Value.GetHttpClient();
         }
 
         /// <summary>

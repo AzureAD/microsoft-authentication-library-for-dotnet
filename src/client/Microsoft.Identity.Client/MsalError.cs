@@ -1098,7 +1098,7 @@ namespace Microsoft.Identity.Client
         public const string InvalidTokenProviderResponseValue = "invalid_token_provider_response_value";
 
         /// <summary>
-        /// Unable to parse the authentication header returned from the resource endpoint
+        /// Msal is unable to parse the authentication header returned from the endpoint. This can be a result of a malformed header returned in either the WWW-Authenticate or the Authentication-Info collections.
         /// </summary>
         public const string UnableToParseAuthenticationHeader = "unable_to_parse_authentication_header";
     }

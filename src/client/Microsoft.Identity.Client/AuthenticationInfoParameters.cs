@@ -60,38 +60,32 @@ namespace Microsoft.Identity.Client
             {
                 if (httpResponseHeaders.Contains(AuthenticationInfoKey))
                 {
-                    var authInfoValue = httpResponseHeaders.Single(header => header.Key == AuthenticationInfoKey).Value.FirstOrDefault();
+                    var authInfoValue = httpResponseHeaders.Where(header => header.Key == AuthenticationInfoKey).Single().Value.FirstOrDefault();
 
-                    if (authInfoValue != null)
+
+                    var AuthValuesSplit = authInfoValue.Split(new char[] { ' ' }, 2);
+
+                    var paramValues = CoreHelpers.SplitWithQuotes(AuthValuesSplit[1], ',')
+                            .Select(v => AuthenticationHeaderParser.ExtractKeyValuePair(v.Trim()))
+                            .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+
+                    parameters.RawParameters = paramValues;
+
+                    if (paramValues.TryGetValue("nextnonce", out string value))
                     {
-                        var AuthValuesSplit = authInfoValue.Split(new char[] { ' ' }, 2);
-
-                        var paramValues = CoreHelpers.SplitWithQuotes(AuthValuesSplit[1], ',')
-                                .Select(v => AuthenticationHeaderParser.ExtractKeyValuePair(v.Trim()))
-                                .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
-
-                        parameters.RawParameters = paramValues;
-
-                        if (paramValues.TryGetValue("nextnonce", out string value))
-                        {
-                            parameters.NextNonce = value;
-                        }
-
-                        return parameters;
+                        parameters.NextNonce = value;
                     }
+
+                    return parameters;
 
                     //Could not get Auth info parameters
                     throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader);
                 }
 
-                return parameters;
+                return null;
             }
-            catch(Exception ex)
+            catch (Exception ex) when (ex is not MsalClientException)
             {
-                if (ex is MsalClientException)
-                {
-                    throw;
-                }
                 throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader, ex);
             }
         }

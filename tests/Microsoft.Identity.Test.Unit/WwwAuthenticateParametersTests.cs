@@ -457,7 +457,7 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public void ExtractAllAuthinfoParametersFromResponseWithAuthParser(bool combineHeaders)
+        public void ExtractAllAuthinfoParametersFromResponseWithAuthParser()
         {
             // Arrange
             HttpResponseMessage httpResponse = CreateAuthInfoHttpResponse();
