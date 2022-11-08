@@ -48,7 +48,8 @@ namespace Microsoft.Identity.Client
             // Confidential client must have a credential
             if (ServiceBundle?.Config.ClientCredential == null &&
                 CommonParameters.OnBeforeTokenRequestHandler == null &&
-                ServiceBundle?.Config.AppTokenProvider == null
+                ServiceBundle?.Config.AppTokenProvider == null &&
+                ServiceBundle?.Config.IsManagedIdentity is false
                 ) 
             {
                 throw new MsalClientException(

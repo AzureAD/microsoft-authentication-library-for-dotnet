@@ -70,6 +70,19 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Specifies to use the Managed Identity to fetch the token.
+        /// </summary>
+        /// <returns>The builder to chain the .With methods</returns>
+        public AcquireTokenForClientParameterBuilder WithManagedIdentity()
+        {
+            ValidateUseOfExperimentalFeature("ManagedIdentity");
+
+            ServiceBundle.Config.IsManagedIdentity = true;
+
+            return this;
+        }
+
+        /// <summary>
         /// Please use WithAzureRegion on the ConfidentialClientApplicationBuilder object
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
