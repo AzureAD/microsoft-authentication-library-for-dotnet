@@ -36,6 +36,9 @@ namespace Microsoft.Identity.Client.Cache.Items
     [DebuggerDisplay("{PreferredUsername} {base.Environment}")]
     internal class MsalAccountCacheItem : MsalCacheItemBase
     {
+        internal MsalAccountCacheKey Key { get; }
+        internal string KeyAsString { get; }
+
         internal MsalAccountCacheItem()
         {
             AuthorityType = CacheAuthorityType.MSSTS.ToString();
@@ -62,6 +65,9 @@ namespace Microsoft.Identity.Client.Cache.Items
                 idToken?.GivenName,
                 idToken?.FamilyName,
                 wamAccountIds);
+
+            Key = new MsalAccountCacheKey(Environment, TenantId, HomeAccountId, PreferredUsername);
+            KeyAsString = Key.ToString();
         }
 
         internal /* for test */ MsalAccountCacheItem(
@@ -133,6 +139,11 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal MsalAccountCacheKey GetKey()
         {
             return new MsalAccountCacheKey(Environment, TenantId, HomeAccountId, PreferredUsername);
+        }
+
+        internal string GetKeyAsString()
+        {
+            return KeyAsString;
         }
 
         internal static MsalAccountCacheItem FromJsonString(string json)

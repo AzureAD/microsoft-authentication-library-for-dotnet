@@ -4,7 +4,7 @@
 using System;
 
 namespace Microsoft.Identity.Client.Cache.Keys
-{
+{//REMOVE
     /// <summary>
     /// An object representing the key of the token cache Id Token dictionary. The
     /// format of the key is not important for this library, as long as it is unique.
@@ -15,6 +15,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
         private readonly string _homeAccountId;
         private readonly string _clientId;
         private readonly string _tenantId;
+        private string KeyAsString;
 
         internal string HomeAccountId => _homeAccountId;
 
@@ -39,17 +40,19 @@ namespace Microsoft.Identity.Client.Cache.Keys
             _homeAccountId = userIdentifier;
             _clientId = clientId;
             _tenantId = tenantId;
-        }
 
-        public override string ToString()
-        {
-            return MsalCacheKeys.GetCredentialKey(
+            KeyAsString = MsalCacheKeys.GetCredentialKey(
                 _homeAccountId,
                 _environment,
                 StorageJsonValues.CredentialTypeIdToken,
                 _clientId,
                 _tenantId,
                 scopes: null);
+        }
+
+        public override string ToString()
+        {
+            return KeyAsString;
         }
 
         #region iOS

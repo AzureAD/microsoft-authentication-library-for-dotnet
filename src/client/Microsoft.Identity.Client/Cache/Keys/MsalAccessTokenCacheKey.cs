@@ -5,7 +5,7 @@ using System;
 using Microsoft.Identity.Client.AuthScheme;
 
 namespace Microsoft.Identity.Client.Cache.Keys
-{
+{//REMOVE
     /// <summary>
     ///     An object representing the key of the token cache AT dictionary. The
     ///     format of the key is not important for this library, as long as it is unique.
@@ -23,6 +23,9 @@ namespace Microsoft.Identity.Client.Cache.Keys
 
         // Note: when using multiple parts, ordering is important
         private readonly string[] _extraKeyParts;
+        private string KeyAsString;
+        private string KeyAsLogStringWithPii;
+        private string KeyAsStringWithoutPii;
 
         internal string TenantId => _tenantId;
         internal string ClientId => _clientId;
@@ -64,11 +67,8 @@ namespace Microsoft.Identity.Client.Cache.Keys
                 _extraKeyParts = new[] { _tokenType };
                 _credentialDescriptor = StorageJsonValues.CredentialTypeAccessTokenWithAuthScheme;
             }
-        }
 
-        public override string ToString()
-        {
-            return MsalCacheKeys.GetCredentialKey(
+            KeyAsString = MsalCacheKeys.GetCredentialKey(
                 _homeAccountId,
                 _environment,
                 _credentialDescriptor,
@@ -76,18 +76,34 @@ namespace Microsoft.Identity.Client.Cache.Keys
                 _tenantId,
                 _normalizedScopes,
                 _extraKeyParts);
-        }
 
-        public string ToLogString(bool piiEnabled = false)
-        {
-            return MsalCacheKeys.GetCredentialKey(
-                piiEnabled? _homeAccountId : _homeAccountId?.GetHashCode().ToString(),
+            KeyAsLogStringWithPii = MsalCacheKeys.GetCredentialKey(
+                true ? _homeAccountId : _homeAccountId?.GetHashCode().ToString(),
                 _environment,
                 _credentialDescriptor,
                 _clientId,
                 _tenantId,
                 _normalizedScopes,
                 _extraKeyParts);
+
+            KeyAsStringWithoutPii = MsalCacheKeys.GetCredentialKey(
+                false ? _homeAccountId : _homeAccountId?.GetHashCode().ToString(),
+                _environment,
+                _credentialDescriptor,
+                _clientId,
+                _tenantId,
+                _normalizedScopes,
+                _extraKeyParts);
+        }
+
+        public override string ToString()
+        {
+            return KeyAsString;
+        }
+
+        public string ToLogString(bool piiEnabled = false)
+        {
+            return piiEnabled ? KeyAsLogStringWithPii : KeyAsStringWithoutPii;
         }
 
         #region iOS

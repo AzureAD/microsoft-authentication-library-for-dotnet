@@ -17,6 +17,9 @@ namespace Microsoft.Identity.Client.Cache.Items
 {
     internal class MsalAccessTokenCacheItem : MsalCredentialCacheItemBase
     {
+        private MsalAccessTokenCacheKey Key { get; }
+        private string KeyAsString { get; }
+
         internal MsalAccessTokenCacheItem(
             string preferredCacheEnv,
             string clientId,
@@ -41,6 +44,16 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = response.ClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
+
+            Key = new MsalAccessTokenCacheKey(
+                Environment,
+                TenantId,
+                HomeAccountId,
+                ClientId,
+                ScopeString,
+                TokenType);
+
+            KeyAsString = Key.ToString();
         }
 
         internal /* for test */ MsalAccessTokenCacheItem(
@@ -66,6 +79,16 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = rawClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
+
+            Key = new MsalAccessTokenCacheKey(
+                Environment,
+                TenantId,
+                HomeAccountId,
+                ClientId,
+                ScopeString,
+                TokenType);
+
+            KeyAsString = Key.ToString();
         }
 
         private MsalAccessTokenCacheItem(
@@ -236,6 +259,11 @@ namespace Microsoft.Identity.Client.Cache.Items
                 ClientId,
                 ScopeString,
                 TokenType);
+        }
+
+        internal string GetKeyAsString()
+        {
+            return KeyAsString;
         }
 
         internal MsalIdTokenCacheKey GetIdTokenItemKey()

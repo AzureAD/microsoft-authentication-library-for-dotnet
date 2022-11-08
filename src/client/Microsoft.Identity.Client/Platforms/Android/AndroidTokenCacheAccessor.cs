@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
             ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
-            editor.PutString(item.GetKey().ToString(), item.ToJsonString());
+            editor.PutString(item.GetKeyAsString(), item.ToJsonString());
             editor.Apply();
         }
 
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         public void SaveAccount(MsalAccountCacheItem item)
         {
             ISharedPreferencesEditor editor = _accountSharedPreference.Edit();
-            editor.PutString(item.GetKey().ToString(), item.ToJsonString());
+            editor.PutString(item.GetKeyAsString(), item.ToJsonString());
             editor.Apply();
         }
         #endregion
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         #region DeleteItem
         public void DeleteAccessToken(MsalAccessTokenCacheItem item)
         {
-            Delete(item.GetKey().ToString(), _accessTokenSharedPreference.Edit());
+            Delete(item.GetKeyAsString(), _accessTokenSharedPreference.Edit());
         }
 
         public void DeleteRefreshToken(MsalRefreshTokenCacheItem item)
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         public void DeleteAccount(MsalAccountCacheItem item)
         {
-            Delete(item.GetKey().ToString(), _accountSharedPreference.Edit());
+            Delete(item.GetKeyAsString(), _accountSharedPreference.Edit());
 
         }
 
