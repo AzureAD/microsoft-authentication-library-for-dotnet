@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 
 namespace Microsoft.Identity.Client.Cache.Keys
-{//REMOVE
+{
     internal partial class MsalCacheKeys
     {
         public const string CacheKeyDelimiter = "-";

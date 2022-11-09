@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #region Add
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            string itemKey = item.GetKeyAsString();
+            string itemKey = item.GetKey().ToString();
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
             AccessTokenCacheDictionary
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public void SaveAccount(MsalAccountCacheItem item)
         {
-            string itemKey = item.GetKeyAsString();
+            string itemKey = item.GetKey().ToString();
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
             AccountCacheDictionary
@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
 
             _logger.WarningPii(
-                $"[Internal cache] Could not find an id token for the access token with key {accessTokenCacheItem.GetKeyAsString()}",
+                $"[Internal cache] Could not find an id token for the access token with key {accessTokenCacheItem.GetKey()}",
                 $"[Internal cache] Could not find an id token for the access token for realm {accessTokenCacheItem.TenantId} ");
             return null;
         }
@@ -152,10 +152,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
             AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
-            if (partition == null || !partition.TryRemove(item.GetKeyAsString(), out _))
+            if (partition == null || !partition.TryRemove(item.GetKey().ToString(), out _))
             {
                 _logger.InfoPii(
-                    $"[Internal cache] Cannot delete access token because it was not found in the cache. Key {item.GetKeyAsString()}.",
+                    $"[Internal cache] Cannot delete access token because it was not found in the cache. Key {item.GetKey()}.",
                     "[Internal cache] Cannot delete access token because it was not found in the cache.");
             }
         }
@@ -191,10 +191,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
             AccountCacheDictionary.TryGetValue(partitionKey, out var partition);
-            if (partition == null || !partition.TryRemove(item.GetKeyAsString(), out _))
+            if (partition == null || !partition.TryRemove(item.GetKey().ToString(), out _))
             {
                 _logger.InfoPii(
-                    $"[Internal cache] Cannot delete account because it was not found in the cache. Key {item.GetKeyAsString()}.",
+                    $"[Internal cache] Cannot delete account because it was not found in the cache. Key {item.GetKey()}.",
                     "[Internal cache] Cannot delete account because it was not found in the cache");
             }
         }

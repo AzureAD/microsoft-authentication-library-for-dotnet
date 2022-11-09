@@ -5,7 +5,7 @@ using System;
 using System.Text;
 
 namespace Microsoft.Identity.Client.Cache.Keys
-{//REMOVE
+{
     /// <summary>
     /// An object representing the key of the token cache Account dictionary. The
     /// format of the key is not important for this library, as long as it is unique.
@@ -16,8 +16,6 @@ namespace Microsoft.Identity.Client.Cache.Keys
         private readonly string _homeAccountId;
         private readonly string _tenantId;
         private readonly string _username;
-
-        private string KeyAsString;
 
         internal string HomeAccountId => _homeAccountId;
 
@@ -32,19 +30,17 @@ namespace Microsoft.Identity.Client.Cache.Keys
             _environment = environment;
             _homeAccountId = userIdentifier;
             _username = username;
+        }
 
+        public override string ToString()
+        {
             var stringBuilder = new StringBuilder();
 
             stringBuilder.Append(_homeAccountId + MsalCacheKeys.CacheKeyDelimiter);
             stringBuilder.Append(_environment + MsalCacheKeys.CacheKeyDelimiter);
             stringBuilder.Append(_tenantId);
 
-            KeyAsString = stringBuilder.ToString();
-        }
-
-        public override string ToString()
-        {
-            return KeyAsString;
+            return stringBuilder.ToString();
         }
 
         #region iOS

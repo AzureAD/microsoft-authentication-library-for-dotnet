@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #region Add
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            string itemKey = item.GetKeyAsString();
+            string itemKey = item.GetKey().ToString();
             string partitionKey = CacheKeyFactory.GetClientCredentialKey(item.ClientId, item.TenantId, item.KeyId);
 
             // if a conflict occurs, pick the latest value
@@ -131,10 +131,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             var partitionKey = CacheKeyFactory.GetClientCredentialKey(item.ClientId, item.TenantId, item.KeyId);
 
             AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
-            if (partition == null || !partition.TryRemove(item.GetKeyAsString(), out _))
+            if (partition == null || !partition.TryRemove(item.GetKey().ToString(), out _))
             {
                 _logger.InfoPii(
-                    $"[Internal cache] Cannot delete access token because it was not found in the cache. Key {item.GetKeyAsString()}.",
+                    $"[Internal cache] Cannot delete access token because it was not found in the cache. Key {item.GetKey()}.",
                     "[Internal cache] Cannot delete access token because it was not found in the cache.");
             }
         }

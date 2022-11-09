@@ -4,7 +4,7 @@
 using System;
 
 namespace Microsoft.Identity.Client.Cache.Keys
-{//REMOVE
+{
     /// <summary>
     /// An object representing the key of the token cache RT dictionary. The
     /// format of the key is not important for this library, as long as it is unique.
@@ -19,7 +19,6 @@ namespace Microsoft.Identity.Client.Cache.Keys
         private readonly string _homeAccountId;
         private readonly string _clientId;
         private readonly string _familyId;
-        private string keyAsString;
 
         internal string HomeAccountId => _homeAccountId;
 
@@ -46,16 +45,9 @@ namespace Microsoft.Identity.Client.Cache.Keys
             _homeAccountId = userIdentifier;
             _clientId = clientId;
             _familyId = familyId;
-
-            keyAsString = GetKeyAsString();
         }
 
         public override string ToString()
-        {
-            return keyAsString;
-        }
-
-        private string GetKeyAsString()
         {
             // FRT
             if (!string.IsNullOrWhiteSpace(_familyId))

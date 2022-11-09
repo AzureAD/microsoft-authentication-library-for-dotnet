@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                     if (elem != null)
                     {
                         var item = MsalAccessTokenCacheItem.FromJObject(elem);
-                        contract.AccessTokens[item.GetKeyAsString()] = item;
+                        contract.AccessTokens[item.GetKey().ToString()] = item;
                     }
                 }
             }
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                     if (elem != null)
                     {
                         var item = MsalAccountCacheItem.FromJObject(elem);
-                        contract.Accounts[item.GetKeyAsString()] = item;
+                        contract.Accounts[item.GetKey().ToString()] = item;
                     }
                 }
             }

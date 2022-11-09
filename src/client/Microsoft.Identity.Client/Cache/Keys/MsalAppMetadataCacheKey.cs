@@ -4,7 +4,7 @@
 using System;
 
 namespace Microsoft.Identity.Client.Cache.Keys
-{//REMOVE
+{
     /// <summary>
     /// App metadata is an optional entity in cache and can be used by apps to store additional metadata applicable to a particular client.
     /// </summary>
@@ -12,15 +12,11 @@ namespace Microsoft.Identity.Client.Cache.Keys
     {
         private readonly string _clientId;
         private readonly string _environment;
-        private string KeyAsString;
 
         public MsalAppMetadataCacheKey(string clientId, string environment)
         {
             _clientId = clientId ?? throw new ArgumentNullException(nameof(clientId));
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
-
-            KeyAsString = ($"{StorageJsonKeys.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}" +
-                $"{_environment}{MsalCacheKeys.CacheKeyDelimiter}{_clientId}").ToLowerInvariant();
         }
 
         /// <summary>
@@ -29,7 +25,8 @@ namespace Microsoft.Identity.Client.Cache.Keys
         /// <returns></returns>
         public override string ToString()
         {
-            return KeyAsString;
+            return ($"{StorageJsonKeys.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}" +
+                $"{_environment}{MsalCacheKeys.CacheKeyDelimiter}{_clientId}").ToLowerInvariant();
         }
 
         #region iOS
