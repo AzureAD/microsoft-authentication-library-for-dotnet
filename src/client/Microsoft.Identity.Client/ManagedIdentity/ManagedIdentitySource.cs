@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
             catch (Exception e)
             {
-                message = AuthenticationResponseInvalidFormatError + "messagebody: " + response.Body;
+                message = AuthenticationResponseInvalidFormatError;
                 exception = e;
             }
 

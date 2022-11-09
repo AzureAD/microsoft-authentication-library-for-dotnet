@@ -21,6 +21,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         [JsonProperty("expires_on")]
         public string ExpiresOn { get; set; }
 
+        [JsonProperty("resource")]
+        public string Resource { get; set; }
+
+        [JsonProperty("token_type")]
+        public string TokenType { get; set; }
+
+        [JsonProperty("client_id")]
+        public string ClientId { get; set; }
+
         [JsonProperty("message")]
         public string Message { get; set; }
     }
