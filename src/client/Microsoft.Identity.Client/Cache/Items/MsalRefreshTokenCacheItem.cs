@@ -50,9 +50,12 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = rawClientInfo;
             FamilyId = familyId;
             HomeAccountId = homeAccountId;
+
+            InitCacheKey();
         }
 
-        private void InitCacheKey()
+        //Internal for test
+        internal void InitCacheKey()
         {
             string key;
             // FRT
@@ -154,6 +157,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             item.OboCacheKey = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash);
 
             item.PopulateFieldsFromJObject(j);
+            item.InitCacheKey();
 
             return item;
         }

@@ -79,9 +79,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private MsalRefreshTokenCacheItem CreateRefreshTokenItem(bool isFrt = false)
         {
+            MsalRefreshTokenCacheItem item;
             if (isFrt)
             {
-                return new MsalRefreshTokenCacheItem
+                item = new MsalRefreshTokenCacheItem
                 {
                     ClientId = TestConstants.ClientId,
                     Environment = "env",
@@ -89,9 +90,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     Secret = "access_token_secret",
                     RawClientInfo = string.Empty
                 };
+
+                item.InitCacheKey();
+
+                return item;
             }
 
-            return new MsalRefreshTokenCacheItem
+            item = new MsalRefreshTokenCacheItem
             {
                 ClientId = TestConstants.ClientId,
                 Environment = "env",
@@ -100,11 +105,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 RawClientInfo = string.Empty,
                 OboCacheKey = "assertion_hash"
             };
+
+            item.InitCacheKey();
+
+            return item;
         }
 
         private MsalIdTokenCacheItem CreateIdTokenItem()
         {
-            return new MsalIdTokenCacheItem
+            var item = new MsalIdTokenCacheItem
             {
                 ClientId = TestConstants.ClientId,
                 Environment = "env",
@@ -113,11 +122,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TenantId = "the_tenant_id",
                 RawClientInfo = string.Empty,
             };
+
+            item.InitCacheKey();
+
+            return item;
         }
 
         private MsalAccountCacheItem CreateAccountItem()
         {
-            return new MsalAccountCacheItem
+            var item = new MsalAccountCacheItem
             {
                 Environment = "env",
                 HomeAccountId = TestConstants.HomeAccountId,
@@ -130,6 +143,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 FamilyName = TestConstants.FamilyName,
                 PreferredUsername = TestConstants.Username
             };
+
+            item.InitCacheKey();
+
+            return item;
         }
 
         private ITokenCacheAccessor CreateTokenCacheAccessor()

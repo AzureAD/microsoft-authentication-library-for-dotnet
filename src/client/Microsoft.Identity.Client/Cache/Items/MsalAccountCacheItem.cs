@@ -90,8 +90,6 @@ namespace Microsoft.Identity.Client.Cache.Items
                 givenName,
                 familyName,
                 wamAccountIds);
-
-            InitCacheKey(environment, tenantId, homeAccountId, preferredUsername);
         }
 
         internal string TenantId { get; set; }
@@ -138,10 +136,11 @@ namespace Microsoft.Identity.Client.Cache.Items
             HomeAccountId = homeAccountId;
             WamAccountIds = wamAccountIds;
 
-            InitCacheKey(environment, tenantId, homeAccountId, preferredUsername);
+            InitCacheKey();
         }
 
-        private void InitCacheKey()
+        //internal for test
+        internal void InitCacheKey()
         {
             var cacheKeyItems = InitCacheKey(Environment, TenantId, HomeAccountId, PreferredUsername);
             CacheKey = cacheKeyItems.CacheKey;
@@ -173,7 +172,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             string iOSService = (tenantId ?? "").ToLowerInvariant();
 
-            string iOSGeneric = userName.ToLowerInvariant();
+            string iOSGeneric = userName?.ToLowerInvariant();
 
             // This is a known issue.
             // Normally AuthorityType should be passed here but since while building the MsalAccountCacheItem it is defaulted to "MSSTS",
@@ -184,11 +183,6 @@ namespace Microsoft.Identity.Client.Cache.Items
         }
 
         #endregion
-
-        //internal MsalAccountCacheKey GetKey()
-        //{
-        //    //return new MsalAccountCacheKey(Environment, TenantId, HomeAccountId, PreferredUsername);
-        //}
 
         internal static MsalAccountCacheItem FromJsonString(string json)
         {

@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
 
-            initCacheKey();
+            InitCacheKey();
         }
 
         internal /* for test */ MsalAccessTokenCacheItem(
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
 
-            initCacheKey();
+            InitCacheKey();
         }
 
         private MsalAccessTokenCacheItem(
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             return newAtItem;
         }
 
-        private void initCacheKey()
+        private void InitCacheKey()
         {
             _extraKeyParts = null;
             _credentialDescriptor = StorageJsonValues.CredentialTypeAccessToken;
@@ -258,7 +258,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             item.OboCacheKey = oboCacheKey;
             item.PopulateFieldsFromJObject(j);
 
-            item.initCacheKey();
+            item.InitCacheKey();
 
             return item;
         }

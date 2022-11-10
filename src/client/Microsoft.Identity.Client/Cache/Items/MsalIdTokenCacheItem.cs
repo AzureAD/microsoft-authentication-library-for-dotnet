@@ -57,7 +57,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             InitCacheKey();
         }
 
-        private void InitCacheKey()
+        //internal for test
+        internal void InitCacheKey()
         {
             CacheKey = MsalCacheKeys.GetCredentialKey(
                 HomeAccountId,
