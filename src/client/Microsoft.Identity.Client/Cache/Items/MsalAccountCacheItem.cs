@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
@@ -88,6 +90,8 @@ namespace Microsoft.Identity.Client.Cache.Items
                 givenName,
                 familyName,
                 wamAccountIds);
+
+            InitCacheKey(environment, tenantId, homeAccountId, preferredUsername);
         }
 
         internal string TenantId { get; set; }
@@ -105,6 +109,11 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// account ID in its token cache. Accounts with associated WAM account ID can be used in silent WAM flows.
         /// </summary>
         internal IDictionary<string, string> WamAccountIds { get; set; }
+        public string CacheKey { get; private set; }
+
+        public IiOSKey iOSCacheKey { get; private set; }
+
+        internal MsalAccountCacheKeyData MsalAccountCacheKeyData { get; private set; }
 
         private void Init(
             string environment,
@@ -128,12 +137,58 @@ namespace Microsoft.Identity.Client.Cache.Items
             FamilyName = familyName;
             HomeAccountId = homeAccountId;
             WamAccountIds = wamAccountIds;
+
+            InitCacheKey(environment, tenantId, homeAccountId, preferredUsername);
         }
 
-        internal MsalAccountCacheKey GetKey()
+        private void InitCacheKey()
         {
-            return new MsalAccountCacheKey(Environment, TenantId, HomeAccountId, PreferredUsername);
+            var cacheKeyItems = InitCacheKey(Environment, TenantId, HomeAccountId, PreferredUsername);
+            CacheKey = cacheKeyItems.CacheKey;
+            iOSCacheKey = cacheKeyItems.iOSKey;
+
+            MsalAccountCacheKeyData = cacheKeyItems;
         }
+
+        internal static MsalAccountCacheKeyData InitCacheKey(string environment, string tenantId, string homeAccountId, string userName)
+        {
+            var stringBuilder = new StringBuilder();
+
+            stringBuilder.Append(homeAccountId + MsalCacheKeys.CacheKeyDelimiter);
+            stringBuilder.Append(environment + MsalCacheKeys.CacheKeyDelimiter);
+            stringBuilder.Append(tenantId);
+
+            var cacheKey = stringBuilder.ToString();
+
+            var iOSCacheKey = InitiOSKey(environment, tenantId, homeAccountId, userName);
+
+            return new MsalAccountCacheKeyData(homeAccountId, cacheKey, iOSCacheKey);
+        }
+
+        #region iOS
+
+        private static IiOSKey InitiOSKey(string environment, string tenantId, string homeAccountId, string userName)
+        {
+            string iOSAccount = MsalCacheKeys.GetiOSAccountKey(homeAccountId, environment);
+
+            string iOSService = (tenantId ?? "").ToLowerInvariant();
+
+            string iOSGeneric = userName.ToLowerInvariant();
+
+            // This is a known issue.
+            // Normally AuthorityType should be passed here but since while building the MsalAccountCacheItem it is defaulted to "MSSTS",
+            // keeping the default value here.
+            int iOSType = MsalCacheKeys.iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()];
+
+            return new IosKey(iOSAccount, iOSService, iOSGeneric, iOSType);
+        }
+
+        #endregion
+
+        //internal MsalAccountCacheKey GetKey()
+        //{
+        //    //return new MsalAccountCacheKey(Environment, TenantId, HomeAccountId, PreferredUsername);
+        //}
 
         internal static MsalAccountCacheItem FromJsonString(string json)
         {
@@ -160,6 +215,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             };
 
             item.PopulateFieldsFromJObject(j);
+
+            item.InitCacheKey();
 
             return item;
         }

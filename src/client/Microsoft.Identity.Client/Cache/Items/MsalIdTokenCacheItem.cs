@@ -53,8 +53,35 @@ namespace Microsoft.Identity.Client.Cache.Items
             Secret = secret;
             RawClientInfo = rawClientInfo;
             HomeAccountId = homeAccountId;
+
+            InitCacheKey();
         }
 
+        private void InitCacheKey()
+        {
+            CacheKey = MsalCacheKeys.GetCredentialKey(
+                HomeAccountId,
+                Environment,
+                StorageJsonValues.CredentialTypeIdToken,
+                ClientId,
+                TenantId,
+                scopes: null);
+
+            InitIosCachekey();
+        }
+
+        private void InitIosCachekey()
+        {
+            string iOSAccount = MsalCacheKeys.GetiOSAccountKey(HomeAccountId, Environment);
+
+            string iOSGeneric = MsalCacheKeys.GetiOSGenericKey(StorageJsonValues.CredentialTypeIdToken, ClientId, TenantId);
+
+            string iOSService = MsalCacheKeys.GetiOSServiceKey(StorageJsonValues.CredentialTypeIdToken, ClientId, TenantId, scopes: null);
+
+            int iOSType = (int)MsalCacheKeys.iOSCredentialAttrType.IdToken;
+
+            iOSCacheKey = new IosKey(iOSAccount, iOSService, iOSGeneric, iOSType);
+        }
 
         internal string TenantId { get; set; }
 
@@ -62,10 +89,8 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal IdToken IdToken => idTokenLazy.Value;
 
-        internal MsalIdTokenCacheKey GetKey()
-        {
-            return new MsalIdTokenCacheKey(Environment, TenantId, HomeAccountId, ClientId);
-        }
+        public string CacheKey { get; private set; }
+        public IosKey iOSCacheKey { get; private set; }
 
         internal static MsalIdTokenCacheItem FromJsonString(string json)
         {
@@ -85,6 +110,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             };
 
             item.PopulateFieldsFromJObject(j);
+            item.InitCacheKey();
 
             return item;
         }

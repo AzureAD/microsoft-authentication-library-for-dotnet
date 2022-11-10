@@ -880,7 +880,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             CoreAssert.AreWithinOneSecond(expected.CachedAt, actual.CachedAt, nameof(actual.CachedAt));
 
             Assert.AreEqual(expected.IsExtendedLifeTimeToken, actual.IsExtendedLifeTimeToken, nameof(actual.IsExtendedLifeTimeToken));
-            Assert.AreEqual(expected.GetKey().ToString(), actual.GetKey().ToString());
+            Assert.AreEqual(expected.CacheKey, actual.CacheKey);
             CollectionAssert.AreEqual(expected.ScopeSet.ToList(), actual.ScopeSet.ToList(), nameof(actual.ScopeSet));
             Assert.AreEqual(expected.TenantId, actual.TenantId, nameof(actual.TenantId));
             Assert.AreEqual(expected.OboCacheKey, actual.OboCacheKey, nameof(actual.OboCacheKey));

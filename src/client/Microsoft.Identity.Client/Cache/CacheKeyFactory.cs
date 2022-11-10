@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client.Cache
             return accessTokenCacheItem.HomeAccountId;
         }
 
-        public static string GetKeyFromAccount(MsalAccountCacheKey accountKey)
+        public static string GetKeyFromAccount(MsalAccountCacheItem accountKey)
         {
             return accountKey.HomeAccountId;
         }

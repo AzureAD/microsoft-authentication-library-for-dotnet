@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -51,6 +52,72 @@ namespace Microsoft.Identity.Client.Cache.Items
             HomeAccountId = homeAccountId;
         }
 
+        private void InitCacheKey()
+        {
+            string key;
+            // FRT
+            if (!string.IsNullOrWhiteSpace(FamilyId))
+            {
+                string d = MsalCacheKeys.CacheKeyDelimiter;
+                key = $"{HomeAccountId}{d}{Environment}{d}{StorageJsonValues.CredentialTypeRefreshToken}{d}{FamilyId}{d}{d}".ToLowerInvariant();
+
+            }
+            else
+            {
+                key = MsalCacheKeys.GetCredentialKey(
+                       HomeAccountId,
+                       Environment,
+                       StorageJsonValues.CredentialTypeRefreshToken,
+                       ClientId,
+                       tenantId: null,
+                       scopes: null);
+            }
+
+            CacheKey = key;
+
+            InitiOSKey();
+        }
+
+        #region iOS
+        private void InitiOSKey()
+        {
+            string iOSService = GetiOSService();
+
+            string iOSGeneric = GetiOSGeneric();
+
+            string iOSAccount = MsalCacheKeys.GetiOSAccountKey(HomeAccountId, Environment);
+
+            int iOSType = (int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken;
+
+            iOSCacheKey = new IosKey(iOSAccount, iOSService, iOSGeneric, iOSType);
+        }
+
+        private string GetiOSGeneric()
+        {
+
+            // FRT
+            if (!string.IsNullOrWhiteSpace(FamilyId))
+            {
+                return $"{StorageJsonValues.CredentialTypeRefreshToken}{MsalCacheKeys.CacheKeyDelimiter}{FamilyId}{MsalCacheKeys.CacheKeyDelimiter}".ToLowerInvariant();
+            }
+
+            return MsalCacheKeys.GetiOSGenericKey(StorageJsonValues.CredentialTypeRefreshToken, ClientId, tenantId: null);
+
+        }
+
+        public string GetiOSService()
+        {
+            // FRT
+            if (!string.IsNullOrWhiteSpace(FamilyId))
+            {
+                return $"{StorageJsonValues.CredentialTypeRefreshToken}{MsalCacheKeys.CacheKeyDelimiter}{FamilyId}{MsalCacheKeys.CacheKeyDelimiter}{MsalCacheKeys.CacheKeyDelimiter}".ToLowerInvariant();
+            }
+
+            return MsalCacheKeys.GetiOSServiceKey(StorageJsonValues.CredentialTypeRefreshToken, ClientId, tenantId: null, scopes: null);
+        }
+
+        #endregion
+
         /// <summary>
         /// Optional. A value here means the token in an FRT.
         /// </summary>
@@ -67,10 +134,8 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// </summary>
         public bool IsFRT => !string.IsNullOrEmpty(FamilyId);
 
-        internal MsalRefreshTokenCacheKey GetKey()
-        {
-            return new MsalRefreshTokenCacheKey(Environment, ClientId, HomeAccountId, FamilyId);
-        }
+        public string CacheKey { get; private set; }
+        public IosKey iOSCacheKey { get; private set; }
 
         internal static MsalRefreshTokenCacheItem FromJsonString(string json)
         {
