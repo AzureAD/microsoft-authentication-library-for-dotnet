@@ -331,8 +331,15 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             this MockHttpManager httpManager,
             string expectedUrl,
             string resource,
-            string response)
+            string response,
+            HttpStatusCode statusCode = HttpStatusCode.OK
+            )
         {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
+            HttpContent content =
+                new StringContent(response);
+            responseMessage.Content = content;
+
             httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -347,7 +354,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                          {
                             {"X-IDENTITY-HEADER", "secret"}
                          },
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(response)
+                        ResponseMessage = responseMessage
                     });
         }
 

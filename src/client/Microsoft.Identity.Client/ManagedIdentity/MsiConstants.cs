@@ -7,7 +7,7 @@ using System.IO;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-    internal class Constants
+    internal class MsiConstants
     {
         public const string OrganizationsTenantId = "organizations";
 

@@ -1096,5 +1096,20 @@ namespace Microsoft.Identity.Client
         /// A required value is missing from the token providerresponse
         /// </summary>
         public const string InvalidTokenProviderResponseValue = "invalid_token_provider_response_value";
+
+        /// <summary>
+        /// A required value is missing from the managed identity response.
+        /// </summary>
+        public const string InvalidManagedIdentityResponse = "invalid_managed_identity_response";
+
+        /// <summary>
+        /// Unknown error response received.
+        /// </summary>
+        public const string ManagedIdentityFailedResponse = "managed_identity_failed_response";
+
+        /// <summary>
+        /// Unknown error response received.
+        /// </summary>
+        public const string UnknownManagedIdentityError = "unknown_managed_identity_error";
     }
 }

@@ -29,8 +29,5 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         [JsonProperty("client_id")]
         public string ClientId { get; set; }
-
-        [JsonProperty("message")]
-        public string Message { get; set; }
     }
 }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
@@ -121,6 +122,18 @@ namespace Microsoft.Identity.Client
           Exception innerException = null)
         {
             MsalServiceException ex = new MsalServiceException(errorCode, errorMessage, innerException);
+
+            SetHttpExceptionData(ex, httpResponse);
+
+            return ex;
+        }
+
+        internal static MsalServiceException FromManagedIdentityResponse(
+            string errorCode,
+            HttpResponse httpResponse)
+        {
+            var managedIdentityResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(httpResponse?.Body);
+            MsalServiceException ex = new MsalServiceException(errorCode, managedIdentityResponse.Message, (int)httpResponse.StatusCode);
 
             SetHttpExceptionData(ex, httpResponse);
 

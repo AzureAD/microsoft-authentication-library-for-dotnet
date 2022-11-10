@@ -95,6 +95,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
           "\"Bearer\",\"client_id\":\"client_id\"}";
         }
 
+        public static string GetMsiErrorResponse()
+        {
+            return "{\"statusCode\":\"500\",\"message\":\"An unexpected error occured while fetching the AAD Token.\",\"correlationId\":\"7d0c9763-ff1d-4842-a3f3-6d49e64f4513\"}";
+        }
+
         public static string CreateClientInfo(string uid = TestConstants.Uid, string utid = TestConstants.Utid)
         {
             return Base64UrlHelpers.Encode("{\"uid\":\"" + uid + "\",\"utid\":\"" + utid + "\"}");

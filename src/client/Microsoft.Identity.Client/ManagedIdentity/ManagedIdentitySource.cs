@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -30,50 +31,60 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             ManagedIdentityRequest request = CreateRequest(parameters.Scopes.ToArray());
             
-            var response = 
-                HttpMethod.Get.Equals(request.Method) ?
-                await _requestContext.ServiceBundle.HttpManager.SendGetAsync(request.UriBuilder.Uri, request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false) : 
-                await _requestContext.ServiceBundle.HttpManager.SendPostAsync(request.UriBuilder.Uri, request.Headers, request.BodyParams, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var response =
+            HttpMethod.Get.Equals(request.Method) ?
+            await _requestContext.ServiceBundle.HttpManager.SendGetAsync(request.UriBuilder.Uri, request.Headers, _requestContext.Logger, isManagedIdentity: true, cancellationToken: cancellationToken).ConfigureAwait(false) :
+            await _requestContext.ServiceBundle.HttpManager.SendPostAsync(request.UriBuilder.Uri, request.Headers, request.BodyParams, _requestContext.Logger, isManagedIdentity: true, cancellationToken: cancellationToken).ConfigureAwait(false);
 
-            return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
+            return HandleResponse(parameters, response);
+            
         }
 
-        protected virtual async Task<ManagedIdentityResponse> HandleResponseAsync(
+        protected virtual ManagedIdentityResponse HandleResponse(
             AppTokenProviderParameters parameters,
-            HttpResponse response,
-            CancellationToken cancellationToken)
+            HttpResponse response)
         {
-            string message;
-            Exception exception = null;
             try
             {
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    return JsonHelper.DeserializeFromJson<ManagedIdentityResponse>(response.Body);
+                    return GetSuccessfulResponse(response);
                 }
 
-                message = JsonHelper.DeserializeFromJson<ManagedIdentityResponse>(response.Body).Message;
+                throw MsalServiceExceptionFactory.FromManagedIdentityResponse(MsalError.ManagedIdentityFailedResponse, response);
             }
             catch (Exception e)
             {
-                message = AuthenticationResponseInvalidFormatError;
-                exception = e;
-            }
+                if (e is MsalServiceException)
+                    throw;
 
-            throw new MsalServiceException("msi-auth-failed", message, exception);
+                throw new MsalServiceException(MsalError.UnknownManagedIdentityError, UnexpectedResponse, e);
+            }
         }
 
         protected abstract ManagedIdentityRequest CreateRequest(string[] scopes);
 
 
-        protected static string GetMessageFromResponse(HttpResponse response, CancellationToken cancellationToken)
+        protected string GetMessageFromResponse(HttpResponse response)
         {
-            if (response.Body == null)
+            if (response.Body.IsNullOrEmpty())
             {
+                _requestContext.Logger.Info("The response body is empty.");
                 return null;
             }
 
-            return JsonHelper.DeserializeFromJson<ManagedIdentityResponse>(response.Body).Message;
+            return JsonHelper.DeserializeFromJson<ManagedIdentityErrorResponse>(response.Body).Message;
+        }
+
+        protected ManagedIdentityResponse GetSuccessfulResponse(HttpResponse response)
+        {
+            ManagedIdentityResponse managedIdentityResponse = JsonHelper.DeserializeFromJson<ManagedIdentityResponse>(response.Body);
+            if (managedIdentityResponse == null || managedIdentityResponse.AccessToken.IsNullOrEmpty() || managedIdentityResponse.ExpiresOn.IsNullOrEmpty())
+            {
+                throw new MsalServiceException(MsalError.InvalidManagedIdentityResponse, AuthenticationResponseInvalidFormatError);
+            }
+
+            return managedIdentityResponse;
         }
     }
 }

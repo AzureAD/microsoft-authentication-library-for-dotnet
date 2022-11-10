@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Net;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ManagedIdentity;
@@ -54,6 +56,38 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow("user.read")]
+        [DataRow("https://management.core.windows.net//user_impersonation")]
+        [DataRow("s")]
+        public async Task AppServiceTestWrongScopeAsync(string resource)
+        {
+            Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", "http://127.0.0.1:41564/msi/token");
+            Environment.SetEnvironmentVariable("IDENTITY_HEADER", "secret");
+
+            using (var httpManager = new MockHttpManager())
+            {
+                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                    .Create("clientId")
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures()
+                    .Build();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", resource, MockHelpers.GetMsiErrorResponse(), HttpStatusCode.InternalServerError);
+                httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", resource, MockHelpers.GetMsiErrorResponse(), HttpStatusCode.InternalServerError);
+
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () => 
+                    await cca.AcquireTokenForClient(new string[] { resource })
+                    .WithManagedIdentity()
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(MsalError.ManagedIdentityFailedResponse, ex.ErrorCode);
+                Assert.AreEqual("An unexpected error occured while fetching the AAD Token.", ex.Message);
             }
         }
     }
