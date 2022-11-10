@@ -90,5 +90,33 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual("An unexpected error occured while fetching the AAD Token.", ex.Message);
             }
         }
+
+        [TestMethod]
+        public async Task AppServiceNullResponseAsync()
+        {
+            Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", "http://127.0.0.1:41564/msi/token");
+            Environment.SetEnvironmentVariable("IDENTITY_HEADER", "secret");
+
+            using (var httpManager = new MockHttpManager())
+            {
+                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                    .Create("clientId")
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures()
+                    .Build();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", "https://management.azure.com", "", HttpStatusCode.OK);
+
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await cca.AcquireTokenForClient(new string[] { "https://management.azure.com" })
+                    .WithManagedIdentity()
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(MsalError.InvalidManagedIdentityResponse, ex.ErrorCode);
+                Assert.AreEqual("Invalid response, the authentication response was not in the expected format.", ex.Message);
+            }
+        }
     }
 }
