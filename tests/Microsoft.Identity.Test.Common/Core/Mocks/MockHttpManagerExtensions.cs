@@ -328,23 +328,26 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public static void AddManagedIdentityMockHandler(
-            this MockHttpManager httpManager)
+            this MockHttpManager httpManager,
+            string expectedUrl,
+            string resource,
+            string response)
         {
             httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "http://127.0.0.1:41564/msi/token/",
+                        ExpectedUrl = expectedUrl,
                         ExpectedQueryParams = new Dictionary<string, string>
                         {
                             { "api-version", "2019-08-01" },
-                            { "resource", "https://management.azure.com" }
+                            { "resource", resource }
                         },
                         ExpectedRequestHeaders = new Dictionary<string, string>
                          {
                             {"X-IDENTITY-HEADER", "secret"}
                          },
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetMsiSuccessfulResponse())
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(response)
                     });
         }
 

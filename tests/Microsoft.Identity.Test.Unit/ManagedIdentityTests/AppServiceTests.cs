@@ -4,6 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -19,10 +20,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-        [TestMethod]
-        public async Task AppServiceHappyPathAsync()
+        [DataTestMethod]
+        [DataRow("http://127.0.0.1:41564/msi/token/", "https://management.azure.com", "https://management.azure.com")]
+        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com", "https://management.azure.com")]
+        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com")]
+        public async Task AppServiceHappyPathAsync(string endpoint, string scope, string resource)
         {
-            Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", "http://127.0.0.1:41564/msi/token/");
+            Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", endpoint);
             Environment.SetEnvironmentVariable("IDENTITY_HEADER", "secret");
 
             using (var httpManager = new MockHttpManager())
@@ -34,9 +38,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Build();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddManagedIdentityMockHandler();
+                httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiSuccessfulResponse());
 
-                var result = await cca.AcquireTokenForClient(new string[] { "https://management.azure.com" })
+                var result = await cca.AcquireTokenForClient(new string[] { scope })
                     .WithManagedIdentity()
                     .ExecuteAsync().ConfigureAwait(false);
 
@@ -44,11 +48,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-                result = await cca.AcquireTokenForClient(new string[] { "https://management.azure.com" })
+                result = await cca.AcquireTokenForClient(new string[] { scope })
                     .WithManagedIdentity()
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
         }
     }
