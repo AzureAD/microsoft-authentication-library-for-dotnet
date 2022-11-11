@@ -118,5 +118,32 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual("Invalid response, the authentication response was not in the expected format.", ex.Message);
             }
         }
+
+        [TestMethod]
+        public async Task AppServiceInvalidEndpointAsync()
+        {
+            Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", "127.0.0.1:41564/msi/token");
+            Environment.SetEnvironmentVariable("IDENTITY_HEADER", "secret");
+
+            using (var httpManager = new MockHttpManager())
+            {
+                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                    .Create("clientId")
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures()
+                    .Build();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", "https://management.azure.com", "", HttpStatusCode.OK);
+
+                MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                    await cca.AcquireTokenForClient(new string[] { "https://management.azure.com" })
+                    .WithManagedIdentity()
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(MsalError.InvalidManagedIdentityEndpoint, ex.ErrorCode);
+            }
+        }
     }
 }

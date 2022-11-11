@@ -1103,7 +1103,7 @@ namespace Microsoft.Identity.Client
         public const string InvalidManagedIdentityResponse = "invalid_managed_identity_response";
 
         /// <summary>
-        /// Unknown error response received.
+        /// Managed Identity error response was received.
         /// </summary>
         public const string ManagedIdentityFailedResponse = "managed_identity_failed_response";
 
@@ -1111,5 +1111,10 @@ namespace Microsoft.Identity.Client
         /// Unknown error response received.
         /// </summary>
         public const string UnknownManagedIdentityError = "unknown_managed_identity_error";
+
+        /// <summary>
+        /// Invalid managed identity endpoint.
+        /// </summary>
+        public const string InvalidManagedIdentityEndpoint = "invalid_managed_identity_endpoint";
     }
 }

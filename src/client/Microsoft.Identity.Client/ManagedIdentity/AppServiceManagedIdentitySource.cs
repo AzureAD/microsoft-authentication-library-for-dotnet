@@ -11,11 +11,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class AppServiceManagedIdentitySource : ManagedIdentitySource
     {
         // MSI Constants. Docs for MSI are available here https://docs.microsoft.com/azure/app-service/overview-managed-identity
-        protected string AppServiceMsiApiVersion = "2019-08-01";
-        protected string SecretHeaderName = "X-IDENTITY-HEADER";
-        protected string ClientIdHeaderName = "client_id";
+        protected const string AppServiceMsiApiVersion = "2019-08-01";
+        protected const string SecretHeaderName = "X-IDENTITY-HEADER";
+        protected const string ClientIdHeaderName = "client_id";
 
-        private const string MsiEndpointInvalidUriError = "The environment variable MSI_ENDPOINT contains an invalid Uri.";
+        private const string MsiEndpointInvalidUriError = "The environment variable IDENTITY_ENDPOINT contains an invalid Uri.";
 
         private readonly Uri _endpoint;
         private readonly string _secret;
@@ -35,7 +35,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             endpointUri = null;
 
             // if BOTH the env vars endpoint and secret values are null, this MSI provider is unavailable.
-            // Also validate that IdentityServerThumbprint is null or empty to differentiate from Service Fabric.
             if (string.IsNullOrEmpty(msiEndpoint) || string.IsNullOrEmpty(secret))
             {
                 return false;
@@ -47,7 +46,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
             catch (FormatException ex)
             {
-                throw new MsalClientException(MsalError.AuthenticationFailed, MsiEndpointInvalidUriError, ex);
+                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, MsiEndpointInvalidUriError, ex);
             }
 
             return true;
