@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Specifies to use the Managed Identity to fetch the token.
+        /// Specifies to use the Managed Identity to fetch the token from the Managed Identity Endpoint.
         /// </summary>
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenForClientParameterBuilder WithManagedIdentity()
