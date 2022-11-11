@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (!string.IsNullOrEmpty(_resourceId))
             {
-                queryParams[MsiConstants.ManagedIdentityResourceId] = _resourceId;
+                queryParams[Constants.ManagedIdentityResourceId] = _resourceId;
             }
 
             request.UriBuilder.AppendQueryParameters(queryParams);
