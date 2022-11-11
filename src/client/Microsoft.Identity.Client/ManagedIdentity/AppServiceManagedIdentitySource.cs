@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         protected override ManagedIdentityRequest CreateRequest(string[] scopes)
         {
-            // covert the scopes to a resource string
+            // convert the scopes to a resource string
             string resource = ScopeUtilities.ScopesToResource(scopes);
 
             ManagedIdentityRequest request = new ManagedIdentityRequest(System.Net.Http.HttpMethod.Get, _endpoint);
