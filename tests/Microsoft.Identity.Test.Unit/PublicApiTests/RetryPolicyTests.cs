@@ -17,7 +17,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [TestClass]
     public class RetryPolicyTests : TestBase
     {
-        [TestMethod]
+// This test is expensive, as it has to wait 1 second - run it only on latest .NET
+#if NET6_0_OR_GREATER 
+        [TestMethod]        
         public async Task RetryPolicyAsync()
         {
             using (var httpManager = new MockHttpManager(retryOnceOn5xx: false))
@@ -128,5 +130,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             return TimeSpan.Zero;
         }
+#endif
     }
 }
