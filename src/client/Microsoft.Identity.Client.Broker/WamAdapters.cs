@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Client.Broker
         //MSA-PT Auth Params
         private const string NativeInteropMsalRequestType = "msal_request_type";
         private const string ConsumersPassthroughRequest = "consumer_passthrough";
+        private const string WamHeaderTitle = "msal_accounts_control_title";
 
         //MSAL Runtime Error Response 
         private enum ResponseStatus
@@ -150,11 +151,11 @@ namespace Microsoft.Identity.Client.Broker
         /// Gets the Common Auth Parameters to be passed to Native Interop
         /// </summary>
         /// <param name="authenticationRequestParameters"></param>
-        /// <param name="isMsaPassthrough"></param>
+        /// <param name="brokerOptions"></param>
         /// <param name="logger"></param>
         public static NativeInterop.AuthParameters GetCommonAuthParameters(
             AuthenticationRequestParameters authenticationRequestParameters, 
-            bool isMsaPassthrough,
+            WindowsBrokerOptions brokerOptions,
             ILoggerAdapter logger)
         {
             logger.Verbose("[WamBroker] Validating Common Auth Parameters.");
@@ -172,8 +173,16 @@ namespace Microsoft.Identity.Client.Broker
             authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
 
             //MSA-PT
-            if (isMsaPassthrough)
+            if (brokerOptions.MsaPassthrough)
+            {
                 authParams.Properties[NativeInteropMsalRequestType] = ConsumersPassthroughRequest;
+            }
+
+            //WAM Header Title
+            if (!string.IsNullOrEmpty(brokerOptions.HeaderText))
+            {
+                authParams.Properties[WamHeaderTitle] = brokerOptions.HeaderText;
+            }
 
             //Client Claims
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ClaimsAndClientCapabilities))
