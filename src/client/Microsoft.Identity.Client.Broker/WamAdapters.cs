@@ -174,11 +174,15 @@ namespace Microsoft.Identity.Client.Broker
 
             //MSA-PT
             if (brokerOptions.MsaPassthrough)
+            {
                 authParams.Properties[NativeInteropMsalRequestType] = ConsumersPassthroughRequest;
+            }
 
             //WAM Header Title
             if (!string.IsNullOrEmpty(brokerOptions.HeaderText))
+            {
                 authParams.Properties[WamHeaderTitle] = brokerOptions.HeaderText;
+            }
 
             //Client Claims
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ClaimsAndClientCapabilities))
