@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Client.Broker
             if (brokerOptions.MsaPassthrough)
                 authParams.Properties[NativeInteropMsalRequestType] = ConsumersPassthroughRequest;
 
-            //MSA-PT
+            //WAM Header Title
             if (!string.IsNullOrEmpty(brokerOptions.HeaderText))
                 authParams.Properties[WamHeaderTitle] = brokerOptions.HeaderText;
 
