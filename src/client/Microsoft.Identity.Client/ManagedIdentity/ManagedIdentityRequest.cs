@@ -13,21 +13,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class ManagedIdentityRequest
     {
         public UriBuilder UriBuilder { get; }
+
         public HttpMethod Method { get; }
+
         public IDictionary<string, string> Headers { get; }
 
-        public IDictionary<string, string> BodyParams { get; }
+        public IDictionary<string, string> BodyParameters { get; } = new Dictionary<string, string>();
 
         public ManagedIdentityRequest(HttpMethod method, Uri endpoint)
         {
             Method = method;
             UriBuilder = new UriBuilder(endpoint);
             Headers = new Dictionary<string, string>();
-
-            if (HttpMethod.Post.Equals(Method))
-            {
-                BodyParams = new Dictionary<string, string>();
-            }
         }
         
     }

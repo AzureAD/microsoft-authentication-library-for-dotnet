@@ -47,11 +47,11 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             IDictionary<string, string> bodyParameters,
             ILoggerAdapter logger,
-            bool isManagedIdentity = false,
+            bool useManagedIdentity = false,
             CancellationToken cancellationToken = default)
         {
             HttpContent body = bodyParameters == null ? null : new FormUrlEncodedContent(bodyParameters);
-            return await SendPostAsync(endpoint, headers, body, logger, isManagedIdentity: isManagedIdentity, cancellationToken).ConfigureAwait(false);
+            return await SendPostAsync(endpoint, headers, body, logger, useManagedIdentity: useManagedIdentity, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<HttpResponse> SendPostAsync(
@@ -59,10 +59,10 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             HttpContent body,
             ILoggerAdapter logger,
-            bool isManagedIdentity = false,
+            bool useManagedIdentity = false,
             CancellationToken cancellationToken = default)
         {
-            return await ExecuteWithRetryAsync(endpoint, headers, body, HttpMethod.Post, logger, isManagedIdentity: isManagedIdentity, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return await ExecuteWithRetryAsync(endpoint, headers, body, HttpMethod.Post, logger, useManagedIdentity: useManagedIdentity, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<HttpResponse> SendGetAsync(
@@ -70,10 +70,10 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             ILoggerAdapter logger,
             bool retry = true,
-            bool isManagedIdentity = false,
+            bool useManagedIdentity = false,
             CancellationToken cancellationToken = default)
         {
-            return await ExecuteWithRetryAsync(endpoint, headers, null, HttpMethod.Get, logger, retry: retry, isManagedIdentity: isManagedIdentity, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return await ExecuteWithRetryAsync(endpoint, headers, null, HttpMethod.Get, logger, retry: retry, useManagedIdentity: useManagedIdentity, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Client.Http
             ILoggerAdapter logger,
             bool doNotThrow = false,
             bool retry = true,
-            bool isManagedIdentity = false,
+            bool useManagedIdentity = false,
             CancellationToken cancellationToken = default)
         {
             Exception timeoutException = null;
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Client.Http
                     logger,
                     doNotThrow,
                     retry: false,
-                    isManagedIdentity: isManagedIdentity,
+                    useManagedIdentity: useManagedIdentity,
                     cancellationToken: cancellationToken).ConfigureAwait(false);
             }
 
@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Client.Http
             }
 
             // package 500 errors in a "service not available" exception
-            if (isRetryableStatusCode && !isManagedIdentity)
+            if (isRetryableStatusCode && !useManagedIdentity)
             {
                 throw MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.ServiceNotAvailable,

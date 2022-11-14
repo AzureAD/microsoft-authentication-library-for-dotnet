@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client
 
         public bool RetryOnServerErrors { get; set; } = true;
 
-        public bool IsManagedIdentity { get; internal set; }
+        public bool UseManagedIdentity { get; internal set; }
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 

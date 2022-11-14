@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client
         {
             ValidateUseOfExperimentalFeature("ManagedIdentity");
 
-            ServiceBundle.Config.IsManagedIdentity = true;
+            ServiceBundle.Config.UseManagedIdentity = true;
 
             return this;
         }

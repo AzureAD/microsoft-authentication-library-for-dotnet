@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client
             if (ServiceBundle?.Config.ClientCredential == null &&
                 CommonParameters.OnBeforeTokenRequestHandler == null &&
                 ServiceBundle?.Config.AppTokenProvider == null &&
-                ServiceBundle?.Config.IsManagedIdentity is false
+                ServiceBundle?.Config.UseManagedIdentity is false
                 ) 
             {
                 throw new MsalClientException(

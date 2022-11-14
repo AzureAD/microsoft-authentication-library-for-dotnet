@@ -33,8 +33,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             
             var response =
             HttpMethod.Get.Equals(request.Method) ?
-            await _requestContext.ServiceBundle.HttpManager.SendGetAsync(request.UriBuilder.Uri, request.Headers, _requestContext.Logger, isManagedIdentity: true, cancellationToken: cancellationToken).ConfigureAwait(false) :
-            await _requestContext.ServiceBundle.HttpManager.SendPostAsync(request.UriBuilder.Uri, request.Headers, request.BodyParams, _requestContext.Logger, isManagedIdentity: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+            await _requestContext.ServiceBundle.HttpManager.SendGetAsync(request.UriBuilder.Uri, request.Headers, _requestContext.Logger, useManagedIdentity: true, cancellationToken: cancellationToken).ConfigureAwait(false) :
+            await _requestContext.ServiceBundle.HttpManager.SendPostAsync(request.UriBuilder.Uri, request.Headers, request.BodyParameters, _requestContext.Logger, useManagedIdentity: true, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             return HandleResponse(parameters, response);
             
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     return GetSuccessfulResponse(response);
                 }
 
-                throw MsalServiceExceptionFactory.FromManagedIdentityResponse(MsalError.ManagedIdentityFailedResponse, response);
+                throw MsalServiceExceptionFactory.FromManagedIdentityResponse(MsalError.ManagedIdentityRequestFailed, response);
             }
             catch (Exception e)
             {

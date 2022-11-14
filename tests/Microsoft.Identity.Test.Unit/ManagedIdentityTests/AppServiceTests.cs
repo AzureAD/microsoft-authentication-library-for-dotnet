@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(MsalError.ManagedIdentityFailedResponse, ex.ErrorCode);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual("An unexpected error occured while fetching the AAD Token.", ex.Message);
             }
         }

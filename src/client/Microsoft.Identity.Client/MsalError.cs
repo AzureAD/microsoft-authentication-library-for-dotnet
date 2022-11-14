@@ -1105,7 +1105,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Managed Identity error response was received.
         /// </summary>
-        public const string ManagedIdentityFailedResponse = "managed_identity_failed_response";
+        public const string ManagedIdentityRequestFailed = "managed_identity_failed_request";
 
         /// <summary>
         /// Unknown error response received.
