@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Region
     internal class RegionDiscoveryProvider : IRegionDiscoveryProvider
     {
         private readonly IRegionManager _regionManager;
-        public const string PublicEnvForRegional = "r.login.microsoftonline.com";
+        public const string PublicEnvForRegional = "login.microsoft.com";
 
         public RegionDiscoveryProvider(IHttpManager httpManager, bool clearCache)
         {
