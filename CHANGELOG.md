@@ -1,3 +1,13 @@
+4.48.1
+==========
+
+### Supportability
+- Fixes an internal (Microsoft 1P only) MSA-PT issue for the new WAM preview broker. See [VS#1809364](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1809364) and [VS#1643652](https://devdiv.visualstudio.com/DevDiv/_workitems/edit/1643652)
+
+### Bug Fixes
+- Added header title to the Account Picker for the new WAM preview broker. See [3803](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3769).  
+
+
 4.48.0
 ==========
 

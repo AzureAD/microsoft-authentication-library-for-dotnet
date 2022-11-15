@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client.Broker
             {
                 using (var authParams = WamAdapters.GetCommonAuthParameters(
                     authenticationRequestParameters, 
-                    _wamOptions.MsaPassthrough, 
+                    _wamOptions, 
                     _logger))
                 {
                     using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Client.Broker
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters, 
-                _wamOptions.MsaPassthrough,
+                _wamOptions,
                 _logger))
             {
                 //Login Hint
@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Client.Broker
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters, 
-                _wamOptions.MsaPassthrough,
+                _wamOptions,
                 _logger))
             {
                 using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInAsync(
@@ -253,7 +253,7 @@ namespace Microsoft.Identity.Client.Broker
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters, 
-                _wamOptions.MsaPassthrough,
+                _wamOptions,
                 _logger))
             {
                 using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
@@ -300,7 +300,7 @@ namespace Microsoft.Identity.Client.Broker
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters, 
-                _wamOptions.MsaPassthrough,
+                _wamOptions,
                 _logger))
             {
                 using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInSilentlyAsync(
@@ -329,7 +329,7 @@ namespace Microsoft.Identity.Client.Broker
 
             using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters, 
-                _wamOptions.MsaPassthrough,
+                _wamOptions,
                 _logger))
             {
                 authParams.Properties["MSALRuntime_Username"] = acquireTokenByUsernamePasswordParameters.Username;
