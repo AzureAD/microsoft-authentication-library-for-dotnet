@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+#if !NET48
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
     {
         public virtual bool PiiLoggingEnabled => throw new NotImplementedException();
 
-        public bool IsDefaultPlatformLoggingEnabled {get;set;} = true;
+        public virtual bool IsDefaultPlatformLoggingEnabled {get;set;} = true;
 
         public virtual string ClientName => throw new NotImplementedException();
 
@@ -55,12 +55,12 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             Console.WriteLine($"LogLevel = {logLevel} msgWithPii = {messageWithPii} msgScrubbed = {messageScrubbed}");
         }
 
-        public DurationLogHelper LogBlockDuration(string measuredBlockName, Client.LogLevel logLevel = Client.LogLevel.Verbose)
+        public virtual DurationLogHelper LogBlockDuration(string measuredBlockName, Client.LogLevel logLevel = Client.LogLevel.Verbose)
         {
             throw new NotImplementedException();
         }
 
-        public DurationLogHelper LogMethodDuration(Client.LogLevel logLevel = Client.LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
+        public virtual DurationLogHelper LogMethodDuration(Client.LogLevel logLevel = Client.LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
         {
             throw new NotImplementedException();
         }
@@ -78,7 +78,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         private MsalTokenResponse _msalTokenResponse = TokenCacheHelper.CreateMsalTokenResponse();
 
         private IServiceBundle _serviceBundle;
-
 
         [TestInitialize]
         public void Init()
@@ -300,3 +299,4 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
     }
 }
+#endif

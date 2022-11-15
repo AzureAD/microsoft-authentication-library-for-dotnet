@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Broker
         private readonly WindowsBrokerOptions _wamOptions;
         private static Exception s_initException;
 
-        private readonly Dictionary<NativeInterop.LogLevel, LogLevel> _logLevelMap = new Dictionary<NativeInterop.LogLevel, LogLevel>()
+        private static Dictionary<NativeInterop.LogLevel, LogLevel> LogLevelMap = new Dictionary<NativeInterop.LogLevel, LogLevel>()
         {
             { NativeInterop.LogLevel.Trace, LogLevel.Verbose },
             { NativeInterop.LogLevel.Debug, LogLevel.Verbose },
@@ -93,11 +93,6 @@ namespace Microsoft.Identity.Client.Broker
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            if (_logger.IsDefaultPlatformLoggingEnabled)
-            {
-                s_lazyCore.Value.LogEvent += LogEventRaised;
-            }
-
             _parentHandle = GetParentWindow(uiParent);
 
             _wamOptions = appConfig.WindowsBrokerOptions ??
@@ -111,7 +106,8 @@ namespace Microsoft.Identity.Client.Broker
 
         private void LogEventRaised(NativeInterop.Core sender, LogEventArgs args)
         {
-            LogLevel msalLogLevel = _logLevelMap[args.LogLevel];
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
+            LogLevel msalLogLevel = LogLevelMap[args.LogLevel];
             if (_logger.IsLoggingEnabled(msalLogLevel))
             {
                 if (_logger.PiiLoggingEnabled)
@@ -122,7 +118,7 @@ namespace Microsoft.Identity.Client.Broker
                             _logger.AlwaysPii(args.Message, string.Empty);
                             break;
                         case LogLevel.Error:
-                            _logger.ErrorPii(args.Message, string.Empty); // TODO confirm with Sam
+                            _logger.ErrorPii(args.Message, string.Empty);
                             break;
                         case LogLevel.Warning:
                             _logger.WarningPii(args.Message, string.Empty);
@@ -167,6 +163,7 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
             MsalTokenResponse msalTokenResponse = null;
 
@@ -241,6 +238,7 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             MsalTokenResponse msalTokenResponse = null;
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
@@ -273,6 +271,7 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             MsalTokenResponse msalTokenResponse = null;
@@ -313,6 +312,7 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
@@ -360,6 +360,7 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
@@ -389,6 +390,7 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
@@ -425,6 +427,7 @@ namespace Microsoft.Identity.Client.Broker
 
         public async Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
             
             if (account == null)
@@ -491,7 +494,7 @@ namespace Microsoft.Identity.Client.Broker
             IInstanceDiscoveryManager instanceDiscoveryManager)
         {
             // runtime does not yet support account discovery
-
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             return Task.FromResult<IReadOnlyList<IAccount>>(Array.Empty<IAccount>());
         }
 
@@ -524,6 +527,39 @@ namespace Microsoft.Identity.Client.Broker
 
             _logger.Verbose($"[WAM Broker] MsalRuntime initialization successful.");
             return true;
+        }
+
+        internal class LogEventWrapper : IDisposable
+        {
+            private bool _disposedValue;
+            RuntimeBroker _broker;
+
+            public LogEventWrapper(RuntimeBroker broker)
+            {
+                _broker = broker;
+                s_lazyCore.Value.LogEvent += _broker.LogEventRaised;
+            }
+
+            protected virtual void Dispose(bool disposing)
+            {
+                if (!_disposedValue)
+                {
+                    if (disposing)
+                    {
+                        // dispose managed state (managed objects)
+                        s_lazyCore.Value.LogEvent -= _broker.LogEventRaised;
+                    }
+
+                    _disposedValue = true;
+                }
+            }
+
+            public void Dispose()
+            {
+                // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+                Dispose(disposing: true);
+                GC.SuppressFinalize(this);
+            }
         }
     }
 }
