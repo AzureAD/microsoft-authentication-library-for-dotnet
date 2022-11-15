@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 ScopeString,
                 _extraKeyParts);
 
-            InitiOSKey();
+            iOSCacheKeyLazy = new Lazy<IiOSKey>(() => InitiOSKey());
         }
 
         internal string ToLogString(bool piiEnabled = false)
@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         #region iOS
 
-        private void InitiOSKey()
+        private IiOSKey InitiOSKey()
         {
             string iOSAccount = MsalCacheKeys.GetiOSAccountKey(HomeAccountId, Environment);
 
@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             int iOSType = (int)MsalCacheKeys.iOSCredentialAttrType.AccessToken;
 
-            iOSCacheKey = new IosKey(iOSAccount, iOSService, iOSGeneric, iOSType);
+            return new IosKey(iOSAccount, iOSService, iOSGeneric, iOSType);
         }
 
         #endregion
@@ -213,7 +213,8 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal string CacheKey { get; private set; }
 
-        internal IiOSKey iOSCacheKey { get; private set; }
+        private Lazy<IiOSKey> iOSCacheKeyLazy;
+        public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
 
         internal static MsalAccessTokenCacheItem FromJsonString(string json)
         {

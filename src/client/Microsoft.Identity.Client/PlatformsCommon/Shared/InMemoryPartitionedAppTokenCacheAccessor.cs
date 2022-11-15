@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// This method is not supported for the app token cache because
         /// there are no user accounts in a client credential flow.
         /// </summary>
-        public MsalAccountCacheItem GetAccount(MsalAccountCacheKeyData accountCacheKeyData)
+        public MsalAccountCacheItem GetAccount(MsalAccountCacheItem accountCacheItem)
         {
             throw new NotSupportedException();
         }

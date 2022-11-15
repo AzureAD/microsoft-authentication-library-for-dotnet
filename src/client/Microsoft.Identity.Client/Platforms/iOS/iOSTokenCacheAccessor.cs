@@ -108,9 +108,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return MsalIdTokenCacheItem.FromJsonString(GetPayload(idTokenItem.iOSCacheKey));
         }
 
-        public MsalAccountCacheItem GetAccount(MsalAccountCacheKeyData accountCacheKeyData)
+        public MsalAccountCacheItem GetAccount(MsalAccountCacheItem accountCacheItem)
         {
-            return MsalAccountCacheItem.FromJsonString(GetPayload(accountCacheKeyData.iOSKey));
+            return MsalAccountCacheItem.FromJsonString(GetPayload(accountCacheItem.iOSCacheKey));
         }
 #endregion
 

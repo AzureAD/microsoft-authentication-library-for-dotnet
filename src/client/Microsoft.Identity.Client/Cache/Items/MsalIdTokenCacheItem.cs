@@ -68,10 +68,10 @@ namespace Microsoft.Identity.Client.Cache.Items
                 TenantId,
                 scopes: null);
 
-            InitIosCachekey();
+            iOSCacheKeyLazy = new Lazy<IiOSKey>(() => InitiOSKey());
         }
 
-        private void InitIosCachekey()
+        private IiOSKey InitiOSKey()
         {
             string iOSAccount = MsalCacheKeys.GetiOSAccountKey(HomeAccountId, Environment);
 
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             int iOSType = (int)MsalCacheKeys.iOSCredentialAttrType.IdToken;
 
-            iOSCacheKey = new IosKey(iOSAccount, iOSService, iOSGeneric, iOSType);
+            return new IosKey(iOSAccount, iOSService, iOSGeneric, iOSType);
         }
 
         internal string TenantId { get; set; }
@@ -91,7 +91,9 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal IdToken IdToken => idTokenLazy.Value;
 
         public string CacheKey { get; private set; }
-        public IosKey iOSCacheKey { get; private set; }
+
+        private Lazy<IiOSKey> iOSCacheKeyLazy;
+        public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
 
         internal static MsalIdTokenCacheItem FromJsonString(string json)
         {

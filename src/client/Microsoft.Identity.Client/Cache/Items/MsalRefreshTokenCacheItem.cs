@@ -78,11 +78,11 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             CacheKey = key;
 
-            InitiOSKey();
+            iOSCacheKeyLazy = new Lazy<IiOSKey>(() => InitiOSKey());
         }
 
         #region iOS
-        private void InitiOSKey()
+        private IiOSKey InitiOSKey()
         {
             string iOSService = GetiOSService();
 
@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             int iOSType = (int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken;
 
-            iOSCacheKey = new IosKey(iOSAccount, iOSService, iOSGeneric, iOSType);
+            return new IosKey(iOSAccount, iOSService, iOSGeneric, iOSType);
         }
 
         private string GetiOSGeneric()
@@ -138,7 +138,9 @@ namespace Microsoft.Identity.Client.Cache.Items
         public bool IsFRT => !string.IsNullOrEmpty(FamilyId);
 
         public string CacheKey { get; private set; }
-        public IosKey iOSCacheKey { get; private set; }
+
+        private Lazy<IiOSKey> iOSCacheKeyLazy;
+        public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
 
         internal static MsalRefreshTokenCacheItem FromJsonString(string json)
         {

@@ -36,12 +36,12 @@ namespace Microsoft.Identity.Client.Cache.Items
             CacheKey = ($"{StorageJsonKeys.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}" +
                 $"{Environment}{MsalCacheKeys.CacheKeyDelimiter}{ClientId}").ToLowerInvariant();
 
-            InitiOSKey();
+            iOSCacheKeyLazy = new Lazy<IiOSKey>(() => InitiOSKey());
         }
 
      #region iOS
 
-        private void InitiOSKey()
+        private IiOSKey InitiOSKey()
         {
             string iOSService = $"{StorageJsonValues.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}{ClientId}".ToLowerInvariant();
 
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             int iOSType = (int)MsalCacheKeys.iOSCredentialAttrType.AppMetadata;
 
-            iOSCacheKey = new IosKey(iOSAccount, iOSService, iOSGeneric, iOSType);
+            return new IosKey(iOSAccount, iOSService, iOSGeneric, iOSType);
         }
 
     #endregion
@@ -69,12 +69,9 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// </summary>
         public string FamilyId { get; }
         public string CacheKey { get; private set; }
-        public IosKey iOSCacheKey { get; private set; }
 
-        //public MsalAppMetadataCacheKey GetKey()
-        //{
-        //    //return new MsalAppMetadataCacheKey(ClientId, Environment);
-        //}
+        private Lazy<IiOSKey> iOSCacheKeyLazy;
+        public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
 
         internal static MsalAppMetadataCacheItem FromJsonString(string json)
         {

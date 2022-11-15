@@ -396,7 +396,7 @@ namespace Microsoft.Identity.Client
 
         private void MergeWamAccountIds(MsalAccountCacheItem msalAccountCacheItem)
         {
-            var existingAccount = Accessor.GetAccount(msalAccountCacheItem.MsalAccountCacheKeyData);
+            var existingAccount = Accessor.GetAccount(msalAccountCacheItem);
             var existingWamAccountIds = existingAccount?.WamAccountIds;
             msalAccountCacheItem.WamAccountIds.MergeDifferentEntries(existingWamAccountIds);
         }
@@ -1123,11 +1123,11 @@ namespace Microsoft.Identity.Client
             var tenantProfiles = await GetTenantProfilesAsync(requestParameters, msalAccessTokenCacheItem.HomeAccountId).ConfigureAwait(false);
 
             var accountCacheItem = Accessor.GetAccount(
-                MsalAccountCacheItem.InitCacheKey(
-                    msalAccessTokenCacheItem.Environment,
-                    msalAccessTokenCacheItem.TenantId,
-                    msalAccessTokenCacheItem.HomeAccountId,
-                    requestParameters.Account?.Username));
+                new MsalAccountCacheItem(
+                        msalAccessTokenCacheItem.Environment,
+                        msalAccessTokenCacheItem.TenantId,
+                        msalAccessTokenCacheItem.HomeAccountId,
+                        requestParameters.Account?.Username));
 
             return new Account(
                 msalAccessTokenCacheItem.HomeAccountId,

@@ -429,15 +429,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var acc3 = TokenCacheHelper.CreateAccountItem("tenant2", "homeAccountId");
 
             // Assert: Null non-existing item
-            Assert.IsNull(accessor.GetAccount(acc1.MsalAccountCacheKeyData));
+            Assert.IsNull(accessor.GetAccount(acc1));
 
             accessor.SaveAccount(acc1);
             accessor.SaveAccount(acc2);
             accessor.SaveAccount(acc3);
 
             // Assert: Get token by key
-            Assert.AreEqual(acc2.CacheKey, accessor.GetAccount(acc2.MsalAccountCacheKeyData).CacheKey);
-            Assert.AreEqual(acc3.CacheKey, accessor.GetAccount(acc3.MsalAccountCacheKeyData).CacheKey);
+            Assert.AreEqual(acc2.CacheKey, accessor.GetAccount(acc2).CacheKey);
+            Assert.AreEqual(acc3.CacheKey, accessor.GetAccount(acc3).CacheKey);
         }
 
         [TestMethod]
@@ -567,7 +567,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             );
 
             Assert.ThrowsException<NotSupportedException>(() =>
-                accessor.GetAccount(TokenCacheHelper.CreateAccountItem().MsalAccountCacheKeyData)
+                accessor.GetAccount(TokenCacheHelper.CreateAccountItem())
             );
 
             Assert.ThrowsException<NotSupportedException>(() =>

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
@@ -92,6 +93,21 @@ namespace Microsoft.Identity.Client.Cache.Items
                 wamAccountIds);
         }
 
+        internal MsalAccountCacheItem(
+            string environment, 
+            string tenantId, 
+            string homeAccountId, 
+            string preferredUsername)
+            : this()
+        {
+            Environment = environment;
+            TenantId = tenantId;
+            HomeAccountId = homeAccountId;
+            PreferredUsername = preferredUsername;
+
+            InitCacheKey();
+        }
+
         internal string TenantId { get; set; }
         internal string PreferredUsername { get; set; }
         internal string Name { get; set; }
@@ -109,9 +125,8 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal IDictionary<string, string> WamAccountIds { get; set; }
         public string CacheKey { get; private set; }
 
-        public IiOSKey iOSCacheKey { get; private set; }
-
-        internal MsalAccountCacheKeyData MsalAccountCacheKeyData { get; private set; }
+        private Lazy<IiOSKey> iOSCacheKeyLazy;
+        public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
 
         private void Init(
             string environment,
@@ -139,40 +154,28 @@ namespace Microsoft.Identity.Client.Cache.Items
             InitCacheKey();
         }
 
-        //internal for test
         internal void InitCacheKey()
-        {
-            var cacheKeyItems = InitCacheKey(Environment, TenantId, HomeAccountId, PreferredUsername);
-            CacheKey = cacheKeyItems.CacheKey;
-            iOSCacheKey = cacheKeyItems.iOSKey;
-
-            MsalAccountCacheKeyData = cacheKeyItems;
-        }
-
-        internal static MsalAccountCacheKeyData InitCacheKey(string environment, string tenantId, string homeAccountId, string userName)
         {
             var stringBuilder = new StringBuilder();
 
-            stringBuilder.Append(homeAccountId + MsalCacheKeys.CacheKeyDelimiter);
-            stringBuilder.Append(environment + MsalCacheKeys.CacheKeyDelimiter);
-            stringBuilder.Append(tenantId);
+            stringBuilder.Append(HomeAccountId + MsalCacheKeys.CacheKeyDelimiter);
+            stringBuilder.Append(Environment + MsalCacheKeys.CacheKeyDelimiter);
+            stringBuilder.Append(TenantId);
 
-            var cacheKey = stringBuilder.ToString();
+            CacheKey = stringBuilder.ToString();
 
-            var iOSCacheKey = InitiOSKey(environment, tenantId, homeAccountId, userName);
-
-            return new MsalAccountCacheKeyData(homeAccountId, cacheKey, iOSCacheKey);
+            iOSCacheKeyLazy = new Lazy<IiOSKey>(() => InitiOSKey());
         }
 
         #region iOS
 
-        private static IiOSKey InitiOSKey(string environment, string tenantId, string homeAccountId, string userName)
+        private IiOSKey InitiOSKey()
         {
-            string iOSAccount = MsalCacheKeys.GetiOSAccountKey(homeAccountId, environment);
+            string iOSAccount = MsalCacheKeys.GetiOSAccountKey(HomeAccountId, Environment);
 
-            string iOSService = (tenantId ?? "").ToLowerInvariant();
+            string iOSService = (TenantId ?? "").ToLowerInvariant();
 
-            string iOSGeneric = userName?.ToLowerInvariant();
+            string iOSGeneric = PreferredUsername?.ToLowerInvariant();
 
             // This is a known issue.
             // Normally AuthorityType should be passed here but since while building the MsalAccountCacheItem it is defaulted to "MSSTS",

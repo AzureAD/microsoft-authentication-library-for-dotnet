@@ -161,9 +161,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
         #endregion
 
-        public MsalAccountCacheItem GetAccount(MsalAccountCacheKeyData accountCacheKeyData)
+        public MsalAccountCacheItem GetAccount(MsalAccountCacheItem accountCacheItem)
         {
-            return MsalAccountCacheItem.FromJsonString(_accountSharedPreference.GetString(accountCacheKeyData.CacheKey, null));
+            return MsalAccountCacheItem.FromJsonString(_accountSharedPreference.GetString(accountCacheItem.CacheKey, null));
         }
 
         /// <summary>

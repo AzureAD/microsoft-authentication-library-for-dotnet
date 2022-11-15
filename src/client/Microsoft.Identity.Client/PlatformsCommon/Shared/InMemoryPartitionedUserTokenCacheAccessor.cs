@@ -129,13 +129,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return null;
         }
 
-        public MsalAccountCacheItem GetAccount(MsalAccountCacheKeyData accountCacheKeyData)
+        public MsalAccountCacheItem GetAccount(MsalAccountCacheItem accountCacheItem)
         {
-            string partitionKey = accountCacheKeyData.HomeAccountId;
+            string partitionKey = CacheKeyFactory.GetKeyFromAccount(accountCacheItem);
 
             AccountCacheDictionary.TryGetValue(partitionKey, out var partition);
             MsalAccountCacheItem cacheItem = null;
-            partition?.TryGetValue(accountCacheKeyData.CacheKey, out cacheItem);
+            partition?.TryGetValue(accountCacheItem.CacheKey, out cacheItem);
             return cacheItem;
         }
 
