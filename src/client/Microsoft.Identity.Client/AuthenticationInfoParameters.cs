@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
                     var AuthValuesSplit = authInfoValue.Split(new char[] { ' ' }, 2);
 
                     var paramValues = CoreHelpers.SplitWithQuotes(AuthValuesSplit[1], ',')
-                            .Select(v => AuthenticationHeaderParser.ExtractKeyValuePair(v.Trim()))
+                            .Select(v => AuthenticationHeaderParser.CreateKeyValuePair(v.Trim(), AuthenticationInfoKey))
                             .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
 
                     parameters.RawParameters = paramValues;

@@ -9,6 +9,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
 
@@ -38,7 +39,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Nonce parsed from HttpResponseHeaders. This is acquired from with the POP WWW-Authenticate header or the Authetnciation-Info header
         /// </summary>
-        public string Nonce { get; private set; }
+        public string PopNonce { get; private set; }
 
         /// <summary>
         /// Creates the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
@@ -104,7 +105,7 @@ namespace Microsoft.Identity.Client
             {
                 var wwwParameters = Client.WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponseHeaders);
 
-                serverNonce = wwwParameters.SingleOrDefault(parameter => parameter.AuthScheme == "PoP")?.Nonce;
+                serverNonce = wwwParameters.SingleOrDefault(parameter => string.Equals(parameter.AuthScheme, Constants.PoPAuthHeaderPrefix, StringComparison.Ordinal))?.PopNonce;
 
                 authenticationHeaderParser.WwwAuthenticateParameters = wwwParameters;
             }
@@ -118,7 +119,7 @@ namespace Microsoft.Identity.Client
             }
 
             //If server nonce is not acquired from WWW-Authenticate headers, use next nonce from Authentication-Info parameters.
-            authenticationHeaderParser.Nonce = serverNonce ?? authenticationInfoParameters.NextNonce;
+            authenticationHeaderParser.PopNonce = serverNonce ?? authenticationInfoParameters.NextNonce;
 
             return authenticationHeaderParser;
         }
@@ -132,19 +133,22 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Extracts a key value pair from an expression of the form a=b
+        /// Creates a key value pair from an expression of the form a=b is possible.
+        /// Otherwise, the key value pair will be returned as (key:<paramref name="authScheme"/>, value:<paramref name="paramValue"/>)
         /// </summary>
-        /// <param name="assignment">assignment</param>
+        /// <param name="paramValue">assignment</param>
+        /// <param name="authScheme">authScheme</param>
         /// <returns>Key Value pair</returns>
-        internal static KeyValuePair<string, string> ExtractKeyValuePair(string assignment)
+        internal static KeyValuePair<string, string> CreateKeyValuePair(string paramValue, string authScheme)
         {
-            string[] segments = CoreHelpers.SplitWithQuotes(assignment, '=')
+            string[] segments = CoreHelpers.SplitWithQuotes(paramValue, '=')
                 .Select(s => s.Trim().Trim('"'))
                 .ToArray();
 
-            if (segments.Length != 2)
+            if (segments.Length < 2)
             {
-                throw new ArgumentException(nameof(assignment), $"{assignment} isn't of the form a=b");
+                // Extracted assignment isn't of the form a=b. To enable this value to be more easily discoverable, it is set with the auth scheme as the key."
+                return new KeyValuePair<string, string>(authScheme, paramValue);
             }
 
             return new KeyValuePair<string, string>(segments[0], segments[1]);

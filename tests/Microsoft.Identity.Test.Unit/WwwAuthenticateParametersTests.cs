@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+#pragma warning disable CS0618 // Type or member is obsolete
 namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
@@ -59,6 +60,39 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        [DataRow("AuthScheme", "" )]
+        [DataRow("AuthScheme", "realm = someRealm")]
+        [DataRow("AuthScheme", "token68")]
+        [DataRow("AuthScheme", "realm = someRealm token68")]
+        [DataRow("AuthScheme", "auth-param1=token1, auth-param2=token2, auth-param3=token3")]
+        [DataRow("AuthScheme", "realm = someRealm auth-param1=token1, auth-param2=token2, auth-param3=token3")]
+        [DataRow("AuthScheme", "token68 auth-param1=token1, auth-param2=token2, auth-param3=token3")]
+        [DataRow("AuthScheme", "realm = someRealm token68 auth-param1=token1, auth-param2=token2, auth-param3=token3")]
+        public void EnsureProperlyFormattedHeadersDoNotFail(string scheme, string values)
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"{scheme} {values}");
+
+            // Act
+            var authParams = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers, scheme);
+
+            // Assert
+            //if (scheme == "NTLM")
+            //{
+            //    Assert.AreEqual(scheme, authParams.AuthScheme);
+            //    Assert.AreEqual(values, authParams.RawParameters[scheme]);
+            //}
+            //else
+            //{
+            //    Assert.AreEqual(3, authParams.RawParameters.Count);
+            //    Assert.AreEqual("WindowsLive", authParams.RawParameters["realm"]);
+            //    Assert.AreEqual("MBI_SSL", authParams.RawParameters["policy"]);
+            //    Assert.AreEqual("ssl.live-tst.net", authParams.RawParameters["siteId"]);
+            //}
+        }
+
+        [TestMethod]
         [DataRow("WLID1.0", "realm=WindowsLive, policy=MBI_SSL, siteId=\"ssl.live-tst.net\"")]
         [DataRow("NTLM", "dG9rZW42OA==")]
         public void CreateWwwAuthenticateResponseForUnknownChallenges(string scheme, string values)
@@ -83,30 +117,6 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual("MBI_SSL", authParams.RawParameters["policy"]);
                 Assert.AreEqual("ssl.live-tst.net", authParams.RawParameters["siteId"]);
             }
-        }
-
-        [TestMethod]
-        [DataRow("Bearer","")]
-        [DataRow("Bearer", "Bearer Malformed String  Malformed String\", \"Malformed String, Malformed String")]
-        [DataRow("Bearer", "Malformed String  Malformed StringMalformed String, Malformed String")]
-        [DataRow("Pop", "Malformed String  Malformed StringMalformed String, Malformed String")]
-        [DataRow("", "Malformed String  Malformed StringMalformed String, Malformed String")]
-        [DataRow("SomeAuthScheme", "Malformed String  Malformed StringMalformed String, Malformed String")]
-        [DataRow("\'SomeAuthScheme\'", "\'Malformed String  Malformed StringMalformed String, Malformed String\'")]
-        [DataRow("&SomeAuthScheme&", "Malformed String  Malformed StringMalformed String, Malformed String")]
-        public void CreateFromMalformedWwwAuthenticateResponse(string scheme, string value)
-        {
-            // Arrange
-            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
-            httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"{scheme} {value}");
-
-            // Act
-            var ex = Assert.ThrowsException<MsalClientException>(() => 
-                                    WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers, scheme));
-
-            //Assert
-            Assert.AreEqual(ex.ErrorCode, MsalError.UnableToParseAuthenticationHeader);
-            Assert.AreEqual(ex.Message, MsalErrorMessage.UnableToParseAuthenticationHeader);
         }
 
         [TestMethod]
@@ -146,6 +156,7 @@ namespace Microsoft.Identity.Test.Unit
 
             // Act
             var authParams = WwwAuthenticateParameters.CreateFromResponseHeaders(httpResponse.Headers);
+
 
             // Assert
             Assert.IsTrue(authParams.RawParameters.ContainsKey(resourceHeaderKey));
@@ -380,7 +391,7 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
             Assert.IsNotNull(popHeader);
-            Assert.AreEqual(TestConstants.Nonce, popHeader.Nonce);
+            Assert.AreEqual(TestConstants.Nonce, popHeader.PopNonce);
         }
 
         [TestMethod]
@@ -400,7 +411,7 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
             Assert.IsNotNull(popHeader);
-            Assert.AreEqual(TestConstants.Nonce, popHeader.Nonce);
+            Assert.AreEqual(TestConstants.Nonce, popHeader.PopNonce);
         }
 
         [TestMethod]
@@ -420,7 +431,7 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
             Assert.IsNotNull(popHeader);
-            Assert.AreEqual(TestConstants.Nonce, popHeader.Nonce);
+            Assert.AreEqual(TestConstants.Nonce, popHeader.PopNonce);
         }
 
         [TestMethod]
@@ -556,3 +567,4 @@ namespace Microsoft.Identity.Test.Unit
         }
     }
 }
+#pragma warning restore CS0618 // Type or member is obsolete

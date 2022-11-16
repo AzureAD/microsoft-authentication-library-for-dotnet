@@ -18,6 +18,7 @@ using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+#pragma warning disable CS0618 // Type or member is obsolete
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     [TestClass]
@@ -28,6 +29,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task CreateWwwAuthenticateResponseFromKeyVaultUrlAsync()
         {
+
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync("https://buildautomation.vault.azure.net/secrets/CertName/CertVersion").ConfigureAwait(false);
 
             Assert.AreEqual("login.windows.net", new Uri(authParams.Authority).Host);
@@ -84,7 +86,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             //Assert
             Assert.IsTrue(parameterList.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
-            Assert.IsNotNull(parameterList.Where(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix).Single().Nonce);
+            Assert.IsNotNull(parameterList.Where(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix).Single().PopNonce);
         }
 
         [TestMethod]
@@ -133,9 +135,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             //Assert
             Assert.IsTrue(parsedHeaders.WwwAuthenticateParameters.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
-            var serverNonce = parsedHeaders.WwwAuthenticateParameters.Where(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix).Single().Nonce;
+            var serverNonce = parsedHeaders.WwwAuthenticateParameters.Where(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix).Single().PopNonce;
             Assert.IsNotNull(serverNonce);
-            Assert.AreEqual(parsedHeaders.Nonce, serverNonce);
+            Assert.AreEqual(parsedHeaders.PopNonce, serverNonce);
             Assert.IsNull(parsedHeaders.AuthenticationInfoParameters);
 
             //Arrange & Act
@@ -144,10 +146,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             //Assert
             Assert.IsNotNull(parsedHeaders.AuthenticationInfoParameters.NextNonce);
-            Assert.AreEqual(parsedHeaders.Nonce, parsedHeaders.AuthenticationInfoParameters.NextNonce);
+            Assert.AreEqual(parsedHeaders.PopNonce, parsedHeaders.AuthenticationInfoParameters.NextNonce);
 
             Assert.IsFalse(parsedHeaders.WwwAuthenticateParameters.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
-            await TestCommon.ValidatePopNonceAsync(parsedHeaders.Nonce).ConfigureAwait(false);
+            await TestCommon.ValidatePopNonceAsync(parsedHeaders.PopNonce).ConfigureAwait(false);
         }
 
 #if NET_CORE
@@ -166,7 +168,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithExperimentalFeatures()
                .WithBrokerPreview().Build();
 
             Assert.IsTrue(pca.IsProofOfPossessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");
@@ -176,7 +177,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     scopes,
                     labResponse.User.Upn,
                     labResponse.User.GetOrFetchPassword())
-                .WithProofOfPossession(parsedHeaders.Nonce, HttpMethod.Get, new Uri(ProtectedUrl))
+                .WithProofOfPossession(parsedHeaders.PopNonce, HttpMethod.Get, new Uri(ProtectedUrl))
                 .ExecuteAsync().ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes, true);
@@ -185,4 +186,5 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 #endif
     }
+#pragma warning restore CS0618 // Type or member is obsolete
 }

@@ -62,12 +62,12 @@ namespace Microsoft.Identity.Client
         /// AuthScheme.
         /// See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate#syntax for more details
         /// </summary>
-        public string AuthScheme { get; private set; } 
+        public string AuthScheme { get; private set; }
 
         /// <summary>
-        /// Server Nonce.
+        /// Pop Nonce. This is acquired from with the POP WWW-Authenticate header.
         /// </summary>
-        public string Nonce { get; private set; }
+        public string PopNonce { get; private set; }
 
         /// <summary>
         /// Return the <see cref="RawParameters"/> of key <paramref name="key"/>.
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client
         /// Gets Azure AD tenant ID.
         /// </summary>
         public string GetTenantId() => Instance.Authority
-                                               .CreateAuthority(Authority, validateAuthority: true)
+                                               .CreateAuthority(Authority, validateAuthority: true)?
                                                .TenantId;
         #region Obsolete Api
         /// <summary>
@@ -104,6 +104,7 @@ namespace Microsoft.Identity.Client
         /// <param name="resourceUri">URI of the resource.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
         [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("This api is now obsolete and has been replaced with CreateFromAuthenticationResponseAsync(...)")]
         public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri)
         {
             return CreateFromResourceResponseAsync(resourceUri, default);
@@ -116,6 +117,7 @@ namespace Microsoft.Identity.Client
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
         [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("This api is now obsolete and has been replaced with CreateFromAuthenticationResponseAsync(...)")]
         public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
         {
             return CreateFromResourceResponseAsync(AuthenticationHeaderParser.GetHttpClient(), resourceUri, cancellationToken);
@@ -129,6 +131,7 @@ namespace Microsoft.Identity.Client
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
         [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("This api is now obsolete and has been replaced with CreateFromAuthenticationResponseAsync(...)")]
         public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(HttpClient httpClient, string resourceUri, CancellationToken cancellationToken = default)
         {
             if (httpClient is null)
@@ -153,7 +156,8 @@ namespace Microsoft.Identity.Client
         /// <param name="scheme">Authentication scheme. Default is "Bearer".</param>
         /// <returns>The parameters requested by the web API.</returns>
         /// <remarks>Currently it only supports the Bearer scheme</remarks>
-        [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]  // hide confidential client on mobile
+        [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("This api is now obsolete and has been replaced with CreateFromAuthenticationHeaders(...)")]
         public static WwwAuthenticateParameters CreateFromResponseHeaders(
             HttpResponseHeaders httpResponseHeaders,
             string scheme = "Bearer")
@@ -180,6 +184,7 @@ namespace Microsoft.Identity.Client
         /// <param name="wwwAuthenticateValue">String contained in a WWW-Authenticate header.</param>
         /// <returns>The parameters requested by the web API.</returns>
         [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("This api is now obsolete and should not be used.")]
         public static WwwAuthenticateParameters CreateFromWwwAuthenticateHeaderValue(string wwwAuthenticateValue)
         {
             return CreateFromWwwAuthenticationHeaderValue(wwwAuthenticateValue, string.Empty);
@@ -380,39 +385,24 @@ namespace Microsoft.Identity.Client
         /// <returns>The parameters requested by the web API.</returns>
         private static WwwAuthenticateParameters CreateFromWwwAuthenticationHeaderValue(string wwwAuthenticateValue, string scheme)
         {
-            if (string.IsNullOrWhiteSpace(wwwAuthenticateValue))
-            {
-                throw new ArgumentNullException(nameof(wwwAuthenticateValue));
-            }
+            IDictionary<string, string> parameters = null;
 
-            //Special NTLM case does not have an a=b format
-            if (scheme == "NTLM")
+            if (!string.IsNullOrWhiteSpace(wwwAuthenticateValue))
             {
-                return new WwwAuthenticateParameters
+                var authValuesSplit = wwwAuthenticateValue.Split(new char[] { ' ' }, 2);
+
+                if (s_knownAuthenticationSchemes.Contains(authValuesSplit[0]))
                 {
-                    RawParameters = new Dictionary<string, string>()
-                    {
-                        { scheme, wwwAuthenticateValue }
-                    },
-                    AuthScheme = scheme
-                };
-            }
-
-            IDictionary<string, string> parameters;
-
-            var authValuesSplit = wwwAuthenticateValue.Split(new char[] { ' ' }, 2);
-
-            if (s_knownAuthenticationSchemes.Contains(authValuesSplit[0]))
-            {
-                parameters = CoreHelpers.SplitWithQuotes(authValuesSplit[1], ',')
-                    .Select(v => AuthenticationHeaderParser.ExtractKeyValuePair(v.Trim()))
-                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
-            }
-            else
-            {
-                parameters = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ',')
-                    .Select(v => AuthenticationHeaderParser.ExtractKeyValuePair(v.Trim()))
-                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+                    parameters = CoreHelpers.SplitWithQuotes(authValuesSplit[1], ',')
+                        .Select(v => AuthenticationHeaderParser.CreateKeyValuePair(v.Trim(), scheme))
+                        .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+                }
+                else
+                {
+                    parameters = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ',')
+                        .Select(v => AuthenticationHeaderParser.CreateKeyValuePair(v.Trim(), scheme))
+                        .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+                }
             }
 
             return CreateWwwAuthenticateParameters(parameters, scheme);
@@ -420,16 +410,16 @@ namespace Microsoft.Identity.Client
 
         internal static WwwAuthenticateParameters CreateWwwAuthenticateParameters(IDictionary<string, string> values, string scheme)
         {
-            WwwAuthenticateParameters wwwAuthenticateParameters = new WwwAuthenticateParameters
-            {
-                RawParameters = values
-            };
+            WwwAuthenticateParameters wwwAuthenticateParameters = new WwwAuthenticateParameters();
 
-            if (values.Count == 0)
+            wwwAuthenticateParameters.AuthScheme = scheme;
+
+            if (values == null)
             {
-                //unable to parse auth header values
-                throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader);
+                return wwwAuthenticateParameters;
             }
+
+            wwwAuthenticateParameters.RawParameters = values;
 
             string value;
 
@@ -466,10 +456,8 @@ namespace Microsoft.Identity.Client
 
             if (values.TryGetValue("nonce", out value))
             {
-                wwwAuthenticateParameters.Nonce = value.Replace("\"", string.Empty);
+                wwwAuthenticateParameters.PopNonce = value.Replace("\"", string.Empty);
             }
-
-            wwwAuthenticateParameters.AuthScheme = scheme;
 
             return wwwAuthenticateParameters;
         }
