@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures()
                     .Build();
 
-                httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiSuccessfulResponse());
 
                 var result = await cca.AcquireTokenForClient(new string[] { scope })
@@ -76,7 +75,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures()
                     .Build();
 
-                httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", resource, MockHelpers.GetMsiErrorResponse(), HttpStatusCode.InternalServerError);
                 httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", resource, MockHelpers.GetMsiErrorResponse(), HttpStatusCode.InternalServerError);
 
@@ -105,7 +103,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures()
                     .Build();
 
-                httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", "https://management.azure.com", "", HttpStatusCode.OK);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
@@ -115,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.InvalidManagedIdentityResponse, ex.ErrorCode);
-                Assert.AreEqual("Invalid response, the authentication response was not in the expected format.", ex.Message);
+                Assert.AreEqual(MsalErrorMessage.AuthenticationResponseInvalidFormatError, ex.Message);
             }
         }
 
@@ -132,9 +129,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithHttpManager(httpManager)
                     .WithExperimentalFeatures()
                     .Build();
-
-                httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", "https://management.azure.com", "", HttpStatusCode.OK);
 
                 MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
                     await cca.AcquireTokenForClient(new string[] { "https://management.azure.com" })

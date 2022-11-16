@@ -23,15 +23,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             "ManagedIdentityCredential authentication unavailable. No Managed Identity endpoint found.";
 
         private Lazy<ManagedIdentitySource> _identitySource;
-        RequestContext _context;
-
-        protected ManagedIdentityClient()
-        {
-        }
 
         public ManagedIdentityClient(RequestContext requestContext)
         {
-            _context = requestContext;
             _identitySource = new Lazy<ManagedIdentitySource>(() => SelectManagedIdentitySource(requestContext));
         }
 
@@ -53,7 +47,5 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             return AppServiceManagedIdentitySource.TryCreate(requestContext);
         }
-
-
     }
 }

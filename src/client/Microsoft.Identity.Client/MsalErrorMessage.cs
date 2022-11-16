@@ -440,5 +440,7 @@ namespace Microsoft.Identity.Client
                                 invalidValueName);
         }
 
+        public const string AuthenticationResponseInvalidFormatError = "Invalid response, the authentication response received did not contain the expected fields.";
+        public const string UnexpectedResponse = "Managed Identity response was not in the expected format. See the inner exception for details.";
     }
 }

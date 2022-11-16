@@ -67,10 +67,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             {
                 ManagedIdentityClient managedIdentityClient = new ManagedIdentityClient(requestContext);
                 ServiceBundle.Config.AppTokenProvider = managedIdentityClient.AppTokenProviderImplAsync;
-                // TODO: disable instance discovery
-                string instanceMetadata = "{\"tenant_discovery_endpoint\":\"https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration\",\"api-version\":\"1.1\",\"metadata\":[{\"preferred_network\":\"login.microsoftonline.com\",\"preferred_cache\":\"login.windows.net\",\"aliases\":[\"login.microsoftonline.com\",\"login.windows.net\",\"login.microsoft.com\",\"sts.windows.net\"]}]}";
-                InstanceDiscoveryResponse instanceDiscovery = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(instanceMetadata);
-                ServiceBundle.Config.CustomInstanceDiscoveryMetadata = instanceDiscovery;
             }
 
             var handler = new ClientCredentialRequest(
