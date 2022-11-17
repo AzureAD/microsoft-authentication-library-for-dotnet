@@ -10,6 +10,8 @@ namespace Microsoft.Identity.Client.AuthScheme.Bearer
     {
         internal const string BearerTokenType = "bearer";
 
+        public TokenType TelemetryTokenType => TokenType.Bearer;
+
         public string AuthorizationHeaderPrefix => "Bearer";
 
         public string AccessTokenType => BearerTokenType;

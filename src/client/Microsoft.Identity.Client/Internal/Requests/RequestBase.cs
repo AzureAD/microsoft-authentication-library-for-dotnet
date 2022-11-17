@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
             AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
-            MsalTelemetryEventDetails telemetryEventDetails = new MsalTelemetryEventDetails();
+            MsalTelemetryEventDetails telemetryEventDetails = new MsalTelemetryEventDetails(TelemetryConstants.AcquireTokenEventName);
             ITelemetryClient[] telemetryClients = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.TelemetryClients;
 
             using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
@@ -189,6 +189,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             apiEvent.IsTokenCacheSerialized = AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.IsExternalSerializationConfiguredByUser();
             apiEvent.IsLegacyCacheEnabled = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
             apiEvent.CacheInfo = CacheRefreshReason.NotApplicable;
+            apiEvent.TokenType = AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
 
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
             EnrichTelemetryApiEvent(apiEvent);
@@ -389,7 +390,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authenticationRequestParameters.RequestContext.Logger.InfoPii(messageWithPii, messageWithoutPii);
             }
 
-            if (authenticationRequestParameters.IsConfidentialClient &&
+            if (authenticationRequestParameters.AppConfig.IsConfidentialClient &&
                 !authenticationRequestParameters.IsClientCredentialRequest &&
                 !CacheManager.TokenCacheInternal.IsAppSubscribedToSerializationEvents())
             {

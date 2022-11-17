@@ -85,8 +85,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             _synchronizationContext = new DedicatedThreadSynchronizationContext();
 
             _coreUIParent = new CoreUIParent() { SynchronizationContext = _synchronizationContext };
-            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
-            _logger = Substitute.For<TestLogger>();
+            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(isConfidentialClient: false);
+            _logger = Substitute.For<ILoggerAdapter>();
 
             _serviceBundle = TestCommon.CreateDefaultServiceBundle();
 

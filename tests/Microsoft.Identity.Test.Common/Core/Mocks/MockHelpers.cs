@@ -102,9 +102,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return stream;
         }
 
-        public static HttpResponseMessage CreateResiliencyMessage(HttpStatusCode statusCode)
+        public static HttpResponseMessage CreateServerErrorMessage(HttpStatusCode statusCode, int? retryAfter = null)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
+            if (retryAfter != null)
+            {
+                responseMessage.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(retryAfter.Value));
+            }
             responseMessage.Content = new StringContent("Server Error 500-599");
             return responseMessage;
         }

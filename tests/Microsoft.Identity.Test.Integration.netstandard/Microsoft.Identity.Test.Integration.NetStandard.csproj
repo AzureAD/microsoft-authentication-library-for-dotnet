@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net5</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
