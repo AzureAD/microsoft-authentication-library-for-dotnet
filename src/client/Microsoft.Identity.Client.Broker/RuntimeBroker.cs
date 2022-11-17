@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.Broker
             ApplicationConfiguration appConfig,
             ILoggerAdapter logger)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = logger;
 
             _parentHandle = GetParentWindow(uiParent);
 
@@ -106,55 +106,25 @@ namespace Microsoft.Identity.Client.Broker
 
         private void LogEventRaised(NativeInterop.Core sender, LogEventArgs args)
         {
-            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
-            LogLevel msalLogLevel = LogLevelMap[args.LogLevel];
-            if (_logger.IsLoggingEnabled(msalLogLevel))
+            if (_logger != null)
             {
-                if (_logger.PiiLoggingEnabled)
+                using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
+                LogLevel msalLogLevel = LogLevelMap[args.LogLevel];
+                if (_logger.IsLoggingEnabled(msalLogLevel))
                 {
-                    switch (msalLogLevel)
+                    string msgWithPii = string.Empty;
+                    string msgNoPii = string.Empty;
+
+                    if (_logger.PiiLoggingEnabled)
                     {
-                        case LogLevel.Always:
-                            _logger.AlwaysPii(args.Message, string.Empty);
-                            break;
-                        case LogLevel.Error:
-                            _logger.ErrorPii(args.Message, string.Empty);
-                            break;
-                        case LogLevel.Warning:
-                            _logger.WarningPii(args.Message, string.Empty);
-                            break;
-                        case LogLevel.Info:
-                            _logger.InfoPii(args.Message, string.Empty);
-                            break;
-                        case LogLevel.Verbose:
-                            _logger.VerbosePii(args.Message, string.Empty);
-                            break;
-                        default:
-                            break;
+                        msgWithPii = args.Message;
                     }
-                }
-                else
-                {
-                    switch (msalLogLevel)
+                    else
                     {
-                        case LogLevel.Always:
-                            _logger.Always(args.Message);
-                            break;
-                        case LogLevel.Error:
-                            _logger.Error(args.Message);
-                            break;
-                        case LogLevel.Warning:
-                            _logger.Warning(args.Message);
-                            break;
-                        case LogLevel.Info:
-                            _logger.Info(args.Message);
-                            break;
-                        case LogLevel.Verbose:
-                            _logger.Verbose(args.Message);
-                            break;
-                        default:
-                            break;
+                        msgNoPii = args.Message;
                     }
+
+                    _logger.Log(msalLogLevel, msgWithPii, msgNoPii);
                 }
             }
         }
@@ -183,7 +153,7 @@ namespace Microsoft.Identity.Client.Broker
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
 
-            _logger.Verbose("[WamBroker] Using Windows account picker.");
+            _logger?.Verbose("[WamBroker] Using Windows account picker.");
 
             if (authenticationRequestParameters?.Account?.HomeAccountId?.ObjectId != null)
             {
@@ -212,9 +182,9 @@ namespace Microsoft.Identity.Client.Broker
                         }
                         else
                         {
-                            _logger.Warning(
+                            _logger?.Warning(
                                 $"[WamBroker] Could not find a WAM account for the selected user {authenticationRequestParameters.Account.Username}");
-                            _logger.Info(
+                            _logger?.Info(
                                 $"[WamBroker] Calling SignInInteractivelyAsync this will show the account picker.");
 
                             msalTokenResponse = await SignInInteractivelyAsync(
@@ -250,7 +220,7 @@ namespace Microsoft.Identity.Client.Broker
             {
                 //Login Hint
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
-                _logger.Verbose("[WamBroker] AcquireTokenInteractive - login hint provided? " + !string.IsNullOrEmpty(loginHint));
+                _logger?.Verbose("[WamBroker] AcquireTokenInteractive - login hint provided? " + !string.IsNullOrEmpty(loginHint));
 
                 using (var result = await s_lazyCore.Value.SignInInteractivelyAsync(
                     _parentHandle,
@@ -277,7 +247,7 @@ namespace Microsoft.Identity.Client.Broker
             MsalTokenResponse msalTokenResponse = null;
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
 
-            _logger.Verbose("[WamBroker] Signing in with the default user account.");
+            _logger?.Verbose("[WamBroker] Signing in with the default user account.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters, 
@@ -318,7 +288,7 @@ namespace Microsoft.Identity.Client.Broker
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
 
-            _logger.Verbose("[WamBroker] Acquiring token silently.");
+            _logger?.Verbose("[WamBroker] Acquiring token silently.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters, 
@@ -332,7 +302,7 @@ namespace Microsoft.Identity.Client.Broker
                 {
                     if (!readAccountResult.IsSuccess)
                     {
-                        _logger.WarningPii(
+                        _logger?.WarningPii(
                             $"[WamBroker] Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}",
                             $"[WamBroker] Could not find a WAM account for the selected user {readAccountResult.Error}");
 
@@ -366,7 +336,7 @@ namespace Microsoft.Identity.Client.Broker
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
 
-            _logger.Verbose("[WamBroker] Acquiring token silently for default account.");
+            _logger?.Verbose("[WamBroker] Acquiring token silently for default account.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters, 
@@ -396,7 +366,7 @@ namespace Microsoft.Identity.Client.Broker
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
 
-            _logger.Verbose("[WamBroker] Acquiring token with Username Password flow.");
+            _logger?.Verbose("[WamBroker] Acquiring token with Username Password flow.");
 
             using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters, 
@@ -432,7 +402,7 @@ namespace Microsoft.Identity.Client.Broker
             
             if (account == null)
             {
-                _logger.Verbose("[WamBroker] No valid account was passed to RemoveAccountAsync. ");
+                _logger?.Verbose("[WamBroker] No valid account was passed to RemoveAccountAsync. ");
                 throw new MsalClientException("wam_remove_account_failed", "No valid account was passed.");
             }
 
@@ -441,11 +411,11 @@ namespace Microsoft.Identity.Client.Broker
             //if OperatingSystemAccount is passed then we use the user signed -in on the machine
             if (PublicClientApplication.IsOperatingSystemAccount(account))
             {
-                _logger.Verbose("[WamBroker] Default Operating System Account cannot be removed. ");
+                _logger?.Verbose("[WamBroker] Default Operating System Account cannot be removed. ");
                 throw new MsalClientException("wam_remove_account_failed", "Default Operating System account cannot be removed.");
             }
 
-            _logger.Info($"Removing WAM Account. Correlation ID : {correlationId} ");
+            _logger?.Info($"Removing WAM Account. Correlation ID : {correlationId} ");
 
             {
                 using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
@@ -455,12 +425,12 @@ namespace Microsoft.Identity.Client.Broker
                 {
                     if (readAccountResult.IsSuccess)
                     {
-                        _logger.Verbose("[WamBroker] WAM Account exist and can be removed.");
+                        _logger?.Verbose("[WamBroker] WAM Account exist and can be removed.");
 
                     }
                     else
                     {
-                        _logger.WarningPii(
+                        _logger?.WarningPii(
                             $"[WamBroker] Could not find a WAM account for the selected user {account.Username}",
                             $"[WamBroker] Could not find a WAM account for the selected user {readAccountResult.Error}");
 
@@ -475,7 +445,7 @@ namespace Microsoft.Identity.Client.Broker
                     {
                         if (result.IsSuccess)
                         {
-                            _logger.Verbose("[WamBroker] Account signed out successfully. ");
+                            _logger?.Verbose("[WamBroker] Account signed out successfully. ");
                         }
                         else
                         {
@@ -507,25 +477,25 @@ namespace Microsoft.Identity.Client.Broker
         {
             if (!DesktopOsHelper.IsWin10OrServerEquivalent())
             {
-                _logger.Warning("[WAM Broker] Not a supported operating system. WAM broker is not available. ");
+                _logger?.Warning("[WAM Broker] Not a supported operating system. WAM broker is not available. ");
                 return false;
             }
 
             // WAM does not work on pure ADFS environments
             if (authorityType == AuthorityType.Adfs)
             {
-                _logger.Warning("[WAM Broker] WAM does not work in pure ADFS environments. Falling back to browser for an ADFS authority unless Proof-of-Possession is configured. ");
+                _logger?.Warning("[WAM Broker] WAM does not work in pure ADFS environments. Falling back to browser for an ADFS authority unless Proof-of-Possession is configured. ");
                 return false;
             }
 
             if (s_lazyCore.Value == null)
             {
-                _logger.Info("[WAM Broker] MsalRuntime initialization failed. See https://aka.ms/msal-net-wam#wam-limitations");
-                _logger.InfoPii(s_initException);
+                _logger?.Info("[WAM Broker] MsalRuntime initialization failed. See https://aka.ms/msal-net-wam#wam-limitations");
+                _logger?.InfoPii(s_initException);
                 return false;
             }
 
-            _logger.Verbose($"[WAM Broker] MsalRuntime initialization successful.");
+            _logger?.Verbose($"[WAM Broker] MsalRuntime initialization successful.");
             return true;
         }
 
