@@ -15,6 +15,9 @@ using System.Net;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
+    /// <summary>
+    /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/ManagedIdentitySource.cs
+    /// </summary>
     internal abstract class ManagedIdentitySource
     {
         protected readonly RequestContext _requestContext;
@@ -32,8 +35,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             
             var response =
             HttpMethod.Get.Equals(request.Method) ?
-            await _requestContext.ServiceBundle.HttpManager.SendGetAsync(request.UriBuilder.Uri, request.Headers, _requestContext.Logger, useManagedIdentity: true, cancellationToken: cancellationToken).ConfigureAwait(false) :
-            await _requestContext.ServiceBundle.HttpManager.SendPostAsync(request.UriBuilder.Uri, request.Headers, request.BodyParameters, _requestContext.Logger, useManagedIdentity: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+            await _requestContext.ServiceBundle.HttpManager.SendGetForceResponseAsync(request.Endpoint, request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false) :
+            await _requestContext.ServiceBundle.HttpManager.SendPostAsync(request.Endpoint, request.Headers, request.BodyParameters, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             return HandleResponse(parameters, response);
             
@@ -51,11 +54,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     return GetSuccessfulResponse(response);
                 }
 
-                throw MsalServiceExceptionFactory.FromManagedIdentityResponse(MsalError.ManagedIdentityRequestFailed, response);
+
+                MsalServiceException msalServiceException = MsalServiceExceptionFactory.FromManagedIdentityResponse(MsalError.ManagedIdentityRequestFailed, response);
+                _requestContext.Logger.Error($"[Managed Identity] request failed, HttpStatusCode: {response.StatusCode}. Error message: {msalServiceException.Message}");
+                throw msalServiceException;
             }
             catch (Exception e) when (e is not MsalServiceException)
             {
-                throw new MsalServiceException(MsalError.UnknownManagedIdentityError, MsalErrorMessage.UnexpectedResponse, e);
+                _requestContext.Logger.Error(MsalErrorMessage.UnexpectedResponse);
+                throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.UnexpectedResponse, e);
             }
         }
 
@@ -67,7 +74,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (managedIdentityResponse == null || managedIdentityResponse.AccessToken.IsNullOrEmpty() || managedIdentityResponse.ExpiresOn.IsNullOrEmpty())
             {
-                throw new MsalServiceException(MsalError.InvalidManagedIdentityResponse, MsalErrorMessage.AuthenticationResponseInvalidFormatError);
+                throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.AuthenticationResponseInvalidFormatError);
             }
 
             return managedIdentityResponse;

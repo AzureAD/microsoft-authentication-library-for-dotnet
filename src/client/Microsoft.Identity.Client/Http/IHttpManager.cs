@@ -19,7 +19,6 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             IDictionary<string, string> bodyParameters,
             ILoggerAdapter logger,
-            bool useManagedIdentity = false,
             CancellationToken cancellationToken = default);
 
         Task<HttpResponse> SendPostAsync(
@@ -27,7 +26,6 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             HttpContent body,
             ILoggerAdapter logger,
-            bool useManagedIdentity = false,
             CancellationToken cancellationToken = default);
 
         Task<HttpResponse> SendGetAsync(
@@ -35,7 +33,6 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             ILoggerAdapter logger,
             bool retry = true,
-            bool useManagedIdentity = false,
             CancellationToken cancellationToken = default);
 
         Task<HttpResponse> SendPostForceResponseAsync(
@@ -43,6 +40,20 @@ namespace Microsoft.Identity.Client.Http
             Dictionary<string, string> headers,
             StringContent body,
             ILoggerAdapter logger,
+            CancellationToken cancellationToken = default);
+
+        Task<HttpResponse> SendPostForceResponseAsync(
+            Uri uri,
+            Dictionary<string, string> headers,
+            Dictionary<string, string> bodyParameters,
+            ILoggerAdapter logger,
+            CancellationToken cancellationToken = default);
+
+        Task<HttpResponse> SendGetForceResponseAsync(
+            Uri endpoint,
+            IDictionary<string, string> headers,
+            ILoggerAdapter logger,
+            bool retry = true,
             CancellationToken cancellationToken = default);
     }
 }

@@ -47,11 +47,10 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             IDictionary<string, string> bodyParameters,
             ILoggerAdapter logger,
-            bool useManagedIdentity = false,
             CancellationToken cancellationToken = default)
         {
             HttpContent body = bodyParameters == null ? null : new FormUrlEncodedContent(bodyParameters);
-            return await SendPostAsync(endpoint, headers, body, logger, useManagedIdentity: useManagedIdentity, cancellationToken).ConfigureAwait(false);
+            return await SendPostAsync(endpoint, headers, body, logger, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<HttpResponse> SendPostAsync(
@@ -59,10 +58,9 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             HttpContent body,
             ILoggerAdapter logger,
-            bool useManagedIdentity = false,
             CancellationToken cancellationToken = default)
         {
-            return await ExecuteWithRetryAsync(endpoint, headers, body, HttpMethod.Post, logger, useManagedIdentity: useManagedIdentity, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return await ExecuteWithRetryAsync(endpoint, headers, body, HttpMethod.Post, logger, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<HttpResponse> SendGetAsync(
@@ -70,14 +68,44 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             ILoggerAdapter logger,
             bool retry = true,
-            bool useManagedIdentity = false,
             CancellationToken cancellationToken = default)
         {
-            return await ExecuteWithRetryAsync(endpoint, headers, null, HttpMethod.Get, logger, retry: retry, useManagedIdentity: useManagedIdentity, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return await ExecuteWithRetryAsync(endpoint, headers, null, HttpMethod.Get, logger, retry: retry, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Performs the POST request just like <see cref="SendPostAsync(Uri, IDictionary{string, string}, HttpContent, ILoggerAdapter, bool, CancellationToken)"/>
+        /// Performs the GET request just like <see cref="SendGetAsync(Uri, IDictionary{string, string}, ILoggerAdapter, bool, CancellationToken)"/>
+        /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="HttpResponse"/> associated
+        /// with the request.
+        /// </summary>
+        public async Task<HttpResponse> SendGetForceResponseAsync(
+            Uri endpoint,
+            IDictionary<string, string> headers,
+            ILoggerAdapter logger,
+            bool retry = true,
+            CancellationToken cancellationToken = default)
+        {
+            return await ExecuteWithRetryAsync(endpoint, headers, null, HttpMethod.Get, logger, retry: retry, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Performs the POST request just like <see cref="SendPostAsync(Uri, IDictionary{string, string}, IDictionary{String, String}, ILoggerAdapter, CancellationToken)"/>
+        /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="HttpResponse"/> associated
+        /// with the request.
+        /// </summary>
+        public async Task<HttpResponse> SendPostForceResponseAsync(
+            Uri uri,
+            Dictionary<string, string> headers,
+            Dictionary<string, string> bodyParameters,
+            ILoggerAdapter logger,
+            CancellationToken cancellationToken = default)
+        {
+            HttpContent body = bodyParameters == null ? null : new FormUrlEncodedContent(bodyParameters);
+            return await ExecuteWithRetryAsync(uri, headers, body, HttpMethod.Post, logger, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Performs the POST request just like <see cref="SendPostAsync(Uri, IDictionary{string, string}, HttpContent, ILoggerAdapter, CancellationToken)"/>
         /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="HttpResponse"/> associated
         /// with the request.
         /// </summary>
@@ -114,7 +142,6 @@ namespace Microsoft.Identity.Client.Http
             ILoggerAdapter logger,
             bool doNotThrow = false,
             bool retry = true,
-            bool useManagedIdentity = false,
             CancellationToken cancellationToken = default)
         {
             Exception timeoutException = null;
@@ -174,7 +201,6 @@ namespace Microsoft.Identity.Client.Http
                     logger,
                     doNotThrow,
                     retry: false,
-                    useManagedIdentity: useManagedIdentity,
                     cancellationToken: cancellationToken).ConfigureAwait(false);
             }
 
@@ -193,7 +219,7 @@ namespace Microsoft.Identity.Client.Http
             }
 
             // package 500 errors in a "service not available" exception
-            if (isRetryableStatusCode && !useManagedIdentity)
+            if (isRetryableStatusCode)
             {
                 throw MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.ServiceNotAvailable,

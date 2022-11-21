@@ -235,7 +235,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     {
         public long LastRequestDurationInMs => 50;
 
-        public async Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, bool useManagedIdentity = false, CancellationToken cancellationToken = default)
+        public async Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
         {
             // simulate delay and also add complexity due to thread context switch
             await Task.Delay(ParallelRequestsTests.NetworkAccessPenaltyMs).ConfigureAwait(false);
@@ -253,7 +253,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             return null;
         }
 
-        public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ILoggerAdapter logger, bool useManagedIdentity = false, CancellationToken cancellationToken = default)
+        public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ILoggerAdapter logger, CancellationToken cancellationToken = default)
         {
             await Task.Delay(ParallelRequestsTests.NetworkAccessPenaltyMs).ConfigureAwait(false);
 
@@ -286,12 +286,22 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             return null;
         }
 
-        public Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, HttpContent body, ILoggerAdapter logger, bool useManagedIdentity, CancellationToken cancellationToken)
+        public Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, HttpContent body, ILoggerAdapter logger, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
         public Task<HttpResponse> SendPostForceResponseAsync(Uri uri, Dictionary<string, string> headers, StringContent body, ILoggerAdapter logger, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<HttpResponse> SendPostForceResponseAsync(Uri uri, Dictionary<string, string> headers, Dictionary<string, string> bodyParameters, ILoggerAdapter logger, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<HttpResponse> SendGetForceResponseAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

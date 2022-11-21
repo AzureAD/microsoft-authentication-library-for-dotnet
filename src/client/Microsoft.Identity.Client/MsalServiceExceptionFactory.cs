@@ -133,7 +133,12 @@ namespace Microsoft.Identity.Client
             HttpResponse httpResponse)
         {
             var managedIdentityResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(httpResponse?.Body);
-            MsalServiceException ex = new MsalServiceException(errorCode, managedIdentityResponse.Message, (int)httpResponse.StatusCode);
+
+            string message = managedIdentityResponse == null ? 
+                "Empty error response received." :
+                $"Error message: {managedIdentityResponse.Message}. Correlation Id: {managedIdentityResponse.CorrelationId}";
+
+            MsalServiceException ex = new MsalServiceException(errorCode, message, (int)httpResponse.StatusCode);
 
             SetHttpExceptionData(ex, httpResponse);
 

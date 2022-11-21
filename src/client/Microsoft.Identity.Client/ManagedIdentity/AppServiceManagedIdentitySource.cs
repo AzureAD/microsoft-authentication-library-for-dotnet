@@ -10,6 +10,9 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
+    /// <summary>
+    /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/AppServiceManagedIdentitySource.cs
+    /// </summary>
     internal class AppServiceManagedIdentitySource : ManagedIdentitySource
     {
         // MSI Constants. Docs for MSI are available here https://docs.microsoft.com/azure/app-service/overview-managed-identity
@@ -65,28 +68,27 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         protected override ManagedIdentityRequest CreateRequest(string[] scopes)
         {
             // convert the scopes to a resource string
-            string resource = ScopeUtilities.ScopesToResource(scopes);
+            string resource = ScopeHelper.ScopesToResource(scopes);
 
             ManagedIdentityRequest request = new ManagedIdentityRequest(System.Net.Http.HttpMethod.Get, _endpoint);
-            IDictionary<string, string> queryParams = new Dictionary<string, string>();
-
+            
             request.Headers.Add(SecretHeaderName, _secret);
-            queryParams["api-version"] = AppServiceMsiApiVersion;
-            queryParams["resource"] = resource;
+            request.QueryParameters["api-version"] = AppServiceMsiApiVersion;
+            request.QueryParameters["resource"] = resource;
 
             if (!string.IsNullOrEmpty(_clientId))
             {
                 _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
-                queryParams[ClientIdHeaderName] = _clientId;
+                request.QueryParameters[ClientIdHeaderName] = _clientId;
             }
 
             if (!string.IsNullOrEmpty(_resourceId))
             {
                 _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
-                queryParams[Constants.ManagedIdentityResourceId] = _resourceId;
+                request.QueryParameters[Constants.ManagedIdentityResourceId] = _resourceId;
             }
 
-            request.UriBuilder.AppendQueryParameters(queryParams);
+            request.CreateUri();
             return request;
         }
     }
