@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
+using Microsoft.Identity.Client.Internal;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -524,6 +525,20 @@ namespace Microsoft.Identity.Client
             {
                 Config.ClientCapabilities = clientCapabilities;
             }
+
+            return (T)this;
+        }
+
+        /// <summary>
+        /// Determines whether or not instance discovery is performed when attempting to authenticate. Setting this to false will completely disable
+        /// instance discovery and authority validation. This will not affect the behavior of application configured with regional endpoints however.
+        /// Also, you can still provide your own instance metadata.
+        /// </summary>
+        /// <param name="enableInstanceDiscovery">Determines if instance discovery/Authority validation is performed</param>
+        /// <returns></returns>
+        public T WithInstanceDiscoevryEndpoint(bool enableInstanceDiscovery)
+        {
+            Config.InstanceDiscoveryEndpoint = Constants.InstanceDiscoveryEndpointDisabled;
 
             return (T)this;
         }

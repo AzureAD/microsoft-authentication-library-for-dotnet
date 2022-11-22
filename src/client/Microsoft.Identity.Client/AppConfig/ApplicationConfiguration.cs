@@ -189,6 +189,7 @@ namespace Microsoft.Identity.Client
 
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
         public bool IsConfidentialClient { get; }
+        public string InstanceDiscoveryEndpoint { get; internal set; }
         #endregion
 
     }

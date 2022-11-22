@@ -29,7 +29,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
     internal class InstanceDiscoveryManager : IInstanceDiscoveryManager
     {
         private readonly IHttpManager _httpManager;
-
         private readonly IUserMetadataProvider _userMetadataProvider;
         private readonly IKnownMetadataProvider _knownMetadataProvider;
         private readonly INetworkCacheMetadataProvider _networkCacheMetadataProvider;
@@ -109,13 +108,25 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             RequestContext requestContext, 
             bool forceValidation = false)
         {
-
             Uri authorityUri = authorityInfo.CanonicalAuthority;
             string environment = authorityInfo.Host;
 
             if (authorityInfo.IsInstanceDiscoverySupported)
             {
                 var entry = _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger);
+
+                //Check if instance discovery endpoint is disabled
+                if (entry == null && requestContext.ServiceBundle.Config.InstanceDiscoveryEndpoint == Constants.InstanceDiscoveryEndpointDisabled)
+                {
+                    //Check if regional discovery provider returns an entry. Regional should not be affected by the disabling of instance discovery endpoint.
+                    entry = await _regionDiscoveryProvider.GetMetadataAsync(authorityUri, requestContext).ConfigureAwait(false);
+
+                    if (entry == null)
+                    {
+                        requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery because it is disabled. ");
+                        return CreateEntryForSingleAuthority(authorityUri);
+                    }
+                }
 
                 if (entry == null && forceValidation)
                 {
@@ -137,6 +148,11 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 }
 
                 return entry;
+            }
+            else if (requestContext.ServiceBundle.Config.InstanceDiscoveryEndpoint == Constants.InstanceDiscoveryEndpointDisabled)
+            {
+                requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery because it is disabled. ");
+                return CreateEntryForSingleAuthority(authorityUri);
             }
             else
             {

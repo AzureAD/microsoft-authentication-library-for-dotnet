@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance.Discovery;
@@ -14,6 +15,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -111,6 +113,61 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                      user.GetOrFetchPassword())
                      .ExecuteAsync())
                 .ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task UncommonAuthorityValidationTestAsync(bool validateAuthority)
+        {
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            LabUser user = labResponse.User;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithInstanceDiscoevryEndpoint(false)
+                .WithAuthority("https://bogus.microsoft.com/common", validateAuthority)
+                .WithTestLogging()
+                .Build();
+
+            Trace.WriteLine("Acquire a token using a not so common authority alias");
+
+            HttpRequestException exception = await AssertException.TaskThrowsAsync<HttpRequestException>(() =>
+                 pca.AcquireTokenByUsernamePassword(
+                    s_scopes,
+                     user.Upn,
+                     user.GetOrFetchPassword())
+                     .ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("No such host is known.", exception.Message);
+            Assert.AreEqual(11001,((SocketException)exception.InnerException).ErrorCode);
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task CommonAuthorityValidationTestAsync(bool validateAuthority)
+        {
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            LabUser user = labResponse.User;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithInstanceDiscoevryEndpoint(false)
+                .WithAuthority(TestConstants.AuthorityOrganizationsTenant, validateAuthority)
+                .WithTestLogging()
+                .Build();
+
+            Trace.WriteLine("Acquire a token using a not so common authority alias");
+
+            var result = await pca.AcquireTokenByUsernamePassword(
+                    s_scopes,
+                    user.Upn,
+                    user.GetOrFetchPassword())
+                    .ExecuteAsync().ConfigureAwait(false);
+
+            Assert.IsTrue(result != null);
         }
 
         /// <summary>
