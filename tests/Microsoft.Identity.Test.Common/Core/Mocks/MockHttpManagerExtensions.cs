@@ -332,6 +332,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string expectedUrl,
             string resource,
             string response,
+            string userAssignedClientIdOrResourceId = null,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             HttpStatusCode statusCode = HttpStatusCode.OK
             )
         {
@@ -340,16 +342,29 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 new StringContent(response);
             responseMessage.Content = content;
 
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>
+                {
+                    { "api-version", "2019-08-01" },
+                    { "resource", resource }
+                };
+            
+            if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
+            {
+                expectedQueryParams.Add("client_id", userAssignedClientIdOrResourceId);
+            } 
+                
+            if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
+            {
+                expectedQueryParams.Add("mi_res_id", userAssignedClientIdOrResourceId);
+            }
+
+
             httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Get,
                         ExpectedUrl = expectedUrl,
-                        ExpectedQueryParams = new Dictionary<string, string>
-                        {
-                            { "api-version", "2019-08-01" },
-                            { "resource", resource }
-                        },
+                        ExpectedQueryParams = expectedQueryParams,
                         ExpectedRequestHeaders = new Dictionary<string, string>
                          {
                             {"X-IDENTITY-HEADER", "secret"}
@@ -389,5 +404,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// Normal server exception
         /// </summary>
         InvalidClient
+    }
+
+    public enum UserAssignedIdentityId
+    {
+        None,
+        ClientId,
+        ResourceId
     }
 }

@@ -442,5 +442,6 @@ namespace Microsoft.Identity.Client
 
         public const string AuthenticationResponseInvalidFormatError = "Invalid response, the authentication response received did not contain the expected fields.";
         public const string UnexpectedResponse = "Managed Identity response was not in the expected format. See the inner exception for details.";
+        public const string ExactlyOneScopeExpected = "To acquire token for managed identity, exactly one scope should be passed.";
     }
 }

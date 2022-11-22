@@ -30,6 +30,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public static ManagedIdentitySource TryCreate(RequestContext requestContext)
         {
             var msiSecret = EnvironmentVariables.IdentityHeader;
+
             return TryValidateEnvVars(EnvironmentVariables.IdentityEndpoint, msiSecret, requestContext.Logger, out Uri endpointUri)
                 ? new AppServiceManagedIdentitySource(requestContext, endpointUri, msiSecret)
                 : null;
@@ -39,6 +40,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             _endpoint = endpoint;
             _secret = secret;
+            _clientId = requestContext.ServiceBundle.Config.UserAssignedClientId;
+            _resourceId = requestContext.ServiceBundle.Config.UserAssignedResourceId;
         }
 
         private static bool TryValidateEnvVars(string msiEndpoint, string secret, ILoggerAdapter logger, out Uri endpointUri)

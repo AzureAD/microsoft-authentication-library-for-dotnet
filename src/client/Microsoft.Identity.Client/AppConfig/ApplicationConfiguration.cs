@@ -109,6 +109,10 @@ namespace Microsoft.Identity.Client
 
         public bool UseManagedIdentity { get; internal set; }
 
+        public string UserAssignedClientId {  get; internal set; }
+
+        public string UserAssignedResourceId { get; internal set; }
+
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
 #region ClientCredentials

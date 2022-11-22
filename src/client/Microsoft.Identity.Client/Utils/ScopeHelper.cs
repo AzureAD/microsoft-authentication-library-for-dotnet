@@ -72,12 +72,12 @@ namespace Microsoft.Identity.Client.Utils
         {
             if (scopes == null)
             {
-                throw new ArgumentNullException(nameof(scopes));
+                throw new MsalClientException(MsalError.ExactlyOneScopeExpected, MsalErrorMessage.ExactlyOneScopeExpected);
             }
 
             if (scopes.Length != 1)
             {
-                throw new ArgumentException("To convert to a resource string the specified array must be exactly length 1", nameof(scopes));
+                throw new MsalClientException(MsalError.ExactlyOneScopeExpected, MsalErrorMessage.ExactlyOneScopeExpected);
             }
 
             if (!scopes[0].EndsWith(DefaultSuffix, StringComparison.Ordinal))

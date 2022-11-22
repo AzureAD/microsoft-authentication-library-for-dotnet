@@ -1116,5 +1116,10 @@ namespace Microsoft.Identity.Client
         /// Invalid managed identity endpoint.
         /// </summary>
         public const string InvalidManagedIdentityEndpoint = "invalid_managed_identity_endpoint";
+
+        /// <summary>
+        /// Exactly one scope is expected.
+        /// </summary>
+        public const string ExactlyOneScopeExpected = "exactly_one_scope_expedted";
     }
 }

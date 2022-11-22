@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,10 +24,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow("http://127.0.0.1:41564/msi/token/", "https://management.azure.com", "https://management.azure.com")]
-        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com", "https://management.azure.com")]
-        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com")]
-        public async Task AppServiceHappyPathAsync(string endpoint, string scope, string resource)
+        [DataRow("http://127.0.0.1:41564/msi/token/", "https://management.azure.com", "https://management.azure.com", null)]
+        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com", "https://management.azure.com", null)]
+        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com", null)]
+        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com", TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
+        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com", "resource_id", UserAssignedIdentityId.ResourceId)]
+        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com", "", UserAssignedIdentityId.None)]
+        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com", "  ", UserAssignedIdentityId.None)]
+        public async Task AppServiceHappyPathAsync(
+            string endpoint, 
+            string scope, 
+            string resource, 
+            string userAssignedClientIdOrResourceId, 
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
         {
             Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", endpoint);
             Environment.SetEnvironmentVariable("IDENTITY_HEADER", "secret");
@@ -39,10 +49,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures()
                     .Build();
 
-                httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiSuccessfulResponse());
+                httpManager.AddManagedIdentityMockHandler(
+                    endpoint, 
+                    resource, 
+                    MockHelpers.GetMsiSuccessfulResponse(), 
+                    userAssignedClientIdOrResourceId: userAssignedClientIdOrResourceId, 
+                    userAssignedIdentityId: userAssignedIdentityId);
 
                 var result = await cca.AcquireTokenForClient(new string[] { scope })
-                    .WithManagedIdentity()
+                    .WithManagedIdentity(userAssignedClientIdOrResourceId)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -75,8 +90,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures()
                     .Build();
 
-                httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", resource, MockHelpers.GetMsiErrorResponse(), HttpStatusCode.InternalServerError);
-                httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", resource, MockHelpers.GetMsiErrorResponse(), HttpStatusCode.InternalServerError);
+                httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", resource, MockHelpers.GetMsiErrorResponse(), statusCode: HttpStatusCode.InternalServerError);
+                httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", resource, MockHelpers.GetMsiErrorResponse(), statusCode: HttpStatusCode.InternalServerError);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () => 
                     await cca.AcquireTokenForClient(new string[] { resource })
@@ -85,7 +100,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual("An unexpected error occured while fetching the AAD Token.", ex.Message);
             }
         }
 
@@ -103,7 +117,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures()
                     .Build();
 
-                httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", "https://management.azure.com", "", HttpStatusCode.OK);
+                httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", "https://management.azure.com", "", statusCode: HttpStatusCode.OK);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await cca.AcquireTokenForClient(new string[] { "https://management.azure.com" })
@@ -111,7 +125,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(MsalError.InvalidManagedIdentityResponse, ex.ErrorCode);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.AuthenticationResponseInvalidFormatError, ex.Message);
             }
         }

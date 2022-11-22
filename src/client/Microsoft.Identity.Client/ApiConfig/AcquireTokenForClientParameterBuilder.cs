@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -73,11 +74,20 @@ namespace Microsoft.Identity.Client
         /// Specifies to use the Managed Identity to fetch the token from the Managed Identity Endpoint.
         /// </summary>
         /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenForClientParameterBuilder WithManagedIdentity()
+        public AcquireTokenForClientParameterBuilder WithManagedIdentity(string userAssignedClientIdOrResourceId = null)
         {
             ValidateUseOfExperimentalFeature("ManagedIdentity");
 
             ServiceBundle.Config.UseManagedIdentity = true;
+
+            if (!userAssignedClientIdOrResourceId.IsNullOrEmpty() && Guid.TryParse(userAssignedClientIdOrResourceId, out _))
+            {
+                ServiceBundle.Config.UserAssignedClientId = userAssignedClientIdOrResourceId;
+            }
+            else
+            {
+                ServiceBundle.Config.UserAssignedResourceId = userAssignedClientIdOrResourceId;
+            }
 
             return this;
         }
