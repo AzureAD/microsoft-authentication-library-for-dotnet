@@ -28,10 +28,10 @@ namespace Microsoft.Identity.Client.Cache.Items
             Environment = preferredCacheEnv;
             FamilyId = familyId;
 
-            InitKey();
+            InitCacheKey();
         }
 
-        private void InitKey()
+        private void InitCacheKey()
         {
             CacheKey = ($"{StorageJsonKeys.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}" +
                 $"{Environment}{MsalCacheKeys.CacheKeyDelimiter}{ClientId}").ToLowerInvariant();
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             item.PopulateFieldsFromJObject(j);
 
-            item.InitKey();
+            item.InitCacheKey();
 
             return item;
         }

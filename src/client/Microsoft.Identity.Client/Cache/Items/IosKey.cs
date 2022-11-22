@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
 
         public int iOSType { get; }
 
-        internal IosKey(string iOSAccount, string iOSGeneric, string iOSService, int iOSType)
+        internal IosKey(string iOSAccount, string iOSService, string iOSGeneric, int iOSType)
         {
             this.iOSAccount = iOSAccount;
             this.iOSGeneric = iOSGeneric;

@@ -294,7 +294,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             return ToJObject().ToString();
         }
 
-        internal MsalIdTokenCacheItem GetIdTokenItemKey()
+        internal MsalIdTokenCacheItem GetIdTokenItem()
         {
             return new MsalIdTokenCacheItem(Environment, ClientId, Secret, RawClientInfo, HomeAccountId, TenantId);
         }

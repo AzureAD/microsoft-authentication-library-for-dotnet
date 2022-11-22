@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         public MsalIdTokenCacheItem GetIdToken(MsalAccessTokenCacheItem accessTokenCacheItem)
         {
             return MsalIdTokenCacheItem.FromJsonString(
-                _idTokenSharedPreference.GetString(accessTokenCacheItem.GetIdTokenItemKey().CacheKey, null));
+                _idTokenSharedPreference.GetString(accessTokenCacheItem.GetIdTokenItem().CacheKey, null));
         }
         #endregion
 

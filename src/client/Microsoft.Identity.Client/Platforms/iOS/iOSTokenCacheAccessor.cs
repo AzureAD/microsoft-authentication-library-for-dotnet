@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 #region GetItem
         public MsalIdTokenCacheItem GetIdToken(MsalAccessTokenCacheItem accessTokenCacheItem)
         {
-            var idTokenItem = accessTokenCacheItem.GetIdTokenItemKey();
+            var idTokenItem = accessTokenCacheItem.GetIdTokenItem();
             return MsalIdTokenCacheItem.FromJsonString(GetPayload(idTokenItem.iOSCacheKey));
         }
 

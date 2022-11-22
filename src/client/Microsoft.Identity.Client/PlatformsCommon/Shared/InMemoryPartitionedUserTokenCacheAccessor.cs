@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string partitionKey = CacheKeyFactory.GetIdTokenKeyFromCachedItem(accessTokenCacheItem);
 
             IdTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
-            if (partition != null && partition.TryGetValue(accessTokenCacheItem.GetIdTokenItemKey().CacheKey, out var idToken))
+            if (partition != null && partition.TryGetValue(accessTokenCacheItem.GetIdTokenItem().CacheKey, out var idToken))
             {
                 return idToken;
             }

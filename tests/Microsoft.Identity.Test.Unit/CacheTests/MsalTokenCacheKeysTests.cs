@@ -35,10 +35,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual("accesstoken-clientid-contoso.com-user.read user.write", iOSKey.iOSService);
             Assert.AreEqual("accesstoken-clientid-contoso.com", iOSKey.iOSGeneric);
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken, iOSKey.iOSType);
-
-            Assert.AreEqual(
-                item,
-                new MsalAccessTokenCacheItem("login.microsoftonline.com", "clientId", tokenResponse, "contoso.com", "uid.utid"));
         }
 
             [TestMethod]
@@ -51,16 +47,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var item = new MsalAccessTokenCacheItem("login.microsoftonline.com", "clientId", tokenResponse, "contoso.com", "uid.utid");
             var iOSKey = item.iOSCacheKey;
 
-            Assert.AreEqual("uid.utid-login.microsoftonline.com-accesstoken_with_authscheme-clientid-contoso.com-user.read user.write-pop", item.ToString());
+            Assert.AreEqual("uid.utid-login.microsoftonline.com-accesstoken_with_authscheme-clientid-contoso.com-user.read user.write-pop", item.CacheKey);
 
             Assert.AreEqual("uid.utid-login.microsoftonline.com", iOSKey.iOSAccount);
             Assert.AreEqual("accesstoken_with_authscheme-clientid-contoso.com-user.read user.write-pop", iOSKey.iOSService);
             Assert.AreEqual("accesstoken_with_authscheme-clientid-contoso.com", iOSKey.iOSGeneric);
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken, iOSKey.iOSType);
-
-            Assert.AreEqual(
-                item,
-                new MsalAccessTokenCacheItem("login.microsoftonline.com", "clientId", tokenResponse, "contoso.com", "uid.utid"));
         }
 
         [TestMethod]
@@ -69,16 +61,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var item = new MsalRefreshTokenCacheItem("login.microsoftonline.com", "clientid", "secret", "rawClientInfo", "", "uid.utid");
             IiOSKey iOSKey = item.iOSCacheKey;
 
-            Assert.AreEqual("uid.utid-login.microsoftonline.com-refreshtoken-clientid--", item.iOSCacheKey);
+            Assert.AreEqual("uid.utid-login.microsoftonline.com-refreshtoken-clientid--", item.CacheKey);
 
             Assert.AreEqual("uid.utid-login.microsoftonline.com", iOSKey.iOSAccount);
             Assert.AreEqual("refreshtoken-clientid--", iOSKey.iOSService);
             Assert.AreEqual("refreshtoken-clientid-", iOSKey.iOSGeneric);
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken, iOSKey.iOSType);
-
-            Assert.AreEqual(
-                item,
-                new MsalRefreshTokenCacheItem("login.microsoftonline.com", "clientid", "secret", "rawClientInfo", "familyId", "uid.utid"));
         }
 
         [TestMethod]
@@ -87,16 +75,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var item = new MsalRefreshTokenCacheItem("login.microsoftonline.com", "CLIENT_ID_NOT_USED", "secret", "rawClientInfo", "1", "uid.utid");
             IiOSKey iOSKey = item.iOSCacheKey;
 
-            Assert.AreEqual("uid.utid-login.microsoftonline.com-refreshtoken-1--", iOSKey.ToString());
+            Assert.AreEqual("uid.utid-login.microsoftonline.com-refreshtoken-1--", item.CacheKey);
 
             Assert.AreEqual("uid.utid-login.microsoftonline.com", iOSKey.iOSAccount);
             Assert.AreEqual("refreshtoken-1--", iOSKey.iOSService);
             Assert.AreEqual("refreshtoken-1-", iOSKey.iOSGeneric);
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken, iOSKey.iOSType);
-
-            Assert.AreEqual(
-                item,
-                new MsalRefreshTokenCacheItem("login.microsoftonline.com", "CLIENT_ID_NOT_USED", "secret", "rawClientInfo", "1", "uid.utid"));
         }
 
         [TestMethod]
@@ -111,31 +95,27 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual("idtoken-clientid-contoso.com-", iOSKey.iOSService);
             Assert.AreEqual("idtoken-clientid-contoso.com", iOSKey.iOSGeneric);
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.IdToken, iOSKey.iOSType);
-
-            Assert.AreEqual(
-                item,
-                new MsalIdTokenCacheItem("login.microsoftonline.com", "clientid", "secret", "rawClientInfo", "uid.utid", "contoso.com"));
         }
 
         [TestMethod]
         public void MsalAccountCacheKey()
         {
-            var key = new MsalAccountCacheItem(
+            var item = new MsalAccountCacheItem(
                 "login.microsoftonline.com",
                 "contoso.com",
                 "uid.utid",
                 "localId");
 
-            var iOSKey = key.iOSCacheKey;
+            var iOSKey = item.iOSCacheKey;
 
-            Assert.AreEqual("uid.utid-login.microsoftonline.com-contoso.com", key.CacheKey);
+            Assert.AreEqual("uid.utid-login.microsoftonline.com-contoso.com", item.CacheKey);
 
             Assert.AreEqual("uid.utid-login.microsoftonline.com", iOSKey.iOSAccount);
             Assert.AreEqual("contoso.com", iOSKey.iOSService);
             Assert.AreEqual("localid", iOSKey.iOSGeneric);
             Assert.AreEqual(MsalCacheKeys.iOSAuthorityTypeToAttrType["MSSTS"], iOSKey.iOSType);
 
-            Assert.AreEqual(key, new MsalAccountCacheItem(
+            Assert.AreEqual(item, new MsalAccountCacheItem(
                 "login.microsoftonline.com",
                 "contoso.com",
                 "uid.utid",
@@ -147,6 +127,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             var item = new MsalAppMetadataCacheItem("clientid", "login.microsoftonline.com", null);
             IiOSKey iOSKey = item.iOSCacheKey;
+
+            Assert.AreEqual("appmetadata-login.microsoftonline.com-clientid", item.CacheKey);
 
             Assert.AreEqual("appmetadata-clientid", iOSKey.iOSService);
             Assert.AreEqual("login.microsoftonline.com", iOSKey.iOSAccount);
