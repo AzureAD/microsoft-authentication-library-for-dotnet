@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ["allowestsrnonmsi"] = "true"
         };
 
-        private const string RegionalHost = "centralus.r.login.microsoftonline.com";
+        private const string RegionalHost = "centralus.login.microsoft.com";
         private const string GlobalHost = "login.microsoftonline.com";
         private IConfidentialClientApplication _confidentialClientApplication;
 
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             AssertValidHost(true, factory);
             AssertTelemetry(factory, $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1004,{CacheRefreshReason.NoCachedAccessToken:D},centralus,3,4|0,1,1");
             Assert.AreEqual(
-                $"https://centralus.r.login.microsoftonline.com/{settings.TenantId}/oauth2/v2.0/token",
+                $"https://{RegionalHost}/{settings.TenantId}/oauth2/v2.0/token",
                 result.AuthenticationResultMetadata.TokenEndpoint);
 
         }
