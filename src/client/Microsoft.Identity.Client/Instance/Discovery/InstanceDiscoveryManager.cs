@@ -149,11 +149,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
                 return entry;
             }
-            else if (requestContext.ServiceBundle.Config.InstanceDiscoveryEndpoint == Constants.InstanceDiscoveryEndpointDisabled)
-            {
-                requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery because it is disabled. ");
-                return CreateEntryForSingleAuthority(authorityUri);
-            }
             else
             {
                 requestContext.Logger.Info("[Instance Discovery] Skipping Instance discovery for non-AAD authority. ");
