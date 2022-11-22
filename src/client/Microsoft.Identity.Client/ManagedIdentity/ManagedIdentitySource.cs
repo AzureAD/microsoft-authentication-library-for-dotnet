@@ -27,8 +27,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             _requestContext = requestContext;
         }
 
-        protected internal string ClientId { get; }
-
         public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(AppTokenProviderParameters parameters, CancellationToken cancellationToken)
         {
             ManagedIdentityRequest request = CreateRequest(parameters.Scopes.ToArray());
@@ -74,6 +72,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (managedIdentityResponse == null || managedIdentityResponse.AccessToken.IsNullOrEmpty() || managedIdentityResponse.ExpiresOn.IsNullOrEmpty())
             {
+                _requestContext.Logger.Error("[Managed Identity] Response is either null or insufficient for authentication.");
                 throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.AuthenticationResponseInvalidFormatError);
             }
 

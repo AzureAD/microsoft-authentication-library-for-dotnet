@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class ManagedIdentityClient
     {
         internal const string MsiUnavailableError =
-            "ManagedIdentityCredential authentication unavailable. No Managed Identity endpoint found.";
+            "Authentication with managed identity is unavailable. No managed identity endpoint found.";
 
         private readonly Lazy<ManagedIdentitySource> _identitySource;
 
