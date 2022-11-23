@@ -1,5 +1,5 @@
 parameters:
-  DataFileDirectory: 'Debug'
+  DataFileDirectory: 'Release'
 
 jobs: #Build and stage projects
 
@@ -11,6 +11,9 @@ jobs: #Build and stage projects
       - visualstudio
   variables:
       runCodesignValidationInjection: false
+
+  #Specified container image to use for build. See: https://hub.docker.com/_/microsoft-windows-servercore
+  container: mcr.microsoft.com/windows/servercore:ltsc2022-KB5017316
 
   steps:
   #Pre build analysis
@@ -27,22 +30,19 @@ jobs: #Build and stage projects
   # Bootstrap the build
   - template: template-build-and-prep-automation.yaml
 
-# iOS test and run is disabled as Azure CI/CD task has issues supporting it
-# the testing will be done manually for now.
-# #   # BUILD IOS APPCENTER APP PHASE
-# - job: 'BuildiOSAppCenterApp'
-#   dependsOn:
-#     - 'PreBuildCheck'
-#   pool:
-#       name: Azure Pipelines
-#       vmImage: 'macOS-12'
-#       demands:
-#       - MSBuild
-#   variables:
-#       runCodesignValidationInjection: false
+# Disabled because mono is unable to restore/build .NET 6 target in MSAL project
+# BUILD IOS APPCENTER APP PHASE
+#- job: 'BuildiOSAppCenterApp'
+#  dependsOn:
+#    - 'PreBuildCheck'
+#  pool:
+#      name: Azure Pipelines
+#      vmImage: macos-latest
+#  variables:
+#      runCodesignValidationInjection: false
 
-#   steps:
-#   - template: template-build-ios-automation.yaml
+#  steps:
+#  - template: template-build-ios-automation.yaml
 
   # BUILD ANDROID APPCENTER APP PHASE
 - job: 'BuildAndroidAppCenterApp'

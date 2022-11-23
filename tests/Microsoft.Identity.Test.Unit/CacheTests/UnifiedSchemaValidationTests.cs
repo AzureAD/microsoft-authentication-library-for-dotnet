@@ -6,11 +6,10 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -31,7 +30,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private const string B2CTenantId = "ba6c0d94-a8da-45b2-83ae-33871f9c2dd8";
         private const string Scopes = "tasks.read user.read openid profile offline_access";
         private const string RedirectUri = "msalb6c69a37-df96-4db0-9088-2ab96e1d8215://auth";
-       
+
 
         // Our json schemas are flat.  This will NOT work for deeply nested json values.  You could check Assert.IsTrue(JToken.DeepEquals()) if you need that.
         private void AssertAreJsonStringsEquivalent(string expectedJson, string actualJson)
@@ -153,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalRefreshTokenCacheItem(
-                MsalEnvironment, 
+                MsalEnvironment,
                 ClientId,
                 response,
                 homeAccountId);
@@ -197,7 +196,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 homeAccountId,
                 idToken,
                 "idlab@msidlab4.onmicrosoft.com",
-                AadTenantId, 
+                AadTenantId,
                 null);
 
             var expectedJsonObject = new JObject
@@ -290,7 +289,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 MsalEnvironment,
                 ClientId,
                 response,
-                MsaTenantId, 
+                MsaTenantId,
                 homeAccountId: homeAccountId);
 
             var expectedJsonObject = new JObject
@@ -327,7 +326,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalRefreshTokenCacheItem(
-                MsalEnvironment, 
+                MsalEnvironment,
                 ClientId,
                 response,
                 homeAccountId);
@@ -457,7 +456,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalRefreshTokenCacheItem(
-                MsalEnvironment, 
+                MsalEnvironment,
                 B2CClientId,
                 response,
                 homeAccountId);
@@ -501,7 +500,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 homeAccountId,
                 IdToken.Parse(response.IdToken),
                 "Missing from the token response",
-                B2CTenantId, 
+                B2CTenantId,
                 null);
 
             var expectedJsonObject = new JObject
@@ -547,9 +546,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 B2CTenantId,
                 homeAccountId);
             DateTime currentDate = DateTime.UtcNow;
-            string expiresOn    = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
+            string expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
             string extExpiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
-            string cachedAt     = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate);
+            string cachedAt = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate);
 
             // 1. Verify payload
             var expectedJsonObject = new JObject
@@ -632,7 +631,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalRefreshTokenCacheItem(
-                MsalEnvironment, 
+                MsalEnvironment,
                 B2CClientId,
                 TestConstants.CreateB2CTestTokenResponseWithTenantId(),
                 homeAccountId);
@@ -675,7 +674,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 homeAccountId,
                 IdToken.Parse(response.IdToken),
                 "Missing from the token response",
-                B2CTenantId, 
+                B2CTenantId,
                 null);
 
             var expectedJsonObject = new JObject
@@ -718,13 +717,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 MsalEnvironment,
                 ClientId,
                 response,
-                AadTenantId, 
+                AadTenantId,
                 homeAccountId);
 
             DateTime currentDate = DateTime.UtcNow;
-            string expiresOn    = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
+            string expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(3600));
             string extExpiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate.AddSeconds(262800));
-            string cachedAt     = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate);
+            string cachedAt = DateTimeHelpers.DateTimeToUnixTimestamp(currentDate);
 
             // 1. Verify payload
             var expectedJsonObject = new JObject
@@ -841,9 +840,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             string homeAccountId = ClientInfo.CreateFromJson(response.ClientInfo).ToAccountIdentifier();
 
             var credential = new MsalRefreshTokenCacheItem(
-                MsalEnvironment, 
+                MsalEnvironment,
                 ClientId,
-                response, 
+                response,
                 homeAccountId: homeAccountId);
 
             var expectedJsonObject = new JObject
@@ -885,7 +884,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 homeAccountId,
                 IdToken.Parse(response.IdToken),
                 "idlab@msidlab4.onmicrosoft.com",
-                AadTenantId, 
+                AadTenantId,
                 null);
 
             var expectedJsonObject = new JObject

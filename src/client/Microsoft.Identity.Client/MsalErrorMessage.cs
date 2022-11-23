@@ -128,12 +128,12 @@ namespace Microsoft.Identity.Client
         public const string BrokerResponseError = "Broker response returned error: ";
         public const string CannotInvokeBroker = "MSAL cannot invoke the broker. The Authenticator App (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
             "Check logs for more details and see https://aka.ms/msal-brokers. ";
-        public const string CannotInvokeBrokerForPop = "MSAL cannot invoke the broker and it is required for Proof-of-Possession. Wam (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
+        public const string CannotInvokeBrokerForPop = "MSAL cannot invoke the broker and it is required for Proof-of-Possession. WAM (Broker) may not be installed on the user's device or there was an error invoking the broker. Use IPublicCleintApplication.IsProofOfPossessionSupportedByClient to ensure Proof-of-Possession can be performed before using WithProofOfPossession." +
             "Check logs for more details and see https://aka.ms/msal-net-pop. ";
         public const string BrokerDoesNotSupportPop = "The broker does not support Proof-of-Possession on the current platform.";
-        public const string BrokerRequiredForPop = "The request has Proof-of-Possession configured but does not have broker enabled. Broker is required for Proof-of-Possession on public clients.";
+        public const string BrokerRequiredForPop = "The request has Proof-of-Possession configured but does not have broker enabled. Broker is required for Proof-of-Possession on public clients. Use IPublicCleintApplication.IsProofOfPossessionSupportedByClient to ensure Proof-of-Possession can be performed before using WithProofOfPossession.";
         public const string NonceRequiredForPop = "The request has Proof-of-Possession configured for public clients but does not have a nonce provided. A nonce is required for Proof-of-Possession on public clients.";
-        public const string AdfsNotSupportedWithBroker = "Broker does not support ADFS environments.";
+        public const string AdfsNotSupportedWithBroker = "Broker does not support ADFS environments. If using Proof-of-Possession, use IPublicCleintApplication.IsProofOfPossessionSupportedByClient to ensure Proof-of-Possession can be performed before calling WithProofOfPossession.";
 
         public const string NullIntentReturnedFromBroker = "Broker returned a null intent. Check the Xamarin Android app settings and logs for more information. ";
         public const string NoAccountForLoginHint = "You are trying to acquire a token silently using a login hint. No account was found in the token cache having this login hint. ";
@@ -433,7 +433,7 @@ namespace Microsoft.Identity.Client
         public const string RequestFailureErrorMessagePii = "=== Token Acquisition ({0}) failed:\n\tAuthority: {1}\n\tClientId: {2}.";
 
         public static string InvalidTokenProviderResponseValue(string invalidValueName)
-            {
+        {
             return string.Format(
                                 CultureInfo.InvariantCulture,
                                 "The following token provider result value is invalid: {0}.",

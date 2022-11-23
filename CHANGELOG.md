@@ -1,3 +1,101 @@
+4.48.1
+==========
+
+### Supportability
+- Fixes an internal (Microsoft 1P only) MSA-PT issue for the new WAM preview broker. See [VS#1809364](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1809364) and [VS#1643652](https://devdiv.visualstudio.com/DevDiv/_workitems/edit/1643652)
+
+### Bug Fixes
+- Added header title to the Account Picker for the new WAM preview broker. See [3803](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3769).  
+
+
+4.48.0
+==========
+
+### New Features
+- Removed support for deprecated `net5.0-windows10.0.17763.0` target. See [3770](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3770) and note below.  
+- Added support for `net6.0` and `net6.0-windows10.0.17763.0` targets. See [3682](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3682) and note below.  
+- Removed support for old `xamarinmac20` target. See [3722](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3722).  
+- `WithProofOfPossession` for public client applications is now generally available. See [3767](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3767).  
+- Added telemetry to log Proof-of-Possession usage. See [3718](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3718).  
+- Exposed tenant profiles for all authorities which are tenanted (B2C and dSTS). See [3703](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3703).  
+- Now logging MSAL version to common telemetry client. See [3745](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3745).  
+- Updated guidance on retry policies. See [Retry Policy wiki](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Retry-Policy) and [3561](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3561).  
+
+### Bug Fixes
+- Fixed a `NullReferenceException` related to authority URLs when calling `AcquireTokenSilent` with an Operating System account in apps using WAM. See [3769](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3769).  
+- Fixed a `NullReferenceException` when using preview broker and calling `AcquireTokenSilent` with MSA account and MSA-PT enabled. See [3743](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3743).  
+- Added an `Exported` attribute to Android activities to be compliant with Android OS 12.1 (API 32) and above requirements. See [3680](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3680).  
+- Fixed incorrect home account details in `AuthenticationResult` of `AcquireTokenByRefreshToken`. See [3736](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3736).  
+
+### .NET 5 and .NET 6 public client applications
+If you have a Windows application which targets `net5.0`, `net5.0-windows`, `net5.0-windowsX`, `net6.0`, or `net6.0-windows` and would like to use either WAM or embedded browser, you must change the app target to at least `net6.0-windows10.0.17763.0`.  System browser works on all of the above targets.  
+The recommendation is to use new Windows broker preview, as it offers better experience than current WAM implementation and will be generally available in the near future. If you want to try the new broker preview, install the NuGet package Microsoft.Identity.Client.Broker and call the `.WithBrokerPreview()` method. For details, see https://aka.ms/msal-net-wam.
+
+
+4.47.2
+==========
+
+### New Features
+- Hide legacy API's that are available only to internal Microsoft only (1P) applications. See [3670](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3670).
+- Soft deprecate `WithAuthority` API on AcquireTokenXXX methods. Instead use `WithTenantId` or `WithTenantIdFromAuthority`, or `WithB2CAuthority` for B2C authorities. See [#3716](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3716)
+- Logging error codes to MSAL Telemetry. See [3595](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3595)
+- Add more logging around client creds and claims. See [3707](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3707).
+- Improve extensibility APIs to support new POP
+
+### Bug Fixes
+- Improved error messages when new preview broker exceptions are thrown. [#3696](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3696)
+- MSAL will now throw an exception if no scopes are passed for the new preview Broker or for B2C scenarios. See [#3675](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3675)
+- Removed .NET 6 MacCatalyst target because MSAL.NET doesn't currently support it. See [#3693](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3693)
+- Throw an exception when new WAM DLLs are not loaded when invoking the new WAM preview broker. See [#3699](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3699)
+
+4.47.1
+==========
+
+### Supportability
+- Fixes an internal (Microsoft 1P only) NuGet feed issue. See [#3689](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3689)
+
+4.47.0
+==========
+
+### New Features
+- Support for .NET MAUI is now generally available for iOS, Windows and Android targets. The package also works with UWP. Refer to [`MauiStatus.md`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/MauiStatus.md) for details.
+- The new MSAL logging feature is now generally available. `WithExperimentalFeatures()` is no longer required when calling `WithLogging()`. See [3548](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3548), [wiki](https://aka.ms/msal-net-logging).
+- Adding IsProofOfPosessionSupportedByClient api to be used to determine if the current broker is able to support Proof-of-Posession. See [3496](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3496) 
+- Adding ability to turn off the default retry-once policy on 5xx errors. See [2877](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2877)
+- Adds new public builder API accepting instances of `ITelemetryClient`. See [3533](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3533).
+- Added logic to log some acquire token data via the new telemetry pipeline. See [3534](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3534).
+
+### Bug Fixes
+- MSAL will now throw an exception if no scopes are passed when the new preview broker is invoked. See [#3654](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3654) and [#3677](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3677)
+- `MsalServiceException.IsRetryable` is now correctly set. See [#3661](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3661)
+- Added extra logging in Preview Broker `RemoveAccountAsync` API. See [#3658](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3658)
+- Added a check for null account in Preview Broker `RemoveAccountAsync` API. See [#3657](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3657)
+- `AuthenticationResult` now shows correct authority for multi-cloud requests using WAM. See [#3637](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3637)
+- Adding null IdentityLogger to prevent null reference exception when using cache logger. See [#3678](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3678)
+
+4.46.2
+==========
+
+### New Features
+- WAM Authentication Library now explicitly supports .NET 4.6.2. See [#3539](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3539)
+
+### Bug Fixes
+- Fixed 'Authenticator Factory has already been started` exception in new MSAL WAM preview. See [#3604](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3604)
+- Added back missing .NET Standard 2.0 target to MSAL.NativeInterop package. See [#3612](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3612)
+- [Resilience] Changed to an improved implementation of HTTP client factory on .NET Framework to improve resiliency (for ex. by reducing the amount of request timeouts). See [#3546](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3546)
+- Logging additional exceptions to telemetry. See [#3547](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3547)
+
+4.46.1
+==========
+
+### New Features
+- Added Explicit .net 461 support to new WAM Preview broker. See [3550](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3550).  
+- Added MSALRuntime TelemetryData to verbose logging when a broker exception is thrown. See [3585](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3585)
+
+### Bug Fixes
+- Minor clarifications in caching logs. See [3582](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3582)
+
+
 4.46.0
 ==========
 

@@ -340,7 +340,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             if (resultBundle != null)
             {
-                _logger.Verbose($"[Android broker] Content resolver operation completed succesfully. Operation: {operation} URI: {contentResolverUri}");
+                _logger.Verbose($"[Android broker] Content resolver operation completed successfully. Operation: {operation} URI: {contentResolverUri}");
             }
 
             return resultBundle;

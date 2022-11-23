@@ -3,24 +3,23 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
-using System.Threading;
-using System.Diagnostics.Tracing;
 
-#if NET5_WIN
-using Microsoft.Identity.Client.Platforms.net5win;
-using WebAuthenticationCoreManagerInterop = Microsoft.Identity.Client.Platforms.net5win.WebAuthenticationCoreManagerInterop;
+#if NET6_WIN
+using Microsoft.Identity.Client.Platforms.net6win;
+using WebAuthenticationCoreManagerInterop = Microsoft.Identity.Client.Platforms.net6win.WebAuthenticationCoreManagerInterop;
 #elif DESKTOP || NET_CORE
 using Microsoft.Identity.Client.Platforms;
 #endif
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
-#if NET5_WIN
+#if NET6_WIN
     [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
 #endif
     internal class WamProxy : IWamProxy
@@ -74,10 +73,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     _logger.VerbosePii(webTokenRequest.ToLogString(true), webTokenRequest.ToLogString(false));
                 }
 #if WINDOWS_APP
-            // UWP requires being on the UI thread
-            await _synchronizationContext;
+                // UWP requires being on the UI thread
+                await _synchronizationContext;
 
-            WebTokenRequestResult wamResult = await WebAuthenticationCoreManager.RequestTokenAsync(webTokenRequest);
+                WebTokenRequestResult wamResult = await WebAuthenticationCoreManager.RequestTokenAsync(webTokenRequest);
 #else
 
                 var wamResult = await WebAuthenticationCoreManagerInterop.RequestTokenForWindowAsync(
@@ -101,12 +100,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 }
 #if WINDOWS_APP
 
-            // UWP requires being on the UI thread
-            await _synchronizationContext;
+                // UWP requires being on the UI thread
+                await _synchronizationContext;
 
-            WebTokenRequestResult wamResult = await WebAuthenticationCoreManager.RequestTokenAsync(
-                webTokenRequest, 
-                wamAccount);
+                WebTokenRequestResult wamResult = await WebAuthenticationCoreManager.RequestTokenAsync(
+                    webTokenRequest,
+                    wamAccount);
 #else
 
                 var wamResult = await WebAuthenticationCoreManagerInterop.RequestTokenWithWebAccountForWindowAsync(

@@ -10,11 +10,14 @@ using System.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json;
 using Microsoft.IdentityModel.Abstractions;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using System.Text.Json;
+#else
+using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client
 {
@@ -30,6 +33,7 @@ namespace Microsoft.Identity.Client
         }
 
         internal ApplicationConfiguration Config { get; }
+
 
         /// <summary>
         /// Uses a specific <see cref="IMsalHttpClientFactory"/> to communicate
@@ -47,6 +51,29 @@ namespace Microsoft.Identity.Client
         public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory)
         {
             Config.HttpClientFactory = httpClientFactory;
+            return (T)this;
+        }
+
+        /// <summary>
+        /// Uses a specific <see cref="IMsalHttpClientFactory"/> to communicate
+        /// with the IdP. This enables advanced scenarios such as setting a proxy,
+        /// or setting the Agent.
+        /// </summary>
+        /// <param name="httpClientFactory">HTTP client factory</param>
+        /// <param name="retryOnceOn5xx">Configures MSAL to retry on 5xx server errors. When enabled (on by default), MSAL will wait 1 second after recieving
+        /// a 5xx error and then retry the http request again.</param>
+        /// <remarks>MSAL does not guarantee that it will not modify the HttpClient, for example by adding new headers.
+        /// Prior to the changes needed in order to make MSAL's httpClients thread safe (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2046/files),
+        /// the httpClient had the possibility of throwing an exception stating "Properties can only be modified before sending the first request".
+        /// MSAL's httpClient will no longer throw this exception after 4.19.0 (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases/tag/4.19.0)
+        /// see (https://aka.ms/msal-httpclient-info) for more information.
+        /// If you only want to configure the retryOnceOn5xx parameter, set httpClientFactory to null and MSAL will use the default http client.
+        /// </remarks>
+        /// <returns>The builder to chain the .With methods</returns>
+        public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory, bool retryOnceOn5xx)
+        {
+            Config.HttpClientFactory = httpClientFactory;
+            Config.RetryOnServerErrors = retryOnceOn5xx;
             return (T)this;
         }
 
@@ -277,7 +304,6 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
-#if !XAMARINMAC2_0
         /// <summary>
         /// Sets the Identity Logger. For details see https://aka.ms/msal-net-logging
         /// </summary>
@@ -295,13 +321,10 @@ namespace Microsoft.Identity.Client
             IIdentityLogger identityLogger,
             bool enablePiiLogging = false)
         {
-            ValidateUseOfExperimentalFeature("IIdentityLogger");
-
             Config.IdentityLogger = identityLogger;
             Config.EnablePiiLogging = enablePiiLogging;
             return (T)this;
         }
-#endif
 
         /// <summary>
         /// Sets the Debug logging callback to a default debug method which displays
@@ -555,18 +578,17 @@ namespace Microsoft.Identity.Client
             }
         }
 
-
         #region Authority
         private void ResolveAuthority()
         {
             if (Config.Authority?.AuthorityInfo != null)
             {
                 var isB2C = Config.Authority is B2CAuthority;
-                
+
                 AadAuthority aadAuthority = Config.Authority as AadAuthority;
-                if (!string.IsNullOrEmpty(Config.TenantId) 
+                if (!string.IsNullOrEmpty(Config.TenantId)
                     && !isB2C
-                    && aadAuthority != null )
+                    && aadAuthority != null)
                 {
                     if (!aadAuthority.IsCommonOrganizationsOrConsumersTenant() &&
                         !string.Equals(aadAuthority.TenantId, Config.TenantId))
@@ -854,7 +876,7 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
-#endregion
+        #endregion
 
         private static string GetValueIfNotEmpty(string original, string value)
         {

@@ -1,10 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using System;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Factories
 {
@@ -22,8 +21,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
 
 #if NET_CORE
             return new Microsoft.Identity.Client.Platforms.netcore.NetCorePlatformProxy(finalLogger);
-#elif NET5_WIN
-            return new Microsoft.Identity.Client.Platforms.net5win.Net5WinPlatformProxy(finalLogger);
+#elif NET6_WIN
+            return new Microsoft.Identity.Client.Platforms.net6win.Net6WinPlatformProxy(finalLogger);
 #elif ANDROID
             return new Microsoft.Identity.Client.Platforms.Android.AndroidPlatformProxy(finalLogger);
 #elif iOS

@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,7 +20,7 @@ namespace Microsoft.Identity.Test.Integration.Win8
         private const string _claims = "{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
         private const string _deviceAuthuser = "idlabca@msidlab8.onmicrosoft.com";
 
-        
+
         [TestMethod]
         public async Task PKeyAuthNonInteractiveTestAsync()
         {
@@ -39,7 +38,7 @@ namespace Microsoft.Identity.Test.Integration.Win8
                  new[] { "user.read" },
                  labResponse.User.Upn,
                  labResponse.User.GetOrFetchPassword())
-             .WithClaims(JObject.Parse(_claims).ToString())
+             .WithClaims(_claims)
              .ExecuteAsync(CancellationToken.None).Result;
 
             //Assert

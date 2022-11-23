@@ -25,6 +25,11 @@ namespace Microsoft.Identity.Client
 {
     internal sealed class ApplicationConfiguration : IAppConfig
     {
+        public ApplicationConfiguration(bool isConfidentialClient) 
+        {
+            IsConfidentialClient = isConfidentialClient;
+        }
+        
         public const string DefaultClientName = "UnknownClient";
         public const string DefaultClientVersion = "0.0.0.0";
 
@@ -43,6 +48,8 @@ namespace Microsoft.Identity.Client
             get => _clientVersion;
             internal set { _clientVersion = string.IsNullOrWhiteSpace(value) ? DefaultClientVersion : value; }
         }
+
+        public ITelemetryClient[] TelemetryClients { get; internal set; } = new ITelemetryClient[0];
 
         public Func<object> ParentActivityOrWindowFunc { get; internal set; }
 
@@ -97,6 +104,8 @@ namespace Microsoft.Identity.Client
         public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
         public bool CacheSynchronizationEnabled { get; internal set; } = true;
         public bool MultiCloudSupportEnabled { get; set; } = false;
+
+        public bool RetryOnServerErrors { get; set; } = true;
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
@@ -179,7 +188,8 @@ namespace Microsoft.Identity.Client
         public ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
-#endregion
+        public bool IsConfidentialClient { get; }
+        #endregion
 
     }
 }

@@ -9,14 +9,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json.Linq;
 using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.Pop
@@ -77,6 +78,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 // Assert
                 Assert.AreEqual("PoP", authenticationScheme.AuthorizationHeaderPrefix);
+                Assert.AreEqual(TokenType.Pop, authenticationScheme.TelemetryTokenType);
                 Assert.AreEqual(JWT, authenticationScheme.KeyId);
                 Assert.AreEqual(2, tokenParams.Count);
                 Assert.AreEqual("pop", tokenParams["token_type"]);
@@ -99,7 +101,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 var jwkFromPopAssertion = JToken.Parse(jwk);
 
                 var initialJwk = JToken.Parse(JWK);
-                Assert.IsTrue(jwkFromPopAssertion["jwk"].DeepEquals(initialJwk));
+                Assert.IsTrue(JToken.DeepEquals(initialJwk, jwkFromPopAssertion["jwk"]));
             }
         }
 
@@ -122,14 +124,14 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
                     authority: TestConstants.AuthorityCommonTenant,
-                    responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(token:$"header.{Guid.NewGuid()}.signature", tokenType: "pop"));
+                    responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(token: $"header.{Guid.NewGuid()}.signature", tokenType: "pop"));
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
                     authority: TestConstants.AuthorityCommonTenant,
                     responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(token: $"header.{Guid.NewGuid()}.signature", tokenType: "pop"));
 
                 Guid correlationId = Guid.NewGuid();
-                TestTimeService testClock = new TestTimeService();                
+                TestTimeService testClock = new TestTimeService();
                 PoPProviderFactory.TimeService = testClock;
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)

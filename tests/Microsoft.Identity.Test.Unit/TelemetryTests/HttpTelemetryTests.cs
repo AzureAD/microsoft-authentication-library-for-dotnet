@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.OAuth2.Throttling;
@@ -291,6 +292,34 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             }
         }
 
+        [TestMethod]
+        public async Task TelemetryTestExceptionLogAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                _app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                            .WithHttpManager(_harness.HttpManager)
+                            .WithDefaultRedirectUri()
+                            .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
+                            .BuildConcrete();
+
+                Trace.WriteLine("Acquire token Interactive with OperationCanceledException.");
+                var result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.TaskCanceledException).ConfigureAwait(false);
+                var previousCorrelationId = result.Correlationid;
+
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                Trace.WriteLine("Acquire token interactive successful.");
+                result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
+                AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheRefreshReason.NotApplicable);
+                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0, 
+                    expectedFailedApiIds: new ApiIds[] { ApiIds.AcquireTokenInteractive }, 
+                    expectedCorrelationIds: new Guid[] { previousCorrelationId }, 
+                    expectedErrors: new string[] { "TaskCanceledException" });
+            }
+        }
+
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
@@ -336,7 +365,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             /// An error occurs at the /token endpoint. HTTP 5xx errors and 429 denote that AAD is down.
             /// In this case the telemetry will not have been recorded and MSAL needs to keep it around.
             /// </summary>
-            AADUnavailableError
+            AADUnavailableError,
+
+            TaskCanceledException
         }
 
         private async Task<(HttpRequestMessage HttpRequest, Guid Correlationid)> RunAcquireTokenInteractiveAsync(
@@ -402,6 +433,22 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                         .AcquireTokenInteractive(TestConstants.s_scope)
                         .WithCorrelationId(correlationId)
                         .ExecuteAsync())
+                        .ConfigureAwait(false);
+
+                    break;
+
+                case AcquireTokenInteractiveOutcome.TaskCanceledException:
+                    correlationId = Guid.NewGuid();
+
+                    CancellationTokenSource cts = new CancellationTokenSource();
+                    cts.Cancel(true);
+                    CancellationToken token = cts.Token;
+                    
+                    var operationCanceledException = await AssertException.TaskThrowsAsync<TaskCanceledException>(() =>
+                        _app
+                        .AcquireTokenInteractive(TestConstants.s_scope)
+                        .WithCorrelationId(correlationId)
+                        .ExecuteAsync(token))
                         .ConfigureAwait(false);
 
                     break;
@@ -509,7 +556,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(3, telemetryCategories.Length);
             Assert.AreEqual(1, telemetryCategories[0].Split(',').Length); // version
             Assert.AreEqual(5, telemetryCategories[1].Split(',').Length); // api_id, cache_info, region_used, region_source, region_outcome
-            Assert.AreEqual(2, telemetryCategories[2].Split(',').Length); // platform_fields
+            Assert.AreEqual(3, telemetryCategories[2].Split(',').Length); // platform_fields
 
             Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion, telemetryCategories[0]); // version
 
@@ -522,6 +569,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(isCacheSerialized ? "1" : "0", telemetryCategories[2].Split(',')[0]); // is_cache_serialized
 
             Assert.AreEqual(isLegacyCacheEnabled ? "1" : "0", telemetryCategories[2].Split(',')[1]); // is_legacy_cache_enabled
+
+            Assert.AreEqual(TokenType.Bearer.ToString("D"), telemetryCategories[2].Split(',')[2]);
         }
 
         private static void AssertPreviousTelemetry(

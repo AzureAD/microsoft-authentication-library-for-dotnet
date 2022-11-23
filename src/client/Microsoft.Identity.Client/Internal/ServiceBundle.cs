@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Internal
             PlatformProxy = config.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(ApplicationLogger);
             HttpManager = config.HttpManager ?? new HttpManager(
                 config.HttpClientFactory ??
-                PlatformProxy.CreateDefaultHttpClientFactory());
+                PlatformProxy.CreateDefaultHttpClientFactory(), config.RetryOnServerErrors);
 
             HttpTelemetryManager = new HttpTelemetryManager();
 

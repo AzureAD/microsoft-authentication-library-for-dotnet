@@ -3,10 +3,11 @@
 
 parameters:
   BuildPlatform: 'any cpu'
-  BuildConfiguration: 'debug'
+  BuildConfiguration: 'Release'
   MsalClientSemVer: '4.0.0-devopsbuild'
 
 steps:
+
 - task: CmdLine@2
   displayName: 'Clear local NuGet cache'
   inputs:

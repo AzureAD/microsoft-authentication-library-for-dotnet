@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
 {
@@ -42,7 +45,7 @@ namespace Microsoft.Identity.Client
         {
             ClientApplicationBase.GuardMobileFrameworks();
 
-            var config = new ApplicationConfiguration();
+            var config = new ApplicationConfiguration(isConfidentialClient: true);
             var builder = new ConfidentialClientApplicationBuilder(config).WithOptions(options);
 
             if (!string.IsNullOrWhiteSpace(options.ClientSecret))
@@ -75,7 +78,7 @@ namespace Microsoft.Identity.Client
         {
             ClientApplicationBase.GuardMobileFrameworks();
 
-            var config = new ApplicationConfiguration();
+            var config = new ApplicationConfiguration(isConfidentialClient: true);
             return new ConfidentialClientApplicationBuilder(config)
                 .WithClientId(clientId)
                 .WithCacheSynchronization(false);
@@ -311,6 +314,51 @@ namespace Microsoft.Identity.Client
         {
             Config.CacheSynchronizationEnabled = enableCacheSynchronization;
             return this;
+        }
+
+        /// <summary>
+        /// Sets telemetry client for the application.
+        /// </summary>
+        /// <param name="telemetryClients">List of telemetry clients to add telemetry logs.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public ConfidentialClientApplicationBuilder WithTelemetryClient(params ITelemetryClient[] telemetryClients)
+        {
+            ValidateUseOfExperimentalFeature("ITelemetryClient");
+
+            if (telemetryClients == null)
+            {
+                throw new ArgumentNullException(nameof(telemetryClients));
+            }
+
+            if (telemetryClients.Length > 0)
+            {
+                foreach (var telemetryClient in telemetryClients)
+                {
+                    if (telemetryClient == null)
+                    {
+                        throw new ArgumentNullException(nameof(telemetryClient));
+                    }
+
+                    telemetryClient.Initialize();
+                }
+
+                Config.TelemetryClients = telemetryClients;
+            }
+
+            TelemetryClientLogMsalVersion();
+
+            return this;
+        }
+
+        private void TelemetryClientLogMsalVersion()
+        {
+            if (Config.TelemetryClients.HasEnabledClients(TelemetryConstants.ConfigurationUpdateEventName))
+            {
+                MsalTelemetryEventDetails telemetryEventDetails = new MsalTelemetryEventDetails(TelemetryConstants.ConfigurationUpdateEventName);
+                telemetryEventDetails.SetProperty(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion());
+
+                Config.TelemetryClients.TrackEvent(telemetryEventDetails);
+            }
         }
 
         internal ConfidentialClientApplicationBuilder WithAppTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)

@@ -2,12 +2,15 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Globalization;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using JObject = System.Text.Json.Nodes.JsonObject;
+#else
 using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
@@ -52,7 +55,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             HomeAccountId = homeAccountId;
         }
 
-    
+
         internal string TenantId { get; set; }
 
         private readonly Lazy<IdToken> idTokenLazy;
@@ -71,14 +74,14 @@ namespace Microsoft.Identity.Client.Cache.Items
                 return null;
             }
 
-            return FromJObject(JObject.Parse(json));
+            return FromJObject(JsonHelper.ParseIntoJsonObject(json));
         }
 
         internal static MsalIdTokenCacheItem FromJObject(JObject j)
         {
             var item = new MsalIdTokenCacheItem
             {
-                TenantId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),
+                TenantId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),
             };
 
             item.PopulateFieldsFromJObject(j);

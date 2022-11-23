@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
@@ -92,9 +93,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public ICacheSessionManager CacheSessionManager { get; }
         public HashSet<string> Scope { get; }
-
-        public bool HasScopes => Scope != null && Scope.Count > 0;
-
         public Uri RedirectUri { get; set; }
 
         public IDictionary<string, string> ExtraQueryParameters { get; }
@@ -152,18 +150,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public PoPAuthenticationConfiguration PopAuthenticationConfiguration => _commonParameters.PopAuthenticationConfiguration;
 
-        public bool IsConfidentialClient
-        {
-            get
-            {
-#if ANDROID || iOS || WINDOWS_APP || MAC
-                return false;
-#else
-                return _serviceBundle.Config.ClientCredential != null;
-#endif
-            }
-        }
-
         /// <remarks>
         /// User assertion is null when <see cref="ILongRunningWebApi.AcquireTokenInLongRunningProcess"/> is called.
         /// </remarks>
@@ -192,7 +178,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("ClaimsAndClientCapabilities - " + ClaimsAndClientCapabilities);
             builder.AppendLine("Authority - " + AuthorityInfo?.CanonicalAuthority);
             builder.AppendLine("ApiId - " + ApiId);
-            builder.AppendLine("IsConfidentialClient - " + IsConfidentialClient);
+            builder.AppendLine("IsConfidentialClient - " + AppConfig.IsConfidentialClient);
             builder.AppendLine("SendX5C - " + SendX5C);
             builder.AppendLine("LoginHint - " + LoginHint);
             builder.AppendLine("IsBrokerConfigured - " + AppConfig.IsBrokerEnabled);
@@ -212,7 +198,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Scopes - " + Scope?.AsSingleString());
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
             builder.AppendLine("ApiId - " + ApiId);
-            builder.AppendLine("IsConfidentialClient - " + IsConfidentialClient);
+            builder.AppendLine("IsConfidentialClient - " + AppConfig.IsConfidentialClient);
             builder.AppendLine("SendX5C - " + SendX5C);
             builder.AppendLine("LoginHint ? " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("IsBrokerConfigured - " + AppConfig.IsBrokerEnabled);

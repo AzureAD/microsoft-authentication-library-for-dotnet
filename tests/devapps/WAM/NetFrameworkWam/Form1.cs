@@ -93,7 +93,8 @@ namespace NetDesktopWinForms
 
             var builder = PublicClientApplicationBuilder
                 .Create(clientId)
-                .WithAuthority(this.authorityCbx.Text);
+                .WithAuthority(this.authorityCbx.Text)
+                .WithMultiCloudSupport(true);
 
             var authMethod = GetAuthMethod();
 
@@ -180,13 +181,6 @@ namespace NetDesktopWinForms
 
             if (!string.IsNullOrEmpty(loginHint))
             {
-                if (IsMsaPassthroughConfigured())
-                {
-                    // TODO: bogavril - move this exception in WAM
-                    throw new InvalidOperationException(
-                        "[TEST APP FAILURE] Do not use login hint on AcquireTokenSilent for MSA-Passthrough. Use the IAccount overload.");
-                }
-
                 Log($"ATS with login hint: " + loginHint);
                 return await pca.AcquireTokenSilent(GetScopes(), loginHint)
                         .ExecuteAsync(cancellationToken)
@@ -236,7 +230,8 @@ namespace NetDesktopWinForms
             string[] result = null;
             cbxScopes.Invoke((MethodInvoker)delegate
             {
-                result = cbxScopes.Text.Split(' ');
+                if (!string.IsNullOrWhiteSpace(cbxScopes.Text))
+                    result = cbxScopes.Text.Split(' ');
             });
 
             return result;

@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -27,7 +28,7 @@ namespace Microsoft.Identity.Client
                 idToken?.TenantId).TenantId;
         }
 
-        public static string GetPreferredUsernameFromIdToken(bool isAdfsAuthority, IdToken idToken)
+        public static string GetUsernameFromIdToken(IdToken idToken)
         {
             // The preferred_username value cannot be null or empty in order to comply with the ADAL/MSAL Unified cache schema.
             // It will be set to "Missing from the token response"
@@ -36,19 +37,9 @@ namespace Microsoft.Identity.Client
                 return NullPreferredUsernameDisplayLabel;
             }
 
-            if (string.IsNullOrWhiteSpace(idToken.PreferredUsername))
-            {
-                if (isAdfsAuthority)
-                {
-                    //The direct to ADFS scenario does not return preferred_username in the id token so it needs to be set to the UPN
-                    return !string.IsNullOrEmpty(idToken.Upn)
-                        ? idToken.Upn
-                        : NullPreferredUsernameDisplayLabel;
-                }
-                return NullPreferredUsernameDisplayLabel;
-            }
-
-            return idToken.PreferredUsername;
+            return idToken.PreferredUsername.NullIfWhiteSpace() ??
+                   idToken.Upn.NullIfWhiteSpace() ??                     
+                   NullPreferredUsernameDisplayLabel;
         }
 
         public static string GetHomeAccountId(AuthenticationRequestParameters requestParams, MsalTokenResponse response, IdToken idToken)

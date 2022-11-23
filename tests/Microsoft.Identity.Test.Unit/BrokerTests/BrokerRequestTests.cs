@@ -29,6 +29,7 @@ using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using NSubstitute.Extensions;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -197,7 +198,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         null,
                         broker,
                         "install_url");
-#if NET5_WIN
+#if NET6_WIN
                 Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #else
                 Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
@@ -221,7 +222,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         _acquireTokenSilentParameters,
                         broker);
 
-#if NET5_WIN
+#if NET6_WIN
                 Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #else
                 Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
@@ -461,9 +462,14 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         private static IBroker CreateBroker(Type brokerType)
         {
             if (brokerType == typeof(NullBroker))
+            {
                 return new NullBroker(null);
+            }
+
             if (brokerType == typeof(IosBrokerMock))
+            {
                 return new IosBrokerMock(null);
+            }
 
             throw new NotImplementedException();
         }
@@ -600,7 +606,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-#if NET5_WIN
+#if NET6_WIN
         [TestMethod]
         public async Task BrokerGetAccountsWithBrokerInstalledTestAsync()
         {
@@ -747,6 +753,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             using (var harness = CreateBrokerHelper())
             {
+                var tokenResponse = CreateTokenResponseForTest();
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 IBroker broker = Substitute.For<IBroker>();
                 _acquireTokenSilentParameters.Account = PublicClientApplication.OperatingSystemAccount;
@@ -759,29 +766,16 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         broker);
                 _parameters.Account = PublicClientApplication.OperatingSystemAccount;
                 broker.AcquireTokenSilentDefaultUserAsync(_parameters, _acquireTokenSilentParameters)
-                    .Returns(Task.FromResult(_msalTokenResponse));
+                    .Returns(Task.FromResult(tokenResponse));
                 broker.IsBrokerInstalledAndInvokable(_parameters.Authority.AuthorityInfo.AuthorityType).Returns(true);
 
                 // Act
                 var result = await brokerSilentAuthStrategy.ExecuteAsync(default).ConfigureAwait(false);
 
                 // Assert
-                Assert.AreSame(_msalTokenResponse.AccessToken, result.AccessToken);
+                Assert.AreSame(tokenResponse.AccessToken, result.AccessToken);
             }
         }
-
-        private MsalTokenResponse _msalTokenResponse = new MsalTokenResponse
-        {
-            IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
-            AccessToken = "access-token",
-            ClientInfo = MockHelpers.CreateClientInfo(),
-            ExpiresIn = 3599,
-            CorrelationId = "correlation-id",
-            RefreshToken = null, // brokers don't return RT
-            Scope = TestConstants.s_scope.AsSingleString(),
-            TokenType = "Bearer",
-            WamAccountId = "wam_account_id",
-        };
 
         [TestMethod]
         public void NoTokenFoundThrowsUIRequiredTest()
@@ -856,6 +850,46 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 _brokerSilentAuthStrategy.ValidateResponseFromBroker(msalToken);
             });
+        }
+
+        [TestMethod]
+        public async Task MultiCloud_WithBroker_Async()
+        {
+            using (var harness = CreateBrokerHelper())
+            {
+                // Arrange
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var builder = PublicClientApplicationBuilder
+                   .Create(TestConstants.ClientId)
+                   .WithAuthority("https://login.microsoftonline.com/common")
+                   .WithMultiCloudSupport(true)
+                   .WithHttpManager(harness.HttpManager);
+
+                var broker = Substitute.For<IBroker>();
+                builder.Config.BrokerCreatorFunc = (_, _, _) => broker;
+
+                var globalPca = builder.WithBroker(true).BuildConcrete();
+
+                // Setup the broker to return AuthorityUrl in the MsalTokenResponse as different cloud
+                broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+
+                var tokenResponse = CreateTokenResponseForTest();
+                tokenResponse.AuthorityUrl = "https://login.microsoftonline.us/organizations";
+                broker.AcquireTokenInteractiveAsync(null, null).ReturnsForAnyArgs(Task.FromResult(tokenResponse));
+
+                // Act - interactive flow logs-in Arlighton user
+                var result = await globalPca.AcquireTokenInteractive(TestConstants.s_graphScopes).ExecuteAsync().ConfigureAwait(false);
+                Assert.AreEqual("login.microsoftonline.us", result.Account.Environment);
+                Assert.AreEqual(TestConstants.Utid, result.TenantId);
+
+                var account = (await globalPca.GetAccountsAsync().ConfigureAwait(false)).Single();
+                Assert.AreEqual("login.microsoftonline.us", account.Environment);
+                Assert.AreEqual(TestConstants.Utid, result.TenantId);
+
+                await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(
+                    async () => await globalPca.AcquireTokenSilent(TestConstants.s_graphScopes, PublicClientApplication.OperatingSystemAccount).ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+            }
         }
 
         private void ProtectionPolicyNotEnabled_Throws_Exception_Common(Action<MsalTokenResponse> action)
@@ -965,6 +999,23 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             _brokerHttpResponse.Headers = new HttpResponseMessage().Headers;
 
             return harness;
+        }
+
+        private MsalTokenResponse CreateTokenResponseForTest()
+
+        {
+            return new MsalTokenResponse()
+            {
+                IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                AccessToken = "access-token",
+                ClientInfo = MockHelpers.CreateClientInfo(),
+                ExpiresIn = 3599,
+                CorrelationId = "correlation-id",
+                RefreshToken = null, // brokers don't return RT
+                Scope = TestConstants.s_scope.AsSingleString(),
+                TokenType = "Bearer",
+                WamAccountId = "wam_account_id",
+            };
         }
     }
 

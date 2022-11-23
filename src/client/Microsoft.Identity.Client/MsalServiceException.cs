@@ -3,10 +3,16 @@
 
 using System;
 using System.Globalization;
+using System.Net;
 using System.Net.Http.Headers;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Utils;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using System.Text.Json.Serialization;
+using JObject = System.Text.Json.Nodes.JsonObject;
+#else
 using Microsoft.Identity.Json.Linq;
-
+#endif
 namespace Microsoft.Identity.Client
 {
 
@@ -20,6 +26,9 @@ namespace Microsoft.Identity.Client
         private const string ResponseBodyKey = "response_body";
         private const string CorrelationIdKey = "correlation_id";
         private const string SubErrorKey = "sub_error";
+        private int _statusCode = 0;
+        private string _responseBody;
+        private HttpResponseHeaders _headers;
 
         #region Constructors
         /// <summary>
@@ -39,7 +48,7 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentNullException(nameof(errorMessage));
             }
-            IsRetryable = IsAadUnavailable();
+            UpdateIsRetryable();
         }
 
         /// <summary>
@@ -77,7 +86,7 @@ namespace Microsoft.Identity.Client
             Exception innerException)
             : base(errorCode, errorMessage, innerException)
         {
-            IsRetryable = IsAadUnavailable();
+            UpdateIsRetryable();            
         }
 
         /// <summary>
@@ -101,7 +110,7 @@ namespace Microsoft.Identity.Client
                 errorCode, errorMessage, innerException)
         {
             StatusCode = statusCode;
-            IsRetryable = IsAadUnavailable();
+            UpdateIsRetryable();
         }
 
         /// <summary>
@@ -143,11 +152,15 @@ namespace Microsoft.Identity.Client
         /// http://msdn.microsoft.com/en-us/library/bb268233(v=vs.85).aspx).
         /// You can use this code for purposes such as implementing retry logic or error investigation.
         /// </summary>
-        public int StatusCode { get; internal set; } = 0;
-
-#if !DESKTOP
-#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
-#endif
+        public int StatusCode
+        {
+            get { return _statusCode; }
+            internal set
+            {
+                _statusCode = value;
+                UpdateIsRetryable();
+            }
+        }
         /// <summary>
         /// Additional claims requested by the service. When this property is not null or empty, this means that the service requires the user to
         /// provide additional claims, such as doing two factor authentication. The are two cases:
@@ -161,13 +174,23 @@ namespace Microsoft.Identity.Client
         /// </list>
         /// For more details see https://aka.ms/msal-net-claim-challenge
         /// </summary>
+#if SUPPORTS_SYSTEM_TEXT_JSON
+        [JsonInclude]
+#endif
         public string Claims { get; internal set; }
-#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
         /// Raw response body received from the server.
         /// </summary>
-        public string ResponseBody { get; set; }
+        public string ResponseBody
+        {
+            get => _responseBody;
+            set
+            {
+                _responseBody = value;
+                UpdateIsRetryable();
+            }
+        }
 
         /// <summary>
         /// Contains the HTTP headers from the server response that indicated an error.
@@ -176,7 +199,14 @@ namespace Microsoft.Identity.Client
         /// When the server returns a 429 Too Many Requests error, a Retry-After should be set. It is important to read and respect the
         /// time specified in the Retry-After header to avoid a retry storm.
         /// </remarks>
-        public HttpResponseHeaders Headers { get; set; }
+        public HttpResponseHeaders Headers { 
+            get => _headers; 
+            set 
+            {
+                _headers = value;
+                UpdateIsRetryable();
+            }
+        }
 
         /// <summary>
         /// An ID that can used to piece up a single authentication flow.
@@ -193,12 +223,14 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// As per discussion with Evo, AAD 
         /// </summary>
-        internal bool IsAadUnavailable()
+        private void UpdateIsRetryable()
         {
-            return 
-                StatusCode == 429 || // "Too Many Requests", does not mean AAD is down
-                StatusCode >= 500 || 
-                string.Equals(ErrorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase);
+            IsRetryable =
+                (StatusCode >= 500 && StatusCode < 600) ||
+                StatusCode == 429 || // too many requests
+                StatusCode == (int)HttpStatusCode.RequestTimeout ||
+                string.Equals(ErrorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(ErrorCode, "temporarily_unavailable", StringComparison.OrdinalIgnoreCase); // as per https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes#handling-error-codes-in-your-application
         }
 
         /// <summary>
@@ -214,6 +246,8 @@ namespace Microsoft.Identity.Client
                 ResponseBody,
                 Headers);
         }
+
+
 
         #region Serialization
 
@@ -233,10 +267,10 @@ namespace Microsoft.Identity.Client
         {
             base.PopulateObjectFromJson(jobj);
 
-            Claims = JsonUtils.GetExistingOrEmptyString(jobj, ClaimsKey);
-            ResponseBody = JsonUtils.GetExistingOrEmptyString(jobj, ResponseBodyKey);
-            CorrelationId = JsonUtils.GetExistingOrEmptyString(jobj, CorrelationIdKey);
-            SubError = JsonUtils.GetExistingOrEmptyString(jobj, SubErrorKey);
+            Claims = JsonHelper.GetExistingOrEmptyString(jobj, ClaimsKey);
+            ResponseBody = JsonHelper.GetExistingOrEmptyString(jobj, ResponseBodyKey);
+            CorrelationId = JsonHelper.GetExistingOrEmptyString(jobj, CorrelationIdKey);
+            SubError = JsonHelper.GetExistingOrEmptyString(jobj, SubErrorKey);
         }
         #endregion
     }

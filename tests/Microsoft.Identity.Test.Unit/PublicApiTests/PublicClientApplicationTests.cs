@@ -7,13 +7,15 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
-using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Advanced;
 #if !NET5_0_OR_GREATER
 using Microsoft.Identity.Client.Desktop;
+#endif
+#if NET_CORE
+using Microsoft.Identity.Client.Broker;
 #endif
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
@@ -358,7 +360,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
 
                 //Validate new default redirect uri
-#if DESKTOP || NET5_WIN
+#if DESKTOP || NET6_WIN
                 Assert.AreEqual(Constants.NativeClientRedirectUri, app.AppConfig.RedirectUri);
 #elif NET_CORE 
                 Assert.AreEqual(app.AppConfig.RedirectUri, "http://localhost");
@@ -842,6 +844,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .ConfigureAwait(false);
         }
 
+#if !NET6_0
         /// <summary>
         /// Cache state:
         ///
@@ -883,7 +886,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 AssertTenantProfiles(response.Account.GetTenantProfiles(), tenant1, tenant2);
                 Assert.AreEqual(tenant1, response.ClaimsPrincipal.FindFirst("tid").Value);
 
-
                 // Act
                 accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
                 account = accounts.Single(a => a.HomeAccountId.TenantId == tenant2);
@@ -899,7 +901,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(tenant2, response.ClaimsPrincipal.FindFirst("tid").Value);
             }
         }
-
+#endif
         /// <summary>
         /// Cache state:
         ///

@@ -132,7 +132,6 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 .WithClientSecret("secret")
                 .Build();
 
-           
             AssertException.Throws<ArgumentNullException>(() =>
                 app
                     .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
@@ -142,43 +141,48 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [TestMethod]
         public void VerifyAuthorityTest()
         {
-            const string utid = TestConstants.Utid;
-            const string utid2 = TestConstants.Utid2;
-
             VerifyAuthority(
-                config: s_commonAuthority,
-                request: null,
+                configAuthority: s_commonAuthority,
+                requestAuthority: null,
                 account: null,
-                resultTid: "common",
+                expectedTenantId: "common",
                 _testRequestContext);
 
             VerifyAuthority(
-               config: s_commonAuthority,
-               request: s_commonAuthority,
+               configAuthority: s_commonAuthority,
+               requestAuthority: s_commonAuthority,
                account: null,
-               resultTid: "common",
+               expectedTenantId: "common",
                _testRequestContext);
 
             VerifyAuthority(
-              config: s_commonAuthority,
-              request: s_commonAuthority,
-              account: new Account(TestConstants.s_userIdentifier, "username", s_commonAuthority.AuthorityInfo.Host),              
-              resultTid: utid,
+              configAuthority: s_commonAuthority,
+              requestAuthority: s_commonAuthority,
+              account: new Account(TestConstants.s_userIdentifier, "username", s_commonAuthority.AuthorityInfo.Host),
+              expectedTenantId: TestConstants.Utid,
               _testRequestContext);
 
             VerifyAuthority(
-             config: s_commonAuthority,
-             request: s_utidAuthority,
+             configAuthority: s_commonAuthority,
+             requestAuthority: s_utidAuthority,
              account: null,
-             resultTid: utid,
+             expectedTenantId: TestConstants.Utid,
              _testRequestContext);
 
             VerifyAuthority(
-             config: s_commonAuthority,
-             request: s_utid2Authority,
+             configAuthority: s_commonAuthority,
+             requestAuthority: s_utid2Authority,
              account: new Account(TestConstants.s_userIdentifier, "username", s_utid2Authority.AuthorityInfo.Host),
-             resultTid: utid2,
+             expectedTenantId: TestConstants.Utid2,
              _testRequestContext);
+
+            VerifyAuthority(
+                configAuthority: s_commonAuthority,
+                requestAuthority: null,
+                account: PublicClientApplication.OperatingSystemAccount,
+                expectedTenantId: "common",
+                _testRequestContext,
+                multiCloudSupport: true);
         }
 
         [TestMethod]
@@ -228,7 +232,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 
             _testRequestContext.ServiceBundle.Config.Authority = Authority.CreateAuthority(TestConstants.B2CAuthority, true);
             var ex4 = await Assert.ThrowsExceptionAsync<MsalClientException>(
-                () =>  Authority.CreateAuthorityForRequestAsync(
+                () => Authority.CreateAuthorityForRequestAsync(
                    _testRequestContext,
                    AuthorityInfo.FromAuthorityUri(TestConstants.B2CCustomDomain, true),
                    null)).ConfigureAwait(false);
@@ -260,15 +264,17 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         }
 
         private static void VerifyAuthority(
-            Authority config,
-            Authority request,
+            Authority configAuthority,
+            Authority requestAuthority,
             IAccount account,
-            string resultTid,
-            RequestContext requestContext)
+            string expectedTenantId,
+            RequestContext requestContext,
+            bool multiCloudSupport = false)
         {
-            requestContext.ServiceBundle.Config.Authority = config;
-            var resultAuthority = Authority.CreateAuthorityForRequestAsync(requestContext, request?.AuthorityInfo, account).Result;
-            Assert.AreEqual(resultTid, resultAuthority.TenantId);
+            requestContext.ServiceBundle.Config.Authority = configAuthority;
+            requestContext.ServiceBundle.Config.MultiCloudSupportEnabled = multiCloudSupport;
+            var resultAuthority = Authority.CreateAuthorityForRequestAsync(requestContext, requestAuthority?.AuthorityInfo, account).Result;
+            Assert.AreEqual(expectedTenantId, resultAuthority.TenantId);
         }
     }
 }

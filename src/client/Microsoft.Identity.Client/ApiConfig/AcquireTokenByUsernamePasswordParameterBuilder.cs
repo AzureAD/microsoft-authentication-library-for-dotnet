@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
@@ -76,7 +77,6 @@ namespace Microsoft.Identity.Client
 #endif
         public AcquireTokenByUsernamePasswordParameterBuilder WithProofOfPossession(string nonce, HttpMethod httpMethod, Uri requestUri)
         {
-            ValidateUseOfExperimentalFeature();
             ClientApplicationBase.GuardMobileFrameworks();
 
             if (!ServiceBundle.Config.IsBrokerEnabled)

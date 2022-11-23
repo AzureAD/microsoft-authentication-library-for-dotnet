@@ -49,13 +49,19 @@ namespace Microsoft.Identity.Client
             }
 
             var tenantId = TokenResponseHelper.GetTenantId(idToken, requestParams);
-
-            bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
-            bool isAadAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Aad;
-            string preferredUsername = TokenResponseHelper.GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
-            string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
+            string username = TokenResponseHelper.GetUsernameFromIdToken(idToken);
             string homeAccountId = TokenResponseHelper.GetHomeAccountId(requestParams, response, idToken);
+
             string suggestedWebCacheKey = CacheKeyFactory.GetExternalCacheKeyFromResponse(requestParams, homeAccountId);
+
+            // token could be comming from a different cloud than the one configured
+            if (requestParams.AppConfig.MultiCloudSupportEnabled && !string.IsNullOrEmpty(response.AuthorityUrl))
+            {
+                var url = new Uri(response.AuthorityUrl);                
+                requestParams.AuthorityManager = new AuthorityManager(
+                    requestParams.RequestContext,
+                    Authority.CreateAuthorityWithEnvironment(requestParams.Authority.AuthorityInfo, url.Host));
+            }
 
             // Do a full instance discovery when saving tokens (if not cached),
             // so that the PreferredNetwork environment is up to date.
@@ -117,16 +123,20 @@ namespace Microsoft.Identity.Client
                              response.ClientInfo,
                              homeAccountId,
                              idToken,
-                             preferredUsername,
+                             username,
                              tenantId,
                              wamAccountIds);
 
                 // Add the newly obtained id token to the list of profiles
-                var tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
-                if (isAadAuthority && tenantProfiles != null)
+                IDictionary<string, TenantProfile> tenantProfiles = null;
+                if (msalIdTokenCacheItem.TenantId != null)
                 {
-                    TenantProfile tenantProfile = new TenantProfile(msalIdTokenCacheItem);
-                    tenantProfiles[msalIdTokenCacheItem.TenantId] = tenantProfile;
+                    tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
+                    if (tenantProfiles != null)
+                    {
+                        TenantProfile tenantProfile = new TenantProfile(msalIdTokenCacheItem);
+                        tenantProfiles[msalIdTokenCacheItem.TenantId] = tenantProfile;
+                    }
                 }
 
                 account = new Account(
@@ -414,7 +424,7 @@ namespace Microsoft.Identity.Client
             // take a snapshot of the access tokens to avoid problems where the underlying collection is changed,
             // as this method is NOT locked by the semaphore
             string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
-            Debug.Assert(partitionKey != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partitioned.");
+            Debug.Assert(partitionKey != null || !requestParams.AppConfig.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
             var accessTokens = Accessor.GetAllAccessTokens(partitionKey, logger);
 
@@ -985,7 +995,7 @@ namespace Microsoft.Identity.Client
                         var wamAccount = new Account(
                             cachedAccount.HomeAccountId,
                             cachedAccount.PreferredUsername,
-                            environment,
+                            cachedAccount.Environment,
                             cachedAccount.WamAccountIds,
                             tenantProfiles?.Values);
 
@@ -1064,12 +1074,16 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParameters,
             string homeAccountId)
         {
-            if (requestParameters.AuthorityInfo.AuthorityType != AuthorityType.Aad)
+            if (!requestParameters.AuthorityInfo.IsMultiTenantSupported)
             {
                 return null;
             }
-
-            Debug.Assert(homeAccountId != null);
+            
+            if (homeAccountId == null)
+            {
+                requestParameters.RequestContext.Logger.Warning("No homeAccountId, skipping tenant profiles");
+                return null;
+            }            
 
             var idTokenCacheItems = Accessor.GetAllIdTokens(homeAccountId);
             FilterTokensByClientId(idTokenCacheItems);

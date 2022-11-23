@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -122,6 +123,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Important: Use WithTenantId or WithTenantIdFromAuthority instead, or WithB2CAuthority for B2C authorities.
+        /// 
         /// Specific authority for which the token is requested. Passing a different value than configured
         /// at the application constructor narrows down the selection to a specific tenant.
         /// This does not change the configured value in the application. This is specific
@@ -133,6 +136,7 @@ namespace Microsoft.Identity.Client
         /// the application registration portal.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [EditorBrowsable(EditorBrowsableState.Never)] // Soft deprecate
         public T WithAuthority(string authorityUri, bool validateAuthority = true)
         {
             if (string.IsNullOrWhiteSpace(authorityUri))
@@ -144,6 +148,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Important: Use WithTenantId or WithTenantIdFromAuthority instead, or WithB2CAuthority for B2C authorities.
+        /// 
         /// Adds a known Azure AD authority to the application to sign-in users from a single
         /// organization (single tenant application) specified by its tenant ID. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
@@ -151,6 +157,7 @@ namespace Microsoft.Identity.Client
         /// <param name="tenantId">GUID of the tenant from which to sign-in users.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [EditorBrowsable(EditorBrowsableState.Never)] // Soft deprecate
         public T WithAuthority(
             string cloudInstanceUri,
             Guid tenantId,
@@ -165,6 +172,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Important: Use WithTenantId or WithTenantIdFromAuthority instead, or WithB2CAuthority for B2C authorities.
+        /// 
         /// Adds a known Azure AD authority to the application to sign-in users from a single
         /// organization (single tenant application) described by its domain name. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
@@ -179,6 +188,7 @@ namespace Microsoft.Identity.Client
         /// and <see cref="WithAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </remarks>
         /// <returns>The builder to chain the .With methods.</returns>
+        [EditorBrowsable(EditorBrowsableState.Never)] // Soft deprecate
         public T WithAuthority(
             string cloudInstanceUri,
             string tenant,
@@ -193,6 +203,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Important: Use WithTenantId or WithTenantIdFromAuthority instead, or WithB2CAuthority for B2C authorities.
+        /// 
         /// Adds a known Azure AD authority to the application to sign-in users from a single
         /// organization (single tenant application) described by its cloud instance and its tenant ID.
         /// See https://aka.ms/msal-net-application-configuration.
@@ -202,6 +214,7 @@ namespace Microsoft.Identity.Client
         /// <param name="tenantId">Tenant Id of the tenant from which to sign-in users.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [EditorBrowsable(EditorBrowsableState.Never)] // Soft deprecate
         public T WithAuthority(
             AzureCloudInstance azureCloudInstance,
             Guid tenantId,
@@ -212,6 +225,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Important: Use WithTenantId or WithTenantIdFromAuthority instead, or WithB2CAuthority for B2C authorities.
+        /// 
         /// Adds a known Azure AD authority to the application to sign-in users from a single
         /// organization (single tenant application) described by its cloud instance and its domain
         /// name or tenant ID. See https://aka.ms/msal-net-application-configuration.
@@ -221,6 +236,7 @@ namespace Microsoft.Identity.Client
         /// <param name="tenant">Tenant Id of the tenant from which to sign-in users. This can also be a GUID.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [EditorBrowsable(EditorBrowsableState.Never)] // Soft deprecate
         public T WithAuthority(
             AzureCloudInstance azureCloudInstance,
             string tenant,
@@ -248,6 +264,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Important: Use WithTenantId or WithTenantIdFromAuthority instead, or WithB2CAuthority for B2C authorities.
+        /// 
         /// Adds a known Azure AD authority to the application to sign-in users specifying
         /// the sign-in audience (the cloud being the Azure public cloud). See https://aka.ms/msal-net-application-configuration.
         /// </summary>
@@ -255,7 +273,8 @@ namespace Microsoft.Identity.Client
         /// any work and school accounts, or any work and school accounts and Microsoft personal
         /// accounts.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
-        /// <returns>The builder to chain the .With methods.</returns>
+        /// <returns>The builder to chain the .With methods.</returns>        
+        [EditorBrowsable(EditorBrowsableState.Never)] // Soft deprecate
         public T WithAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(authorityAudience, validateAuthority);
@@ -337,7 +356,7 @@ namespace Microsoft.Identity.Client
         /// <param name="authorityUri">Authority URL for an ADFS server.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <remarks>MSAL.NET supports ADFS 2019 or later.</remarks>
-        /// <returns>The builder to chain the .With methods.</returns>
+        /// <returns>The builder to chain the .With methods.</returns>                
         public T WithAdfsAuthority(string authorityUri, bool validateAuthority = true)
         {
             if (string.IsNullOrWhiteSpace(authorityUri))

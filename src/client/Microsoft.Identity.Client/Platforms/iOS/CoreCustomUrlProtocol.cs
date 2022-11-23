@@ -4,7 +4,7 @@
 using System;
 using Foundation;
 
-namespace Microsoft.Identity.Client.Platforms.Shared.Apple
+namespace Microsoft.Identity.Client.Platforms.iOS
 {
     internal class CoreCustomUrlProtocol : NSUrlProtocol
     {
@@ -38,19 +38,19 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Apple
 
         public override void StartLoading()
         {
-            if (this.Request == null)
+            if (Request == null)
             {
                 return;
             }
 
-            NSMutableUrlRequest mutableRequest = (NSMutableUrlRequest) this.Request.MutableCopy();
+            NSMutableUrlRequest mutableRequest = (NSMutableUrlRequest)Request.MutableCopy();
             SetProperty(new NSString("YES"), "ADURLProtocol", mutableRequest);
-            this.connection = new NSUrlConnection(mutableRequest, new CoreCustomConnectionDelegate(this), true);
+            connection = new NSUrlConnection(mutableRequest, new CoreCustomConnectionDelegate(this), true);
         }
 
         public override void StopLoading()
         {
-            this.connection.Cancel();
+            connection.Cancel();
         }
 
         private class CoreCustomConnectionDelegate : NSUrlConnectionDataDelegate
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Apple
             public override NSUrlRequest WillSendRequest(NSUrlConnection connection, NSUrlRequest request,
                 NSUrlResponse response)
             {
-                NSMutableUrlRequest mutableRequest = (NSMutableUrlRequest) request.MutableCopy();
+                NSMutableUrlRequest mutableRequest = (NSMutableUrlRequest)request.MutableCopy();
                 if (response != null)
                 {
                     RemoveProperty("ADURLProtocol", mutableRequest);

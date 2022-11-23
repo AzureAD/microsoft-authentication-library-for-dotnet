@@ -28,6 +28,22 @@ namespace Microsoft.Identity.Client.Utils
             return new HashSet<string>(userScopes.Concat(OAuth2Value.ReservedScopes));
         }
 
+        public static bool HasNonMsalScopes(HashSet<string> userScopes)
+        {
+            if (userScopes == null)
+                return false;
+
+            foreach (var userScope in userScopes)
+            {
+                if (!string.IsNullOrWhiteSpace(userScope) && 
+                    !OAuth2Value.ReservedScopes.Contains(userScope))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public static HashSet<string> ConvertStringToScopeSet(string singleString)
         {
             if (string.IsNullOrEmpty(singleString))

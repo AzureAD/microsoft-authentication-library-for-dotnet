@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -122,9 +125,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.AreEqual("wam2", wamAccountIds[TestConstants.ClientId]);
                 Assert.AreEqual("wam3", wamAccountIds[TestConstants.ClientId2]);
                 CoreAssert.AssertDictionariesAreEqual(wamAccountIds, (accounts2.Single() as Account).WamAccountIds, StringComparer.Ordinal);
-#else
-                Assert.IsTrue(accounts1.All(a => (a as IAccountInternal).WamAccountIds == null));
-                Assert.IsTrue(accounts2.All(a => (a as IAccountInternal).WamAccountIds == null));
 #endif
             }
         }
@@ -165,8 +165,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 var wamAccountIds = (accounts.Single(acc => acc.HomeAccountId.Identifier == commonAccId) as Account).WamAccountIds;
                 Assert.AreEqual(1, wamAccountIds.Count);
                 Assert.AreEqual("wam_acc_id", wamAccountIds[TestConstants.ClientId]);
-#else
-                Assert.IsTrue(accounts.All(a => (a as IAccountInternal).WamAccountIds == null));
 #endif
             }
         }

@@ -183,6 +183,11 @@ namespace Microsoft.Identity.Client
         public const string UnknownBrokerError = "unknown_broker_error";
 
         /// <summary>
+        /// WAM Signout failed.
+        /// </summary>
+        public const string WamFailedToSignout = "wam_failed_to_signout";
+
+        /// <summary>
         /// Authentication failed.
         /// <para>What happens?</para>
         /// The authentication failed. For instance the user did not enter the right password
@@ -1015,6 +1020,12 @@ namespace Microsoft.Identity.Client
         /// pops up
         /// </summary>
         public const string WamPickerError = "wam_interactive_picker_error";
+
+        /// <summary>
+        /// <para>What happens?</para>No scopes have been requested
+        /// <para>Mitigation</para>At least one scope must be specified for MSAL Runtime WAM
+        /// </summary>
+        public const string WamScopesRequired = "scopes_required_wam";
 
         /// <summary>
         /// <para>What happens?</para>The embedded browser cannot be started because a runtime component is missing.
