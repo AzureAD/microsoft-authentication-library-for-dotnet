@@ -464,6 +464,8 @@ namespace Microsoft.Identity.Client.Broker
                         msalAccounts.Add(WamAdapters.ConvertToMsalAccount(acc, clientID, _logger));
                     }
 
+                    s_lazyCore.Value.Dispose();
+
                     _logger.Verbose($"[WamBroker] Converted {msalAccounts.Count} WAM account(s) to MSAL Account(s).");
                 }
                 else
