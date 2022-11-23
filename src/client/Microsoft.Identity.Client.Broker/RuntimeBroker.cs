@@ -106,26 +106,16 @@ namespace Microsoft.Identity.Client.Broker
 
         private void LogEventRaised(NativeInterop.Core sender, LogEventArgs args)
         {
-            if (_logger != null)
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
+            LogLevel msalLogLevel = LogLevelMap[args.LogLevel];
+            if (_logger.IsLoggingEnabled(msalLogLevel))
             {
-                using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
-                LogLevel msalLogLevel = LogLevelMap[args.LogLevel];
-                if (_logger.IsLoggingEnabled(msalLogLevel))
-                {
-                    string msgWithPii = string.Empty;
-                    string msgNoPii = string.Empty;
+                string msgWithPii = string.Empty;
+                string msgNoPii = string.Empty;
 
-                    if (_logger.PiiLoggingEnabled)
-                    {
-                        msgWithPii = args.Message;
-                    }
-                    else
-                    {
-                        msgNoPii = args.Message;
-                    }
-
-                    _logger.Log(msalLogLevel, msgWithPii, msgNoPii);
-                }
+                // as of now, there will be no Pii.
+                // TODO change when Pii is added
+                _logger.Log(msalLogLevel, string.Empty, args.Message);
             }
         }
 

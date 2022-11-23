@@ -15,7 +15,6 @@ using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.OAuth2;
@@ -33,39 +32,6 @@ using Account = Microsoft.Identity.Client.Account;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
-    internal class TestLogger : ILoggerAdapter
-    {
-        public virtual bool PiiLoggingEnabled => throw new NotImplementedException();
-
-        public virtual bool IsDefaultPlatformLoggingEnabled {get;set;} = true;
-
-        public virtual string ClientName => throw new NotImplementedException();
-
-        public virtual string ClientVersion => throw new NotImplementedException();
-
-        public virtual IIdentityLogger IdentityLogger => throw new NotImplementedException();
-
-        public virtual bool IsLoggingEnabled(Client.LogLevel logLevel)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual void Log(Client.LogLevel logLevel, string messageWithPii, string messageScrubbed)
-        {
-            Console.WriteLine($"LogLevel = {logLevel} msgWithPii = {messageWithPii} msgScrubbed = {messageScrubbed}");
-        }
-
-        public virtual DurationLogHelper LogBlockDuration(string measuredBlockName, Client.LogLevel logLevel = Client.LogLevel.Verbose)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual DurationLogHelper LogMethodDuration(Client.LogLevel logLevel = Client.LogLevel.Verbose, [CallerMemberName] string methodName = null, [CallerFilePath] string filePath = null)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     [TestClass]
     [TestCategory(TestCategories.Broker)]
     public class RuntimeBrokerTests : TestBase
@@ -188,14 +154,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             AssertException.Throws<NotImplementedException>(() => _wamBroker.HandleInstallUrl("http://app"));
         }
 
-        // Done - Logs in one
-        // NA - logs in multiple
-        // Done - maps correctly
-        // Done - Is Pii enabled
-        // Done - does not emit when loglevel is not appropriate
-        // Is API Platform logging enabled?
-        // no mem leaks
-
         [TestMethod]
         public async Task ATS_CallsLog_When_CalledAsync()
         {
@@ -219,6 +177,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             AcquireTokenSilentParameters silentParams = new AcquireTokenSilentParameters();
             silentParams.Account = PublicClientApplication.OperatingSystemAccount;
+            authRequestParams.Account = PublicClientApplication.OperatingSystemAccount;
 
             // Act
             try
@@ -229,10 +188,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 // Assert
                 _logger.Received().Log(Arg.Any<Client.LogLevel>(), Arg.Any<string>(), Arg.Any<string>());
-            }
-            catch (Exception ex)
-            {
-                Assert.IsTrue(false, ex.Message);
             }
         }
 
@@ -254,27 +209,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             // Assert
             _logger.Received().Log(msalLogLevel, string.Empty, logMessage);
-        }
-
-        [DataTestMethod]
-        [DataRow(Client.NativeInterop.LogLevel.Trace, Client.LogLevel.Verbose)]
-        [DataRow(Client.NativeInterop.LogLevel.Debug, Client.LogLevel.Verbose)]
-        [DataRow(Client.NativeInterop.LogLevel.Info, Client.LogLevel.Info)]
-        [DataRow(Client.NativeInterop.LogLevel.Warning, Client.LogLevel.Warning)]
-        [DataRow(Client.NativeInterop.LogLevel.Error, Client.LogLevel.Error)]
-        [DataRow(Client.NativeInterop.LogLevel.Fatal, Client.LogLevel.Error)]
-        public void LogEventRaised_MapsEvents_Correctly_When_Pii(Client.NativeInterop.LogLevel nativeLogLevel, Client.LogLevel msalLogLevel)
-        {
-            const string logMessage = "This is test";
-            _logger.IsLoggingEnabled(msalLogLevel).Returns(true);
-            _logger.PiiLoggingEnabled.Returns(true);
-
-            Type wamBrokerType = _wamBroker.GetType();
-            MethodInfo fireLogMethod = wamBrokerType.GetMethod("LogEventRaised", BindingFlags.NonPublic | BindingFlags.Instance);
-            fireLogMethod.Invoke(_wamBroker, new object[] { null, new LogEventArgs(nativeLogLevel, logMessage) });
-
-            // Assert
-            _logger.Received().Log(msalLogLevel, logMessage, string.Empty);
         }
 
         [DataTestMethod]

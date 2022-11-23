@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
-            MsalLoggerValidator testLogger = new MsalLoggerValidator();
+            WamLoggerValidator testLogger = new WamLoggerValidator();
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)

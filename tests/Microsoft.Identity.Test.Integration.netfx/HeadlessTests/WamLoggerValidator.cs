@@ -7,18 +7,16 @@ using Microsoft.IdentityModel.Abstractions;
 /// <summary>
 /// Performs validation on logs
 /// </summary>
-public class MsalLoggerValidator : IIdentityLogger
+public class WamLoggerValidator : IIdentityLogger
 {
-    // string that i tpart of MSAL logs
-    private const string MSALCPPIdentifier = "[MSAL:000";
-
-    // count of MsalCPP logs
-    private int MsalCPPLogCount { get; set; }
+    // string that is part of MSAL logs
+    private const string MsalCppIdentifier = "[MSAL:000";
 
     /// <summary>
     /// Determines if any CPP log has been logged
     /// </summary>
-    public virtual bool HasLogged => MsalCPPLogCount > 0;
+    public virtual bool HasLogged
+    { get; private set; }
 
     public virtual bool IsEnabled(EventLogLevel eventLogLevel) => true;
 
@@ -28,9 +26,10 @@ public class MsalLoggerValidator : IIdentityLogger
     /// <param name="entry">Entry of log</param>
     public virtual void Log(LogEntry entry)
     {
-        if (entry.Message.Contains(MSALCPPIdentifier))
+        if (!HasLogged &&
+            entry.Message.Contains(MsalCppIdentifier))
         {
-            MsalCPPLogCount++;
+            HasLogged= true;
         }
     }
 }

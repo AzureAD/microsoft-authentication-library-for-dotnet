@@ -70,12 +70,12 @@ namespace NetDesktopWinForms
             }
         }
 
-        private static Assembly GetAssembly(string assmblyName)
+        private static Assembly GetAssembly(string assemblyName)
         {
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 Debug.WriteLine($"Assembly Name {assembly.FullName}");
-                if (assembly.FullName.StartsWith(assmblyName))
+                if (assembly.FullName.StartsWith(assemblyName))
                 {
                     return assembly;
                 }

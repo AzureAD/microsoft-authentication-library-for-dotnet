@@ -459,13 +459,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string[] scopes = { "User.Read" };
             string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
 
-            MsalLoggerValidator testLogger = new MsalLoggerValidator();
+            WamLoggerValidator wastestLogger = new WamLoggerValidator();
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithExperimentalFeatures()
-               .WithLogging(testLogger)
+               .WithLogging(wastestLogger)
                .WithBrokerPreview().Build();
 
             Assert.IsTrue(pca.IsProofOfPossessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");
@@ -480,7 +480,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes, true);
 
-            Assert.IsTrue(testLogger.HasLogged);
+            Assert.IsTrue(wastestLogger.HasLogged);
 
             await VerifyPoPTokenAsync(
                 labResponse.App.AppId,

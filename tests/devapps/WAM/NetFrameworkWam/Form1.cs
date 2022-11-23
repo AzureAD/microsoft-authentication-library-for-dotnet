@@ -126,10 +126,10 @@ namespace NetDesktopWinForms
                 MsaPassthrough = cbxMsaPt.Checked,
                 HeaderText = "MSAL Dev App .NET FX"
             })
-            .WithLogging((x, y, z) =>
+            .WithLogging((logLevel, message, _) =>
             { 
-                Debug.WriteLine($"{x} {y}");
-                Log("***MSAL Log*** " + y);
+                Debug.WriteLine($"{logLevel} {message}");
+                Log("***MSAL Log*** " + message);
             }, LogLevel.Verbose, true);
 
             var pca = builder.Build();
