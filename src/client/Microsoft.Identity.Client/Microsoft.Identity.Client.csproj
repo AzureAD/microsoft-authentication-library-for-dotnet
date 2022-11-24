@@ -170,12 +170,12 @@
     <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
   </ItemGroup>
-  
+
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
     <IsTrimmable>true</IsTrimmable>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
   </PropertyGroup>
-  
+
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
     <Compile Include="$(PathToMsalSources)\Platforms\net6\**\*.cs" LinkBase="Platforms\net6" />
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
@@ -248,7 +248,7 @@
 
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkIos)'">
-    <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />    
+    <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -263,7 +263,7 @@
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
     <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
-  </ItemGroup> 
+  </ItemGroup>
   <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid'))">
     <Compile Include="$(PathToMsalSources)\Platforms\Android\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
@@ -304,12 +304,12 @@
     <PackageReference Include="Xamarin.AndroidX.Browser" Version="1.4.0" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Ios)' Or '$(TargetFramework)' == '$(TargetFrameworkNet6Mac)'">
-    <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />    
+    <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.22.0" />
+    <ProjectReference Include="..\Microsoft.Identity.Client.Services\Microsoft.Identity.Client.Services.csproj" />
   </ItemGroup>
 </Project>
