@@ -18,8 +18,6 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.WsTrust;
-using System.Globalization;
 
 namespace Microsoft.Identity.Client.Broker
 {
@@ -442,6 +440,11 @@ namespace Microsoft.Identity.Client.Broker
 
                     _logger.Verbose($"[WamBroker] Broker returned {wamAccounts.Count()} account(s).");
 
+                    if (wamAccounts.Count() == 0)
+                    {
+                        return Array.Empty<IAccount>();
+                    }
+
                     //If "multi-cloud" is enabled, we do not have to do instanceMetadata matching
                     if (!requestContext.ServiceBundle.Config.MultiCloudSupportEnabled)
                     {
@@ -464,7 +467,7 @@ namespace Microsoft.Identity.Client.Broker
                         msalAccounts.Add(WamAdapters.ConvertToMsalAccount(acc, clientID, _logger));
                     }
 
-                    s_lazyCore.Value.Dispose();
+                    s_lazyCore.Value?.Dispose();
 
                     _logger.Verbose($"[WamBroker] Converted {msalAccounts.Count} WAM account(s) to MSAL Account(s).");
                 }
@@ -476,7 +479,7 @@ namespace Microsoft.Identity.Client.Broker
                         $" Error Message: {discoverAccountsResult.Error.Context} \n" +
                         $" Internal Error Code: {discoverAccountsResult.Error.Tag.ToString(CultureInfo.InvariantCulture)} \n" +
                         $" Telemetry Data: {discoverAccountsResult.TelemetryData } \n";
-                    _logger.Error($"[WamBroker] {errorMessage}");
+                    _logger.ErrorPii($"[WamBroker] {errorMessage}", string.Empty);
 
                     return Array.Empty<IAccount>();
                 }

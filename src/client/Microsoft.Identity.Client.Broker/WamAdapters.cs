@@ -278,7 +278,7 @@ namespace Microsoft.Identity.Client.Broker
                 string authorityUrl = null;
 
                 // workaround for bug https://identitydivision.visualstudio.com/Engineering/_workitems/edit/2047936
-                // i.e. environment is not set correctly in multi-cloud apps and home_enviroment is not set
+                // i.e. environment is not set correctly in multi-cloud apps and home_environment is not set
                 if (authenticationRequestParameters.AppConfig.MultiCloudSupportEnabled && string.IsNullOrEmpty(authorityUrl))
                 {
                     IdToken idToken = IdToken.Parse(authResult.RawIdToken);
@@ -307,7 +307,7 @@ namespace Microsoft.Identity.Client.Broker
             }
             catch (NativeInterop.MsalRuntimeException ex)
             {
-                logger.Error($"[WamBroker] Could not acquire token using WAM. {ex.Message}");
+                logger.ErrorPii($"[WamBroker] Could not acquire token using WAM. {ex.Message}", string.Empty);
                 throw new MsalServiceException("wam_failed", $"Could not acquire token using WAM. {ex.Message}");
             }
 
