@@ -168,6 +168,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
             Assert.IsNotNull(accounts);
 
+            //This test does not actually get a work or school account
+            //it simply validates that the GetAccounts merging works and accounts are returned
             var account = accounts.FirstOrDefault();
             Assert.AreEqual(labResponse.User.Upn, account.Username);
         }
