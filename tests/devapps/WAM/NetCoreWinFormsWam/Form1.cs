@@ -299,7 +299,7 @@ namespace NetDesktopWinForms
             return result;
         }
 
-        private async Task LogResultAndRefreshAccountsAsync(AuthenticationResult ar, bool refresAccounts = true)
+        private async Task LogResultAndRefreshAccountsAsync(AuthenticationResult ar, bool refreshAccounts = true)
         {
             string message =
 
@@ -319,7 +319,7 @@ namespace NetDesktopWinForms
 
             Log("Refreshing accounts");
 
-            if(refresAccounts)
+            if(refreshAccounts)
                 await RefreshAccountsAsync().ConfigureAwait(true);
         }
 
