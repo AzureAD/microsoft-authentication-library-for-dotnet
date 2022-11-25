@@ -426,7 +426,6 @@ namespace Microsoft.Identity.Client.Broker
 
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
-            List<IAccount> msalAccounts = new List<IAccount>();
             var requestContext = cacheSessionManager.RequestContext;
 
             using (var discoverAccountsResult = await s_lazyCore.Value.DiscoverAccountsAsync(
@@ -461,15 +460,20 @@ namespace Microsoft.Identity.Client.Broker
 
                         _logger.Verbose($"[WamBroker] {wamAccounts.Count} account(s) returned after filtering.");
                     }
-                    
+
+                    List<IAccount> msalAccounts = new List<IAccount>();
+
                     foreach (var acc in wamAccounts)
                     {
-                        msalAccounts.Add(WamAdapters.ConvertToMsalAccount(acc, clientID, _logger));
+                        if (WamAdapters.TryConvertToMsalAccount(acc, clientID, _logger, out IAccount account))
+                        {
+                            msalAccounts.Add(account);
+                        }
                     }
 
-                    s_lazyCore.Value?.Dispose();
-
                     _logger.Verbose($"[WamBroker] Converted {msalAccounts.Count} WAM account(s) to MSAL Account(s).");
+
+                    return msalAccounts;
                 }
                 else
                 {
@@ -484,8 +488,6 @@ namespace Microsoft.Identity.Client.Broker
                     return Array.Empty<IAccount>();
                 }
             }
-
-            return msalAccounts;
         }
 
         public void HandleInstallUrl(string appLink)
