@@ -2,9 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
-    <TargetFrameworkNetDesktop Condition="$([MSBuild]::IsOsPlatform('Windows'))">net461</TargetFrameworkNetDesktop>
+    <TargetFrameworkNetDesktop45 Condition="$([MSBuild]::IsOsPlatform('Windows'))">net45</TargetFrameworkNetDesktop45>
+    <TargetFrameworkNetDesktop461 Condition="$([MSBuild]::IsOsPlatform('Windows'))">net461</TargetFrameworkNetDesktop461>
     <TargetFrameworkNet6>net6</TargetFrameworkNet6>
-    <TargetFrameworks>$(TargetFrameworkNet6);$(TargetFrameworkNetStandard);$(TargetFrameworkNetDesktop)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworkNet6);$(TargetFrameworkNetStandard);$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461)</TargetFrameworks>
 
     <Configurations>Debug;Release</Configurations>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -49,6 +50,8 @@
     <NoWarn>$(NoWarn);NU5131;NETSDK1138</NoWarn>
   </PropertyGroup>
 
+  <Import Project="../../../build/platform_and_feature_flags.props" />
+
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)'">
     <!-- On net6 we use a System.Text.Json for json operations, which is faster and does not use reflection-->
     <IsTrimmable>true</IsTrimmable>
@@ -66,45 +69,43 @@
     </DefineConstants>
   </PropertyGroup>
 
-  <!-- Other constants -->
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' ">
-    <DefineConstants>$(DefineConstants);NET_CORE;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32;</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)' ">
-    <DefineConstants>$(DefineConstants);NETSTANDARD;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32;</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)' ">
-    <DefineConstants>$(DefineConstants);DESKTOP;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32;</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <!-- This None is here so the conditionally included files show up in the Solution Explorer -->
-    <None Include="$(MSBuildThisFileDirectory)\**\*.cs;$(MSBuildThisFileDirectory)\**\*.xml;$(MSBuildThisFileDirectory)\**\*.axml" Exclude="$(MSBuildThisFileDirectory)\obj\**\*.*;$(PathToMsalSources)\bin\**\*.*" />
+    <None Include="$(MSBuildThisFileDirectory)\**\*.cs;$(MSBuildThisFileDirectory)\**\*.xml;$(MSBuildThisFileDirectory)\**\*.axml" Exclude="$(MSBuildThisFileDirectory)\obj\**\*.*;$(MSBuildThisFileDirectory)\bin\**\*.*" />
     <!-- Manually include the cs files -->
     <Compile Include="$(MSBuildThisFileDirectory)\**\*.cs" Exclude="$(MSBuildThisFileDirectory)\obj\**\*.*" />
-    <Compile Remove="$(MSBuildThisFileDirectory)\Platforms\**\*.*;" />
-    <None Include="Platforms\netdesktop\NetDesktopCryptographyManager.cs" />
-    <None Include="Platforms\netdesktop\NetDesktopFeatureFlags.cs" />
-    <None Include="Platforms\netdesktop\NetDesktopPlatformProxy.cs" />
-
+    <Compile Remove="$(MSBuildThisFileDirectory)\Platforms\**\*.*;$(MSBuildThisFileDirectory)\Resources\*.cs" />
+    <Compile Remove="$(MSBuildThisFileDirectory)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
+    
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.22.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
+    <Compile Include="$(MSBuildThisFileDirectory)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
+    <Compile Include="$(MSBuildThisFileDirectory)\Platforms\netstandard\**\*.cs" LinkBase="Platforms\netstandard" />
+    <Compile Include="$(MSBuildThisFileDirectory)\Platforms\Features\DesktopOS\**\*.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)'">
     <Compile Include="$(MSBuildThisFileDirectory)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
     <Compile Include="$(MSBuildThisFileDirectory)\Platforms\net6\**\*.cs" LinkBase="Platforms\net6" />
+    <Compile Include="$(MSBuildThisFileDirectory)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)\Platforms\Features\DesktopOS\**\*.cs" />
 
     <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
     <Compile Remove="$(MSBuildThisFileDirectory)\json\**\*.*" />
   </ItemGroup>
-  
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
-    <Compile Include="$(MSBuildThisFileDirectory)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
-    <Compile Include="$(MSBuildThisFileDirectory)\Platforms\netstandard\**\*.cs" LinkBase="Platforms\netstandard" />
+
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' ">
+    <Compile Remove="$(MSBuildThisFileDirectory)\PlatformsCommon\Shared\CommonCryptographyManager.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
     <Compile Include="$(MSBuildThisFileDirectory)\Platforms\netdesktop\**\*.cs" LinkBase="Platforms\netdesktop" />
+    <Compile Include="$(MSBuildThisFileDirectory)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)\Platforms\Features\DesktopOS\**\*.cs" />
 
     <Reference Include="System" />
     <Reference Include="System.Core" />
