@@ -462,6 +462,10 @@ namespace NetDesktopWinForms
                 {
                     var result = await RunAtiAsync(pca, GetAutocancelToken()).ConfigureAwait(false);
                     await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
+
+                    // now to ATS on multiple threads in parallel
+                    int ThreadsToRun = 25;
+                    await RunATSParallel(pca, result, ThreadsToRun).ConfigureAwait(false);
                 }
                 catch (Exception ex3)
                 {
@@ -472,6 +476,39 @@ namespace NetDesktopWinForms
             catch (Exception ex2)
             {
                 Log("Exception: " + ex2);
+            }
+        }
+
+        private async Task RunATSParallel(IPublicClientApplication pca, AuthenticationResult result, int threadsToRun)
+        {
+            int count = 0;
+
+            Task[] tasks = new Task[threadsToRun];
+            for (int i = 0; i < threadsToRun; i++)
+            {
+                tasks[i] = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var builder = pca.AcquireTokenSilent(GetScopes(), result.Account);
+                        _ = await builder.ExecuteAsync(GetAutocancelToken()).ConfigureAwait(false);
+
+                        Interlocked.Increment(ref count);
+                    }
+                    catch (Exception exSilent)
+                    {
+                        Log(exSilent.Message);
+                        throw;
+                    }
+                });
+            }
+
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            if (threadsToRun != count)
+            {
+                Log($"The number of silent calls did not succeed as expected");
+                throw new Exception($"Sucessful ATS calls Expected = {threadsToRun} Actual = {count}");
             }
         }
 
