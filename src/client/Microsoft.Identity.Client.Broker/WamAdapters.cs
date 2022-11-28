@@ -337,6 +337,13 @@ namespace Microsoft.Identity.Client.Broker
             ILoggerAdapter logger, 
             out IAccount acc)
         {
+            //native interop account will never be null, but good to check
+            if (nativeAccount is null)
+            {
+                acc = null;
+                return false;
+            }
+
             if (string.IsNullOrEmpty(nativeAccount.AccountId) ||
                     string.IsNullOrEmpty(nativeAccount.HomeAccountid) ||
                     string.IsNullOrEmpty(nativeAccount.Environment) ||
