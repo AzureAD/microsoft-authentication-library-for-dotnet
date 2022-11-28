@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.Broker
             ApplicationConfiguration appConfig,
             ILoggerAdapter logger)
         {
-            _logger = logger;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             _parentHandle = GetParentWindow(uiParent);
 
@@ -115,6 +115,7 @@ namespace Microsoft.Identity.Client.Broker
 
                 // as of now, there will be no Pii.
                 // TODO change when Pii is added
+                // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3822
                 _logger.Log(msalLogLevel, string.Empty, args.Message);
             }
         }

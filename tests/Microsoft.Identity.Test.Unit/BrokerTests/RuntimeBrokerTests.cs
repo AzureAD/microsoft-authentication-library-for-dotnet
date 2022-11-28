@@ -158,12 +158,12 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         public async Task ATS_CallsLog_When_CalledAsync()
         {
             // Arrange
-            var appTokenCache = new TokenCache(_serviceBundle, isApplicationTokenCache: true);
+            var appTokenCache = new TokenCache(_serviceBundle, isApplicationTokenCache: false);
             var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid());
             var tenantAuthority = AuthorityInfo.FromAadAuthority(AzureCloudInstance.AzurePublic, tenant: TestConstants.AadTenantId, validateAuthority: false);
             var acquireTokenCommonParameters = new AcquireTokenCommonParameters
             {
-                ApiId = ApiEvent.ApiIds.AcquireTokenForClient,
+                ApiId = ApiEvent.ApiIds.AcquireTokenSilent,
                 AuthorityOverride = tenantAuthority
             };
 
