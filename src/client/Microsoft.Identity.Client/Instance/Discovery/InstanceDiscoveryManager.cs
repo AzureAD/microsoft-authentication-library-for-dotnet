@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
             if (requestContext.ServiceBundle.Config.UseManagedIdentity)
             {
-                return DefaultInstanceDiscoveryMetadata;
+                return CreateEntryForSingleAuthority(authorityInfo.CanonicalAuthority);
             }
 
             if (authorityInfo.IsInstanceDiscoverySupported)

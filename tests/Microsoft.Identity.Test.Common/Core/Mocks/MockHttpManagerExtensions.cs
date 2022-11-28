@@ -358,7 +358,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 expectedQueryParams.Add("mi_res_id", userAssignedClientIdOrResourceId);
             }
 
-
             httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {

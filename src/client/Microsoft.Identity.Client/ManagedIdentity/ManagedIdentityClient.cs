@@ -23,17 +23,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal const string MsiUnavailableError =
             "Authentication with managed identity is unavailable. No managed identity endpoint found.";
 
-        private readonly Lazy<ManagedIdentitySource> _identitySource;
+        private readonly ManagedIdentitySource _identitySource;
 
         public ManagedIdentityClient(RequestContext requestContext)
         {
-            _identitySource = new Lazy<ManagedIdentitySource>(() => SelectManagedIdentitySource(requestContext));
+            _identitySource = SelectManagedIdentitySource(requestContext);
         }
 
         private async Task<ManagedIdentityResponse> AuthenticateCoreAsync(AppTokenProviderParameters parameters,
             CancellationToken cancellationToken)
         {
-            return await _identitySource.Value.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
+            return await _identitySource.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
         }
 
         internal async Task<AppTokenProviderResult> AppTokenProviderImplAsync(AppTokenProviderParameters parameters)
@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return new AppTokenProviderResult() { AccessToken = response.AccessToken, ExpiresInSeconds = DateTimeHelpers.GetDurationFromNowInSeconds(response.ExpiresOn) };
         }
 
-        // This method tries to create managed identity source for different sources, if none is created then defaults to imds.
+        // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
         private static ManagedIdentitySource SelectManagedIdentitySource(RequestContext requestContext)
         {
             return AppServiceManagedIdentitySource.TryCreate(requestContext) ?? 

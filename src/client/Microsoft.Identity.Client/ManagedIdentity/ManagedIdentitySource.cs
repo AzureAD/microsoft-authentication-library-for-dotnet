@@ -21,6 +21,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal abstract class ManagedIdentitySource
     {
         protected readonly RequestContext _requestContext;
+        protected static string ManagedIdentitySourceName;
 
         protected ManagedIdentitySource(RequestContext requestContext)
         {
@@ -30,38 +31,41 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(AppTokenProviderParameters parameters, CancellationToken cancellationToken)
         {
             ManagedIdentityRequest request = CreateRequest(parameters.Scopes.ToArray());
-            
-            var response =
-            HttpMethod.Get.Equals(request.Method) ?
+
+            HttpResponse response =
+            request.Method == HttpMethod.Get ?
             await _requestContext.ServiceBundle.HttpManager.SendGetForceResponseAsync(request.Endpoint, request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false) :
             await _requestContext.ServiceBundle.HttpManager.SendPostAsync(request.Endpoint, request.Headers, request.BodyParameters, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             return HandleResponse(parameters, response);
-            
         }
 
         protected virtual ManagedIdentityResponse HandleResponse(
             AppTokenProviderParameters parameters,
             HttpResponse response)
         {
+            string message;
+            Exception exception = null;
+
             try
             {
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    _requestContext.Logger.Info("[Managed Identity] Successful response received.");
+                    _requestContext.Logger.Info($"[{ManagedIdentitySourceName}] Successful response received.");
                     return GetSuccessfulResponse(response);
                 }
 
-
-                MsalServiceException msalServiceException = MsalServiceExceptionFactory.FromManagedIdentityResponse(MsalError.ManagedIdentityRequestFailed, response);
-                _requestContext.Logger.Error($"[Managed Identity] request failed, HttpStatusCode: {response.StatusCode}. Error message: {msalServiceException.Message}");
-                throw msalServiceException;
+                message = GetMessageFromResponse(response);
+                _requestContext.Logger.Error($"[{ManagedIdentitySourceName}] request failed, HttpStatusCode: {response.StatusCode}. Error message: {message}");
             }
             catch (Exception e) when (e is not MsalServiceException)
             {
-                _requestContext.Logger.Error(MsalErrorMessage.UnexpectedResponse);
-                throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.UnexpectedResponse, e);
+                _requestContext.Logger.Error($"[{ManagedIdentitySourceName}] Exception: " + e.Message);
+                exception = e;
+                message = string.Format(MsalErrorMessage.UnexpectedResponse, ManagedIdentitySourceName);
             }
+
+            throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message, exception);
         }
 
         protected abstract ManagedIdentityRequest CreateRequest(string[] scopes);
@@ -72,11 +76,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (managedIdentityResponse == null || managedIdentityResponse.AccessToken.IsNullOrEmpty() || managedIdentityResponse.ExpiresOn.IsNullOrEmpty())
             {
-                _requestContext.Logger.Error("[Managed Identity] Response is either null or insufficient for authentication.");
-                throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.AuthenticationResponseInvalidFormatError);
+                _requestContext.Logger.Error($"[{ManagedIdentitySourceName}] Response is either null or insufficient for authentication.");
+                throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, string.Format(MsalErrorMessage.AuthenticationResponseInvalidFormatError, ManagedIdentitySourceName));
             }
 
             return managedIdentityResponse;
+        }
+
+        internal static string GetMessageFromResponse(HttpResponse response)
+        {
+            var managedIdentityResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
+
+            return managedIdentityResponse == null ?
+                $"[{ManagedIdentitySourceName}] Empty error response received." :
+                $"[{ManagedIdentitySourceName}] Error message: {managedIdentityResponse.Message}. Correlation Id: {managedIdentityResponse.CorrelationId}";
         }
     }
 }
