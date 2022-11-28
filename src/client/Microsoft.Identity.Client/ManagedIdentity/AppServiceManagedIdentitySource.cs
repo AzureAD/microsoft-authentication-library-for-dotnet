@@ -44,8 +44,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             _endpoint = endpoint;
             _secret = secret;
-            _clientId = requestContext.ServiceBundle.Config.UserAssignedClientId;
-            _resourceId = requestContext.ServiceBundle.Config.UserAssignedResourceId;
+            _clientId = requestContext.ServiceBundle.Config.MIUserAssignedClientId;
+            _resourceId = requestContext.ServiceBundle.Config.MIUserAssignedResourceId;
         }
 
         private static bool TryValidateEnvVars(string msiEndpoint, string secret, ILoggerAdapter logger, out Uri endpointUri)

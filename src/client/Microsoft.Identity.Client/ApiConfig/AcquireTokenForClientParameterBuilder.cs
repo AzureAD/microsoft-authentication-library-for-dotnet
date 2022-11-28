@@ -82,11 +82,11 @@ namespace Microsoft.Identity.Client
 
             if (!userAssignedClientIdOrResourceId.IsNullOrEmpty() && Guid.TryParse(userAssignedClientIdOrResourceId, out _))
             {
-                ServiceBundle.Config.UserAssignedClientId = userAssignedClientIdOrResourceId;
+                ServiceBundle.Config.MIUserAssignedClientId = userAssignedClientIdOrResourceId;
             }
             else
             {
-                ServiceBundle.Config.UserAssignedResourceId = userAssignedClientIdOrResourceId;
+                ServiceBundle.Config.MIUserAssignedResourceId = userAssignedClientIdOrResourceId;
             }
 
             return this;
