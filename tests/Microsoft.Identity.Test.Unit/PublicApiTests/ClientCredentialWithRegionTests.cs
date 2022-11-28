@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit
                 var tokenHttpCallHandler = new MockHttpMessageHandler()
                 {
                     // Asserts
-                    ExpectedUrl = $"https://eastus.r.login.microsoftonline.com/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/token",
+                    ExpectedUrl = $"https://eastus.login.microsoft.com/17b189bc-2b81-4ec5-aa51-3e628cbc931b/oauth2/v2.0/token",
                     ExpectedMethod = HttpMethod.Post,
 
                     ResponseMessage = CreateResponse(true)
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(RegionAutodetectionSource.Imds, result.ApiEvent.RegionAutodetectionSource);
                 Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.ApiEvent.RegionOutcome);
                 Assert.AreEqual(
-                    "https://centralus.r.login.microsoftonline.com/common/oauth2/v2.0/token",
+                    "https://centralus.login.microsoft.com/common/oauth2/v2.0/token",
                     result.AuthenticationResultMetadata.TokenEndpoint);
                 Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                 Assert.AreEqual(RegionOutcome.AutodetectSuccess, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
@@ -417,10 +417,10 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("login.microsoftonline.us", "login.microsoftonline.us")]
         [DataRow("login.usgovcloudapi.net", "login.microsoftonline.us")]
         [DataRow("login-us.microsoftonline.com", "login-us.microsoftonline.com")]
-        [DataRow("login.windows.net", "r.login.microsoftonline.com")]
-        [DataRow("login.microsoft.com", "r.login.microsoftonline.com")]
-        [DataRow("sts.windows.net", "r.login.microsoftonline.com")]
-        [DataRow("login.microsoftonline.com", "r.login.microsoftonline.com")]
+        [DataRow("login.windows.net", "login.microsoft.com")]
+        [DataRow("login.microsoft.com", "login.microsoft.com")]
+        [DataRow("sts.windows.net", "login.microsoft.com")]
+        [DataRow("login.microsoftonline.com", "login.microsoft.com")]
         public async Task PublicAndSovereignCloud_UsesPreferredNetwork_AndNoDiscovery_Async(string inputEnv, string expectedEnv)
         {
             try
@@ -705,7 +705,7 @@ namespace Microsoft.Identity.Test.Unit
             return new MockHttpMessageHandler()
             {
                 ExpectedUrl = expectRegional ?
-                    $"https://{TestConstants.Region}.r.login.microsoftonline.com/common/oauth2/v2.0/token" :
+                    $"https://{TestConstants.Region}.login.microsoft.com/common/oauth2/v2.0/token" :
                     "https://login.microsoftonline.com/common/oauth2/v2.0/token",
                 ExpectedMethod = HttpMethod.Post,
                 ResponseMessage = CreateResponse(true)
