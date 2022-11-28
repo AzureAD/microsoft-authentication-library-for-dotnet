@@ -11,6 +11,8 @@
     <LangVersion>latest</LangVersion>
     
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
+
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
