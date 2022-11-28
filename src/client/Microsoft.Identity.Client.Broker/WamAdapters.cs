@@ -383,7 +383,7 @@ namespace Microsoft.Identity.Client.Broker
                 Environment.NewLine + "=== [WamBroker] Converting WAM Account to MSAL Account ===" + Environment.NewLine);
 
             builder.AppendLine($"wamAccount.AccountId: {string.IsNullOrEmpty(wamAccount.AccountId)}.");
-            builder.AppendLine($"wamAccount.HomeAccountid: {string.IsNullOrEmpty(wamAccount.HomeAccountid)}12.");
+            builder.AppendLine($"wamAccount.HomeAccountid: {string.IsNullOrEmpty(wamAccount.HomeAccountid)}");
             builder.AppendLine($"wamAccount.Environment: {wamAccount.Environment}.");
             builder.AppendLine($"wamAccount.UserName: {string.IsNullOrEmpty(wamAccount.UserName)}.");
 
