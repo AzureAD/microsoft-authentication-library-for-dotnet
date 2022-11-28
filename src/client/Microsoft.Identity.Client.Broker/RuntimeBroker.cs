@@ -106,7 +106,6 @@ namespace Microsoft.Identity.Client.Broker
 
         private void LogEventRaised(NativeInterop.Core sender, LogEventArgs args)
         {
-            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             LogLevel msalLogLevel = LogLevelMap[args.LogLevel];
             if (_logger.IsLoggingEnabled(msalLogLevel))
             {
