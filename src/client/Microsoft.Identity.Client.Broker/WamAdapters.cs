@@ -325,40 +325,35 @@ namespace Microsoft.Identity.Client.Broker
         /// <summary>
         /// Converts to MSAL Account Id or Null
         /// </summary>
-        /// <param name="a"></param>
+        /// <param name="nativeAccount"></param>
         /// <param name="clientId"></param>
         /// <param name="logger"></param>
         /// <param name="acc"></param>
         /// <returns></returns>
         /// <exception cref="MsalServiceException"></exception>
         public static bool TryConvertToMsalAccount(
-            NativeInterop.Account a, 
+            NativeInterop.Account nativeAccount,
             string clientId, 
             ILoggerAdapter logger, 
             out IAccount acc)
         {
-            if (a == null)
-            {
-                throw new MsalServiceException("wam_failed", "Could not convert into MSAL Account.");
-            }
-
-            if (string.IsNullOrEmpty(a.AccountId) ||
-                    string.IsNullOrEmpty(a.HomeAccountid) ||
-                    string.IsNullOrEmpty(a.Environment) ||
-                    string.IsNullOrEmpty(a.UserName))
+            if (string.IsNullOrEmpty(nativeAccount.AccountId) ||
+                    string.IsNullOrEmpty(nativeAccount.HomeAccountid) ||
+                    string.IsNullOrEmpty(nativeAccount.Environment) ||
+                    string.IsNullOrEmpty(nativeAccount.UserName))
             {
                 //log message
-                ToLogMessage(a, logger);
+                ToLogMessage(nativeAccount, logger);
                 acc = null;
                 return false;
             }
 
             acc = new Account(
-                    a.HomeAccountid,
-                    a.UserName,
-                    a.Environment,
+                    nativeAccount.HomeAccountid,
+                    nativeAccount.UserName,
+                    nativeAccount.Environment,
                     new Dictionary<string, string>() {
-                        { clientId, a.AccountId } 
+                        { clientId, nativeAccount.AccountId } 
                     });
 
             return true;
