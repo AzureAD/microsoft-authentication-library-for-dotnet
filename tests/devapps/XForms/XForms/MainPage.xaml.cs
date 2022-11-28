@@ -11,6 +11,7 @@ using Xamarin.Forms.Xaml;
 
 namespace XForms
 {
+#pragma warning disable CA1501
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MainPage : TabbedPage
     {
@@ -20,4 +21,5 @@ namespace XForms
             NavigationPage.SetHasNavigationBar(this, false);
         }
     }
+#pragma warning restore CA1501
 }
