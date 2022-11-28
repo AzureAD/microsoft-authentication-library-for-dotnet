@@ -344,6 +344,8 @@ namespace Microsoft.Identity.Client.Broker
                 return false;
             }
 
+            //if any one of the account properties from Interop is null 
+            //log and return 
             if (string.IsNullOrEmpty(nativeAccount.AccountId) ||
                     string.IsNullOrEmpty(nativeAccount.HomeAccountid) ||
                     string.IsNullOrEmpty(nativeAccount.Environment) ||
@@ -360,7 +362,10 @@ namespace Microsoft.Identity.Client.Broker
                     nativeAccount.UserName,
                     nativeAccount.Environment,
                     new Dictionary<string, string>() {
-                        { clientId, nativeAccount.AccountId } 
+                        { 
+                            clientId, 
+                            nativeAccount.AccountId 
+                        } 
                     });
 
             return true;
@@ -377,7 +382,8 @@ namespace Microsoft.Identity.Client.Broker
         {
             // Create PII enabled string builder
             var builder = new StringBuilder(
-                Environment.NewLine + "=== [WamBroker] Converting WAM Account to MSAL Account ===" + Environment.NewLine);
+                Environment.NewLine + "=== [WamBroker] Converting WAM Account to MSAL Account ===" +
+                Environment.NewLine);
 
             builder.AppendLine($"wamAccount.AccountId: {wamAccount.AccountId}.");
             builder.AppendLine($"wamAccount.HomeAccountid: {wamAccount.HomeAccountid}.");
@@ -387,7 +393,8 @@ namespace Microsoft.Identity.Client.Broker
 
             // Create non PII enabled string builder
             builder = new StringBuilder(
-                Environment.NewLine + "=== [WamBroker] Converting WAM Account to MSAL Account ===" + Environment.NewLine);
+                Environment.NewLine + "=== [WamBroker] Converting WAM Account to MSAL Account ===" + 
+                Environment.NewLine);
 
             builder.AppendLine($"wamAccount.AccountId: {string.IsNullOrEmpty(wamAccount.AccountId)}.");
             builder.AppendLine($"wamAccount.HomeAccountid: {string.IsNullOrEmpty(wamAccount.HomeAccountid)}");
