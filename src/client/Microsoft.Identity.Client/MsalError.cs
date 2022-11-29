@@ -1120,6 +1120,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Exactly one scope is expected.
         /// </summary>
-        public const string ExactlyOneScopeExpected = "exactly_one_scope_expedted";
+        public const string ExactlyOneScopeExpected = "exactly_one_scope_expected";
     }
 }
