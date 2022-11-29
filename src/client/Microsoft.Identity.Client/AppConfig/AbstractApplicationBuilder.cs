@@ -389,9 +389,8 @@ namespace Microsoft.Identity.Client
         /// Sets the redirect URI of the application. See https://aka.ms/msal-net-application-configuration
         /// </summary>
         /// <param name="redirectUri">URL where the STS will call back the application with the security token.
-        /// This parameter is not required for desktop or UWP applications (as a default is used).
-        /// It's not required for mobile applications that don't use a broker
-        /// It is required for web apps</param>
+        /// Public Client Applications 
+        /// </param>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithRedirectUri(string redirectUri)
         {
