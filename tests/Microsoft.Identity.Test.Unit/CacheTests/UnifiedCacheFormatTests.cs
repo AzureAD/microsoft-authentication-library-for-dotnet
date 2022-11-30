@@ -252,7 +252,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var idTokenCacheItem = cache.Accessor.GetAllIdTokens().First();
             var key = idTokenCacheItem.iOSCacheKey;
 
-            Assert.AreEqual(_expectedIdTokenCacheKey, key.ToString());
+            Assert.AreEqual(_expectedIdTokenCacheKey, idTokenCacheItem.CacheKey);
 
             Assert.AreEqual(_expectedIdTokenCacheKeyIosService, key.iOSService);
             Assert.AreEqual(_expectedIdTokenCacheKeyIosAccount, key.iOSAccount);

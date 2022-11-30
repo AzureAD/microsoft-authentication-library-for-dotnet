@@ -126,7 +126,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             return newAtItem;
         }
 
-        private void InitCacheKey()
+        //internal for test
+        internal void InitCacheKey()
         {
             _extraKeyParts = null;
             _credentialDescriptor = StorageJsonValues.CredentialTypeAccessToken;
