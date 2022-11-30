@@ -55,13 +55,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
 
                 message = GetMessageFromResponse(response);
-                _requestContext.Logger.Error("[Managed Identity] request failed, HttpStatusCode: {response.StatusCode}. Error message: {message}");
+                _requestContext.Logger.Error($"[Managed Identity] request failed, HttpStatusCode: {response.StatusCode} Error message: {message}");
             }
             catch (Exception e) when (e is not MsalServiceException)
             {
                 _requestContext.Logger.Error("[Managed Identity] Exception: " + e.Message);
                 exception = e;
-                message = MsalErrorMessage.UnexpectedResponse, ManagedIdentitySourceName);
+                message = MsalErrorMessage.UnexpectedResponse;
             }
 
             throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message, exception);
@@ -87,8 +87,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             var managedIdentityResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
 
             return managedIdentityResponse == null ?
-                $"[{ManagedIdentitySourceName}] Empty error response received." :
-                $"[{ManagedIdentitySourceName}] Error message: {managedIdentityResponse.Message}. Correlation Id: {managedIdentityResponse.CorrelationId}";
+                "[Managed Identity] Empty error response received." :
+                $"[Managed Identity] Error message: {managedIdentityResponse.Message}. Correlation Id: {managedIdentityResponse.CorrelationId}";
         }
     }
 }
