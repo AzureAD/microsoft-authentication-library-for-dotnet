@@ -8,6 +8,7 @@ using Xamarin.Forms.Xaml;
 
 namespace XForms
 {
+#pragma warning disable CA1501
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class LogPage : ContentPage
     {
@@ -69,4 +70,5 @@ namespace XForms
             }
         }
     }
+#pragma warning restore CA1501
 }
