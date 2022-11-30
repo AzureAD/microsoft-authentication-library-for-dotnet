@@ -397,7 +397,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     _clientInfo,
                     _homeAccountId);
 
-                atItem.Secret = atItem.GetKey().ToString();
+                atItem.Secret = atItem.CacheKey;
                 cache.Accessor.SaveAccessToken(atItem);
 
                 var param = harness.CreateAuthenticationRequestParameters(
@@ -429,7 +429,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     _clientInfo,
                     _homeAccountId);
 
-                atItem.Secret = atItem.GetKey().ToString();
+                atItem.Secret = atItem.CacheKey;
                 cache.Accessor.SaveAccessToken(atItem);
 
                 var param = harness.CreateAuthenticationRequestParameters(
@@ -441,7 +441,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var cacheItem = cache.FindAccessTokenAsync(param).Result;
 
                 Assert.IsNotNull(cacheItem);
-                Assert.AreEqual(atItem.GetKey().ToString(), cacheItem.GetKey().ToString());
+                Assert.AreEqual(atItem.CacheKey, cacheItem.CacheKey);
                 Assert.IsTrue(cacheItem.IsExtendedLifeTimeToken);
             }
         }
@@ -466,7 +466,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     _clientInfo,
                     _homeAccountId);
 
-                atItem.Secret = atItem.GetKey().ToString();
+                atItem.Secret = atItem.CacheKey;
                 cache.Accessor.SaveAccessToken(atItem);
 
                 var param = harness.CreateAuthenticationRequestParameters(
@@ -569,7 +569,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     _homeAccountId);
 
-                string rtKey = rtItem.GetKey().ToString();
+                string rtKey = rtItem.CacheKey;
                 cache.Accessor.SaveRefreshToken(rtItem);
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
@@ -606,7 +606,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     _homeAccountId);
 
-                string rtKey = rtItem.GetKey().ToString();
+                string rtKey = rtItem.CacheKey;
                 cache.Accessor.SaveRefreshToken(rtItem);
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
@@ -640,7 +640,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     _clientInfo,
                     _homeAccountId);
 
-                string atKey = atItem.GetKey().ToString();
+                string atKey = atItem.CacheKey;
                 atItem.Secret = atKey;
 
                 cache.Accessor.SaveAccessToken(atItem);
@@ -654,7 +654,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var cacheItem = await cache.FindAccessTokenAsync(authParams).ConfigureAwait(false);
 
                 Assert.IsNotNull(cacheItem);
-                Assert.AreEqual(atItem.GetKey().ToString(), cacheItem.GetKey().ToString());
+                Assert.AreEqual(atItem.CacheKey, cacheItem.CacheKey);
             }
         }
 
@@ -720,7 +720,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 // create key out of access token cache item and then
                 // set it as the value of the access token.
-                string atKey = atItem.GetKey().ToString();
+                string atKey = atItem.CacheKey;
                 atItem.Secret = atKey;
                 cache.Accessor.SaveAccessToken(atItem);
 
@@ -732,7 +732,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     _homeAccountId);
 
-                string rtKey = rtItem.GetKey().ToString();
+                string rtKey = rtItem.CacheKey;
                 rtItem.Secret = rtKey;
                 cache.Accessor.SaveRefreshToken(rtItem);
 
@@ -785,7 +785,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     _homeAccountId);
 
-                string rtKey = rtItem.GetKey().ToString();
+                string rtKey = rtItem.CacheKey;
                 rtItem.Secret = rtKey;
                 rtItem.OboCacheKey = assertion;
                 cache.Accessor.SaveRefreshToken(rtItem);
@@ -1420,7 +1420,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var accessTokens = cache.Accessor.GetAllAccessTokens().ToList();
                 foreach (MsalAccessTokenCacheItem item in accessTokens)
                 {
-                    Assert.IsTrue(dump.Contains(item.GetKey().ToLogString()));
+                    Assert.IsTrue(dump.Contains(item.ToLogString()));
                     if (accessTokens.IndexOf(item) >= 9)
                     {
                         break;
