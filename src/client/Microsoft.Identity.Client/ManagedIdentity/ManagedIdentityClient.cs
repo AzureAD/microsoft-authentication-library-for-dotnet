@@ -27,7 +27,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         public ManagedIdentityClient(RequestContext requestContext)
         {
-            _identitySource = SelectManagedIdentitySource(requestContext);
+            using (requestContext.Logger.LogMethodDuration())
+            {
+                _identitySource = SelectManagedIdentitySource(requestContext);
+            }
         }
 
         private async Task<ManagedIdentityResponse> AuthenticateCoreAsync(AppTokenProviderParameters parameters,

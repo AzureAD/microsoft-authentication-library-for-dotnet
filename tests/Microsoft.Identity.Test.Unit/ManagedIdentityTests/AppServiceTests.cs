@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                     Assert.IsNotNull(ex);
                     Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                    Assert.AreEqual("[Managed Identity App Service] Empty error response received.", ex.Message);
+                    Assert.AreEqual("[Managed Identity] Empty error response received.", ex.Message);
                 }
             }
             finally
@@ -182,7 +182,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                     Assert.IsNotNull(ex);
                     Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                    Assert.AreEqual(string.Format(MsalErrorMessage.AuthenticationResponseInvalidFormatError, "Managed Identity App Service"), ex.Message);
+                    Assert.AreEqual(MsalErrorMessage.AuthenticationResponseInvalidFormatError, ex.Message);
                 }
             }
             finally
