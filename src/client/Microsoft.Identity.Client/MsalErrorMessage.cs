@@ -440,8 +440,8 @@ namespace Microsoft.Identity.Client
                                 invalidValueName);
         }
 
-        public const string AuthenticationResponseInvalidFormatError = "[{0}] Invalid response, the authentication response received did not contain the expected fields.";
-        public const string UnexpectedResponse = "[{0}] Managed Identity response was not in the expected format. See the inner exception for details.";
-        public const string ExactlyOneScopeExpected = "[{0}] To acquire token for managed identity, exactly one scope should be passed.";
+        public const string AuthenticationResponseInvalidFormatError = "[Managed Identity] Invalid response, the authentication response received did not contain the expected fields.";
+        public const string UnexpectedResponse = "[Managed Identity] Response was not in the expected format. See the inner exception for details.";
+        public const string ExactlyOneScopeExpected = "[Managed Identity] To acquire token for managed identity, exactly one scope should be passed.";
     }
 }

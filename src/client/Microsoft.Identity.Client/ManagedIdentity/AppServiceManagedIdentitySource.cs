@@ -18,9 +18,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // MSI Constants. Docs for MSI are available here https://docs.microsoft.com/azure/app-service/overview-managed-identity
         private const string AppServiceMsiApiVersion = "2019-08-01";
         private const string SecretHeaderName = "X-IDENTITY-HEADER";
-        private const string ClientIdHeaderName = "client_id";
 
-        private const string MsiEndpointInvalidUriError = "[Managed Identity App Service] The environment variable IDENTITY_ENDPOINT contains an invalid Uri {0}.";
+        private const string MsiEndpointInvalidUriError = "[Managed Identity] The environment variable IDENTITY_ENDPOINT contains an invalid Uri {0} in app service managed identity source.";
 
         private readonly Uri _endpoint;
         private readonly string _secret;
@@ -30,14 +29,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public static ManagedIdentitySource TryCreate(RequestContext requestContext)
         {
             var msiSecret = EnvironmentVariables.IdentityHeader;
-            
-            if (TryValidateEnvVars(EnvironmentVariables.IdentityEndpoint, msiSecret, requestContext.Logger, out Uri endpointUri))
-            {
-                ManagedIdentitySourceName = "Managed Identity App Service";
-                return new AppServiceManagedIdentitySource(requestContext, endpointUri, msiSecret);
-            }
 
-            return null;
+            return TryValidateEnvVars(EnvironmentVariables.IdentityEndpoint, msiSecret, requestContext.Logger, out Uri endpointUri)
+                ? new AppServiceManagedIdentitySource(requestContext, endpointUri, msiSecret)
+                : null;
         }
 
         private AppServiceManagedIdentitySource(RequestContext requestContext, Uri endpoint, string secret) : base(requestContext)
@@ -55,7 +50,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // if BOTH the env vars endpoint and secret values are null, this MSI provider is unavailable.
             if (string.IsNullOrEmpty(msiEndpoint) || string.IsNullOrEmpty(secret))
             {
-                logger.Info($"[{ManagedIdentitySourceName}] App service managed identity is unavailable.");
+                logger.Info("[Managed Identity] App service managed identity is unavailable.");
                 return false;
             }
 
@@ -68,7 +63,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(CultureInfo.InvariantCulture, MsiEndpointInvalidUriError, msiEndpoint), ex);
             }
 
-            logger.Info($"[{ManagedIdentitySourceName}] Environment variables validation passed for app service managed identity. Endpoint uri: {endpointUri}");
+            logger.Info($"[Managed Identity] Environment variables validation passed for app service managed identity. Endpoint uri: {endpointUri}");
             return true;
         }
 
@@ -85,13 +80,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (!string.IsNullOrEmpty(_clientId))
             {
-                _requestContext.Logger.Info($"[{ManagedIdentitySourceName}] Adding user assigned client id to the request.");
-                request.QueryParameters[ClientIdHeaderName] = _clientId;
+                _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
+                request.QueryParameters[Constants.ManagedIdentityClientId] = _clientId;
             }
 
             if (!string.IsNullOrEmpty(_resourceId))
             {
-                _requestContext.Logger.Info($"[{ManagedIdentitySourceName}] Adding user assigned resource id to the request.");
+                _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
                 request.QueryParameters[Constants.ManagedIdentityResourceId] = _resourceId;
             }
 

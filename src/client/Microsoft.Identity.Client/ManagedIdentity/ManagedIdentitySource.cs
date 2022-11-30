@@ -21,7 +21,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal abstract class ManagedIdentitySource
     {
         protected readonly RequestContext _requestContext;
-        protected static string ManagedIdentitySourceName;
 
         protected ManagedIdentitySource(RequestContext requestContext)
         {
@@ -51,18 +50,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    _requestContext.Logger.Info($"[{ManagedIdentitySourceName}] Successful response received.");
+                    _requestContext.Logger.Info("[Managed Identity] Successful response received.");
                     return GetSuccessfulResponse(response);
                 }
 
                 message = GetMessageFromResponse(response);
-                _requestContext.Logger.Error($"[{ManagedIdentitySourceName}] request failed, HttpStatusCode: {response.StatusCode}. Error message: {message}");
+                _requestContext.Logger.Error("[Managed Identity] request failed, HttpStatusCode: {response.StatusCode}. Error message: {message}");
             }
             catch (Exception e) when (e is not MsalServiceException)
             {
-                _requestContext.Logger.Error($"[{ManagedIdentitySourceName}] Exception: " + e.Message);
+                _requestContext.Logger.Error("[Managed Identity] Exception: " + e.Message);
                 exception = e;
-                message = string.Format(MsalErrorMessage.UnexpectedResponse, ManagedIdentitySourceName);
+                message = MsalErrorMessage.UnexpectedResponse, ManagedIdentitySourceName);
             }
 
             throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message, exception);
@@ -76,8 +75,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (managedIdentityResponse == null || managedIdentityResponse.AccessToken.IsNullOrEmpty() || managedIdentityResponse.ExpiresOn.IsNullOrEmpty())
             {
-                _requestContext.Logger.Error($"[{ManagedIdentitySourceName}] Response is either null or insufficient for authentication.");
-                throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, string.Format(MsalErrorMessage.AuthenticationResponseInvalidFormatError, ManagedIdentitySourceName));
+                _requestContext.Logger.Error("[Managed Identity] Response is either null or insufficient for authentication.");
+                throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.AuthenticationResponseInvalidFormatError);
             }
 
             return managedIdentityResponse;
