@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
         void DeserializeMsalV3(byte[] msalV3State, bool shouldClearExistingCache = false);
 
         /// <summary>
-        /// Serializes the token cache to the ADAL.NET 3.x cache format. 
+        /// Serializes a part of the token cache - the refresh tokens - to the ADAL.NET 3.x cache format. 
         /// If you need to maintain SSO between an application using ADAL 3.x and this application using MSAL 3.x or later,
         /// use <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> in adition to <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
         ///
@@ -65,7 +65,8 @@ namespace Microsoft.Identity.Client
         byte[] SerializeAdalV3();
 
         /// <summary>
-        /// Deserializes the token cache to the ADAL.NET 3.x cache format. This API should only be used to maintain SSO between an application using ADAL 3.x and this application using MSAL 3.x or later.
+        /// Deerializes a part of the token cache - the refresh tokens - to the ADAL.NET 3.x cache format.         
+        /// This API should only be used to maintain SSO between an application using ADAL 3.x and this application using MSAL 3.x or later.
         /// Use <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> in addition to <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
         /// 
         /// See https://aka.ms/adal-to-msal-net/cache for details on how to use this advanced API correctly.
