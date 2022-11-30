@@ -469,9 +469,9 @@ namespace Microsoft.Identity.Client.Broker
                 {
                     List<NativeInterop.Account> wamAccounts = discoverAccountsResult.Accounts;
 
-                    _logger.Info($"[WamBroker] Broker returned {wamAccounts.Count()} account(s).");
+                    _logger.Info($"[WamBroker] Broker returned {wamAccounts.Count} account(s).");
 
-                    if (wamAccounts.Count() == 0)
+                    if (wamAccounts.Count == 0)
                     {
                         return Array.Empty<IAccount>();
                     }
