@@ -140,6 +140,44 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.IsNotNull(accounts);
             Assert.AreEqual(0, accounts.Count());
         }
+
+        [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        public async Task WamListWindowsWorkAndSchoolAccountsAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
+
+            IntPtr intPtr = GetForegroundWindow();
+
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithParentActivityOrWindow(windowHandleProvider)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithBrokerPreview()
+               .WithWindowsBrokerOptions(
+                new WindowsBrokerOptions() 
+                {
+                    ListWindowsWorkAndSchoolAccounts = true
+                })
+               .Build();
+
+            // Acquire token using username password
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+
+            // Get Accounts
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            Assert.IsNotNull(accounts);
+
+            //This test does not actually get a work or school account
+            //it simply validates that the GetAccounts merging works and accounts are returned
+            var account = accounts.FirstOrDefault();
+            Assert.AreEqual(labResponse.User.Upn, account.Username);
+        }
     }
 }
 #endif

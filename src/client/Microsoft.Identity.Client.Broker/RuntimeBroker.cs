@@ -1,8 +1,10 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -15,7 +17,7 @@ using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
-using System.Globalization;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Broker
 {
@@ -97,11 +99,6 @@ namespace Microsoft.Identity.Client.Broker
 
             _wamOptions = appConfig.WindowsBrokerOptions ??
                 WindowsBrokerOptions.CreateDefault();
-
-            if (_wamOptions.ListWindowsWorkAndSchoolAccounts)
-            {
-                throw new NotImplementedException("The new broker implementation does not yet support Windows account discovery (ListWindowsWorkAndSchoolAccounts option)");
-            }
         }
 
         private void LogEventRaised(NativeInterop.Core sender, LogEventArgs args)
@@ -446,16 +443,87 @@ namespace Microsoft.Identity.Client.Broker
             }
         }
 
-        public Task<IReadOnlyList<IAccount>> GetAccountsAsync(
+        public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(
             string clientID,
             string redirectUri,
             AuthorityInfo authorityInfo,
             ICacheSessionManager cacheSessionManager,
             IInstanceDiscoveryManager instanceDiscoveryManager)
         {
-            // runtime does not yet support account discovery
-            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
-            return Task.FromResult<IReadOnlyList<IAccount>>(Array.Empty<IAccount>());
+            if (!_wamOptions.ListWindowsWorkAndSchoolAccounts)
+            {
+                _logger.Info("[WamBroker] ListWindowsWorkAndSchoolAccounts option was not enabled.");
+                return Array.Empty<IAccount>();
+            }
+
+            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
+
+            var requestContext = cacheSessionManager.RequestContext;
+
+            using (var discoverAccountsResult = await s_lazyCore.Value.DiscoverAccountsAsync(
+                clientID,
+                cacheSessionManager.RequestContext.CorrelationId.ToString("D"), 
+                cacheSessionManager.RequestContext.UserCancellationToken).ConfigureAwait(false))
+            {
+                if (discoverAccountsResult.IsSuccess)
+                {
+                    List<NativeInterop.Account> wamAccounts = discoverAccountsResult.Accounts;
+
+                    _logger.Info($"[WamBroker] Broker returned {wamAccounts.Count} account(s).");
+
+                    if (wamAccounts.Count == 0)
+                    {
+                        return Array.Empty<IAccount>();
+                    }
+
+                    //If "multi-cloud" is enabled, we do not have to do instanceMetadata matching
+                    if (!requestContext.ServiceBundle.Config.MultiCloudSupportEnabled)
+                    {
+                        var environmentList = discoverAccountsResult.Accounts.Select(acc => acc.Environment).Distinct().ToList();
+
+                        var instanceMetadata = await instanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                                authorityInfo,
+                                environmentList,
+                                requestContext).ConfigureAwait(false);
+
+                        _logger.Verbose($"[WamBroker] Filtering WAM accounts based on Environment.");
+
+                        wamAccounts.RemoveAll(acc => !instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
+
+                        _logger.Verbose($"[WamBroker] {wamAccounts.Count} account(s) returned after filtering.");
+                    }
+
+                    List<IAccount> msalAccounts = new List<IAccount>();
+
+                    foreach (var acc in wamAccounts)
+                    {
+                        if (WamAdapters.TryConvertToMsalAccount(acc, clientID, _logger, out IAccount account))
+                        {
+                            msalAccounts.Add(account);
+                        }
+                    }
+
+                    _logger.Verbose($"[WamBroker] Converted {msalAccounts.Count} WAM account(s) to MSAL Account(s).");
+
+                    return msalAccounts;
+                }
+                else
+                {
+                    string errorMessagePii =
+                        $" [WamBroker] \n" +
+                        $" Error Code: {discoverAccountsResult.Error.ErrorCode} \n" +
+                        $" Error Message: {discoverAccountsResult.Error.Context} \n" +
+                        $" Internal Error Code: {discoverAccountsResult.Error.Tag.ToString(CultureInfo.InvariantCulture)} \n" +
+                        $" Telemetry Data: {discoverAccountsResult.TelemetryData } \n";
+
+                    _logger.ErrorPii($"[WamBroker] {errorMessagePii}", 
+                        $"[WamBroker] DiscoverAccounts Error. " +
+                        $"Error Code : {discoverAccountsResult.Error.ErrorCode}. " +
+                        $"Internal Error Code: {discoverAccountsResult.Error.Tag.ToString(CultureInfo.InvariantCulture)}");
+
+                    return Array.Empty<IAccount>();
+                }
+            }
         }
 
         public void HandleInstallUrl(string appLink)
