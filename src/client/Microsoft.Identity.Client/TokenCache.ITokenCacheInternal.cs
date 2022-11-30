@@ -282,17 +282,17 @@ namespace Microsoft.Identity.Client
             {
                 var accessTokenCacheItems = Accessor.GetAllAccessTokens();
                 var refreshTokenCacheItems = Accessor.GetAllRefreshTokens();
-                var accessTokenCacheKeys = accessTokenCacheItems.Take(10).Select(item => item.GetKey()).ToList();
+                var accessTokenCacheItemsSubset = accessTokenCacheItems.Take(10).Select(item => item).ToList();
 
                 StringBuilder tokenCacheKeyDump = new StringBuilder();
 
                 tokenCacheKeyDump.AppendLine($"Total number of access tokens in cache: {accessTokenCacheItems.Count}");
                 tokenCacheKeyDump.AppendLine($"Total number of refresh tokens in cache: {refreshTokenCacheItems.Count}");
 
-                tokenCacheKeyDump.AppendLine($"Token cache dump of the first {accessTokenCacheKeys.Count} cache keys.");
-                foreach (var cacheKey in accessTokenCacheKeys)
+                tokenCacheKeyDump.AppendLine($"Token cache dump of the first {accessTokenCacheItemsSubset.Count} cache keys.");
+                foreach (var cacheItem in accessTokenCacheItemsSubset)
                 {
-                    tokenCacheKeyDump.AppendLine($"AT Cache Key: {cacheKey.ToLogString(requestParameters.RequestContext.Logger.PiiLoggingEnabled)}");
+                    tokenCacheKeyDump.AppendLine($"AT Cache Key: {cacheItem.ToLogString(requestParameters.RequestContext.Logger.PiiLoggingEnabled)}");
                 }
 
                 requestParameters.RequestContext.Logger.Verbose(tokenCacheKeyDump.ToString());
@@ -396,7 +396,7 @@ namespace Microsoft.Identity.Client
 
         private void MergeWamAccountIds(MsalAccountCacheItem msalAccountCacheItem)
         {
-            var existingAccount = Accessor.GetAccount(msalAccountCacheItem.GetKey());
+            var existingAccount = Accessor.GetAccount(msalAccountCacheItem);
             var existingWamAccountIds = existingAccount?.WamAccountIds;
             msalAccountCacheItem.WamAccountIds.MergeDifferentEntries(existingWamAccountIds);
         }
@@ -875,7 +875,7 @@ namespace Microsoft.Identity.Client
 
             var appMetadata =
                 instanceMetadata.Aliases
-                .Select(env => Accessor.GetAppMetadata(new MsalAppMetadataCacheKey(ClientId, env)))
+                .Select(env => Accessor.GetAppMetadata(new MsalAppMetadataCacheItem(ClientId, env, null)))
                 .FirstOrDefault(item => item != null);
 
             // From a FOCI perspective, an app has 3 states - in the family, not in the family or unknown
@@ -1123,11 +1123,11 @@ namespace Microsoft.Identity.Client
             var tenantProfiles = await GetTenantProfilesAsync(requestParameters, msalAccessTokenCacheItem.HomeAccountId).ConfigureAwait(false);
 
             var accountCacheItem = Accessor.GetAccount(
-                new MsalAccountCacheKey(
-                    msalAccessTokenCacheItem.Environment,
-                    msalAccessTokenCacheItem.TenantId,
-                    msalAccessTokenCacheItem.HomeAccountId,
-                    requestParameters.Account?.Username));
+                new MsalAccountCacheItem(
+                        msalAccessTokenCacheItem.Environment,
+                        msalAccessTokenCacheItem.TenantId,
+                        msalAccessTokenCacheItem.HomeAccountId,
+                        requestParameters.Account?.Username));
 
             return new Account(
                 msalAccessTokenCacheItem.HomeAccountId,

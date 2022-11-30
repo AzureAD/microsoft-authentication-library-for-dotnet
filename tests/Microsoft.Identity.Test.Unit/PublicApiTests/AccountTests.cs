@@ -227,7 +227,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     clientInfo,
                     homeAccountId);
 
-                atItem.Secret = atItem.GetKey().ToString();
+                atItem.Secret = atItem.CacheKey;
                 app.UserTokenCacheInternal.Accessor.SaveAccessToken(atItem);
 
                 // another cache entry for different uid. user count should be 2.

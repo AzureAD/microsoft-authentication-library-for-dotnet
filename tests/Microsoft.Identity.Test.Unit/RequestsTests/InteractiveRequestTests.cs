@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     clientInfo,
                     homeAccountId);
 
-                string atKey = atItem.GetKey().ToString();
+                string atKey = atItem.CacheKey;
                 atItem.Secret = atKey;
                 ((ITokenCacheInternal)cache).Accessor.SaveAccessToken(atItem);
 

@@ -214,15 +214,16 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 }
             }
             var atCacheItem = cache.Accessor.GetAllAccessTokens().First();
-            var key = atCacheItem.GetKey();
+            var keyString = atCacheItem.CacheKey;
+            var iOsKey = atCacheItem.iOSCacheKey;
 
-            Assert.AreEqual(_expectedAtCacheKey, key.ToString());
+            Assert.AreEqual(_expectedAtCacheKey, keyString);
 
-            Assert.AreEqual(_expectedAtCacheKeyIosService, key.iOSService);
-            Assert.AreEqual(_expectedAtCacheKeyIosAccount, key.iOSAccount);
-            Assert.AreEqual(_expectedAtCacheKeyIosGeneric, key.iOSGeneric);
-            Assert.AreEqual(_expectedAtCacheKeyIosGeneric, key.iOSGeneric);
-            Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken, key.iOSType);
+            Assert.AreEqual(_expectedAtCacheKeyIosService, iOsKey.iOSService);
+            Assert.AreEqual(_expectedAtCacheKeyIosAccount, iOsKey.iOSAccount);
+            Assert.AreEqual(_expectedAtCacheKeyIosGeneric, iOsKey.iOSGeneric);
+            Assert.AreEqual(_expectedAtCacheKeyIosGeneric, iOsKey.iOSGeneric);
+            Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken, iOsKey.iOSType);
         }
 
         private void ValidateRt(ITokenCacheInternal cache)
@@ -232,14 +233,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             //    (ExpectedRtCacheValue, cache.GetAllRefreshTokenCacheItems(requestContext));
 
             var rtCacheItem = cache.Accessor.GetAllRefreshTokens().First();
-            var key = rtCacheItem.GetKey();
+            var iOSKey = rtCacheItem.iOSCacheKey;
 
-            Assert.AreEqual(_expectedRtCacheKey, key.ToString());
+            Assert.AreEqual(_expectedRtCacheKey, rtCacheItem.CacheKey);
 
-            Assert.AreEqual(_expectedRtCacheKeyIosService, key.iOSService);
-            Assert.AreEqual(_expectedRtCacheKeyIosAccount, key.iOSAccount);
-            Assert.AreEqual(_expectedRtCacheKeyIosGeneric, key.iOSGeneric);
-            Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken, key.iOSType);
+            Assert.AreEqual(_expectedRtCacheKeyIosService, iOSKey.iOSService);
+            Assert.AreEqual(_expectedRtCacheKeyIosAccount, iOSKey.iOSAccount);
+            Assert.AreEqual(_expectedRtCacheKeyIosGeneric, iOSKey.iOSGeneric);
+            Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken, iOSKey.iOSType);
         }
 
         private void ValidateIdToken(ITokenCacheInternal cache)
@@ -249,9 +250,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             //    (ExpectedIdTokenCacheValue, cache.GetAllIdTokenCacheItems(requestContext));
 
             var idTokenCacheItem = cache.Accessor.GetAllIdTokens().First();
-            var key = idTokenCacheItem.GetKey();
+            var key = idTokenCacheItem.iOSCacheKey;
 
-            Assert.AreEqual(_expectedIdTokenCacheKey, key.ToString());
+            Assert.AreEqual(_expectedIdTokenCacheKey, idTokenCacheItem.CacheKey);
 
             Assert.AreEqual(_expectedIdTokenCacheKeyIosService, key.iOSService);
             Assert.AreEqual(_expectedIdTokenCacheKeyIosAccount, key.iOSAccount);
@@ -266,14 +267,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             //    (ExpectedAccountCacheValue, cache.GetAllAccountCacheItems(requestContext));
 
             var accountCacheItem = cache.Accessor.GetAllAccounts().First();
-            var key = accountCacheItem.GetKey();
+            var iOSKey = accountCacheItem.iOSCacheKey;
 
-            Assert.AreEqual(_expectedAccountCacheKey, key.ToString());
+            Assert.AreEqual(_expectedAccountCacheKey, accountCacheItem.CacheKey);
 
-            Assert.AreEqual(_expectedAccountCacheKeyIosService, key.iOSService);
-            Assert.AreEqual(_expectedAccountCacheKeyIosAccount, key.iOSAccount);
-            Assert.AreEqual(_expectedAccountCacheKeyIosGeneric, key.iOSGeneric);
-            Assert.AreEqual(MsalCacheKeys.iOSAuthorityTypeToAttrType["MSSTS"], key.iOSType);
+            Assert.AreEqual(_expectedAccountCacheKeyIosService, iOSKey.iOSService);
+            Assert.AreEqual(_expectedAccountCacheKeyIosAccount, iOSKey.iOSAccount);
+            Assert.AreEqual(_expectedAccountCacheKeyIosGeneric, iOSKey.iOSGeneric);
+            Assert.AreEqual(MsalCacheKeys.iOSAuthorityTypeToAttrType["MSSTS"], iOSKey.iOSType);
         }
 
         private void ValidateCacheEntityValue(string expectedEntityValue, ICollection<string> entities)

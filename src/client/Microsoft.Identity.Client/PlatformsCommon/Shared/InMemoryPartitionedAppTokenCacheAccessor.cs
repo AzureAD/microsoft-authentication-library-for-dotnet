@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #region Add
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            string itemKey = item.GetKey().ToString();
+            string itemKey = item.CacheKey;
             string partitionKey = CacheKeyFactory.GetClientCredentialKey(item.ClientId, item.TenantId, item.KeyId);
 
             // if a conflict occurs, pick the latest value
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public void SaveAppMetadata(MsalAppMetadataCacheItem item)
         {
-            string key = item.GetKey().ToString();
+            string key = item.CacheKey;
             AppMetadataDictionary[key] = item;
         }
         #endregion
@@ -113,14 +113,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// This method is not supported for the app token cache because
         /// there are no user accounts in a client credential flow.
         /// </summary>
-        public MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey)
+        public MsalAccountCacheItem GetAccount(MsalAccountCacheItem accountCacheItem)
         {
             throw new NotSupportedException();
         }
 
-        public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
+        public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheItem appMetadataItem)
         {
-            AppMetadataDictionary.TryGetValue(appMetadataKey.ToString(), out MsalAppMetadataCacheItem cacheItem);
+            AppMetadataDictionary.TryGetValue(appMetadataItem.CacheKey, out MsalAppMetadataCacheItem cacheItem);
             return cacheItem;
         }
         #endregion
@@ -131,10 +131,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             var partitionKey = CacheKeyFactory.GetClientCredentialKey(item.ClientId, item.TenantId, item.KeyId);
 
             AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
-            if (partition == null || !partition.TryRemove(item.GetKey().ToString(), out _))
+            if (partition == null || !partition.TryRemove(item.CacheKey, out _))
             {
                 _logger.InfoPii(
-                    $"[Internal cache] Cannot delete access token because it was not found in the cache. Key {item.GetKey()}.",
+                    $"[Internal cache] Cannot delete access token because it was not found in the cache. Key {item.CacheKey}.",
                     "[Internal cache] Cannot delete access token because it was not found in the cache.");
             }
         }
