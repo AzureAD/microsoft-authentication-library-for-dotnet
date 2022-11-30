@@ -93,6 +93,11 @@ namespace Microsoft.Identity.Client.Broker
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
+            if(_logger.PiiLoggingEnabled)
+            {
+                s_lazyCore.Value.EnablePii(_logger.PiiLoggingEnabled);
+            }
+
             _parentHandle = GetParentWindow(uiParent);
 
             _wamOptions = appConfig.WindowsBrokerOptions ??

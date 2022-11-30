@@ -53,6 +53,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             _coreUIParent = new CoreUIParent() { SynchronizationContext = _synchronizationContext };
             ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(isConfidentialClient: false);
             _logger = Substitute.For<ILoggerAdapter>();
+            _logger.PiiLoggingEnabled.Returns(true);
 
             _serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
