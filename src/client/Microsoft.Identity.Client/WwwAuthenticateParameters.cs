@@ -393,21 +393,6 @@ namespace Microsoft.Identity.Client
 
                 parameters = parametersList.Select(v => AuthenticationHeaderParser.CreateKeyValuePair(v.Trim(), scheme))
                                 .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
-
-                //var authValuesSplit = wwwAuthenticateValue.Split(new char[] { ' ' });
-
-                //if (s_knownAuthenticationSchemes.Contains(authValuesSplit[0]))
-                //{
-                //    parameters = CoreHelpers.SplitWithQuotes(authValuesSplit[1], ',')
-                //        .Select(v => AuthenticationHeaderParser.CreateKeyValuePair(v.Trim(), scheme))
-                //        .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
-                //}
-                //else
-                //{
-                //    parameters = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ',')
-                //        .Select(v => AuthenticationHeaderParser.CreateKeyValuePair(v.Trim(), scheme))
-                //        .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
-                //}
             }
 
             return CreateWwwAuthenticateParameters(parameters, scheme);
@@ -423,11 +408,6 @@ namespace Microsoft.Identity.Client
             {
                 authValuesSplit = authValuesSplit.Skip(1).ToArray();
             }
-
-            //foreach (var authValue in authValuesSplit)
-            //{
-            //    authValue = authValue.Replace(",", string.Empty);
-            //}
 
             result = authValuesSplit.Select(authValue => authValue.Replace(",", string.Empty)).ToArray();
 
