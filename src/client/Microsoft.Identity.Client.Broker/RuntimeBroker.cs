@@ -469,7 +469,7 @@ namespace Microsoft.Identity.Client.Broker
                 {
                     List<NativeInterop.Account> wamAccounts = discoverAccountsResult.Accounts;
 
-                    _logger.Verbose($"[WamBroker] Broker returned {wamAccounts.Count()} account(s).");
+                    _logger.Info($"[WamBroker] Broker returned {wamAccounts.Count()} account(s).");
 
                     if (wamAccounts.Count() == 0)
                     {
@@ -509,13 +509,17 @@ namespace Microsoft.Identity.Client.Broker
                 }
                 else
                 {
-                    string errorMessage =
+                    string errorMessagePii =
                         $" [WamBroker] \n" +
                         $" Error Code: {discoverAccountsResult.Error.ErrorCode} \n" +
                         $" Error Message: {discoverAccountsResult.Error.Context} \n" +
                         $" Internal Error Code: {discoverAccountsResult.Error.Tag.ToString(CultureInfo.InvariantCulture)} \n" +
                         $" Telemetry Data: {discoverAccountsResult.TelemetryData } \n";
-                    _logger.ErrorPii($"[WamBroker] {errorMessage}", string.Empty);
+
+                    _logger.ErrorPii($"[WamBroker] {errorMessagePii}", 
+                        $"[WamBroker] DiscoverAccounts Error. " +
+                        $"Error Code : {discoverAccountsResult.Error.ErrorCode}. " +
+                        $"Internal Error Code: {discoverAccountsResult.Error.Tag.ToString(CultureInfo.InvariantCulture)}");
 
                     return Array.Empty<IAccount>();
                 }

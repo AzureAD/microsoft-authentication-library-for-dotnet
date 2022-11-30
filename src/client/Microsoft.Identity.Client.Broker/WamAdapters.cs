@@ -328,19 +328,19 @@ namespace Microsoft.Identity.Client.Broker
         /// <param name="nativeAccount"></param>
         /// <param name="clientId"></param>
         /// <param name="logger"></param>
-        /// <param name="acc"></param>
+        /// <param name="msalAccount"></param>
         /// <returns></returns>
         /// <exception cref="MsalServiceException"></exception>
         public static bool TryConvertToMsalAccount(
             NativeInterop.Account nativeAccount,
             string clientId, 
             ILoggerAdapter logger, 
-            out IAccount acc)
+            out IAccount msalAccount)
         {
             //native interop account will never be null, but good to check
             if (nativeAccount is null)
             {
-                acc = null;
+                msalAccount = null;
                 return false;
             }
 
@@ -353,11 +353,11 @@ namespace Microsoft.Identity.Client.Broker
             {
                 //log message
                 ToLogMessage(nativeAccount, logger);
-                acc = null;
+                msalAccount = null;
                 return false;
             }
 
-            acc = new Account(
+            msalAccount = new Account(
                     nativeAccount.HomeAccountid,
                     nativeAccount.UserName,
                     nativeAccount.Environment,
