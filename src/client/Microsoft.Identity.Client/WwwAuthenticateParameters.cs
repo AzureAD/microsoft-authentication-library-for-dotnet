@@ -389,23 +389,49 @@ namespace Microsoft.Identity.Client
 
             if (!string.IsNullOrWhiteSpace(wwwAuthenticateValue))
             {
-                var authValuesSplit = wwwAuthenticateValue.Split(new char[] { ' ' }, 2);
+                var parametersList = GetParsedAuthValueElements(wwwAuthenticateValue);
 
-                if (s_knownAuthenticationSchemes.Contains(authValuesSplit[0]))
-                {
-                    parameters = CoreHelpers.SplitWithQuotes(authValuesSplit[1], ',')
-                        .Select(v => AuthenticationHeaderParser.CreateKeyValuePair(v.Trim(), scheme))
-                        .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
-                }
-                else
-                {
-                    parameters = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ',')
-                        .Select(v => AuthenticationHeaderParser.CreateKeyValuePair(v.Trim(), scheme))
-                        .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
-                }
+                parameters = parametersList.Select(v => AuthenticationHeaderParser.CreateKeyValuePair(v.Trim(), scheme))
+                                .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+
+                //var authValuesSplit = wwwAuthenticateValue.Split(new char[] { ' ' });
+
+                //if (s_knownAuthenticationSchemes.Contains(authValuesSplit[0]))
+                //{
+                //    parameters = CoreHelpers.SplitWithQuotes(authValuesSplit[1], ',')
+                //        .Select(v => AuthenticationHeaderParser.CreateKeyValuePair(v.Trim(), scheme))
+                //        .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+                //}
+                //else
+                //{
+                //    parameters = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ',')
+                //        .Select(v => AuthenticationHeaderParser.CreateKeyValuePair(v.Trim(), scheme))
+                //        .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+                //}
             }
 
             return CreateWwwAuthenticateParameters(parameters, scheme);
+        }
+
+        private static string[] GetParsedAuthValueElements(string wwwAuthenticateValue)
+        {
+            string[] result;
+            var authValuesSplit = wwwAuthenticateValue.Split(new char[] { ' ' });
+
+            //Ensure that known headers are not being parsed.
+            if (s_knownAuthenticationSchemes.Contains(authValuesSplit[0]))
+            {
+                authValuesSplit = authValuesSplit.Skip(1).ToArray();
+            }
+
+            //foreach (var authValue in authValuesSplit)
+            //{
+            //    authValue = authValue.Replace(",", string.Empty);
+            //}
+
+            result = authValuesSplit.Select(authValue => authValue.Replace(",", string.Empty)).ToArray();
+
+            return result ?? new string[0];
         }
 
         internal static WwwAuthenticateParameters CreateWwwAuthenticateParameters(IDictionary<string, string> values, string scheme)
@@ -416,6 +442,7 @@ namespace Microsoft.Identity.Client
 
             if (values == null)
             {
+                wwwAuthenticateParameters.RawParameters = new Dictionary<string, string>();
                 return wwwAuthenticateParameters;
             }
 
@@ -456,7 +483,7 @@ namespace Microsoft.Identity.Client
 
             if (values.TryGetValue("nonce", out value))
             {
-                wwwAuthenticateParameters.PopNonce = value.Replace("\"", string.Empty);
+                wwwAuthenticateParameters.PopNonce = value;
             }
 
             return wwwAuthenticateParameters;

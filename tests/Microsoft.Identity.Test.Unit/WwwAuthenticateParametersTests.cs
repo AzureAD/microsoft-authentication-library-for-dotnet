@@ -60,15 +60,11 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [DataRow("AuthScheme", "" )]
-        [DataRow("AuthScheme", "realm = someRealm")]
+        [DataRow("AuthScheme", "")]
         [DataRow("AuthScheme", "token68")]
-        [DataRow("AuthScheme", "realm = someRealm token68")]
         [DataRow("AuthScheme", "auth-param1=token1, auth-param2=token2, auth-param3=token3")]
-        [DataRow("AuthScheme", "realm = someRealm auth-param1=token1, auth-param2=token2, auth-param3=token3")]
         [DataRow("AuthScheme", "token68 auth-param1=token1, auth-param2=token2, auth-param3=token3")]
-        [DataRow("AuthScheme", "realm = someRealm token68 auth-param1=token1, auth-param2=token2, auth-param3=token3")]
-        public void EnsureProperlyFormattedHeadersDoNotFail(string scheme, string values)
+        public void EnsureProperlyFormattedHeadersWithToken86DoNotFail(string scheme, string values)
         {
             // Arrange
             HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
@@ -78,18 +74,46 @@ namespace Microsoft.Identity.Test.Unit
             var authParams = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers, scheme);
 
             // Assert
-            //if (scheme == "NTLM")
-            //{
-            //    Assert.AreEqual(scheme, authParams.AuthScheme);
-            //    Assert.AreEqual(values, authParams.RawParameters[scheme]);
-            //}
-            //else
-            //{
-            //    Assert.AreEqual(3, authParams.RawParameters.Count);
-            //    Assert.AreEqual("WindowsLive", authParams.RawParameters["realm"]);
-            //    Assert.AreEqual("MBI_SSL", authParams.RawParameters["policy"]);
-            //    Assert.AreEqual("ssl.live-tst.net", authParams.RawParameters["siteId"]);
-            //}
+            Assert.AreEqual(scheme, authParams.AuthScheme);
+
+            if (string.IsNullOrEmpty(values))
+            {
+                Assert.AreEqual(0, authParams.RawParameters.Count);
+            }
+            else if (values == "token68")
+            {
+                Assert.AreEqual("token68", authParams.RawParameters[scheme]);
+            }
+            else
+            {
+                Assert.AreEqual("token1", authParams.RawParameters["auth-param1"]);
+                Assert.AreEqual("token2", authParams.RawParameters["auth-param2"]);
+                Assert.AreEqual("token3", authParams.RawParameters["auth-param3"]);
+            }
+        }
+
+        [TestMethod]
+        [DataRow("AuthScheme", "realm=someRealm")]
+        [DataRow("AuthScheme", "realm=someRealm token68")]
+        [DataRow("AuthScheme", "realm=someRealm auth-param1=token1, auth-param2=token2, auth-param3=token3")]
+        [DataRow("AuthScheme", "realm=someRealm token68 auth-param1=token1, auth-param2=token2, auth-param3=token3")]
+        public void EnsureProperlyFormattedHeadersWithRealmDoNotFail(string scheme, string values)
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"{scheme} {values}");
+
+            // Act
+            var authParams = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers, scheme);
+
+            // Assert
+            Assert.AreEqual(scheme, authParams.AuthScheme);
+            Assert.AreEqual("someRealm", authParams.RawParameters["realm"]);
+
+            if (values == "token68")
+            {
+                Assert.AreEqual("token68", authParams.RawParameters[scheme]);
+            }
         }
 
         [TestMethod]
