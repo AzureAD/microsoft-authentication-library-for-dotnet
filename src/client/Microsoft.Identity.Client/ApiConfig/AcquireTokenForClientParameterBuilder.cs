@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Specifies to use the Managed Identity to fetch the token from the Managed Identity Endpoint.
-        /// For more details see https://aka.ms/msal-managed-identity.
+        /// For more details see https://aka.ms/msal-net-managed-identity.
         /// </summary>
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenForClientParameterBuilder WithManagedIdentity(string userAssignedClientIdOrResourceId = null)

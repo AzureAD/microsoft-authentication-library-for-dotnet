@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             return managedIdentityResponse == null ?
                 "[Managed Identity] Empty error response received." :
-                $"[Managed Identity] Error message: {managedIdentityResponse.Message}. Correlation Id: {managedIdentityResponse.CorrelationId}";
+                $"[Managed Identity] Error message: {managedIdentityResponse.Message} Correlation Id: {managedIdentityResponse.CorrelationId}";
         }
     }
 }
