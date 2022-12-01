@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -8,7 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -276,7 +278,7 @@ namespace Microsoft.Identity.Client.Broker
                 string authorityUrl = null;
 
                 // workaround for bug https://identitydivision.visualstudio.com/Engineering/_workitems/edit/2047936
-                // i.e. environment is not set correctly in multi-cloud apps and home_enviroment is not set
+                // i.e. environment is not set correctly in multi-cloud apps and home_environment is not set
                 if (authenticationRequestParameters.AppConfig.MultiCloudSupportEnabled && string.IsNullOrEmpty(authorityUrl))
                 {
                     IdToken idToken = IdToken.Parse(authResult.RawIdToken);
@@ -305,6 +307,7 @@ namespace Microsoft.Identity.Client.Broker
             }
             catch (NativeInterop.MsalRuntimeException ex)
             {
+                logger.ErrorPii($"[WamBroker] Could not acquire token using WAM. {ex.Message}", string.Empty);
                 throw new MsalServiceException("wam_failed", $"Could not acquire token using WAM. {ex.Message}");
             }
 
@@ -317,6 +320,89 @@ namespace Microsoft.Identity.Client.Broker
         private static string GetExpectedRedirectUri(string clientId)
         {
             return $"ms-appx-web://microsoft.aad.brokerplugin/{clientId}";
+        }
+
+        /// <summary>
+        /// Converts to MSAL Account Id or Null
+        /// </summary>
+        /// <param name="nativeAccount"></param>
+        /// <param name="clientId"></param>
+        /// <param name="logger"></param>
+        /// <param name="msalAccount"></param>
+        /// <returns></returns>
+        /// <exception cref="MsalServiceException"></exception>
+        public static bool TryConvertToMsalAccount(
+            NativeInterop.Account nativeAccount,
+            string clientId, 
+            ILoggerAdapter logger, 
+            out IAccount msalAccount)
+        {
+            //native interop account will never be null, but good to check
+            if (nativeAccount is null)
+            {
+                msalAccount = null;
+                return false;
+            }
+
+            //if any one of the account properties from Interop is null 
+            //log and return 
+            if (string.IsNullOrEmpty(nativeAccount.AccountId) ||
+                    string.IsNullOrEmpty(nativeAccount.HomeAccountid) ||
+                    string.IsNullOrEmpty(nativeAccount.Environment) ||
+                    string.IsNullOrEmpty(nativeAccount.UserName))
+            {
+                //log message
+                ToLogMessage(nativeAccount, logger);
+                msalAccount = null;
+                return false;
+            }
+
+            msalAccount = new Account(
+                    nativeAccount.HomeAccountid,
+                    nativeAccount.UserName,
+                    nativeAccount.Environment,
+                    new Dictionary<string, string>() {
+                        { 
+                            clientId, 
+                            nativeAccount.AccountId 
+                        } 
+                    });
+
+            return true;
+        }
+
+        /// <summary>
+        /// Logs Messages
+        /// </summary>
+        /// <param name="wamAccount"></param>
+        /// <param name="logger"></param>
+        private static void ToLogMessage(
+            NativeInterop.Account wamAccount,
+            ILoggerAdapter logger)
+        {
+            // Create PII enabled string builder
+            var builder = new StringBuilder(
+                Environment.NewLine + "=== [WamBroker] Converting WAM Account to MSAL Account ===" +
+                Environment.NewLine);
+
+            builder.AppendLine($"wamAccount.AccountId: {wamAccount.AccountId}.");
+            builder.AppendLine($"wamAccount.HomeAccountid: {wamAccount.HomeAccountid}.");
+            builder.AppendLine($"wamAccount.UserName: {wamAccount.UserName}.");
+
+            string messageWithPii = builder.ToString();
+
+            // Create non PII enabled string builder
+            builder = new StringBuilder(
+                Environment.NewLine + "=== [WamBroker] Converting WAM Account to MSAL Account ===" + 
+                Environment.NewLine);
+
+            builder.AppendLine($"wamAccount.AccountId: {string.IsNullOrEmpty(wamAccount.AccountId)}.");
+            builder.AppendLine($"wamAccount.HomeAccountid: {string.IsNullOrEmpty(wamAccount.HomeAccountid)}");
+            builder.AppendLine($"wamAccount.Environment: {wamAccount.Environment}.");
+            builder.AppendLine($"wamAccount.UserName: {string.IsNullOrEmpty(wamAccount.UserName)}.");
+
+            logger.InfoPii(messageWithPii, builder.ToString());
+            logger.Error($"[WamBroker] WAM Account properties are missing. Cannot convert to MSAL Accounts.");
         }
 
         /// <summary>

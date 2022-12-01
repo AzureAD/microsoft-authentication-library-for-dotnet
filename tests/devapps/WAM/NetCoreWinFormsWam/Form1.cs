@@ -141,7 +141,7 @@ namespace NetDesktopWinForms
                 MsaPassthrough = cbxMsaPt.Checked,
                 HeaderText = "MSAL Dev App .NET FX"
             })
-            .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true);
+            .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true, true);
 
             var pca = builder.Build();
 
@@ -299,7 +299,7 @@ namespace NetDesktopWinForms
             return result;
         }
 
-        private async Task LogResultAndRefreshAccountsAsync(AuthenticationResult ar, bool refresAccounts = true)
+        private async Task LogResultAndRefreshAccountsAsync(AuthenticationResult ar, bool refreshAccounts = true)
         {
             string message =
 
@@ -319,7 +319,7 @@ namespace NetDesktopWinForms
 
             Log("Refreshing accounts");
 
-            if(refresAccounts)
+            if(refreshAccounts)
                 await RefreshAccountsAsync().ConfigureAwait(true);
         }
 
