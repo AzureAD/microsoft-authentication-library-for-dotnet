@@ -55,35 +55,40 @@ namespace Microsoft.Identity.Client
 
             try
             {
-                if (httpResponseHeaders.Contains(AuthenticationInfoKey))
+                var authInfoValueList = httpResponseHeaders.SingleOrDefault(header => header.Key == AuthenticationInfoKey).Value;
+
+                if (authInfoValueList != null)
                 {
-                    var authInfoValue = httpResponseHeaders.Where(header => header.Key == AuthenticationInfoKey).Single().Value.FirstOrDefault();
-
-
+                    var authInfoValue = authInfoValueList.FirstOrDefault();
                     var AuthValuesSplit = authInfoValue.Split(new char[] { ' ' }, 2);
+                    IDictionary<string, string> paramValues;
 
-                    var paramValues = CoreHelpers.SplitWithQuotes(AuthValuesSplit[1], ',')
-                            .Select(v => AuthenticationHeaderParser.CreateKeyValuePair(v.Trim(), AuthenticationInfoKey))
-                            .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
-
-                    parameters.RawParameters = paramValues;
-
-                    if (paramValues.TryGetValue("nextnonce", out string value))
+                    if (AuthValuesSplit.Count() != 2)
                     {
-                        parameters.NextNonce = value;
+                        //Header is not in the form of a=b.
+                        paramValues = new Dictionary<string, string>();
+                        paramValues.Add(new KeyValuePair<string, string>(AuthenticationInfoKey, authInfoValue));
+                    }
+                    else
+                    {
+                        paramValues = CoreHelpers.SplitWithQuotes(AuthValuesSplit[1], ',')
+                                .Select(v => AuthenticationHeaderParser.CreateKeyValuePair(v.Trim(), AuthenticationInfoKey))
+                                .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+
+                        if (paramValues.TryGetValue("nextnonce", out string value))
+                        {
+                            parameters.NextNonce = value;
+                        }
                     }
 
-                    return parameters;
-
-                    //Could not get Auth info parameters
-                    throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader);
+                    parameters.RawParameters = paramValues;
                 }
 
-                return null;
+                return parameters;
             }
             catch (Exception ex) when (ex is not MsalClientException)
             {
-                throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader, ex);
+                throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader + $" See inner exception for details.", ex);
             }
         }
     }

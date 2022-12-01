@@ -65,9 +65,9 @@ namespace Microsoft.Identity.Client
         public string AuthScheme { get; private set; }
 
         /// <summary>
-        /// Pop Nonce. This is acquired from with the POP WWW-Authenticate header.
+        /// The nonce acquired from the WWW-Authenticate header.
         /// </summary>
-        public string PopNonce { get; private set; }
+        public string Nonce { get; private set; }
 
         /// <summary>
         /// Return the <see cref="RawParameters"/> of key <paramref name="key"/>.
@@ -269,7 +269,7 @@ namespace Microsoft.Identity.Client
                         throw;
                     }
 
-                    throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader, ex);
+                    throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader + " See inner exception for details.", ex);
                 }
             }
 
@@ -369,7 +369,7 @@ namespace Microsoft.Identity.Client
                 }
                 catch (Exception ex) when (ex is not MsalException)
                 {
-                    throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader, ex);
+                    throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader + " See inner exception for details.", ex);
                 }
             }
 
@@ -401,15 +401,16 @@ namespace Microsoft.Identity.Client
         private static string[] GetParsedAuthValueElements(string wwwAuthenticateValue)
         {
             string[] result;
-            var authValuesSplit = wwwAuthenticateValue.Split(new char[] { ' ' });
+            char[] charsToTrim = { ',', ' ' };
+            var authValuesSplit = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ' ' );
 
             //Ensure that known headers are not being parsed.
             if (s_knownAuthenticationSchemes.Contains(authValuesSplit[0]))
             {
-                authValuesSplit = authValuesSplit.Skip(1).ToArray();
+                authValuesSplit = authValuesSplit.Skip(1).ToList();
             }
 
-            result = authValuesSplit.Select(authValue => authValue.Replace(",", string.Empty)).ToArray();
+            result = authValuesSplit.Select(authValue => authValue.TrimEnd(charsToTrim)).ToArray();
 
             return result ?? new string[0];
         }
@@ -463,7 +464,7 @@ namespace Microsoft.Identity.Client
 
             if (values.TryGetValue("nonce", out value))
             {
-                wwwAuthenticateParameters.PopNonce = value;
+                wwwAuthenticateParameters.Nonce = value;
             }
 
             return wwwAuthenticateParameters;

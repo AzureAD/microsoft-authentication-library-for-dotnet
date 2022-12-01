@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client
             {
                 var wwwParameters = Client.WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponseHeaders);
 
-                serverNonce = wwwParameters.SingleOrDefault(parameter => string.Equals(parameter.AuthScheme, Constants.PoPAuthHeaderPrefix, StringComparison.Ordinal))?.PopNonce;
+                serverNonce = wwwParameters.SingleOrDefault(parameter => string.Equals(parameter.AuthScheme, Constants.PoPAuthHeaderPrefix, StringComparison.Ordinal))?.Nonce;
 
                 authenticationHeaderParser.WwwAuthenticateParameters = wwwParameters;
             }

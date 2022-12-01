@@ -131,8 +131,8 @@ namespace Microsoft.Identity.Test.Unit
             // Assert
             if (scheme == "NTLM")
             {
-                Assert.AreEqual(scheme, authParams.AuthScheme);
-                Assert.AreEqual(values, authParams.RawParameters[scheme]);
+                Assert.AreEqual("NTLM", authParams.AuthScheme);
+                Assert.AreEqual("dG9rZW42OA==", authParams.RawParameters[scheme]);
             }
             else
             {
@@ -144,9 +144,22 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [DataRow("nextnonce", "")]
+        public void CreateFromtoken68AuthInfoResponse()
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            httpResponse.Headers.Add(AuthenticationInfoName, $"token68");
+
+            // Act
+            var parameters = AuthenticationInfoParameters.CreateFromHeaders(httpResponse.Headers);
+
+            //Assert
+            Assert.IsNotNull(parameters);
+            Assert.AreEqual("token68", parameters.RawParameters[AuthenticationInfoName]);
+        }
+
+        [TestMethod]
         [DataRow("nextnonce", "Some, Malformed, Nonce")]
-        [DataRow("", TestConstants.Nonce)]
         [DataRow("", "Some, Malformed, Nonce")]
         public void CreateFromMalformedAuthInfoResponse(string paramName, string value)
         {
@@ -160,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit
 
             //Assert
             Assert.AreEqual(ex.ErrorCode, MsalError.UnableToParseAuthenticationHeader);
-            Assert.AreEqual(ex.Message, MsalErrorMessage.UnableToParseAuthenticationHeader);
+            Assert.AreEqual(ex.Message, MsalErrorMessage.UnableToParseAuthenticationHeader + " See inner exception for details.");
         }
 
         [TestMethod]
@@ -415,7 +428,7 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
             Assert.IsNotNull(popHeader);
-            Assert.AreEqual(TestConstants.Nonce, popHeader.PopNonce);
+            Assert.AreEqual(TestConstants.Nonce, popHeader.Nonce);
         }
 
         [TestMethod]
@@ -435,7 +448,7 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
             Assert.IsNotNull(popHeader);
-            Assert.AreEqual(TestConstants.Nonce, popHeader.PopNonce);
+            Assert.AreEqual(TestConstants.Nonce, popHeader.Nonce);
         }
 
         [TestMethod]
@@ -455,7 +468,7 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
             Assert.IsNotNull(popHeader);
-            Assert.AreEqual(TestConstants.Nonce, popHeader.PopNonce);
+            Assert.AreEqual(TestConstants.Nonce, popHeader.Nonce);
         }
 
         [TestMethod]

@@ -74,23 +74,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(3, authParams.RawParameters.Count);
             Assert.IsNull(authParams.Claims);
             Assert.AreEqual("invalid_token", authParams.Error);
+            Assert.AreEqual($"https://{authority}/{tenantId}", authParams.RawParameters["authorization_uri"]);
         }
 
         [TestMethod]
         public async Task ExtractNonceFromWwwAuthHeadersAsync()
-        {
-            //Arrange & Act
-            //Test for nonce in WWW-Authenticate header
-            var parameterList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(
-                                                         "https://testingsts.azurewebsites.net/servernonce/invalidsignature").ConfigureAwait(false);
-
-            //Assert
-            Assert.IsTrue(parameterList.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
-            Assert.IsNotNull(parameterList.Where(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix).Single().PopNonce);
-        }
-
-        [TestMethod]
-        public async Task ExtractNonceFromWwwAuthHeadersRawPamamsAsync()
         {
             //Arrange & Act
             //Test for nonce in WWW-Authenticate header
@@ -106,6 +94,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
 
             //Assert
+            Assert.IsTrue(parameterList.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
+            Assert.IsNotNull(parameterList.Single(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix).Nonce);
             Assert.IsTrue(!popNonce.IsNullOrEmpty());
             await TestCommon.ValidatePopNonceAsync(popNonce).ConfigureAwait(false);
         }
@@ -135,7 +125,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             //Assert
             Assert.IsTrue(parsedHeaders.WwwAuthenticateParameters.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
-            var serverNonce = parsedHeaders.WwwAuthenticateParameters.Where(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix).Single().PopNonce;
+            var serverNonce = parsedHeaders.WwwAuthenticateParameters.Where(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix).Single().Nonce;
             Assert.IsNotNull(serverNonce);
             Assert.AreEqual(parsedHeaders.PopNonce, serverNonce);
             Assert.IsNull(parsedHeaders.AuthenticationInfoParameters);
