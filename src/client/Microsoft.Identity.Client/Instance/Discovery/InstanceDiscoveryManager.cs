@@ -36,13 +36,6 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         private readonly INetworkMetadataProvider _networkMetadataProvider;
         private readonly IRegionDiscoveryProvider _regionDiscoveryProvider;
 
-        private readonly InstanceDiscoveryMetadataEntry DefaultInstanceDiscoveryMetadata = new InstanceDiscoveryMetadataEntry()
-        {
-            PreferredNetwork = "login.microsoftonline.com",
-            PreferredCache = "login.windows.net",
-            Aliases = new[] { "login.microsoftonline.com", "login.windows.net", "login.microsoft.com", "sts.windows.net" } 
-        };
-
         public InstanceDiscoveryManager(
           IHttpManager httpManager,
           bool /* for test */ shouldClearCaches,
@@ -95,6 +88,12 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         {
             string environment = authorityInfo.Host;
 
+            // Skip instance discovery for managed identity
+            if (requestContext.ServiceBundle.Config.UseManagedIdentity)
+            {
+                return CreateEntryForSingleAuthority(authorityInfo.CanonicalAuthority);
+            }
+
             if (authorityInfo.IsInstanceDiscoverySupported)
             {
                 return
@@ -120,9 +119,10 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             Uri authorityUri = authorityInfo.CanonicalAuthority;
             string environment = authorityInfo.Host;
 
+            // Skip instance discovery for managed identity
             if (requestContext.ServiceBundle.Config.UseManagedIdentity)
             {
-                return CreateEntryForSingleAuthority(authorityInfo.CanonicalAuthority);
+                return CreateEntryForSingleAuthority(authorityUri);
             }
 
             if (authorityInfo.IsInstanceDiscoverySupported)

@@ -74,6 +74,8 @@ namespace Microsoft.Identity.Client
         /// Specifies to use the Managed Identity to fetch the token from the Managed Identity Endpoint.
         /// For more details see https://aka.ms/msal-net-managed-identity.
         /// </summary>
+        /// <param name="userAssignedClientIdOrResourceId">This is an optional parameter to pass client id or resource id for a user assigned managed identity. 
+        /// For system assigned managed identity, no need to pass a value to this parameter. </param>
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenForClientParameterBuilder WithManagedIdentity(string userAssignedClientIdOrResourceId = null)
         {
@@ -83,11 +85,11 @@ namespace Microsoft.Identity.Client
 
             if (!userAssignedClientIdOrResourceId.IsNullOrEmpty() && Guid.TryParse(userAssignedClientIdOrResourceId, out _))
             {
-                ServiceBundle.Config.MIUserAssignedClientId = userAssignedClientIdOrResourceId;
+                ServiceBundle.Config.ManagedIdentityUserAssignedClientId = userAssignedClientIdOrResourceId;
             }
             else
             {
-                ServiceBundle.Config.MIUserAssignedResourceId = userAssignedClientIdOrResourceId;
+                ServiceBundle.Config.ManagedIdentityIUserAssignedResourceId = userAssignedClientIdOrResourceId;
             }
 
             return this;

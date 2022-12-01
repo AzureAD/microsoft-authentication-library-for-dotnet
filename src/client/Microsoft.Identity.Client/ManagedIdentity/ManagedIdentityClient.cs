@@ -33,15 +33,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        private async Task<ManagedIdentityResponse> AuthenticateCoreAsync(AppTokenProviderParameters parameters,
-            CancellationToken cancellationToken)
-        {
-            return await _identitySource.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
-        }
-
         internal async Task<AppTokenProviderResult> AppTokenProviderImplAsync(AppTokenProviderParameters parameters)
         {
-            ManagedIdentityResponse response = await AuthenticateCoreAsync(parameters, parameters.CancellationToken).ConfigureAwait(false);
+            ManagedIdentityResponse response = await _identitySource.AuthenticateAsync(parameters, parameters.CancellationToken).ConfigureAwait(false);
 
             return new AppTokenProviderResult() { AccessToken = response.AccessToken, ExpiresInSeconds = DateTimeHelpers.GetDurationFromNowInSeconds(response.ExpiresOn) };
         }
