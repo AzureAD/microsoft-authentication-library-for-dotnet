@@ -1096,5 +1096,30 @@ namespace Microsoft.Identity.Client
         /// A required value is missing from the token providerresponse
         /// </summary>
         public const string InvalidTokenProviderResponseValue = "invalid_token_provider_response_value";
+
+        /// <summary>
+        /// A required value is missing from the managed identity response.
+        /// </summary>
+        public const string InvalidManagedIdentityResponse = "invalid_managed_identity_response";
+
+        /// <summary>
+        /// Managed Identity error response was received.
+        /// </summary>
+        public const string ManagedIdentityRequestFailed = "managed_identity_request_failed";
+
+        /// <summary>
+        /// Unknown error response received.
+        /// </summary>
+        public const string UnknownManagedIdentityError = "unknown_managed_identity_error";
+
+        /// <summary>
+        /// Invalid managed identity endpoint.
+        /// </summary>
+        public const string InvalidManagedIdentityEndpoint = "invalid_managed_identity_endpoint";
+
+        /// <summary>
+        /// Exactly one scope is expected.
+        /// </summary>
+        public const string ExactlyOneScopeExpected = "exactly_one_scope_expected";
     }
 }

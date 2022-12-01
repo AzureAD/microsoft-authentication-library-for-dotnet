@@ -365,21 +365,38 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             ValidateSingleEntryMetadata(new Uri(TestAuthority), actualResult);
         }
 
-        private async Task ValidateSelfEntryAsync(Uri authority)
+        [TestMethod]
+        public async Task InstanceDiscoveryIsSkippedForManagedIdentityAsync()
+        {
+            var httpManager = new MockHttpManager();
+            var appConfig = new ApplicationConfiguration(isConfidentialClient: true)
+            {
+                HttpManager = httpManager,
+                UseManagedIdentity = true
+            };
+
+            var serviceBundle = ServiceBundle.Create (appConfig);
+
+            RequestContext requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+
+            await ValidateSelfEntryAsync(new Uri("https://login.microsoftonline.com/common/"), requestContext).ConfigureAwait(false);
+        }
+
+        private async Task ValidateSelfEntryAsync(Uri authority, RequestContext requestContext = null)
         {
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 InstanceDiscoveryMetadataEntry entry = await harness.ServiceBundle.InstanceDiscoveryManager
                     .GetMetadataEntryAsync(                    
                         AuthorityInfo.FromAuthorityUri(authority.AbsoluteUri,true),
-                        new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                        requestContext ?? new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .ConfigureAwait(false);
 
                 InstanceDiscoveryMetadataEntry entry2 = await harness.ServiceBundle.InstanceDiscoveryManager
                     .GetMetadataEntryTryAvoidNetworkAsync(
                         AuthorityInfo.FromAuthorityUri(authority.AbsoluteUri, true),
                         new[] { "some_env" },
-                        new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                        requestContext ?? new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .ConfigureAwait(false);
 
                 ValidateSingleEntryMetadata(authority, entry);
