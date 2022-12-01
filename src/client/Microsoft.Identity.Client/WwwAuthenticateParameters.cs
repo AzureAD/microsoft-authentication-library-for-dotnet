@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
         [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("This api is now obsolete and has been replaced with CreateFromAuthenticationResponseAsync(...)")]
+        [Obsolete("This api is now obsolete and has been replaced with replaced with CreateFromAuthenticationResponseAsync(HttpResponseHeaders, string)")]
         public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(HttpClient httpClient, string resourceUri, CancellationToken cancellationToken = default)
         {
             if (httpClient is null)
