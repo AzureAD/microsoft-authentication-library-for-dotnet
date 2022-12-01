@@ -37,15 +37,15 @@ namespace Microsoft.Identity.Client.Http
 
         Task<HttpResponse> SendPostForceResponseAsync(
             Uri uri,
-            Dictionary<string, string> headers,
+            IDictionary<string, string> headers,
             StringContent body,
             ILoggerAdapter logger,
             CancellationToken cancellationToken = default);
 
         Task<HttpResponse> SendPostForceResponseAsync(
             Uri uri,
-            Dictionary<string, string> headers,
-            Dictionary<string, string> bodyParameters,
+            IDictionary<string, string> headers,
+            IDictionary<string, string> bodyParameters,
             ILoggerAdapter logger,
             CancellationToken cancellationToken = default);
 
