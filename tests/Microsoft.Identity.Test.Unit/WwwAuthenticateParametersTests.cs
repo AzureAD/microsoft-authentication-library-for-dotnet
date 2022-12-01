@@ -110,9 +110,15 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(scheme, authParams.AuthScheme);
             Assert.AreEqual("someRealm", authParams.RawParameters["realm"]);
 
-            if (values == "token68")
+            if (values.Contains("token68"))
             {
                 Assert.AreEqual("token68", authParams.RawParameters[scheme]);
+            }
+            else if (values.Contains("auth-param1"))
+            {
+                Assert.AreEqual("token1", authParams.RawParameters["auth-param1"]);
+                Assert.AreEqual("token2", authParams.RawParameters["auth-param2"]);
+                Assert.AreEqual("token3", authParams.RawParameters["auth-param3"]);
             }
         }
 
