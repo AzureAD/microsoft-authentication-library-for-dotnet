@@ -115,61 +115,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
         }
 
-        [TestMethod]
-        [DataRow(true)]
-        [DataRow(false)]
-        public async Task UncommonAuthorityValidationTestAsync(bool validateAuthority)
-        {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            LabUser user = labResponse.User;
-
-            IPublicClientApplication pca = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithInstanceDiscoevryEndpoint(false)
-                .WithAuthority("https://bogus.microsoft.com/common", validateAuthority)
-                .WithTestLogging()
-                .Build();
-
-            Trace.WriteLine("Acquire a token using a not so common authority alias");
-
-            HttpRequestException exception = await AssertException.TaskThrowsAsync<HttpRequestException>(() =>
-                 pca.AcquireTokenByUsernamePassword(
-                    s_scopes,
-                     user.Upn,
-                     user.GetOrFetchPassword())
-                     .ExecuteAsync())
-                .ConfigureAwait(false);
-
-            Assert.AreEqual("No such host is known.", exception.Message);
-            Assert.AreEqual(11001,((SocketException)exception.InnerException).ErrorCode);
-        }
-
-        [TestMethod]
-        [DataRow(true)]
-        [DataRow(false)]
-        public async Task CommonAuthorityValidationTestAsync(bool validateAuthority)
-        {
-            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            LabUser user = labResponse.User;
-
-            IPublicClientApplication pca = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithInstanceDiscoevryEndpoint(false)
-                .WithAuthority(TestConstants.AuthorityOrganizationsTenant, validateAuthority)
-                .WithTestLogging()
-                .Build();
-
-            Trace.WriteLine("Acquire a token using a not so common authority alias");
-
-            var result = await pca.AcquireTokenByUsernamePassword(
-                    s_scopes,
-                    user.Upn,
-                    user.GetOrFetchPassword())
-                    .ExecuteAsync().ConfigureAwait(false);
-
-            Assert.IsTrue(result != null);
-        }
-
         /// <summary>
         /// If this test fails, please update the <see cref="KnownMetadataProvider"/> to
         /// use whatever Evo uses (i.e. the aliases, preferred network / metadata from the url below).

@@ -536,9 +536,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="enableInstanceDiscovery">Determines if instance discovery/Authority validation is performed</param>
         /// <returns></returns>
-        public T WithInstanceDiscoveryEndpoint(bool enableInstanceDiscovery)
+        public T WithInstanceDiscovery(bool enableInstanceDiscovery)
         {
-            Config.InstanceDiscoveryEndpoint = Constants.InstanceDiscoveryEndpointDisabled;
+            Config.IsInstanceDiscoveryEnabled = enableInstanceDiscovery;
 
             return (T)this;
         }

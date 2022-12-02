@@ -37,7 +37,6 @@ namespace Microsoft.Identity.Client.Internal
         public const string PoPTokenType = "pop";
         public const string PoPAuthHeaderPrefix = "PoP";
         public const string RequestConfirmation = "req_cnf";
-        public const string InstanceDiscoveryEndpointDisabled = "DISABLED";
 
         public static string FormatEnterpriseRegistrationOnPremiseUri(string domain)
         {

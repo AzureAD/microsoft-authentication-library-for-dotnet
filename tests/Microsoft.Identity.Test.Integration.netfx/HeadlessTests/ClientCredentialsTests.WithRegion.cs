@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
 
             builder.WithAuthority($@"https://{settings.Environment}/{settings.TenantId}")
-                .WithInstanceDiscoevryEndpoint(settings.InstanceDiscoveryEndpoint)
+                .WithInstanceDiscovery(settings.InstanceDiscoveryEndpoint)
                 .WithTestLogging()
                 .WithExperimentalFeatures(true)
                 .WithHttpClientFactory(factory);

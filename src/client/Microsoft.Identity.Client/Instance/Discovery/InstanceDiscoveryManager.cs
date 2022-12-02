@@ -89,16 +89,28 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
             if (authorityInfo.IsInstanceDiscoverySupported)
             {
-                return
-                    _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
-                    await _regionDiscoveryProvider.GetMetadataAsync(authorityInfo.CanonicalAuthority, requestContext).ConfigureAwait(false) ??
-                    _networkCacheMetadataProvider.GetMetadata(environment, requestContext.Logger) ??
+                InstanceDiscoveryMetadataEntry entry = null;
+                entry = _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
+                await _regionDiscoveryProvider.GetMetadataAsync(authorityInfo.CanonicalAuthority, requestContext).ConfigureAwait(false);
+
+                //Check if instance discovery endpoint is disabled
+                if (entry == null && requestContext.ServiceBundle.Config.IsInstanceDiscoveryEnabled)
+                {
+                    entry = _networkCacheMetadataProvider.GetMetadata(environment, requestContext.Logger) ??
                     _knownMetadataProvider.GetMetadata(environment, existingEnvironmentsInCache, requestContext.Logger) ??
                     await GetMetadataEntryAsync(authorityInfo, requestContext).ConfigureAwait(false);
+                }
+
+                if (entry == null)
+                {
+                    entry = CreateEntryForSingleAuthority(authorityInfo.CanonicalAuthority);
+                }
+
+                return entry;
             }
             else
             {
-                requestContext.Logger.Info($"Skipping Instance discovery for {authorityInfo.AuthorityType} authority");
+                requestContext.Logger.Info($"Skipping Instance discovery for {authorityInfo.AuthorityType} authority because is not supported.");
                 return await GetMetadataEntryAsync(authorityInfo, requestContext).ConfigureAwait(false);
             }
         }
@@ -116,7 +128,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 var entry = _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger);
 
                 //Check if instance discovery endpoint is disabled
-                if (entry == null && requestContext.ServiceBundle.Config.InstanceDiscoveryEndpoint == Constants.InstanceDiscoveryEndpointDisabled)
+                if (entry == null && !requestContext.ServiceBundle.Config.IsInstanceDiscoveryEnabled)
                 {
                     //Check if regional discovery provider returns an entry. Regional should not be affected by the disabling of instance discovery endpoint.
                     entry = await _regionDiscoveryProvider.GetMetadataAsync(authorityUri, requestContext).ConfigureAwait(false);
@@ -134,6 +146,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
                 }
 
+                requestContext.Logger.Info("[Instance Discovery] Instance discovery is enabled and will be performed");
                 entry = entry ??
                     await _regionDiscoveryProvider.GetMetadataAsync(authorityUri, requestContext).ConfigureAwait(false) ??
                     await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);

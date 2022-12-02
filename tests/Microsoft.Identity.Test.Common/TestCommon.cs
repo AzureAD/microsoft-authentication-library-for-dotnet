@@ -65,7 +65,8 @@ namespace Microsoft.Identity.Test.Common
             bool validateAuthority = true,
             bool isLegacyCacheEnabled = true,
             bool isMultiCloudSupportEnabled = false, 
-            bool isConfidentialClient = false)
+            bool isConfidentialClient = false,
+            bool isInstanceDiscoveryEnabled = true)
         {
 
             var appConfig = new ApplicationConfiguration(isConfidentialClient)
@@ -79,7 +80,8 @@ namespace Microsoft.Identity.Test.Common
                 IsExtendedTokenLifetimeEnabled = isExtendedTokenLifetimeEnabled,
                 Authority = Authority.CreateAuthority(authority, validateAuthority),
                 LegacyCacheCompatibilityEnabled = isLegacyCacheEnabled,
-                MultiCloudSupportEnabled = isMultiCloudSupportEnabled
+                MultiCloudSupportEnabled = isMultiCloudSupportEnabled,
+                IsInstanceDiscoveryEnabled = isInstanceDiscoveryEnabled
             };
             return new ServiceBundle(appConfig, clearCaches);
         }
