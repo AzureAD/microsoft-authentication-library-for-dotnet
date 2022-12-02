@@ -27,32 +27,27 @@ namespace Microsoft.Identity.Client.Cache
             var cache = new CacheSerializationContract(unknownNodes);
             foreach (var token in _accessor.GetAllAccessTokens())
             {
-                cache.AccessTokens[token.GetKey()
-                                    .ToString()] = token;
+                cache.AccessTokens[token.CacheKey] = token;
             }
 
             foreach (var token in _accessor.GetAllRefreshTokens())
             {
-                cache.RefreshTokens[token.GetKey()
-                                     .ToString()] = token;
+                cache.RefreshTokens[token.CacheKey] = token;
             }
 
             foreach (var token in _accessor.GetAllIdTokens())
             {
-                cache.IdTokens[token.GetKey()
-                                .ToString()] = token;
+                cache.IdTokens[token.CacheKey] = token;
             }
 
             foreach (var accountItem in _accessor.GetAllAccounts())
             {
-                cache.Accounts[accountItem.GetKey()
-                                .ToString()] = accountItem;
+                cache.Accounts[accountItem.CacheKey] = accountItem;
             }
 
             foreach (var appMetadata in _accessor.GetAllAppMetadata())
             {
-                cache.AppMetadata[appMetadata.GetKey()
-                    .ToString()] = appMetadata;
+                cache.AppMetadata[appMetadata.CacheKey] = appMetadata;
             }
 
             return cache.ToJsonString()

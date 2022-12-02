@@ -197,7 +197,7 @@ namespace Microsoft.Identity.Client.Region
 
                             Uri imdsUri = BuildImdsUri(DefaultApiVersion);
 
-                            HttpResponse response = await _httpManager.SendGetAsync(imdsUri, headers, logger, retry: false, GetCancellationToken(requestCancellationToken))
+                            HttpResponse response = await _httpManager.SendGetAsync(imdsUri, headers, logger, retry: false, cancellationToken: GetCancellationToken(requestCancellationToken))
                                 .ConfigureAwait(false);
 
                             // A bad request occurs when the version in the IMDS call is no longer supported.
@@ -205,7 +205,7 @@ namespace Microsoft.Identity.Client.Region
                             {
                                 string apiVersion = await GetImdsUriApiVersionAsync(logger, headers, requestCancellationToken).ConfigureAwait(false); // Get the latest version
                                 imdsUri = BuildImdsUri(apiVersion);
-                                response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, logger, retry: false, GetCancellationToken(requestCancellationToken))
+                                response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, logger, retry: false, cancellationToken: GetCancellationToken(requestCancellationToken))
                                     .ConfigureAwait(false); // Call again with updated version
                             }
 
@@ -299,7 +299,7 @@ namespace Microsoft.Identity.Client.Region
         {
             Uri imdsErrorUri = new Uri(ImdsEndpoint);
 
-            HttpResponse response = await _httpManager.SendGetAsync(imdsErrorUri, headers, logger, retry: false, GetCancellationToken(userCancellationToken)).ConfigureAwait(false);
+            HttpResponse response = await _httpManager.SendGetAsync(imdsErrorUri, headers, logger, retry: false, cancellationToken: GetCancellationToken(userCancellationToken)).ConfigureAwait(false);
 
             // When IMDS endpoint is called without the api version query param, bad request response comes back with latest version.
             if (response.StatusCode == HttpStatusCode.BadRequest)

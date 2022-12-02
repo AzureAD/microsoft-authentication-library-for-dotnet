@@ -87,6 +87,12 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         {
             string environment = authorityInfo.Host;
 
+            // Skip instance discovery for managed identity
+            if (requestContext.ServiceBundle.Config.UseManagedIdentity)
+            {
+                return CreateEntryForSingleAuthority(authorityInfo.CanonicalAuthority);
+            }
+
             if (authorityInfo.IsInstanceDiscoverySupported)
             {
                 InstanceDiscoveryMetadataEntry entry = null;
@@ -122,6 +128,12 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         {
             Uri authorityUri = authorityInfo.CanonicalAuthority;
             string environment = authorityInfo.Host;
+
+            // Skip instance discovery for managed identity
+            if (requestContext.ServiceBundle.Config.UseManagedIdentity)
+            {
+                return CreateEntryForSingleAuthority(authorityUri);
+            }
 
             if (authorityInfo.IsInstanceDiscoverySupported)
             {

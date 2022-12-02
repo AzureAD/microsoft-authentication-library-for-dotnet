@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Kerberos;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.WsTrust;
@@ -35,6 +36,8 @@ namespace Microsoft.Identity.Client.Platforms.net6
     [JsonSerializable(typeof(JsonWebToken.JWTPayload))]
     [JsonSerializable(typeof(DeviceAuthHeader))]
     [JsonSerializable(typeof(DeviceAuthPayload))]
+    [JsonSerializable(typeof(ManagedIdentityResponse))]
+    [JsonSerializable(typeof(ManagedIdentityErrorResponse))]
     [JsonSourceGenerationOptions]
     internal partial class MsalJsonSerializerContext : JsonSerializerContext
     {

@@ -1,8 +1,10 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -15,7 +17,7 @@ using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
-using System.Globalization;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Broker
 {
@@ -26,6 +28,16 @@ namespace Microsoft.Identity.Client.Broker
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
         private readonly WindowsBrokerOptions _wamOptions;
         private static Exception s_initException;
+
+        private static Dictionary<NativeInterop.LogLevel, LogLevel> LogLevelMap = new Dictionary<NativeInterop.LogLevel, LogLevel>()
+        {
+            { NativeInterop.LogLevel.Trace, LogLevel.Verbose },
+            { NativeInterop.LogLevel.Debug, LogLevel.Verbose },
+            { NativeInterop.LogLevel.Info, LogLevel.Info },
+            { NativeInterop.LogLevel.Warning, LogLevel.Warning },
+            { NativeInterop.LogLevel.Error, LogLevel.Error },
+            { NativeInterop.LogLevel.Fatal, LogLevel.Error },
+        };
 
         public bool IsPopSupported => true;
 
@@ -87,10 +99,20 @@ namespace Microsoft.Identity.Client.Broker
 
             _wamOptions = appConfig.WindowsBrokerOptions ??
                 WindowsBrokerOptions.CreateDefault();
+        }
 
-            if (_wamOptions.ListWindowsWorkAndSchoolAccounts)
+        private void LogEventRaised(NativeInterop.Core sender, LogEventArgs args)
+        {
+            LogLevel msalLogLevel = LogLevelMap[args.LogLevel];
+            if (_logger.IsLoggingEnabled(msalLogLevel))
             {
-                throw new NotImplementedException("The new broker implementation does not yet support Windows account discovery (ListWindowsWorkAndSchoolAccounts option)");
+                string msgWithPii = string.Empty;
+                string msgNoPii = string.Empty;
+
+                // as of now, there will be no Pii.
+                // TODO change when Pii is added
+                // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3822
+                _logger.Log(msalLogLevel, string.Empty, args.Message);
             }
         }
 
@@ -98,6 +120,7 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
             MsalTokenResponse msalTokenResponse = null;
 
@@ -117,7 +140,7 @@ namespace Microsoft.Identity.Client.Broker
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
 
-            _logger.Verbose("[WamBroker] Using Windows account picker.");
+            _logger?.Verbose("[WamBroker] Using Windows account picker.");
 
             if (authenticationRequestParameters?.Account?.HomeAccountId?.ObjectId != null)
             {
@@ -146,9 +169,9 @@ namespace Microsoft.Identity.Client.Broker
                         }
                         else
                         {
-                            _logger.Warning(
+                            _logger?.Warning(
                                 $"[WamBroker] Could not find a WAM account for the selected user {authenticationRequestParameters.Account.Username}");
-                            _logger.Info(
+                            _logger?.Info(
                                 $"[WamBroker] Calling SignInInteractivelyAsync this will show the account picker.");
 
                             msalTokenResponse = await SignInInteractivelyAsync(
@@ -172,6 +195,7 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             MsalTokenResponse msalTokenResponse = null;
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
@@ -183,7 +207,7 @@ namespace Microsoft.Identity.Client.Broker
             {
                 //Login Hint
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
-                _logger.Verbose("[WamBroker] AcquireTokenInteractive - login hint provided? " + !string.IsNullOrEmpty(loginHint));
+                _logger?.Verbose("[WamBroker] AcquireTokenInteractive - login hint provided? " + !string.IsNullOrEmpty(loginHint));
 
                 using (var result = await s_lazyCore.Value.SignInInteractivelyAsync(
                     _parentHandle,
@@ -204,12 +228,13 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             MsalTokenResponse msalTokenResponse = null;
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
 
-            _logger.Verbose("[WamBroker] Signing in with the default user account.");
+            _logger?.Verbose("[WamBroker] Signing in with the default user account.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters, 
@@ -244,12 +269,13 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
 
-            _logger.Verbose("[WamBroker] Acquiring token silently.");
+            _logger?.Verbose("[WamBroker] Acquiring token silently.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters, 
@@ -263,7 +289,7 @@ namespace Microsoft.Identity.Client.Broker
                 {
                     if (!readAccountResult.IsSuccess)
                     {
-                        _logger.WarningPii(
+                        _logger?.WarningPii(
                             $"[WamBroker] Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}",
                             $"[WamBroker] Could not find a WAM account for the selected user {readAccountResult.Error}");
 
@@ -291,12 +317,13 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
 
-            _logger.Verbose("[WamBroker] Acquiring token silently for default account.");
+            _logger?.Verbose("[WamBroker] Acquiring token silently for default account.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters, 
@@ -320,12 +347,13 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
 
-            _logger.Verbose("[WamBroker] Acquiring token with Username Password flow.");
+            _logger?.Verbose("[WamBroker] Acquiring token with Username Password flow.");
 
             using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters, 
@@ -356,11 +384,12 @@ namespace Microsoft.Identity.Client.Broker
 
         public async Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
             
             if (account == null)
             {
-                _logger.Verbose("[WamBroker] No valid account was passed to RemoveAccountAsync. ");
+                _logger?.Verbose("[WamBroker] No valid account was passed to RemoveAccountAsync. ");
                 throw new MsalClientException("wam_remove_account_failed", "No valid account was passed.");
             }
 
@@ -369,11 +398,11 @@ namespace Microsoft.Identity.Client.Broker
             //if OperatingSystemAccount is passed then we use the user signed -in on the machine
             if (PublicClientApplication.IsOperatingSystemAccount(account))
             {
-                _logger.Verbose("[WamBroker] Default Operating System Account cannot be removed. ");
+                _logger?.Verbose("[WamBroker] Default Operating System Account cannot be removed. ");
                 throw new MsalClientException("wam_remove_account_failed", "Default Operating System account cannot be removed.");
             }
 
-            _logger.Info($"Removing WAM Account. Correlation ID : {correlationId} ");
+            _logger?.Info($"Removing WAM Account. Correlation ID : {correlationId} ");
 
             {
                 using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
@@ -383,12 +412,12 @@ namespace Microsoft.Identity.Client.Broker
                 {
                     if (readAccountResult.IsSuccess)
                     {
-                        _logger.Verbose("[WamBroker] WAM Account exist and can be removed.");
+                        _logger?.Verbose("[WamBroker] WAM Account exist and can be removed.");
 
                     }
                     else
                     {
-                        _logger.WarningPii(
+                        _logger?.WarningPii(
                             $"[WamBroker] Could not find a WAM account for the selected user {account.Username}",
                             $"[WamBroker] Could not find a WAM account for the selected user {readAccountResult.Error}");
 
@@ -403,7 +432,7 @@ namespace Microsoft.Identity.Client.Broker
                     {
                         if (result.IsSuccess)
                         {
-                            _logger.Verbose("[WamBroker] Account signed out successfully. ");
+                            _logger?.Verbose("[WamBroker] Account signed out successfully. ");
                         }
                         else
                         {
@@ -414,16 +443,87 @@ namespace Microsoft.Identity.Client.Broker
             }
         }
 
-        public Task<IReadOnlyList<IAccount>> GetAccountsAsync(
+        public async Task<IReadOnlyList<IAccount>> GetAccountsAsync(
             string clientID,
             string redirectUri,
             AuthorityInfo authorityInfo,
             ICacheSessionManager cacheSessionManager,
             IInstanceDiscoveryManager instanceDiscoveryManager)
         {
-            // runtime does not yet support account discovery
+            if (!_wamOptions.ListWindowsWorkAndSchoolAccounts)
+            {
+                _logger.Info("[WamBroker] ListWindowsWorkAndSchoolAccounts option was not enabled.");
+                return Array.Empty<IAccount>();
+            }
 
-            return Task.FromResult<IReadOnlyList<IAccount>>(Array.Empty<IAccount>());
+            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
+
+            var requestContext = cacheSessionManager.RequestContext;
+
+            using (var discoverAccountsResult = await s_lazyCore.Value.DiscoverAccountsAsync(
+                clientID,
+                cacheSessionManager.RequestContext.CorrelationId.ToString("D"), 
+                cacheSessionManager.RequestContext.UserCancellationToken).ConfigureAwait(false))
+            {
+                if (discoverAccountsResult.IsSuccess)
+                {
+                    List<NativeInterop.Account> wamAccounts = discoverAccountsResult.Accounts;
+
+                    _logger.Info($"[WamBroker] Broker returned {wamAccounts.Count} account(s).");
+
+                    if (wamAccounts.Count == 0)
+                    {
+                        return Array.Empty<IAccount>();
+                    }
+
+                    //If "multi-cloud" is enabled, we do not have to do instanceMetadata matching
+                    if (!requestContext.ServiceBundle.Config.MultiCloudSupportEnabled)
+                    {
+                        var environmentList = discoverAccountsResult.Accounts.Select(acc => acc.Environment).Distinct().ToList();
+
+                        var instanceMetadata = await instanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                                authorityInfo,
+                                environmentList,
+                                requestContext).ConfigureAwait(false);
+
+                        _logger.Verbose($"[WamBroker] Filtering WAM accounts based on Environment.");
+
+                        wamAccounts.RemoveAll(acc => !instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
+
+                        _logger.Verbose($"[WamBroker] {wamAccounts.Count} account(s) returned after filtering.");
+                    }
+
+                    List<IAccount> msalAccounts = new List<IAccount>();
+
+                    foreach (var acc in wamAccounts)
+                    {
+                        if (WamAdapters.TryConvertToMsalAccount(acc, clientID, _logger, out IAccount account))
+                        {
+                            msalAccounts.Add(account);
+                        }
+                    }
+
+                    _logger.Verbose($"[WamBroker] Converted {msalAccounts.Count} WAM account(s) to MSAL Account(s).");
+
+                    return msalAccounts;
+                }
+                else
+                {
+                    string errorMessagePii =
+                        $" [WamBroker] \n" +
+                        $" Error Code: {discoverAccountsResult.Error.ErrorCode} \n" +
+                        $" Error Message: {discoverAccountsResult.Error.Context} \n" +
+                        $" Internal Error Code: {discoverAccountsResult.Error.Tag.ToString(CultureInfo.InvariantCulture)} \n" +
+                        $" Telemetry Data: {discoverAccountsResult.TelemetryData } \n";
+
+                    _logger.ErrorPii($"[WamBroker] {errorMessagePii}", 
+                        $"[WamBroker] DiscoverAccounts Error. " +
+                        $"Error Code : {discoverAccountsResult.Error.ErrorCode}. " +
+                        $"Internal Error Code: {discoverAccountsResult.Error.Tag.ToString(CultureInfo.InvariantCulture)}");
+
+                    return Array.Empty<IAccount>();
+                }
+            }
         }
 
         public void HandleInstallUrl(string appLink)
@@ -435,26 +535,59 @@ namespace Microsoft.Identity.Client.Broker
         {
             if (!DesktopOsHelper.IsWin10OrServerEquivalent())
             {
-                _logger.Warning("[WAM Broker] Not a supported operating system. WAM broker is not available. ");
+                _logger?.Warning("[WAM Broker] Not a supported operating system. WAM broker is not available. ");
                 return false;
             }
 
             // WAM does not work on pure ADFS environments
             if (authorityType == AuthorityType.Adfs)
             {
-                _logger.Warning("[WAM Broker] WAM does not work in pure ADFS environments. Falling back to browser for an ADFS authority unless Proof-of-Possession is configured. ");
+                _logger?.Warning("[WAM Broker] WAM does not work in pure ADFS environments. Falling back to browser for an ADFS authority unless Proof-of-Possession is configured. ");
                 return false;
             }
 
             if (s_lazyCore.Value == null)
             {
-                _logger.Info("[WAM Broker] MsalRuntime initialization failed. See https://aka.ms/msal-net-wam#wam-limitations");
-                _logger.InfoPii(s_initException);
+                _logger?.Info("[WAM Broker] MsalRuntime initialization failed. See https://aka.ms/msal-net-wam#wam-limitations");
+                _logger?.InfoPii(s_initException);
                 return false;
             }
 
-            _logger.Verbose($"[WAM Broker] MsalRuntime initialization successful.");
+            _logger?.Verbose($"[WAM Broker] MsalRuntime initialization successful.");
             return true;
+        }
+
+        internal class LogEventWrapper : IDisposable
+        {
+            private bool _disposedValue;
+            RuntimeBroker _broker;
+
+            public LogEventWrapper(RuntimeBroker broker)
+            {
+                _broker = broker;
+                s_lazyCore.Value.LogEvent += _broker.LogEventRaised;
+            }
+
+            protected virtual void Dispose(bool disposing)
+            {
+                if (!_disposedValue)
+                {
+                    if (disposing)
+                    {
+                        // dispose managed state (managed objects)
+                        s_lazyCore.Value.LogEvent -= _broker.LogEventRaised;
+                    }
+
+                    _disposedValue = true;
+                }
+            }
+
+            public void Dispose()
+            {
+                // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+                Dispose(disposing: true);
+                GC.SuppressFinalize(this);
+            }
         }
     }
 }
