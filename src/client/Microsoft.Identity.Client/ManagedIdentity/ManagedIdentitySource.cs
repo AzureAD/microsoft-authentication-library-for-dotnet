@@ -31,6 +31,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             ManagedIdentityRequest request = CreateRequest(parameters.Scopes.ToArray());
 
+            if (cancellationToken.IsCancellationRequested)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
             HttpResponse response =
             request.Method == HttpMethod.Get ?
             await _requestContext.ServiceBundle.HttpManager.SendGetForceResponseAsync(request.Endpoint, request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false) :
@@ -82,13 +87,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return managedIdentityResponse;
         }
 
-        internal static string GetMessageFromResponse(HttpResponse response)
+        internal string GetMessageFromResponse(HttpResponse response)
         {
             var managedIdentityResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
 
-            return managedIdentityResponse == null ?
-                "[Managed Identity] Empty error response received." :
-                $"[Managed Identity] Error message: {managedIdentityResponse.Message} Correlation Id: {managedIdentityResponse.CorrelationId}";
+            if (managedIdentityResponse == null)
+            {
+                return "[Managed Identity] Empty error response received.";
+            }
+
+            if (!string.IsNullOrEmpty(managedIdentityResponse.Message))
+            { 
+                return $"[Managed Identity] Error Message: {managedIdentityResponse.Message} Correlation Id: {managedIdentityResponse.CorrelationId}";
+            }
+
+            return $"[Managed Identity] Error Code: {managedIdentityResponse.Error} Error Message: {managedIdentityResponse.ErrorDescription}";
         }
     }
 }

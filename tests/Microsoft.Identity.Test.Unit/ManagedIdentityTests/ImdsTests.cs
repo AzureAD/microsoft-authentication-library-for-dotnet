@@ -3,7 +3,9 @@
 
 using System;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
+using Castle.Core.Resource;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -12,9 +14,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
     [TestClass]
-    public class AppServiceTests
+    public class ImdsTests
     {
-        private const string ApiVersion = "2019-08-01";
+        private const string ApiVersion = "2018-02-01";
+        private const string ImdsEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token";
+        private const string DefaultResource = "https://management.azure.com";
 
         [TestInitialize]
         public void TestInitialize()
@@ -25,18 +29,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestCleanup]
         public void TestCleanup()
         {
-            SetEnvironmentVariables(null, null);
+            SetEnvironmentVariables(null);
         }
 
         [DataTestMethod]
-        [DataRow("http://127.0.0.1:41564/msi/token/", "https://management.azure.com", "https://management.azure.com", null)]
-        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com", "https://management.azure.com", null)]
-        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com", null)]
-        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com", TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com", "resource_id", UserAssignedIdentityId.ResourceId)]
-        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com", "", UserAssignedIdentityId.None)]
-        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com", "  ", UserAssignedIdentityId.None)]
-        public async Task AppServiceHappyPathAsync(
+        [DataRow("http://169.254.169.254", DefaultResource, DefaultResource, null)]
+        [DataRow(null, DefaultResource, DefaultResource, null)]
+        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", DefaultResource, null)]
+        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", DefaultResource, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
+        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", DefaultResource, "resource_id", UserAssignedIdentityId.ResourceId)]
+        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", DefaultResource, "", UserAssignedIdentityId.None)]
+        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", DefaultResource, "  ", UserAssignedIdentityId.None)]
+        public async Task ImdsHappyPathAsync(
             string endpoint, 
             string scope, 
             string resource, 
@@ -56,11 +60,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         .Build();
 
                     httpManager.AddManagedIdentityMockHandler(
-                        endpoint,
+                        ImdsEndpoint,
                         resource,
-                        MockHelpers.GetMsiSuccessfulResponse(),
+                        MockHelpers.GetMsiImdsSuccessfulResponse(),
                         ApiVersion,
-                        ManagedIdentitySourceType.AppService,
+                        ManagedIdentitySourceType.IMDS,
                         userAssignedClientIdOrResourceId: userAssignedClientIdOrResourceId,
                         userAssignedIdentityId: userAssignedIdentityId);
 
@@ -83,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             } 
             finally
             {
-                SetEnvironmentVariables(null, null);
+                SetEnvironmentVariables(null);
             }
         }
 
@@ -95,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         {
             try
             {
-                SetEnvironmentVariables("http://127.0.0.1:41564/msi/token");
+                SetEnvironmentVariables("http://169.254.169.254");
 
                 using (var httpManager = new MockHttpManager())
                 {
@@ -105,10 +109,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         .WithExperimentalFeatures()
                         .Build();
 
-                    httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", resource, MockHelpers.GetMsiErrorResponse(), 
-                        ApiVersion, ManagedIdentitySourceType.AppService, statusCode: HttpStatusCode.InternalServerError);
-                    httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", resource, MockHelpers.GetMsiErrorResponse(), 
-                        ApiVersion, ManagedIdentitySourceType.AppService, statusCode: HttpStatusCode.InternalServerError);
+                    httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, resource, MockHelpers.GetMsiImdsErrorResponse(), ApiVersion, 
+                        ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
+                    httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, resource, MockHelpers.GetMsiImdsErrorResponse(), ApiVersion, 
+                        ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
 
                     MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                         await cca.AcquireTokenForClient(new string[] { resource })
@@ -121,16 +125,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
             finally 
             {
-                SetEnvironmentVariables(null, null);
+                SetEnvironmentVariables(null);
             }
         }
 
         [TestMethod]
-        public async Task AppServiceErrorResponseNoPayloadTestAsync()
+        public async Task ImdsErrorResponseNoPayloadTestAsync()
         {
             try
             {
-                SetEnvironmentVariables("http://127.0.0.1:41564/msi/token");
+                SetEnvironmentVariables("http://169.254.169.254");
 
                 using (var httpManager = new MockHttpManager())
                 {
@@ -140,10 +144,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         .WithExperimentalFeatures()
                         .Build();
 
-                    httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", "scope", "", ApiVersion,
-                        ManagedIdentitySourceType.AppService, statusCode: HttpStatusCode.InternalServerError);
-                    httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", "scope", "", ApiVersion,
-                        ManagedIdentitySourceType.AppService, statusCode: HttpStatusCode.InternalServerError);
+                    httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "scope", "", ApiVersion, ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
+                    httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "scope", "", ApiVersion, ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
 
                     MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                         await cca.AcquireTokenForClient(new string[] { "scope" })
@@ -157,16 +159,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
             finally
             {
-                SetEnvironmentVariables(null, null);
+                SetEnvironmentVariables(null);
             }
         }
 
         [TestMethod]
-        public async Task AppServiceNullResponseAsync()
+        public async Task ImdsNullResponseAsync()
         {
             try
             {
-                SetEnvironmentVariables("http://127.0.0.1:41564/msi/token");
+                SetEnvironmentVariables("http://169.254.169.254");
 
                 using (var httpManager = new MockHttpManager())
                 {
@@ -176,13 +178,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         .WithExperimentalFeatures()
                         .Build();
 
-                    httpManager.AddManagedIdentityMockHandler(
-                        "http://127.0.0.1:41564/msi/token", 
-                        "https://management.azure.com", 
-                        "", 
-                        ApiVersion, 
-                        ManagedIdentitySourceType.AppService, 
-                        statusCode: HttpStatusCode.OK);
+                    httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "https://management.azure.com", "", ApiVersion, ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.OK);
 
                     MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                         await cca.AcquireTokenForClient(new string[] { "https://management.azure.com" })
@@ -196,16 +192,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
             finally
             {
-                SetEnvironmentVariables(null, null);
+                SetEnvironmentVariables(null);
             }
         }
 
         [TestMethod]
-        public async Task AppServiceInvalidEndpointAsync()
+        public async Task ImdsBadRequestTestAsync()
         {
             try
             {
-                SetEnvironmentVariables("127.0.0.1:41564/msi/token");
+                SetEnvironmentVariables("http://169.254.169.254");
 
                 using (var httpManager = new MockHttpManager())
                 {
@@ -213,27 +209,32 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         .Create("clientId")
                         .WithHttpManager(httpManager)
                         .WithExperimentalFeatures()
-                        .Build();
+                    .Build();
 
-                    MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                        await cca.AcquireTokenForClient(new string[] { "https://management.azure.com" })
+                    httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, DefaultResource, MockHelpers.GetMsiImdsErrorResponse(), ApiVersion,
+                        ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.BadRequest);
+                    httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, DefaultResource, MockHelpers.GetMsiImdsErrorResponse(), ApiVersion,
+                        ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.BadRequest);
+
+                    MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                        await cca.AcquireTokenForClient(new string[] { DefaultResource })
                         .WithManagedIdentity()
                         .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                     Assert.IsNotNull(ex);
-                    Assert.AreEqual(MsalError.InvalidManagedIdentityEndpoint, ex.ErrorCode);
+                    Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+                    Assert.IsTrue(ex.Message.Contains("The requested identity has not been assigned to this resource."));
                 }
             }
-            finally 
-            { 
-                SetEnvironmentVariables(null, null); 
+            finally
+            {
+                SetEnvironmentVariables(null);
             }
         }
 
-        private void SetEnvironmentVariables(string endpoint, string secret = "secret")
+        private void SetEnvironmentVariables(string endpoint)
         {
-            Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", endpoint);
-            Environment.SetEnvironmentVariable("IDENTITY_HEADER", secret);
+            Environment.SetEnvironmentVariable("AZURE_POD_IDENTITY_AUTHORITY_HOST", endpoint);
         }
     }
 }

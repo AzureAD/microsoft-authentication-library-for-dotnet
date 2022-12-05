@@ -13,18 +13,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     [JsonObject]
     [Preserve(AllMembers = true)]
-    internal class ManagedIdentityErrorResponse
+    internal class ManagedIdentityImdsErrorResponse
     {
-        [JsonProperty("message")]
-        public string Message { get; set; }
-
-        [JsonProperty("correlationId")]
-        public string CorrelationId { get; set; }
-
         [JsonProperty("error")]
         public string Error { get; set; }
 
         [JsonProperty("error_description")]
         public string ErrorDescription { get; set; }
+
+        [JsonProperty("correlation_id")]
+        public string CorrelationId { get; set; }
     }
 }
