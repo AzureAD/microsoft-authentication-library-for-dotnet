@@ -213,8 +213,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                     httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, DefaultResource, MockHelpers.GetMsiImdsErrorResponse(), ApiVersion,
                         ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.BadRequest);
-                    httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, DefaultResource, MockHelpers.GetMsiImdsErrorResponse(), ApiVersion,
-                        ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.BadRequest);
 
                     MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                         await cca.AcquireTokenForClient(new string[] { DefaultResource })
