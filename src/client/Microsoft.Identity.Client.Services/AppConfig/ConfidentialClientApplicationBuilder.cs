@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.IdentityModel.Abstractions;
@@ -28,6 +29,7 @@ namespace Microsoft.Identity.Client
             : base(configuration)
         {
             ClientApplicationBase.GuardMobileFrameworks();
+            configuration.PlatformProxyFactory = new ConfidentialPlatformProxyFactory();
         }
 
         /// <summary>
@@ -178,7 +180,7 @@ namespace Microsoft.Identity.Client
         /// of the application (the client) requesting the tokens</param>
         /// <returns></returns>
         public ConfidentialClientApplicationBuilder WithClientSecret(string clientSecret)
-        {            
+        {
             if (string.IsNullOrWhiteSpace(clientSecret))
             {
                 throw new ArgumentNullException(nameof(clientSecret));
@@ -203,7 +205,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(signedClientAssertion));
             }
 
-            Config.ClientCredential = new SignedAssertionClientCredential(signedClientAssertion);            
+            Config.ClientCredential = new SignedAssertionClientCredential(signedClientAssertion);
             return this;
         }
 

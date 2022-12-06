@@ -440,5 +440,6 @@ namespace Microsoft.Identity.Client
                                 invalidValueName);
         }
 
+        public const string PublicClientOnlyOperation = "This operation is only supported on public clients.";
     }
 }

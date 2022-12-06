@@ -10,12 +10,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
     /// <summary>
     ///     Returns the platform / os specific implementation of a PlatformProxy.
     /// </summary>
-    internal static class PlatformProxyFactory
+    internal class PublicPlatformProxyFactory : IPlatformProxyFactory
     {
         /// <summary>
         ///     Gets the platform proxy, which can be used to perform platform specific operations
         /// </summary>
-        public static IPlatformProxy CreatePlatformProxy(ILoggerAdapter logger)
+        public IPlatformProxy CreatePlatformProxy(ILoggerAdapter logger)
         {
             var finalLogger = logger ?? LoggerHelper.NullLogger;
 
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
 #elif NETSTANDARD
             return new Microsoft.Identity.Client.Platforms.netstandard.NetStandardPlatformProxy(finalLogger);
 #elif DESKTOP
-            return new Microsoft.Identity.Client.Platforms.net45.NetDesktopPlatformProxy(finalLogger);
+            return new Microsoft.Identity.Client.Platforms.net45.NetDesktopPlatformProxyPublic(finalLogger);
 #else
             throw new PlatformNotSupportedException();
 #endif

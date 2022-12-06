@@ -25,11 +25,11 @@ namespace Microsoft.Identity.Client
 {
     internal sealed class ApplicationConfiguration : IAppConfig
     {
-        public ApplicationConfiguration(bool isConfidentialClient) 
+        public ApplicationConfiguration(bool isConfidentialClient)
         {
             IsConfidentialClient = isConfidentialClient;
         }
-        
+
         public const string DefaultClientName = "UnknownClient";
         public const string DefaultClientVersion = "0.0.0.0";
 
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
-#region ClientCredentials
+        #region ClientCredentials
 
         public IClientCredential ClientCredential { get; internal set; }
 
@@ -140,18 +140,18 @@ namespace Microsoft.Identity.Client
                 {
                     return cred.Certificate;
                 }
-               
+
                 return null;
             }
         }
 
-#endregion
+        #endregion
 
-#region Region
+        #region Region
         public string AzureRegion { get; set; }
-#endregion
+        #endregion
 
-#region Authority
+        #region Authority
         // These are all used to create the Authority when the app is built.
 
         public string TenantId { get; internal set; }
@@ -179,9 +179,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool ValidateAuthority { get; set; }
 
-#endregion
+        #endregion
 
-#region Test Hooks
+        #region Test Hooks
         public ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
 
         public ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
@@ -191,5 +191,6 @@ namespace Microsoft.Identity.Client
         public bool IsConfidentialClient { get; }
         #endregion
 
+        public IPlatformProxyFactory PlatformProxyFactory { get; set; }
     }
 }

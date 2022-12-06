@@ -50,41 +50,10 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
         }
 
-        /// <summary>
-        ///     Get the user logged in to Windows or throws
-        /// </summary>
-        /// <returns>Upn or throws</returns>
+        /// <inheritdoc />
         public override Task<string> GetUserPrincipalNameAsync()
         {
-            const int NameUserPrincipal = 8;
-            return Task.FromResult(GetUserPrincipalName(NameUserPrincipal));
-        }
-
-        private string GetUserPrincipalName(int nameFormat)
-        {
-            // TODO: there is discrepancy between the implementation of this method on net45 - throws if upn not found - and uap and
-            // the rest of the platforms - returns ""
-
-            uint userNameSize = 0;
-            WindowsNativeMethods.GetUserNameEx(nameFormat, null, ref userNameSize);
-            if (userNameSize == 0)
-            {
-                throw new MsalClientException(
-                    MsalError.GetUserNameFailed,
-                    MsalErrorMessage.GetUserNameFailed,
-                    new Win32Exception(Marshal.GetLastWin32Error()));
-            }
-
-            var sb = new StringBuilder((int)userNameSize);
-            if (!WindowsNativeMethods.GetUserNameEx(nameFormat, sb, ref userNameSize))
-            {
-                throw new MsalClientException(
-                    MsalError.GetUserNameFailed,
-                    MsalErrorMessage.GetUserNameFailed,
-                    new Win32Exception(Marshal.GetLastWin32Error()));
-            }
-
-            return sb.ToString();
+            throw new NotSupportedException(MsalErrorMessage.PublicClientOnlyOperation);
         }
 
         /// <inheritdoc />
@@ -107,7 +76,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <inheritdoc />
         protected override IWebUIFactory CreateWebUiFactory()
         {
-            return new NetDesktopWebUIFactory();
+            throw new NotSupportedException(MsalErrorMessage.PublicClientOnlyOperation);
         }
 
         /// <inheritdoc />
@@ -177,25 +146,54 @@ namespace Microsoft.Identity.Client.Platforms.net45
                     {
                         int releaseKey = (int)ndpKey.GetValue("Release");
                         if (releaseKey >= 528040)
+                        {
                             return "4.8 or later";
+                        }
+
                         if (releaseKey >= 461808)
+                        {
                             return "4.7.2";
+                        }
+
                         if (releaseKey >= 461308)
+                        {
                             return "4.7.1";
+                        }
+
                         if (releaseKey >= 460798)
+                        {
                             return "4.7";
+                        }
+
                         if (releaseKey >= 394802)
+                        {
                             return "4.6.2";
+                        }
+
                         if (releaseKey >= 394254)
+                        {
                             return "4.6.1";
+                        }
+
                         if (releaseKey >= 393295)
+                        {
                             return "4.6";
+                        }
+
                         if (releaseKey >= 379893)
+                        {
                             return "4.5.2";
+                        }
+
                         if (releaseKey >= 378675)
+                        {
                             return "4.5.1";
+                        }
+
                         if (releaseKey >= 378389)
+                        {
                             return "4.5";
+                        }
                     }
                 }
                 return string.Empty;
@@ -215,23 +213,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         public override Task StartDefaultOsBrowserAsync(string url, bool isBrokerConfigured)
         {
-            try
-            {
-                var psi = new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true
-                };
-                Process.Start(psi);
-            }
-            catch
-            {
-                // hack because of this: https://github.com/dotnet/corefx/issues/10361
-                url = url.Replace("&", "^&");
-                Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
-            }
-
-            return Task.FromResult(0);
+            throw new NotSupportedException(MsalErrorMessage.PublicClientOnlyOperation);
         }
 
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
@@ -244,6 +226,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             return new NetDesktopDeviceAuthManager();
         }
 
-        public override bool BrokerSupportsWamAccounts => true;
+        public override bool BrokerSupportsWamAccounts => throw new NotSupportedException(MsalErrorMessage.PublicClientOnlyOperation);
+
     }
 }
