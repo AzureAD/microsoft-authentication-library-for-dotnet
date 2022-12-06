@@ -533,8 +533,11 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Determines whether or not instance discovery is performed when attempting to authenticate. Setting this to false will completely disable
         /// instance discovery and authority validation. This will not affect the behavior of application configured with regional endpoints however.
-        /// Also, you can still provide your own instance metadata.
         /// </summary>
+        /// <remarks>If instance discovery and no user metadata is provided, MSAL will use the provided authority without any checks.
+        /// <see cref="WithInstanceDiscoveryMetadata(string instanceDiscoveryJson)"/> takes priority over <paramref name="enableInstanceDiscovery"/>
+        /// so instance metadata can be provided regardless of this configuration.
+        /// </remarks>
         /// <param name="enableInstanceDiscovery">Determines if instance discovery/Authority validation is performed</param>
         /// <returns></returns>
         public T WithInstanceDiscovery(bool enableInstanceDiscovery)
