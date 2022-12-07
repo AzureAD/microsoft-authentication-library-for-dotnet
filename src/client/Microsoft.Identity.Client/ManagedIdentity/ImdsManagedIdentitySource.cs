@@ -11,7 +11,6 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -28,15 +27,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string DefaultMessage = "[Managed Identity] Service request failed.";
 
         internal const string IdentityUnavailableError = "[Managed Identity] Authentication unavailable. The requested identity has not been assigned to this resource.";
-        internal const string NoResponseError = "[Managed Identity] Authentication unavailable. No response received from the managed identity endpoint.";
-        internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
         internal const string GatewayError = "[Managed Identity] Authentication unavailable. The request failed due to a gateway error.";
 
         private readonly string _clientId;
         private readonly string _resourceId;
         private readonly Uri _imdsEndpoint;
-
-        
 
         internal ImdsManagedIdentitySource(RequestContext requestContext) : base(requestContext)
         {
@@ -59,11 +54,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             _resourceId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId;
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string[] scopes)
+        protected override ManagedIdentityRequest CreateRequest(string resource)
         {
-            // covert the scopes to a resource string
-            string resource = ScopeHelper.ScopesToResource(scopes);
-
             ManagedIdentityRequest request = new(HttpMethod.Get, _imdsEndpoint);
 
             request.Headers.Add("Metadata", "true");
@@ -75,13 +67,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 _requestContext.Logger.Verbose("[Managed Identity] Adding user assigned client id to the request.");
                 request.QueryParameters[Constants.ManagedIdentityClientId] = _clientId;
             }
-            if (!string.IsNullOrEmpty(_resourceId))
+            else if (!string.IsNullOrEmpty(_resourceId))
             {
                 _requestContext.Logger.Verbose("[Managed Identity] Adding user assigned resource id to the request.");
                 request.QueryParameters[Constants.ManagedIdentityResourceId] = _resourceId;
             }
 
-            request.ComputeUri();
             return request;
         }
 
@@ -90,11 +81,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             try
             {
                 return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
-            }
-            catch (MsalServiceException e) when (e.ErrorCode == MsalError.ManagedIdentityRequestFailed)
-            {
-                _requestContext.Logger.Error(NoResponseError + e.Message);
-                throw;
             }
             catch (TaskCanceledException)
             {
@@ -120,14 +106,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 string message = CreateRequestFailedMessage(response, baseMessage);
 
-                var errorContentMessage = GetMessageFromResponse(response);
+                var errorContentMessage = GetMessageFromErrorResponse(response);
 
-                if (errorContentMessage != null)
-                {
-                    message = message + Environment.NewLine + errorContentMessage;
-                }
+                message = message + Environment.NewLine + errorContentMessage;
 
-                _requestContext.Logger.Error(message);
+                _requestContext.Logger.Error($"Error message: {message} Http status code: {response.StatusCode}");
                 throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message);
             }
 

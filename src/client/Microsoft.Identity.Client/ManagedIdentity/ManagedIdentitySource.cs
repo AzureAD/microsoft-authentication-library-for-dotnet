@@ -21,6 +21,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal abstract class ManagedIdentitySource
     {
         protected readonly RequestContext _requestContext;
+        internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
 
         protected ManagedIdentitySource(RequestContext requestContext)
         {
@@ -29,19 +30,31 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(AppTokenProviderParameters parameters, CancellationToken cancellationToken)
         {
-            ManagedIdentityRequest request = CreateRequest(parameters.Scopes.ToArray());
+            // Convert the scopes to a resource string.
+            string resource = ScopeHelper.ScopesToResource(parameters.Scopes.ToArray());
 
             if (cancellationToken.IsCancellationRequested)
             {
+                _requestContext.Logger.Error(TimeoutError);
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
-            HttpResponse response =
-            request.Method == HttpMethod.Get ?
-            await _requestContext.ServiceBundle.HttpManager.SendGetForceResponseAsync(request.Endpoint, request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false) :
-            await _requestContext.ServiceBundle.HttpManager.SendPostForceResponseAsync(request.Endpoint, request.Headers, request.BodyParameters, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
+            ManagedIdentityRequest request = CreateRequest(resource);
 
-            return HandleResponse(parameters, response);
+            try
+            {
+                HttpResponse response =
+            request.Method == HttpMethod.Get ?
+            await _requestContext.ServiceBundle.HttpManager.SendGetForceResponseAsync(request.ComputeUri(), request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false) :
+            await _requestContext.ServiceBundle.HttpManager.SendPostForceResponseAsync(request.ComputeUri(), request.Headers, request.BodyParameters, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
+
+                return HandleResponse(parameters, response);
+            }
+            catch(TaskCanceledException)
+            {
+                _requestContext.Logger.Error(TimeoutError);
+                throw;
+            }
         }
 
         protected virtual ManagedIdentityResponse HandleResponse(
@@ -59,12 +72,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     return GetSuccessfulResponse(response);
                 }
 
-                message = GetMessageFromResponse(response);
+                message = GetMessageFromErrorResponse(response);
                 _requestContext.Logger.Error($"[Managed Identity] request failed, HttpStatusCode: {response.StatusCode} Error message: {message}");
             }
             catch (Exception e) when (e is not MsalServiceException)
             {
-                _requestContext.Logger.Error("[Managed Identity] Exception: " + e.Message);
+                _requestContext.Logger.Error($"[Managed Identity] Exception: {e.Message} Http status code: {response?.StatusCode}");
                 exception = e;
                 message = MsalErrorMessage.UnexpectedResponse;
             }
@@ -72,7 +85,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message, exception);
         }
 
-        protected abstract ManagedIdentityRequest CreateRequest(string[] scopes);
+        protected abstract ManagedIdentityRequest CreateRequest(string resource);
 
         protected ManagedIdentityResponse GetSuccessfulResponse(HttpResponse response)
         {
@@ -87,13 +100,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return managedIdentityResponse;
         }
 
-        internal string GetMessageFromResponse(HttpResponse response)
+        internal string GetMessageFromErrorResponse(HttpResponse response)
         {
             var managedIdentityResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
 
             if (managedIdentityResponse == null)
             {
-                return "[Managed Identity] Empty error response received.";
+                return "[Managed Identity] Authentication unavailable. No response received from the managed identity endpoint.";
             }
 
             if (!string.IsNullOrEmpty(managedIdentityResponse.Message))

@@ -3,11 +3,8 @@
 
 using System;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
-using Castle.Core.Resource;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -22,17 +19,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         private const string DefaultResource = "https://management.azure.com";
 
         [DataTestMethod]
-        [DataRow("http://169.254.169.254", DefaultResource, DefaultResource, null)]
-        [DataRow(null, DefaultResource, DefaultResource, null)]
-        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", DefaultResource, null)]
-        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", DefaultResource, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", DefaultResource, "resource_id", UserAssignedIdentityId.ResourceId)]
-        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", DefaultResource, "", UserAssignedIdentityId.None)]
-        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", DefaultResource, "  ", UserAssignedIdentityId.None)]
+        [DataRow("http://169.254.169.254", DefaultResource, null)]
+        [DataRow(null, DefaultResource, null)] 
+        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", null)] // default IMDS endpoint will be used if environment variable is not set.
+        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
+        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", "resource_id", UserAssignedIdentityId.ResourceId)]
+        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", "", UserAssignedIdentityId.None)]
+        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", "  ", UserAssignedIdentityId.None)]
         public async Task ImdsHappyPathAsync(
             string endpoint,
             string scope,
-            string resource,
             string userAssignedClientIdOrResourceId,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
         {
@@ -49,7 +45,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddManagedIdentityMockHandler(
                     ImdsEndpoint,
-                    resource,
+                    DefaultResource,
                     MockHelpers.GetMsiImdsSuccessfulResponse(),
                     ApiVersion,
                     ManagedIdentitySourceType.IMDS,
@@ -77,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow("user.read")]
         [DataRow("https://management.core.windows.net//user_impersonation")]
         [DataRow("s")]
-        public async Task AppServiceTestWrongScopeAsync(string resource)
+        public async Task ImdsTestWrongScopeAsync(string resource)
         {
 
             using (new EnvVariableContext())
@@ -131,7 +127,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual("[Managed Identity] Empty error response received.", ex.Message);
             }
         }
 

@@ -17,19 +17,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     public class AppServiceTests
     {
         private const string ApiVersion = "2019-08-01";
+        private const string DefaultResource = "https://management.azure.com";
 
         [DataTestMethod]
-        [DataRow("http://127.0.0.1:41564/msi/token/", "https://management.azure.com", "https://management.azure.com", null)]
-        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com", "https://management.azure.com", null)]
-        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com", null)]
-        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com", TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com", "resource_id", UserAssignedIdentityId.ResourceId)]
-        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com", "", UserAssignedIdentityId.None)]
-        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "https://management.azure.com", "  ", UserAssignedIdentityId.None)]
+        [DataRow("http://127.0.0.1:41564/msi/token/", "https://management.azure.com", null)]
+        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com", null)]
+        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", null)]
+        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
+        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "resource_id", UserAssignedIdentityId.ResourceId)]
+        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "", UserAssignedIdentityId.None)]
+        [DataRow("http://127.0.0.1:41564/msi/token", "https://management.azure.com/.default", "  ", UserAssignedIdentityId.None)]
         public async Task AppServiceHappyPathAsync(
             string endpoint,
             string scope,
-            string resource,
             string userAssignedClientIdOrResourceId,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
         {
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
-                    resource,
+                    DefaultResource,
                     MockHelpers.GetMsiSuccessfulResponse(),
                     ApiVersion,
                     ManagedIdentitySourceType.AppService,
@@ -128,7 +128,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual("[Managed Identity] Empty error response received.", ex.Message);
             }
 
         }
