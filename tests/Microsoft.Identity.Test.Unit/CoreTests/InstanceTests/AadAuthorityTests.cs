@@ -90,10 +90,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 AuthorityManager am = new AuthorityManager(new RequestContext(harness.ServiceBundle, Guid.NewGuid()), instance);
                 await am.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
 
-                //Instance discovery is disabled. No exception should be thrown.
                 if (isInstanceDiscoveryEnabled)
                 {
-                    Assert.Fail("validation should have failed here");
+                    Assert.Fail("Validation should have failed with an exception when instance discovery is enabled.");
                 }
                 
                 Assert.IsNull(am);

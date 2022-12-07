@@ -107,10 +107,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     await GetMetadataEntryAsync(authorityInfo, requestContext).ConfigureAwait(false);
                 }
 
-                if (entry == null)
-                {
-                    entry = CreateEntryForSingleAuthority(authorityInfo.CanonicalAuthority);
-                }
+                entry ??= CreateEntryForSingleAuthority(authorityInfo.CanonicalAuthority);
 
                 return entry;
             }
