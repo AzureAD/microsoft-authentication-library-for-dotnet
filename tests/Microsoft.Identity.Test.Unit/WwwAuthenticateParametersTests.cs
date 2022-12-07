@@ -124,6 +124,7 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         [DataRow("WLID1.0", "realm=WindowsLive, policy=MBI_SSL, siteId=\"ssl.live-tst.net\"")]
+        [DataRow("WLID2.0", "realm=WindowsLive, policy=MBI_SSL, siteId=\"ssl.live-tst.net - ssl2.live-tst2.net\"")]//Adding spaces in between quotes to ensure parsing is not broken
         [DataRow("NTLM", "dG9rZW42OA==")]
         public void CreateWwwAuthenticateResponseForUnknownChallenges(string scheme, string values)
         {
@@ -140,12 +141,19 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual("NTLM", authParams.AuthScheme);
                 Assert.AreEqual("dG9rZW42OA==", authParams.RawParameters[scheme]);
             }
-            else
+            else if (scheme == "WLID1.0")
             {
                 Assert.AreEqual(3, authParams.RawParameters.Count);
                 Assert.AreEqual("WindowsLive", authParams.RawParameters["realm"]);
                 Assert.AreEqual("MBI_SSL", authParams.RawParameters["policy"]);
                 Assert.AreEqual("ssl.live-tst.net", authParams.RawParameters["siteId"]);
+            }
+            else
+            {
+                Assert.AreEqual(3, authParams.RawParameters.Count);
+                Assert.AreEqual("WindowsLive", authParams.RawParameters["realm"]);
+                Assert.AreEqual("MBI_SSL", authParams.RawParameters["policy"]);
+                Assert.AreEqual("ssl.live-tst.net - ssl2.live-tst2.net", authParams.RawParameters["siteId"]);
             }
         }
 
@@ -458,6 +466,50 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        public void ExtractDuplicateWWWAuthenticateParametersFromResponse()
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = CreateMultipleHttpHeaderResponse();
+
+            // Act
+            var headers = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers);
+            var bearerHeader1 = headers.Where(header => header.AuthScheme == "Bearer").First();
+            var popHeader1 = headers.Where(header => header.AuthScheme == "PoP").First();
+            var bearerHeader2 = headers.Where(header => header.AuthScheme == "Bearer").Last();
+            var popHeader2 = headers.Where(header => header.AuthScheme == "PoP").Last();
+
+            // Assert
+            Assert.IsNotNull(bearerHeader1);
+            Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader1.Authority);
+            Assert.IsNotNull(popHeader1);
+            Assert.AreEqual(TestConstants.Nonce, popHeader1.Nonce);
+
+            Assert.IsNotNull(bearerHeader2);
+            Assert.AreEqual("https://login.microsoftonline.com/TenantId2", bearerHeader2.Authority);
+
+            Assert.IsNotNull(popHeader2);
+            Assert.AreEqual("someNonce2", popHeader2.Nonce);
+        }
+
+        [TestMethod]
+        public void ExtractAllUppercaseParametersFromResponse()
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = CreateUppercaseHttpHeaderResponse();
+
+            // Act
+            var headers = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers);
+            var bearerHeader = headers.Where(header => header.AuthScheme == "Bearer").Single();
+            var popHeader = headers.Where(header => header.AuthScheme == "PoP").Single();
+
+            // Assert
+            Assert.IsNotNull(bearerHeader);
+            Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
+            Assert.IsNotNull(popHeader);
+            Assert.AreEqual(TestConstants.Nonce, popHeader.Nonce);
+        }
+
+        [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
         public void ExtractAllParametersFromResponseWithAuthParser(bool combineHeaders)
@@ -594,6 +646,32 @@ namespace Microsoft.Identity.Test.Unit
                 {
                     { WwwAuthenticateHeaderName, $"Bearer authorization_uri=\"https://login.microsoftonline.com/TenantId/oauth2/authorize\", resource_id=\"https://endpoint/\"" },
                     { WwwAuthenticateHeaderName, $"PoP nonce=\"someNonce\""}
+                }
+            };
+        }
+
+        private static HttpResponseMessage CreateMultipleHttpHeaderResponse()
+        {
+            return new HttpResponseMessage(HttpStatusCode.Unauthorized)
+            {
+                Headers =
+                {
+                    { WwwAuthenticateHeaderName, $"Bearer authorization_uri=\"https://login.microsoftonline.com/TenantId/oauth2/authorize\"" },
+                    { WwwAuthenticateHeaderName, $"Bearer authorization_uri=\"https://login.microsoftonline.com/TenantId/oauth2/authorize2\"" },
+                    { WwwAuthenticateHeaderName, $"PoP nonce=\"someNonce\"" },
+                    { WwwAuthenticateHeaderName, $"PoP nonce=\"someNonce2\"" }
+                }
+            };
+        }
+
+        private static HttpResponseMessage CreateUppercaseHttpHeaderResponse()
+        {
+            return new HttpResponseMessage(HttpStatusCode.Unauthorized)
+            {
+                Headers =
+                {
+                    { WwwAuthenticateHeaderName, $"Bearer AUTHORIZATION_URI=\"https://login.microsoftonline.com/TenantId/oauth2/authorize\"" },
+                    { WwwAuthenticateHeaderName, $"PoP NONCE=\"someNonce\"" }
                 }
             };
         }

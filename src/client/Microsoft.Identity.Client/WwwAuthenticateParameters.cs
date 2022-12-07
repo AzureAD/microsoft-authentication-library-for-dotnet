@@ -275,31 +275,6 @@ namespace Microsoft.Identity.Client
 
             return CreateWwwAuthenticateParameters(new Dictionary<string, string>(), string.Empty);
         }
-
-        /// <summary>
-        /// Gets the claim challenge from HTTP header.
-        /// Used, for example, for CA auth context.
-        /// </summary>
-        /// <param name="httpResponseHeaders">The HTTP response headers.</param>
-        /// <param name="scheme">Authentication scheme. Default is Bearer.</param>
-        /// <returns>The claims challenge</returns>
-        public static string GetClaimChallengeFromResponseHeaders(
-            HttpResponseHeaders httpResponseHeaders,
-            string scheme = Constants.BearerAuthHeaderPrefix)
-        {
-            WwwAuthenticateParameters parameters = CreateFromAuthenticationHeaders(
-                httpResponseHeaders,
-                scheme);
-
-            // read the header and checks if it contains an error with insufficient_claims value.
-            if (parameters.Claims != null &&
-                string.Equals(parameters.Error, "insufficient_claims", StringComparison.OrdinalIgnoreCase))
-            {
-                return parameters.Claims;
-            }
-
-            return null;
-        }
         #endregion Single Scheme Api
 
         #region Multi Scheme Api
@@ -376,6 +351,31 @@ namespace Microsoft.Identity.Client
             return parameterList;
         }
         #endregion Multi Scheme Api
+
+        /// <summary>
+        /// Gets the claim challenge from HTTP header.
+        /// Used, for example, for CA auth context.
+        /// </summary>
+        /// <param name="httpResponseHeaders">The HTTP response headers.</param>
+        /// <param name="scheme">Authentication scheme. Default is Bearer.</param>
+        /// <returns>The claims challenge</returns>
+        public static string GetClaimChallengeFromResponseHeaders(
+            HttpResponseHeaders httpResponseHeaders,
+            string scheme = Constants.BearerAuthHeaderPrefix)
+        {
+            WwwAuthenticateParameters parameters = CreateFromAuthenticationHeaders(
+                httpResponseHeaders,
+                scheme);
+
+            // read the header and checks if it contains an error with insufficient_claims value.
+            if (parameters.Claims != null &&
+                string.Equals(parameters.Error, "insufficient_claims", StringComparison.OrdinalIgnoreCase))
+            {
+                return parameters.Claims;
+            }
+
+            return null;
+        }
 
         /// <summary>
         /// Creates parameters from the WWW-Authenticate string.
