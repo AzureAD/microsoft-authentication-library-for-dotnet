@@ -106,8 +106,11 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                     _knownMetadataProvider.GetMetadata(environment, existingEnvironmentsInCache, requestContext.Logger) ??
                     await GetMetadataEntryAsync(authorityInfo, requestContext).ConfigureAwait(false);
                 }
-
-                entry ??= CreateEntryForSingleAuthority(authorityInfo.CanonicalAuthority);
+                if (entry == null)
+                {
+                    requestContext.Logger.Info($"Skipping Instance discovery for {authorityInfo.AuthorityType} authority because is not enabled.");
+                    entry = CreateEntryForSingleAuthority(authorityInfo.CanonicalAuthority);
+                }
 
                 return entry;
             }

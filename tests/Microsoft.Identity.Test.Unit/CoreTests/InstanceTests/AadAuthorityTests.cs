@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     Assert.Fail("Validation should have failed with an exception when instance discovery is enabled.");
                 }
                 
-                Assert.IsNull(am);
+                Assert.IsNotNull(am);
             }
             catch (Exception exc)
             {
