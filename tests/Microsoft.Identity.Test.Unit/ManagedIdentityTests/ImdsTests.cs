@@ -8,29 +8,18 @@ using System.Threading.Tasks;
 using Castle.Core.Resource;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
     [TestClass]
-    public class ImdsTests
+    public class ImdsTests : TestBase
     {
         private const string ApiVersion = "2018-02-01";
         private const string ImdsEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token";
         private const string DefaultResource = "https://management.azure.com";
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            SetEnvironmentVariables(null);
-        }
 
         [DataTestMethod]
         [DataRow("http://169.254.169.254", DefaultResource, DefaultResource, null)]
@@ -41,53 +30,46 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow("http://169.254.169.254", "https://management.azure.com/.default", DefaultResource, "", UserAssignedIdentityId.None)]
         [DataRow("http://169.254.169.254", "https://management.azure.com/.default", DefaultResource, "  ", UserAssignedIdentityId.None)]
         public async Task ImdsHappyPathAsync(
-            string endpoint, 
-            string scope, 
-            string resource, 
-            string userAssignedClientIdOrResourceId, 
+            string endpoint,
+            string scope,
+            string resource,
+            string userAssignedClientIdOrResourceId,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
         {
-            try
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(endpoint);
 
-                using (var httpManager = new MockHttpManager())
-                {
-                    IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
-                        .Create("clientId")
-                        .WithHttpManager(httpManager)
-                        .WithExperimentalFeatures()
-                        .Build();
+                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                    .Create("clientId")
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures()
+                    .Build();
 
-                    httpManager.AddManagedIdentityMockHandler(
-                        ImdsEndpoint,
-                        resource,
-                        MockHelpers.GetMsiImdsSuccessfulResponse(),
-                        ApiVersion,
-                        ManagedIdentitySourceType.IMDS,
-                        userAssignedClientIdOrResourceId: userAssignedClientIdOrResourceId,
-                        userAssignedIdentityId: userAssignedIdentityId);
+                httpManager.AddManagedIdentityMockHandler(
+                    ImdsEndpoint,
+                    resource,
+                    MockHelpers.GetMsiImdsSuccessfulResponse(),
+                    ApiVersion,
+                    ManagedIdentitySourceType.IMDS,
+                    userAssignedClientIdOrResourceId: userAssignedClientIdOrResourceId,
+                    userAssignedIdentityId: userAssignedIdentityId);
 
-                    var result = await cca.AcquireTokenForClient(new string[] { scope })
-                        .WithManagedIdentity(userAssignedClientIdOrResourceId)
-                        .ExecuteAsync().ConfigureAwait(false);
+                var result = await cca.AcquireTokenForClient(new string[] { scope })
+                    .WithManagedIdentity(userAssignedClientIdOrResourceId)
+                    .ExecuteAsync().ConfigureAwait(false);
 
-                    Assert.IsNotNull(result);
-                    Assert.IsNotNull(result.AccessToken);
-                    Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-                    result = await cca.AcquireTokenForClient(new string[] { scope })
-                        .WithManagedIdentity()
-                        .ExecuteAsync().ConfigureAwait(false);
+                result = await cca.AcquireTokenForClient(new string[] { scope })
+                    .WithManagedIdentity()
+                    .ExecuteAsync().ConfigureAwait(false);
 
-                    Assert.IsNotNull(result);
-                    Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-                }
-                
-            } 
-            finally
-            {
-                SetEnvironmentVariables(null);
+                Assert.IsNotNull(result);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
         }
 
@@ -97,136 +79,116 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow("s")]
         public async Task AppServiceTestWrongScopeAsync(string resource)
         {
-            try
+
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables("http://169.254.169.254");
 
-                using (var httpManager = new MockHttpManager())
-                {
-                    IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
-                        .Create("clientId")
-                        .WithHttpManager(httpManager)
-                        .WithExperimentalFeatures()
-                        .Build();
+                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                    .Create("clientId")
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures()
+                    .Build();
 
-                    httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, resource, MockHelpers.GetMsiImdsErrorResponse(), ApiVersion, 
-                        ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
-                    httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, resource, MockHelpers.GetMsiImdsErrorResponse(), ApiVersion, 
-                        ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
+                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, resource, MockHelpers.GetMsiImdsErrorResponse(), ApiVersion,
+                    ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
+                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, resource, MockHelpers.GetMsiImdsErrorResponse(), ApiVersion,
+                    ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
 
-                    MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                        await cca.AcquireTokenForClient(new string[] { resource })
-                        .WithManagedIdentity()
-                        .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await cca.AcquireTokenForClient(new string[] { resource })
+                    .WithManagedIdentity()
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
-                    Assert.IsNotNull(ex);
-                    Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                }
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
             }
-            finally 
-            {
-                SetEnvironmentVariables(null);
-            }
+
         }
 
         [TestMethod]
         public async Task ImdsErrorResponseNoPayloadTestAsync()
         {
-            try
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables("http://169.254.169.254");
 
-                using (var httpManager = new MockHttpManager())
-                {
-                    IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
                         .Create("clientId")
                         .WithHttpManager(httpManager)
                         .WithExperimentalFeatures()
                         .Build();
 
-                    httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "scope", "", ApiVersion, ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
-                    httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "scope", "", ApiVersion, ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
+                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "scope", "", ApiVersion, ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
+                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "scope", "", ApiVersion, ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
 
-                    MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                        await cca.AcquireTokenForClient(new string[] { "scope" })
-                        .WithManagedIdentity()
-                        .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await cca.AcquireTokenForClient(new string[] { "scope" })
+                    .WithManagedIdentity()
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
-                    Assert.IsNotNull(ex);
-                    Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                    Assert.AreEqual("[Managed Identity] Empty error response received.", ex.Message);
-                }
-            }
-            finally
-            {
-                SetEnvironmentVariables(null);
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+                Assert.AreEqual("[Managed Identity] Empty error response received.", ex.Message);
             }
         }
 
         [TestMethod]
         public async Task ImdsNullResponseAsync()
         {
-            try
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables("http://169.254.169.254");
 
-                using (var httpManager = new MockHttpManager())
-                {
-                    IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
                         .Create("clientId")
                         .WithHttpManager(httpManager)
                         .WithExperimentalFeatures()
                         .Build();
 
-                    httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "https://management.azure.com", "", ApiVersion, ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.OK);
+                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "https://management.azure.com", "", ApiVersion, ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.OK);
 
-                    MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                        await cca.AcquireTokenForClient(new string[] { "https://management.azure.com" })
-                        .WithManagedIdentity()
-                        .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await cca.AcquireTokenForClient(new string[] { "https://management.azure.com" })
+                    .WithManagedIdentity()
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
-                    Assert.IsNotNull(ex);
-                    Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                    Assert.AreEqual(MsalErrorMessage.AuthenticationResponseInvalidFormatError, ex.Message);
-                }
-            }
-            finally
-            {
-                SetEnvironmentVariables(null);
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.AuthenticationResponseInvalidFormatError, ex.Message);
             }
         }
 
         [TestMethod]
         public async Task ImdsBadRequestTestAsync()
         {
-            try
+
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+
             {
                 SetEnvironmentVariables("http://169.254.169.254");
 
-                using (var httpManager = new MockHttpManager())
-                {
-                    IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
-                        .Create("clientId")
-                        .WithHttpManager(httpManager)
-                        .WithExperimentalFeatures()
-                    .Build();
+                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                    .Create("clientId")
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures()
+                .Build();
 
-                    httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, DefaultResource, MockHelpers.GetMsiImdsErrorResponse(), ApiVersion,
-                        ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.BadRequest);
+                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, DefaultResource, MockHelpers.GetMsiImdsErrorResponse(), ApiVersion,
+                    ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.BadRequest);
 
-                    MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                        await cca.AcquireTokenForClient(new string[] { DefaultResource })
-                        .WithManagedIdentity()
-                        .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await cca.AcquireTokenForClient(new string[] { DefaultResource })
+                    .WithManagedIdentity()
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
-                    Assert.IsNotNull(ex);
-                    Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                    Assert.IsTrue(ex.Message.Contains("The requested identity has not been assigned to this resource."));
-                }
-            }
-            finally
-            {
-                SetEnvironmentVariables(null);
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+                Assert.IsTrue(ex.Message.Contains("The requested identity has not been assigned to this resource."));
             }
         }
 
