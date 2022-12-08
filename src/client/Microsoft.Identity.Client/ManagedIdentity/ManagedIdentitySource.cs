@@ -30,14 +30,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(AppTokenProviderParameters parameters, CancellationToken cancellationToken)
         {
-            // Convert the scopes to a resource string.
-            string resource = ScopeHelper.ScopesToResource(parameters.Scopes.ToArray());
-
             if (cancellationToken.IsCancellationRequested)
             {
                 _requestContext.Logger.Error(TimeoutError);
                 cancellationToken.ThrowIfCancellationRequested();
             }
+
+            // Convert the scopes to a resource string.
+            string resource = ScopeHelper.ScopesToResource(parameters.Scopes.ToArray());
 
             ManagedIdentityRequest request = CreateRequest(resource);
 
@@ -45,8 +45,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 HttpResponse response =
             request.Method == HttpMethod.Get ?
-            await _requestContext.ServiceBundle.HttpManager.SendGetForceResponseAsync(request.ComputeUri(), request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false) :
-            await _requestContext.ServiceBundle.HttpManager.SendPostForceResponseAsync(request.ComputeUri(), request.Headers, request.BodyParameters, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
+            await _requestContext.ServiceBundle.HttpManager.SendGetForceResponseAsync(request.Endpoint.Value, request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false) :
+            await _requestContext.ServiceBundle.HttpManager.SendPostForceResponseAsync(request.Endpoint.Value, request.Headers, request.BodyParameters, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
 
                 return HandleResponse(parameters, response);
             }
