@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
             var finalLogger = logger ?? LoggerHelper.NullLogger;
 
 #if NET_CORE
-            return new Microsoft.Identity.Client.Platforms.netcore.NetCorePlatformProxy(finalLogger);
+            return new Microsoft.Identity.Client.Platforms.netcore.NetCorePlatformProxyPublic(finalLogger);
 #elif NET6_WIN
             return new Microsoft.Identity.Client.Platforms.net6win.Net6WinPlatformProxy(finalLogger);
 #elif ANDROID
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
 #elif WINDOWS_APP
             return new Microsoft.Identity.Client.Platforms.uap.UapPlatformProxy(finalLogger);
 #elif NETSTANDARD
-            return new Microsoft.Identity.Client.Platforms.netstandard.NetStandardPlatformProxy(finalLogger);
+            return new Microsoft.Identity.Client.Platforms.netstandard.NetStandardPlatformProxyPublic(finalLogger);
 #elif DESKTOP
             return new Microsoft.Identity.Client.Platforms.net45.NetDesktopPlatformProxyPublic(finalLogger);
 #else
