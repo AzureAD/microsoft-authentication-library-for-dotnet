@@ -4,10 +4,20 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Security;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.WsTrust;
+using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Client
 {
@@ -29,11 +39,14 @@ namespace Microsoft.Identity.Client
         internal PublicClientApplication(ApplicationConfiguration configuration)
             : base(configuration)
         {
+            ServiceBundle = Internal.ServiceBundlePublic.Create(configuration);
         }
 
         private const string CurrentOSAccountDescriptor = "current_os_account";
         private static readonly IAccount s_currentOsAccount =
             new Account(CurrentOSAccountDescriptor, null, null, null);
+
+        internal IServiceBundlePublic ServiceBundlePublic { get { return (IServiceBundlePublic)ServiceBundle; } }
 
         /// <summary>
         /// Currently only the Windows broker is able to login with the current user, see https://aka.ms/msal-net-wam for details.
@@ -66,7 +79,7 @@ namespace Microsoft.Identity.Client
         {
             get
             {
-                return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsSystemWebViewAvailable;
+                return ServiceBundlePublic.PlatformProxyPublic.GetWebUiFactory(ServiceBundle.Config).IsSystemWebViewAvailable;
             }
         }
 
@@ -79,7 +92,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public bool IsEmbeddedWebViewAvailable()
         {
-            return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsEmbeddedWebViewAvailable;
+            return ServiceBundlePublic.PlatformProxyPublic.GetWebUiFactory(ServiceBundle.Config).IsEmbeddedWebViewAvailable;
         }
 
         /// <summary>
@@ -88,7 +101,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool IsUserInteractive()
         {
-            return ServiceBundle.PlatformProxy.GetWebUiFactory(ServiceBundle.Config).IsUserInteractive;
+            return ServiceBundlePublic.PlatformProxyPublic.GetWebUiFactory(ServiceBundle.Config).IsUserInteractive;
         }
 
         /// <summary>
@@ -106,7 +119,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public bool IsBrokerAvailable()
         {
-            return ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null)
+            return ServiceBundlePublic.PlatformProxyPublic.CreateBroker(ServiceBundle.Config, null)
                     .IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority?.AuthorityInfo?.AuthorityType ?? AuthorityType.Aad);
         }
 
@@ -140,7 +153,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes)
         {
             return AcquireTokenInteractiveParameterBuilder
-                .Create(ClientExecutorFactory.CreatePublicClientExecutor(this), scopes)
+                .Create(ClientExecutorFactoryPublic.CreatePublicClientExecutor(this), scopes)
                 .WithParentActivityOrWindowFunc(ServiceBundle.Config.ParentActivityOrWindowFunc);
         }
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
@@ -172,7 +185,7 @@ namespace Microsoft.Identity.Client
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
         {
             return AcquireTokenWithDeviceCodeParameterBuilder.Create(
-                ClientExecutorFactory.CreatePublicClientExecutor(this),
+                ClientExecutorFactoryPublic.CreatePublicClientExecutor(this),
                 scopes,
                 deviceCodeResultCallback);
         }
@@ -211,7 +224,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes)
         {
             return AcquireTokenByIntegratedWindowsAuthParameterBuilder.Create(
-                ClientExecutorFactory.CreatePublicClientExecutor(this),
+                ClientExecutorFactoryPublic.CreatePublicClientExecutor(this),
                 scopes);
         }
 
@@ -239,7 +252,7 @@ namespace Microsoft.Identity.Client
             SecureString password)
         {
             return AcquireTokenByUsernamePasswordParameterBuilder.Create(
-                ClientExecutorFactory.CreatePublicClientExecutor(this),
+                ClientExecutorFactoryPublic.CreatePublicClientExecutor(this),
                 scopes,
                 username,
                 new string(password.PasswordToCharArray()));
@@ -266,7 +279,7 @@ namespace Microsoft.Identity.Client
             string password)
         {
             return AcquireTokenByUsernamePasswordParameterBuilder.Create(
-                ClientExecutorFactory.CreatePublicClientExecutor(this),
+                ClientExecutorFactoryPublic.CreatePublicClientExecutor(this),
                 scopes,
                 username,
                 password);
@@ -280,7 +293,7 @@ namespace Microsoft.Identity.Client
         {
             if (ServiceBundle.Config.IsBrokerEnabled)
             {
-                var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+                var broker = ServiceBundlePublic.PlatformProxyPublic.CreateBroker(ServiceBundle.Config, null);
 
                 if (broker.IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType))
                 {
@@ -290,5 +303,253 @@ namespace Microsoft.Identity.Client
 
             return false;
         }
+
+        /// <summary>
+        /// Removes all tokens in the cache for the specified account.
+        /// </summary>
+        /// <param name="account">Instance of the account that needs to be removed</param>
+        public new async Task RemoveAsync(IAccount account)
+        {
+            await RemoveAsync(account, default).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Removes all tokens in the cache for the specified account.
+        /// </summary>
+        /// <param name="account">Instance of the account that needs to be removed</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        public async Task RemoveAsync(IAccount account, CancellationToken cancellationToken = default)
+        {
+            Guid correlationId = Guid.NewGuid();
+            RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
+            requestContext.ApiEvent = new ApiEvent(correlationId);
+            requestContext.ApiEvent.ApiId = ApiIds.RemoveAccount;
+
+            var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
+              requestContext,
+              null).ConfigureAwait(false);
+
+            var authParameters = new AuthenticationRequestParameters(
+                   ServiceBundle,
+                   UserTokenCacheInternal,
+                   new AcquireTokenCommonParameters() { ApiId = requestContext.ApiEvent.ApiId },
+                   requestContext,
+                   authority);
+
+            if (account != null && UserTokenCacheInternal != null)
+            {
+                await UserTokenCacheInternal.RemoveAccountAsync(account, authParameters).ConfigureAwait(false);
+            }
+
+            if (AppConfig.IsBrokerEnabled && ServiceBundlePublic.PlatformProxyPublic.CanBrokerSupportSilentAuth())
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var broker = ServiceBundlePublic.PlatformProxyPublic.CreateBroker(ServiceBundle.Config, null);
+                if (broker.IsBrokerInstalledAndInvokable(authority.AuthorityInfo.AuthorityType))
+                {
+                    await broker.RemoveAccountAsync(ServiceBundle.Config, account).ConfigureAwait(false);
+                }
+            }
+        }
+
+        #region Accounts
+        /// <summary>
+        /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
+        /// </summary>
+        public new async Task<IEnumerable<IAccount>> GetAccountsAsync()
+        {
+            return await GetAccountsAsync(default(CancellationToken)).ConfigureAwait(false);
+        }
+
+        // TODO: MSAL 5 - add cancellationToken to the interface
+        /// <summary>
+        /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
+        /// </summary>
+        public async Task<IEnumerable<IAccount>> GetAccountsAsync(CancellationToken cancellationToken = default)
+        {
+            return await GetAccountsInternalAsync(ApiIds.GetAccounts, null, cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Get the <see cref="IAccount"/> collection by its identifier among the accounts available in the token cache,
+        /// based on the user flow. This is for Azure AD B2C scenarios.
+        /// </summary>
+        /// <param name="userFlow">The identifier is the user flow being targeted by the specific B2C authority/>.
+        /// </param>
+        public new async Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow)
+        {
+            return await GetAccountsAsync(userFlow, default).ConfigureAwait(false);
+        }
+
+        // TODO: MSAL 5 - add cancellationToken to the interface
+        /// <summary>
+        /// Get the <see cref="IAccount"/> collection by its identifier among the accounts available in the token cache,
+        /// based on the user flow. This is for Azure AD B2C scenarios.
+        /// </summary>
+        /// <param name="userFlow">The identifier is the user flow being targeted by the specific B2C authority/>.
+        /// </param>
+        /// <param name="cancellationToken">Cancellation token </param>
+        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(userFlow))
+            {
+                throw new ArgumentException($"{nameof(userFlow)} should not be null or whitespace", nameof(userFlow));
+            }
+
+            var accounts = await GetAccountsInternalAsync(ApiIds.GetAccountsByUserFlow, null, cancellationToken).ConfigureAwait(false);
+
+            return accounts.Where(acc =>
+                acc.HomeAccountId.ObjectId.EndsWith(
+                    userFlow, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // TODO: MSAL 5 - add cancellationToken to the interface
+        /// <summary>
+        /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.
+        /// </summary>
+        /// <param name="accountId">Account identifier. The identifier is typically the
+        /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>.
+        /// You typically get the account id from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property>
+        /// </param>
+        /// <param name="cancellationToken">Cancellation token </param>
+        public async Task<IAccount> GetAccountAsync(string accountId, CancellationToken cancellationToken = default)
+        {
+            var accounts = await GetAccountsInternalAsync(ApiIds.GetAccountById, accountId, cancellationToken).ConfigureAwait(false);
+            return accounts.SingleOrDefault();
+        }
+
+        /// <summary>
+        /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.
+        /// </summary>
+        /// <param name="accountId">Account identifier. The identifier is typically the
+        /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>.
+        /// You typically get the account id from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property>
+        /// </param>
+        public new async Task<IAccount> GetAccountAsync(string accountId)
+        {
+            if (!string.IsNullOrWhiteSpace(accountId))
+            {
+                return await GetAccountAsync(accountId, default).ConfigureAwait(false);
+            }
+
+            return null;
+        }
+
+        private async Task<IEnumerable<IAccount>> GetAccountsInternalAsync(ApiIds apiId, string homeAccountIdFilter, CancellationToken cancellationToken)
+        {
+            Guid correlationId = Guid.NewGuid();
+            RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
+            requestContext.ApiEvent = new ApiEvent(correlationId);
+            requestContext.ApiEvent.ApiId = apiId;
+
+            var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
+              requestContext,
+              null).ConfigureAwait(false);
+
+            var authParameters = new AuthenticationRequestParameters(
+                   ServiceBundle,
+                   UserTokenCacheInternal,
+                   new AcquireTokenCommonParameters() { ApiId = apiId },
+                   requestContext,
+                   authority,
+                   homeAccountIdFilter);
+
+            // a simple session consisting of a single call
+            var cacheSessionManager = new CacheSessionManager(
+                UserTokenCacheInternal,
+                authParameters);
+
+            var accountsFromCache = await cacheSessionManager.GetAccountsAsync().ConfigureAwait(false);
+            var accountsFromBroker = await GetAccountsFromBrokerAsync(homeAccountIdFilter, cacheSessionManager, cancellationToken).ConfigureAwait(false);
+            accountsFromCache ??= Enumerable.Empty<IAccount>();
+            accountsFromBroker ??= Enumerable.Empty<IAccount>();
+
+            ServiceBundle.ApplicationLogger.Info($"Found {accountsFromCache.Count()} cache accounts and {accountsFromBroker.Count()} broker accounts");
+            IEnumerable<IAccount> cacheAndBrokerAccounts = MergeAccounts(accountsFromCache, accountsFromBroker);
+
+            ServiceBundle.ApplicationLogger.Info($"Returning {cacheAndBrokerAccounts.Count()} accounts");
+            return cacheAndBrokerAccounts;
+        }
+
+        private async Task<IEnumerable<IAccount>> GetAccountsFromBrokerAsync(
+            string homeAccountIdFilter,
+            ICacheSessionManager cacheSessionManager,
+            CancellationToken cancellationToken)
+        {
+            if (AppConfig.IsBrokerEnabled && ServiceBundlePublic.PlatformProxyPublic.CanBrokerSupportSilentAuth())
+            {
+                var broker = ServiceBundlePublic.PlatformProxyPublic.CreateBroker(ServiceBundle.Config, null);
+                if (broker.IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType))
+                {
+                    var brokerAccounts =
+                        (await broker.GetAccountsAsync(
+                            AppConfig.ClientId,
+                            AppConfig.RedirectUri,
+                            AuthorityInfo,
+                            cacheSessionManager,
+                            ServiceBundle.InstanceDiscoveryManager).ConfigureAwait(false))
+                        ?? Enumerable.Empty<IAccount>();
+
+                    if (!string.IsNullOrEmpty(homeAccountIdFilter))
+                    {
+                        brokerAccounts = brokerAccounts.Where(
+                            acc => homeAccountIdFilter.Equals(
+                                acc.HomeAccountId.Identifier,
+                                StringComparison.OrdinalIgnoreCase));
+                    }
+
+                    brokerAccounts = await FilterBrokerAccountsByEnvAsync(brokerAccounts, cancellationToken).ConfigureAwait(false);
+                    return brokerAccounts;
+                }
+            }
+
+            return Enumerable.Empty<IAccount>();
+        }
+
+        // Not all brokers return the accounts only for the given env
+        private async Task<IEnumerable<IAccount>> FilterBrokerAccountsByEnvAsync(IEnumerable<IAccount> brokerAccounts, CancellationToken cancellationToken)
+        {
+            ServiceBundle.ApplicationLogger.Verbose($"Filtering broker accounts by env. Before filtering: " + brokerAccounts.Count());
+
+            ISet<string> allEnvs = new HashSet<string>(
+                brokerAccounts.Select(aci => aci.Environment),
+                StringComparer.OrdinalIgnoreCase);
+
+            var instanceMetadata = await ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                AuthorityInfo,
+                allEnvs,
+                CreateRequestContext(Guid.NewGuid(), cancellationToken)).ConfigureAwait(false);
+
+            brokerAccounts = brokerAccounts.Where(acc => instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
+
+            ServiceBundle.ApplicationLogger.Verbose($"After filtering: " + brokerAccounts.Count());
+
+            return brokerAccounts;
+        }
+
+        private IEnumerable<IAccount> MergeAccounts(
+            IEnumerable<IAccount> cacheAccounts,
+            IEnumerable<IAccount> brokerAccounts)
+        {
+            List<IAccount> allAccounts = new List<IAccount>(cacheAccounts);
+
+            foreach (IAccount account in brokerAccounts)
+            {
+                if (!allAccounts.Any(x => x.HomeAccountId.Equals(account.HomeAccountId))) // AccountId is equatable
+                {
+                    allAccounts.Add(account);
+                }
+                else
+                {
+                    ServiceBundle.ApplicationLogger.InfoPii(
+                        "Account merge eliminated broker account with id: " + account.HomeAccountId,
+                        "Account merge eliminated an account");
+                }
+            }
+
+            return allAccounts;
+        }
+        #endregion
     }
 }

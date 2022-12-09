@@ -3,13 +3,18 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Client
 {
@@ -223,5 +228,158 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams = await base.CreateRequestParametersAsync(commonParameters, requestContext, cache).ConfigureAwait(false);
             return requestParams;
         }
+
+        /// <summary>
+        /// Removes all tokens in the cache for the specified account.
+        /// </summary>
+        /// <param name="account">Instance of the account that needs to be removed</param>
+        public new async Task RemoveAsync(IAccount account)
+        {
+            await RemoveAsync(account, default).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Removes all tokens in the cache for the specified account.
+        /// </summary>
+        /// <param name="account">Instance of the account that needs to be removed</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        public async Task RemoveAsync(IAccount account, CancellationToken cancellationToken = default)
+        {
+            Guid correlationId = Guid.NewGuid();
+            RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
+            requestContext.ApiEvent = new ApiEvent(correlationId);
+            requestContext.ApiEvent.ApiId = ApiIds.RemoveAccount;
+
+            var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
+              requestContext,
+              null).ConfigureAwait(false);
+
+            var authParameters = new AuthenticationRequestParameters(
+                   ServiceBundle,
+                   UserTokenCacheInternal,
+                   new AcquireTokenCommonParameters() { ApiId = requestContext.ApiEvent.ApiId },
+                   requestContext,
+                   authority);
+
+            if (account != null && UserTokenCacheInternal != null)
+            {
+                await UserTokenCacheInternal.RemoveAccountAsync(account, authParameters).ConfigureAwait(false);
+            }
+        }
+
+        #region Accounts
+        /// <summary>
+        /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
+        /// </summary>
+        public new async Task<IEnumerable<IAccount>> GetAccountsAsync()
+        {
+            return await GetAccountsAsync(default(CancellationToken)).ConfigureAwait(false);
+        }
+
+        // TODO: MSAL 5 - add cancellationToken to the interface
+        /// <summary>
+        /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
+        /// </summary>
+        public new async Task<IEnumerable<IAccount>> GetAccountsAsync(CancellationToken cancellationToken = default)
+        {
+            return await GetAccountsInternalAsync(ApiIds.GetAccounts, null, cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Get the <see cref="IAccount"/> collection by its identifier among the accounts available in the token cache,
+        /// based on the user flow. This is for Azure AD B2C scenarios.
+        /// </summary>
+        /// <param name="userFlow">The identifier is the user flow being targeted by the specific B2C authority/>.
+        /// </param>
+        public new async Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow)
+        {
+            return await GetAccountsAsync(userFlow, default).ConfigureAwait(false);
+        }
+
+        // TODO: MSAL 5 - add cancellationToken to the interface
+        /// <summary>
+        /// Get the <see cref="IAccount"/> collection by its identifier among the accounts available in the token cache,
+        /// based on the user flow. This is for Azure AD B2C scenarios.
+        /// </summary>
+        /// <param name="userFlow">The identifier is the user flow being targeted by the specific B2C authority/>.
+        /// </param>
+        /// <param name="cancellationToken">Cancellation token </param>
+        public new async Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(userFlow))
+            {
+                throw new ArgumentException($"{nameof(userFlow)} should not be null or whitespace", nameof(userFlow));
+            }
+
+            var accounts = await GetAccountsInternalAsync(ApiIds.GetAccountsByUserFlow, null, cancellationToken).ConfigureAwait(false);
+
+            return accounts.Where(acc =>
+                acc.HomeAccountId.ObjectId.EndsWith(
+                    userFlow, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // TODO: MSAL 5 - add cancellationToken to the interface
+        /// <summary>
+        /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.
+        /// </summary>
+        /// <param name="accountId">Account identifier. The identifier is typically the
+        /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>.
+        /// You typically get the account id from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property>
+        /// </param>
+        /// <param name="cancellationToken">Cancellation token </param>
+        public new async Task<IAccount> GetAccountAsync(string accountId, CancellationToken cancellationToken = default)
+        {
+            var accounts = await GetAccountsInternalAsync(ApiIds.GetAccountById, accountId, cancellationToken).ConfigureAwait(false);
+            return accounts.SingleOrDefault();
+        }
+
+        /// <summary>
+        /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.
+        /// </summary>
+        /// <param name="accountId">Account identifier. The identifier is typically the
+        /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>.
+        /// You typically get the account id from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property>
+        /// </param>
+        public new async Task<IAccount> GetAccountAsync(string accountId)
+        {
+            if (!string.IsNullOrWhiteSpace(accountId))
+            {
+                return await GetAccountAsync(accountId, default).ConfigureAwait(false);
+            }
+
+            return null;
+        }
+
+        private async Task<IEnumerable<IAccount>> GetAccountsInternalAsync(ApiIds apiId, string homeAccountIdFilter, CancellationToken cancellationToken)
+        {
+            Guid correlationId = Guid.NewGuid();
+            RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
+            requestContext.ApiEvent = new ApiEvent(correlationId);
+            requestContext.ApiEvent.ApiId = apiId;
+
+            var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
+              requestContext,
+              null).ConfigureAwait(false);
+
+            var authParameters = new AuthenticationRequestParameters(
+                   ServiceBundle,
+                   UserTokenCacheInternal,
+                   new AcquireTokenCommonParameters() { ApiId = apiId },
+                   requestContext,
+                   authority,
+                   homeAccountIdFilter);
+
+            // a simple session consisting of a single call
+            var cacheSessionManager = new CacheSessionManager(
+                UserTokenCacheInternal,
+                authParameters);
+
+            var accountsFromCache = await cacheSessionManager.GetAccountsAsync().ConfigureAwait(false);
+
+            ServiceBundle.ApplicationLogger.Info($"Found {accountsFromCache.Count()} cache accounts.");
+            return accountsFromCache;
+        }
+
+        #endregion
     }
 }

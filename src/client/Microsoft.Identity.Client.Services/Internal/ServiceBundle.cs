@@ -9,12 +9,9 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.OAuth2.Throttling;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Http;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -41,7 +38,6 @@ namespace Microsoft.Identity.Client.Internal
                 config.CustomInstanceDiscoveryMetadata,
                 config.CustomInstanceDiscoveryMetadataUri);
 
-            WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             ThrottlingManager = SingletonThrottlingManager.GetInstance();
             DeviceAuthManager = config.DeviceAuthManagerForTest ?? PlatformProxy.CreateDeviceAuthManager();
 
@@ -64,10 +60,7 @@ namespace Microsoft.Identity.Client.Internal
         public IInstanceDiscoveryManager InstanceDiscoveryManager { get; }
 
         /// <inheritdoc />
-        public IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
-
-        /// <inheritdoc />
-        public IPlatformProxy PlatformProxy { get; private set; }
+        public IPlatformProxy PlatformProxy { get; protected set; }
 
         /// <inheritdoc />
         public ApplicationConfiguration Config { get; }
