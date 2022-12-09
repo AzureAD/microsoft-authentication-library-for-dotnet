@@ -195,6 +195,7 @@ namespace Microsoft.Identity.Client
 
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
         public bool IsConfidentialClient { get; }
+        public bool IsInstanceDiscoveryEnabled { get; internal set; } = true;
         #endregion
 
     }
