@@ -59,28 +59,28 @@ namespace Microsoft.Identity.Client.Platforms.Android
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
             ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
-            editor.PutString(item.GetKey().ToString(), item.ToJsonString());
+            editor.PutString(item.CacheKey, item.ToJsonString());
             editor.Apply();
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
             ISharedPreferencesEditor editor = _refreshTokenSharedPreference.Edit();
-            editor.PutString(item.GetKey().ToString(), item.ToJsonString());
+            editor.PutString(item.CacheKey, item.ToJsonString());
             editor.Apply();
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
         {
             ISharedPreferencesEditor editor = _idTokenSharedPreference.Edit();
-            editor.PutString(item.GetKey().ToString(), item.ToJsonString());
+            editor.PutString(item.CacheKey, item.ToJsonString());
             editor.Apply();
         }
 
         public void SaveAccount(MsalAccountCacheItem item)
         {
             ISharedPreferencesEditor editor = _accountSharedPreference.Edit();
-            editor.PutString(item.GetKey().ToString(), item.ToJsonString());
+            editor.PutString(item.CacheKey, item.ToJsonString());
             editor.Apply();
         }
         #endregion
@@ -88,22 +88,22 @@ namespace Microsoft.Identity.Client.Platforms.Android
         #region DeleteItem
         public void DeleteAccessToken(MsalAccessTokenCacheItem item)
         {
-            Delete(item.GetKey().ToString(), _accessTokenSharedPreference.Edit());
+            Delete(item.CacheKey, _accessTokenSharedPreference.Edit());
         }
 
         public void DeleteRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            Delete(item.GetKey().ToString(), _refreshTokenSharedPreference.Edit());
+            Delete(item.CacheKey, _refreshTokenSharedPreference.Edit());
         }
 
         public void DeleteIdToken(MsalIdTokenCacheItem item)
         {
-            Delete(item.GetKey().ToString(), _idTokenSharedPreference.Edit());
+            Delete(item.CacheKey, _idTokenSharedPreference.Edit());
         }
 
         public void DeleteAccount(MsalAccountCacheItem item)
         {
-            Delete(item.GetKey().ToString(), _accountSharedPreference.Edit());
+            Delete(item.CacheKey, _accountSharedPreference.Edit());
 
         }
 
@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         public MsalIdTokenCacheItem GetIdToken(MsalAccessTokenCacheItem accessTokenCacheItem)
         {
             return MsalIdTokenCacheItem.FromJsonString(
-                _idTokenSharedPreference.GetString(accessTokenCacheItem.GetIdTokenItemKey().ToString(), null));
+                _idTokenSharedPreference.GetString(accessTokenCacheItem.GetIdTokenItem().CacheKey, null));
         }
         #endregion
 
@@ -161,9 +161,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
         #endregion
 
-        public MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey)
+        public MsalAccountCacheItem GetAccount(MsalAccountCacheItem accountCacheItem)
         {
-            return MsalAccountCacheItem.FromJsonString(_accountSharedPreference.GetString(accountKey.ToString(), null));
+            return MsalAccountCacheItem.FromJsonString(_accountSharedPreference.GetString(accountCacheItem.CacheKey, null));
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
 
         #region App Metadata - not used on Android
-        public MsalAppMetadataCacheItem ReadAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
+        public MsalAppMetadataCacheItem ReadAppMetadata(MsalAppMetadataCacheItem appMetadataItem)
         {
             throw new NotImplementedException();
         }
@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             throw new NotImplementedException();
         }
 
-        public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
+        public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheItem appMetadataItem)
         {
             throw new NotImplementedException();
         }

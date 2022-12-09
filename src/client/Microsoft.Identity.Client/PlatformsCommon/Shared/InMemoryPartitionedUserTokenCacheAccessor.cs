@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         #region Add
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            string itemKey = item.GetKey().ToString();
+            string itemKey = item.CacheKey;
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
             AccessTokenCacheDictionary
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            string itemKey = item.GetKey().ToString();
+            string itemKey = item.CacheKey;
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
             RefreshTokenCacheDictionary
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
         {
-            string itemKey = item.GetKey().ToString();
+            string itemKey = item.CacheKey;
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
             IdTokenCacheDictionary
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public void SaveAccount(MsalAccountCacheItem item)
         {
-            string itemKey = item.GetKey().ToString();
+            string itemKey = item.CacheKey;
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
             AccountCacheDictionary
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public void SaveAppMetadata(MsalAppMetadataCacheItem item)
         {
-            string key = item.GetKey().ToString();
+            string key = item.CacheKey;
             AppMetadataDictionary[key] = item;
         }
         #endregion
@@ -118,30 +118,30 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string partitionKey = CacheKeyFactory.GetIdTokenKeyFromCachedItem(accessTokenCacheItem);
 
             IdTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
-            if (partition != null && partition.TryGetValue(accessTokenCacheItem.GetIdTokenItemKey().ToString(), out var idToken))
+            if (partition != null && partition.TryGetValue(accessTokenCacheItem.GetIdTokenItem().CacheKey, out var idToken))
             {
                 return idToken;
             }
 
             _logger.WarningPii(
-                $"[Internal cache] Could not find an id token for the access token with key {accessTokenCacheItem.GetKey()}",
+                $"[Internal cache] Could not find an id token for the access token with key {accessTokenCacheItem.CacheKey}",
                 $"[Internal cache] Could not find an id token for the access token for realm {accessTokenCacheItem.TenantId} ");
             return null;
         }
 
-        public MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey)
+        public MsalAccountCacheItem GetAccount(MsalAccountCacheItem accountCacheItem)
         {
-            string partitionKey = CacheKeyFactory.GetKeyFromAccount(accountKey);
+            string partitionKey = CacheKeyFactory.GetKeyFromAccount(accountCacheItem);
 
             AccountCacheDictionary.TryGetValue(partitionKey, out var partition);
             MsalAccountCacheItem cacheItem = null;
-            partition?.TryGetValue(accountKey.ToString(), out cacheItem);
+            partition?.TryGetValue(accountCacheItem.CacheKey, out cacheItem);
             return cacheItem;
         }
 
-        public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
+        public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheItem appMetadataItem)
         {
-            AppMetadataDictionary.TryGetValue(appMetadataKey.ToString(), out MsalAppMetadataCacheItem cacheItem);
+            AppMetadataDictionary.TryGetValue(appMetadataItem.CacheKey, out MsalAppMetadataCacheItem cacheItem);
             return cacheItem;
         }
         #endregion
@@ -152,10 +152,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
             AccessTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
-            if (partition == null || !partition.TryRemove(item.GetKey().ToString(), out _))
+            if (partition == null || !partition.TryRemove(item.CacheKey, out _))
             {
                 _logger.InfoPii(
-                    $"[Internal cache] Cannot delete access token because it was not found in the cache. Key {item.GetKey()}.",
+                    $"[Internal cache] Cannot delete access token because it was not found in the cache. Key {item.CacheKey}.",
                     "[Internal cache] Cannot delete access token because it was not found in the cache.");
             }
         }
@@ -165,10 +165,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
             RefreshTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
-            if (partition == null || !partition.TryRemove(item.GetKey().ToString(), out _))
+            if (partition == null || !partition.TryRemove(item.CacheKey, out _))
             {
                 _logger.InfoPii(
-                    $"[Internal cache] Cannot delete refresh token because it was not found in the cache. Key {item.GetKey()}.",
+                    $"[Internal cache] Cannot delete refresh token because it was not found in the cache. Key {item.CacheKey}.",
                     "[Internal cache] Cannot delete refresh token because it was not found in the cache.");
             }
         }
@@ -178,10 +178,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
             IdTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
-            if (partition == null || !partition.TryRemove(item.GetKey().ToString(), out _))
+            if (partition == null || !partition.TryRemove(item.CacheKey, out _))
             {
                 _logger.InfoPii(
-                    $"[Internal cache] Cannot delete ID token because it was not found in the cache. Key {item.GetKey()}.",
+                    $"[Internal cache] Cannot delete ID token because it was not found in the cache. Key {item.CacheKey}.",
                     "[Internal cache] Cannot delete ID token because it was not found in the cache.");
             }
         }
@@ -191,10 +191,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
             AccountCacheDictionary.TryGetValue(partitionKey, out var partition);
-            if (partition == null || !partition.TryRemove(item.GetKey().ToString(), out _))
+            if (partition == null || !partition.TryRemove(item.CacheKey, out _))
             {
                 _logger.InfoPii(
-                    $"[Internal cache] Cannot delete account because it was not found in the cache. Key {item.GetKey()}.",
+                    $"[Internal cache] Cannot delete account because it was not found in the cache. Key {item.CacheKey}.",
                     "[Internal cache] Cannot delete account because it was not found in the cache");
             }
         }

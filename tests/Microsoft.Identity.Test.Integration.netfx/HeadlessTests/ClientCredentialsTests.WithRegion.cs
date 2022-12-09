@@ -58,11 +58,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task AcquireTokenToRegionalEndpointAsync()
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task AcquireTokenToRegionalEndpointAsync(bool instanceDiscoveryEnabled)
         {
             // Arrange
             var factory = new HttpSnifferClientFactory();
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            settings.InstanceDiscoveryEndpoint = instanceDiscoveryEnabled;
             _confidentialClientApplication = BuildCCA(settings, factory);
 
             Environment.SetEnvironmentVariable(TestConstants.RegionName, TestConstants.Region);
@@ -73,7 +76,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(
                 $"https://{RegionalHost}/{settings.TenantId}/oauth2/v2.0/token",
                 result.AuthenticationResultMetadata.TokenEndpoint);
-
         }
 
         [TestMethod]
@@ -138,6 +140,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
 
             builder.WithAuthority($@"https://{settings.Environment}/{settings.TenantId}")
+                .WithInstanceDiscovery(settings.InstanceDiscoveryEndpoint)
                 .WithTestLogging()
                 .WithExperimentalFeatures(true)
                 .WithHttpClientFactory(factory);

@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string homeAccountId = TestConstants.HomeAccountId,
             string refreshToken = TestConstants.RTSecret)
         {
-            return new MsalRefreshTokenCacheItem()
+            var item = new MsalRefreshTokenCacheItem()
             {
                 ClientId = TestConstants.ClientId,
                 Environment = TestConstants.ProductionPrefCacheEnvironment,
@@ -77,6 +77,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 OboCacheKey = oboCacheKey,
                 Secret = refreshToken,
             };
+
+            item.InitCacheKey();
+
+            return item;
         }
 
         internal static MsalIdTokenCacheItem CreateIdTokenCacheItem(
@@ -85,7 +89,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string uid = TestConstants.Uid,
             string idToken = "")
         {
-            return new MsalIdTokenCacheItem()
+            var item = new MsalIdTokenCacheItem()
             {
                 ClientId = TestConstants.ClientId,
                 Environment = TestConstants.ProductionPrefCacheEnvironment,
@@ -93,19 +97,27 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 TenantId = tenant,
                 Secret = !string.IsNullOrEmpty(idToken) ? idToken : MockHelpers.CreateIdToken(uid, TestConstants.DisplayableId, tenant),
             };
+
+            item.InitCacheKey();
+
+            return item;
         }
 
         internal static MsalAccountCacheItem CreateAccountItem(
             string tenant = TestConstants.Utid,
             string homeAccountId = TestConstants.HomeAccountId)
         {
-            return new MsalAccountCacheItem()
+            var item = new MsalAccountCacheItem()
             {
                 Environment = TestConstants.ProductionPrefCacheEnvironment,
                 HomeAccountId = homeAccountId,
                 TenantId = tenant,
                 PreferredUsername = TestConstants.DisplayableId,
             };
+
+            item.InitCacheKey();
+
+            return item;
         }
 
         internal static MsalAppMetadataCacheItem CreateAppMetadataItem(

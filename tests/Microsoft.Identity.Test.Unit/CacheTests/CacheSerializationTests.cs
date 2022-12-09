@@ -79,9 +79,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private MsalRefreshTokenCacheItem CreateRefreshTokenItem(bool isFrt = false)
         {
+            MsalRefreshTokenCacheItem item;
+
             if (isFrt)
             {
-                return new MsalRefreshTokenCacheItem
+                item = new MsalRefreshTokenCacheItem
                 {
                     ClientId = TestConstants.ClientId,
                     Environment = "env",
@@ -90,21 +92,26 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     RawClientInfo = string.Empty
                 };
             }
-
-            return new MsalRefreshTokenCacheItem
+            else
             {
-                ClientId = TestConstants.ClientId,
-                Environment = "env",
-                HomeAccountId = TestConstants.HomeAccountId,
-                Secret = "access_token_secret",
-                RawClientInfo = string.Empty,
-                OboCacheKey = "assertion_hash"
-            };
+                item = new MsalRefreshTokenCacheItem
+                {
+                    ClientId = TestConstants.ClientId,
+                    Environment = "env",
+                    HomeAccountId = TestConstants.HomeAccountId,
+                    Secret = "access_token_secret",
+                    RawClientInfo = string.Empty,
+                    OboCacheKey = "assertion_hash"
+                };
+            }
+
+            item.InitCacheKey();
+            return item;
         }
 
         private MsalIdTokenCacheItem CreateIdTokenItem()
         {
-            return new MsalIdTokenCacheItem
+            var item = new MsalIdTokenCacheItem
             {
                 ClientId = TestConstants.ClientId,
                 Environment = "env",
@@ -113,11 +120,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TenantId = "the_tenant_id",
                 RawClientInfo = string.Empty,
             };
+
+            item.InitCacheKey();
+            return item;
         }
 
         private MsalAccountCacheItem CreateAccountItem()
         {
-            return new MsalAccountCacheItem
+            var item = new MsalAccountCacheItem
             {
                 Environment = "env",
                 HomeAccountId = TestConstants.HomeAccountId,
@@ -130,6 +140,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 FamilyName = TestConstants.FamilyName,
                 PreferredUsername = TestConstants.Username
             };
+
+            item.InitCacheKey();
+            return item;
         }
 
         private ITokenCacheAccessor CreateTokenCacheAccessor()
@@ -164,6 +177,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     extendedExpiresOn: DateTimeHelpers.UnixTimestampToDateTime(23456));
 
                 item.Environment += $"_{keyPrefix}{i}"; // ensure we get unique cache keys
+                item.InitCacheKey();
                 accessor.SaveAccessToken(item);
             }
 
@@ -171,18 +185,21 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 var item = CreateRefreshTokenItem();
                 item.Environment += $"_{keyPrefix}{i}"; // ensure we get unique cache keys
+                item.InitCacheKey();
                 accessor.SaveRefreshToken(item);
             }
 
             // Create an FRT
             var frt = CreateRefreshTokenItem(true);
             frt.FamilyId = "1";
+            frt.InitCacheKey();
             accessor.SaveRefreshToken(frt);
 
             for (int i = 1; i <= numIdTokens; i++)
             {
                 var item = CreateIdTokenItem();
                 item.Environment += $"_{keyPrefix}{i}"; // ensure we get unique cache keys
+                item.InitCacheKey();
                 accessor.SaveIdToken(item);
             }
 
@@ -190,6 +207,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 var item = CreateAccountItem();
                 item.Environment += $"_{keyPrefix}{i}"; // ensure we get unique cache keys
+                item.InitCacheKey();
                 accessor.SaveAccount(item);
             }
 
@@ -880,7 +898,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             CoreAssert.AreWithinOneSecond(expected.CachedAt, actual.CachedAt, nameof(actual.CachedAt));
 
             Assert.AreEqual(expected.IsExtendedLifeTimeToken, actual.IsExtendedLifeTimeToken, nameof(actual.IsExtendedLifeTimeToken));
-            Assert.AreEqual(expected.GetKey().ToString(), actual.GetKey().ToString());
+            Assert.AreEqual(expected.CacheKey, actual.CacheKey);
             CollectionAssert.AreEqual(expected.ScopeSet.ToList(), actual.ScopeSet.ToList(), nameof(actual.ScopeSet));
             Assert.AreEqual(expected.TenantId, actual.TenantId, nameof(actual.TenantId));
             Assert.AreEqual(expected.OboCacheKey, actual.OboCacheKey, nameof(actual.OboCacheKey));
