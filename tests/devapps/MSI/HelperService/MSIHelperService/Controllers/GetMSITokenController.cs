@@ -2,11 +2,36 @@
 // Licensed under the MIT License.
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Test.Common.Http;
 using MSIHelperService.Helper;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace MSIHelperService.Controllers
 {
+    [ApiController]
+    [Route("[controller]")]
+    [SwaggerTag(description: "Gets MSI Token")]
+    public class HttpController : ControllerBase
+    {
+        private readonly ILogger _logger;
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        public HttpController(ILogger<GetMSITokenController> logger, IHttpClientFactory httpClientFactory)
+        {
+            _logger = logger;
+            _httpClientFactory = httpClientFactory;
+        }
+
+        [HttpPost]
+        public async Task<HttpResponseFacade> SendAsync(HttpRequestFacade requestFacade)
+        {
+            HttpRequestMessage request = requestFacade.ToHttpRequestMessage();
+            HttpResponseMessage response = await _httpClientFactory.CreateClient().SendAsync(request).ConfigureAwait(false);
+            return HttpResponseFacade.FromHttpResponseMessage(response);
+        }
+    }
+    
+    
     [ApiController]
     [Route("[controller]")]
     [SwaggerTag(description: "Gets MSI Token")]

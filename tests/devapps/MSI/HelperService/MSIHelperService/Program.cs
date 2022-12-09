@@ -17,6 +17,8 @@ builder.Services.AddEndpointsApiExplorer();
 // Register the Swagger generator, defining 1 or more Swagger documents
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddHttpClient();
+
 builder.Services.AddApplicationInsightsTelemetry();
 
 builder.Services.AddAuthorization(options =>

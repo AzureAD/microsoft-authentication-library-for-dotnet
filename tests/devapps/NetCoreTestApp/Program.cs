@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Desktop;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Test.Common.Http;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using NetCoreTestApp.Experimental;
 
@@ -54,7 +55,7 @@ namespace NetCoreTestApp
             var ccaSettings = ConfidentialAppSettings.GetSettings(Cloud.Public);
             s_clientIdForConfidentialApp = ccaSettings.ClientId;
             s_ccaAuthority = ccaSettings.Authority;
-            s_confidentialClientSecret = ccaSettings.GetSecret();
+            //s_confidentialClientSecret = ccaSettings.GetSecret();
 
             var pca = CreatePca();
             RunConsoleAppLogicAsync(pca).Wait();
@@ -68,9 +69,12 @@ namespace NetCoreTestApp
 
         private static IPublicClientApplication CreatePca()
         {
+            var proxyHttpFactory = new RemoteHttpFactory(new Uri("https://localhost:7059/Http"));
+            
             var pcaBuilder = PublicClientApplicationBuilder
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
+                            .WithHttpClientFactory(proxyHttpFactory)
                             .WithLogging(Log, LogLevel.Verbose, true)
                             .WithExperimentalFeatures()
                             .WithDesktopFeatures();
