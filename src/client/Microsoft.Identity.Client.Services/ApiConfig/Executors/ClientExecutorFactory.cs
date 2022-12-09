@@ -5,16 +5,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
     internal static class ClientExecutorFactory
     {
-        public static IPublicClientApplicationExecutor CreatePublicClientExecutor(
-            PublicClientApplication publicClientApplication)
-        {
-            IPublicClientApplicationExecutor executor = new PublicClientExecutor(
-                publicClientApplication.ServiceBundle,
-                publicClientApplication);
-
-            return executor;
-        }
-
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
