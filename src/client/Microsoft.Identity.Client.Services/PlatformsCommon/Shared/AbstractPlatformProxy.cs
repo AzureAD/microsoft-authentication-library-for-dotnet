@@ -2,15 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
@@ -47,14 +43,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         protected ILoggerAdapter Logger { get; }
 
         /// <inheritdoc />
-        public IWebUIFactory GetWebUiFactory(ApplicationConfiguration appConfig)
-        {
-            return appConfig.WebUiFactoryCreator != null ?
-              appConfig.WebUiFactoryCreator() :
-              CreateWebUiFactory();
-        }
-
-        /// <inheritdoc />
         public string GetDeviceModel()
         {
             return _deviceModel.Value;
@@ -73,9 +61,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         /// <inheritdoc />
-        public abstract Task<string> GetUserPrincipalNameAsync();
-
-        /// <inheritdoc />
         public string GetCallingApplicationName()
         {
             return _callingApplicationName.Value;
@@ -92,9 +77,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return _deviceId.Value;
         }
-
-        /// <inheritdoc />
-        public abstract string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false);
 
         /// <inheritdoc />
         public string GetProductName()
@@ -134,21 +116,20 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// <inheritdoc />
         public IPlatformLogger PlatformLogger => _platformLogger.Value;
 
-        protected abstract IWebUIFactory CreateWebUiFactory();
-        protected abstract IFeatureFlags CreateFeatureFlags();
+        internal abstract IFeatureFlags CreateFeatureFlags();
 
-        protected abstract string InternalGetDeviceModel();
-        protected abstract string InternalGetOperatingSystem();
-        protected abstract string InternalGetProcessorArchitecture();
-        protected abstract string InternalGetCallingApplicationName();
-        protected abstract string InternalGetCallingApplicationVersion();
-        protected abstract string InternalGetDeviceId();
-        protected abstract string InternalGetProductName();
-        protected abstract ICryptographyManager InternalGetCryptographyManager();
-        protected abstract IPlatformLogger InternalGetPlatformLogger();
+        internal abstract string InternalGetDeviceModel();
+        internal abstract string InternalGetOperatingSystem();
+        internal abstract string InternalGetProcessorArchitecture();
+        internal abstract string InternalGetCallingApplicationName();
+        internal abstract string InternalGetCallingApplicationVersion();
+        internal abstract string InternalGetDeviceId();
+        internal abstract string InternalGetProductName();
+        internal abstract ICryptographyManager InternalGetCryptographyManager();
+        internal abstract IPlatformLogger InternalGetPlatformLogger();
 
         // RuntimeInformation.FrameworkDescription is available on all platforms except .NET Framework 4.7 and lower.
-        protected virtual string InternalGetRuntimeVersion()
+        internal virtual string InternalGetRuntimeVersion()
         {
 #if !DESKTOP
             return System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
@@ -171,25 +152,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             OverloadFeatureFlags = featureFlags;
         }
-
-        public virtual Task StartDefaultOsBrowserAsync(string url, bool IBrokerConfigured)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
-        {
-            return appConfig.BrokerCreatorFunc != null ?
-                appConfig.BrokerCreatorFunc(uiParent, appConfig, Logger) :
-                new NullBroker(Logger);
-        }
-
-        public virtual bool CanBrokerSupportSilentAuth()
-        {
-            return true;
-        }
-
-        public virtual bool BrokerSupportsWamAccounts => false;
 
         public virtual IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {

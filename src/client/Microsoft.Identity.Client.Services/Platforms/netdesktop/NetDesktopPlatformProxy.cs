@@ -2,22 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.UI;
 using Microsoft.Win32;
 
 namespace Microsoft.Identity.Client.Platforms.net45
@@ -51,69 +43,46 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
 
         /// <inheritdoc />
-        public override Task<string> GetUserPrincipalNameAsync()
-        {
-            throw new NotSupportedException(MsalErrorMessage.PublicClientOnlyOperation);
-        }
-
-        /// <inheritdoc />
-        public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
-        {
-            if (useRecommendedRedirectUri)
-            {
-                return Constants.NativeClientRedirectUri;
-            }
-
-            return Constants.DefaultRedirectUri;
-        }
-
-        /// <inheritdoc />
         public override ILegacyCachePersistence CreateLegacyCachePersistence()
         {
             return new InMemoryLegacyCachePersistance();
         }
 
         /// <inheritdoc />
-        protected override IWebUIFactory CreateWebUiFactory()
-        {
-            throw new NotSupportedException(MsalErrorMessage.PublicClientOnlyOperation);
-        }
-
-        /// <inheritdoc />
-        protected override string InternalGetDeviceModel()
+        internal override string InternalGetDeviceModel()
         {
             // Since MSAL .NET may be used on servers, for security reasons, we do not emit device type.
             return null;
         }
 
         /// <inheritdoc />
-        protected override string InternalGetOperatingSystem()
+        internal override string InternalGetOperatingSystem()
         {
             return DesktopOsHelper.GetWindowsVersionString();
         }
 
         /// <inheritdoc />
-        protected override string InternalGetProcessorArchitecture()
+        internal override string InternalGetProcessorArchitecture()
         {
             return IsWindows ? WindowsNativeMethods.GetProcessorArchitecture() : null;
         }
 
         /// <inheritdoc />
-        protected override string InternalGetCallingApplicationName()
+        internal override string InternalGetCallingApplicationName()
         {
             // Considered PII, ensure that it is hashed.
             return Assembly.GetEntryAssembly()?.GetName()?.Name;
         }
 
         /// <inheritdoc />
-        protected override string InternalGetCallingApplicationVersion()
+        internal override string InternalGetCallingApplicationVersion()
         {
             // Considered PII, ensure that it is hashed.
             return Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString();
         }
 
         /// <inheritdoc />
-        protected override string InternalGetDeviceId()
+        internal override string InternalGetDeviceId()
         {
             try
             {
@@ -129,12 +98,12 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
 
         /// <inheritdoc />
-        protected override string InternalGetProductName()
+        internal override string InternalGetProductName()
         {
             return "MSAL.Desktop";
         }
 
-        protected override string InternalGetRuntimeVersion()
+        internal override string InternalGetRuntimeVersion()
         {
             // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#query-the-registry-using-code
             try
@@ -205,16 +174,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
 
         /// <inheritdoc />
-        protected override ICryptographyManager InternalGetCryptographyManager() => new NetDesktopCryptographyManager();
+        internal override ICryptographyManager InternalGetCryptographyManager() => new NetDesktopCryptographyManager();
 
-        protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
+        internal override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
-        protected override IFeatureFlags CreateFeatureFlags() => new NetDesktopFeatureFlags();
-
-        public override Task StartDefaultOsBrowserAsync(string url, bool isBrokerConfigured)
-        {
-            throw new NotSupportedException(MsalErrorMessage.PublicClientOnlyOperation);
-        }
+        internal override IFeatureFlags CreateFeatureFlags() => new NetDesktopFeatureFlags();
 
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
@@ -225,8 +189,5 @@ namespace Microsoft.Identity.Client.Platforms.net45
         {
             return new NetDesktopDeviceAuthManager();
         }
-
-        public override bool BrokerSupportsWamAccounts => throw new NotSupportedException(MsalErrorMessage.PublicClientOnlyOperation);
-
     }
 }

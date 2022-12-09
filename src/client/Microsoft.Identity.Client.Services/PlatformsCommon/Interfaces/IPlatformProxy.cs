@@ -1,12 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
-using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 {
@@ -27,12 +24,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         string GetProcessorArchitecture();
 
         /// <summary>
-        /// Gets the UPN of the user currently logged into the OS
-        /// </summary>
-        /// <returns></returns>
-        Task<string> GetUserPrincipalNameAsync();
-
-        /// <summary>
         /// Returns the name of the calling assembly
         /// </summary>
         /// <returns></returns>
@@ -49,11 +40,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// </summary>
         /// <returns></returns>
         string GetDeviceId();
-
-        /// <summary>
-        /// Gets the default redirect URI for the platform, which sometimes includes the clientId
-        /// </summary>
-        string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false);
 
         /// <summary>
         /// Returns the MSAL platform, e.g. MSAL.NetCore, MSAL.Desktop.
@@ -79,35 +65,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 
         IPlatformLogger PlatformLogger { get; }
 
-        IWebUIFactory GetWebUiFactory(ApplicationConfiguration appConfig);
-
         IPoPCryptoProvider GetDefaultPoPCryptoProvider();
 
         IFeatureFlags GetFeatureFlags();
 
         void /* for test */ SetFeatureFlags(IFeatureFlags featureFlags);
 
-        /// <summary>
-        /// Go to a URL using the OS default browser. 
-        /// </summary>
-        Task StartDefaultOsBrowserAsync(string url, bool isBrokerConfigured);
-
-        IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent);
-
         IDeviceAuthManager CreateDeviceAuthManager();
-
-        /// <summary>
-        /// Most brokers take care of both silent auth and interactive auth, however some (iOS) 
-        /// does not support silent auth and gives the RT back to MSAL.
-        /// </summary>
-        /// <returns></returns>
-        bool CanBrokerSupportSilentAuth();
-
-        /// <summary>
-        /// WAM broker has a deeper integration into MSAL because MSAL needs to store 
-        /// WAM account IDs in the token cache. 
-        /// </summary>
-        bool BrokerSupportsWamAccounts { get; }
 
         IMsalHttpClientFactory CreateDefaultHttpClientFactory();
     }

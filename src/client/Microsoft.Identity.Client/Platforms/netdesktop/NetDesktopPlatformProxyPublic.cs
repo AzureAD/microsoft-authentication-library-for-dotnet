@@ -1,12 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,19 +14,22 @@ using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Win32;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
     /// <summary>
     ///     Platform / OS specific logic.
     /// </summary>
-    internal class NetDesktopPlatformProxyPublic : NetDesktopPlatformProxy
+    internal class NetDesktopPlatformProxyPublic : AbstractPlatformProxyPublic
     {
+        // Instance variable because cannot extend multiple base classes.
+        private readonly NetDesktopPlatformProxy _netDesktopPlatformProxy;
+
         /// <inheritdoc />
         public NetDesktopPlatformProxyPublic(ILoggerAdapter logger)
             : base(logger)
         {
+            _netDesktopPlatformProxy = new NetDesktopPlatformProxy(logger);
         }
 
         /// <summary>
@@ -71,10 +70,86 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
 
         /// <inheritdoc />
+        public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
+        {
+            if (useRecommendedRedirectUri)
+            {
+                return Constants.NativeClientRedirectUri;
+            }
+
+            return Constants.DefaultRedirectUri;
+        }
+
+        /// <inheritdoc />
+        public override ILegacyCachePersistence CreateLegacyCachePersistence()
+        {
+            return _netDesktopPlatformProxy.CreateLegacyCachePersistence();
+        }
+
+        /// <inheritdoc />
         protected override IWebUIFactory CreateWebUiFactory()
         {
             return new NetDesktopWebUIFactory();
         }
+
+        /// <inheritdoc />
+        internal override string InternalGetDeviceModel()
+        {
+            // Since MSAL .NET may be used on servers, for security reasons, we do not emit device type.
+            return _netDesktopPlatformProxy.InternalGetDeviceModel();
+        }
+
+        /// <inheritdoc />
+        internal override string InternalGetOperatingSystem()
+        {
+            return _netDesktopPlatformProxy.InternalGetOperatingSystem();
+        }
+
+        /// <inheritdoc />
+        internal override string InternalGetProcessorArchitecture()
+        {
+            return _netDesktopPlatformProxy.InternalGetProcessorArchitecture();
+        }
+
+        /// <inheritdoc />
+        internal override string InternalGetCallingApplicationName()
+        {
+            // Considered PII, ensure that it is hashed.
+            return _netDesktopPlatformProxy.InternalGetCallingApplicationName();
+        }
+
+        /// <inheritdoc />
+        internal override string InternalGetCallingApplicationVersion()
+        {
+            // Considered PII, ensure that it is hashed.
+            return _netDesktopPlatformProxy.InternalGetCallingApplicationVersion();
+        }
+
+        /// <inheritdoc />
+        internal override string InternalGetDeviceId()
+        {
+            // Considered PII, ensure that it is hashed.
+            return _netDesktopPlatformProxy.InternalGetDeviceId();
+        }
+
+        /// <inheritdoc />
+        internal override string InternalGetProductName()
+        {
+            return _netDesktopPlatformProxy.InternalGetProductName();
+        }
+
+        internal override string InternalGetRuntimeVersion()
+        {
+            // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#query-the-registry-using-code
+            return _netDesktopPlatformProxy.InternalGetRuntimeVersion();
+        }
+
+        /// <inheritdoc />
+        internal override ICryptographyManager InternalGetCryptographyManager() => _netDesktopPlatformProxy.InternalGetCryptographyManager();
+
+        internal override IPlatformLogger InternalGetPlatformLogger() => _netDesktopPlatformProxy.InternalGetPlatformLogger();
+
+        internal override IFeatureFlags CreateFeatureFlags() => _netDesktopPlatformProxy.CreateFeatureFlags();
 
         public override Task StartDefaultOsBrowserAsync(string url, bool isBrokerConfigured)
         {
@@ -97,6 +172,17 @@ namespace Microsoft.Identity.Client.Platforms.net45
             return Task.FromResult(0);
         }
 
+        public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
+        {
+            return _netDesktopPlatformProxy.GetDefaultPoPCryptoProvider();
+        }
+
+        public override IDeviceAuthManager CreateDeviceAuthManager()
+        {
+            return _netDesktopPlatformProxy.CreateDeviceAuthManager();
+        }
+
         public override bool BrokerSupportsWamAccounts => true;
+
     }
 }
