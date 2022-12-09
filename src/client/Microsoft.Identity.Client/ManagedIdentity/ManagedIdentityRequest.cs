@@ -13,8 +13,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal class ManagedIdentityRequest
     {
-        public Lazy<Uri> Endpoint => new Lazy<Uri>(() => ComputeUri(this)) ;
-
         private readonly Uri _baseEndpoint;
 
         public HttpMethod Method { get; }
@@ -34,10 +32,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             QueryParameters = new Dictionary<string, string>();
         }
 
-        public static Uri ComputeUri(ManagedIdentityRequest managedIdentityRequest)
+        public Uri ComputeUri()
         {
-            UriBuilder uriBuilder = new(managedIdentityRequest._baseEndpoint);
-            uriBuilder.AppendQueryParameters(managedIdentityRequest.QueryParameters);
+            UriBuilder uriBuilder = new(_baseEndpoint);
+            uriBuilder.AppendQueryParameters(QueryParameters);
 
             return uriBuilder.Uri;
         }

@@ -45,8 +45,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 HttpResponse response =
             request.Method == HttpMethod.Get ?
-            await _requestContext.ServiceBundle.HttpManager.SendGetForceResponseAsync(request.Endpoint.Value, request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false) :
-            await _requestContext.ServiceBundle.HttpManager.SendPostForceResponseAsync(request.Endpoint.Value, request.Headers, request.BodyParameters, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
+            await _requestContext.ServiceBundle.HttpManager.SendGetForceResponseAsync(request.ComputeUri(), request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false) :
+            await _requestContext.ServiceBundle.HttpManager.SendPostForceResponseAsync(request.ComputeUri(), request.Headers, request.BodyParameters, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
 
                 return HandleResponse(parameters, response);
             }
