@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         /// <inheritdoc />
-        public IWebUIFactory GetWebUiFactory(ApplicationConfiguration appConfig)
+        public IWebUIFactory GetWebUiFactory(ApplicationConfigurationPublic appConfig)
         {
             return appConfig.WebUiFactoryCreator != null ?
               appConfig.WebUiFactoryCreator() :
@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             throw new NotImplementedException();
         }
 
-        public virtual IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
+        public virtual IBroker CreateBroker(ApplicationConfigurationPublic appConfig, CoreUIParent uiParent)
         {
             return appConfig.BrokerCreatorFunc != null ?
                 appConfig.BrokerCreatorFunc(uiParent, appConfig, Logger) :

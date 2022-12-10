@@ -22,6 +22,9 @@ namespace Microsoft.Identity.Client.Internal
         /// <inheritdoc />
         public IPlatformProxyPublic PlatformProxyPublic { get { return (IPlatformProxyPublic)PlatformProxy; } }
 
+        /// <inheritdoc />
+        public ApplicationConfigurationPublic ConfigPublic { get { return (ApplicationConfigurationPublic)Config; } }
+
         public static new ServiceBundle Create(ApplicationConfiguration config)
         {
             return new ServiceBundlePublic(config);

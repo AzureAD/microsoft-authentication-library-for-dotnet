@@ -5,25 +5,20 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.UI;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
 {
-    internal sealed class ApplicationConfiguration : IAppConfig
+    internal class ApplicationConfiguration : IAppConfig
     {
         public ApplicationConfiguration(bool isConfidentialClient)
         {
@@ -57,11 +52,6 @@ namespace Microsoft.Identity.Client
         public string IosKeychainSecurityGroup { get; internal set; }
 
         public bool IsBrokerEnabled { get; internal set; }
-
-        public WindowsBrokerOptions WindowsBrokerOptions { get; set; }
-
-        public Func<CoreUIParent, ApplicationConfiguration, ILoggerAdapter, IBroker> BrokerCreatorFunc { get; set; }
-        public Func<IWebUIFactory> WebUiFactoryCreator { get; set; }
 
         /// <summary>
         /// Service principal name for Kerberos Service Ticket.

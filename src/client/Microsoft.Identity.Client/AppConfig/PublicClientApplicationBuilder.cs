@@ -6,7 +6,7 @@ using System.ComponentModel;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 #if iOS
 using UIKit;
@@ -37,6 +37,8 @@ namespace Microsoft.Identity.Client
             configuration.PlatformProxyFactory = new PublicPlatformProxyFactory();
         }
 
+        internal ApplicationConfigurationPublic ConfigPublic { get { return (ApplicationConfigurationPublic)Config; } }
+
         /// <summary>
         /// Creates a PublicClientApplicationBuilder from public client application
         /// configuration options. See https://aka.ms/msal-net-application-configuration
@@ -46,7 +48,7 @@ namespace Microsoft.Identity.Client
         /// parameters, and to create a public client application instance</returns>
         public static PublicClientApplicationBuilder CreateWithApplicationOptions(PublicClientApplicationOptions options)
         {
-            var config = new ApplicationConfiguration(isConfidentialClient: false);
+            var config = new ApplicationConfigurationPublic();
             return new PublicClientApplicationBuilder(config)
                 .WithOptions(options)
                 .WithKerberosTicketClaim(options.KerberosServicePrincipalName, options.TicketContainer);
@@ -62,7 +64,7 @@ namespace Microsoft.Identity.Client
         /// parameters, and to create a public client application instance</returns>
         public static PublicClientApplicationBuilder Create(string clientId)
         {
-            var config = new ApplicationConfiguration(isConfidentialClient: false);
+            var config = new ApplicationConfigurationPublic();
             return new PublicClientApplicationBuilder(config).WithClientId(clientId);
         }
 
@@ -203,7 +205,7 @@ namespace Microsoft.Identity.Client
         public PublicClientApplicationBuilder WithWindowsBrokerOptions(WindowsBrokerOptions options)
         {
             WindowsBrokerOptions.ValidatePlatformAvailability();
-            Config.WindowsBrokerOptions = options;
+            ConfigPublic.WindowsBrokerOptions = options;
             return this;
         }
 
@@ -349,8 +351,8 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public bool IsBrokerAvailable()
         {
-            return new PublicPlatformProxyFactory().CreatePlatformProxy(null)
-                    .CreateBroker(Config, null).IsBrokerInstalledAndInvokable(Config.Authority?.AuthorityInfo?.AuthorityType ?? AuthorityType.Aad);
+            return ((IPlatformProxyPublic)new PublicPlatformProxyFactory().CreatePlatformProxy(null))
+                    .CreateBroker(ConfigPublic, null).IsBrokerInstalledAndInvokable(Config.Authority?.AuthorityInfo?.AuthorityType ?? AuthorityType.Aad);
         }
 
         /// <summary>
@@ -389,7 +391,7 @@ namespace Microsoft.Identity.Client
 #endif
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))
             {
-                Config.RedirectUri = new PublicPlatformProxyFactory().CreatePlatformProxy(null)
+                Config.RedirectUri = ((IPlatformProxyPublic)new PublicPlatformProxyFactory().CreatePlatformProxy(null))
                                                          .GetDefaultRedirectUri(Config.ClientId, Config.UseRecommendedDefaultRedirectUri);
             }
 

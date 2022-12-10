@@ -24,14 +24,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// </summary>
         string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false);
 
-        IWebUIFactory GetWebUiFactory(ApplicationConfiguration appConfig);
+        IWebUIFactory GetWebUiFactory(ApplicationConfigurationPublic appConfig);
 
         /// <summary>
         /// Go to a URL using the OS default browser. 
         /// </summary>
         Task StartDefaultOsBrowserAsync(string url, bool isBrokerConfigured);
 
-        IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent);
+        IBroker CreateBroker(ApplicationConfigurationPublic appConfig, CoreUIParent uiParent);
 
         /// <summary>
         /// Most brokers take care of both silent auth and interactive auth, however some (iOS) 

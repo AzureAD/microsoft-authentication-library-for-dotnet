@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client
         {
             get
             {
-                return ServiceBundlePublic.PlatformProxyPublic.GetWebUiFactory(ServiceBundle.Config).IsSystemWebViewAvailable;
+                return ServiceBundlePublic.PlatformProxyPublic.GetWebUiFactory(ServiceBundlePublic.ConfigPublic).IsSystemWebViewAvailable;
             }
         }
 
@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public bool IsEmbeddedWebViewAvailable()
         {
-            return ServiceBundlePublic.PlatformProxyPublic.GetWebUiFactory(ServiceBundle.Config).IsEmbeddedWebViewAvailable;
+            return ServiceBundlePublic.PlatformProxyPublic.GetWebUiFactory(ServiceBundlePublic.ConfigPublic).IsEmbeddedWebViewAvailable;
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool IsUserInteractive()
         {
-            return ServiceBundlePublic.PlatformProxyPublic.GetWebUiFactory(ServiceBundle.Config).IsUserInteractive;
+            return ServiceBundlePublic.PlatformProxyPublic.GetWebUiFactory(ServiceBundlePublic.ConfigPublic).IsUserInteractive;
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public bool IsBrokerAvailable()
         {
-            return ServiceBundlePublic.PlatformProxyPublic.CreateBroker(ServiceBundle.Config, null)
+            return ServiceBundlePublic.PlatformProxyPublic.CreateBroker(ServiceBundlePublic.ConfigPublic, null)
                     .IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority?.AuthorityInfo?.AuthorityType ?? AuthorityType.Aad);
         }
 
@@ -293,7 +293,7 @@ namespace Microsoft.Identity.Client
         {
             if (ServiceBundle.Config.IsBrokerEnabled)
             {
-                var broker = ServiceBundlePublic.PlatformProxyPublic.CreateBroker(ServiceBundle.Config, null);
+                var broker = ServiceBundlePublic.PlatformProxyPublic.CreateBroker(ServiceBundlePublic.ConfigPublic, null);
 
                 if (broker.IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType))
                 {
@@ -345,7 +345,7 @@ namespace Microsoft.Identity.Client
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var broker = ServiceBundlePublic.PlatformProxyPublic.CreateBroker(ServiceBundle.Config, null);
+                var broker = ServiceBundlePublic.PlatformProxyPublic.CreateBroker(ServiceBundlePublic.ConfigPublic, null);
                 if (broker.IsBrokerInstalledAndInvokable(authority.AuthorityInfo.AuthorityType))
                 {
                     await broker.RemoveAccountAsync(ServiceBundle.Config, account).ConfigureAwait(false);
@@ -479,7 +479,7 @@ namespace Microsoft.Identity.Client
         {
             if (AppConfig.IsBrokerEnabled && ServiceBundlePublic.PlatformProxyPublic.CanBrokerSupportSilentAuth())
             {
-                var broker = ServiceBundlePublic.PlatformProxyPublic.CreateBroker(ServiceBundle.Config, null);
+                var broker = ServiceBundlePublic.PlatformProxyPublic.CreateBroker(ServiceBundlePublic.ConfigPublic, null);
                 if (broker.IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType))
                 {
                     var brokerAccounts =

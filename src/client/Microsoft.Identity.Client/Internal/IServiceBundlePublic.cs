@@ -11,5 +11,7 @@ namespace Microsoft.Identity.Client.Internal
         IPlatformProxyPublic PlatformProxyPublic { get; }
 
         IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
+
+        ApplicationConfigurationPublic ConfigPublic { get; }
     }
 }
