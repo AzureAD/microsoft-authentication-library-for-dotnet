@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (!Broker.IsBrokerInstalledAndInvokable(_authenticationRequestParameters.AuthorityInfo.AuthorityType))
             {
-                if(_authenticationRequestParameters.PopAuthenticationConfiguration != null)
+                if (_authenticationRequestParameters.PopAuthenticationConfiguration != null)
                 {
                     throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.CannotInvokeBrokerForPop);
                 }
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     throw new MsalUiRequiredException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription);
                 }
 
-                throw MsalServiceExceptionFactory.FromBrokerResponse(msalTokenResponse,
+                throw MsalServiceExceptionFactoryPublic.FromBrokerResponse(msalTokenResponse,
                                                      MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription);
             }
 

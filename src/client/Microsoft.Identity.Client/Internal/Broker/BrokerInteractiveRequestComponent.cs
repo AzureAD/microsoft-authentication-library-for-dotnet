@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Internal.Broker
 {
@@ -52,11 +52,11 @@ namespace Microsoft.Identity.Client.Internal.Broker
                 }
 
                 _logger.Info(LogMessages.AddBrokerInstallUrlToPayload);
-                Broker.HandleInstallUrl(_optionalBrokerInstallUrl);                
+                Broker.HandleInstallUrl(_optionalBrokerInstallUrl);
             }
 
             var tokenResponse = await Broker.AcquireTokenInteractiveAsync(
-                _authenticationRequestParameters, 
+                _authenticationRequestParameters,
                 _interactiveParameters)
                 .ConfigureAwait(false);
 
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
                 _logger.Error(
                     LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
 
-                throw MsalServiceExceptionFactory.FromBrokerResponse(msalTokenResponse,
+                throw MsalServiceExceptionFactoryPublic.FromBrokerResponse(msalTokenResponse,
                                                                      MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription);
             }
 
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             //|| authCode.StartsWith(_serviceBundle.Config.RedirectUri, StringComparison.OrdinalIgnoreCase) // TODO: what is this?!
             {
                 installationUri = ExtractAppLink(authCode);
-                return (installationUri != null);
+                return installationUri != null;
             }
 
             installationUri = null;
