@@ -507,7 +507,7 @@ namespace Microsoft.Identity.Client
         public PublicClientApplication(string clientId, string authority)
             : base(PublicClientApplicationBuilder
                 .Create(clientId)
-                .WithRedirectUri(((IPlatformProxyPublic)new PublicPlatformProxyFactory().CreatePlatformProxy(null)).GetDefaultRedirectUri(clientId))
+                .WithRedirectUri(((IPlatformProxyPublic)new PlatformProxyFactoryPublic().CreatePlatformProxy(null)).GetDefaultRedirectUri(clientId))
                 .WithAuthority(new Uri(authority), true)
                 .BuildConfiguration())
         {

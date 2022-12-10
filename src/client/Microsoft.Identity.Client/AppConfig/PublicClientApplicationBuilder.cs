@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client
         internal PublicClientApplicationBuilder(ApplicationConfiguration configuration)
             : base(configuration)
         {
-            configuration.PlatformProxyFactory = new PublicPlatformProxyFactory();
+            configuration.PlatformProxyFactory = new PlatformProxyFactoryPublic();
         }
 
         internal ApplicationConfigurationPublic ConfigPublic { get { return (ApplicationConfigurationPublic)Config; } }
@@ -351,7 +351,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public bool IsBrokerAvailable()
         {
-            return ((IPlatformProxyPublic)new PublicPlatformProxyFactory().CreatePlatformProxy(null))
+            return ((IPlatformProxyPublic)new PlatformProxyFactoryPublic().CreatePlatformProxy(null))
                     .CreateBroker(ConfigPublic, null).IsBrokerInstalledAndInvokable(Config.Authority?.AuthorityInfo?.AuthorityType ?? AuthorityType.Aad);
         }
 
@@ -391,7 +391,7 @@ namespace Microsoft.Identity.Client
 #endif
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))
             {
-                Config.RedirectUri = ((IPlatformProxyPublic)new PublicPlatformProxyFactory().CreatePlatformProxy(null))
+                Config.RedirectUri = ((IPlatformProxyPublic)new PlatformProxyFactoryPublic().CreatePlatformProxy(null))
                                                          .GetDefaultRedirectUri(Config.ClientId, Config.UseRecommendedDefaultRedirectUri);
             }
 

@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client
             : base(configuration)
         {
             ClientApplicationBase.GuardMobileFrameworks();
-            configuration.PlatformProxyFactory = new ConfidentialPlatformProxyFactory();
+            configuration.PlatformProxyFactory = new PlatformProxyFactory();
         }
 
         /// <summary>

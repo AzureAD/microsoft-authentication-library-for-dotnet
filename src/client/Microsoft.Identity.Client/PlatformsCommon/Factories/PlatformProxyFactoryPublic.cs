@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
     /// <summary>
     ///     Returns the platform / os specific implementation of a PlatformProxy.
     /// </summary>
-    internal class PublicPlatformProxyFactory : IPlatformProxyFactory
+    internal class PlatformProxyFactoryPublic : IPlatformProxyFactory
     {
         /// <summary>
         ///     Gets the platform proxy, which can be used to perform platform specific operations
