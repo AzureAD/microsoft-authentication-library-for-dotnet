@@ -161,5 +161,15 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             string result = await SendLabRequestAsync(LabApiConstants.LabUserCredentialEndpoint, queryDict).ConfigureAwait(false);
             return JsonConvert.DeserializeObject<LabCredentialResponse>(result).Secret;
         }
+
+        public async Task<string> GetMSIHelperServiceTokenAsync()
+        {
+            if (_labApiAccessToken == null)
+                _labApiAccessToken = await LabAuthenticationHelper
+                    .GetAccessTokenForLabAPIAsync(_labAccessAppId, _labAccessClientSecret)
+                    .ConfigureAwait(false);
+
+            return _labApiAccessToken.Value.Token;
+        }
     }
 }
