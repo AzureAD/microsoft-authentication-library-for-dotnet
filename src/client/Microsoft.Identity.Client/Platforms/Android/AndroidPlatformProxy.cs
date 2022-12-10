@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 #else
     [global::Android.Runtime.Preserve(AllMembers = true)]
 #endif
-    internal class AndroidPlatformProxy : AbstractPlatformProxy
+    internal class AndroidPlatformProxy : AbstractPlatformProxyPublic
     {
         internal const string AndroidDefaultRedirectUriTemplate = "msal{0}://auth";
         public AndroidPlatformProxy(ILoggerAdapter logger) : base(logger)
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return Task.FromResult(string.Empty);
 
         }
-        protected override string InternalGetProcessorArchitecture()
+        internal override string InternalGetProcessorArchitecture()
         {
             if (global::Android.OS.Build.VERSION.SdkInt < global::Android.OS.BuildVersionCodes.Lollipop)
             {
@@ -55,13 +55,13 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return null;
         }
 
-        protected override string InternalGetOperatingSystem()
+        internal override string InternalGetOperatingSystem()
         {
             return ((int)global::Android.OS.Build.VERSION.SdkInt)
                 .ToString(CultureInfo.InvariantCulture);
         }
 
-        protected override string InternalGetDeviceModel()
+        internal override string InternalGetDeviceModel()
         {
             return global::Android.OS.Build.Model;
         }
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return string.Format(CultureInfo.InvariantCulture, AndroidDefaultRedirectUriTemplate, clientId);
         }
 
-        protected override string InternalGetProductName()
+        internal override string InternalGetProductName()
         {
             return "MSAL.Xamarin.Android";
         }
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Name of the calling application</returns>
-        protected override string InternalGetCallingApplicationName()
+        internal override string InternalGetCallingApplicationName()
         {
             return global::Android.App.Application.Context.ApplicationInfo?.LoadLabel(global::Android.App.Application.Context.PackageManager);
         }
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Version of the calling application</returns>
-        protected override string InternalGetCallingApplicationVersion()
+        internal override string InternalGetCallingApplicationVersion()
         {
             return global::Android.App.Application.Context.PackageManager.GetPackageInfo(global::Android.App.Application.Context.PackageName, 0)?.VersionName;
         }
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         /// Considered PII. Please ensure that it is hashed.
         /// </summary>
         /// <returns>Device identifier</returns>
-        protected override string InternalGetDeviceId()
+        internal override string InternalGetDeviceId()
         {
             return global::Android.Provider.Settings.Secure.GetString(
                 global::Android.App.Application.Context.ContentResolver,
@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         /// <inheritdoc />
         public override ITokenCacheAccessor CreateTokenCacheAccessor(
-            CacheOptions cacheOptions, 
+            CacheOptions cacheOptions,
             bool isApplicationTokenCache = false)
         {
             return new AndroidTokenCacheAccessor();
@@ -126,13 +126,13 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return new AndroidWebUIFactory();
         }
 
-        protected override ICryptographyManager InternalGetCryptographyManager() => new CommonCryptographyManager();
+        internal override ICryptographyManager InternalGetCryptographyManager() => new CommonCryptographyManager();
 
-        protected override IPlatformLogger InternalGetPlatformLogger() => new AndroidPlatformLogger();
+        internal override IPlatformLogger InternalGetPlatformLogger() => new AndroidPlatformLogger();
 
-        protected override IFeatureFlags CreateFeatureFlags() => new AndroidFeatureFlags();     
+        internal override IFeatureFlags CreateFeatureFlags() => new AndroidFeatureFlags();
 
-        public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
+        public override IBroker CreateBroker(ApplicationConfigurationPublic appConfig, CoreUIParent uiParent)
         {
             return AndroidBrokerFactory.CreateBroker(uiParent, Logger);
         }

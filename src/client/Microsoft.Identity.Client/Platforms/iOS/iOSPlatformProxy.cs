@@ -1,24 +1,23 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Foundation;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using UIKit;
-using Microsoft.Identity.Client.Internal.Broker;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {
     /// <summary>
     ///     Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here.
     /// </summary>
-    internal class iOSPlatformProxy : AbstractPlatformProxy
+    internal class iOSPlatformProxy : AbstractPlatformProxyPublic
     {
         internal const string IosDefaultRedirectUriTemplate = "msal{0}://auth";
 
@@ -31,17 +30,17 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             return Task.FromResult(string.Empty);
         }
-        protected override  string InternalGetProcessorArchitecture()
+        internal override string InternalGetProcessorArchitecture()
         {
             return null;
         }
 
-        protected override  string InternalGetOperatingSystem()
+        internal override string InternalGetOperatingSystem()
         {
             return UIDevice.CurrentDevice.SystemVersion;
         }
 
-        protected override  string InternalGetDeviceModel()
+        internal override string InternalGetDeviceModel()
         {
             return UIDevice.CurrentDevice.Model;
         }
@@ -52,7 +51,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return string.Format(CultureInfo.InvariantCulture, IosDefaultRedirectUriTemplate, clientId);
         }
 
-        protected override  string InternalGetProductName()
+        internal override string InternalGetProductName()
         {
             return "MSAL.Xamarin.iOS";
         }
@@ -61,7 +60,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Name of the calling application</returns>
-        protected override  string InternalGetCallingApplicationName()
+        internal override string InternalGetCallingApplicationName()
         {
             return (NSString)NSBundle.MainBundle?.InfoDictionary?["CFBundleName"];
         }
@@ -70,7 +69,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Version of the calling application</returns>
-        protected override  string InternalGetCallingApplicationVersion()
+        internal override string InternalGetCallingApplicationVersion()
         {
             return (NSString)NSBundle.MainBundle?.InfoDictionary?["CFBundleVersion"];
         }
@@ -79,7 +78,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         /// Considered PII. Please ensure that it is hashed.
         /// </summary>
         /// <returns>Device identifier</returns>
-        protected override  string InternalGetDeviceId()
+        internal override string InternalGetDeviceId()
         {
             return UIDevice.CurrentDevice?.IdentifierForVendor?.AsString();
         }
@@ -90,7 +89,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         }
 
         public override ITokenCacheAccessor CreateTokenCacheAccessor(
-            CacheOptions tokenCacheAccessorOptions, 
+            CacheOptions tokenCacheAccessorOptions,
             bool isApplicationTokenCache = false)
         {
             return new iOSTokenCacheAccessor();
@@ -102,12 +101,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return new IosWebUIFactory();
         }
 
-        protected override ICryptographyManager InternalGetCryptographyManager() => new CommonCryptographyManager();
-        protected override IPlatformLogger InternalGetPlatformLogger() => new ConsolePlatformLogger();
+        internal override ICryptographyManager InternalGetCryptographyManager() => new CommonCryptographyManager();
+        internal override IPlatformLogger InternalGetPlatformLogger() => new ConsolePlatformLogger();
 
-        protected override IFeatureFlags CreateFeatureFlags() => new iOSFeatureFlags();
+        internal override IFeatureFlags CreateFeatureFlags() => new iOSFeatureFlags();
 
-        public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
+        public override IBroker CreateBroker(ApplicationConfigurationPublic appConfig, CoreUIParent uiParent)
         {
             return new iOSBroker(Logger, CryptographyManager, uiParent);
         }

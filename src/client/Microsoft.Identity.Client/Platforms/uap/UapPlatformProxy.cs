@@ -13,14 +13,10 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Platforms.Features.WamBroker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.TelemetryCore.Internal;
 using Microsoft.Identity.Client.UI;
 using Windows.ApplicationModel;
-using Windows.Networking;
-using Windows.Networking.Connectivity;
 using Windows.Security.Authentication.Web;
 using Windows.Security.ExchangeActiveSyncProvisioning;
-using Windows.Storage;
 using Windows.System;
 
 namespace Microsoft.Identity.Client.Platforms.uap
@@ -28,7 +24,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
     /// <summary>
     /// Platform / OS specific logic. No library (ADAL / MSAL) specific code should go in here.
     /// </summary>
-    internal class UapPlatformProxy : AbstractPlatformProxy
+    internal class UapPlatformProxy : AbstractPlatformProxyPublic
     {
         public UapPlatformProxy(ILoggerAdapter logger)
             : base(logger)
@@ -99,24 +95,24 @@ namespace Microsoft.Identity.Client.Platforms.uap
                 MsalErrorMessage.UapCannotFindDomainUser);
         }
 
-        protected override string InternalGetProcessorArchitecture()
+        internal override string InternalGetProcessorArchitecture()
         {
             return WindowsNativeMethods.GetProcessorArchitecture();
         }
 
-        protected override string InternalGetOperatingSystem()
+        internal override string InternalGetOperatingSystem()
         {
             return "Windows 10";
         }
 
-        protected override string InternalGetDeviceModel()
+        internal override string InternalGetDeviceModel()
         {
             var deviceInformation = new Windows.Security.ExchangeActiveSyncProvisioning.EasClientDeviceInformation();
             return deviceInformation.SystemProductName;
         }
         public override bool BrokerSupportsWamAccounts => true;
 
-        public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
+        public override IBroker CreateBroker(ApplicationConfigurationPublic appConfig, CoreUIParent uiParent)
         {
             return new WamBroker(uiParent, appConfig, Logger);
         }
@@ -131,7 +127,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return Constants.DefaultRedirectUri;
         }
 
-        protected override string InternalGetProductName()
+        internal override string InternalGetProductName()
         {
             return "MSAL.UAP";
         }
@@ -140,7 +136,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Name of the calling application</returns>
-        protected override string InternalGetCallingApplicationName()
+        internal override string InternalGetCallingApplicationName()
         {
             return Package.Current?.DisplayName?.ToString();
         }
@@ -149,7 +145,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Version of the calling application</returns>
-        protected override string InternalGetCallingApplicationVersion()
+        internal override string InternalGetCallingApplicationVersion()
         {
             return Package.Current?.Id?.Version.ToString();
         }
@@ -158,22 +154,21 @@ namespace Microsoft.Identity.Client.Platforms.uap
         /// Considered PII. Please ensure that it is hashed.
         /// </summary>
         /// <returns>Device identifier</returns>
-        protected override string InternalGetDeviceId()
+        internal override string InternalGetDeviceId()
         {
             return new EasClientDeviceInformation()?.Id.ToString();
         }
 
         public override ILegacyCachePersistence CreateLegacyCachePersistence() => new UapLegacyCachePersistence(Logger, CryptographyManager);
 
-        public override ICacheSerializationProvider CreateTokenCacheBlobStorage() => 
+        public override ICacheSerializationProvider CreateTokenCacheBlobStorage() =>
             new SynchronizedAndEncryptedFileProvider(Logger);
 
         protected override IWebUIFactory CreateWebUiFactory() => new UapWebUIFactory();
-        protected override ICryptographyManager InternalGetCryptographyManager() => new UapCryptographyManager();
-        protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
+        internal override ICryptographyManager InternalGetCryptographyManager() => new UapCryptographyManager();
+        internal override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
-        protected override IFeatureFlags CreateFeatureFlags() => new UapFeatureFlags();
-       
+        internal override IFeatureFlags CreateFeatureFlags() => new UapFeatureFlags();
 
         public override IDeviceAuthManager CreateDeviceAuthManager()
         {

@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Platforms.net6win
     /// <summary>
     ///     Platform / OS specific logic.
     /// </summary>
-    internal class Net6WinPlatformProxy : NetCorePlatformProxy
+    internal class Net6WinPlatformProxy : NetCorePlatformProxyPublic
     {
         /// <inheritdoc />
         public Net6WinPlatformProxy(ILoggerAdapter logger)
@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Platforms.net6win
 #if NET6_WIN
         [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
 #endif
-        public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
+        public override IBroker CreateBroker(ApplicationConfigurationPublic appConfig, CoreUIParent uiParent)
         {
             if (DesktopOsHelper.IsWin10OrServerEquivalent())
             {
