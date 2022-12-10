@@ -42,7 +42,7 @@ namespace MSIHelperService.Controllers
         [SwaggerResponse(400, "Returns the error object for any validation failures", Type = typeof(string))]
         [SwaggerResponse(500, "Returns the error object for any Server Errors", Type = typeof(string))]
         [HttpGet]
-        public Dictionary<string, string>? GetEnvValues([FromQuery(Name = "resource")]
+        public async Task<Dictionary<string, string>>? GetEnvValues([FromQuery(Name = "resource")]
         string resource = MSIHelper.DefaultAzureResource)
         {
             _logger.LogInformation("GetEnvironmentVariablesController called.");
@@ -53,11 +53,11 @@ namespace MSIHelperService.Controllers
             //Call the MSIHelper method based on the resource
             Dictionary<string, string>? response = Enum.Parse<MSIHelper.AzureResource>(resource) switch
             {
-                MSIHelper.AzureResource.webapp => MSIHelper.GetWebAppEnvironmentVariables(
-                    _logger),
+                MSIHelper.AzureResource.webapp => await MSIHelper.GetWebAppEnvironmentVariablesAsync(
+                    _logger).ConfigureAwait(false),
 
-                MSIHelper.AzureResource.function => MSIHelper.GetFunctionAppEnvironmentVariables(httpClient,
-                    _logger),
+                MSIHelper.AzureResource.function => await MSIHelper.GetFunctionAppEnvironmentVariablesAsync(httpClient,
+                    _logger).ConfigureAwait(false),
 
                 MSIHelper.AzureResource.vm => throw new NotImplementedException(),
 

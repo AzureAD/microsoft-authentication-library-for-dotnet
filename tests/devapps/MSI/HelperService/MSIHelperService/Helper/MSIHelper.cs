@@ -25,7 +25,11 @@ namespace MSIHelperService.Helper
         internal const string ContentTypeJson = "application/json";
         internal const string ContentTypeTextOrHtml = "text/html";
         internal const string ContentTypeMulipartOrFormData = "multipart/form-data";
+
+        //default azure resource if nothing is passed in the controllers
         internal const string DefaultAzureResource = "webapp";
+
+        //IDENTITY_HEADER in the App Service
         internal const string ManagedIdentityAuthenticationHeader = "X-IDENTITY-HEADER";
 
         //Environment variables
@@ -37,6 +41,8 @@ namespace MSIHelperService.Helper
         internal static readonly string? s_webhookLocation = Environment.GetEnvironmentVariable("webhookLocation");
         internal static readonly string? s_oMSAdminClientID = Environment.GetEnvironmentVariable("OMSAdminClientID");
         internal static readonly string? s_oMSAdminClientSecret = Environment.GetEnvironmentVariable("OMSAdminClientSecret");
+
+        //Microsoft authority endpoint
         internal const string Authority = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47";
 
         //Enum for HTTP Error Response Codes
@@ -66,7 +72,7 @@ namespace MSIHelperService.Helper
         /// </summary>
         /// <param name="logger"></param>
         /// <returns>Returns the environment variables</returns>
-        public static Dictionary<string, string> GetWebAppEnvironmentVariables(
+        public static async Task<Dictionary<string, string>> GetWebAppEnvironmentVariablesAsync(
             ILogger logger)
         {
             //Gets Azure Web App Specific environment variables and sends it back
@@ -78,7 +84,7 @@ namespace MSIHelperService.Helper
 
             logger.LogInformation("GetWebAppEnvironmentVariables Function called.");
 
-            return keyValuePairs;
+            return await Task.FromResult(keyValuePairs).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -87,14 +93,14 @@ namespace MSIHelperService.Helper
         /// <param name="httpClient"></param>
         /// <param name="logger"></param>
         /// <returns>Returns the environment variables</returns>
-        public static Dictionary<string, string>? GetFunctionAppEnvironmentVariables(
+        public static async Task<Dictionary<string, string>?> GetFunctionAppEnvironmentVariablesAsync(
             HttpClient httpClient,
             ILogger logger)
         {
             logger.LogInformation("GetFunctionAppEnvironmentVariables Function called.");
 
-            string? token = Task.Run(async () => await GetMSALToken(logger).ConfigureAwait(false))
-                .GetAwaiter().GetResult();
+            string? token = await GetMSALToken(logger)
+                .ConfigureAwait(false);
 
             //clear the default request header for each call
             ClearDefaultRequestHeaders(logger, httpClient);
@@ -103,13 +109,13 @@ namespace MSIHelperService.Helper
             SetAuthorizationHeader(token, httpClient, logger);
 
             //send the request
-            HttpResponseMessage result = Task.Run(async () => await httpClient
-            .GetAsync(s_functionAppUri + "GetEnvironmentVariables?code=" + s_functionAppEnvCode).ConfigureAwait(false))
-            .GetAwaiter().GetResult();
+            HttpResponseMessage result = await httpClient
+            .GetAsync(s_functionAppUri + 
+            "GetEnvironmentVariables?code=" 
+            + s_functionAppEnvCode)
+            .ConfigureAwait(false);
 
-            var content = Task.Run(
-                async () => await result.Content.ReadAsStringAsync().ConfigureAwait(false))
-                .GetAwaiter().GetResult();
+            var content = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
 
             Dictionary<string, string>? envValuePairs = JsonConvert.DeserializeObject<Dictionary<string, string>>(content);
 
@@ -277,7 +283,10 @@ namespace MSIHelperService.Helper
 
             json = JsonConvert.SerializeObject
                 (content, Formatting.Indented, new JsonSerializerSettings()
-                { ReferenceLoopHandling = ReferenceLoopHandling.Serialize, TypeNameHandling = TypeNameHandling.None });
+                { 
+                    ReferenceLoopHandling = ReferenceLoopHandling.Serialize, 
+                    TypeNameHandling = TypeNameHandling.None 
+                });
 
             return json.Trim();
 
