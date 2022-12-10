@@ -593,8 +593,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class RSACertificatePopCryptoProvider : IPoPCryptoProvider
     {
         private readonly X509Certificate2 _cert;
-
-
         public RSACertificatePopCryptoProvider(X509Certificate2 cert)
         {
             _cert = cert ?? throw new ArgumentNullException(nameof(cert));
