@@ -6,6 +6,9 @@ using Newtonsoft.Json;
 
 namespace MSIHelperService
 {
+    /// <summary>
+    /// ManagedIdentityResponse
+    /// </summary>
     [JsonObject]
     public class ManagedIdentityResponse
     {

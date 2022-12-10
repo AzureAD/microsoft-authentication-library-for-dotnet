@@ -7,20 +7,28 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace MSIHelperService.Controllers
 {
+    /// <summary>
+    /// GetMSITokenController
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     [SwaggerTag(description: "Gets MSI Token")]
     public class GetMSITokenController : ControllerBase
     {
         private readonly ILogger _logger;
+        private readonly IHttpClientFactory? _httpClientFactory;
 
         /// <summary>
         /// GetMSITokenController ctor
+        /// Inject Logger and IHttpClientFactory instance 
         /// </summary>
         /// <param name="logger"></param>
-        public GetMSITokenController(ILogger<GetMSITokenController> logger)
+        public GetMSITokenController(
+            ILogger<GetMSITokenController> logger, 
+            IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
+            _httpClientFactory = httpClientFactory;
         }
 
         /// <summary>
@@ -44,16 +52,22 @@ namespace MSIHelperService.Controllers
         {
             _logger.LogInformation("GetMSITokenController called.");
 
+            //create an HttpClient using IHttpClientFactory
+            HttpClient httpClient = _httpClientFactory.CreateClient();
+
+            //Call the MSIHelper method based on the resource
             ActionResult? msiEndpointResult = Enum.Parse<MSIHelper.AzureResource>(azureResource) switch
             {
                 MSIHelper.AzureResource.webapp => await MSIHelper.GetWebAppMSIToken(
                     identityHeader,
                     uri,
+                    httpClient,
                     _logger).ConfigureAwait(false),
 
                 MSIHelper.AzureResource.function => await MSIHelper.GetFunctionAppMSIToken(
                     identityHeader,
                     uri,
+                    httpClient,
                     _logger).ConfigureAwait(false),
 
                 MSIHelper.AzureResource.vm => throw new NotImplementedException(),

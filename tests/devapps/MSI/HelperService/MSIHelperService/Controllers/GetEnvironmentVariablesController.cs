@@ -7,20 +7,28 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace MSIHelperService.Controllers
 {
+    /// <summary>
+    /// GetEnvironmentVariablesController
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     [SwaggerTag(description: "Gets All Environment Variables")]
     public class GetEnvironmentVariablesController : ControllerBase
     {
         private readonly ILogger _logger;
+        private readonly IHttpClientFactory? _httpClientFactory;
 
         /// <summary>
         /// GetEnvironmentVariablesController ctor
+        /// Inject Logger and IHttpClientFactory instance 
         /// </summary>
         /// <param name="logger"></param>
-        public GetEnvironmentVariablesController(ILogger<GetEnvironmentVariablesController> logger)
+        public GetEnvironmentVariablesController(
+            ILogger<GetEnvironmentVariablesController> logger, 
+            IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
+            _httpClientFactory = httpClientFactory;
         }
 
         /// <summary>
@@ -39,12 +47,16 @@ namespace MSIHelperService.Controllers
         {
             _logger.LogInformation("GetEnvironmentVariablesController called.");
 
+            //create an HttpClient using IHttpClientFactory
+            HttpClient httpClient = _httpClientFactory.CreateClient();
+
+            //Call the MSIHelper method based on the resource
             Dictionary<string, string>? response = Enum.Parse<MSIHelper.AzureResource>(resource) switch
             {
                 MSIHelper.AzureResource.webapp => MSIHelper.GetWebAppEnvironmentVariables(
                     _logger),
 
-                MSIHelper.AzureResource.function => MSIHelper.GetFunctionAppEnvironmentVariables(
+                MSIHelper.AzureResource.function => MSIHelper.GetFunctionAppEnvironmentVariables(httpClient,
                     _logger),
 
                 MSIHelper.AzureResource.vm => throw new NotImplementedException(),

@@ -21,8 +21,6 @@ namespace MSIHelperService.Helper
 {
     internal static class MSIHelper
     {
-        private static HttpClient s_httpClient = new HttpClient();
-
         //content type
         internal const string ContentTypeJson = "application/json";
         internal const string ContentTypeTextOrHtml = "text/html";
@@ -31,28 +29,14 @@ namespace MSIHelperService.Helper
         internal const string ManagedIdentityAuthenticationHeader = "X-IDENTITY-HEADER";
 
         //Environment variables
-        internal static string? s_requestAppID = Environment.GetEnvironmentVariable("requestAppID");
-        internal static string? s_requestAppSecret = Environment.GetEnvironmentVariable("requestAppSecret");
-        internal static string? s_functionAppUri = Environment.GetEnvironmentVariable("functionAppUri");
-        internal static string? s_functionAppEnvCode = Environment.GetEnvironmentVariable("functionAppEnvCode");
-        internal static string? s_functionAppMSICode = Environment.GetEnvironmentVariable("functionAppMSICode");
-        internal static string? s_webhookLocation = Environment.GetEnvironmentVariable("webhookLocation");
-        internal static string? s_oMSAdminClientID = Environment.GetEnvironmentVariable("OMSAdminClientID");
-        internal static string? s_oMSAdminClientSecret = Environment.GetEnvironmentVariable("OMSAdminClientSecret");
-
-        //Protected from this API so the getEnvironmentVariable does not return these
-        internal static string[] s_protectedEnvironmentVariables = new string[] {
-            "requestAppID",
-            "requestAppSecret",
-            "functionAppUri",
-            "functionAppEnvCode",
-            "functionAppMSICode",
-            "webhookLocation",
-            "OMSAdminClientID",
-            "OMSAdminClientSecret",
-            "path"
-        };
-
+        internal static readonly string? s_requestAppID = Environment.GetEnvironmentVariable("requestAppID");
+        internal static readonly string? s_requestAppSecret = Environment.GetEnvironmentVariable("requestAppSecret");
+        internal static readonly string? s_functionAppUri = Environment.GetEnvironmentVariable("functionAppUri");
+        internal static readonly string? s_functionAppEnvCode = Environment.GetEnvironmentVariable("functionAppEnvCode");
+        internal static readonly string? s_functionAppMSICode = Environment.GetEnvironmentVariable("functionAppMSICode");
+        internal static readonly string? s_webhookLocation = Environment.GetEnvironmentVariable("webhookLocation");
+        internal static readonly string? s_oMSAdminClientID = Environment.GetEnvironmentVariable("OMSAdminClientID");
+        internal static readonly string? s_oMSAdminClientSecret = Environment.GetEnvironmentVariable("OMSAdminClientSecret");
         internal const string Authority = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47";
 
         //Enum for HTTP Error Response Codes
@@ -78,35 +62,10 @@ namespace MSIHelperService.Helper
         }
 
         /// <summary>
-        /// Gets the Environment Variable from the Azure Web App
-        /// </summary>
-        /// <param name="variableName"></param>
-        /// <param name="logger"></param>
-        /// <returns>Returns the environment variable</returns>
-        public static string? GetWebAppEnvironmentVariable(
-            string variableName,
-            ILogger logger)
-        {
-            //On the Web app we have stored some environment variables, those variables 
-            //hold values that are used to call into several other azure resources
-            //Hide the App ID and App Secret and other variableds in this API
-            //these are used to get token for other azure test resources and stored in the
-            //web apps environment variables
-
-            logger.LogInformation("GetWebAppEnvironmentVariable Function called.");
-
-            return
-                s_protectedEnvironmentVariables.Any(s => s.Contains(variableName, StringComparison.OrdinalIgnoreCase)) ?
-                null :
-                Environment.GetEnvironmentVariable(variableName);
-        }
-
-        /// <summary>
         /// Gets the Environment Variables from the Azure Web App
         /// </summary>
-        /// <param name="variableName"></param>
         /// <param name="logger"></param>
-        /// <returns>Returns the environment variable</returns>
+        /// <returns>Returns the environment variables</returns>
         public static Dictionary<string, string> GetWebAppEnvironmentVariables(
             ILogger logger)
         {
@@ -125,58 +84,26 @@ namespace MSIHelperService.Helper
         /// <summary>
         /// Gets the Environment Variable from the Azure Function
         /// </summary>
-        /// <param name="variableName"></param>
+        /// <param name="httpClient"></param>
         /// <param name="logger"></param>
-        /// <returns></returns>
-        public static string? GetFunctionAppEnvironmentVariable(
-            string variableName,
-            ILogger logger)
-        {
-            logger.LogInformation("GetFunctionAppEnvironmentVariable Function called.");
-
-            string? token = Task.Run(async () => await GetMSALToken(logger).ConfigureAwait(false)).GetAwaiter().GetResult();
-
-            //clear the default request header for each call
-            ClearDefaultRequestHeaders(logger);
-
-            //Set the Authorization header
-            SetAuthorizationHeader(token, logger);
-
-            //send the request
-            HttpResponseMessage result = Task.Run(async () => await s_httpClient
-            .GetAsync(s_functionAppUri + "GetEnvironmentVariables?code=" + s_functionAppEnvCode +
-                "&variablename=" + variableName).ConfigureAwait(false))
-            .GetAwaiter().GetResult();
-
-            var content = Task.Run(
-                async () => await result.Content.ReadAsStringAsync()
-                .ConfigureAwait(false)).GetAwaiter().GetResult();
-
-            logger.LogInformation("GetFunctionAppEnvironmentVariables call was successful.");
-
-            return content;
-        }
-
-        /// <summary>
-        /// Gets the Environment Variable from the Azure Function
-        /// </summary>
-        /// <param name="logger"></param>
-        /// <returns></returns>
+        /// <returns>Returns the environment variables</returns>
         public static Dictionary<string, string>? GetFunctionAppEnvironmentVariables(
+            HttpClient httpClient,
             ILogger logger)
         {
             logger.LogInformation("GetFunctionAppEnvironmentVariables Function called.");
 
-            string? token = Task.Run(async () => await GetMSALToken(logger).ConfigureAwait(false)).GetAwaiter().GetResult();
+            string? token = Task.Run(async () => await GetMSALToken(logger).ConfigureAwait(false))
+                .GetAwaiter().GetResult();
 
             //clear the default request header for each call
-            ClearDefaultRequestHeaders(logger);
+            ClearDefaultRequestHeaders(logger, httpClient);
 
             //Set the Authorization header
-            SetAuthorizationHeader(token, logger);
+            SetAuthorizationHeader(token, httpClient, logger);
 
             //send the request
-            HttpResponseMessage result = Task.Run(async () => await s_httpClient
+            HttpResponseMessage result = Task.Run(async () => await httpClient
             .GetAsync(s_functionAppUri + "GetEnvironmentVariables?code=" + s_functionAppEnvCode).ConfigureAwait(false))
             .GetAwaiter().GetResult();
 
@@ -196,11 +123,13 @@ namespace MSIHelperService.Helper
         /// </summary>
         /// <param name="identityHeader"></param>
         /// <param name="uri"></param>
+        /// <param name="httpClient"></param>
         /// <param name="logger"></param>
-        /// <returns></returns>
+        /// <returns>Returns MSI Token</returns>
         public static async Task<ActionResult?> GetWebAppMSIToken(
             string? identityHeader,
             string? uri,
+            HttpClient httpClient,
             ILogger logger)
         {
             logger.LogInformation("GetWebAppMSIToken Function called.");
@@ -211,10 +140,15 @@ namespace MSIHelperService.Helper
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, decodedUri);
             requestMessage.Headers.Add(ManagedIdentityAuthenticationHeader, identityHeader);
 
-            //send the request
-            HttpResponseMessage result = await s_httpClient.SendAsync(requestMessage).ConfigureAwait(false);
+            //clear the default request header for each call
+            ClearDefaultRequestHeaders(logger, httpClient);
 
-            string body = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+            //send the request
+            HttpResponseMessage? result = await httpClient.SendAsync(requestMessage)
+                .ConfigureAwait(false);
+
+            string body = await result.Content.ReadAsStringAsync()
+                .ConfigureAwait(false);
 
             logger.LogInformation("GetWebAppMSIToken Function call was successful.");
 
@@ -226,31 +160,35 @@ namespace MSIHelperService.Helper
         /// </summary>
         /// <param name="identityHeader"></param>
         /// <param name="uri"></param>
+        /// <param name="httpClient"></param>
         /// <param name="logger"></param>
-        /// <returns></returns>
+        /// <returns>Returns MSI Token</returns>
         public static async Task<ActionResult?> GetFunctionAppMSIToken(
             string identityHeader,
             string uri,
+            HttpClient httpClient,
             ILogger logger)
         {
             logger.LogInformation("GetFunctionAppMSIToken Function called.");
 
-            string? token = await GetMSALToken(logger).ConfigureAwait(false);
+            string? token = await GetMSALToken(logger)
+                .ConfigureAwait(false);
 
             //clear the default request header for each call
-            ClearDefaultRequestHeaders(logger);
+            ClearDefaultRequestHeaders(logger, httpClient);
 
             //Set the Authorization header
-            SetAuthorizationHeader(token, logger);
+            SetAuthorizationHeader(token, httpClient, logger);
 
             //send the request
             var encodedUri = HttpUtility.UrlEncode(uri);
 
-            HttpResponseMessage result = await s_httpClient.GetAsync(s_functionAppUri + "getToken?code=" +
+            HttpResponseMessage result = await httpClient.GetAsync(s_functionAppUri + "getToken?code=" +
                 s_functionAppMSICode + "&uri=" + encodedUri + "&header=" +identityHeader)
                 .ConfigureAwait(false);
 
-            string body = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+            string body = await result.Content.ReadAsStringAsync()
+                .ConfigureAwait(false);
 
             logger.LogInformation("GetFunctionAppMSIToken call was successful.");
 
@@ -298,27 +236,34 @@ namespace MSIHelperService.Helper
         /// Clear default request headers on the http client
         /// </summary>
         /// <param name="logger"></param>
+        /// <param name="httpClient"></param>
         /// <returns></returns>
-        private static void ClearDefaultRequestHeaders(ILogger logger)
+        private static void ClearDefaultRequestHeaders(
+            ILogger logger, 
+            HttpClient httpClient)
         {
             logger.LogInformation("ClearDefaultRequestHeaders Function called.");
 
-            s_httpClient.DefaultRequestHeaders.Clear();
+            if (httpClient != null)
+                httpClient?.DefaultRequestHeaders.Clear();
         }
 
         /// <summary>
         /// Sets the authorization header on the http client
         /// </summary>
         /// <param name="token"></param>
+        /// <param name="httpClient"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
         private static void SetAuthorizationHeader(
             string? token,
+            HttpClient httpClient,
             ILogger logger)
         {
             logger.LogInformation("SetAuthorizationHeader Function called.");
-
-            s_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            
+            if(httpClient!=null)
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
         /// <summary>
