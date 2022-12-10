@@ -27,6 +27,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static readonly string s_baseURL = "https://service.msidlab.com/";
         private static readonly string s_clientId = "client_id";
         private static Dictionary<string, string> s_envVariables = new Dictionary<string, string>();
+        private const string UserAssignedClientID = "3b57c42c-3201-4295-ae27-d6baec5b7027";
+        private const string Mi_res_id = "/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSAL_MSI_USERID";
 
         public enum AzureResource
         {
@@ -72,9 +74,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [DataTestMethod]
-        [DataRow(AzureResource.webapp)]
-        [DataRow(AzureResource.function)]
-        public async Task AcquireMSITokenAsync(AzureResource azureResource)
+        [DataRow(AzureResource.webapp, "", DisplayName = "System Identity Web App")]
+        [DataRow(AzureResource.function, "", DisplayName = "System Identity Function App")]
+        [DataRow(AzureResource.webapp, UserAssignedClientID, DisplayName = "User Identity Web App")]
+        [DataRow(AzureResource.function, UserAssignedClientID, DisplayName = "User Identity Function App")]
+        [DataRow(AzureResource.webapp, Mi_res_id, DisplayName = "ResourceID Web App")]
+        [DataRow(AzureResource.function, Mi_res_id, DisplayName = "ResourceID Function App")]
+        public async Task AcquireMSITokenAsync(AzureResource azureResource, string userIdentity)
         {
             AuthenticationResult result = null;
 
@@ -96,7 +102,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             try
             {
                 result = await cca.AcquireTokenForClient(s_msi_scopes)
-                    .WithManagedIdentity()
+                    .WithManagedIdentity(userIdentity)
                     .ExecuteAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -110,8 +116,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
+            //User Identity Client ID 
+            //Need to check if we are exposing Client ID in msal token response
+            //if (!string.IsNullOrEmpty(userIdentity))
+            //{
+            //    Assert.AreEqual(UserAssignedClientID, result.);
+            //}
+
             result = await cca.AcquireTokenForClient(s_msi_scopes)
-                .WithManagedIdentity()
+                .WithManagedIdentity(userIdentity)
                 .ExecuteAsync().ConfigureAwait(false);
 
             Assert.IsNotNull(result.Scopes);

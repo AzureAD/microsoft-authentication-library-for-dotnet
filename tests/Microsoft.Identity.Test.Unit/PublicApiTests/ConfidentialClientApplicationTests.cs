@@ -1755,7 +1755,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(2, callbackInvoked);
 
-
             differentScopesForAt = "new scope";
 
             // Acquire token from app provider with new scopes
