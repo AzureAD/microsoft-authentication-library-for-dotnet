@@ -97,8 +97,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             {
                 result = await cca.AcquireTokenForClient(s_msi_scopes)
                     .WithManagedIdentity()
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
+                    .ExecuteAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -106,9 +105,21 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.IsNull(ex.Message);
             }
 
+            //Assert
+
+            Assert.IsNotNull(result.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+            result = await cca.AcquireTokenForClient(s_msi_scopes)
+                .WithManagedIdentity()
+                .ExecuteAsync().ConfigureAwait(false);
+
+            Assert.IsNotNull(result.Scopes);
+            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+
             ClearEnvironmentVariables();
             
-            Assert.IsNotNull(result.AccessToken);
+            
         }
 
         private async Task<bool> SetEnvironmentVariablesAsync(AzureResource resource)
