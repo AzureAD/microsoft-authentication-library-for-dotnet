@@ -42,7 +42,7 @@ namespace MSIHelperService.Controllers
         [SwaggerResponse(400, "Returns the error object for any validation failures", Type = typeof(string))]
         [SwaggerResponse(500, "Returns the error object for any Server Errors", Type = typeof(string))]
         [HttpGet]
-        public async Task<Dictionary<string, string>>? GetEnvValues([FromQuery(Name = "resource")]
+        public async Task<Dictionary<string, string>?> GetEnvValues([FromQuery(Name = "resource")]
         string resource = MSIHelper.DefaultAzureResource)
         {
             _logger.LogInformation("GetEnvironmentVariablesController called.");
