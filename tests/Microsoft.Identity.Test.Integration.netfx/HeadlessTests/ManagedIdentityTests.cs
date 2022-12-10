@@ -82,6 +82,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataRow(AzureResource.function, Mi_res_id, DisplayName = "ResourceID Function App")]
         public async Task AcquireMSITokenAsync(AzureResource azureResource, string userIdentity)
         {
+            //Arrange
             AuthenticationResult result = null;
 
             //Set the Environment Variables
@@ -99,6 +100,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Create CCA with Proxy
             IConfidentialClientApplication cca = CreateCCAWithProxy(uri);
 
+            //Act
             try
             {
                 result = await cca.AcquireTokenForClient(s_msi_scopes)
@@ -112,7 +114,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
 
             //Assert
-
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
@@ -131,8 +132,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
             ClearEnvironmentVariables();
-            
-            
+
         }
 
         private async Task<bool> SetEnvironmentVariablesAsync(AzureResource resource)

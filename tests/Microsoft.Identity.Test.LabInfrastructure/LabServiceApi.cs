@@ -165,9 +165,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public async Task<string> GetMSIHelperServiceTokenAsync()
         {
             if (_labApiAccessToken == null)
+            {
                 _labApiAccessToken = await LabAuthenticationHelper
                     .GetAccessTokenForLabAPIAsync(_labAccessAppId, _labAccessClientSecret)
                     .ConfigureAwait(false);
+            }
 
             return _labApiAccessToken.Value.Token;
         }
