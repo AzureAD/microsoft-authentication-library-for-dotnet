@@ -38,7 +38,7 @@ namespace MSIHelperService.Controllers
         [SwaggerResponse(400, "Returns the error object for any validation failures", Type = typeof(ManagedIdentityResponse))]
         [SwaggerResponse(500, "Returns the error object for any Server Errors", Type = typeof(ManagedIdentityResponse))]
         public async Task<ActionResult?> GetRemoteHttpResponse(
-            [FromHeader(Name = "IDENTITY_HEADER")] string identityHeader,
+            [FromHeader(Name = "X-IDENTITY-HEADER")] string identityHeader,
             [FromQuery(Name = "uri")] string uri,
             [FromQuery(Name = "azureResource")] string azureResource = MSIHelper.DefaultAzureResource)
         {
