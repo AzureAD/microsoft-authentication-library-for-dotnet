@@ -72,7 +72,7 @@ MSI Helper Service exposes two endpoints :
 
 A sample request to the `GetEnvironmentVariables` 
 
-```
+```http
 curl -X 'GET' \
   'https://service.msidlab.com/GetEnvironmentVariables?resource=webapp' \
   -H 'accept: text/plain'
@@ -80,7 +80,7 @@ curl -X 'GET' \
 
 And here is a successful response from the service. 
 
-```
+```http
 {
   "IDENTITY_HEADER": "69C62B109AAF4EB7B01061197C14F550",
   "IDENTITY_ENDPOINT": "http://127.0.0.1:41292/msi/token/",
@@ -93,15 +93,39 @@ And here is a successful response from the service.
 - The `GetEnvironmentVariables` api, accepts an MSI supported Azure resource as a query parameter and returns all the environment variables needed for you to form a http request.  
 - Once you have formed the URI you can use the `GetMSIToken` endpoint and send the request to the Helper Service, this will inturn call the MSI endpoint and return a MSI token response.  
 
-```
+```http
 "{\"statusCode\":500,\"message\":\"An unexpected error occured while fetching the AAD Token.\",\"correlationId\":\"91acf506-d323-4bdd-a5f5-b5b71a09e1dc\"}"
 ```
 
 You should also be able to test for exceptions that the MSI endpoint throws
 
-```
+```http
 "An attempt was made to access a socket in a way forbidden by its access permissions. (127.0.0.1:41292) \n\nAn attempt was made to access a socket in a way forbidden by its access permissions."
 ```
+
+## How to get a token from the MSI Helper service
+
+From the earlier example, you saw how to send an environment variable request for an Azure resource using the `GetEnvironmentVariables` endpoint. Once you get the environment variables, you will need to form the URI as how you would send the request to the actual MSI endpoint. Let's take a look at the below example to understand this better. We have used the environment variables we received from the earlier request to form the URI below and send the request to the `GetMSIToken` endpoint
+
+```http
+curl -X 'GET' \
+  'https://service.msidlab.com/GetMSIToken?uri=http%3A%2F%2F127.0.0.1%3A41292%2Fmsi%2Ftoken%2F%3Fresource%3Dhttps%3A%2F%2Fvault.azure.net%26api-version%3D2019-08-01&azureResource=webapp' \
+  -H 'accept: text/plain' \
+  -H 'X-IDENTITY-HEADER: 69C62B109AAF4EB7B01061197C14F550'
+```
+
+And here is a successful response from the service. 
+
+```http
+{
+  "access_token": "eyJ0eXAiOiJKV1QiLCJh-trimmed",
+  "expires_on": "1670868725",
+  "resource": "https://vault.azure.net",
+  "token_type": "Bearer",
+  "client_id": "D67DE30B-1051-4254-909E-85AF7E28C98E"
+}
+```
+
 
 ## How Auth SDKs teams can takes advantage of this service for testing? 
 
