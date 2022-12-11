@@ -117,7 +117,7 @@ The MSAL test code, which can run from any dev box or CI pipeline, will proxy al
 
 ## How does this service work?
 
-The service is deployed to a Azure Web App and it exposes the Azure Web Apps MSI endpoint for testing. i.e. it exposes it's own MSI endpoint so the Web App resource can be tested. In addition to that it also calls into other Azure resources like Azure Function and exposes their MSI endpoints as well. 
+The service is deployed to an Azure Web App and it exposes the Azure Web Apps MSI endpoint for testing. i.e. it exposes it's own MSI endpoint so the Web App resource can be tested. In addition to that it also calls into other Azure resources like Azure Function, ServiceFabric, AzureARC and IMDS and exposes their MSI endpoints as well. 
 
 ### How to build and deploy the helper service (exposes Web App MSI)
 
@@ -125,43 +125,63 @@ Build the current project (The MSI Helper Service - MSIHelperService.csproj) and
 
 - Once you have built the MSIHelperService.csproj 
 - Right click on the project and select the `publish` option
-
+<br>
   <img src="images/publish_vs.PNG" alt="publish" width="400"/>
 
 - Select the appropriate [Web App](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/MSAL_MSI/providers/Microsoft.Web/sites/msihelperservice/appServices) under the Lab Subscription and click `publish` 
-
+<br>
   <img src="images/msihelper_azure_settings.PNG" alt="settings" width="600"/>
 
 - make sure you are publishing to the staging slot of the app service so you do not break the existing CI runs. Also, select the `Deploy as a Zip Package` checkbox
-
+<br>
   <img src="images/staging.PNG" alt="staging" width="400"/>
+
 
 > **_NOTE:_**  You will need to have Identity Lab permissions to deploy to the helper service. Make sure to keep the settings same as how it is shown in the above screenshot
 
 - Once the service has been deployed you can test the service using the swagger or run MSAL integration tests pointing to the staging slot 
 
 - To test the service under the staging slot, you can either use the [staging slot swagger](https://msihelperservice-staging.azurewebsites.net/swagger/index.html) but we highly recommend testing using MSAL integration tests as this will tests all endpoints for all resources. To do so, edit the service base URL in the MSI integration test and change it from [https://service.msidlab.com](https://service.msidlab.com) to [https://msihelperservice-staging.azurewebsites.net/](https://msihelperservice-staging.azurewebsites.net/) and run the the tests 
-
+<br>
 <img src="images/replace.PNG" alt="replace" width="800"/>
+
+<br>
 
 - After validation go to [Azure Portal](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/MSAL_MSI/providers/Microsoft.Web/sites/msihelperservice/deploymentSlotsV2) and from under the deployment slot, swap the services
 
+<br>
 <img src="images/swap.PNG" alt="swap" width="800"/>
+<br>
 
-
-> **_NOTE:_**  Once you have swapped the slot make sure to point the base url to the production slot again in your code
+> **_NOTE:_**  Once you have swapped the slot make sure to point the base url to the production slot again in your code and test it again with the production endpoint fron the MSAL integration testing
 
 ### How to build and deploy the Function App 
 
-Function app deployment is easy but also complicated. We do not have a staging slot for the Azure functions. But there shouldn't be a need ever to deploy to function app or to any other Azure Resources after MSAL MSI has gone live. The function app code can be found `AzureFunction` folders 
-
-
+Function app deployment is easy but can also be risky. There is no failover mechanism here since we do not have a staging slot for the Azure functions. But there shouldn't be a need ever to deploy to the function app or to any other Azure resources (VM / Azure ARC / Service Fabric) after MSAL MSI has gone live. The function app code can be found `AzureFunction` folders 
+<br>
 <img src="images/function.PNG" alt="function" width="800"/>
+<br>
 
 - The [function app](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/MSAL_MSI/providers/Microsoft.Web/sites/msalmsifunction/appServices) also exposes two protected endpoints. These endpoints are called internally by the MSI Helper service. 
-
+<br>
 <img src="images/func_endpoints.PNG" alt="func_endpoints" width="800"/>
+<br>
 
 - To make changes simply copy paste the code from the appropriate Get*.cs files into these endpoints in the function app
+<br>
 
 > **_NOTE:_**  Any changes made to this function app will affect both the production and the staging slot of the MSI Helper Service. There are several ID4S teams that are dependent on these services, so before making any change please ensure that you have tested the code in a sample azure function app. 
+
+## Troubleshooting 
+
+The MSI Helper Service has been deployed with Application Insights and a good amount of logging for troubleshooting. You can go to the Azure Portal and select the [MSI Helper Service App Insights](https://ms.portal.azure.com/#view/AppInsightsExtension/DetailsV2Blade/ComponentId~/%7B%22SubscriptionId%22%3A%22c1686c51-b717-4fe0-9af3-24a20a41fb0c%22%2C%22ResourceGroup%22%3A%22MSAL_MSI%22%2C%22Name%22%3A%22msihelperservice%22%2C%22LinkedApplicationType%22%3A0%2C%22ResourceId%22%3A%22%252Fsubscriptions%252Fc1686c51-b717-4fe0-9af3-24a20a41fb0c%252FresourceGroups%252FMSAL_MSI%252Fproviders%252Fmicrosoft.insights%252Fcomponents%252Fmsihelperservice%22%2C%22ResourceType%22%3A%22microsoft.insights%252Fcomponents%22%2C%22IsAzureFirst%22%3Afalse%7D/DataModel~/%7B%22eventId%22%3A%22e83141d4-78ec-11ed-9983-000d3a54144f%22%2C%22timestamp%22%3A%222022-12-11T00%3A43%3A16.617Z%22%2C%22cacheId%22%3A%2283de9b73-774b-4ec7-94cf-2663b362e6f6%22%2C%22eventTable%22%3A%22requests%22%2C%22timeContext%22%3A%7B%22durationMs%22%3A86400000%2C%22endTime%22%3A%222022-12-11T01%3A13%3A14.404Z%22%7D%7D) and see the transaction logs 
+
+
+<img src="images/logs.PNG" alt="logs" width="800"/>
+<br>
+<br>
+
+For, the Function App. Go to Azure Portal and select [Monitor](https://ms.portal.azure.com/#view/WebsitesExtension/FunctionMenuBlade/~/monitor/resourceId/%2Fsubscriptions%2Fc1686c51-b717-4fe0-9af3-24a20a41fb0c%2FresourceGroups%2FMSAL_MSI%2Fproviders%2FMicrosoft.Web%2Fsites%2Fmsalmsifunction%2Ffunctions%2FGetEnvironmentVariables) under the Function App Endpoints and this will give you the invocations and logs 
+
+<img src="images/invocation.PNG" alt="invocation" width="800"/>
+<br>
