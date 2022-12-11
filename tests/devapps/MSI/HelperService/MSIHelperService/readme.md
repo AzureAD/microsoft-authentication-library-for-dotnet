@@ -10,11 +10,11 @@ manager: bogavril
 
 # Testing managed identities for Azure resources using MSAL .Net?
 
-A common challenge for developers testing Managed Identities is you have to deploy your code to a Managed Identity Service so you can hit the Managed Identity Service endpoints. This makes it hard to run integration tests on CI pipelines or on local dev box.
+A common challenge for developers testing Managed Identities is to deploy the code to a Managed Identity Service so they can hit the Managed Identity Service endpoints. This makes it hard to run integration tests on CI pipelines or on a local dev box.
 
 To eliminate this problem, MSAL .Net team has built a MSI Helper service that exposes several managed identity sources through a web api using which you can run tests. 
 
-This protected web service is able to hit the Managed Identity endpoints of Managed Identity Sources (for e.g. Azure Web App, Function App or a Virtual machine) and transfer the managed identity response back to you. 
+This protected web service is able to send http requests to Managed Identity endpoints (for e.g. Azure Web App, Function App or a Virtual machine) and transfer the managed identity response back to you. 
 
 Developers / Applications wanting to test managed identity can use this test service and take advantage of the same features of testing on a managed identity source.
 
@@ -24,7 +24,7 @@ To gain access to the MSI Helper service you will need access to [Identity Labs]
 
 ## Managed identity types
 
-There are two types of managed identities:
+There are two types of managed identities that are supported by this service:
 
 - **System-assigned**. Some Azure resources, such as virtual machines allow you to enable a managed identity directly on the resource. When you enable a system-assigned managed identity: 
     - A service principal of a special type is created in Azure AD for the identity. The service principal is tied to the lifecycle of that Azure resource. When the Azure resource is deleted, Azure automatically deletes the service principal for you. 
