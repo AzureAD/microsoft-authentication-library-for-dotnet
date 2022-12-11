@@ -207,3 +207,7 @@ For, the Function App. Go to Azure Portal and select [Monitor](https://ms.portal
 
 <img src="images/invocation.PNG" alt="invocation" width="800"/>
 <br>
+
+## Need Help? 
+
+Contact Gladwin Johnson / Bogdan Gavril for further assistance.
