@@ -8,7 +8,7 @@ manager: bogavril
 #Customer intent: As a developer I would like to test Managed Service Identity on my dev box and run integration tests. This document provides the test setup on how this can be achieved.
 ---
 
-# Testing managed identities for Azure resources using MSAL .Net?
+# Testing managed identities for Azure resources using MSAL .Net
 
 A common challenge for developers testing Managed Identities is to deploy the code to a Managed Identity Service so they can hit the Managed Identity Service endpoints. This makes it hard to run integration tests on CI pipelines or on a local dev box.
 
