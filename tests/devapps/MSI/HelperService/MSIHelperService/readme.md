@@ -127,7 +127,7 @@ And here is a successful response from the service.
 ```
 
 
-## How Auth SDKs teams can takes advantage of this service for testing? 
+## How Auth SDKs teams can take advantage of this service for testing? 
 
 Your code running from any dev box or CI pipeline will get service credentials from the lab vault and connect to the protected helper service, and then proxy all environment variable reads and http requests to this web service hosted on an Azure Web App. Depending upon what resource is being testing the Helper service will make calls to the Azure Resources under test and get the Managed Identity token response back to MSAL.
 
