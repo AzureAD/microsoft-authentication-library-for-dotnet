@@ -72,7 +72,7 @@ MSAL .Net team has deployed a Managed Identity helper service called the MSIHelp
 
 The protected test service can be accessed by going to https://service.msidlab.com/. You can also use the [Swagger](https://service.msidlab.com/swagger/index.html) to test this service. 
 
-## How does this service work?
+## What are the different endpoints the service exposes?
 
 MSI Helper Service exposes two endpoints : 
 
@@ -110,3 +110,58 @@ You should also be able to test for exceptions that the MSI throws
 ```
 "An attempt was made to access a socket in a way forbidden by its access permissions. (127.0.0.1:41292) \n\nAn attempt was made to access a socket in a way forbidden by its access permissions."
 ```
+
+## How MSAL takes advantage of this service for testing? 
+
+The MSAL test code, which can run from any dev box or CI pipeline, will proxy all environment variable reads and http requests to this web service hosted on the Web App. Depending upon what resource is being testing the Helper service will make calls to the Azure Resources under test and get the Managed Identity token response back to MSAL.
+
+## How does this service work?
+
+The service is deployed to a Azure Web App and it exposes the Azure Web Apps MSI endpoint for testing. i.e. it exposes it's own MSI endpoint so the Web App resource can be tested. In addition to that it also calls into other Azure resources like Azure Function and exposes their MSI endpoints as well. 
+
+### How to build and deploy the helper service (exposes Web App MSI)
+
+Build the current project (The MSI Helper Service - MSIHelperService.csproj) and deploy to the Azure Web App. 
+
+- Once you have built the MSIHelperService.csproj 
+- Right click on the project and select the `publish` option
+
+  <img src="images/publish_vs.PNG" alt="publish" width="400"/>
+
+- Select the appropriate [Web App](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/MSAL_MSI/providers/Microsoft.Web/sites/msihelperservice/appServices) under the Lab Subscription and click `publish` 
+
+  <img src="images/msihelper_azure_settings.PNG" alt="settings" width="600"/>
+
+- make sure you are publishing to the staging slot of the app service so you do not break the existing CI runs. Also, select the `Deploy as a Zip Package` checkbox
+
+  <img src="images/staging.PNG" alt="staging" width="400"/>
+
+> **_NOTE:_**  You will need to have Identity Lab permissions to deploy to the helper service. Make sure to keep the settings same as how it is shown in the above screenshot
+
+- Once the service has been deployed you can test the service using the swagger or run MSAL integration tests pointing to the staging slot 
+
+- To test the service under the staging slot, you can either use the [staging slot swagger](https://msihelperservice-staging.azurewebsites.net/swagger/index.html) but we highly recommend testing using MSAL integration tests as this will tests all endpoints for all resources. To do so, edit the service base URL in the MSI integration test and change it from [https://service.msidlab.com](https://service.msidlab.com) to [https://msihelperservice-staging.azurewebsites.net/](https://msihelperservice-staging.azurewebsites.net/) and run the the tests 
+
+<img src="images/replace.PNG" alt="replace" width="800"/>
+
+- After validation go to [Azure Portal](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/MSAL_MSI/providers/Microsoft.Web/sites/msihelperservice/deploymentSlotsV2) and from under the deployment slot, swap the services
+
+<img src="images/swap.PNG" alt="swap" width="800"/>
+
+
+> **_NOTE:_**  Once you have swapped the slot make sure to point the base url to the production slot again in your code
+
+### How to build and deploy the Function App 
+
+Function app deployment is easy but also complicated. We do not have a staging slot for the Azure functions. But there shouldn't be a need ever to deploy to function app or to any other Azure Resources after MSAL MSI has gone live. The function app code can be found `AzureFunction` folders 
+
+
+<img src="images/function.PNG" alt="function" width="800"/>
+
+- The [function app](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/MSAL_MSI/providers/Microsoft.Web/sites/msalmsifunction/appServices) also exposes two protected endpoints. These endpoints are called internally by the MSI Helper service. 
+
+<img src="images/func_endpoints.PNG" alt="func_endpoints" width="800"/>
+
+- To make changes simply copy paste the code from the appropriate Get*.cs files into these endpoints in the function app
+
+> **_NOTE:_**  Any changes made to this function app will affect both the production and the staging slot of the MSI Helper Service. There are several ID4S teams that are dependent on these services, so before making any change please ensure that you have tested the code in a sample azure function app. 
