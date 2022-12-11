@@ -1,5 +1,5 @@
 ---
-title: Managed identities for Azure resources Testing
+title: How to effectively test Managed identities on Azure resources
 description: An overview of the managed identities for Azure resources test framework and setup.
 services: MSAL
 author: gljohns
@@ -8,42 +8,31 @@ manager: bogavril
 #Customer intent: As a developer I would like to test Managed Service Identity on my dev box and run integration tests. This document provides the test setup on how this can be achieved.
 ---
 
-# Testing managed identities for Azure resources using MSAL .Net
+# Testing managed identities on Azure resources for MSAL .Net and other Auth SDKs
 
-A common challenge for developers testing Managed Identities is to deploy the code to a Managed Identity Service so they can hit the Managed Identity Service endpoints. This makes it hard to run integration tests on CI pipelines or on a local dev box.
+A common challenge for developers testing Managed Identities is to deploy their code to a Managed Identity Service, so they can send requests to the Managed Identity endpoints. While this may be feasible for an end-to-end testing scenario, but it could be challenging to run integration tests on CI pipelines or on a local dev box.
 
-To eliminate this problem, MSAL .Net team has built a MSI Helper service that exposes several managed identity sources through a web api using which you can run tests. 
+To eliminate this problem, MSAL .Net team has built a MSI Helper service that exposes several managed identity sources through a web api using which you can access the identity endpoints from your tests and acquire Managed Identity token responses. The API accepts the same query params of a managed identity endpoint, this will allow your test(s) to call the api just like how you would make a http request to the managed identity endpoint while your code runs inside of a managed identity source.   
 
-This protected web service is able to send http requests to Managed Identity endpoints (for e.g. Azure Web App, Function App or a Virtual machine) and transfer the managed identity response back to you. 
+This protected web service is able to send http requests to Managed Identity endpoints (for e.g. Azure Web App, Function App or a Virtual machine) and transfer the managed identity response back to you. Since Identity Labs manages all the azure resources there will be zero cost and zero maintenance for you and your service. 
 
-Developers / Applications wanting to test managed identity can use this test service and take advantage of the same features of testing on a managed identity source.
-
-To use this test service you will need to be part of the MSAL .Net team or the Identity for Services (ID4S) team or one of it's partner teams. 
+Developers / Applications wanting to test managed identity can use this test service and take advantage of the same features of testing on a managed identity source. **To use this test service you will need to be part of the MSAL .Net team or the Identity for Services (ID4S) team or one of it's partner teams.** 
 
 To gain access to the MSI Helper service you will need access to [Identity Labs](https://docs.msidlab.com/)
 
-## Managed identity types
+## Managed identity types support
 
-There are two types of managed identities that are supported by this service:
+There are two types of managed identities, and both are supported by this service:
 
 - **System-assigned**. Some Azure resources, such as virtual machines allow you to enable a managed identity directly on the resource. When you enable a system-assigned managed identity: 
     - A service principal of a special type is created in Azure AD for the identity. The service principal is tied to the lifecycle of that Azure resource. When the Azure resource is deleted, Azure automatically deletes the service principal for you. 
     - By design, only that Azure resource can use this identity to request tokens from Azure AD.
-    - You authorize the managed identity to have access to one or more services.
+    - Using the MSI Helper service you will be able to test this type
 
 - **User-assigned**. You may also create a managed identity as a standalone Azure resource. You can [create a user-assigned managed identity](https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-manage-ua-identity-portal) and assign it to one or more Azure Resources. When you enable a user-assigned managed identity:      
     - A service principal of a special type is created in Azure AD for the identity. The service principal is managed separately from the resources that use it. 
     - User-assigned identities can be used by multiple resources.
-    - You authorize the managed identity to have access to one or more services.
-
-## How can I use managed identities for Azure resources?
-
-You can use managed identities by following the steps below: 
-
-1. Create a managed identity in Azure. You can choose between system-assigned managed identity or user-assigned managed identity. 
-    1. When using a user-assigned managed identity, you assign the managed identity to the "source" Azure Resource, such as a Virtual Machine, Azure Logic App or an Azure Web App.
-3. Authorize the managed identity to have access to the "target" service.
-4. Use the managed identity to access a resource. In this step, you can use the Azure SDK with the Azure.Identity library. Some "source" resources offer connectors that know how to use Managed identities for the connections. In that case, you use the identity as a feature of that "source" resource.
+    - MSI Helper service uses a single user identity shared across all azure resources
 
 ## What Azure services support the feature?<a name="which-azure-services-support-managed-identity"></a>
 
@@ -70,9 +59,9 @@ MSAL .Net team has deployed a Managed Identity helper service called the MSIHelp
 
 ## Where is this service deployed?
 
-The protected test service can be accessed by going to https://service.msidlab.com/. You can also use the [Swagger](https://service.msidlab.com/swagger/index.html) to test this service. 
+The protected test service can be accessed by going to [https://service.msidlab.com/](https://service.msidlab.com/). You can also use the [MSI Helper Swagger](https://service.msidlab.com/swagger/index.html) to test this service. 
 
-## What are the different endpoints the service exposes?
+## What are the different endpoints the MSI Helper service exposes?
 
 MSI Helper Service exposes two endpoints : 
 
@@ -99,21 +88,24 @@ And here is a successful response from the service.
 }
 ```
 
-And an error response
+> **_NOTE:_**  
+
+- The `GetEnvironmentVariables` api, accepts an MSI supported Azure resource as a query parameter and returns all the environment variables needed for you to form a http request.  
+- Once you have formed the URI you can use the `GetMSIToken` endpoint and send the request to the Helper Service, this will inturn call the MSI endpoint and return a MSI token response.  
 
 ```
 "{\"statusCode\":500,\"message\":\"An unexpected error occured while fetching the AAD Token.\",\"correlationId\":\"91acf506-d323-4bdd-a5f5-b5b71a09e1dc\"}"
 ```
 
-You should also be able to test for exceptions that the MSI throws
+You should also be able to test for exceptions that the MSI endpoint throws
 
 ```
 "An attempt was made to access a socket in a way forbidden by its access permissions. (127.0.0.1:41292) \n\nAn attempt was made to access a socket in a way forbidden by its access permissions."
 ```
 
-## How MSAL takes advantage of this service for testing? 
+## How Auth SDKs teams can takes advantage of this service for testing? 
 
-The MSAL test code, which can run from any dev box or CI pipeline, will proxy all environment variable reads and http requests to this web service hosted on the Web App. Depending upon what resource is being testing the Helper service will make calls to the Azure Resources under test and get the Managed Identity token response back to MSAL.
+Your code running from any dev box or CI pipeline will get service credentials from the lab vault and connect to the protected helper service, and then proxy all environment variable reads and http requests to this web service hosted on an Azure Web App. Depending upon what resource is being testing the Helper service will make calls to the Azure Resources under test and get the Managed Identity token response back to MSAL.
 
 ## How does this service work?
 
