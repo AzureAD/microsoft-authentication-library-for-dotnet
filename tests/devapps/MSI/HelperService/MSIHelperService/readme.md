@@ -210,4 +210,4 @@ For, the Function App. Go to Azure Portal and select [Monitor](https://ms.portal
 
 ## Need Help? 
 
-Contact Gladwin Johnson / Bogdan Gavril for further assistance.
+Contact Neha Bhargava / Gladwin Johnson / Bogdan Gavril for further assistance.
