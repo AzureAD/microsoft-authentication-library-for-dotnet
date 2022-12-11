@@ -74,8 +74,39 @@ The protected test service can be accessed by going to https://service.msidlab.c
 
 ## How does this service work?
 
-MSI Helper Service exposed two endpoints : 
+MSI Helper Service exposes two endpoints : 
 
-![Endpoints](images/endpoints.png)
+<img src="images/endpoints.PNG" alt="endpoints" width="400"/>
 
-- 
+- GetEnvironmentVariables, and 
+- GetMSIToken
+
+A sample request to the `GetEnvironmentVariables` 
+
+```
+curl -X 'GET' \
+  'https://service.msidlab.com/GetEnvironmentVariables?resource=webapp' \
+  -H 'accept: text/plain'
+```
+
+And here is a successful response from the service. 
+
+```
+{
+  "IDENTITY_HEADER": "69C62B109AAF4EB7B01061197C14F550",
+  "IDENTITY_ENDPOINT": "http://127.0.0.1:41292/msi/token/",
+  "IDENTITY_API_VERSION": "2019-08-01"
+}
+```
+
+And an error response
+
+```
+"{\"statusCode\":500,\"message\":\"An unexpected error occured while fetching the AAD Token.\",\"correlationId\":\"91acf506-d323-4bdd-a5f5-b5b71a09e1dc\"}"
+```
+
+You should also be able to test for exceptions that the MSI throws
+
+```
+"An attempt was made to access a socket in a way forbidden by its access permissions. (127.0.0.1:41292) \n\nAn attempt was made to access a socket in a way forbidden by its access permissions."
+```
