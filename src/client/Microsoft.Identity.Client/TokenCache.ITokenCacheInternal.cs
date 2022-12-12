@@ -188,8 +188,12 @@ namespace Microsoft.Identity.Client
                     }
 
                     // Don't cache access tokens from broker
+#if iOS
+                    if (msalAccessTokenCacheItem != null)
+#else
                     if (msalAccessTokenCacheItem != null && !(response.TokenSource == TokenSource.Broker))
-                    {
+#endif
+                        {
                         logger.Info("[SaveTokenResponseAsync] Saving AT in cache and removing overlapping ATs...");
                         DeleteAccessTokensWithIntersectingScopes(
                             requestParams,
@@ -400,9 +404,9 @@ namespace Microsoft.Identity.Client
             var existingWamAccountIds = existingAccount?.WamAccountIds;
             msalAccountCacheItem.WamAccountIds.MergeDifferentEntries(existingWamAccountIds);
         }
-        #endregion
+#endregion
 
-        #region FindAccessToken
+#region FindAccessToken
         /// <summary>
         /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performance.
         /// More information about how to test and what data to look for is in https://aka.ms/msal-net-performance-testing.
@@ -705,7 +709,7 @@ namespace Microsoft.Identity.Client
                         requestKid));
             return null;
         }
-        #endregion
+#endregion
 
         private void FilterTokensByClientId<T>(List<T> tokenCacheItems) where T : MsalCredentialCacheItemBase
         {
