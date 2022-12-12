@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 			}
 			else
 			{
-                requestContext.Logger.Verbose("[Managed Identity] Unable to find an endpoint in environment variable for IMDS, using the default endpoint.");
+                requestContext.Logger.Verbose("[Managed Identity] Unable to find AZURE_POD_IDENTITY_AUTHORITY_HOST environment variable for IMDS, using the default endpoint.");
             	_imdsEndpoint = s_imdsEndpoint;
 			}
 
