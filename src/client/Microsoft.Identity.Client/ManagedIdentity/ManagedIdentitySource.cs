@@ -104,17 +104,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             var managedIdentityErrorResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
 
-            if (managedIdentityResponse == null)
+            if (managedIdentityErrorResponse == null)
             {
                 return "[Managed Identity] Authentication unavailable. No response received from the managed identity endpoint.";
             }
 
-            if (!string.IsNullOrEmpty(managedIdentityResponse.Message))
+            if (!string.IsNullOrEmpty(managedIdentityErrorResponse.Message))
             { 
-                return $"[Managed Identity] Error Message: {managedIdentityResponse.Message} Correlation Id: {managedIdentityResponse.CorrelationId}";
+                return $"[Managed Identity] Error Message: {managedIdentityErrorResponse.Message} Correlation Id: {managedIdentityErrorResponse.CorrelationId}";
             }
 
-            return $"[Managed Identity] Error Code: {managedIdentityResponse.Error} Error Message: {managedIdentityResponse.ErrorDescription}";
+            return $"[Managed Identity] Error Code: {managedIdentityErrorResponse.Error} Error Message: {managedIdentityErrorResponse.ErrorDescription}";
         }
     }
 }
