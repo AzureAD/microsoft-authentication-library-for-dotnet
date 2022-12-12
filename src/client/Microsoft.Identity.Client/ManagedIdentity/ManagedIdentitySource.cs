@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         internal string GetMessageFromErrorResponse(HttpResponse response)
         {
-            var managedIdentityResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
+            var managedIdentityErrorResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
 
             if (managedIdentityResponse == null)
             {
