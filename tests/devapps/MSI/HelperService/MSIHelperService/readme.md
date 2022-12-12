@@ -92,6 +92,7 @@ And here is a successful response from the service.
 
 - The `GetEnvironmentVariables` api, accepts an MSI supported Azure resource as a query parameter and returns all the environment variables needed for you to form a http request.  
 - Once you have formed the URI you can use the `GetMSIToken` endpoint and send the request to the Helper Service, this will inturn call the MSI endpoint and return a MSI token response.  
+- `IDENTITY_API_VERSION` environment variable is not a MSI resource based environment variable. MSAL SDKs hardcode this value or fetch it from the MSI version endpoint. This is returned by the API for ease of use while testing.  
 
 ```http
 "{\"statusCode\":500,\"message\":\"An unexpected error occured while fetching the AAD Token.\",\"correlationId\":\"91acf506-d323-4bdd-a5f5-b5b71a09e1dc\"}"
