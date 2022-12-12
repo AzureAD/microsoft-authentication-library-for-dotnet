@@ -22,6 +22,7 @@ using Microsoft.Identity.Client.Internal.Broker;
 using NSubstitute;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests.Silent;
+using System.Data;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -95,35 +96,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task BrokerSilentRequestLocalCacheTestAsync()
-        {
-            //Broker is configured by user and is installed.
-            //Should be pulling from local cache
-            await BrokerSilentRequestTestExecutorAsync(true, true).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        public async Task BrokerSilentRequestBrokerRequiredTestAsync()
-        {
-            //Broker is not configured by user but is installed
-            await BrokerSilentRequestTestExecutorAsync(false, true).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        public async Task BrokerSilentRequestBrokerConfiguredButNotInstalledTestAsync()
-        {
-            //Broker is configured by user but is not installed
-            await BrokerSilentRequestTestExecutorAsync(false, true).ConfigureAwait(false);
-        }
-
-        [TestMethod]
-        public async Task BrokerSilentRequestBrokerNotConfiguredAndNotInstalledTestAsync()
-        {
-            //Broker is not configured by user and is not installed
-            await BrokerSilentRequestTestExecutorAsync(false, false).ConfigureAwait(false);
-        }
-
-        public async Task BrokerSilentRequestTestExecutorAsync(bool brokerConfiguredByUser, bool brokerIsInstalledAndInvokable)
+        [DataRow(true, true)] //Broker is configured by user and is installed.
+        [DataRow(false, true)] //Broker is not configured by user but is installed
+        [DataRow(true, false)] //Broker is configured by user but is not installed
+        [DataRow(false, false)] //Broker is not configured by user and is not installed
+        public async Task BrokerSilentRequestLocalCacheTestAsync(bool brokerConfiguredByUser, bool brokerIsInstalledAndInvokable)
         {
             string brokerID = "Broker@broker.com";
             using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
@@ -156,13 +133,27 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 var request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
 
-                var result = await request.RunAsync(default).ConfigureAwait(false);
+                if (brokerConfiguredByUser) //When broker is enabled, local cache should not be used
+                {
+                    var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
+                        request.RunAsync(default)
+                        ,false
+                        ).ConfigureAwait(false);
 
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
-                Assert.AreEqual(brokerID, result.Account.Username);
-                await mockBroker.DidNotReceiveWithAnyArgs().AcquireTokenSilentAsync(null, null).ConfigureAwait(false);
+                    Assert.IsNotNull(exception);
+                    Assert.AreEqual(MsalError.FailedToAcquireTokenSilentlyFromBroker, exception.ErrorCode);
+                    Assert.AreEqual("Broker could not satisfy the silent request.", exception.Message);
+                }
+                else
+                {
+                    var result = await request.RunAsync(default).ConfigureAwait(false);
+
+                    Assert.IsNotNull(result);
+                    Assert.IsNotNull(result.AccessToken);
+                    Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+                    Assert.AreEqual(brokerID, result.Account.Username);
+                    await mockBroker.DidNotReceiveWithAnyArgs().AcquireTokenSilentAsync(null, null).ConfigureAwait(false);
+                }
             }
         }
 
