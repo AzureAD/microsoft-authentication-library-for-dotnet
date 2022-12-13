@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit
             var authParams = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers, scheme);
 
             // Assert
-            Assert.AreEqual(scheme, authParams.AuthScheme);
+            Assert.AreEqual(scheme, authParams.AuthenticationScheme);
 
             if (scheme == "AuthScheme1")
             {
@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Test.Unit
             var authParams = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers, scheme);
 
             // Assert
-            Assert.AreEqual(scheme, authParams.AuthScheme);
+            Assert.AreEqual(scheme, authParams.AuthenticationScheme);
             Assert.AreEqual("someRealm", authParams.RawParameters["realm"]);
 
             if (scheme == "AuthScheme2" || scheme == "AuthScheme4")
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Test.Unit
             // Assert
             if (scheme == "NTLM")
             {
-                Assert.AreEqual("NTLM", authParams.AuthScheme);
+                Assert.AreEqual("NTLM", authParams.AuthenticationScheme);
                 Assert.AreEqual("dG9rZW42OA==", authParams.RawParameters[scheme]);
             }
             else if (scheme == "WLID1.0")
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Test.Unit
             httpResponse.Headers.Add(AuthenticationInfoName, $"token68");
 
             // Act
-            var parameters = AuthenticationInfoParameters.CreateFromHeaders(httpResponse.Headers);
+            var parameters = AuthenticationInfoParameters.CreateFromResponseHeaders(httpResponse.Headers);
 
             //Assert
             Assert.IsNotNull(parameters);
@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Test.Unit
 
             // Act
             var ex = Assert.ThrowsException<MsalClientException>(() =>
-                                    AuthenticationInfoParameters.CreateFromHeaders(httpResponse.Headers));
+                                    AuthenticationInfoParameters.CreateFromResponseHeaders(httpResponse.Headers));
 
             //Assert
             Assert.AreEqual(ex.ErrorCode, MsalError.UnableToParseAuthenticationHeader);
@@ -438,8 +438,8 @@ namespace Microsoft.Identity.Test.Unit
             var httpClient = new HttpClient(handler);
             var headers = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, httpClient, default).ConfigureAwait(false);
 
-            var bearerHeader = headers.Where(header => header.AuthScheme == "Bearer").Single();
-            var popHeader = headers.Where(header => header.AuthScheme == "PoP").Single();
+            var bearerHeader = headers.Where(header => header.AuthenticationScheme == "Bearer").Single();
+            var popHeader = headers.Where(header => header.AuthenticationScheme == "PoP").Single();
 
             Assert.IsNotNull(bearerHeader);
             Assert.AreEqual("https://login.microsoftonline.com/TenantId", bearerHeader.Authority);
@@ -457,8 +457,8 @@ namespace Microsoft.Identity.Test.Unit
 
             // Act
             var headers = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers);
-            var bearerHeader = headers.Where(header => header.AuthScheme == "Bearer").Single();
-            var popHeader = headers.Where(header => header.AuthScheme == "PoP").Single();
+            var bearerHeader = headers.Where(header => header.AuthenticationScheme == "Bearer").Single();
+            var popHeader = headers.Where(header => header.AuthenticationScheme == "PoP").Single();
 
             // Assert
             Assert.IsNotNull(bearerHeader);
@@ -475,10 +475,10 @@ namespace Microsoft.Identity.Test.Unit
 
             // Act
             var headers = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers);
-            var bearerHeader1 = headers.Where(header => header.AuthScheme == "Bearer").First();
-            var popHeader1 = headers.Where(header => header.AuthScheme == "PoP").First();
-            var bearerHeader2 = headers.Where(header => header.AuthScheme == "Bearer").Last();
-            var popHeader2 = headers.Where(header => header.AuthScheme == "PoP").Last();
+            var bearerHeader1 = headers.Where(header => header.AuthenticationScheme == "Bearer").First();
+            var popHeader1 = headers.Where(header => header.AuthenticationScheme == "PoP").First();
+            var bearerHeader2 = headers.Where(header => header.AuthenticationScheme == "Bearer").Last();
+            var popHeader2 = headers.Where(header => header.AuthenticationScheme == "PoP").Last();
 
             // Assert
             Assert.IsNotNull(bearerHeader1);
@@ -501,8 +501,8 @@ namespace Microsoft.Identity.Test.Unit
 
             // Act
             var headers = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponse.Headers);
-            var bearerHeader = headers.Where(header => header.AuthScheme == "Bearer").Single();
-            var popHeader = headers.Where(header => header.AuthScheme == "PoP").Single();
+            var bearerHeader = headers.Where(header => header.AuthenticationScheme == "Bearer").Single();
+            var popHeader = headers.Where(header => header.AuthenticationScheme == "PoP").Single();
 
             // Assert
             Assert.IsNotNull(bearerHeader);
@@ -521,8 +521,8 @@ namespace Microsoft.Identity.Test.Unit
 
             // Act
             var headers = AuthenticationHeaderParser.ParseAuthenticationHeaders(httpResponse.Headers);
-            var bearerHeader = headers.WwwAuthenticateParameters.Where(header => header.AuthScheme == "Bearer").Single();
-            var popHeader = headers.WwwAuthenticateParameters.Where(header => header.AuthScheme == "PoP").Single();
+            var bearerHeader = headers.WwwAuthenticateParameters.Where(header => header.AuthenticationScheme == "Bearer").Single();
+            var popHeader = headers.WwwAuthenticateParameters.Where(header => header.AuthenticationScheme == "PoP").Single();
 
             // Assert
             Assert.IsNotNull(bearerHeader);
@@ -538,7 +538,7 @@ namespace Microsoft.Identity.Test.Unit
             HttpResponseMessage httpResponse = CreateAuthInfoHttpResponse();
 
             // Act
-            var header = AuthenticationInfoParameters.CreateFromHeaders(httpResponse.Headers);
+            var header = AuthenticationInfoParameters.CreateFromResponseHeaders(httpResponse.Headers);
 
             // Assert
             Assert.IsNotNull(header);
@@ -552,7 +552,7 @@ namespace Microsoft.Identity.Test.Unit
             HttpResponseMessage httpResponse = CreateAuthInfoHttpResponse();
 
             // Act
-            var header = AuthenticationInfoParameters.CreateFromHeaders(httpResponse.Headers);
+            var header = AuthenticationInfoParameters.CreateFromResponseHeaders(httpResponse.Headers);
             var nextNonce = header.RawParameters["nextnonce"];
             var realm = header.RawParameters["realm"];
 

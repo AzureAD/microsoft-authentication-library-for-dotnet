@@ -88,14 +88,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var parameters = parameterList.FirstOrDefault();
 
-            if (parameters.AuthScheme == "PoP" && parameters.RawParameters.Keys.Contains("nonce")) //Check if next nonce for POP is available
+            if (parameters.AuthenticationScheme == "PoP" && parameters.RawParameters.Keys.Contains("nonce")) //Check if next nonce for POP is available
             {
                 popNonce = parameters.RawParameters["nonce"];
             }
 
             //Assert
-            Assert.IsTrue(parameterList.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
-            Assert.IsNotNull(parameterList.Single(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix).Nonce);
+            Assert.IsTrue(parameterList.Any(param => param.AuthenticationScheme == Constants.PoPAuthHeaderPrefix));
+            Assert.IsNotNull(parameterList.Single(param => param.AuthenticationScheme == Constants.PoPAuthHeaderPrefix).Nonce);
             Assert.IsTrue(!popNonce.IsNullOrEmpty());
             await TestCommon.ValidatePopNonceAsync(popNonce).ConfigureAwait(false);
         }
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             HttpResponseMessage httpResponseMessage = await httpClient.GetAsync("https://testingsts.azurewebsites.net/servernonce/authinfo", new CancellationToken()).ConfigureAwait(false);
 
             //Assert
-            var authInfoParameters = AuthenticationInfoParameters.CreateFromHeaders(httpResponseMessage.Headers);
+            var authInfoParameters = AuthenticationInfoParameters.CreateFromResponseHeaders(httpResponseMessage.Headers);
             Assert.IsNotNull(authInfoParameters);
             Assert.IsNotNull(authInfoParameters.NextNonce);
             await TestCommon.ValidatePopNonceAsync(authInfoParameters.NextNonce).ConfigureAwait(false);
@@ -124,8 +124,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var parsedHeaders = await AuthenticationHeaderParser.ParseAuthenticationHeadersAsync("https://testingsts.azurewebsites.net/servernonce/invalidsignature").ConfigureAwait(false);
 
             //Assert
-            Assert.IsTrue(parsedHeaders.WwwAuthenticateParameters.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
-            var serverNonce = parsedHeaders.WwwAuthenticateParameters.Where(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix).Single().Nonce;
+            Assert.IsTrue(parsedHeaders.WwwAuthenticateParameters.Any(param => param.AuthenticationScheme == Constants.PoPAuthHeaderPrefix));
+            var serverNonce = parsedHeaders.WwwAuthenticateParameters.Where(param => param.AuthenticationScheme == Constants.PoPAuthHeaderPrefix).Single().Nonce;
             Assert.IsNotNull(serverNonce);
             Assert.AreEqual(parsedHeaders.PopNonce, serverNonce);
             Assert.IsNull(parsedHeaders.AuthenticationInfoParameters);
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(parsedHeaders.AuthenticationInfoParameters.NextNonce);
             Assert.AreEqual(parsedHeaders.PopNonce, parsedHeaders.AuthenticationInfoParameters.NextNonce);
 
-            Assert.IsFalse(parsedHeaders.WwwAuthenticateParameters.Any(param => param.AuthScheme == Constants.PoPAuthHeaderPrefix));
+            Assert.IsFalse(parsedHeaders.WwwAuthenticateParameters.Any(param => param.AuthenticationScheme == Constants.PoPAuthHeaderPrefix));
             await TestCommon.ValidatePopNonceAsync(parsedHeaders.PopNonce).ConfigureAwait(false);
         }
 

@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="httpResponseHeaders">HttpResponseHeaders.</param>
         /// <returns>Authentication-Info provided by the endpoint</returns>
-        public static AuthenticationInfoParameters CreateFromHeaders(HttpResponseHeaders httpResponseHeaders)
+        public static AuthenticationInfoParameters CreateFromResponseHeaders(HttpResponseHeaders httpResponseHeaders)
         {
             AuthenticationInfoParameters parameters = new AuthenticationInfoParameters();
 

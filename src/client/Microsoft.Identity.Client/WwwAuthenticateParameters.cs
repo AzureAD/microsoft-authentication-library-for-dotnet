@@ -10,6 +10,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 
@@ -62,7 +63,7 @@ namespace Microsoft.Identity.Client
         /// AuthScheme.
         /// See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate#syntax for more details
         /// </summary>
-        public string AuthScheme { get; private set; }
+        public string AuthenticationScheme { get; private set; }
 
         /// <summary>
         /// The nonce acquired from the WWW-Authenticate header.
@@ -170,7 +171,7 @@ namespace Microsoft.Identity.Client
                 {
                     string wwwAuthenticateValue = headerValue.Parameter;
                     var parameters = CreateFromWwwAuthenticateHeaderValue(wwwAuthenticateValue);
-                    parameters.AuthScheme = scheme;
+                    parameters.AuthenticationScheme = scheme;
                     return parameters;
                 }
             }
@@ -258,7 +259,7 @@ namespace Microsoft.Identity.Client
                         throw;
                     }
 
-                    throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader + " See inner exception for details.", ex);
+                    throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader + $"Response Headers: {httpResponseHeaders.ToString()} See inner exception for details.", ex);
                 }
             }
 
@@ -397,7 +398,7 @@ namespace Microsoft.Identity.Client
         {
             WwwAuthenticateParameters wwwAuthenticateParameters = new WwwAuthenticateParameters();
 
-            wwwAuthenticateParameters.AuthScheme = scheme;
+            wwwAuthenticateParameters.AuthenticationScheme = scheme;
 
             if (values == null)
             {

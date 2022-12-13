@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client
             {
                 var wwwParameters = Client.WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponseHeaders);
 
-                serverNonce = wwwParameters.SingleOrDefault(parameter => string.Equals(parameter.AuthScheme, Constants.PoPAuthHeaderPrefix, StringComparison.Ordinal))?.Nonce;
+                serverNonce = wwwParameters.SingleOrDefault(parameter => string.Equals(parameter.AuthenticationScheme, Constants.PoPAuthHeaderPrefix, StringComparison.Ordinal))?.Nonce;
 
                 authenticationHeaderParser.WwwAuthenticateParameters = wwwParameters;
             }
@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client
                 authenticationHeaderParser.WwwAuthenticateParameters = new List<WwwAuthenticateParameters>();
 
                 //If no WWW-AuthenticateHeaders exist, attempt to parse AuthenticationInfo headers instead
-                authenticationInfoParameters = AuthenticationInfoParameters.CreateFromHeaders(httpResponseHeaders);
+                authenticationInfoParameters = AuthenticationInfoParameters.CreateFromResponseHeaders(httpResponseHeaders);
                 authenticationHeaderParser.AuthenticationInfoParameters = authenticationInfoParameters;
             }
 
