@@ -47,33 +47,38 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        public async Task FailedValidationTestAsync()
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task FailedValidationTestAsync(bool isInstanceDiscoveryEnabled)
         {
-            using var harness = CreateTestHarness();
+            using var harness = CreateTestHarness(isInstanceDiscoveryEnabled: isInstanceDiscoveryEnabled);
 
-            // add mock response for instance validation
-            harness.HttpManager.AddMockHandler(
-                new MockHttpMessageHandler
-                {
-                    ExpectedMethod = HttpMethod.Get,
-                    ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",
-                    ExpectedQueryParams = new Dictionary<string, string>
+            if (isInstanceDiscoveryEnabled)
+            {
+                // add mock response for instance validation
+                harness.HttpManager.AddMockHandler(
+                    new MockHttpMessageHandler
                     {
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",
+                        ExpectedQueryParams = new Dictionary<string, string>
+                        {
                         {"api-version", "1.1"},
                         {
                             "authorization_endpoint",
                             "https%3A%2F%2Flogin.microsoft0nline.com%2Fmytenant.com%2Foauth2%2Fv2.0%2Fauthorize"
                         },
-                    },
-                    ResponseMessage = MockHelpers.CreateFailureMessage(
-                        HttpStatusCode.BadRequest,
-                        "{\"error\":\"invalid_instance\"," + "\"error_description\":\"AADSTS50049: " +
-                        "Unknown or invalid instance. Trace " + "ID: b9d0894d-a9a4-4dba-b38e-8fb6a009bc00 " +
-                        "Correlation ID: 34f7b4cf-4fa2-4f35-a59b" + "-54b6f91a9c94 Timestamp: 2016-08-23 " +
-                        "20:45:49Z\",\"error_codes\":[50049]," + "\"timestamp\":\"2016-08-23 20:45:49Z\"," +
-                        "\"trace_id\":\"b9d0894d-a9a4-4dba-b38e-8f" + "b6a009bc00\",\"correlation_id\":\"34f7b4cf-" +
-                        "4fa2-4f35-a59b-54b6f91a9c94\"}")
-                });
+                        },
+                        ResponseMessage = MockHelpers.CreateFailureMessage(
+                            HttpStatusCode.BadRequest,
+                            "{\"error\":\"invalid_instance\"," + "\"error_description\":\"AADSTS50049: " +
+                            "Unknown or invalid instance. Trace " + "ID: b9d0894d-a9a4-4dba-b38e-8fb6a009bc00 " +
+                            "Correlation ID: 34f7b4cf-4fa2-4f35-a59b" + "-54b6f91a9c94 Timestamp: 2016-08-23 " +
+                            "20:45:49Z\",\"error_codes\":[50049]," + "\"timestamp\":\"2016-08-23 20:45:49Z\"," +
+                            "\"trace_id\":\"b9d0894d-a9a4-4dba-b38e-8f" + "b6a009bc00\",\"correlation_id\":\"34f7b4cf-" +
+                            "4fa2-4f35-a59b-54b6f91a9c94\"}")
+                    });
+            }
 
             Authority instance = Authority.CreateAuthority("https://login.microsoft0nline.com/mytenant.com", true);
             Assert.IsNotNull(instance);
@@ -84,7 +89,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             {
                 AuthorityManager am = new AuthorityManager(new RequestContext(harness.ServiceBundle, Guid.NewGuid()), instance);
                 await am.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
-                Assert.Fail("validation should have failed here");
+
+                if (isInstanceDiscoveryEnabled)
+                {
+                    Assert.Fail("Validation should have failed with an exception when instance discovery is enabled.");
+                }
+                
+                Assert.IsNotNull(am);
             }
             catch (Exception exc)
             {

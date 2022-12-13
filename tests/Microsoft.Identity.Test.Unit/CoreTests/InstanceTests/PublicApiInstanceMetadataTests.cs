@@ -17,13 +17,16 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     public class PublicApiInstanceMetadataTests : TestBase
     {
         [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
-        public async Task AcquireTokenInterative_WithValidCustomInstanceMetadata_Async()
+        public async Task AcquireTokenInterative_WithValidCustomInstanceMetadata_Async(bool isInstanceDiscoveryEnabled)
         {
             string instanceMetadataJson = File.ReadAllText(
                 ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
 
-            using (var harness = CreateTestHarness())
+            //Since user provided metadata takes priority over isInstanceDiscoveryEnabled, existing behavior should not be affected.
+            using (var harness = CreateTestHarness(isInstanceDiscoveryEnabled: isInstanceDiscoveryEnabled))
             {
                 // No instance discovery is made - it is important to not have this mock handler added
                 // harness.HttpManager.AddInstanceDiscoveryMockHandler();
@@ -55,13 +58,16 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         [DeploymentItem(@"Resources\CustomInstanceMetadata.json")]
-        public async Task AcquireTokenInterative_WithBadCustomInstanceMetadata_Async()
+        public async Task AcquireTokenInterative_WithBadCustomInstanceMetadata_Async(bool isInstanceDiscoveryEnabled)
         {
             string instanceMetadataJson = File.ReadAllText(
                 ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
 
-            using (var harness = CreateTestHarness())
+            //Since user provided metadata takes priority over isInstanceDiscoveryEnabled, existing behavior should not be affected.
+            using (var harness = CreateTestHarness(isInstanceDiscoveryEnabled: isInstanceDiscoveryEnabled))
             {
                 // No instance discovery is made - it is important to not have this mock handler added
                 // harness.HttpManager.AddInstanceDiscoveryMockHandler();

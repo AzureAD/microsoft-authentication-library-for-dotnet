@@ -26,6 +26,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
         Cloud Cloud { get; }
         bool UseAppIdUri { get; set; }
+
+        bool InstanceDiscoveryEndpoint { get; set; }
     }    
 
     public class ConfidentialAppSettings
@@ -45,6 +47,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             public Cloud Cloud => Cloud.Public;
 
             public bool UseAppIdUri { get; set; }
+            public bool InstanceDiscoveryEndpoint { get; set; } = true;
 
             public X509Certificate2 GetCertificate()
             {
@@ -90,6 +93,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             public Cloud Cloud => Cloud.Adfs;
 
             public bool UseAppIdUri { get; set; }
+
+            public bool InstanceDiscoveryEndpoint { get; set; } = true;
         }
 
         private class PpeConfidentialAppSettings : IConfidentialAppSettings
@@ -116,6 +121,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             public Cloud Cloud => Cloud.PPE;
 
             public bool UseAppIdUri { get; set; }
+
+            public bool InstanceDiscoveryEndpoint { get; set; } = true;
         }
 
         private class ArlingtonConfidentialAppSettings : IConfidentialAppSettings
@@ -143,6 +150,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             public Cloud Cloud => Cloud.Arlington;
 
             public bool UseAppIdUri { get; set; }
+
+            public bool InstanceDiscoveryEndpoint { get; set; } = true;
         }   
 
         private static Lazy<IConfidentialAppSettings> s_publicCloudSettings =
