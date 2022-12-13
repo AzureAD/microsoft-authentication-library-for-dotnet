@@ -57,9 +57,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 commonParameters,
                 requestContext,
                 _confidentialClientApplication.AppTokenCacheInternal).ConfigureAwait(false);
-       
+
             requestParams.SendX5C = clientParameters.SendX5C ?? false;
-            
+
             var handler = new ClientCredentialRequest(
                 ServiceBundle,
                 requestParams,
@@ -114,9 +114,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             }
 
             await requestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
-            var handler = new AuthCodeRequestComponent(
+            var handler = new AuthCodeRequestComponentBase(
                 requestParameters,
-                authorizationRequestUrlParameters.ToInteractiveParameters());
+                authorizationRequestUrlParameters);
 
             if (authorizationRequestUrlParameters.CodeVerifier != null)
             {

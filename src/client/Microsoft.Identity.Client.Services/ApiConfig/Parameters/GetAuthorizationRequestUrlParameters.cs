@@ -17,19 +17,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
         public Prompt Prompt { get; set; } = Prompt.SelectAccount;
 
-        public AcquireTokenInteractiveParameters ToInteractiveParameters()
-        {
-            return new AcquireTokenInteractiveParameters
-            {
-                Account = Account,
-                ExtraScopesToConsent = ExtraScopesToConsent,
-                LoginHint = LoginHint,
-                Prompt = Prompt,
-                UseEmbeddedWebView = WebViewPreference.NotSpecified,
-                CodeVerifier = CodeVerifier
-            };
-        }
-
         /// <inheritdoc />
         public void LogParameters(ILoggerAdapter logger)
         {
