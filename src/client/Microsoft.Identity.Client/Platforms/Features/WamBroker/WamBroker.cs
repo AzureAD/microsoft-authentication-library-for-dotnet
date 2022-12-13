@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,13 +16,12 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using System.Diagnostics;
 #if !UAP10_0_17763
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.Utils.Windows;
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                     authenticationRequestParameters.Authority.TenantId, isMsa)
                     .ConfigureAwait(false);
 
-                if (PublicClientApplication.IsOperatingSystemAccount(authenticationRequestParameters.Account))
+                if (authenticationRequestParameters.Account.IsOperatingSystemAccount())
                 {
                     var wamResult = await AcquireInteractiveWithWamAccountAsync(
                         authenticationRequestParameters,
@@ -327,7 +327,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             string differentAuthority = null;
             if (string.Equals(authenticationRequestParameters.Authority.TenantId, Constants.OrganizationsTenant)) // /organizations used
             {
-                if (webAccountProvider != null && _webAccountProviderFactory.IsOrganizationsProvider(webAccountProvider) ||
+                if ((webAccountProvider != null && _webAccountProviderFactory.IsOrganizationsProvider(webAccountProvider)) ||
                     (await IsDefaultAccountAndAadAsync(authenticationRequestParameters.Account).ConfigureAwait(false)))
                 {
                     differentAuthority = authenticationRequestParameters.Authority.GetTenantedAuthority("common");
@@ -339,9 +339,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         private async Task<bool> IsDefaultAccountAndAadAsync(IAccount account)
         {
-            if (account != null && PublicClientApplication.IsOperatingSystemAccount(account))
+            if (account != null && account.IsOperatingSystemAccount())
             {
-                bool defaultOsAccountIsAAD = !(await _webAccountProviderFactory.IsDefaultAccountMsaAsync().ConfigureAwait(false));
+                bool defaultOsAccountIsAAD = !await _webAccountProviderFactory.IsDefaultAccountMsaAsync().ConfigureAwait(false);
                 return defaultOsAccountIsAAD;
             }
 
@@ -758,7 +758,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 return null;
             }
 
-            Account accountInternal = (msalAccount as Account);
+            Account accountInternal = msalAccount as Account;
             if (accountInternal?.WamAccountIds != null &&
                 accountInternal.WamAccountIds.TryGetValue(clientId, out string wamAccountId))
             {
@@ -839,7 +839,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 var aadAccounts = await _aadPlugin.GetAccountsAsync(clientID, authorityInfo, cacheSessionManager, instanceDiscoveryManager).ConfigureAwait(false);
                 var msaAccounts = await _msaPlugin.GetAccountsAsync(clientID, authorityInfo, cacheSessionManager, instanceDiscoveryManager).ConfigureAwait(false);
 
-                return (aadAccounts.Concat(msaAccounts)).ToList();
+                return aadAccounts.Concat(msaAccounts).ToList();
             }
         }
 

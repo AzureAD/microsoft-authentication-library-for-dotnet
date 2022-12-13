@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
-            
+
             ThrowIfCurrentBrokerAccount();
 
             AuthenticationResult authResult = null;
@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 return authResult;
             }
             catch (MsalServiceException e)
-            {                
+            {
                 logger.Warning($"Refreshing the RT failed. Is the exception retryable? {e.IsRetryable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null} ");
 
                 if (cachedAccessTokenItem != null && e.IsRetryable)
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
         private void ThrowIfCurrentBrokerAccount()
         {
-            if (PublicClientApplication.IsOperatingSystemAccount(AuthenticationRequestParameters.Account))
+            if (AuthenticationRequestParameters.Account.IsOperatingSystemAccount())
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose(
                     "OperatingSystemAccount is only supported by some brokers");
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 TokenSource.Cache,
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
                 account);
-        }       
+        }
 
         private async Task<MsalTokenResponse> TryGetTokenUsingFociAsync(CancellationToken cancellationToken)
         {

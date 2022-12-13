@@ -63,11 +63,6 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal static bool IsOperatingSystemAccount(IAccount account)
-        {
-            return string.Equals(account?.HomeAccountId?.Identifier, CurrentOSAccountDescriptor, StringComparison.Ordinal);
-        }
-
         /// <summary>
         /// Returns true if MSAL can use a system browser.
         /// </summary>

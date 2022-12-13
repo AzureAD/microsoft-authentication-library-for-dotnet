@@ -14,6 +14,8 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public static class AccountExtensions
     {
+        private const string CurrentOSAccountDescriptor = "current_os_account";
+
         /// <summary>        
         /// The same account can exist in its home tenant and also as a guest in multiple other tenants. 
         /// <see cref="TenantProfile"/> is derived from the ID token for that tenant.
@@ -22,6 +24,11 @@ namespace Microsoft.Identity.Client
         public static IEnumerable<TenantProfile> GetTenantProfiles(this IAccount account)
         {
             return (account as Account)?.TenantProfiles;
+        }
+
+        internal static bool IsOperatingSystemAccount(this IAccount account)
+        {
+            return string.Equals(account?.HomeAccountId?.Identifier, CurrentOSAccountDescriptor, StringComparison.Ordinal);
         }
     }
 }

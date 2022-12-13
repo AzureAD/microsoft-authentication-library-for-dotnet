@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
@@ -15,7 +16,6 @@ using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
-using System.Globalization;
 
 namespace Microsoft.Identity.Client.Broker
 {
@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Broker
         /// Being a C API, MSAL runtime uses a "global init" and "global shutdown" approach. 
         /// It is recommended to initialize the runtime once and to clean it up only once. 
         /// </summary>
-        private static Lazy<NativeInterop.Core> s_lazyCore = new Lazy<NativeInterop.Core>(() =>
+        private static readonly Lazy<NativeInterop.Core> s_lazyCore = new Lazy<NativeInterop.Core>(() =>
         {
             try
             {
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client.Broker
             }
 
             //if OperatingSystemAccount is passed then we use the user signed-in on the machine
-            if (PublicClientApplication.IsOperatingSystemAccount(authenticationRequestParameters.Account))
+            if (authenticationRequestParameters.Account.IsOperatingSystemAccount())
             {
                 return await AcquireTokenInteractiveDefaultUserAsync(authenticationRequestParameters, acquireTokenInteractiveParameters).ConfigureAwait(false);
             }
@@ -122,8 +122,8 @@ namespace Microsoft.Identity.Client.Broker
             if (authenticationRequestParameters?.Account?.HomeAccountId?.ObjectId != null)
             {
                 using (var authParams = WamAdapters.GetCommonAuthParameters(
-                    authenticationRequestParameters, 
-                    _wamOptions, 
+                    authenticationRequestParameters,
+                    _wamOptions,
                     _logger))
                 {
                     using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Client.Broker
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
-                authenticationRequestParameters, 
+                authenticationRequestParameters,
                 _wamOptions,
                 _logger))
             {
@@ -212,7 +212,7 @@ namespace Microsoft.Identity.Client.Broker
             _logger.Verbose("[WamBroker] Signing in with the default user account.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
-                authenticationRequestParameters, 
+                authenticationRequestParameters,
                 _wamOptions,
                 _logger))
             {
@@ -252,7 +252,7 @@ namespace Microsoft.Identity.Client.Broker
             _logger.Verbose("[WamBroker] Acquiring token silently.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
-                authenticationRequestParameters, 
+                authenticationRequestParameters,
                 _wamOptions,
                 _logger))
             {
@@ -299,7 +299,7 @@ namespace Microsoft.Identity.Client.Broker
             _logger.Verbose("[WamBroker] Acquiring token silently for default account.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
-                authenticationRequestParameters, 
+                authenticationRequestParameters,
                 _wamOptions,
                 _logger))
             {
@@ -328,7 +328,7 @@ namespace Microsoft.Identity.Client.Broker
             _logger.Verbose("[WamBroker] Acquiring token with Username Password flow.");
 
             using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(
-                authenticationRequestParameters, 
+                authenticationRequestParameters,
                 _wamOptions,
                 _logger))
             {
@@ -357,7 +357,7 @@ namespace Microsoft.Identity.Client.Broker
         public async Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
-            
+
             if (account == null)
             {
                 _logger.Verbose("[WamBroker] No valid account was passed to RemoveAccountAsync. ");
@@ -367,7 +367,7 @@ namespace Microsoft.Identity.Client.Broker
             string correlationId = Guid.NewGuid().ToString();
 
             //if OperatingSystemAccount is passed then we use the user signed -in on the machine
-            if (PublicClientApplication.IsOperatingSystemAccount(account))
+            if (account.IsOperatingSystemAccount())
             {
                 _logger.Verbose("[WamBroker] Default Operating System Account cannot be removed. ");
                 throw new MsalClientException("wam_remove_account_failed", "Default Operating System account cannot be removed.");

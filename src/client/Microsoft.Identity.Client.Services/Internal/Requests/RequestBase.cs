@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,12 +17,11 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.IdentityModel.Abstractions;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
-using System.Net.Http;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -237,7 +237,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (fromServer == null ||
                 AuthenticationRequestParameters?.Account?.HomeAccountId == null ||
-                PublicClientApplication.IsOperatingSystemAccount(AuthenticationRequestParameters?.Account))
+                AuthenticationRequestParameters?.Account?.IsOperatingSystemAccount() is true)
             {
                 return;
             }
@@ -348,14 +348,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected KeyValuePair<string, string>? GetCcsUpnHeader(string upnHeader)
         {
-            if (AuthenticationRequestParameters.Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C) 
+            if (AuthenticationRequestParameters.Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C)
             {
                 return null;
             }
 
             string OidCcsHeader = CoreHelpers.GetCcsUpnHint(upnHeader);
 
-            return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader) as KeyValuePair<string, string>?;
+            return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader);
         }
 
         private void LogRequestStarted(AuthenticationRequestParameters authenticationRequestParameters)
@@ -405,7 +405,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
             {
                 string scopes = string.Join(" ", result.Scopes);
-                
+
                 AuthenticationRequestParameters.RequestContext.Logger.Info("\n\t=== Token Acquisition finished successfully:");
                 AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
                         $" AT expiration time: {result.ExpiresOn}, scopes: {scopes}. " +
@@ -427,7 +427,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal async Task<AuthenticationResult> HandleTokenRefreshErrorAsync(MsalServiceException e, MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
-            
+
             logger.Warning($"Fetching a new AT failed. Is exception retry-able? {e.IsRetryable}. Is there an AT in the cache that is usable? {cachedAccessTokenItem != null}");
 
             if (cachedAccessTokenItem != null && e.IsRetryable)
