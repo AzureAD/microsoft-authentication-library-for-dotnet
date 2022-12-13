@@ -107,6 +107,12 @@ namespace Microsoft.Identity.Client
 
         public bool RetryOnServerErrors { get; set; } = true;
 
+        public bool UseManagedIdentity { get; internal set; }
+
+        public string ManagedIdentityUserAssignedClientId {  get; internal set; }
+
+        public string ManagedIdentityUserAssignedResourceId { get; internal set; }
+
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
 #region ClientCredentials
@@ -189,6 +195,7 @@ namespace Microsoft.Identity.Client
 
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
         public bool IsConfidentialClient { get; }
+        public bool IsInstanceDiscoveryEnabled { get; internal set; } = true;
         #endregion
 
     }

@@ -17,7 +17,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [TestClass]
     public class RetryPolicyTests : TestBase
     {
-        [TestMethod]
+// This test is expensive, as it has to wait 1 second - run it only on latest .NET
+#if NET6_0_OR_GREATER 
+        [TestMethod]        
         public async Task RetryPolicyAsync()
         {
             using (var httpManager = new MockHttpManager(retryOnceOn5xx: false))
@@ -55,13 +57,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             case 1:
                                 Assert.AreEqual(1, retryAfter.TotalSeconds);
                                 // MSAL enforces Retry-After via throttling, so the test must wait 
-                                await Task.Delay(1 * 1000).ConfigureAwait(false); 
+                                await Task.Delay(1 * 1100).ConfigureAwait(false); 
                                 break;
                             case 2:
-                                Assert.AreEqual(0, retryAfter.TotalSeconds);
+                                Assert.AreEqual(
+                                    0, 
+                                    retryAfter.TotalSeconds, 
+                                    $"Exception should not have Retry-After and should not be a throttling exception - {exception}");
                                 break;
                             default:
-                                Assert.Fail("4th attempt shoudl succeed");
+                                Assert.Fail("3rd attempt should succeed");
                                 break;
                         }
                     });
@@ -125,5 +130,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             return TimeSpan.Zero;
         }
+#endif
     }
 }

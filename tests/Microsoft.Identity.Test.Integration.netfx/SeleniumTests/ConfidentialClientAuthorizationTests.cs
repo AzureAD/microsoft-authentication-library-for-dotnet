@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private static readonly TimeSpan s_timeout = TimeSpan.FromMinutes(1);
 
         private static readonly string[] s_scopes = { "User.Read" };
-        private const string ConfidentialClientID = "8b5195c6-3cc2-4e81-ad28-1e07ad219f3e";
+        private const string ConfidentialClientID = "35dc5034-9b65-4a5d-ad81-73cca468c1e0"; //msidlab4.com app
         private const string TenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
         private const string CertificateName = "for-cca-testing";
 

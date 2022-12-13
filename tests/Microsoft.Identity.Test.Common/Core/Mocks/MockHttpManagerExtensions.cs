@@ -327,6 +327,57 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     });
         }
 
+        public static void AddManagedIdentityMockHandler(
+            this MockHttpManager httpManager,
+            string expectedUrl,
+            string resource,
+            string response,
+            string apiVersion,
+            ManagedIdentitySourceType managedIdentitySourceType,
+            string userAssignedClientIdOrResourceId = null,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            HttpStatusCode statusCode = HttpStatusCode.OK
+            )
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
+            HttpContent content =
+                new StringContent(response);
+            responseMessage.Content = content;
+
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>
+                {
+                    { "api-version", apiVersion },
+                    { "resource", resource }
+                };
+
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+
+            if (managedIdentitySourceType != ManagedIdentitySourceType.IMDS)
+            {
+                expectedRequestHeaders.Add("X-IDENTITY-HEADER", "secret");
+            }
+            
+            if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
+            {
+                expectedQueryParams.Add("client_id", userAssignedClientIdOrResourceId);
+            } 
+                
+            if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
+            {
+                expectedQueryParams.Add("mi_res_id", userAssignedClientIdOrResourceId);
+            }
+
+            httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = expectedUrl,
+                        ExpectedQueryParams = expectedQueryParams,
+                        ExpectedRequestHeaders = expectedRequestHeaders,
+                        ResponseMessage = responseMessage
+                    });
+        }
+
         public static void AddRegionDiscoveryMockHandlerNotFound(
             this MockHttpManager httpManager)
         {
@@ -359,4 +410,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// </summary>
         InvalidClient
     }
-}
+
+    public enum UserAssignedIdentityId
+    {
+        None,
+        ClientId,
+        ResourceId
+    }
+
+    public enum ManagedIdentitySourceType
+    {
+        IMDS,
+        AppService
+    }
+ }

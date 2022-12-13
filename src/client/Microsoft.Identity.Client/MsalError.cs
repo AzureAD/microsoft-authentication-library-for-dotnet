@@ -1101,5 +1101,29 @@ namespace Microsoft.Identity.Client
         /// Msal is unable to parse the authentication header returned from the endpoint. This can be a result of a malformed header returned in either the WWW-Authenticate or the Authentication-Info collections.
         /// </summary>
         public const string UnableToParseAuthenticationHeader = "unable_to_parse_authentication_header";
+
+        /// A required value is missing from the managed identity response.
+        /// </summary>
+        public const string InvalidManagedIdentityResponse = "invalid_managed_identity_response";
+
+        /// <summary>
+        /// Managed Identity error response was received.
+        /// </summary>
+        public const string ManagedIdentityRequestFailed = "managed_identity_request_failed";
+
+        /// <summary>
+        /// Unknown error response received.
+        /// </summary>
+        public const string UnknownManagedIdentityError = "unknown_managed_identity_error";
+
+        /// <summary>
+        /// Invalid managed identity endpoint.
+        /// </summary>
+        public const string InvalidManagedIdentityEndpoint = "invalid_managed_identity_endpoint";
+
+        /// <summary>
+        /// Exactly one scope is expected.
+        /// </summary>
+        public const string ExactlyOneScopeExpected = "exactly_one_scope_expected";
     }
 }

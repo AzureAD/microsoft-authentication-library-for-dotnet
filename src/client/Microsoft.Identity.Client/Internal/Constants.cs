@@ -39,6 +39,9 @@ namespace Microsoft.Identity.Client.Internal
         public const string RequestConfirmation = "req_cnf";
         public const string BearerAuthHeaderPrefix = "Bearer";
 
+        public const string ManagedIdentityClientId = "client_id";
+        public const string ManagedIdentityResourceId = "mi_res_id";
+
         public static string FormatEnterpriseRegistrationOnPremiseUri(string domain)
         {
             return string.Format(

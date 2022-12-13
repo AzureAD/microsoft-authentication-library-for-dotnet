@@ -27,6 +27,7 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string ScopeStr = "r1/scope1 r1/scope2";
         public const string ScopeStrFormat = "r{0}/scope1 r{0}/scope2";
+        public const string MsiResource = "scope";
         public static readonly string[] s_graphScopes = new[] { "user.read" };
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
         public const string ClientCredentialAudience = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0";
@@ -64,8 +65,8 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string ProductionPrefNetworkEnvironment = "login.microsoftonline.com";
         public const string ProductionPrefCacheEnvironment = "login.windows.net";
-        public const string ProductionPrefRegionalEnvironment = "centralus.r.login.microsoftonline.com";
-        public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.r.login.microsoftonline.com";
+        public const string ProductionPrefRegionalEnvironment = "centralus.login.microsoft.com";
+        public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.login.microsoft.com";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
         public const string SovereignNetworkEnvironmentDE = "login.microsoftonline.de";
         public const string SovereignNetworkEnvironmentCN = "login.partner.microsoftonline.cn";

@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                     if (elem != null)
                     {
                         var item = MsalAccessTokenCacheItem.FromJObject(elem);
-                        contract.AccessTokens[item.GetKey().ToString()] = item;
+                        contract.AccessTokens[item.CacheKey] = item;
                     }
                 }
             }
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                     if (elem != null)
                     {
                         var item = MsalRefreshTokenCacheItem.FromJObject(elem);
-                        contract.RefreshTokens[item.GetKey().ToString()] = item;
+                        contract.RefreshTokens[item.CacheKey] = item;
                     }
                 }
             }
@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                     if (elem != null)
                     {
                         var item = MsalIdTokenCacheItem.FromJObject(elem);
-                        contract.IdTokens[item.GetKey().ToString()] = item;
+                        contract.IdTokens[item.CacheKey] = item;
                     }
                 }
             }
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                     if (elem != null)
                     {
                         var item = MsalAccountCacheItem.FromJObject(elem);
-                        contract.Accounts[item.GetKey().ToString()] = item;
+                        contract.Accounts[item.CacheKey] = item;
                     }
                 }
             }
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                     if (elem != null)
                     {
                         var item = MsalAppMetadataCacheItem.FromJObject(elem);
-                        contract.AppMetadata[item.GetKey().ToString()] = item;
+                        contract.AppMetadata[item.CacheKey] = item;
                     }
                 }
             }

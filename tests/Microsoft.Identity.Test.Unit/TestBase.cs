@@ -55,13 +55,16 @@ namespace Microsoft.Identity.Test.Unit
         internal MockHttpAndServiceBundle CreateTestHarness(
             LogCallback logCallback = null,
             bool isExtendedTokenLifetimeEnabled = false,
-            bool isMultiCloudSupportEnabled = false)
+            bool isMultiCloudSupportEnabled = false,
+            bool isInstanceDiscoveryEnabled = true)
         {
             return new MockHttpAndServiceBundle(
                 logCallback,
                 isExtendedTokenLifetimeEnabled,
                 testContext: TestContext,
-                isMultiCloudSupportEnabled: isMultiCloudSupportEnabled);
+                isMultiCloudSupportEnabled: isMultiCloudSupportEnabled,
+                isInstanceDiscoveryEnabled: isInstanceDiscoveryEnabled
+                );
         }
 
         private static void EnableFileTracingOnEnvVar()

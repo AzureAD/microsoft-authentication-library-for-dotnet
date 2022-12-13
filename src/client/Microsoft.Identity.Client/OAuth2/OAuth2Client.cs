@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client.OAuth2
                             _headers,
                             _bodyParameters,
                             requestContext.Logger,
-                            requestContext.UserCancellationToken)
+                            cancellationToken: requestContext.UserCancellationToken)
                                  .ConfigureAwait(false);
                     }
                     else
