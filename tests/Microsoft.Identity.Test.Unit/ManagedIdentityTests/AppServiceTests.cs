@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.AuthenticationResponseInvalidFormatError, ex.Message);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidFormatError, ex.Message);
             }
 
         }

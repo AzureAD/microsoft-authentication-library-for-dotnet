@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 _requestContext.Logger.Error($"[Managed Identity] Exception: {e.Message} Http status code: {response?.StatusCode}");
                 exception = e;
-                message = MsalErrorMessage.UnexpectedResponse;
+                message = MsalErrorMessage.ManagedIdentityUnexpectedResponse;
             }
 
             throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message, exception);
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             if (managedIdentityResponse == null || managedIdentityResponse.AccessToken.IsNullOrEmpty() || managedIdentityResponse.ExpiresOn.IsNullOrEmpty())
             {
                 _requestContext.Logger.Error("[Managed Identity] Response is either null or insufficient for authentication.");
-                throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.AuthenticationResponseInvalidFormatError);
+                throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.ManagedIdentityInvalidFormatError);
             }
 
             return managedIdentityResponse;
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (managedIdentityErrorResponse == null)
             {
-                return "[Managed Identity] Authentication unavailable. No response received from the managed identity endpoint.";
+                return MsalErrorMessage.ManagedIdentityNoResponseReceived;
             }
 
             if (!string.IsNullOrEmpty(managedIdentityErrorResponse.Message))

@@ -93,6 +93,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.UserAssignedManagedIdentityNotSupported, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, ex.Message);
             }
         }
 
@@ -119,7 +120,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.NoChallengeErrorMessage, ex.Message);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityNoChallengeError, ex.Message);
             }
         }
 
@@ -146,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.InvalidChallangeErrorMessage, ex.Message);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidChallange, ex.Message);
             }
         }
 
@@ -207,7 +208,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual("[Managed Identity] Authentication unavailable. No response received from the managed identity endpoint.", ex.Message);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityNoResponseReceived, ex.Message);
             }
         }
 
@@ -234,7 +235,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.AuthenticationResponseInvalidFormatError, ex.Message);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidFormatError, ex.Message);
             }
         }
 
@@ -259,6 +260,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.InvalidManagedIdentityEndpoint, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, ex.Message);
             }
         }
 

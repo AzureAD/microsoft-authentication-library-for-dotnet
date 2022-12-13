@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (!Uri.TryCreate(identityEndpoint, UriKind.Absolute, out Uri endpointUri))
             {
-                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, MsalErrorMessage.IdentityEndpointInvalidUriError);
+                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError);
             }
 
             return new AzureArcManagedIdentitySource(endpointUri, requestContext);
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (!string.IsNullOrEmpty(_clientId) || !string.IsNullOrEmpty(_resourceId))
             {
-                throw new MsalClientException(MsalError.UserAssignedManagedIdentityNotSupported, MsalErrorMessage.UserAssignedNotSupportedErrorMessage);
+                throw new MsalClientException(MsalError.UserAssignedManagedIdentityNotSupported, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported);
             }
         }
 
@@ -72,14 +72,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 if (!response.HeadersAsDictionary.TryGetValue("WWW-Authenticate", out string challenge))
                 {
-                    throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.NoChallengeErrorMessage);
+                    throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.ManagedIdentityNoChallengeError);
                 }
 
                 var splitChallenge = challenge.Split(new char[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
 
                 if (splitChallenge.Length != 2)
                 {
-                    throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.InvalidChallangeErrorMessage);
+                    throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.ManagedIdentityInvalidChallange);
                 }
 
                 var authHeaderValue = "Basic " + File.ReadAllText(splitChallenge[1]);
