@@ -32,7 +32,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static readonly string s_errorMessageWithCorrId = "[Managed Identity] Error message:  " +
             "Correlation Id: ";
         private static readonly string s_emptyResponse = "[Managed Identity] Empty error response received.";
-        private static Dictionary<string, string> s_envVariables = new Dictionary<string, string>();
         private const string UserAssignedClientID = "3b57c42c-3201-4295-ae27-d6baec5b7027";
         private const string Mi_res_id = "/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSAL_MSI_USERID";
 
@@ -79,7 +78,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task AcquireMSITokenAsync(MsiAzureResource azureResource, string userIdentity)
         {
             //Arrange
-            AuthenticationResult result = null;
+            AuthenticationResult result;
 
             //Set the Environment Variables
             var environmentVariables = await GetEnvironmentVariablesAsync(azureResource)
@@ -126,9 +125,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         }
 
-        [DataTestMethod]
-        [DataRow(MsiAzureResource.WebApp, "", SendMSIHeader.None, DisplayName = "Web App No Header")]
-        [DataRow(MsiAzureResource.WebApp, "", SendMSIHeader.WithWrongValue, DisplayName = "Web App Wrong Header")]
+        //[DataTestMethod]
+        //[DataRow(MsiAzureResource.WebApp, "", SendMSIHeader.None, DisplayName = "Web App No Header")]
+        //[DataRow(MsiAzureResource.WebApp, "", SendMSIHeader.WithWrongValue, DisplayName = "Web App Wrong Header")]
         public async Task TryAcquireMSITokenHeaderTestAsync(
             MsiAzureResource azureResource, 
             string userIdentity,
@@ -174,9 +173,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ClearEnvironmentVariables(environmentVariables);
         }
 
-        [DataTestMethod]
-        [DataRow(MsiAzureResource.WebApp, "", MSIResource.None, DisplayName = "Web App No Resource")]
-        [DataRow(MsiAzureResource.WebApp, "", MSIResource.Fake, DisplayName = "Web App Wrong Resource")]
+        //[DataTestMethod]
+        //[DataRow(MsiAzureResource.WebApp, "", MSIResource.None, DisplayName = "Web App No Resource")]
+        //[DataRow(MsiAzureResource.WebApp, "", MSIResource.Fake, DisplayName = "Web App Wrong Resource")]
         public async Task TryAcquireMSITokenResourceTestAsync(
             MsiAzureResource azureResource,
             string userIdentity,
@@ -220,8 +219,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ClearEnvironmentVariables(environmentVariables);
         }
 
-        [DataTestMethod]
-        [DataRow(MsiAzureResource.WebApp, "", MSIApiVersion.Fake, DisplayName = "Web App Wrong Api Version")]
+        //[DataTestMethod]
+        //[DataRow(MsiAzureResource.WebApp, "", MSIApiVersion.Fake, DisplayName = "Web App Wrong Api Version")]
         public async Task TryAcquireMSITokenApiVersionTestAsync(
             MsiAzureResource azureResource,
             string userIdentity,
