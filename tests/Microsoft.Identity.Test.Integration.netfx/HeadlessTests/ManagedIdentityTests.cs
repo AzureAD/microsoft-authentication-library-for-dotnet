@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -29,9 +28,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static readonly string[] s_msi_scopes = { "https://management.azure.com" };
         private static readonly string s_baseURL = "https://service.msidlab.com/";
         private static readonly string s_clientId = "client_id";
-        private static readonly string s_errorMessageWithCorrId = "[Managed Identity] Error message:  " +
-            "Correlation Id: ";
-        private static readonly string s_emptyResponse = "[Managed Identity] Empty error response received.";
+        private static Dictionary<string, string> s_envVariables = new Dictionary<string, string>();
         private const string UserAssignedClientID = "3b57c42c-3201-4295-ae27-d6baec5b7027";
         private const string Mi_res_id = "/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSAL_MSI_USERID";
 
@@ -78,16 +75,20 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task AcquireMSITokenAsync(MsiAzureResource azureResource, string userIdentity)
         {
             //Arrange
-            AuthenticationResult result;
+            AuthenticationResult result = null;
 
             //Set the Environment Variables
-            var environmentVariables = await GetEnvironmentVariablesAsync(azureResource)
+            bool isEnvironmentVariableSet = await SetEnvironmentVariablesAsync(azureResource)
                 .ConfigureAwait(false);
 
-            SetEnvironmentVariables(environmentVariables);
+            if (!isEnvironmentVariableSet)
+            {
+                Assert.Fail("AcquireMSITokenForWebAppAsync failed to set environment variables.");
+            }
 
             //form the URI 
-            string uri = s_baseURL + $"GetMSIToken?azureresource={azureResource}&uri=";
+            string uri = s_baseURL + $"GetMSIToken?" +
+                $"azureresource={azureResource.ToString().ToLowerInvariant()}&uri=";
 
             //Create CCA with Proxy
             IConfidentialClientApplication cca = CreateCCAWithProxy(uri);
@@ -106,13 +107,19 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             //Assert
             Assert.IsNotNull(result.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
             CoreAssert.IsWithinRange(
                             DateTimeOffset.UtcNow + TimeSpan.FromHours(0),
                             result.ExpiresOn,
                             TimeSpan.FromHours(24));
 
-            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            //User Identity Client ID 
+            //Need to check if we are exposing Client ID in msal token response
+            //if (!string.IsNullOrEmpty(userIdentity))
+            //{
+            //    Assert.AreEqual(UserAssignedClientID, result.);
+            //}
 
             result = await cca.AcquireTokenForClient(s_msi_scopes)
                 .WithManagedIdentity(userIdentity)
@@ -121,196 +128,51 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(result.Scopes);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
-            ClearEnvironmentVariables(environmentVariables);
+            ClearEnvironmentVariables();
 
         }
 
-        //[DataTestMethod]
-        //[DataRow(MsiAzureResource.WebApp, "", SendMSIHeader.None, DisplayName = "Web App No Header")]
-        //[DataRow(MsiAzureResource.WebApp, "", SendMSIHeader.WithWrongValue, DisplayName = "Web App Wrong Header")]
-        public async Task TryAcquireMSITokenHeaderTestAsync(
-            MsiAzureResource azureResource, 
-            string userIdentity,
-            SendMSIHeader sendHeader)
+        private async Task<bool> SetEnvironmentVariablesAsync(MsiAzureResource resource)
         {
-            //Arrange
+            //Get the Web App Environment Variables from the MSI Helper Service
+            string uri = s_baseURL + "GetEnvironmentVariables?resource=" + resource;
 
-            //Set the Environment Variables
-            var environmentVariables = await GetEnvironmentVariablesAsync(azureResource)
+            var environmentVariableResponse = await LabUserHelper
+                .GetMSIEnvironmentVariablesAsync(uri)
                 .ConfigureAwait(false);
 
-            SetEnvironmentVariables(environmentVariables);
-
-            //form the URI 
-            string uri = s_baseURL + $"GetMSIToken?azureresource={azureResource}&uri=";
-
-            //Create CCA with Proxy
-            IConfidentialClientApplication cca = CreateCCAWithProxy(uri, sendHeader: sendHeader);
-
-            //Act
-            try
+            //process the response
+            if (!string.IsNullOrEmpty(environmentVariableResponse))
             {
-                AuthenticationResult result = await cca.AcquireTokenForClient(s_msi_scopes)
-                    .WithManagedIdentity(userIdentity)
-                    .ExecuteAsync().ConfigureAwait(false);
+                s_envVariables = JsonConvert.DeserializeObject<Dictionary<string, string>>(environmentVariableResponse);
             }
-            catch (MsalServiceException ex)
+            else
             {
-                string messageToCheck = sendHeader == SendMSIHeader.None ? 
-                    s_errorMessageWithCorrId : s_emptyResponse;
-
-                //When we do not send headers in the request, APP service will reply back with 
-                //{"type":"https://tools.ietf.org/html/rfc7231#section-6.5.1",
-                //"title":"One or more validation errors occurred.",
-                //"status":400,"traceId":"00-b378055402d5a88a840d248f138dc7f3-3377be9e34b55a52-00",
-                //"errors":{"X-IDENTITY-HEADER":["The identityHeader field is required."]}}
-                //This may not be a valid case becaue we identify the app service based on the 
-                //header environment variable. so the value cannot be stripped but could there be a 
-                //scenario where this could happen or should we handle exceptions better in this scenario
-                Assert.AreEqual(messageToCheck, ex.Message);
+                return false;
             }
 
-            ClearEnvironmentVariables(environmentVariables);
-        }
-
-        //[DataTestMethod]
-        //[DataRow(MsiAzureResource.WebApp, "", MSIResource.None, DisplayName = "Web App No Resource")]
-        //[DataRow(MsiAzureResource.WebApp, "", MSIResource.Fake, DisplayName = "Web App Wrong Resource")]
-        public async Task TryAcquireMSITokenResourceTestAsync(
-            MsiAzureResource azureResource,
-            string userIdentity,
-            MSIResource msiResource)
-        {
-            //Arrange
-
-            //Set the Environment Variables
-            var environmentVariables = await GetEnvironmentVariablesAsync(azureResource)
-                .ConfigureAwait(false);
-
-            SetEnvironmentVariables(environmentVariables);
-
-            //form the URI 
-            string uri = s_baseURL + $"GetMSIToken?azureresource={azureResource}&uri=";
-
-            //Create CCA with Proxy
-            IConfidentialClientApplication cca = CreateCCAWithProxy(uri, msiResource: msiResource);
-
-            //Act
-            try
-            {
-                AuthenticationResult result = await cca.AcquireTokenForClient(s_msi_scopes)
-                    .WithManagedIdentity(userIdentity)
-                    .ExecuteAsync().ConfigureAwait(false);
-            }
-            catch (MsalServiceException ex)
-            {
-                string messageToCheck = s_emptyResponse;
-
-                //When we do not send resource in the request, APP service will reply back with 
-                //"{\"targetSite\":null,\"message\":\"Query string missing resource.\",\"data\":{},
-                //\"innerException\":null,\"helpLink\":null,\"source\":null,\"hResult\":-2146233088,\
-                //"stackTrace\":null}"
-
-                //And for the wrong resource MSI service actually gives back a token for https://bing.com
-
-                Assert.AreEqual(messageToCheck, ex.Message);
-            }
-
-            ClearEnvironmentVariables(environmentVariables);
-        }
-
-        //[DataTestMethod]
-        //[DataRow(MsiAzureResource.WebApp, "", MSIApiVersion.Fake, DisplayName = "Web App Wrong Api Version")]
-        public async Task TryAcquireMSITokenApiVersionTestAsync(
-            MsiAzureResource azureResource,
-            string userIdentity,
-            MSIApiVersion msiApiVersion)
-        {
-            //Arrange
-
-            //Set the Environment Variables
-            var environmentVariables = await GetEnvironmentVariablesAsync(azureResource)
-                .ConfigureAwait(false);
-
-            SetEnvironmentVariables(environmentVariables);
-
-            //form the URI 
-            string uri = s_baseURL + $"GetMSIToken?azureresource={azureResource}&uri=";
-
-            //Create CCA with Proxy
-            IConfidentialClientApplication cca = CreateCCAWithProxy(uri, msiApiVersion: msiApiVersion);
-
-            //Act
-            try
-            {
-                AuthenticationResult result = await cca.AcquireTokenForClient(s_msi_scopes)
-                    .WithManagedIdentity(userIdentity)
-                    .ExecuteAsync().ConfigureAwait(false);
-            }
-            catch (MsalServiceException ex)
-            {
-                string messageToCheck = s_emptyResponse;
-
-                //When we  send a wrong API version in the request, APP service will reply back with 
-                //"{\"error\":{\"code\":\"UnsupportedApiVersion\",\"message\":\
-                //"The HTTP resource that matches the request URI 'http://127.0.0.1:41292/msi/token'
-                //does not support the API version '2017-08-01'.\",\"innerError\":null}}"
-                Assert.AreEqual(messageToCheck, ex.Message);
-            }
-
-            ClearEnvironmentVariables(environmentVariables);
-        }
-
-        private async Task<Dictionary<string,string>> GetEnvironmentVariablesAsync(MsiAzureResource resource)
-        {
-            try
-            {
-                //Get the Web App Environment Variables from the MSI Helper Service
-                string uri = (s_baseURL + "GetEnvironmentVariables?resource=" + resource).ToLowerInvariant();
-
-                var environmentVariableResponse = await LabUserHelper
-                    .GetMSIEnvironmentVariablesAsync(uri)
-                    .ConfigureAwait(false);
-
-                //process the response
-                Dictionary<string, string> environmentVariables = 
-                    JsonConvert.DeserializeObject<Dictionary<string, string>>(environmentVariableResponse);
-
-                return environmentVariables;
-            }
-            catch
-            {
-                throw new Exception("Test Failure - Unable to get MSI Environment Variables. Check MSI Helper Service.");
-            }
-        }
-
-        private void SetEnvironmentVariables(Dictionary<string, string> environmentVariables)
-        {
             //Set the environment variables
-            foreach (KeyValuePair<string, string> kvp in environmentVariables)
+            foreach (KeyValuePair<string, string> kvp in s_envVariables)
             {
                 Environment.SetEnvironmentVariable(kvp.Key, kvp.Value);
             }
+
+            return true;
         }
 
-        private void ClearEnvironmentVariables(Dictionary<string, string> environmentVariables)
+        private void ClearEnvironmentVariables()
         {
             //Clear the environment variables
-            foreach (KeyValuePair<string, string> kvp in environmentVariables)
+            foreach (KeyValuePair<string, string> kvp in s_envVariables)
             {
                 Environment.SetEnvironmentVariable(kvp.Key, "");
             }
         }
 
-        private IConfidentialClientApplication CreateCCAWithProxy(
-            string url, 
-            SendMSIHeader sendHeader = SendMSIHeader.Original,
-            MSIResource msiResource = MSIResource.Original,
-            MSIApiVersion msiApiVersion = MSIApiVersion.MsalDefault)
+        private IConfidentialClientApplication CreateCCAWithProxy(string url)
         {
             //Proxy the request 
-            ProxyHttpManager proxyHttpManager = new ProxyHttpManager
-                (url, sendHeader, msiResource, msiApiVersion);
+            ProxyHttpManager proxyHttpManager = new ProxyHttpManager(url);
 
             ConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
                .Create(s_clientId)
