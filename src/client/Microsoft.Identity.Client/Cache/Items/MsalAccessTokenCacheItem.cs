@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
@@ -17,6 +18,9 @@ namespace Microsoft.Identity.Client.Cache.Items
 {
     internal class MsalAccessTokenCacheItem : MsalCredentialCacheItemBase
     {
+        private string[] _extraKeyParts;
+        private string _credentialDescriptor;
+
         internal MsalAccessTokenCacheItem(
             string preferredCacheEnv,
             string clientId,
@@ -41,6 +45,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = response.ClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
+
+            InitCacheKey();
         }
 
         internal /* for test */ MsalAccessTokenCacheItem(
@@ -66,6 +72,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = rawClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
+
+            InitCacheKey();
         }
 
         private MsalAccessTokenCacheItem(
@@ -118,6 +126,59 @@ namespace Microsoft.Identity.Client.Cache.Items
             return newAtItem;
         }
 
+        //internal for test
+        internal void InitCacheKey()
+        {
+            _extraKeyParts = null;
+            _credentialDescriptor = StorageJsonValues.CredentialTypeAccessToken;
+
+            if (AuthSchemeHelper.StoreTokenTypeInCacheKey(TokenType))
+            {
+                _extraKeyParts = new[] { TokenType };
+                _credentialDescriptor = StorageJsonValues.CredentialTypeAccessTokenWithAuthScheme;
+            }
+
+            CacheKey = MsalCacheKeys.GetCredentialKey(
+                HomeAccountId,
+                Environment,
+                _credentialDescriptor,
+                ClientId,
+                TenantId,
+                ScopeString,
+                _extraKeyParts);
+
+            iOSCacheKeyLazy = new Lazy<IiOSKey>(() => InitiOSKey());
+        }
+
+        internal string ToLogString(bool piiEnabled = false)
+        {
+            return MsalCacheKeys.GetCredentialKey(
+                piiEnabled ? HomeAccountId : HomeAccountId?.GetHashCode().ToString(),
+                Environment,
+                _credentialDescriptor,
+                ClientId,
+                TenantId,
+                ScopeString,
+                _extraKeyParts);
+        }
+
+        #region iOS
+
+        private IiOSKey InitiOSKey()
+        {
+            string iOSAccount = MsalCacheKeys.GetiOSAccountKey(HomeAccountId, Environment);
+
+            string iOSService = MsalCacheKeys.GetiOSServiceKey(_credentialDescriptor, ClientId, TenantId, ScopeString, _extraKeyParts);
+
+            string iOSGeneric = MsalCacheKeys.GetiOSGenericKey(_credentialDescriptor, ClientId, TenantId);
+
+            int iOSType = (int)MsalCacheKeys.iOSCredentialAttrType.AccessToken;
+
+            return new IosKey(iOSAccount, iOSService, iOSGeneric, iOSType);
+        }
+
+        #endregion
+
         internal string TenantId
         {
             get; private set;
@@ -150,6 +211,11 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal DateTimeOffset CachedAt { get; private set; }
 
         public bool IsExtendedLifeTimeToken { get; set; }
+
+        internal string CacheKey { get; private set; }
+
+        private Lazy<IiOSKey> iOSCacheKeyLazy;
+        public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
 
         internal static MsalAccessTokenCacheItem FromJsonString(string json)
         {
@@ -194,6 +260,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             item.OboCacheKey = oboCacheKey;
             item.PopulateFieldsFromJObject(j);
 
+            item.InitCacheKey();
+
             return item;
         }
 
@@ -227,20 +295,9 @@ namespace Microsoft.Identity.Client.Cache.Items
             return ToJObject().ToString();
         }
 
-        internal MsalAccessTokenCacheKey GetKey()
+        internal MsalIdTokenCacheItem GetIdTokenItem()
         {
-            return new MsalAccessTokenCacheKey(
-                Environment,
-                TenantId,
-                HomeAccountId,
-                ClientId,
-                ScopeString,
-                TokenType);
-        }
-
-        internal MsalIdTokenCacheKey GetIdTokenItemKey()
-        {
-            return new MsalIdTokenCacheKey(Environment, TenantId, HomeAccountId, ClientId);
+            return new MsalIdTokenCacheItem(Environment, ClientId, Secret, RawClientInfo, HomeAccountId, TenantId);
         }
 
         internal bool IsExpiredWithBuffer()

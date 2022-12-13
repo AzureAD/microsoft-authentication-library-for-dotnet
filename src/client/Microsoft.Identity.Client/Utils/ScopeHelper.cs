@@ -10,6 +10,8 @@ namespace Microsoft.Identity.Client.Utils
 {
     internal static class ScopeHelper
     {
+        private const string DefaultSuffix = "/.default";
+
         public static bool ScopeContains(ISet<string> outerSet, IEnumerable<string> possibleContainedSet)
         {
             foreach (string key in possibleContainedSet)
@@ -64,6 +66,26 @@ namespace Microsoft.Identity.Client.Utils
             }
 
             return new HashSet<string>(input, StringComparer.OrdinalIgnoreCase);
-        }    
+        }
+
+        public static string ScopesToResource(string[] scopes)
+        {
+            if (scopes == null)
+            {
+                throw new MsalClientException(MsalError.ExactlyOneScopeExpected, MsalErrorMessage.ExactlyOneScopeExpected);
+            }
+
+            if (scopes.Length != 1)
+            {
+                throw new MsalClientException(MsalError.ExactlyOneScopeExpected, MsalErrorMessage.ExactlyOneScopeExpected);
+            }
+
+            if (!scopes[0].EndsWith(DefaultSuffix, StringComparison.Ordinal))
+            {
+                return scopes[0];
+            }
+
+            return scopes[0].Remove(scopes[0].LastIndexOf(DefaultSuffix, StringComparison.Ordinal));
+        }
     }
 }

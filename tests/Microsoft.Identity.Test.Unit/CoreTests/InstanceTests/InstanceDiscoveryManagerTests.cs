@@ -42,6 +42,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             _networkCacheMetadataProvider = Substitute.For<INetworkCacheMetadataProvider>();
             _userMetadataProvider = Substitute.For<IUserMetadataProvider>();
 
+            InitializeTestObjects();
+        }
+
+        private void InitializeTestObjects(bool isInstanceDiscoveryEnabled = true)
+        {
             _expectedResult = new InstanceDiscoveryMetadataEntry()
             {
                 Aliases = new[] { "some_env.com", "some_env2.com" },
@@ -49,7 +54,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 PreferredNetwork = "env"
             };
 
-            _harness = base.CreateTestHarness();
+            _harness = base.CreateTestHarness(isInstanceDiscoveryEnabled: isInstanceDiscoveryEnabled);
 
             _testRequestContext = new RequestContext(_harness.ServiceBundle, Guid.NewGuid());
             _discoveryManager = new InstanceDiscoveryManager(
@@ -120,6 +125,59 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // Assert
             Assert.AreSame(_expectedResult, actualResult1, "The static provider should be queried first");
             Assert.AreSame(_expectedResult, actualResult2, "The static provider should be queried first");
+        }
+
+        [TestMethod]
+        public async Task InstanceDiscoveryDisabled_Async()
+        {
+            // Arrange
+            InitializeTestObjects(false);
+            INetworkMetadataProvider networkMetadataProvider = new NetworkMetadataProvider(
+                Substitute.For<IHttpManager>(),
+                _networkCacheMetadataProvider);
+
+            _networkCacheMetadataProvider.GetMetadata("some_env.com", Arg.Any<ILoggerAdapter>()).Returns(_expectedResult);
+
+            _discoveryManager = new InstanceDiscoveryManager(
+              _harness.HttpManager,
+              false,
+              null,
+              null,
+              _knownMetadataProvider,
+              _networkCacheMetadataProvider,
+              networkMetadataProvider);
+
+            // Act
+            InstanceDiscoveryMetadataEntry actualResult1 = await _discoveryManager.GetMetadataEntryTryAvoidNetworkAsync(
+                AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),
+                new[] { "env1", "env2" },
+                _testRequestContext)
+                .ConfigureAwait(false);
+
+            //Ensures that no network call is made for instance discovery
+            _networkCacheMetadataProvider.Received(0).GetMetadata("some_env.com", Arg.Any<ILoggerAdapter>());
+
+            InstanceDiscoveryMetadataEntry actualResult2 = await _discoveryManager.GetMetadataEntryAsync(
+                AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),
+                _testRequestContext)
+                .ConfigureAwait(false);
+
+            //Ensures that no network call is made for instance discovery
+            _networkCacheMetadataProvider.Received(0).GetMetadata("some_env.com", Arg.Any<ILoggerAdapter>());
+            _networkCacheMetadataProvider.AddMetadata(null, null);
+
+            // Assert
+            Assert.AreEqual("some_env.com", actualResult1.Aliases.Single());
+            Assert.AreEqual("some_env.com", actualResult1.PreferredCache);
+            Assert.AreEqual("some_env.com", actualResult1.PreferredNetwork);
+
+            Assert.AreEqual("some_env.com", actualResult2.Aliases.Single());
+            Assert.AreEqual("some_env.com", actualResult2.PreferredCache);
+            Assert.AreEqual("some_env.com", actualResult2.PreferredNetwork);
+
+            //Ensure cached result is not returned
+            Assert.AreNotSame(_expectedResult, actualResult1);
+            Assert.AreNotSame(_expectedResult, actualResult2);
         }
 
         [TestMethod]
@@ -365,21 +423,38 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             ValidateSingleEntryMetadata(new Uri(TestAuthority), actualResult);
         }
 
-        private async Task ValidateSelfEntryAsync(Uri authority)
+        [TestMethod]
+        public async Task InstanceDiscoveryIsSkippedForManagedIdentityAsync()
+        {
+            var httpManager = new MockHttpManager();
+            var appConfig = new ApplicationConfiguration(isConfidentialClient: true)
+            {
+                HttpManager = httpManager,
+                UseManagedIdentity = true
+            };
+
+            var serviceBundle = ServiceBundle.Create (appConfig);
+
+            RequestContext requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+
+            await ValidateSelfEntryAsync(new Uri("https://login.microsoftonline.com/common/"), requestContext).ConfigureAwait(false);
+        }
+
+        private async Task ValidateSelfEntryAsync(Uri authority, RequestContext requestContext = null)
         {
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 InstanceDiscoveryMetadataEntry entry = await harness.ServiceBundle.InstanceDiscoveryManager
                     .GetMetadataEntryAsync(                    
                         AuthorityInfo.FromAuthorityUri(authority.AbsoluteUri,true),
-                        new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                        requestContext ?? new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .ConfigureAwait(false);
 
                 InstanceDiscoveryMetadataEntry entry2 = await harness.ServiceBundle.InstanceDiscoveryManager
                     .GetMetadataEntryTryAvoidNetworkAsync(
                         AuthorityInfo.FromAuthorityUri(authority.AbsoluteUri, true),
                         new[] { "some_env" },
-                        new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
+                        requestContext ?? new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .ConfigureAwait(false);
 
                 ValidateSingleEntryMetadata(authority, entry);

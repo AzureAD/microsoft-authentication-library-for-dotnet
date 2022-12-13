@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(1, GetAccessTokenCache(accessor, isAppCache).Count);
             string partitionKey1 = GetPartitionKey(isAppCache, at1);
-            Assert.IsNotNull(GetAccessTokenCache(accessor, isAppCache)[partitionKey1][at1.GetKey().ToString()]);
+            Assert.IsNotNull(GetAccessTokenCache(accessor, isAppCache)[partitionKey1][at1.CacheKey]);
 
             var at2 = TokenCacheHelper.CreateAccessTokenItem("scope2", "tenant1", "homeAccountId");
 
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.AreEqual(2, accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(1, GetAccessTokenCache(accessor, isAppCache).Count);
-            Assert.IsNotNull(GetAccessTokenCache(accessor, isAppCache)[partitionKey1][at2.GetKey().ToString()]);
+            Assert.IsNotNull(GetAccessTokenCache(accessor, isAppCache)[partitionKey1][at2.CacheKey]);
 
             var at3 = TokenCacheHelper.CreateAccessTokenItem("scope1", "tenant2", "homeAccountId2");
 
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(3, accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(2, GetAccessTokenCache(accessor, isAppCache).Count);
             string partitionKey2 = GetPartitionKey(isAppCache, at3);
-            Assert.IsNotNull(GetAccessTokenCache(accessor, isAppCache)[partitionKey2][at3.GetKey().ToString()]);
+            Assert.IsNotNull(GetAccessTokenCache(accessor, isAppCache)[partitionKey2][at3.CacheKey]);
         }
 
         [DataTestMethod]
@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var appMetadataItem = TokenCacheHelper.CreateAppMetadataItem();
             accessor.SaveAppMetadata(appMetadataItem);
 
-            Assert.AreEqual(appMetadataItem.GetKey(), accessor.GetAppMetadata(appMetadataItem.GetKey()).GetKey());
+            Assert.AreEqual(appMetadataItem.CacheKey, accessor.GetAppMetadata(appMetadataItem).CacheKey);
         }
 
         [DataTestMethod]
@@ -179,7 +179,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, accessor.GetAllRefreshTokens().Count);
             Assert.AreEqual(1, accessor.RefreshTokenCacheDictionary.Count);
             string partitionKey1 = CacheKeyFactory.GetKeyFromCachedItem(rt1);
-            Assert.IsNotNull(accessor.RefreshTokenCacheDictionary[partitionKey1][rt1.GetKey().ToString()]);
+            Assert.IsNotNull(accessor.RefreshTokenCacheDictionary[partitionKey1][rt1.CacheKey]);
 
             var rt2 = TokenCacheHelper.CreateRefreshTokenItem("userAssertion", "homeAccountId2");
 
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.AreEqual(2, accessor.GetAllRefreshTokens().Count);
             Assert.AreEqual(1, accessor.RefreshTokenCacheDictionary.Count);
-            Assert.IsNotNull(accessor.RefreshTokenCacheDictionary[partitionKey1][rt2.GetKey().ToString()]);
+            Assert.IsNotNull(accessor.RefreshTokenCacheDictionary[partitionKey1][rt2.CacheKey]);
 
             var rt3 = TokenCacheHelper.CreateRefreshTokenItem("userAssertion2", "homeAccountId");
 
@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(3, accessor.GetAllRefreshTokens().Count);
             Assert.AreEqual(2, accessor.RefreshTokenCacheDictionary.Count);
             string partitionKey2 = CacheKeyFactory.GetKeyFromCachedItem(rt3);
-            Assert.IsNotNull(accessor.RefreshTokenCacheDictionary[partitionKey2][rt3.GetKey().ToString()]);
+            Assert.IsNotNull(accessor.RefreshTokenCacheDictionary[partitionKey2][rt3.CacheKey]);
         }
 
         [TestMethod]
@@ -265,7 +265,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, accessor.GetAllIdTokens().Count);
             Assert.AreEqual(1, accessor.IdTokenCacheDictionary.Count);
             string partitionKey1 = CacheKeyFactory.GetKeyFromCachedItem(idt1);
-            Assert.IsNotNull(accessor.IdTokenCacheDictionary[partitionKey1][idt1.GetKey().ToString()]);
+            Assert.IsNotNull(accessor.IdTokenCacheDictionary[partitionKey1][idt1.CacheKey]);
 
             var idt2 = TokenCacheHelper.CreateIdTokenCacheItem("tenant2", "homeAccountId");
 
@@ -274,7 +274,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.AreEqual(2, accessor.GetAllIdTokens().Count);
             Assert.AreEqual(1, accessor.IdTokenCacheDictionary.Count);
-            Assert.IsNotNull(accessor.IdTokenCacheDictionary[partitionKey1][idt2.GetKey().ToString()]);
+            Assert.IsNotNull(accessor.IdTokenCacheDictionary[partitionKey1][idt2.CacheKey]);
 
             var idt3 = TokenCacheHelper.CreateIdTokenCacheItem("tenant1", "homeAccountId2");
 
@@ -286,7 +286,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(3, accessor.GetAllIdTokens().Count);
             Assert.AreEqual(2, accessor.IdTokenCacheDictionary.Count);
             string partitionKey2 = CacheKeyFactory.GetKeyFromCachedItem(idt3);
-            Assert.IsNotNull(accessor.IdTokenCacheDictionary[partitionKey2][idt3.GetKey().ToString()]);
+            Assert.IsNotNull(accessor.IdTokenCacheDictionary[partitionKey2][idt3.CacheKey]);
         }
 
         [TestMethod]
@@ -330,8 +330,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             accessor.SaveIdToken(idt3);
 
             // Assert: Get token by key
-            Assert.AreEqual(idt2.GetKey(), accessor.GetIdToken(at2).GetKey());
-            Assert.AreEqual(idt3.GetKey(), accessor.GetIdToken(at3).GetKey());
+            Assert.AreEqual(idt2.CacheKey, accessor.GetIdToken(at2).CacheKey);
+            Assert.AreEqual(idt3.CacheKey, accessor.GetIdToken(at3).CacheKey);
         }
 
         [TestMethod]
@@ -373,7 +373,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, accessor.GetAllAccounts().Count);
             Assert.AreEqual(1, accessor.AccountCacheDictionary.Count);
             string partitionKey1 = CacheKeyFactory.GetKeyFromCachedItem(acc1);
-            Assert.IsNotNull(accessor.AccountCacheDictionary[partitionKey1][acc1.GetKey().ToString()]);
+            Assert.IsNotNull(accessor.AccountCacheDictionary[partitionKey1][acc1.CacheKey]);
 
             var acc2 = TokenCacheHelper.CreateAccountItem("tenant2", "homeAccountId");
 
@@ -382,7 +382,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.AreEqual(2, accessor.GetAllAccounts().Count);
             Assert.AreEqual(1, accessor.AccountCacheDictionary.Count);
-            Assert.IsNotNull(accessor.AccountCacheDictionary[partitionKey1][acc2.GetKey().ToString()]);
+            Assert.IsNotNull(accessor.AccountCacheDictionary[partitionKey1][acc2.CacheKey]);
 
             var acc3 = TokenCacheHelper.CreateAccountItem("tenant1", "homeAccountId2");
 
@@ -394,7 +394,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(3, accessor.GetAllAccounts().Count);
             Assert.AreEqual(2, accessor.AccountCacheDictionary.Count);
             string partitionKey2 = CacheKeyFactory.GetKeyFromCachedItem(acc3);
-            Assert.IsNotNull(accessor.AccountCacheDictionary[partitionKey2][acc3.GetKey().ToString()]);
+            Assert.IsNotNull(accessor.AccountCacheDictionary[partitionKey2][acc3.CacheKey]);
         }
 
         [TestMethod]
@@ -429,15 +429,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var acc3 = TokenCacheHelper.CreateAccountItem("tenant2", "homeAccountId");
 
             // Assert: Null non-existing item
-            Assert.IsNull(accessor.GetAccount(acc1.GetKey()));
+            Assert.IsNull(accessor.GetAccount(acc1));
 
             accessor.SaveAccount(acc1);
             accessor.SaveAccount(acc2);
             accessor.SaveAccount(acc3);
 
             // Assert: Get token by key
-            Assert.AreEqual(acc2.GetKey(), accessor.GetAccount(acc2.GetKey()).GetKey());
-            Assert.AreEqual(acc3.GetKey(), accessor.GetAccount(acc3.GetKey()).GetKey());
+            Assert.AreEqual(acc2.CacheKey, accessor.GetAccount(acc2).CacheKey);
+            Assert.AreEqual(acc3.CacheKey, accessor.GetAccount(acc3).CacheKey);
         }
 
         [TestMethod]
@@ -567,7 +567,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             );
 
             Assert.ThrowsException<NotSupportedException>(() =>
-                accessor.GetAccount(TokenCacheHelper.CreateAccountItem().GetKey())
+                accessor.GetAccount(TokenCacheHelper.CreateAccountItem())
             );
 
             Assert.ThrowsException<NotSupportedException>(() =>

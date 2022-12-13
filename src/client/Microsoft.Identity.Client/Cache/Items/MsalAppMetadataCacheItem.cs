@@ -27,10 +27,37 @@ namespace Microsoft.Identity.Client.Cache.Items
             ClientId = clientId;
             Environment = preferredCacheEnv;
             FamilyId = familyId;
+
+            InitCacheKey();
         }
 
-        /// <remarks>mandatory</remarks>
-        public string ClientId { get; }
+        private void InitCacheKey()
+        {
+            CacheKey = ($"{StorageJsonKeys.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}" +
+                $"{Environment}{MsalCacheKeys.CacheKeyDelimiter}{ClientId}").ToLowerInvariant();
+
+            iOSCacheKeyLazy = new Lazy<IiOSKey>(() => InitiOSKey());
+        }
+
+     #region iOS
+
+        private IiOSKey InitiOSKey()
+        {
+            string iOSService = $"{StorageJsonValues.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}{ClientId}".ToLowerInvariant();
+
+            string iOSGeneric = "1";
+
+            string iOSAccount = $"{Environment}".ToLowerInvariant();
+
+            int iOSType = (int)MsalCacheKeys.iOSCredentialAttrType.AppMetadata;
+
+            return new IosKey(iOSAccount, iOSService, iOSGeneric, iOSType);
+        }
+
+    #endregion
+
+    /// <remarks>mandatory</remarks>
+    public string ClientId { get; }
 
         /// <remarks>mandatory</remarks>
 
@@ -41,11 +68,10 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// with id 1. If familyId is empty, it means an app is not part of a family. A missing entry means unknown status.
         /// </summary>
         public string FamilyId { get; }
+        public string CacheKey { get; private set; }
 
-        public MsalAppMetadataCacheKey GetKey()
-        {
-            return new MsalAppMetadataCacheKey(ClientId, Environment);
-        }
+        private Lazy<IiOSKey> iOSCacheKeyLazy;
+        public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
 
         internal static MsalAppMetadataCacheItem FromJsonString(string json)
         {
@@ -66,6 +92,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             var item = new MsalAppMetadataCacheItem(clientId, environment, familyId);
 
             item.PopulateFieldsFromJObject(j);
+
+            item.InitCacheKey();
 
             return item;
         }

@@ -5,8 +5,11 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
@@ -59,7 +62,13 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 _confidentialClientApplication.AppTokenCacheInternal).ConfigureAwait(false);
        
             requestParams.SendX5C = clientParameters.SendX5C ?? false;
-            
+
+            if (ServiceBundle.Config.UseManagedIdentity)
+            {
+                ManagedIdentityClient managedIdentityClient = new ManagedIdentityClient(requestContext);
+                ServiceBundle.Config.AppTokenProvider = managedIdentityClient.AppTokenProviderImplAsync;
+            }
+
             var handler = new ClientCredentialRequest(
                 ServiceBundle,
                 requestParams,

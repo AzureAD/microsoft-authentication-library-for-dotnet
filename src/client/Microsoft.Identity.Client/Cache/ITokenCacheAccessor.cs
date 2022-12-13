@@ -22,9 +22,9 @@ namespace Microsoft.Identity.Client.Cache
 
         MsalIdTokenCacheItem GetIdToken(MsalAccessTokenCacheItem accessTokenCacheItem);
 
-        MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey);
+        MsalAccountCacheItem GetAccount(MsalAccountCacheItem accountCacheItem);
 
-        MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey);
+        MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheItem appMetadataItem);
 
         void DeleteAccessToken(MsalAccessTokenCacheItem item);
 
