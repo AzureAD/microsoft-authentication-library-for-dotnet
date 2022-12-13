@@ -29,6 +29,7 @@ using Microsoft.Identity.Client;
 [assembly: InternalsVisibleTo("XForms" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("WebApi" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("NetFxConsoleApp" + KeyTokens.MSAL)]
+[assembly: InternalsVisibleTo("Net70TestApp" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("DesktopTestApp" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("UWP standalone" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("XamarinDev" + KeyTokens.MSAL)]

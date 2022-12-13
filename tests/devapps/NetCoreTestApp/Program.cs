@@ -1,4 +1,7 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿#if Net70App
+#define NET70
+#endif
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -10,10 +13,16 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+
+#if !NET70
 using Microsoft.Identity.Client.Desktop;
-using Microsoft.Identity.Client.Extensibility;
+#endif
+
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
+using Microsoft.Identity.Client.Extensibility;
 using NetCoreTestApp.Experimental;
+
+
 
 namespace NetCoreTestApp
 {
@@ -68,12 +77,21 @@ namespace NetCoreTestApp
 
         private static IPublicClientApplication CreatePca()
         {
+#if NET70
+            var pcaBuilder = PublicClientApplicationBuilder
+                            .Create(s_clientIdForPublicApp)
+                            .WithAuthority(GetAuthority())
+                            .WithLogging(Log, LogLevel.Verbose, true)
+                            .WithExperimentalFeatures();
+#else
             var pcaBuilder = PublicClientApplicationBuilder
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
                             .WithLogging(Log, LogLevel.Verbose, true)
                             .WithExperimentalFeatures()
                             .WithDesktopFeatures();
+
+#endif
 
             Console.WriteLine($"IsBrokerAvailable: {pcaBuilder.IsBrokerAvailable()}");
 
@@ -440,10 +458,15 @@ namespace NetCoreTestApp
                                 .ExecuteAsync());
 
                         authenticationResultTask.Wait();
+                        Console.WriteLine($"CorrelationId: {authenticationResultTask.Result.CorrelationId}");
                     }
                     catch (Exception ex)
                     {
+                        var txtColor = Console.ForegroundColor;
+                        Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine($"Thread #{Id}: {ex}");
+                        Console.ForegroundColor = txtColor;
+                        System.Diagnostics.Debugger.Break();
                     }
                 }
                 Console.WriteLine($"Thread #{Id} stop.");
