@@ -460,4 +460,34 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         public const string ADFS2019ClientSecretURL = "https://buildautomation.vault.azure.net/secrets/ADFS2019ClientCredSecret/";
         public const string ADFS2019ClientSecretName = "ADFS2019ClientCredSecret";
     }
+
+    public enum MsiAzureResource
+    {
+        WebApp,
+        Function,
+        Vm,
+        AzureArc,
+        CloudShell,
+        ServiceFabric
+    }
+
+    public enum SendMSIHeader
+    {
+        Original,
+        WithWrongValue,
+        None
+    }
+
+    public enum MSIResource
+    {
+        Original,
+        None,
+        Fake
+    }
+
+    public enum MSIApiVersion
+    {
+        MsalDefault,
+        Fake
+    }
 }
