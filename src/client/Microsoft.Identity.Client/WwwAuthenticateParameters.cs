@@ -197,20 +197,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="resourceUri">URI of the resource.</param>
         /// <param name="scheme">Authentication scheme.</param>
-        /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        public static Task<WwwAuthenticateParameters> CreateFromAuthenticationResponseAsync(string resourceUri, string scheme)
-        {
-            return CreateFromAuthenticationResponseAsync(resourceUri, scheme, default);
-        }
-
-        /// <summary>
-        /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
-        /// </summary>
-        /// <param name="resourceUri">URI of the resource.</param>
-        /// <param name="scheme">Authentication scheme.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        public static Task<WwwAuthenticateParameters> CreateFromAuthenticationResponseAsync(string resourceUri, string scheme, CancellationToken cancellationToken)
+        public static Task<WwwAuthenticateParameters> CreateFromAuthenticationResponseAsync(string resourceUri, string scheme, CancellationToken cancellationToken = default)
         {
             return CreateFromAuthenticationResponseAsync(resourceUri, scheme, AuthenticationHeaderParser.GetHttpClient(), cancellationToken);
         }
@@ -223,7 +212,7 @@ namespace Microsoft.Identity.Client
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <param name="scheme">Authentication scheme.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        public static async Task<WwwAuthenticateParameters> CreateFromAuthenticationResponseAsync(string resourceUri, string scheme, HttpClient httpClient, CancellationToken cancellationToken)
+        public static async Task<WwwAuthenticateParameters> CreateFromAuthenticationResponseAsync(string resourceUri, string scheme, HttpClient httpClient, CancellationToken cancellationToken = default)
         {
             if (httpClient is null)
             {
@@ -278,24 +267,13 @@ namespace Microsoft.Identity.Client
         #endregion Single Scheme Api
 
         #region Multi Scheme Api
-
-        /// <summary>
-        /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
-        /// </summary>
-        /// <param name="resourceUri">URI of the resource.</param>
-        /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        public static Task<IReadOnlyList<WwwAuthenticateParameters>> CreateFromAuthenticationResponseAsync(string resourceUri)
-        {
-            return CreateFromAuthenticationResponseAsync(resourceUri, new CancellationToken());
-        }
-
         /// <summary>
         /// Create the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
         /// </summary>
         /// <param name="resourceUri">URI of the resource.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        public static Task<IReadOnlyList<WwwAuthenticateParameters>> CreateFromAuthenticationResponseAsync(string resourceUri, CancellationToken cancellationToken)
+        public static Task<IReadOnlyList<WwwAuthenticateParameters>> CreateFromAuthenticationResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
         {
             return CreateFromAuthenticationResponseAsync(resourceUri, AuthenticationHeaderParser.GetHttpClient(), cancellationToken);
         }
@@ -307,7 +285,7 @@ namespace Microsoft.Identity.Client
         /// <param name="resourceUri">URI of the resource.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        public static async Task<IReadOnlyList<WwwAuthenticateParameters>> CreateFromAuthenticationResponseAsync(string resourceUri, HttpClient httpClient, CancellationToken cancellationToken)
+        public static async Task<IReadOnlyList<WwwAuthenticateParameters>> CreateFromAuthenticationResponseAsync(string resourceUri, HttpClient httpClient, CancellationToken cancellationToken = default)
         {
             if (httpClient is null)
             {

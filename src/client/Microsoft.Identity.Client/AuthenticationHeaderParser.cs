@@ -45,19 +45,9 @@ namespace Microsoft.Identity.Client
         /// Creates the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
         /// </summary>
         /// <param name="resourceUri">URI of the resource.</param>
-        /// <returns></returns>
-        public static async Task<AuthenticationHeaderParser> ParseAuthenticationHeadersAsync(string resourceUri)
-        {
-            return await ParseAuthenticationHeadersAsync(resourceUri, default).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Creates the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
-        /// </summary>
-        /// <param name="resourceUri">URI of the resource.</param>
         /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
         /// <returns></returns>
-        public static async Task<AuthenticationHeaderParser> ParseAuthenticationHeadersAsync(string resourceUri, CancellationToken cancellationToken)
+        public static async Task<AuthenticationHeaderParser> ParseAuthenticationHeadersAsync(string resourceUri, CancellationToken cancellationToken = default)
         {
             return await ParseAuthenticationHeadersAsync(resourceUri, GetHttpClient(), cancellationToken).ConfigureAwait(false);
         }
@@ -70,7 +60,7 @@ namespace Microsoft.Identity.Client
         /// <param name="httpClient">Instance of <see cref="HttpClient"/> to make the request with.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static async Task<AuthenticationHeaderParser> ParseAuthenticationHeadersAsync(string resourceUri, HttpClient httpClient, CancellationToken cancellationToken)
+        public static async Task<AuthenticationHeaderParser> ParseAuthenticationHeadersAsync(string resourceUri, HttpClient httpClient, CancellationToken cancellationToken = default)
         {
             if (httpClient is null)
             {

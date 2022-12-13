@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
@@ -60,10 +61,10 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [DataRow("AuthScheme", "")]
-        [DataRow("AuthScheme", "token68")]
-        [DataRow("AuthScheme", "auth-param1=token1, auth-param2=token2, auth-param3=token3")]
-        [DataRow("AuthScheme", "token68 auth-param1=token1, auth-param2=token2, auth-param3=token3")]
+        [DataRow("AuthScheme1", "")]
+        [DataRow("AuthScheme2", "token68")]
+        [DataRow("AuthScheme3", "auth-param1=token1, auth-param2=token2, auth-param3=token3")]
+        [DataRow("AuthScheme4", "token68 auth-param1=token1, auth-param2=token2, auth-param3=token3")]
         public void EnsureProperlyFormattedHeadersWithToken86DoNotFail(string scheme, string values)
         {
             // Arrange
@@ -76,11 +77,11 @@ namespace Microsoft.Identity.Test.Unit
             // Assert
             Assert.AreEqual(scheme, authParams.AuthScheme);
 
-            if (string.IsNullOrEmpty(values))
+            if (scheme == "AuthScheme1")
             {
                 Assert.AreEqual(0, authParams.RawParameters.Count);
             }
-            else if (values == "token68")
+            else if (scheme == "AuthScheme2")
             {
                 Assert.AreEqual("token68", authParams.RawParameters[scheme]);
             }
@@ -93,10 +94,10 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [DataRow("AuthScheme", "realm=someRealm")]
-        [DataRow("AuthScheme", "realm=someRealm token68")]
-        [DataRow("AuthScheme", "realm=someRealm auth-param1=token1, auth-param2=token2, auth-param3=token3")]
-        [DataRow("AuthScheme", "realm=someRealm token68 auth-param1=token1, auth-param2=token2, auth-param3=token3")]
+        [DataRow("AuthScheme1", "realm=someRealm")]
+        [DataRow("AuthScheme2", "realm=someRealm token68")]
+        [DataRow("AuthScheme3", "realm=someRealm auth-param1=token1, auth-param2=token2, auth-param3=token3")]
+        [DataRow("AuthScheme4", "realm=someRealm token68 auth-param1=token1, auth-param2=token2, auth-param3=token3")]
         public void EnsureProperlyFormattedHeadersWithRealmDoNotFail(string scheme, string values)
         {
             // Arrange
@@ -110,11 +111,12 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(scheme, authParams.AuthScheme);
             Assert.AreEqual("someRealm", authParams.RawParameters["realm"]);
 
-            if (values.Contains("token68"))
+            if (scheme == "AuthScheme2" || scheme == "AuthScheme4")
             {
                 Assert.AreEqual("token68", authParams.RawParameters[scheme]);
             }
-            else if (values.Contains("auth-param1"))
+            
+            if (scheme == "AuthScheme3" || scheme == "AuthScheme4")
             {
                 Assert.AreEqual("token1", authParams.RawParameters["auth-param1"]);
                 Assert.AreEqual("token2", authParams.RawParameters["auth-param2"]);
@@ -187,7 +189,7 @@ namespace Microsoft.Identity.Test.Unit
 
             //Assert
             Assert.AreEqual(ex.ErrorCode, MsalError.UnableToParseAuthenticationHeader);
-            Assert.AreEqual(ex.Message, MsalErrorMessage.UnableToParseAuthenticationHeader + " See inner exception for details.");
+            Assert.AreEqual(ex.Message, MsalErrorMessage.UnableToParseAuthenticationHeader + $"Response Headers: {httpResponse.Headers.ToString()} See inner exception for details.");
         }
 
         [TestMethod]
@@ -355,21 +357,21 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNull(authParamList.FirstOrDefault().GetTenantId());
         }
 
-        [DataRow(null)]
         [TestMethod]
-        public async Task CreateFromResourceResponseAsync_HttpClient_Null_Async(HttpClient httpClient)
+        public async Task CreateFromResourceResponseAsync_HttpClient_Null_Async()
         {
             const string resourceUri = "https://example.com/";
+            HttpClient client = null;
 
-            Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(httpClient, resourceUri);
-
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
-
-            action = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, "Bearer", httpClient, default);
+            Func<Task> action = () => WwwAuthenticateParameters.CreateFromResourceResponseAsync(null, resourceUri);
 
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
 
-            action = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, httpClient, default);
+            action = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, "Bearer", null, default);
+
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
+
+            action = () => WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(resourceUri, client, default);
 
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(action).ConfigureAwait(false);
         }
