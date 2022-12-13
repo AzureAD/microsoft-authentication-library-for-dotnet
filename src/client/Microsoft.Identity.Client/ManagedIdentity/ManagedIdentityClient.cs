@@ -41,6 +41,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private static ManagedIdentitySource SelectManagedIdentitySource(RequestContext requestContext)
         {
             return AppServiceManagedIdentitySource.TryCreate(requestContext) ?? 
+                AzureArcManagedIdentitySource.TryCreate(requestContext) ??
                 new ImdsManagedIdentitySource(requestContext);
         }
     }

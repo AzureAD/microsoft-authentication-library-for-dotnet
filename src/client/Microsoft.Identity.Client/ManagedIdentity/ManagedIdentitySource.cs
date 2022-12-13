@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             await _requestContext.ServiceBundle.HttpManager.SendGetForceResponseAsync(request.ComputeUri(), request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false) :
             await _requestContext.ServiceBundle.HttpManager.SendPostForceResponseAsync(request.ComputeUri(), request.Headers, request.BodyParameters, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
 
-                return HandleResponse(parameters, response);
+                return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
             }
             catch(TaskCanceledException)
             {
@@ -57,9 +57,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        protected virtual ManagedIdentityResponse HandleResponse(
+        protected virtual async Task<ManagedIdentityResponse> HandleResponseAsync(
             AppTokenProviderParameters parameters,
-            HttpResponse response)
+            HttpResponse response,
+            CancellationToken cancellationToken)
         {
             string message;
             Exception exception = null;
