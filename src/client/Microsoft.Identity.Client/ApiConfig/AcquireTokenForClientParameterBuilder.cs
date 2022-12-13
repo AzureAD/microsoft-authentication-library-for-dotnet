@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                ServiceBundle.Config.ManagedIdentityIUserAssignedResourceId = userAssignedClientIdOrResourceId;
+                ServiceBundle.Config.ManagedIdentityUserAssignedResourceId = userAssignedClientIdOrResourceId;
             }
 
             return this;

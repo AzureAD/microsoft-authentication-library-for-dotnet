@@ -12,5 +12,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     {
         public static string IdentityEndpoint => Environment.GetEnvironmentVariable("IDENTITY_ENDPOINT");
         public static string IdentityHeader => Environment.GetEnvironmentVariable("IDENTITY_HEADER");
+        public static string PodIdentityEndpoint => Environment.GetEnvironmentVariable("AZURE_POD_IDENTITY_AUTHORITY_HOST");
     }
 }

@@ -332,6 +332,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string expectedUrl,
             string resource,
             string response,
+            string apiVersion,
+            ManagedIdentitySourceType managedIdentitySourceType,
             string userAssignedClientIdOrResourceId = null,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             HttpStatusCode statusCode = HttpStatusCode.OK
@@ -344,9 +346,16 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>
                 {
-                    { "api-version", "2019-08-01" },
+                    { "api-version", apiVersion },
                     { "resource", resource }
                 };
+
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+
+            if (managedIdentitySourceType != ManagedIdentitySourceType.IMDS)
+            {
+                expectedRequestHeaders.Add("X-IDENTITY-HEADER", "secret");
+            }
             
             if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
             {
@@ -364,10 +373,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                         ExpectedMethod = HttpMethod.Get,
                         ExpectedUrl = expectedUrl,
                         ExpectedQueryParams = expectedQueryParams,
-                        ExpectedRequestHeaders = new Dictionary<string, string>
-                         {
-                            {"X-IDENTITY-HEADER", "secret"}
-                         },
+                        ExpectedRequestHeaders = expectedRequestHeaders,
                         ResponseMessage = responseMessage
                     });
         }
@@ -411,4 +417,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         ClientId,
         ResourceId
     }
-}
+
+    public enum ManagedIdentitySourceType
+    {
+        IMDS,
+        AppService
+    }
+ }
