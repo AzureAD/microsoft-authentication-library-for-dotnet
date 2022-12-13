@@ -383,10 +383,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     });
         }
 
-        public static void AddManagedIdentityWSTrustMockHandler(this MockHttpManager httpManager, string filePath)
+        public static void AddManagedIdentityWSTrustMockHandler(this MockHttpManager httpManager, string filePath = null)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.Unauthorized);
-            responseMessage.Headers.Add("WWW-Authenticate", $"Basic realm={filePath}");
+            if (filePath != null)
+            {
+                responseMessage.Headers.Add("WWW-Authenticate", $"Basic realm={filePath}");
+            }
+            
             httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {

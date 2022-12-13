@@ -96,6 +96,60 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
+        [TestMethod]
+        public async Task AzureArcAuthHeaderMissingAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(Endpoint);
+
+                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                    .Create("clientId")
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures()
+                    .Build();
+
+                httpManager.AddManagedIdentityWSTrustMockHandler();
+
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await cca.AcquireTokenForClient(new string[] { "scope" })
+                    .WithManagedIdentity()
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.NoChallengeErrorMessage, ex.Message);
+            }
+        }
+
+        [TestMethod]
+        public async Task AzureArcAuthHeaderInvalidAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(Endpoint);
+
+                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                    .Create("clientId")
+                    .WithHttpManager(httpManager)
+                    .WithExperimentalFeatures()
+                    .Build();
+
+                httpManager.AddManagedIdentityWSTrustMockHandler("somevalue=filepath");
+
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await cca.AcquireTokenForClient(new string[] { "scope" })
+                    .WithManagedIdentity()
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.InvalidChallangeErrorMessage, ex.Message);
+            }
+        }
+
         [DataTestMethod]
         [DataRow("user.read")]
         [DataRow("https://management.core.windows.net//user_impersonation")]

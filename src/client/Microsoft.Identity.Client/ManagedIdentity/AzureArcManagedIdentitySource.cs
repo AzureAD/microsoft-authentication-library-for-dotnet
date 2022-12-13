@@ -15,10 +15,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal class AzureArcManagedIdentitySource : ManagedIdentitySource
     {
-        private const string IdentityEndpointInvalidUriError = "[Managed Identity] The environment variable IDENTITY_ENDPOINT contains an invalid Uri.";
-        private const string NoChallengeErrorMessage = "[Managed Identity] Did not receive expected WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint.";
-        private const string InvalidChallangeErrorMessage = "[Managed Identity] The WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint did not match the expected format.";
-        private const string UserAssignedNotSupportedErrorMessage = "[Managed Identity] User assigned identity is not supported by the Azure Arc Managed Identity Endpoint. To authenticate with the system assigned identity omit the client id when constructing the ManagedIdentityCredential, or if authenticating with the DefaultAzureCredential ensure the AZURE_CLIENT_ID environment variable is not set.";
         private const string ArcApiVersion = "2019-11-01";
 
         private readonly string _clientId;
@@ -38,7 +34,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (!Uri.TryCreate(identityEndpoint, UriKind.Absolute, out Uri endpointUri))
             {
-                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, IdentityEndpointInvalidUriError);
+                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, MsalErrorMessage.IdentityEndpointInvalidUriError);
             }
 
             return new AzureArcManagedIdentitySource(endpointUri, requestContext);
@@ -52,7 +48,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (!string.IsNullOrEmpty(_clientId) || !string.IsNullOrEmpty(_resourceId))
             {
-                throw new MsalClientException(MsalError.UserAssignedManagedIdentityNotSupported, UserAssignedNotSupportedErrorMessage);
+                throw new MsalClientException(MsalError.UserAssignedManagedIdentityNotSupported, MsalErrorMessage.UserAssignedNotSupportedErrorMessage);
             }
         }
 
@@ -76,14 +72,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 if (!response.HeadersAsDictionary.TryGetValue("WWW-Authenticate", out string challenge))
                 {
-                    throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, NoChallengeErrorMessage);
+                    throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.NoChallengeErrorMessage);
                 }
 
                 var splitChallenge = challenge.Split(new char[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
 
                 if (splitChallenge.Length != 2)
                 {
-                    throw new MsalClientException(MsalError.ManagedIdentityRequestFailed, InvalidChallangeErrorMessage);
+                    throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.InvalidChallangeErrorMessage);
                 }
 
                 var authHeaderValue = "Basic " + File.ReadAllText(splitChallenge[1]);
