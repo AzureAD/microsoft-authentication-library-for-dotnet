@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -44,7 +45,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures()
                     .Build();
 
-                httpManager.AddManagedIdentityWSTrustMockHandler(ResourceHelper.GetTestResourceRelativePath("ManagedIdentityAzureArcSecret.txt"));
+                httpManager.AddManagedIdentityWSTrustMockHandler(endpoint,
+                    ResourceHelper.GetTestResourceRelativePath("ManagedIdentityAzureArcSecret.txt"));
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -111,7 +113,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures()
                     .Build();
 
-                httpManager.AddManagedIdentityWSTrustMockHandler();
+                httpManager.AddManagedIdentityWSTrustMockHandler(Endpoint);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await cca.AcquireTokenForClient(new string[] { "scope" })
@@ -138,7 +140,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures()
                     .Build();
 
-                httpManager.AddManagedIdentityWSTrustMockHandler("somevalue=filepath");
+                httpManager.AddManagedIdentityWSTrustMockHandler(Endpoint, "somevalue=filepath");
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await cca.AcquireTokenForClient(new string[] { "scope" })
@@ -167,10 +169,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures()
                     .Build();
 
-                httpManager.AddManagedIdentityWSTrustMockHandler(ResourceHelper.GetTestResourceRelativePath("ManagedIdentityAzureArcSecret.txt"));
+                httpManager.AddManagedIdentityWSTrustMockHandler(Endpoint, 
+                    ResourceHelper.GetTestResourceRelativePath("ManagedIdentityAzureArcSecret.txt"));
                 httpManager.AddManagedIdentityMockHandler(Endpoint, resource, MockHelpers.GetMsiErrorResponse(), 
                     ApiVersion, ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.InternalServerError);
-                httpManager.AddManagedIdentityWSTrustMockHandler(ResourceHelper.GetTestResourceRelativePath("ManagedIdentityAzureArcSecret.txt"));
+                httpManager.AddManagedIdentityWSTrustMockHandler(Endpoint, 
+                    ResourceHelper.GetTestResourceRelativePath("ManagedIdentityAzureArcSecret.txt"));
                 httpManager.AddManagedIdentityMockHandler(Endpoint, resource, MockHelpers.GetMsiErrorResponse(), 
                     ApiVersion, ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.InternalServerError);
 
@@ -260,7 +264,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.InvalidManagedIdentityEndpoint, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, ex.Message);
+                Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "localhost/token", "Azure arc"), ex.Message);
             }
         }
 

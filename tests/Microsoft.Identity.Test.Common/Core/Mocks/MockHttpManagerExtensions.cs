@@ -383,7 +383,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     });
         }
 
-        public static void AddManagedIdentityWSTrustMockHandler(this MockHttpManager httpManager, string filePath = null)
+        public static void AddManagedIdentityWSTrustMockHandler(
+            this MockHttpManager httpManager, 
+            string expectedUrl, 
+            string filePath = null)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.Unauthorized);
             if (filePath != null)
@@ -395,8 +398,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Get,
-                        ResponseMessage = responseMessage,
-
+                        ExpectedUrl = expectedUrl,
+                        ResponseMessage = responseMessage
                     });
         }
 
