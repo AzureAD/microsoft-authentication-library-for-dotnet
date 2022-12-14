@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             if (managedIdentityResponse == null || managedIdentityResponse.AccessToken.IsNullOrEmpty() || managedIdentityResponse.ExpiresOn.IsNullOrEmpty())
             {
                 _requestContext.Logger.Error("[Managed Identity] Response is either null or insufficient for authentication.");
-                throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.ManagedIdentityInvalidFormatError);
+                throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.ManagedIdentityInvalidResponse);
             }
 
             return managedIdentityResponse;
