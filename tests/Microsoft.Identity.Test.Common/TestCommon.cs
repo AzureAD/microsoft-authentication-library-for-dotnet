@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -66,7 +67,8 @@ namespace Microsoft.Identity.Test.Common
             bool isLegacyCacheEnabled = true,
             bool isMultiCloudSupportEnabled = false, 
             bool isConfidentialClient = false,
-            bool isInstanceDiscoveryEnabled = true)
+            bool isInstanceDiscoveryEnabled = true,
+            IPlatformProxy platformProxy = null)
         {
 
             var appConfig = new ApplicationConfiguration(isConfidentialClient)
@@ -81,7 +83,8 @@ namespace Microsoft.Identity.Test.Common
                 Authority = Authority.CreateAuthority(authority, validateAuthority),
                 LegacyCacheCompatibilityEnabled = isLegacyCacheEnabled,
                 MultiCloudSupportEnabled = isMultiCloudSupportEnabled,
-                IsInstanceDiscoveryEnabled = isInstanceDiscoveryEnabled
+                IsInstanceDiscoveryEnabled = isInstanceDiscoveryEnabled,
+                PlatformProxy = platformProxy
             };
             return new ServiceBundle(appConfig, clearCaches);
         }
@@ -129,6 +132,7 @@ namespace Microsoft.Identity.Test.Common
             {
             };
         }
+
         public static KeyValuePair<string, IEnumerable<string>> GetCcsHeaderFromSnifferFactory(HttpSnifferClientFactory factory)
         {
             if (factory.RequestsAndResponses.Any())

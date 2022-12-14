@@ -23,11 +23,14 @@ using NSubstitute;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests.Silent;
 using System.Data;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
     [TestClass]
-    public class SilentRequestTests
+    public class SilentRequestTests : TestBase
     {
         [TestInitialize]
         public void TestInitialize()
@@ -105,7 +108,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             string brokerID = "Broker@broker.com";
             using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant))
             {
-                // resul will be from the cache
+                // result will be from the local cache
                 TokenCacheHelper.PopulateCache(harness.Cache.Accessor,
                     TestConstants.Uid,
                     TestConstants.Utid,
@@ -154,6 +157,52 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Assert.AreEqual(brokerID, result.Account.Username);
                     await mockBroker.DidNotReceiveWithAnyArgs().AcquireTokenSilentAsync(null, null).ConfigureAwait(false);
                 }
+            }
+        }
+
+        [TestMethod]
+        public async Task IosBrokerSilentRequestLocalCacheTestAsync()
+        {
+            string brokerID = "Broker@broker.com";
+            IBroker mockBroker = CreateBroker(typeof(IosBrokerMock));
+            IPlatformProxy platformProxy = Substitute.For<IPlatformProxy>();
+            platformProxy.CanBrokerSupportSilentAuth().Returns(false); //Ios sets this to false so local cache should be used
+            platformProxy.CreateTokenCacheAccessor(Arg.Any<CacheOptions>()).Returns(PlatformProxyFactory.CreatePlatformProxy(null).CreateTokenCacheAccessor(null));
+            platformProxy.CreateBroker(Arg.Any<ApplicationConfiguration>(), Arg.Any<CoreUIParent>()).ReturnsForAnyArgs(mockBroker);
+
+            using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant, platformProxy))
+            {
+                // result will be from the local cache
+                TokenCacheHelper.PopulateCache(harness.Cache.Accessor,
+                    TestConstants.Uid,
+                    TestConstants.Utid,
+                    TestConstants.ClientId,
+                    TestConstants.ProductionPrefCacheEnvironment,
+                    brokerID);
+
+                harness.ServiceBundle.Config.BrokerCreatorFunc = (app, config, logger) => mockBroker;
+
+                var parameters = harness.CreateRequestParams(
+                    harness.Cache,
+                    null,
+                    TestConstants.ExtraQueryParameters,
+                    null,
+                    authorityOverride: AuthorityInfo.FromAuthorityUri(TestConstants.AuthorityCommonTenant, false));
+                parameters.AppConfig.IsBrokerEnabled = true;
+
+                var silentParameters = new AcquireTokenSilentParameters()
+                {
+                    Account = new Account(TestConstants.HomeAccountId, TestConstants.DisplayableId, TestConstants.ProductionPrefCacheEnvironment),
+                };
+
+                var request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
+
+                var result = await request.RunAsync(default).ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+                Assert.AreEqual(brokerID, result.Account.Username);
             }
         }
 
@@ -209,9 +258,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             private readonly MockHttpAndServiceBundle _mockHttpAndServiceBundle;
 
-            public MockHttpTestHarness(string authorityUri)
+            public MockHttpTestHarness(string authorityUri, IPlatformProxy platformProxy = null)
             {
-                _mockHttpAndServiceBundle = new MockHttpAndServiceBundle();
+                _mockHttpAndServiceBundle = new MockHttpAndServiceBundle(platformProxy: platformProxy);
                 Authority = Authority.CreateAuthority(authorityUri);
                 Cache = new TokenCache(ServiceBundle, false);
             }
