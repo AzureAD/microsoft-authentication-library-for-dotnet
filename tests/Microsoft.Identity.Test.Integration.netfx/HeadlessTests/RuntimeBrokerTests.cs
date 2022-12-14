@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
-        public async Task WamUsernamePasswordRequestAsync_WithPii()
+        public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             string[] scopes = { "User.Read" };
