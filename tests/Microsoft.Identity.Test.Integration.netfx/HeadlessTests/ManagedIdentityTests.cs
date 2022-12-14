@@ -26,42 +26,44 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class ManagedIdentityTests
     {
         private static readonly string[] s_msi_scopes = { "https://management.azure.com" };
-        private static readonly string s_baseURL = "https://service.msidlab.com/";
         private static readonly string s_clientId = "client_id";
-        private static Dictionary<string, string> s_envVariables = new Dictionary<string, string>();
+
+        //http proxy base URL 
+        private static readonly string s_baseURL = "https://service.msidlab.com/";
+
+        //Shared User Assigned Client ID
         private const string UserAssignedClientID = "3b57c42c-3201-4295-ae27-d6baec5b7027";
-        private const string Mi_res_id = "/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSAL_MSI_USERID";
+        
+        //Resource ID of the User Assigned Identity 
+        private const string Mi_res_id = "/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/" +
+            "resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/" +
+            "MSAL_MSI_USERID";
 
         [TestMethod]
         public async Task ManagedIdentitySourceCheckAsync()
         {
             //Arrange
             string result = string.Empty;
-            string exception = string.Empty;
-            string expectedClientException = "Authentication with managed identity is unavailable. " +
-                "No managed identity endpoint found.";
+            string expectedClientException = "[Managed Identity] Authentication unavailable. " +
+                "No response received from the managed identity endpoint.";
 
             IConfidentialClientApplication cca = CreateCCAWithProxy(s_baseURL);
 
             //Act
             try
             {
-                AuthenticationResult authenticationResult = await cca.AcquireTokenForClient(s_msi_scopes)
+                AuthenticationResult authenticationResult = await cca
+                    .AcquireTokenForClient(s_msi_scopes)
                     .WithManagedIdentity()
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }
-            catch (MsalClientException ex)
+            catch (MsalServiceException ex)
             {
                 result = ex.Message;
             }
-            catch (Exception ex)
-            {
-                exception = ex.Message;
-            }
 
             //Assert
-            Assert.IsTrue(string.IsNullOrEmpty(exception));
             Assert.AreSame(result, expectedClientException);
         }
 
@@ -77,64 +79,74 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Arrange
             AuthenticationResult result = null;
 
-            //Set the Environment Variables
-            bool isEnvironmentVariableSet = await SetEnvironmentVariablesAsync(azureResource)
-                .ConfigureAwait(false);
-
-            if (!isEnvironmentVariableSet)
+            using (new EnvVariableContext())
             {
-                Assert.Fail("AcquireMSITokenForWebAppAsync failed to set environment variables.");
-            }
+                //Get the Environment Variables
+                Dictionary<string, string> envVariables = 
+                    await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
 
-            //form the URI 
-            string uri = s_baseURL + $"GetMSIToken?" +
-                $"azureresource={azureResource.ToString().ToLowerInvariant()}&uri=";
+                //Set the Environment Variables
+                SetEnvironmentVariables(envVariables);
 
-            //Create CCA with Proxy
-            IConfidentialClientApplication cca = CreateCCAWithProxy(uri);
+                //form the http proxy URI 
+                string uri = s_baseURL + $"GetMSIToken?" +
+                    $"azureresource={azureResource.ToString().ToLowerInvariant()}&uri=";
 
-            //Act
-            try
-            {
-                result = await cca.AcquireTokenForClient(s_msi_scopes)
+                //Create CCA with Proxy
+                IConfidentialClientApplication cca = CreateCCAWithProxy(uri);
+
+                //Act
+                try
+                {
+                    result = await cca
+                        .AcquireTokenForClient(s_msi_scopes)
+                        .WithManagedIdentity(userIdentity)
+                        .ExecuteAsync().ConfigureAwait(false);
+                }
+                catch (MsalClientException ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+            
+                //Assert
+                //1. MSI Helper service trims the access token, so that the access token from the MSI
+                //   is not fully returned to the calling service or test for security reasons
+                Assert.IsTrue(result.AccessToken.Length == 28);
+
+                //2. First token response is from the MSI Endpoint
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                //3. Validate the ExpiresOn falls within a 24 hour range from now
+                CoreAssert.IsWithinRange(
+                                DateTimeOffset.UtcNow + TimeSpan.FromHours(0),
+                                result.ExpiresOn,
+                                TimeSpan.FromHours(24));
+
+                result = await cca
+                    .AcquireTokenForClient(s_msi_scopes)
                     .WithManagedIdentity(userIdentity)
-                    .ExecuteAsync().ConfigureAwait(false);
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                //4. Validate the scope
+                Assert.IsTrue(s_msi_scopes.All(result.Scopes.Contains));
+
+                //5. Validate the second call to token endpoint gets returned from the cache
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
-            catch (MsalClientException ex)
-            {
-                throw new Exception(ex.Message);
-            }
-
-            //Assert
-            Assert.IsNotNull(result.AccessToken);
-            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-
-            CoreAssert.IsWithinRange(
-                            DateTimeOffset.UtcNow + TimeSpan.FromHours(0),
-                            result.ExpiresOn,
-                            TimeSpan.FromHours(24));
-
-            //User Identity Client ID 
-            //Need to check if we are exposing Client ID in msal token response
-            //if (!string.IsNullOrEmpty(userIdentity))
-            //{
-            //    Assert.AreEqual(UserAssignedClientID, result.);
-            //}
-
-            result = await cca.AcquireTokenForClient(s_msi_scopes)
-                .WithManagedIdentity(userIdentity)
-                .ExecuteAsync().ConfigureAwait(false);
-
-            Assert.IsNotNull(result.Scopes);
-            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-
-            ClearEnvironmentVariables();
-
         }
 
-        private async Task<bool> SetEnvironmentVariablesAsync(MsiAzureResource resource)
+        /// <summary>
+        /// Gets the environment variable
+        /// </summary>
+        /// <param name="resource"></param>
+        /// <returns></returns>
+        private async Task<Dictionary<string, string>> GetEnvironmentVariablesAsync(
+            MsiAzureResource resource)
         {
-            //Get the Web App Environment Variables from the MSI Helper Service
+            Dictionary<string, string> environmentVariables = new Dictionary<string, string>();
+
+            //Get the Environment Variables from the MSI Helper Service
             string uri = s_baseURL + "GetEnvironmentVariables?resource=" + resource;
 
             var environmentVariableResponse = await LabUserHelper
@@ -144,34 +156,35 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //process the response
             if (!string.IsNullOrEmpty(environmentVariableResponse))
             {
-                s_envVariables = JsonConvert.DeserializeObject<Dictionary<string, string>>(environmentVariableResponse);
-            }
-            else
-            {
-                return false;
+                environmentVariables = JsonConvert.DeserializeObject
+                    <Dictionary<string, string>>(environmentVariableResponse);
             }
 
+            return environmentVariables;
+
+        }
+
+        /// <summary>
+        /// Sets the Environment Variables
+        /// </summary>
+        /// <param name="envVariables"></param>
+        private void SetEnvironmentVariables(Dictionary<string, string> envVariables)
+        {
             //Set the environment variables
-            foreach (KeyValuePair<string, string> kvp in s_envVariables)
+            foreach (KeyValuePair<string, string> kvp in envVariables)
             {
                 Environment.SetEnvironmentVariable(kvp.Key, kvp.Value);
             }
-
-            return true;
         }
 
-        private void ClearEnvironmentVariables()
-        {
-            //Clear the environment variables
-            foreach (KeyValuePair<string, string> kvp in s_envVariables)
-            {
-                Environment.SetEnvironmentVariable(kvp.Key, "");
-            }
-        }
-
+        /// <summary>
+        /// Create the CCA with the http proxy
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         private IConfidentialClientApplication CreateCCAWithProxy(string url)
         {
-            //Proxy the request 
+            //Proxy the MSI token request 
             ProxyHttpManager proxyHttpManager = new ProxyHttpManager(url);
 
             ConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
