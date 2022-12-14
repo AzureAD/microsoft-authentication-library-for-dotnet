@@ -50,13 +50,19 @@ namespace Microsoft.Identity.Test.Integration.Broker
             try
             {
                 var result = await pca.AcquireTokenSilent(scopes, PublicClientApplication.OperatingSystemAccount).ExecuteAsync().ConfigureAwait(false);
-
+                Assert.IsTrue(false, "AcquireTokenSilent successfull!");
             }
             catch (MsalUiRequiredException ex)
             {
+                Console.WriteLine(ex.Message);
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+                Trace.WriteLine(ex.Message);
                 Assert.IsTrue(ex.Message.Contains("Need user interaction to continue"));
             }
-
+            catch (Exception ex)
+            {
+                Assert.Fail(ex.Message);
+            }
         }
 
         [RunOn(TargetFrameworks.NetCore)]
