@@ -15,6 +15,9 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
+     /// <summary>
+    /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/AzureArcManagedIdentitySource.cs
+    /// </summary>
     internal class AzureArcManagedIdentitySource : ManagedIdentitySource
     {
         private const string ArcApiVersion = "2019-11-01";
