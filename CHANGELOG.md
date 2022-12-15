@@ -12,7 +12,7 @@
 - Enabling MSAL Runtime logging integration. See [3575](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3575)
 
 ### Bug Fixes
-- Optimizing MSAL cache key logic to improve performance. See 3393](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3393)
+- Optimizing MSAL cache key logic to improve performance. See [3393](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3393)
 
 4.48.1
 ==========
