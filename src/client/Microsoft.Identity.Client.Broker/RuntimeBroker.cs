@@ -292,7 +292,7 @@ namespace Microsoft.Identity.Client.Broker
                     if (!readAccountResult.IsSuccess)
                     {
                         _logger?.WarningPii(
-                            $"[WamBroker] Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username} error: {readAccountResult.Error}",
+                            $"[WamBroker] Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}. Error: {readAccountResult.Error}",
                             $"[WamBroker] Could not find a WAM account for the selected user. Error: {readAccountResult.Error}");
 
                         throw new MsalUiRequiredException(
