@@ -35,7 +35,6 @@ namespace Microsoft.Identity.Client
 
         internal ApplicationConfiguration Config { get; }
 
-
         /// <summary>
         /// Uses a specific <see cref="IMsalHttpClientFactory"/> to communicate
         /// with the IdP. This enables advanced scenarios such as setting a proxy,
@@ -535,7 +534,7 @@ namespace Microsoft.Identity.Client
         /// instance discovery and authority validation. This will not affect the behavior of application configured with regional endpoints however.
         /// </summary>
         /// <remarks>If instance discovery is disabled and no user metadata is provided, MSAL will use the provided authority without any checks.
-        /// <see cref="WithInstanceDiscoveryMetadata(string instanceDiscoveryJson)"/> takes priority over <paramref name="enableInstanceDiscovery"/>
+        /// <see cref="WithInstanceDiscoveryMetadata(string)"/> takes priority over <paramref name="enableInstanceDiscovery"/>
         /// so instance metadata can be provided regardless of this configuration.
         /// </remarks>
         /// <param name="enableInstanceDiscovery">Determines if instance discovery/Authority validation is performed</param>

@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client
             Exception innerException)
             : base(errorCode, errorMessage, innerException)
         {
-            UpdateIsRetryable();            
+            UpdateIsRetryable();
         }
 
         /// <summary>
@@ -199,9 +199,10 @@ namespace Microsoft.Identity.Client
         /// When the server returns a 429 Too Many Requests error, a Retry-After should be set. It is important to read and respect the
         /// time specified in the Retry-After header to avoid a retry storm.
         /// </remarks>
-        public HttpResponseHeaders Headers { 
-            get => _headers; 
-            set 
+        public HttpResponseHeaders Headers
+        {
+            get => _headers;
+            set
             {
                 _headers = value;
                 UpdateIsRetryable();
@@ -246,8 +247,6 @@ namespace Microsoft.Identity.Client
                 ResponseBody,
                 Headers);
         }
-
-
 
         #region Serialization
 
