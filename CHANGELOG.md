@@ -1,3 +1,19 @@
+4.49.0
+==========
+### New Features
+- MSAL will now use `<region>.login.microsoft.com` when using regional ESTS-R. See [3252](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3252)
+- Added Support for Account Discovery when using Wam broker. See [3458](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3458)
+- Added support for app service system assigned managed identity (Managed Service Identity). See [3754](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3754)
+- Added IMDS managed identity source to Managed Service Identity integration in MSAL. See [3829](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3829)
+- Added the ability to disable Instance Discovery/Authority validation using `WithInstanceDiscovery(bool enableInstanceDiscovery)`. See [3775](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3775)
+- Added new apis to acquire authentication data from WWW-Authenticate/Authentication-Info headers. This will provide additional support for Proof-of-Possession. See [3026](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3026)
+
+### Supportability
+- Enabling MSAL Runtime logging integration. See [3575](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3575)
+
+### Bug Fixes
+- Optimizing MSAL cache key logic to improve performance. See 3393](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3393)
+
 4.48.1
 ==========
 
