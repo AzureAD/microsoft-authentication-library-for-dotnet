@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
             catch (MsalUiRequiredException ex)
             {
-                Assert.IsTrue(string.IsNullOrEmpty(ex.ErrorCode));
+                Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
             }
 
         }
