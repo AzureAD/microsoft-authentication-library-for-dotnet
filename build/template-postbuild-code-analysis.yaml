@@ -2,7 +2,7 @@
 # Run post-build code analysis (e.g. Roslyn analyzers)
 
 steps:
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@3
   displayName: 'Run Roslyn Analyzers'
   continueOnError: true
 
