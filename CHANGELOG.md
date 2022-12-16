@@ -14,6 +14,7 @@
 
 ### Bug Fixes
 - Optimizing MSAL cache key logic to improve performance. See [3393](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3393)
+- Update Broker to use Interop 0.13.3 to resolve crash resulting from garbage collection when using WAM broker. See [3868](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3868)
 
 4.48.1
 ==========
