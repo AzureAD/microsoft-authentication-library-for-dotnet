@@ -441,8 +441,15 @@ namespace Microsoft.Identity.Client
                                 invalidValueName);
         }
 
-        public const string AuthenticationResponseInvalidFormatError = "[Managed Identity] Invalid response, the authentication response received did not contain the expected fields.";
-        public const string UnexpectedResponse = "[Managed Identity] Response was not in the expected format. See the inner exception for details.";
-        public const string ExactlyOneScopeExpected = "[Managed Identity] To acquire token for managed identity, exactly one scope should be passed.";
+        public const string ManagedIdentityNoResponseReceived = "[Managed Identity] Authentication unavailable. No response received from the managed identity endpoint.";
+        public const string ManagedIdentityInvalidResponse = "[Managed Identity] Invalid response, the authentication response received did not contain the expected fields.";
+        public const string ManagedIdentityUnexpectedResponse = "[Managed Identity] Unexpected exception occurred when parsing the response. See the inner exception for details.";
+        public const string ManagedIdentityExactlyOneScopeExpected = "[Managed Identity] To acquire token for managed identity, exactly one scope must be passed.";
+
+        public const string ManagedIdentityEndpointInvalidUriError = "[Managed Identity] The environment variable IDENTITY_ENDPOINT contains an invalid Uri {0} in {1} managed identity source.";
+        public const string ManagedIdentityNoChallengeError = "[Managed Identity] Did not receive expected WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint.";
+        public const string ManagedIdentityInvalidChallange = "[Managed Identity] The WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint did not match the expected format.";
+        public const string ManagedIdentityUserAssignedNotSupported = "[Managed Identity] User assigned identity is not supported by the Azure Arc Managed Identity Endpoint. To authenticate with the system assigned identity omit the client id to .WithManagedIentity().";
+
     }
 }

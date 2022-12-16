@@ -127,6 +127,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityNoResponseReceived, ex.Message);
             }
         }
 
@@ -153,14 +154,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.AuthenticationResponseInvalidFormatError, ex.Message);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidResponse, ex.Message);
             }
         }
 
         [TestMethod]
         public async Task ImdsBadRequestTestAsync()
         {
-
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
 

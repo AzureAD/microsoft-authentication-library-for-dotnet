@@ -1126,5 +1126,11 @@ namespace Microsoft.Identity.Client
         /// Exactly one scope is expected.
         /// </summary>
         public const string ExactlyOneScopeExpected = "exactly_one_scope_expected";
+
+        /// <summary>
+        /// User assigned managed identity is not supported for this source.
+        /// </summary>
+        public const string UserAssignedManagedIdentityNotSupported = "user_assigned_managed_identity_not_supported";
+
     }
 }
