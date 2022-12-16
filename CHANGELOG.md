@@ -2,11 +2,10 @@
 ==========
 ### New Features
 - MSAL will now use `<region>.login.microsoft.com` when using regional ESTS-R. See [3252](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3252)
-- Added Support for Account Discovery when using Wam broker. See [3458](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3458)
-- Added support for app service system assigned managed identity (Managed Service Identity). See [3754](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3754)
-- Added IMDS managed identity source to Managed Service Identity integration in MSAL. See [3829](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3829)
+- Added support for acquiring Work and School accounts when calling `GetAccounts` using the new Broker preview. See [3458](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3458)
+- Added ability to acquire tokens using system and user-assigned managed identities in App Services and IMDS-enabled environments. See [3754](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3754) and [3829](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3829)
 - Added the ability to disable Instance Discovery/Authority validation using `WithInstanceDiscovery(bool enableInstanceDiscovery)`. See [3775](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3775)
-- Added new apis to acquire authentication data from WWW-Authenticate/Authentication-Info headers. This will provide additional support for Proof-of-Possession. See [3026](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3026)
+- Added new APIs to acquire authentication data from WWW-Authenticate and Authentication-Info request headers. This will provide additional support for Proof-of-Possession. See [3026](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3026)
 
 ### Supportability
 - Enabling MSAL Runtime logging integration. See [3575](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3575)
