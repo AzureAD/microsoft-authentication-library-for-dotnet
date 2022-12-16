@@ -3,9 +3,11 @@
 ### New Features
 - MSAL will now use `<region>.login.microsoft.com` when using regional ESTS-R. See [3252](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3252)
 - Added support for acquiring Work and School accounts when calling `GetAccounts` using the new Broker preview. See [3458](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3458)
-- Added ability to acquire tokens using system and user-assigned managed identities in App Services and IMDS-enabled environments. See [3754](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3754) and [3829](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3829)
 - Added the ability to disable Instance Discovery/Authority validation using `WithInstanceDiscovery(bool enableInstanceDiscovery)`. See [3775](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3775)
 - Added new APIs to acquire authentication data from WWW-Authenticate and Authentication-Info request headers. This will provide additional support for Proof-of-Possession. See [3026](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3026)
+
+### Expiremental Features
+- [Managed identities for Azure resources](https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) provide Azure services with an automatically managed identity in Azure Active Directory. You can use this identity to authenticate to any service that supports Azure AD authentication, without having credentials in your code. MSAL .NET now supports acquiring token for Managed Identities for Azure App Service and Azure Virtual Machines. See [3754](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3754) and [3829](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3829).  Use `WithManagedIdentity` method on the `AcquireTokenForClient` API to get MSI token in MSAL. This is an experimental feature and may change in the future versions of MSAL
 
 ### Supportability
 - Enabling MSAL Runtime logging integration. See [3575](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3575)
