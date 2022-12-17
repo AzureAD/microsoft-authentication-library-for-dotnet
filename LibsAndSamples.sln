@@ -108,6 +108,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\pipeline-ci.yaml = build\pipeline-ci.yaml
 		build\pipeline-perf-tests-automation.yaml = build\pipeline-perf-tests-automation.yaml
 		build\pipeline-pullrequest.yaml = build\pipeline-pullrequest.yaml
+		build\pipeline-releasebuild-netonly.yaml = build\pipeline-releasebuild-netonly.yaml
 		build\pipeline-releasebuild.yaml = build\pipeline-releasebuild.yaml
 		build\template-android-appcenter-tests.yaml = build\template-android-appcenter-tests.yaml
 		build\template-build-and-prep-automation.yaml = build\template-build-and-prep-automation.yaml
@@ -222,7 +223,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.UIA
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Managed Identity apps", "Managed Identity apps", "{BCAEE9AE-8D3E-4C77-A2E4-134E1552D5F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedIdentityAppVM", "ManagedIdentityAppVM\ManagedIdentityAppVM.csproj", "{63BB0654-0AB2-4975-B12C-6CCCBED98E40}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManagedIdentityAppVM", "ManagedIdentityAppVM\ManagedIdentityAppVM.csproj", "{63BB0654-0AB2-4975-B12C-6CCCBED98E40}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
