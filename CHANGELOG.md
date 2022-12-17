@@ -1,4 +1,4 @@
-4.49.0
+4.49.1
 ==========
 ### New Features
 - MSAL will now use `<region>.login.microsoft.com` when using regional ESTS-R for public cloud. See [3252](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3252)
