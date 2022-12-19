@@ -1,5 +1,9 @@
 4.49.1
 ==========
+### New Features
+
+Extended Managed Identity experimental functionality with support for Azure Arc.
+
 ### Bug Fixes
 - Updated the Broker package to use Microsoft.Identity.Client.Interop 0.13.3 to resolve crash related to garbage collection when using new WAM broker preview. See [3868](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3868)
 
