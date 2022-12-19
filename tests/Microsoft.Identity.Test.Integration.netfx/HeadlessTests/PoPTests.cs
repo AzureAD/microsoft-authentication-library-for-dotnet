@@ -480,7 +480,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes, true);
 
-            Assert.IsTrue(wastestLogger.HasLogged);
+            //Disabling MSALRuntime Logger check
+            //Assert.IsTrue(wastestLogger.HasLogged);
 
             await VerifyPoPTokenAsync(
                 labResponse.App.AppId,
