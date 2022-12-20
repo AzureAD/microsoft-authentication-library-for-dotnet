@@ -4,7 +4,7 @@
 - Extended managed identity experimental functionality with support for Azure Arc. See [3862](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3862)  
 
 ### Bug Fixes
-- Updated the Broker package to use Microsoft.Identity.Client.Interop 0.13.3 to resolve crash related to garbage collection when using new WAM broker preview. See [3868](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3868)  
+- Updated the Broker package to use Microsoft.Identity.Client.NativeInterop 0.13.3 to resolve crash related to garbage collection when using new WAM broker preview. See [3868](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3868)  
 - Disabled additional logging in new WAM broker introduced in MSAL 4.49.0. See [3875](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3875)  
 
 4.49.0
