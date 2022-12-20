@@ -1,3 +1,12 @@
+4.49.1
+==========
+### New Features
+- Extended managed identity experimental functionality with support for Azure Arc. See [3862](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3862)  
+
+### Bug Fixes
+- Updated the Broker package to use Microsoft.Identity.Client.NativeInterop 0.13.3 to resolve crash related to garbage collection when using new WAM broker preview. See [3868](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3868)  
+- Disabled additional logging in new WAM broker introduced in MSAL 4.49.0. See [3875](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3875)  
+
 4.49.0
 ==========
 ### New Features
@@ -7,14 +16,13 @@
 - Added new APIs to acquire authentication data from WWW-Authenticate and Authentication-Info request headers. This will provide additional support for Proof-of-Possession. See [3026](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3026)
 
 ### Experimental Features
-- [Managed identities for Azure resources](https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) provide Azure services with an automatically managed identity in Azure Active Directory. You can use this identity to authenticate to any service that supports Azure AD authentication, without having credentials in your code. MSAL .NET now supports acquiring token for Managed Identities for Azure App Service and Azure Virtual Machines. See [3754](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3754) and [3829](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3829).  Use `WithManagedIdentity` method on the `AcquireTokenForClient` API to get MSI token in MSAL. This is an experimental feature and may change in the future versions of MSAL
+- [Managed identities for Azure resources](https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) provide Azure services with an automatically managed identity in Azure Active Directory. You can use this identity to authenticate to any service that supports Azure AD authentication, without having credentials in your code. MSAL now supports acquiring token for managed identities for Azure App Services and Azure Virtual Machines. Use `WithManagedIdentity()` method on the `AcquireTokenForClient` API to get an MSI token. This is an experimental feature and may change in the future versions of MSAL. See [3754](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3754) and [3829](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3829)
 
 ### Supportability
-- Enabling MSAL Runtime logging integration. See [3575](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3575)
+- Enabled more logging for new WAM broker. See [3575](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3575)
 
 ### Bug Fixes
-- Optimizing MSAL cache key logic to improve performance. See [3393](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3393)
-- Update Broker to use Interop 0.13.3 to resolve crash resulting from garbage collection when using WAM broker. See [3868](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3868)
+- Optimized MSAL cache key logic to improve performance. See [3393](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3393)
 
 4.48.1
 ==========
