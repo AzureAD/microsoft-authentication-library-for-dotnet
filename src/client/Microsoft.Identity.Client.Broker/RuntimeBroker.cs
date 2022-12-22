@@ -120,7 +120,6 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
             MsalTokenResponse msalTokenResponse = null;
 
@@ -169,8 +168,10 @@ namespace Microsoft.Identity.Client.Broker
                         }
                         else
                         {
-                            _logger?.Warning(
-                                $"[WamBroker] Could not find a WAM account for the selected user {authenticationRequestParameters.Account.Username}");
+                            _logger?.WarningPii(
+                                $"[WamBroker] Could not find a WAM account for the selected user {authenticationRequestParameters.Account.Username}, error: {readAccountResult.Error}",
+                                $"[WamBroker] Could not find a WAM account for the selected user. Error: {readAccountResult.Error}");
+                            
                             _logger?.Info(
                                 $"[WamBroker] Calling SignInInteractivelyAsync this will show the account picker.");
 
@@ -195,7 +196,6 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             MsalTokenResponse msalTokenResponse = null;
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
@@ -228,7 +228,6 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             MsalTokenResponse msalTokenResponse = null;
@@ -269,7 +268,6 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
@@ -290,12 +288,12 @@ namespace Microsoft.Identity.Client.Broker
                     if (!readAccountResult.IsSuccess)
                     {
                         _logger?.WarningPii(
-                            $"[WamBroker] Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}",
-                            $"[WamBroker] Could not find a WAM account for the selected user {readAccountResult.Error}");
+                            $"[WamBroker] Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}. Error: {readAccountResult.Error}",
+                            $"[WamBroker] Could not find a WAM account for the selected user. Error: {readAccountResult.Error}");
 
                         throw new MsalUiRequiredException(
                             "wam_no_account_for_id",
-                            $"Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}. {readAccountResult.Error}");
+                            $"Could not find a WAM account for the selected user. Error: {readAccountResult.Error}");
                     }
 
                     using (NativeInterop.AuthResult result = await s_lazyCore.Value.AcquireTokenSilentlyAsync(
@@ -317,7 +315,6 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
@@ -347,7 +344,6 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
         {
-            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
@@ -384,7 +380,6 @@ namespace Microsoft.Identity.Client.Broker
 
         public async Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
-            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
             
             if (account == null)
@@ -418,8 +413,8 @@ namespace Microsoft.Identity.Client.Broker
                     else
                     {
                         _logger?.WarningPii(
-                            $"[WamBroker] Could not find a WAM account for the selected user {account.Username}",
-                            $"[WamBroker] Could not find a WAM account for the selected user {readAccountResult.Error}");
+                            $"[WamBroker] Could not find a WAM account for the selected user {account.Username} - error: {readAccountResult.Error}",
+                            $"[WamBroker] Could not find a WAM account for the selected user, error: {readAccountResult.Error}");
 
                         string errorMessage = $"{readAccountResult.Error} (error code : {readAccountResult.Error.ErrorCode})";
                         throw new MsalServiceException("wam_no_account_found", errorMessage);

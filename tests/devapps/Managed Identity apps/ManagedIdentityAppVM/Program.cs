@@ -8,7 +8,7 @@ IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder.Create
                 .WithDebugLoggingCallback(logLevel: LogLevel.Verbose, enablePiiLogging: true, withDefaultPlatformLoggingEnabled: true)
                 .Build();
 
-string scope = "https://management.azure.com";
+string? scope = "https://management.azure.com";
 
 do
 {
@@ -31,4 +31,4 @@ do
 
     Console.WriteLine("Enter the scope to acquire token, 'q' to quit.");
     scope = Console.ReadLine();
-} while (!scope.Equals("q", StringComparison.InvariantCultureIgnoreCase));
+} while (scope?.Equals("q", StringComparison.InvariantCultureIgnoreCase) is false);

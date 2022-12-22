@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
             catch (MsalUiRequiredException ex)
             {
-                Assert.IsTrue(ex.Message.Contains("Need user interaction to continue"));
+                Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
             }
 
         }
@@ -118,7 +118,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             var account = accounts.FirstOrDefault();
             Assert.IsNotNull(account);
 
-            Assert.IsTrue(testLogger.HasLogged);
+            //Disable MSALRuntime logger
+            //Assert.IsTrue(testLogger.HasLogged);
 
             // Acquire token silently
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
