@@ -37,22 +37,30 @@ stages:
       inputs:
         script: 'nuget locals all -clear'
 
-    - task: VSBuild@1
-      displayName: 'NuGet restore $(ProjectPath)'
-      inputs:
-        solution: $(ProjectPath)
-        msbuildArgs: '/t:restore'
-        platform: ${{ variables.BuildPlatform }}
-        configuration: ${{ variables.BuildConfiguration }}
 
-    - task: VSBuild@1
-      displayName: 'Build $(ProjectPath)'
+    - task: DotNetCoreCLI@2
+      displayName: 'Build solution'
       inputs:
-        solution: $(ProjectPath)
-        msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=$(parameters.MsalClientSemVer) /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
-        platform: ${{ variables.BuildPlatform }}
-        configuration: ${{ variables.BuildConfiguration }}
-        maximumCpuCount: true
+        command: 'build'
+        projects: $(ProjectPath)
+        arguments: '-c $(BuildConfiguration) /p:MsalClientSemVer=$(MsalClientSemVer) /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
+
+    #- task: VSBuild@1
+    #  displayName: 'NuGet restore $(ProjectPath)'
+    #  inputs:
+    #    solution: $(ProjectPath)
+    #    msbuildArgs: '/t:restore'
+    #    platform: ${{ variables.BuildPlatform }}
+    #    configuration: ${{ variables.BuildConfiguration }}
+
+    #- task: VSBuild@1
+    #  displayName: 'Build $(ProjectPath)'
+    #  inputs:
+    #    solution: $(ProjectPath)
+    #    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=$(parameters.MsalClientSemVer) /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
+    #    platform: ${{ variables.BuildPlatform }}
+    #    configuration: ${{ variables.BuildConfiguration }}
+    #    maximumCpuCount: true
 
     - task: CopyFiles@2
       displayName: 'Stage MSAL src'
@@ -99,13 +107,13 @@ stages:
         Contents: '**\*'
         TargetFolder: $(Build.SourcesDirectory)\src\client
 
-    - task: VSBuild@1
-      displayName: 'NuGet restore'
-      inputs:
-        solution: 'LibsAndSamples.sln'
-        msbuildArgs: '/t:restore'
-        platform: 'any cpu'
-        configuration: 'Release'
+    #- task: VSBuild@1
+    #  displayName: 'NuGet restore'
+    #  inputs:
+    #    solution: 'LibsAndSamples.sln'
+    #    msbuildArgs: '/t:restore'
+    #    platform: 'any cpu'
+    #    configuration: 'Release'
 
     - template: template-sign-binary.yaml
       parameters:
