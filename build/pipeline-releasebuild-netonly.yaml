@@ -10,10 +10,10 @@ variables:
   MsalClientSemVer: '4.0.0-devopsbuild'
 
 stages:
-- stage: MSAL netonly
+- stage: MsalNetOnly
   jobs:
 
-  - job: 'Build, pack, sign'
+  - job: 'BuildPackSign'
     pool:
       vmImage: 'windows-2022'
       demands:
