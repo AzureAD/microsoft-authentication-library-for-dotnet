@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if SUPPORTS_SYSTEM_TEXT_JSON
 
 using System.Collections.Generic;
 using System.Text.Json;
@@ -14,7 +15,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.WsTrust;
 
-namespace Microsoft.Identity.Client.Platforms.net6
+namespace Microsoft.Identity.Client.PlatformsCommon.Shared.Json
 {
     /// <summary>
     /// This class specifies metadata for System.Text.Json source generation.
@@ -61,3 +62,4 @@ namespace Microsoft.Identity.Client.Platforms.net6
         }
     }
 }
+#endif

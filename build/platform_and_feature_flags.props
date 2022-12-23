@@ -9,7 +9,7 @@
     <DefineConstants>$(DefineConstants);NET6_WIN;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_BROKER;SUPPORTS_WIN32;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
-    <DefineConstants>$(DefineConstants);WINDOWS_APP;SUPPORTS_BROKER;SUPPORTS_CUSTOM_CACHE;IS_XAMARIN_OR_UWP</DefineConstants>
+    <DefineConstants>$(DefineConstants);WINDOWS_APP;SUPPORTS_BROKER;SUPPORTS_CUSTOM_CACHE;IS_XAMARIN_OR_UWP;SUPPORTS_SYSTEM_TEXT_JSON</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) Or '$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">
     <DefineConstants>$(DefineConstants);ANDROID;SUPPORTS_BROKER;IS_XAMARIN_OR_UWP</DefineConstants>

@@ -1,11 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+#if SUPPORTS_SYSTEM_TEXT_JSON
 
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Microsoft.Identity.Client.Platforms.net6
+namespace Microsoft.Identity.Client.PlatformsCommon.Shared.Json
 {
     internal class JsonStringConverter : JsonConverter<string>
     {
@@ -40,3 +41,4 @@ namespace Microsoft.Identity.Client.Platforms.net6
         }
     }
 }
+#endif
