@@ -9,7 +9,7 @@ using System.Text;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
-using Microsoft.Identity.Client.Platforms.net6;
+using Microsoft.Identity.Client.PlatformsCommon.Shared.Json;
 using System.Text.Json.Serialization;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 using JObject = System.Text.Json.Nodes.JsonObject;

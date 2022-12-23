@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
-using Microsoft.Identity.Client.Platforms.net6;
+using Microsoft.Identity.Client.PlatformsCommon.Shared.Json;
 #else
 using Microsoft.Identity.Json;
 #endif

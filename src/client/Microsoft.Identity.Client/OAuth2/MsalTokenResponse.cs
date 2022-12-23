@@ -12,7 +12,7 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
-using Microsoft.Identity.Client.Platforms.net6;
+using Microsoft.Identity.Client.PlatformsCommon.Shared.Json;
 using JObject = System.Text.Json.Nodes.JsonObject;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else

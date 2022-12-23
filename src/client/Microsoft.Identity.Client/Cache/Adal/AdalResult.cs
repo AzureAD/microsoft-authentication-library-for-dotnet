@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 #if SUPPORTS_SYSTEM_TEXT_JSON
-using Microsoft.Identity.Client.Platforms.net6;
+using Microsoft.Identity.Client.PlatformsCommon.Shared.Json;
 using JsonProperty = System.Text.Json.Serialization.JsonIncludeAttribute;
 #else
 using Microsoft.Identity.Json;
