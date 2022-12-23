@@ -9,12 +9,11 @@ variables:
   ProjectPath: '$(Build.SourcesDirectory)\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
   MsalClientSemVer: '4.0.0-devopsbuild'
 
-#BUILD PHASE 
 stages:
-- stage: MSAL-netonly Build and Pack
+- stage: MSAL-netonly
   jobs:
 
-  - job: 'BuildAndStageProjects'
+  - job: 'Build, pack, sign'
     pool:
       vmImage: 'windows-2022'
       demands:
@@ -37,147 +36,35 @@ stages:
       inputs:
         script: 'nuget locals all -clear'
 
+    - template: template-prebuild-code-analysis.yaml
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Build solution'
+    - task: VSBuild@1
+      displayName: 'Build $(ProjectPath)'
       inputs:
-        command: 'build'
-        projects: $(ProjectPath)
-        arguments: '-c $(BuildConfiguration) /p:MsalClientSemVer=$(MsalClientSemVer) /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
+        solution: $(ProjectPath)
+        msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=$(parameters.MsalClientSemVer) /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true /p:NET_ONLY_INTERNAL_PACKAGE=true'
+        platform: ${{ variables.BuildPlatform }}
+        configuration: ${{ variables.BuildConfiguration }}
+        maximumCpuCount: true
 
-    #- task: VSBuild@1
-    #  displayName: 'NuGet restore $(ProjectPath)'
-    #  inputs:
-    #    solution: $(ProjectPath)
-    #    msbuildArgs: '/t:restore'
-    #    platform: ${{ variables.BuildPlatform }}
-    #    configuration: ${{ variables.BuildConfiguration }}
-
-    #- task: VSBuild@1
-    #  displayName: 'Build $(ProjectPath)'
-    #  inputs:
-    #    solution: $(ProjectPath)
-    #    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=$(parameters.MsalClientSemVer) /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
-    #    platform: ${{ variables.BuildPlatform }}
-    #    configuration: ${{ variables.BuildConfiguration }}
-    #    maximumCpuCount: true
-
-    - task: CopyFiles@2
-      displayName: 'Stage MSAL src'
-      inputs:
-        SourceFolder: src\client
-        Contents: '**\**.cs'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)/msalSrc'
-
-    - task: CopyFiles@2
-      displayName: 'Stage MSAL src bin'
-      inputs:
-        SourceFolder: src\client
-        Contents: '**\bin\**\*'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)/msalSrc'
-
-    - task: PublishPipelineArtifact@1
-      displayName: 'Publish Artifact: drop'
-      inputs:
-      targetPath: $(Build.ArtifactStagingDirectory)
-      artifactName: drop
-
-    # Pack and sign packages
-  - job: 'PackAndSign'
-    dependsOn:
-    - 'BuildAndStageProjects'
-    pool:
-      vmImage: 'windows-2022'
-      demands:
-      - msbuild
-      - visualstudio
-
-    steps:
-    - task: DownloadPipelineArtifact@2
-      displayName: 'Download Drop'
-      inputs:
-        artifact: drop
-        patterns: '**/*'
-        path: $(Build.ArtifactStagingDirectory)/drop
-
-    - task: CopyFiles@2
-      displayName: 'Get MSAL src'
-      inputs:
-        SourceFolder: '$(Build.ArtifactStagingDirectory)\drop\msalSrc'
-        Contents: '**\*'
-        TargetFolder: $(Build.SourcesDirectory)\src\client
-
-    #- task: VSBuild@1
-    #  displayName: 'NuGet restore'
-    #  inputs:
-    #    solution: 'LibsAndSamples.sln'
-    #    msbuildArgs: '/t:restore'
-    #    platform: 'any cpu'
-    #    configuration: 'Release'
-
-    - template: template-sign-binary.yaml
+    - template: template-pack-and-sign-nuget.yaml
       parameters:
-        FolderPath: '${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}'
-        Pattern: '**\bin\**\${{ parameters.AssemblyName }}.dll'
-
-    - template: template-nuget-pack.yaml
-      parameters:
-        NoBuild: 'true'
-        BuildConfiguration: ${{ parameters.BuildConfiguration }}
-        ProjectPath: '${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}\${{ parameters.AssemblyName }}.csproj'
-
-        # Copy all packages out to staging
-    - task: CopyFiles@2
-      displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)\packages'
-      inputs:
-        SourceFolder: '$(Build.SourcesDirectory)\$(MsalSourceDir)'
-        Contents: '**\*nupkg'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)\packages'
-        flattenFolders: true
-
-    # Sign all final nuget packages in the staging directory
-    - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-      displayName: 'Sign Packages'
-      inputs:
-        ConnectedServiceName: 'IDDP Code Signing'
-        FolderPath: '$(Build.ArtifactStagingDirectory)\packages'
-        Pattern: '*nupkg'
-        signConfigType: inlineSignParams
-        inlineOperation: |
-         [
-             {
-                 "keyCode": "CP-401405",
-                 "operationSetCode": "NuGetSign",
-                 "parameters": [ ],
-                 "toolName": "sign",
-                 "toolVersion": "1.0"
-             },
-             {
-                 "keyCode": "CP-401405",
-                 "operationSetCode": "NuGetVerify",
-                 "parameters": [ ],
-                 "toolName": "sign",
-                 "toolVersion": "1.0"
-             }
-         ]
-        SessionTimeout: 20
-        VerboseLogin: true
-      timeoutInMinutes: 5
+        BuildConfiguration: ${{ variables.BuildConfiguration }}
+        ProjectRootPath: '$(Build.SourcesDirectory)\src\client\Microsoft.Identity.Client'
+        AssemblyName: 'Microsoft.Identity.Client'
 
     - task: CmdLine@2
       displayName: 'Verify packages are signed'
       inputs:
-        script: 'dotnet nuget verify ${{ parameters.NugetPackagesWildcard }}'
-      continueOnError: true
+        script: 'dotnet nuget verify $(Build.ArtifactStagingDirectory)\packages\*.nupkg'
 
     - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
       displayName: 'Get Software Bill Of Materials (SBOM)'
       inputs:
-           BuildDropPath: '${{ parameters.ArtifactPublishPath }}'
+        BuildDropPath: '$(Build.ArtifactStagingDirectory)\packages'
 
     - task: PublishPipelineArtifact@1
       displayName: 'Publish Artifact: packages'
       inputs:
-        targetPath: '${{ parameters.ArtifactPublishPath }}'
-        artifactName: '${{ parameters.DropArtifactName }}'
-      condition: eq(${{ parameters.PublishArtifacts }}, 'true')
+        targetPath: '$(Build.ArtifactStagingDirectory)\packages'
+        artifactName: packages
