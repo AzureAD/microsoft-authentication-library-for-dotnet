@@ -10,7 +10,7 @@ variables:
   MsalClientSemVer: '4.0.0-devopsbuild'
 
 stages:
-- stage: MSAL-netonly
+- stage: MSAL netonly
   jobs:
 
   - job: 'Build, pack, sign'
