@@ -56,7 +56,6 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
                            ""UserAssertionHash"": null
                         }";
 
-
             AdalResultWrapper result = JsonHelper.DeserializeFromJson<AdalResultWrapper>(json);
             Assert.AreEqual("idlab@msidlab4.onmicrosoft.com", result.Result.UserInfo.DisplayableId);
             Assert.AreEqual("rt_secret", result.RefreshToken);
