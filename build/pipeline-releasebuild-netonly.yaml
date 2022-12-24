@@ -15,7 +15,7 @@ stages:
 
   - job: 'BuildPackSign'
     pool:
-      vmImage: 'windows-2022'
+      vmImage: 'windows-2019'
       demands:
       - msbuild
       - visualstudio
