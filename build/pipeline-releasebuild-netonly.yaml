@@ -15,7 +15,7 @@ stages:
 
   - job: 'BuildPackSign'
     pool:
-      vmImage: 'windows-2019'
+      vmImage: 'windows-2022'
       demands:
       - msbuild
       - visualstudio
@@ -37,7 +37,15 @@ stages:
         script: 'nuget locals all -clear'
 
     - template: template-prebuild-code-analysis.yaml
-
+    
+    - task: VSBuild@1
+      displayName: 'Restore $(ProjectPath)'
+      inputs:
+        solution: $(ProjectPath)
+        msbuildArgs: '/t:restore /p:NET_ONLY_INTERNAL_PACKAGE=true'
+        platform: ${{ variables.BuildPlatform }}
+        configuration: ${{ variables.BuildConfiguration }}
+        
     - task: VSBuild@1
       displayName: 'Build $(ProjectPath)'
       inputs:
