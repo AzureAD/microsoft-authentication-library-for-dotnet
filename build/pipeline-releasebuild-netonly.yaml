@@ -58,7 +58,7 @@ stages:
     - template: template-pack-and-sign-nuget.yaml
       parameters:
         BuildConfiguration: ${{ variables.BuildConfiguration }}
-        ProjectRootPath: '$(Build.SourcesDirectory)\src\client\Microsoft.Identity.Client'
+        ProjectRootPath: '$(Build.SourcesDirectory)\src\client\'
         AssemblyName: 'Microsoft.Identity.Client'
 
     - task: CmdLine@2
