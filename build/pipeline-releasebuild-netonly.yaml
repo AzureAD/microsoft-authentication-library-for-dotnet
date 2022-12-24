@@ -50,7 +50,7 @@ stages:
       displayName: 'Build $(ProjectPath)'
       inputs:
         solution: $(ProjectPath)
-        msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true /p:NET_ONLY_INTERNAL_PACKAGE=true'
+        msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ variables.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true /p:NET_ONLY_INTERNAL_PACKAGE=true'
         platform: ${{ variables.BuildPlatform }}
         configuration: ${{ variables.BuildConfiguration }}
         maximumCpuCount: true
