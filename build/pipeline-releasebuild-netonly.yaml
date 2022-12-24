@@ -36,7 +36,7 @@ stages:
       inputs:
         script: 'nuget locals all -clear'
 
-    - template: template-prebuild-code-analysis.yaml
+    # - template: template-prebuild-code-analysis.yaml
     
     - task: VSBuild@1
       displayName: 'Restore $(ProjectPath)'
