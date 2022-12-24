@@ -6,7 +6,7 @@ steps:
   displayName: 'Run PoliCheck'
   inputs:
     targetType: F
-    optionsUEPATH: 'build/policheck_exclusion.xml'
+    optionsUEPATH: '$(Build.SourcesDirectory)/build/policheck_exclusion.xml'
     optionsFTPATH: 'build/policheck_filetypes.xml'
   continueOnError: true
 
