@@ -4,7 +4,7 @@ trigger: none
 pr: none
 
 variables:
-  BuildPlatform: 'any cpu'
+  BuildPlatform: 'AnyCPU'
   BuildConfiguration: 'release'
   ProjectFilePath: '$(Build.SourcesDirectory)\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
   ProjectFolderPath: '$(Build.SourcesDirectory)\src\client\Microsoft.Identity.Client'
