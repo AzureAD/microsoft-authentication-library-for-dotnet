@@ -65,7 +65,7 @@ stages:
       displayName: 'Pack ${{ variables.ProjectFilePath }}'
       inputs:
         solution: ${{ variables.ProjectFilePath }}
-        msbuildArgs: '/t:pack /p:nobuild=${{parameters.NoBuild}} /p:IncludeSymbols=true /p:NET_ONLY_INTERNAL_PACKAGE=true'
+        msbuildArgs: '/t:pack /p:nobuild=true /p:IncludeSymbols=true /p:NET_ONLY_INTERNAL_PACKAGE=true'
         configuration: ${{ variables.BuildConfiguration }}
 
     - task: CmdLine@2
