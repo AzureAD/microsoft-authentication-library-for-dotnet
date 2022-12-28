@@ -51,7 +51,7 @@ stages:
       displayName: 'Build $(ProjectFilePath)'
       inputs:
         solution: $(ProjectFilePath)
-        msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ variables.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true /p:NET_ONLY_INTERNAL_PACKAGE=true'
+        msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=$(variables.MsalClientSemVer) /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true /p:NET_ONLY_INTERNAL_PACKAGE=true'
         platform: ${{ variables.BuildPlatform }}
         configuration: ${{ variables.BuildConfiguration }}
         maximumCpuCount: true
@@ -67,6 +67,42 @@ stages:
         solution: ${{ variables.ProjectFilePath }}
         msbuildArgs: '/t:pack /p:nobuild=true /p:IncludeSymbols=true /p:NET_ONLY_INTERNAL_PACKAGE=true'
         configuration: ${{ variables.BuildConfiguration }}
+
+    - task: CopyFiles@2
+      displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)\packages'
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)\'
+        Contents: '**\*nupkg'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)\packages'
+        flattenFolders: true
+
+    - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+      displayName: 'Sign Packages'
+      inputs:
+        ConnectedServiceName: 'IDDP Code Signing'
+        FolderPath: '$(Build.ArtifactStagingDirectory)\packages'
+        Pattern: '*nupkg'
+        signConfigType: inlineSignParams
+        inlineOperation: |
+         [
+             {
+                 "keyCode": "CP-401405",
+                 "operationSetCode": "NuGetSign",
+                 "parameters": [ ],
+                 "toolName": "sign",
+                 "toolVersion": "1.0"
+             },
+             {
+                 "keyCode": "CP-401405",
+                 "operationSetCode": "NuGetVerify",
+                 "parameters": [ ],
+                 "toolName": "sign",
+                 "toolVersion": "1.0"
+             }
+         ]
+        SessionTimeout: 20
+        VerboseLogin: true
+      timeoutInMinutes: 5
 
     - task: CmdLine@2
       displayName: 'Verify packages are signed'
