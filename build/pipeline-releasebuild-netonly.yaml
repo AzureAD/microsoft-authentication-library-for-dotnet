@@ -5,7 +5,7 @@ pr: none
 
 variables:
   BuildPlatform: 'AnyCPU'
-  BuildConfiguration: 'release'
+  BuildConfiguration: 'Release'
   ProjectFilePath: '$(Build.SourcesDirectory)\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
   ProjectFolderPath: '$(Build.SourcesDirectory)\src\client\Microsoft.Identity.Client'
 
@@ -54,6 +54,8 @@ stages:
         platform: ${{ variables.BuildPlatform }}
         configuration: ${{ variables.BuildConfiguration }}
         maximumCpuCount: true
+
+    - template: template-postbuild-code-analysis.yaml
 
     - template: template-sign-binary.yaml
       parameters:
@@ -118,3 +120,5 @@ stages:
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)\packages'
         artifactName: packages
+
+    - template: template-publish-analysis-and-cleanup.yaml
