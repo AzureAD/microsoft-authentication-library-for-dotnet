@@ -246,7 +246,6 @@ namespace Microsoft.Identity.Test.Common
             Assert.IsNull(ticket, "Kerberos Ticket exists.");
         }
 
-
         public static async Task ValidatePopNonceAsync(string nonce)
         {
             var httpClientFactory = PlatformProxyFactory.CreatePlatformProxy(null).CreateDefaultHttpClientFactory();
