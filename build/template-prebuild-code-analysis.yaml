@@ -20,5 +20,5 @@ steps:
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@2
   displayName: 'Post Analysis'
   inputs:
-    CredScan: true
-    PoliCheck: true
+    GdnBreakGdnToolCredScan: true
+    GdnBreakGdnToolPoliCheck: true

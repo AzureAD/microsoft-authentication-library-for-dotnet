@@ -70,4 +70,4 @@ steps:
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@2
   displayName: 'Check BinSkim Results'
   inputs:
-    BinSkim: true
+    GdnBreakGdnToolBinSkim: true
