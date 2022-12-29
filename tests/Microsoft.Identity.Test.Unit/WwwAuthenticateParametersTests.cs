@@ -210,7 +210,6 @@ namespace Microsoft.Identity.Test.Unit
             // Act
             var authParams = WwwAuthenticateParameters.CreateFromResponseHeaders(httpResponse.Headers);
 
-
             // Assert
             Assert.IsTrue(authParams.RawParameters.ContainsKey(resourceHeaderKey));
             Assert.IsTrue(authParams.RawParameters.ContainsKey(authorizationUriHeaderKey));

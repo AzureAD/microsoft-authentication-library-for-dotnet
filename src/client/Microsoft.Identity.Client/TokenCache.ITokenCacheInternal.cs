@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.Bearer;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
@@ -57,7 +56,7 @@ namespace Microsoft.Identity.Client
             // token could be comming from a different cloud than the one configured
             if (requestParams.AppConfig.MultiCloudSupportEnabled && !string.IsNullOrEmpty(response.AuthorityUrl))
             {
-                var url = new Uri(response.AuthorityUrl);                
+                var url = new Uri(response.AuthorityUrl);
                 requestParams.AuthorityManager = new AuthorityManager(
                     requestParams.RequestContext,
                     Authority.CreateAuthorityWithEnvironment(requestParams.Authority.AuthorityInfo, url.Host));
@@ -386,7 +385,9 @@ namespace Microsoft.Identity.Client
                 // do not suggest an expiration date from the past or within 5 min, as tokens will not be usable anyway
                 // and HasTokens will be set to false, letting implementers know to delete the cache node
                 if (cacheExpiry < DateTimeOffset.UtcNow + Constants.AccessTokenExpirationBuffer)
+                {
                     return null;
+                }
 
                 return cacheExpiry;
             }
@@ -753,7 +754,9 @@ namespace Microsoft.Identity.Client
             string familyId)
         {
             if (requestParams.Authority == null)
+            {
                 return null;
+            }
 
             var requestKey = CacheKeyFactory.GetKeyFromRequest(requestParams);
             var refreshTokens = Accessor.GetAllRefreshTokens(requestKey);
@@ -914,7 +917,9 @@ namespace Microsoft.Identity.Client
             }
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
+            {
                 logger.Verbose($"[GetAccounts] Found {refreshTokenCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache. ");
+            }
 
             // Multi-cloud support - must filter by environment.
             ISet<string> allEnvironmentsInCache = new HashSet<string>(
@@ -947,7 +952,9 @@ namespace Microsoft.Identity.Client
             }
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
+            {
                 logger.Verbose($"[GetAccounts] Found {refreshTokenCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache after environment filtering. ");
+            }
 
             IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
             foreach (MsalRefreshTokenCacheItem rtItem in refreshTokenCacheItems)
@@ -1021,7 +1028,9 @@ namespace Microsoft.Identity.Client
                     StringComparison.OrdinalIgnoreCase)).ToList();
 
                 if (logger.IsLoggingEnabled(LogLevel.Verbose))
+                {
                     logger.Verbose($"Filtered by home account id. Remaining accounts {accounts.Count()} ");
+                }
             }
 
             return accounts;
@@ -1078,12 +1087,12 @@ namespace Microsoft.Identity.Client
             {
                 return null;
             }
-            
+
             if (homeAccountId == null)
             {
                 requestParameters.RequestContext.Logger.Warning("No homeAccountId, skipping tenant profiles");
                 return null;
-            }            
+            }
 
             var idTokenCacheItems = Accessor.GetAllIdTokens(homeAccountId);
             FilterTokensByClientId(idTokenCacheItems);
@@ -1169,7 +1178,6 @@ namespace Microsoft.Identity.Client
                             identityLogger: requestParameters.RequestContext.Logger.IdentityLogger,
                             piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
 
-
                         await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
                         await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
                     }
@@ -1204,7 +1212,6 @@ namespace Microsoft.Identity.Client
                            requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId,
                            identityLogger: requestParameters.RequestContext.Logger.IdentityLogger,
                             piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
-
 
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                     }
