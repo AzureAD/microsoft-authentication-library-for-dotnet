@@ -89,6 +89,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "all", "all", "{C44AADC0-1E9
 		build\MSAL.CodeCoverage.runsettings = build\MSAL.CodeCoverage.runsettings
 		NuGet.Config = NuGet.Config
 		build\platform_and_feature_flags.props = build\platform_and_feature_flags.props
+		build\policheck_exclusion.xml = build\policheck_exclusion.xml
+		build\policheck_filetypes.xml = build\policheck_filetypes.xml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetFxConsoleApp", "tests\devapps\NetFxConsoleTestApp\NetFxConsoleApp.csproj", "{2EBB7FFE-47E0-46F8-A4D6-79A4CF44729C}"
