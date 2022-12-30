@@ -55,8 +55,6 @@ stages:
         configuration: ${{ variables.BuildConfiguration }}
         maximumCpuCount: true
 
-    - template: template-postbuild-code-analysis.yaml
-
     - template: template-sign-binary.yaml
       parameters:
         FolderPath: '${{ variables.ProjectFolderPath }}'
