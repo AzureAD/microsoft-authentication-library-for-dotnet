@@ -11,9 +11,9 @@
     "areaPath": "IDDP\\DevEx-Client-SDK\\DotNet",
     "iterationPath": "IDDP\\Unscheduled",
     "tools": [
-        "BinSkim",
-        "CredScan",
-        "PoliCheck",
-        "Roslyn"
+        "binskim",
+        "credscan",
+        "policheck",
+        "roslynanalyzers"
     ]
 }
