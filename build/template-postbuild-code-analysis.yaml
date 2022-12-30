@@ -6,6 +6,8 @@ steps:
   displayName: 'Run Roslyn Analyzers'
   inputs:
     userProvideBuildInfo: auto
+  env:
+    system_accesstoken: $(System.AccessToken)
   continueOnError: true
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@2

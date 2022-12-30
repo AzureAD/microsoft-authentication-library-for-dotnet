@@ -6,7 +6,7 @@
     "codebaseAdmins": [
         "EUROPE\\aadidagt"
     ],
-    "instanceUrl": "IDENTITYDIVISION",
+    "instanceUrl": "https://identitydivision.visualstudio.com",
     "projectName": "IDDP",
     "areaPath": "IDDP\\DevEx-Client-SDK\\DotNet",
     "iterationPath": "IDDP\\Unscheduled",
