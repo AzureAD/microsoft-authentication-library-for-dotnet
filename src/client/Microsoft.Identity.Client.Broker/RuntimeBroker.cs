@@ -431,7 +431,12 @@ namespace Microsoft.Identity.Client.Broker
                         }
                         else
                         {
-                            WamAdapters.ThrowExceptionFromWamError(result, _logger);
+                            _logger?.WarningPii(
+                            $"[WamBroker] Could not sign out user {account.Username} - error: {result.Error}",
+                            $"[WamBroker] Could not sign out user, error: {result.Error}");
+
+                            string errorMessage = $"{result.Error} (error code : {result.Error.ErrorCode})";
+                            throw new MsalServiceException("wam_sign_out_failed", errorMessage);
                         }
                     }
                 }
