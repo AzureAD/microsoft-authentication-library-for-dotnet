@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", msiEndpoint, "App Service"), ex);
             }
 
-            logger.Info($"[Managed Identity] Environment variables validation passed for app service managed identity. Endpoint uri: {endpointUri}");
+            logger.Info($"[Managed Identity] Environment variables validation passed for app service managed identity. Endpoint URI: {endpointUri}. Creating App Service managed identity.");
             return true;
         }
 

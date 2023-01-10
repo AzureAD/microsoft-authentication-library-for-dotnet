@@ -34,6 +34,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // if BOTH the env vars IDENTITY_ENDPOINT and IMDS_ENDPOINT are set the MsiType is Azure Arc
             if (string.IsNullOrEmpty(identityEndpoint) || string.IsNullOrEmpty(imdsEndpoint))
             {
+                requestContext.Logger.Verbose("[Managed Identity] Azure Arc managed identity is unavailable.");
                 return null;
             }
 
@@ -43,6 +44,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", identityEndpoint, "Azure Arc"));
             }
 
+            requestContext.Logger.Verbose("[Managed Identity] Creating Azure Arc managed identity. Endpoint URI: " + endpointUri);
             return new AzureArcManagedIdentitySource(endpointUri, requestContext);
         }
 
