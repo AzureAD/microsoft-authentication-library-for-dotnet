@@ -43,6 +43,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return 
                 ServiceFabricManagedIdentitySource.TryCreate(requestContext) ??
                 AppServiceManagedIdentitySource.TryCreate(requestContext) ?? 
+                CloudShellManagedIdentitySource.TryCreate(requestContext) ??
                 AzureArcManagedIdentitySource.TryCreate(requestContext) ??
                 new ImdsManagedIdentitySource(requestContext);
         }
