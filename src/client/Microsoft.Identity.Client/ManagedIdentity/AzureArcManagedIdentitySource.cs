@@ -15,7 +15,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-     /// <summary>
+    /// <summary>
     /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/AzureArcManagedIdentitySource.cs
     /// </summary>
     internal class AzureArcManagedIdentitySource : ManagedIdentitySource
@@ -39,7 +39,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (!Uri.TryCreate(identityEndpoint, UriKind.Absolute, out Uri endpointUri))
             {
-                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, identityEndpoint, "Azure arc"));
+                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(
+                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", identityEndpoint, "Azure arc"));
             }
 
             return new AzureArcManagedIdentitySource(endpointUri, requestContext);
