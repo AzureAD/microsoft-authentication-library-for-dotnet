@@ -103,7 +103,6 @@ namespace Microsoft.Identity.Test.Unit
             }
             public override bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
             {
-                // WAM does not work on pure ADFS environments
                 if (authorityType == AuthorityType.Adfs)
                 {
                     return false;

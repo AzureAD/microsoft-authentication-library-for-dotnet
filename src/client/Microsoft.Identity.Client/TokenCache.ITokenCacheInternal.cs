@@ -188,12 +188,8 @@ namespace Microsoft.Identity.Client
                     }
 
                     // Don't cache access tokens from broker
-#if iOS
-                    if (msalAccessTokenCacheItem != null)
-#else
-                    if (msalAccessTokenCacheItem != null && !(response.TokenSource == TokenSource.Broker))
-#endif
-                        {
+                    if (ShouldCacheAccessToken(msalAccessTokenCacheItem, response.TokenSource))
+                    {
                         logger.Info("[SaveTokenResponseAsync] Saving AT in cache and removing overlapping ATs...");
                         DeleteAccessTokensWithIntersectingScopes(
                             requestParams,
@@ -275,6 +271,20 @@ namespace Microsoft.Identity.Client
                 _semaphoreSlim.Release();
                 logger.Verbose("[SaveTokenResponseAsync] Released token cache semaphore. ");
             }
+        }
+
+        private bool ShouldCacheAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem, TokenSource tokenSource)
+        {
+#if iOS
+            if (msalAccessTokenCacheItem != null)
+#else
+            if (msalAccessTokenCacheItem != null && tokenSource != TokenSource.Broker)
+#endif
+            {
+                return true;
+            }
+
+            return false;
         }
 
         //This method pulls all of the access and refresh tokens from the cache and can therefore be very impactful on performance.
