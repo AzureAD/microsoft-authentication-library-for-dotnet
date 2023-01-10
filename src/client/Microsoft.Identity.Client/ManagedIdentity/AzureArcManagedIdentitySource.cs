@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             if (!Uri.TryCreate(identityEndpoint, UriKind.Absolute, out Uri endpointUri))
             {
                 throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(
-                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", identityEndpoint, "Azure arc"));
+                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", identityEndpoint, "Azure Arc"));
             }
 
             return new AzureArcManagedIdentitySource(endpointUri, requestContext);

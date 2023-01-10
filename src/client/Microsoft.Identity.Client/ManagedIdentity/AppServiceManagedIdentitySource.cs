@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             catch (FormatException ex)
             {
                 throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(
-                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", msiEndpoint, "App service"), ex);
+                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", msiEndpoint, "App Service"), ex);
             }
 
             logger.Info($"[Managed Identity] Environment variables validation passed for app service managed identity. Endpoint uri: {endpointUri}");

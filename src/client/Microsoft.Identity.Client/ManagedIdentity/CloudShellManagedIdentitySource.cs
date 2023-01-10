@@ -32,8 +32,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
             catch (FormatException ex)
             {
-                throw new MsalClientException(MsalError.AuthenticationFailed, string.Format(
-                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "MSI_ENDPOINT", msiEndpoint, "Cloud shell"), ex);
+                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(
+                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "MSI_ENDPOINT", msiEndpoint, "Cloud Shell"), ex);
             }
 
             return new CloudShellManagedIdentitySource(endpointUri, requestContext);
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.Headers.Add("ContentType", "application/x-www-form-urlencoded");
             request.Headers.Add("Metadata", "true");
 
-            request.BodyParameters.Add("resource", Uri.EscapeDataString(resource));
+            request.BodyParameters.Add("resource", resource);
 
             return request;
         }
