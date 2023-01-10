@@ -19,8 +19,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string AppServiceMsiApiVersion = "2019-08-01";
         private const string SecretHeaderName = "X-IDENTITY-HEADER";
 
-        private const string MsiEndpointInvalidUriError = "[Managed Identity] The environment variable IDENTITY_ENDPOINT contains an invalid Uri {0} in app service managed identity source.";
-
         private readonly Uri _endpoint;
         private readonly string _secret;
         private readonly string _clientId;
@@ -60,10 +58,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
             catch (FormatException ex)
             {
-                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, msiEndpoint, "App service"), ex);
+                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(
+                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", msiEndpoint, "App Service"), ex);
             }
 
-            logger.Info($"[Managed Identity] Environment variables validation passed for app service managed identity. Endpoint uri: {endpointUri}");
+            logger.Info($"[Managed Identity] Environment variables validation passed for app service managed identity. Endpoint URI: {endpointUri}. Creating App Service managed identity.");
             return true;
         }
 

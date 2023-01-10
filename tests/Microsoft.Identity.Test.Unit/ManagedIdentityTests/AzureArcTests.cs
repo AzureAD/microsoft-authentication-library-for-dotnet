@@ -17,7 +17,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [DeploymentItem("Resources\\ManagedIdentityAzureArcSecret.txt")]
     public class AzureArcTests
     {
-        private const string ApiVersion = "2019-11-01";
         private const string Endpoint = "http://localhost:40342/metadata/identity/oauth2/token";
         private const string Resource = "https://management.azure.com";
 
@@ -52,7 +51,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     endpoint,
                     Resource,
                     MockHelpers.GetMsiSuccessfulResponse(),
-                    ApiVersion,
                     ManagedIdentitySourceType.AzureArc);
 
                 var result = await cca.AcquireTokenForClient(new string[] { scope })
@@ -172,11 +170,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddManagedIdentityWSTrustMockHandler(Endpoint, 
                     ResourceHelper.GetTestResourceRelativePath("ManagedIdentityAzureArcSecret.txt"));
                 httpManager.AddManagedIdentityMockHandler(Endpoint, resource, MockHelpers.GetMsiErrorResponse(), 
-                    ApiVersion, ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.InternalServerError);
+                    ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.InternalServerError);
                 httpManager.AddManagedIdentityWSTrustMockHandler(Endpoint, 
                     ResourceHelper.GetTestResourceRelativePath("ManagedIdentityAzureArcSecret.txt"));
                 httpManager.AddManagedIdentityMockHandler(Endpoint, resource, MockHelpers.GetMsiErrorResponse(), 
-                    ApiVersion, ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.InternalServerError);
+                    ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.InternalServerError);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await cca.AcquireTokenForClient(new string[] { resource })
@@ -202,8 +200,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures()
                     .Build();
 
-                httpManager.AddManagedIdentityMockHandler(Endpoint, "scope", "", ApiVersion, ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.InternalServerError);
-                httpManager.AddManagedIdentityMockHandler(Endpoint, "scope", "", ApiVersion, ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.InternalServerError);
+                httpManager.AddManagedIdentityMockHandler(Endpoint, "scope", "", ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.InternalServerError);
+                httpManager.AddManagedIdentityMockHandler(Endpoint, "scope", "", ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.InternalServerError);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await cca.AcquireTokenForClient(new string[] { "scope" })
@@ -230,7 +228,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures()
                     .Build();
 
-                httpManager.AddManagedIdentityMockHandler(Endpoint, "https://management.azure.com", "", ApiVersion, ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.OK);
+                httpManager.AddManagedIdentityMockHandler(Endpoint, "https://management.azure.com", "", ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.OK);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await cca.AcquireTokenForClient(new string[] { "https://management.azure.com" })
@@ -264,7 +262,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.InvalidManagedIdentityEndpoint, ex.ErrorCode);
-                Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "localhost/token", "Azure arc"), ex.Message);
+                Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", "localhost/token", "Azure Arc"), ex.Message);
             }
         }
 

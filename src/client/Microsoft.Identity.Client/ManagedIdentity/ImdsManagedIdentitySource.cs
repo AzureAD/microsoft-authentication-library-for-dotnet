@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             if (!string.IsNullOrEmpty(EnvironmentVariables.PodIdentityEndpoint))
 			{
-                requestContext.Logger.Verbose("[Managed Identity] Environment variable for IMDS returned endpoint: " + EnvironmentVariables.PodIdentityEndpoint);
+                requestContext.Logger.Verbose("[Managed Identity] Environment variable AZURE_POD_IDENTITY_AUTHORITY_HOST for IMDS returned endpoint: " + EnvironmentVariables.PodIdentityEndpoint);
                 var builder = new UriBuilder(EnvironmentVariables.PodIdentityEndpoint)
                 {
                     Path = ImdsTokenPath
@@ -52,6 +52,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             _clientId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId;
             _resourceId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId;
+
+            requestContext.Logger.Verbose("[Managed Identity] Creating IMDS managed identity source. Endpoint URI: " + _imdsEndpoint);
         }
 
         protected override ManagedIdentityRequest CreateRequest(string resource)
