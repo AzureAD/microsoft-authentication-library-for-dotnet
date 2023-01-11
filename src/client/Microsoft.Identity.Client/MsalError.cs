@@ -1132,5 +1132,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string UserAssignedManagedIdentityNotSupported = "user_assigned_managed_identity_not_supported";
 
+        /// <summary>
+        /// User assigned managed identity is not configurable at runtime for service fabric.
+        /// </summary>
+        public const string UserAssignedManagedIdentityNotConfigurableAtRuntime = "user_assigned_managed_identity_not_configurable_at_runtime";
+
     }
 }

@@ -450,6 +450,7 @@ namespace Microsoft.Identity.Client
         public const string ManagedIdentityNoChallengeError = "[Managed Identity] Did not receive expected WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint.";
         public const string ManagedIdentityInvalidChallange = "[Managed Identity] The WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint did not match the expected format.";
         public const string ManagedIdentityUserAssignedNotSupported = "[Managed Identity] User assigned identity is not supported by the Azure Arc and Cloud Shell Managed Identity Endpoints. To authenticate with the system assigned identity omit the client id to .WithManagedIentity().";
+        public const string ManagedIdentityUserAssignedNotConfigurableAtRuntime = "[Managed Identity] Service Fabric user assigned managed identity ClientId or ResourceId is not configurable at runtime.";
 
     }
 }
