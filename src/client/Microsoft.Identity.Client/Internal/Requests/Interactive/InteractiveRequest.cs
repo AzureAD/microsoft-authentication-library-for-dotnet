@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _authCodeRequestComponentOverride = authCodeRequestComponentOverride;
             _authCodeExchangeComponentOverride = authCodeExchangeComponentOverride;
             _brokerInteractiveComponent = brokerExchangeComponentOverride;
-            _serviceBundle = _serviceBundle;
+            _serviceBundle = serviceBundle;
             _logger = requestParams.RequestContext.Logger;
         }
 
