@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             try
             {
                 var result = await pca.AcquireTokenSilent(scopes, PublicClientApplication.OperatingSystemAccount).ExecuteAsync().ConfigureAwait(false);
-                Assert.IsTrue(false, "AcquireTokenSilent successfull!");
+                Assert.IsTrue(false, "AcquireTokenSilent successful!");
             }
             catch (MsalUiRequiredException ex)
             {
