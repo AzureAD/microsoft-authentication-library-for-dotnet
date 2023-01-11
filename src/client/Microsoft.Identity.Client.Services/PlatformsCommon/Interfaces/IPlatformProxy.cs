@@ -74,5 +74,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         IDeviceAuthManager CreateDeviceAuthManager();
 
         IMsalHttpClientFactory CreateDefaultHttpClientFactory();
+
+        /// <summary>
+        /// WAM broker has a deeper integration into MSAL because MSAL needs to store 
+        /// WAM account IDs in the token cache. 
+        /// </summary>
+        bool BrokerSupportsWamAccounts { get; }
     }
 }

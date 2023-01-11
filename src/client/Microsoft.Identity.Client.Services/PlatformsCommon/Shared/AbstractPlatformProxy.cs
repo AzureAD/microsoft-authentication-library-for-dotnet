@@ -173,5 +173,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// On other platforms, the app developer must use the serialization callbacks
         /// </summary>
         public virtual bool LegacyCacheRequiresSerialization => true;
+
+        public virtual bool BrokerSupportsWamAccounts => false;
     }
 }

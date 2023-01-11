@@ -39,11 +39,5 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// </summary>
         /// <returns></returns>
         bool CanBrokerSupportSilentAuth();
-
-        /// <summary>
-        /// WAM broker has a deeper integration into MSAL because MSAL needs to store 
-        /// WAM account IDs in the token cache. 
-        /// </summary>
-        bool BrokerSupportsWamAccounts { get; }
     }
 }
