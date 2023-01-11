@@ -83,13 +83,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
     <Compile Include="$(MSBuildThisFileDirectory)\Platforms\netstandard\**\*.cs" LinkBase="Platforms\netstandard" />
     <Compile Include="$(MSBuildThisFileDirectory)\Platforms\Features\DesktopOS\**\*.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)'">
     <Compile Include="$(MSBuildThisFileDirectory)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
     <Compile Include="$(MSBuildThisFileDirectory)\Platforms\net6\**\*.cs" LinkBase="Platforms\net6" />
-    <Compile Include="$(MSBuildThisFileDirectory)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)\Platforms\Features\DesktopOS\**\*.cs" />
 
     <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
@@ -102,8 +100,6 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
     <Compile Include="$(MSBuildThisFileDirectory)\Platforms\netdesktop\**\*.cs" LinkBase="Platforms\netdesktop" />
-    <Compile Include="$(MSBuildThisFileDirectory)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)\Platforms\Features\DesktopOS\**\*.cs" />
 
     <Reference Include="System" />

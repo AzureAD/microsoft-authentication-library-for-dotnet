@@ -7,6 +7,7 @@ using System.Reflection;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
@@ -24,7 +25,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         internal override string InternalGetProcessorArchitecture()
         {
-            return DesktopOsHelper.IsWindows() ? WindowsNativeMethods.GetProcessorArchitecture() : null;
+            return DesktopOsHelper2.IsWindows() ? WindowsNativeMethods.GetProcessorArchitecture() : null;
         }
 
         internal override string InternalGetOperatingSystem()

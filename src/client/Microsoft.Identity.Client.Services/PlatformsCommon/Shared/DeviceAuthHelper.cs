@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #if NET_CORE || NET6_WIN || DESKTOP || NETSTANDARD
             try
             {
-                return !DesktopOsHelper.IsWin10OrServerEquivalent();
+                return !DesktopOsHelper2.IsWin10OrServerEquivalent();
             }
             catch (DllNotFoundException)
             {

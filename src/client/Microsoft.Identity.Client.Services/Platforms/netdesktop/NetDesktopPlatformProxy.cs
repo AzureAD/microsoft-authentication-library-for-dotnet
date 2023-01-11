@@ -8,6 +8,7 @@ using System.Reflection;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Win32;
@@ -58,7 +59,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <inheritdoc />
         internal override string InternalGetOperatingSystem()
         {
-            return DesktopOsHelper.GetWindowsVersionString();
+            return DesktopOsHelper2.GetWindowsVersionString();
         }
 
         /// <inheritdoc />
