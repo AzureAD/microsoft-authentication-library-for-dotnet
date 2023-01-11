@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Broker
         /// </summary>
         public RuntimeBroker(
             CoreUIParent uiParent,
-            ApplicationConfiguration appConfig,
+            ApplicationConfigurationPublic appConfig,
             ILoggerAdapter logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

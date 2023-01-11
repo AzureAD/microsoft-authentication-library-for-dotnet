@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
@@ -35,7 +36,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                var proxy = PlatformProxyFactory.CreatePlatformProxy(new NullLogger());
+                var proxy = new PlatformProxyFactoryPublic().CreatePlatformProxy(new NullLogger()) as IPlatformProxyPublic;
                 await proxy.StartDefaultOsBrowserAsync(url, true).ConfigureAwait(false);
             }
 
@@ -61,7 +62,7 @@ namespace Microsoft.Identity.Client
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                var proxy = PlatformProxyFactory.CreatePlatformProxy(new NullLogger());
+                var proxy = new PlatformProxyFactoryPublic().CreatePlatformProxy(new NullLogger()) as IPlatformProxyPublic;
                 await proxy.StartDefaultOsBrowserAsync(url, true).ConfigureAwait(false);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))

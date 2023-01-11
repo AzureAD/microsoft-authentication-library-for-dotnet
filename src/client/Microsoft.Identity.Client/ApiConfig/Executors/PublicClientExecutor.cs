@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             requestParams.Account = interactiveParameters.Account;
 
             InteractiveRequest interactiveRequest =
-                new InteractiveRequest(requestParams, interactiveParameters);
+                new InteractiveRequest(requestParams, interactiveParameters, _publicClientApplication.ServiceBundlePublic);
 
             return await interactiveRequest.RunAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 _publicClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
 
             var handler = new IntegratedWindowsAuthRequest(
-                ServiceBundle,
+                _publicClientApplication.ServiceBundlePublic,
                 requestParams,
                 integratedWindowsAuthParameters);
 
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 _publicClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
 
             var handler = new UsernamePasswordRequest(
-                ServiceBundle,
+                _publicClientApplication.ServiceBundlePublic,
                 requestParams,
                 usernamePasswordParameters);
 

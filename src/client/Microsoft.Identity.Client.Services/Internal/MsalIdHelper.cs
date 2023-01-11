@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public static IDictionary<string, string> GetMsalIdParameters(ILoggerAdapter logger)
         {
-            var platformProxy = PlatformProxyFactory.CreatePlatformProxy(logger);
+            var platformProxy = new PlatformProxyFactory().CreatePlatformProxy(logger);
             if (platformProxy == null)
             {
                 throw new MsalClientException(

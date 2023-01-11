@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Desktop
         /// </summary>
         private static void AddSupportForWebView2(PublicClientApplicationBuilder builder)
         {
-            builder.Config.WebUiFactoryCreator = () => new WebView2WebUiFactory();
+            builder.ConfigPublic.WebUiFactoryCreator = () => new WebView2WebUiFactory();
         }
     }
 }

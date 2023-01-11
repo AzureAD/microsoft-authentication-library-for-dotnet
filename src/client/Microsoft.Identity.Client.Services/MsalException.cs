@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A string representation of the current exception.</returns>
         public override string ToString()
         {
-            string msalProductName = PlatformProxyFactory.CreatePlatformProxy(null).GetProductName();
+            string msalProductName = new PlatformProxyFactory().CreatePlatformProxy(null).GetProductName();
             string msalVersion = MsalIdHelper.GetMsalVersion();
 
             string innerExceptionContents = InnerException == null

@@ -912,7 +912,7 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para>Provide a nonce when proof of possession is configured for public clients.
         /// </summary>
         public const string NonceRequiredForPopOnPCA = "nonce_required_for_pop_on_pca";
-#if iOS
+
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not been enabled for the application.
         /// From MSAL 2.x and ADAL 4.x, the keychain for the publisher needs to be accessed in order to provide
@@ -954,7 +954,7 @@ namespace Microsoft.Identity.Client
         /// <para>For more details</para> see https://aka.ms/msal-net-ios-broker
         /// </summary>
         public const string ReadingApplicationTokenFromKeychainFailed = "reading_application_token_from_keychain_failed";
-        
+
         /// <summary>
         /// A broker key was generated but it was not saved to the KeyChain. 
         /// <para>Mitigation</para> Make sure the app has permissions to write to the keychain group 'com.microsoft.adalcache'.
@@ -968,9 +968,7 @@ namespace Microsoft.Identity.Client
         /// Capture and inspect the logs to see why the fetch operation failed.
         /// </summary>
         public const string BrokerKeyFetchFailed = "ios_broker_key_fetch_failed";
-#endif
 
-#if ANDROID
         /// <summary>
         /// Xamarin.Android specific. This error indicates that a system browser was not installed on the user's device, and authentication
         /// using system browser could not be attempted because there was no available Android activity to handle the intent.
@@ -996,8 +994,6 @@ namespace Microsoft.Identity.Client
         /// the AndroidManifest.xml file, and https://aka.ms/msal-net-android-specificities
         /// </summary>
         public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
-
-#endif
 
         /// <summary>
         /// When calling AcquireTokenInteractive with the WAM broker, the call must be made from the UI thread.

@@ -14,11 +14,11 @@ namespace Microsoft.Identity.Client.WsTrust
     internal class CommonNonInteractiveHandler
     {
         private readonly RequestContext _requestContext;
-        private readonly IServiceBundle _serviceBundle;
+        private readonly IServiceBundlePublic _serviceBundle;
 
         public CommonNonInteractiveHandler(
             RequestContext requestContext,
-            IServiceBundle serviceBundle)
+            IServiceBundlePublic serviceBundle)
         {
             _requestContext = requestContext;
             _serviceBundle = serviceBundle;
@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.WsTrust
         /// </summary>
         public async Task<string> GetPlatformUserAsync()
         {
-            string platformUsername = await _serviceBundle.PlatformProxy.GetUserPrincipalNameAsync().ConfigureAwait(false);
+            string platformUsername = await _serviceBundle.PlatformProxyPublic.GetUserPrincipalNameAsync().ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(platformUsername))
             {
                 _requestContext.Logger.Error("Could not find UPN for logged in user. ");
@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client.WsTrust
             {
                 throw new MsalClientException(
                     MsalError.ParsingWsTrustResponseFailed,
-                    "There was an error parsing WS-Trust response from the endpoint. This may occur if there is an issue with your ADFS configuration." 
+                    "There was an error parsing WS-Trust response from the endpoint. This may occur if there is an issue with your ADFS configuration."
                     + " See https://aka.ms/msal-net-iwa-troubleshooting for more details. Error Message: " + ex.Message,
                     ex);
             }

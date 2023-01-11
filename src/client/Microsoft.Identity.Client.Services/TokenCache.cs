@@ -65,19 +65,21 @@ namespace Microsoft.Identity.Client
         /// </summary>
         [Obsolete("The recommended way to get a cache is by using IClientApplicationBase.UserTokenCache or IClientApplicationBase.AppTokenCache")]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public TokenCache() : this((IServiceBundle)null, false, null)
+        public TokenCache() : this(null, false, null)
         {
         }
 
         internal TokenCache(IServiceBundle serviceBundle, bool isApplicationTokenCache, ICacheSerializationProvider optionalDefaultSerializer = null)
         {
             if (serviceBundle == null)
+            {
                 throw new ArgumentNullException(nameof(serviceBundle));
+            }
 
             // useRealSemaphore= false for MyApps and potentially for all apps when using non-singleton MSAL
             _semaphoreSlim = new OptionalSemaphoreSlim(useRealSemaphore: serviceBundle.Config.CacheSynchronizationEnabled);
 
-            var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
+            var proxy = serviceBundle?.PlatformProxy ?? new PlatformProxyFactory().CreatePlatformProxy(null);
             Accessor = proxy.CreateTokenCacheAccessor(serviceBundle.Config.AccessorOptions, isApplicationTokenCache);
             _featureFlags = proxy.GetFeatureFlags();
 

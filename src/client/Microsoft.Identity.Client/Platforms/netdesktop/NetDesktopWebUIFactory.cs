@@ -6,6 +6,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 
@@ -33,7 +34,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             {
                 requestContext.Logger.Info("Using system browser.");
                 return new DefaultOsBrowserWebUi(
-                    requestContext.ServiceBundle.PlatformProxy,
+                    (IPlatformProxyPublic)requestContext.ServiceBundle.PlatformProxy,
                     requestContext.Logger,
                     coreUIParent.SystemWebViewOptions);
             }

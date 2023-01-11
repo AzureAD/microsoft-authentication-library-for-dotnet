@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AcquireTokenByIntegratedWindowsAuthParameters _integratedWindowsAuthParameters;
 
         public IntegratedWindowsAuthRequest(
-            IServiceBundle serviceBundle,
+            IServiceBundlePublic serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters)
             : base(serviceBundle, authenticationRequestParameters, integratedWindowsAuthParameters)

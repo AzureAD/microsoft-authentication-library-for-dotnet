@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         /// </summary>
         public WamBroker(
             CoreUIParent uiParent,
-            ApplicationConfiguration appConfig,
+            ApplicationConfigurationPublic appConfig,
             ILoggerAdapter logger,
             IWamPlugin testAadPlugin = null,
             IWamPlugin testmsaPlugin = null,

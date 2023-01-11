@@ -1,29 +1,29 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.Identity.Client.Core;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Utils;
-using UIKit;
-using Foundation;
-using System;
 using CoreFoundation;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using System.Globalization;
-using Security;
-using Microsoft.Identity.Client.Internal.Requests;
+using Foundation;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Internal;
-using System.Linq;
-using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
+using Security;
+using UIKit;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {
@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             // this needs to be case sensitive because the AppBundle is case sensitive
             brokerRequest.Add(
-                BrokerParameter.RedirectUri, 
+                BrokerParameter.RedirectUri,
                 authenticationRequestParameters.RedirectUri.OriginalString);
 
             if (authenticationRequestParameters.ExtraQueryParameters?.Any() == true)
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 brokerRequest.Add(BrokerParameter.Prompt, acquireTokenInteractiveParameters.Prompt.PromptValue);
             }
-            
+
             if (!string.IsNullOrEmpty(authenticationRequestParameters.Claims))
             {
                 brokerRequest.Add(BrokerParameter.Claims, authenticationRequestParameters.Claims);
@@ -285,11 +285,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                         responseDictionary[iOSBrokerConstants.ApplicationToken]);
                 }
 
-                brokerTokenResponse = MsalTokenResponse.CreateFromiOSBrokerResponse(responseDictionary);
+                brokerTokenResponse = MsalTokenResponseHelper.CreateFromiOSBrokerResponse(responseDictionary);
 
                 if (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errCode))
                 {
-                    if(errCode == BrokerResponseConst.iOSBrokerUserCancellationErrorCode)
+                    if (errCode == BrokerResponseConst.iOSBrokerUserCancellationErrorCode)
                     {
                         responseDictionary[BrokerResponseConst.BrokerErrorCode] = MsalError.AuthenticationCanceledError;
                     }

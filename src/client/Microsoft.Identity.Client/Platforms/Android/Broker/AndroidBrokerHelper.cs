@@ -4,30 +4,30 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
 using Android.Accounts;
 using Android.App;
 using Android.Content;
-using Android.OS;
 using Android.Content.PM;
+using Android.Database;
+using Android.OS;
 using Android.Util;
 using Java.Security;
 using Java.Util.Concurrent;
-using Signature = Android.Content.PM.Signature;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
-using System.Threading.Tasks;
-using OperationCanceledException = Android.Accounts.OperationCanceledException;
-using AndroidUri = Android.Net.Uri;
-using Android.Database;
 using Microsoft.Identity.Json.Utilities;
-using System.Threading;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Http;
 using AndroidNative = Android;
-using System.Linq;
+using AndroidUri = Android.Net.Uri;
+using OperationCanceledException = Android.Accounts.OperationCanceledException;
+using Signature = Android.Content.PM.Signature;
 
 namespace Microsoft.Identity.Client.Platforms.Android.Broker
 {
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             //Force this to return true for broker test app
             var authenticator = GetInstalledAuthenticator();
-            return authenticator!= null
+            return authenticator != null
                    && !packageName.Equals(BrokerConstants.PackageName, StringComparison.OrdinalIgnoreCase)
                    && !packageName
            .Equals(BrokerConstants.AzureAuthenticatorAppPackageName, StringComparison.OrdinalIgnoreCase);
@@ -124,30 +124,30 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             string homeAccountId = brokerRequest.HomeAccountId;
             string localAccountId = brokerRequest.LocalAccountId;
 
-                dynamic AccountDataList = JArray.Parse(accountData);
+            dynamic AccountDataList = JArray.Parse(accountData);
 
-                foreach (JObject account in AccountDataList)
+            foreach (JObject account in AccountDataList)
+            {
+                var accountInfo = account[BrokerResponseConst.Account];
+                var accountInfoHomeAccountID = accountInfo[BrokerResponseConst.HomeAccountId]?.ToString();
+                var accountInfoLocalAccountID = accountInfo[BrokerResponseConst.LocalAccountId]?.ToString();
+
+                if (string.Equals(accountInfo[BrokerResponseConst.UserName].ToString(), username, StringComparison.OrdinalIgnoreCase))
                 {
-                    var accountInfo = account[BrokerResponseConst.Account];
-                    var accountInfoHomeAccountID = accountInfo[BrokerResponseConst.HomeAccountId]?.ToString();
-                    var accountInfoLocalAccountID = accountInfo[BrokerResponseConst.LocalAccountId]?.ToString();
-
-                    if (string.Equals(accountInfo[BrokerResponseConst.UserName].ToString(), username, StringComparison.OrdinalIgnoreCase))
-                    {
-                        // TODO: broker request should be immutable!
-                        brokerRequest.HomeAccountId = accountInfoHomeAccountID;
-                        brokerRequest.LocalAccountId = accountInfoLocalAccountID;
-                        _logger.Info("[Android broker] Found broker account in Android account manager using the provided login hint. ");
-                        return brokerRequest;
-                    }
-
-                    if (string.Equals(accountInfoHomeAccountID, homeAccountId, StringComparison.Ordinal) &&
-                         string.Equals(accountInfoLocalAccountID, localAccountId, StringComparison.Ordinal))
-                    {
-                        _logger.Info("[Android broker] Found broker account in Android account manager using the provided account. ");
-                        return brokerRequest;
-                    }
+                    // TODO: broker request should be immutable!
+                    brokerRequest.HomeAccountId = accountInfoHomeAccountID;
+                    brokerRequest.LocalAccountId = accountInfoLocalAccountID;
+                    _logger.Info("[Android broker] Found broker account in Android account manager using the provided login hint. ");
+                    return brokerRequest;
                 }
+
+                if (string.Equals(accountInfoHomeAccountID, homeAccountId, StringComparison.Ordinal) &&
+                     string.Equals(accountInfoLocalAccountID, localAccountId, StringComparison.Ordinal))
+                {
+                    _logger.Info("[Android broker] Found broker account in Android account manager using the provided account. ");
+                    return brokerRequest;
+                }
+            }
 
             _logger.Info("[Android broker] The requested account does not exist in the Android account manager. ");
             throw new MsalUiRequiredException(MsalError.NoAndroidBrokerAccountFound, MsalErrorMessage.NoAndroidBrokerAccountFound);
@@ -432,7 +432,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             if (!string.IsNullOrEmpty(silentResult))
             {
-                return MsalTokenResponse.CreateFromAndroidBrokerResponse(silentResult, correlationId);
+                return MsalTokenResponseHelper.CreateFromAndroidBrokerResponse(silentResult, correlationId);
             }
 
             return new MsalTokenResponse
@@ -446,9 +446,13 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             _logger.Error(ex.Message);
             if (ex is MsalException)
+            {
                 throw ex;
+            }
             else
+            {
                 throw new MsalClientException(MsalError.AndroidBrokerOperationFailed, ex.Message, ex);
+            }
         }
 
         public void HandleInstallUrl(string appLink, Activity activity)

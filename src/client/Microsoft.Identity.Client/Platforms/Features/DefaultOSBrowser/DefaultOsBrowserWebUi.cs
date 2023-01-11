@@ -38,10 +38,10 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
         private readonly IUriInterceptor _uriInterceptor;
         private readonly ILoggerAdapter _logger;
         private readonly SystemWebViewOptions _webViewOptions;
-        private readonly IPlatformProxy _platformProxy;
+        private readonly IPlatformProxyPublic _platformProxy;
 
         public DefaultOsBrowserWebUi(
-            IPlatformProxy proxy,
+            IPlatformProxyPublic proxy,
             ILoggerAdapter logger,
             SystemWebViewOptions webViewOptions,
             /* for test */ IUriInterceptor uriInterceptor = null)

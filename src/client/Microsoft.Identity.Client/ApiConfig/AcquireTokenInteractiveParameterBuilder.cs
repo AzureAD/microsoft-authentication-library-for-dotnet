@@ -3,17 +3,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.AppConfig;
-using System.Net.Http;
-using System.ComponentModel;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 #if iOS
 using UIKit;
@@ -365,7 +365,7 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerRequiredForPop);
             }
 
-            var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+            var broker = ServiceBundlePublic.PlatformProxyPublic.CreateBroker(ServiceBundlePublic.ConfigPublic, null);
 
             if (!broker.IsPopSupported)
             {

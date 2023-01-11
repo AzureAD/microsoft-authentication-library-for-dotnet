@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.StaticCacheWithExternalSerialization);
             }
 
-            var proxy = cache.ServiceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
+            var proxy = cache.ServiceBundle?.PlatformProxy ?? new PlatformProxyFactory().CreatePlatformProxy(null);
             cache.Accessor = proxy.CreateTokenCacheAccessor(options, tokenCacheInternal.IsApplicationCache);
         }
 

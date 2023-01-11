@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Client
 #endif
 
 #if NET461
-            if (Config.BrokerCreatorFunc == null)
+            if (ConfigPublic.BrokerCreatorFunc == null)
             {
                 throw new PlatformNotSupportedException(
                     "The Windows broker is not directly available on MSAL for .NET Framework. " +
@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Client
 #endif
 
 #if NET_CORE
-            if (Config.BrokerCreatorFunc == null && DesktopOsHelper.IsWindows())
+            if (ConfigPublic.BrokerCreatorFunc == null && DesktopOsHelper.IsWindows())
             {
                 throw new PlatformNotSupportedException(
                     "If you have a .NET Core 3.1 application, install the NuGet package Microsoft.Identity.Client.Desktop and call the extension method .WithWindowsBroker() first. " +

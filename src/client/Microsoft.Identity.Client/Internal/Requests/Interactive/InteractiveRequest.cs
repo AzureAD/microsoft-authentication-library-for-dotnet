@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         private readonly AuthenticationRequestParameters _requestParams;
         private readonly AcquireTokenInteractiveParameters _interactiveParameters;
-        private readonly IServiceBundle _serviceBundle;
+        private readonly IServiceBundlePublic _serviceBundle;
         private readonly ILoggerAdapter _logger;
         private const string InstanceAwareParam = "instance_aware";
 
@@ -41,6 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public InteractiveRequest(
             AuthenticationRequestParameters requestParams,
             AcquireTokenInteractiveParameters interactiveParameters,
+            IServiceBundlePublic serviceBundle,
             /* for test */ IAuthCodeRequestComponent authCodeRequestComponentOverride = null,
             /* for test */ ITokenRequestComponent authCodeExchangeComponentOverride = null,
             /* for test */ ITokenRequestComponent brokerExchangeComponentOverride = null) :
@@ -53,7 +54,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _authCodeRequestComponentOverride = authCodeRequestComponentOverride;
             _authCodeExchangeComponentOverride = authCodeExchangeComponentOverride;
             _brokerInteractiveComponent = brokerExchangeComponentOverride;
-            _serviceBundle = requestParams.RequestContext.ServiceBundle;
+            _serviceBundle = _serviceBundle;
             _logger = requestParams.RequestContext.Logger;
         }
 
@@ -72,8 +73,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<MsalTokenResponse> FetchTokensFromBrokerAsync(string brokerInstallUrl, CancellationToken cancellationToken)
         {
-            IBroker broker = _serviceBundle.PlatformProxy.CreateBroker(
-                _serviceBundle.Config,
+            IBroker broker = _serviceBundle.PlatformProxyPublic.CreateBroker(
+                _serviceBundle.ConfigPublic,
                 _interactiveParameters.UiParent);
 
             ITokenRequestComponent brokerInteractiveRequest =
@@ -151,7 +152,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _requestParams.AuthorityManager = new AuthorityManager(
                     _requestParams.RequestContext,
                     Authority.CreateAuthorityWithEnvironment(_requestParams.Authority.AuthorityInfo, authResult.CloudInstanceHost));
-                
+
                 await ResolveAuthorityAsync().ConfigureAwait(false);
             }
 

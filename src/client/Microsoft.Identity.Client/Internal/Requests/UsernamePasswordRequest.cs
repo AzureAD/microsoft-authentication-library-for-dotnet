@@ -25,9 +25,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AcquireTokenByUsernamePasswordParameters _usernamePasswordParameters;
         private readonly AuthenticationRequestParameters _requestParameters;
         private readonly ILoggerAdapter _logger;
+        private readonly IServiceBundlePublic _serviceBundle;
 
         public UsernamePasswordRequest(
-            IServiceBundle serviceBundle,
+            IServiceBundlePublic serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenByUsernamePasswordParameters usernamePasswordParameters)
             : base(serviceBundle, authenticationRequestParameters, usernamePasswordParameters)
@@ -38,6 +39,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authenticationRequestParameters.RequestContext,
                 serviceBundle);
             _logger = _requestParameters.RequestContext.Logger;
+            _serviceBundle = serviceBundle;
         }
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
@@ -46,7 +48,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await UpdateUsernameAsync().ConfigureAwait(false);
 
             MsalTokenResponse msalTokenResponse = await GetTokenResponseAsync(cancellationToken).ConfigureAwait(false);
-            
+
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 
@@ -56,7 +58,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 _logger.Info("Broker is configured. Starting broker flow. ");
 
-                IBroker broker = _requestParameters.RequestContext.ServiceBundle.PlatformProxy.CreateBroker(_requestParameters.RequestContext.ServiceBundle.Config, null);
+                IBroker broker = _serviceBundle.PlatformProxyPublic.CreateBroker(_serviceBundle.ConfigPublic, null);
 
                 if (broker.IsBrokerInstalledAndInvokable(_requestParameters.AuthorityInfo.AuthorityType))
                 {

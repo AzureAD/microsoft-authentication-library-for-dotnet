@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
         public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
         {
-            var httpClientFactory = PlatformProxyFactory.CreatePlatformProxy(null).CreateDefaultHttpClientFactory();
+            var httpClientFactory = new PlatformProxyFactory().CreatePlatformProxy(null).CreateDefaultHttpClientFactory();
             var httpClient = httpClientFactory.GetHttpClient();
             return CreateFromResourceResponseAsync(httpClient, resourceUri, cancellationToken);
         }

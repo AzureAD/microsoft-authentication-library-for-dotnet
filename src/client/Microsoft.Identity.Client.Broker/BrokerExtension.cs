@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Broker
         {
             if (DesktopOsHelper.IsWin10OrServerEquivalent())
             {
-                builder.Config.BrokerCreatorFunc =
+                builder.ConfigPublic.BrokerCreatorFunc =
                      (uiParent, appConfig, logger) =>
                      {
                          logger.Info("[WamBroker] WAM supported OS.");
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Broker
             }
             else
             {
-                builder.Config.BrokerCreatorFunc =
+                builder.ConfigPublic.BrokerCreatorFunc =
                    (uiParent, appConfig, logger) =>
                    {
                        logger.Info("[WamBroker] Not a Win10 machine. WAM is not available");
