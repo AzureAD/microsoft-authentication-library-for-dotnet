@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.Kerberos
 #if !SUPPORTS_WIN32
             throw new PlatformNotSupportedException("Ticket Cache interface is not supported for this .NET platform. It is supported on .NET Classic, .NET Core and NetStandadrd");
 #else
-            if (!DesktopOsHelper.IsWindows())
+            if (!DesktopOsHelper2.IsWindows())
             {
                 throw new PlatformNotSupportedException("Ticket Cache interface is not supported on this OS. It is supported on Windows only.");
 
@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Client.Kerberos
 #if !SUPPORTS_WIN32
             throw new PlatformNotSupportedException("Ticket Cache interface is not supported for this .NET platform. It is supported on .NET Classic, .NET Core and NetStandadrd");
 #else
-            if (!DesktopOsHelper.IsWindows())
+            if (!DesktopOsHelper2.IsWindows())
             {
                 throw new PlatformNotSupportedException("Ticket Cache interface is not supported on this OS. It is supported on Windows only.");
 
@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Client.Kerberos
 
             return null;
         }
-        
+
         /// <summary>
         /// Generate a Kerberos Ticket Claim string.
         /// </summary>

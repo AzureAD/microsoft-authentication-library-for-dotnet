@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
         private readonly InitContextFlag _clientFlags;
         private NativeMethods.SECURITY_HANDLE _credentialsHandle;
         private NativeMethods.SECURITY_HANDLE _securityContext;
-        private long _logonId;
+        private readonly long _logonId;
 
         public SspiSecurityContext(
             Credential credential,
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
             long logonId = 0,
             InitContextFlag clientFlags = _defaultRequiredFlags)
         {
-            if (!DesktopOsHelper.IsWindows())
+            if (!DesktopOsHelper2.IsWindows())
             {
                 throw new PlatformNotSupportedException("Ticket Cache interface is not supported for this OS platform.");
             }
