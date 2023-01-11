@@ -195,6 +195,7 @@ namespace Microsoft.Identity.Client
         /// Client applications accept extended life time tokens only if
         /// the ExtendedLifeTimeEnabled Boolean is set to true on ClientApplicationBase.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this feature is not in use
         public bool IsExtendedLifeTimeToken { get; }
 
         /// <summary>
@@ -214,6 +215,7 @@ namespace Microsoft.Identity.Client
         /// Gets the point in time in which the Access Token returned in the AccessToken property ceases to be valid in MSAL's extended LifeTime.
         /// This value is calculated based on current UTC time measured locally and the value ext_expiresIn received from the service.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this feature is not in use
         public DateTimeOffset ExtendedExpiresOn { get; }
 
         /// <summary>
