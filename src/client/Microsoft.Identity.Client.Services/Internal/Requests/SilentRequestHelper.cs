@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.Internal
                 }
                 catch (MsalServiceException ex)
                 {
-                    string logMsg = $"Background fetch failed with MsalServiceException. Is exception retryable? { ex.IsRetryable}";
+                    string logMsg = $"Background fetch failed with MsalServiceException. Is exception retryable? {ex.IsRetryable}";
                     if (ex.StatusCode == 400)
                     {
                         logger.ErrorPiiWithPrefix(ex, logMsg);
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.Internal
             });
         }
 
-        private static Random s_random = new Random();
+        private static readonly Random s_random = new Random();
         private static DateTimeOffset? GetRefreshOnWithJitter(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             if (msalAccessTokenCacheItem.RefreshOn.HasValue)
@@ -116,8 +116,8 @@ namespace Microsoft.Identity.Client.Internal
                 var refreshOnWithJitter = msalAccessTokenCacheItem.RefreshOn.Value + TimeSpan.FromSeconds(jitter);
                 return refreshOnWithJitter;
             }
-            
-            return null;           
+
+            return null;
         }
     }
 }

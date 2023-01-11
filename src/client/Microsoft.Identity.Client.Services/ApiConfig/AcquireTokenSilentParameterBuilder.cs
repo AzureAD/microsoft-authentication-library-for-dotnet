@@ -193,7 +193,9 @@ namespace Microsoft.Identity.Client
         public AcquireTokenSilentParameterBuilder WithProofOfPossession(string nonce, HttpMethod httpMethod, Uri requestUri)
         {
             if (ServiceBundle.Config.IsConfidentialClient)
+            {
                 ValidateUseOfExperimentalFeature();
+            }
 
             // On public client, we only support POP via the broker
             if (!ServiceBundle.Config.IsConfidentialClient &&
@@ -203,20 +205,6 @@ namespace Microsoft.Identity.Client
             }
 
             ClientApplicationBase.GuardMobileFrameworks();
-            var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
-
-            if (ServiceBundle.Config.IsBrokerEnabled)
-            {
-                if (string.IsNullOrEmpty(nonce))
-                {
-                    throw new ArgumentNullException(nameof(nonce));
-                }
-
-                if (!broker.IsPopSupported)
-                {
-                    throw new MsalClientException(MsalError.BrokerDoesNotSupportPop, MsalErrorMessage.BrokerDoesNotSupportPop);
-                }
-            }
 
             PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri ?? throw new ArgumentNullException(nameof(requestUri)));
             popConfig.HttpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));

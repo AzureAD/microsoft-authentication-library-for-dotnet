@@ -281,6 +281,40 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <param name="account"></param>
+        /// <returns></returns>
+        public new AcquireTokenSilentParameterBuilderPublic AcquireTokenSilent(IEnumerable<string> scopes, IAccount account)
+        {
+            return AcquireTokenSilentParameterBuilderPublic.Create(
+                ClientExecutorFactoryPublic.CreatePublicClientExecutor(this),
+                scopes,
+                account);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <param name="loginHint"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public new AcquireTokenSilentParameterBuilderPublic AcquireTokenSilent(IEnumerable<string> scopes, string loginHint)
+        {
+            if (string.IsNullOrWhiteSpace(loginHint))
+            {
+                throw new ArgumentNullException(nameof(loginHint));
+            }
+
+            return AcquireTokenSilentParameterBuilderPublic.Create(
+                ClientExecutorFactoryPublic.CreatePublicClientExecutor(this),
+                scopes,
+                loginHint);
+        }
+
+        /// <summary>
         /// Used to determine if the currently available broker is able to perform Proof-of-Possession.
         /// </summary>
         /// <returns>Boolean indicating if Proof-of-Possession is supported</returns>

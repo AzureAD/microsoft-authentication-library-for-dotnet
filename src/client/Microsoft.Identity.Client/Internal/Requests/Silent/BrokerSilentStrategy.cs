@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal AuthenticationRequestParameters _authenticationRequestParameters;
         protected IServiceBundle _serviceBundle;
         private readonly AcquireTokenSilentParameters _silentParameters;
-        private readonly SilentRequest _silentRequest;
+        protected SilentRequest SilentRequest;
         internal IBroker Broker { get; }
         private readonly ILoggerAdapter _logger;
 
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _authenticationRequestParameters = authenticationRequestParameters;
             _silentParameters = silentParameters;
             _serviceBundle = serviceBundle;
-            _silentRequest = request;
+            SilentRequest = request;
             Broker = broker ?? throw new ArgumentNullException(nameof(broker));
             _logger = authenticationRequestParameters.RequestContext.Logger;
         }
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 ValidateResponseFromBroker(response);
                 Metrics.IncrementTotalAccessTokensFromBroker();
-                return await _silentRequest.CacheTokenResponseAndCreateAuthenticationResultAsync(response).ConfigureAwait(false);
+                return await SilentRequest.CacheTokenResponseAndCreateAuthenticationResultAsync(response).ConfigureAwait(false);
             }
 
             return null;
