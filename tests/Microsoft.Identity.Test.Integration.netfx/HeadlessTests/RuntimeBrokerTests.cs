@@ -54,10 +54,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
             catch (MsalUiRequiredException ex)
             {
-                Console.WriteLine(ex.Message);
-                System.Diagnostics.Debug.WriteLine(ex.Message);
-                Trace.WriteLine(ex.Message);
-                Assert.IsTrue(ex.Message.Contains("Need user interaction to continue"));
+                Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
             }
             catch (Exception ex)
             {

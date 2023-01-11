@@ -154,7 +154,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-
         [TestMethod]
         public async Task ConfidentialClientUsingSecretNoInstanceDiscoveryTestAsync()
         {
@@ -1787,7 +1786,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TestConstants.DefaultAccessToken, result.AccessToken);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(2, callbackInvoked);
-
 
             differentScopesForAt = "new scope";
 

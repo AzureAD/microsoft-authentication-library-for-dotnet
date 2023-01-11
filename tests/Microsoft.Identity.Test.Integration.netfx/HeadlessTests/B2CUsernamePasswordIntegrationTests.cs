@@ -68,7 +68,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(claimsPrincipal.FindFirst("nbf"));
             Assert.IsNotNull(claimsPrincipal.FindFirst("exp"));
 
-
         }
     }
 }

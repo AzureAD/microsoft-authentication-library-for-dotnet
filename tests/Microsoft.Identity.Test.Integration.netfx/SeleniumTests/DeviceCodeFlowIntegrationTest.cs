@@ -51,7 +51,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user").ConfigureAwait(false);
         }
 
-
         [RunOn(TargetFrameworks.NetCore)]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.Arlington)]
