@@ -50,7 +50,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             try
             {
                 var result = await pca.AcquireTokenSilent(scopes, PublicClientApplication.OperatingSystemAccount).ExecuteAsync().ConfigureAwait(false);
-                Assert.IsTrue(false, "AcquireTokenSilent successful!");
+                Assert.Fail(" AcquireTokenSilent was successful. MsalUiRequiredException should have been thrown.");
+
             }
             catch (MsalUiRequiredException ex)
             {
@@ -121,17 +122,14 @@ namespace Microsoft.Identity.Test.Integration.Broker
             var account = accounts.FirstOrDefault();
             Assert.IsNotNull(account);
 
+            Assert.IsTrue(testLogger.HasLogged);
+            Assert.IsFalse(testLogger.HasPiiLogged);
+
 
             // Acquire token silently
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(result, TokenSource.Cache, labResponse.Lab.TenantId, expectedScopes);
-
-            // Acquire token interactively WithAccount
-            // Commented out because of flakiness.
-            //result = await pca.AcquireTokenInteractive(scopes).WithAccount(account).ExecuteAsync().ConfigureAwait(false);
-
-            //MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
 
             // Remove Account
             await pca.RemoveAsync(account).ConfigureAwait(false);
@@ -139,6 +137,53 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Assert the account is removed
             accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 
+            Assert.IsNotNull(accounts);
+            Assert.AreEqual(0, accounts.Count());
+        }
+
+        [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
+
+            IntPtr intPtr = GetForegroundWindow();
+
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            WamLoggerValidator testLogger = new WamLoggerValidator();
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithParentActivityOrWindow(windowHandleProvider)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithLogging(testLogger, enablePiiLogging: true)
+               .WithBrokerPreview().Build();
+
+            // Acquire token using username password
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+
+            // Get Accounts
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            Assert.IsNotNull(accounts);
+
+            var account = accounts.FirstOrDefault();
+            Assert.IsNotNull(account);
+
+            Assert.IsTrue(testLogger.HasLogged);
+            Assert.IsTrue(testLogger.HasPiiLogged);
+
+            // Acquire token silently
+            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Cache, labResponse.Lab.TenantId, expectedScopes);
+
+            await pca.RemoveAsync(account).ConfigureAwait(false);
+            // Assert the account is removed
+            accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
             Assert.IsNotNull(accounts);
             Assert.AreEqual(0, accounts.Count());
         }

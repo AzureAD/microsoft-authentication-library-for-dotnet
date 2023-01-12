@@ -111,13 +111,10 @@ namespace Microsoft.Identity.Client.Broker
             LogLevel msalLogLevel = LogLevelMap[args.LogLevel];
             if (_logger.IsLoggingEnabled(msalLogLevel))
             {
-                string msgWithPii = string.Empty;
-                string msgNoPii = string.Empty;
+                string msgWithPii = _logger.PiiLoggingEnabled ? args.Message : string.Empty;
+                string msgNoPii = !_logger.PiiLoggingEnabled ? args.Message : string.Empty;
 
-                // as of now, there will be no Pii.
-                // TODO change when Pii is added
-                // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3822
-                _logger.Log(msalLogLevel, string.Empty, args.Message);
+                _logger.Log(msalLogLevel, msgWithPii, msgNoPii);
             }
         }
 
@@ -125,6 +122,7 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
             MsalTokenResponse msalTokenResponse = null;
 
@@ -201,6 +199,7 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             MsalTokenResponse msalTokenResponse = null;
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
@@ -233,6 +232,7 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             MsalTokenResponse msalTokenResponse = null;
@@ -273,6 +273,7 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
@@ -320,6 +321,7 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
@@ -349,6 +351,7 @@ namespace Microsoft.Identity.Client.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
@@ -385,6 +388,7 @@ namespace Microsoft.Identity.Client.Broker
 
         public async Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
             
             if (account == null)
@@ -455,7 +459,7 @@ namespace Microsoft.Identity.Client.Broker
                 _logger.Info("[WamBroker] ListWindowsWorkAndSchoolAccounts option was not enabled.");
                 return Array.Empty<IAccount>();
             }
-
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             var requestContext = cacheSessionManager.RequestContext;
