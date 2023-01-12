@@ -203,6 +203,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             const string logMessage = "This is test";
             _logger.IsLoggingEnabled(msalLogLevel).Returns(true);
+            _logger.PiiLoggingEnabled.Returns(false);
 
             Type wamBrokerType = _wamBroker.GetType();
             MethodInfo fireLogMethod = wamBrokerType.GetMethod("LogEventRaised", BindingFlags.NonPublic | BindingFlags.Instance);
