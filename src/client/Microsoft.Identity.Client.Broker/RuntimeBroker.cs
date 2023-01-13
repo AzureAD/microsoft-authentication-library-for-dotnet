@@ -111,10 +111,14 @@ namespace Microsoft.Identity.Client.Broker
             LogLevel msalLogLevel = LogLevelMap[args.LogLevel];
             if (_logger.IsLoggingEnabled(msalLogLevel))
             {
-                string msgWithPii = _logger.PiiLoggingEnabled ? args.Message : string.Empty;
-                string msgNoPii = !_logger.PiiLoggingEnabled ? args.Message : string.Empty;
-
-                _logger.Log(msalLogLevel, msgWithPii, msgNoPii);
+                if (_logger.PiiLoggingEnabled)
+                {
+                    _logger.Log(msalLogLevel, args.Message, string.Empty);
+                }
+                else
+                {
+                    _logger.Log(msalLogLevel, string.Empty, args.Message);
+                }
             }
         }
 
