@@ -23,7 +23,12 @@ namespace Microsoft.Identity.Client.Platforms.net6
                     new JsonSerializerOptions()
                     {
                         NumberHandling = JsonNumberHandling.AllowReadingFromString |
-                        JsonNumberHandling.WriteAsString
+                        JsonNumberHandling.WriteAsString,
+                        AllowTrailingCommas = true,
+                        Converters =
+                        {
+                            new JsonStringConverter(),
+                        }
                     };
             }
         }
