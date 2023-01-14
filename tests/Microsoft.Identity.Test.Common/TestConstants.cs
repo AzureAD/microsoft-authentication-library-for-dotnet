@@ -461,7 +461,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         public const string ADFS2019ClientSecretName = "ADFS2019ClientCredSecret";
     }
 
-    //MSI Azure resources resources
+    //MSI Azure resources
     public enum MsiAzureResource
     {
         WebApp,

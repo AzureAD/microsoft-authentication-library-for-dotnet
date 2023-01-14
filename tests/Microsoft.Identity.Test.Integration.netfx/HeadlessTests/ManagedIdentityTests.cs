@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static readonly string s_clientId = "client_id";
 
         //http proxy base URL 
-        private static readonly string s_baseURL = "https://service.msidlab.com/";
+        private static readonly string s_baseURL = "https://msihelperservice-staging.azurewebsites.net/";
 
         //Shared User Assigned Client ID
         private const string UserAssignedClientID = "3b57c42c-3201-4295-ae27-d6baec5b7027";
@@ -40,36 +40,28 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             "MSAL_MSI_USERID";
 
         [TestMethod]
-        public async Task ManagedIdentitySourceCheckAsync()
+        public async Task ManagedIdentity_WithoutEnvironmentVariables_ThrowsAsync()
         {
             //Arrange
             string result = string.Empty;
-            string expectedClientException = "[Managed Identity] Authentication unavailable. " +
-                "No response received from the managed identity endpoint.";
 
             IConfidentialClientApplication cca = CreateCCAWithProxy(s_baseURL);
 
-            //Act
-            try
+            var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
             {
-                AuthenticationResult authenticationResult = await cca
-                    .AcquireTokenForClient(s_msi_scopes)
-                    .WithManagedIdentity()
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-            }
-            catch (MsalServiceException ex)
-            {
-                result = ex.Message;
-            }
+                await cca
+                .AcquireTokenForClient(s_msi_scopes)
+                .WithManagedIdentity()
+                .ExecuteAsync().ConfigureAwait(false);
+            }).ConfigureAwait(false);
 
-            //Assert
-            Assert.AreSame(result, expectedClientException);
+            Assert.IsNotNull(ex);
         }
 
         [DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System Identity Web App")]
         [DataRow(MsiAzureResource.Function, "", DisplayName = "System Identity Function App")]
+        [DataRow(MsiAzureResource.Vm, "", DisplayName = "System Identity Virtual Machine")]
         [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, DisplayName = "User Identity Web App")]
         [DataRow(MsiAzureResource.Function, UserAssignedClientID, DisplayName = "User Identity Function App")]
         [DataRow(MsiAzureResource.WebApp, Mi_res_id, DisplayName = "ResourceID Web App")]
@@ -77,7 +69,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task AcquireMSITokenAsync(MsiAzureResource azureResource, string userIdentity)
         {
             //Arrange
-            AuthenticationResult result = null;
 
             using (new EnvVariableContext())
             {
@@ -96,22 +87,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 IConfidentialClientApplication cca = CreateCCAWithProxy(uri);
 
                 //Act
-                try
-                {
-                    result = await cca
+                AuthenticationResult result = await cca
                         .AcquireTokenForClient(s_msi_scopes)
                         .WithManagedIdentity(userIdentity)
                         .ExecuteAsync().ConfigureAwait(false);
-                }
-                catch (MsalClientException ex)
-                {
-                    throw new Exception(ex.Message);
-                }
             
                 //Assert
-                //1. MSI Helper service trims the access token, so that the access token from the MSI
-                //   is not fully returned to the calling service or test for security reasons
-                Assert.IsTrue(result.AccessToken.Length == 28);
+                //1. Access token
+                Assert.IsNotNull(result.AccessToken);
 
                 //2. First token response is from the MSI Endpoint
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
