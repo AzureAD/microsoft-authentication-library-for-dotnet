@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -176,7 +176,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string CodeVerifier = "someCodeVerifier";
 
         public const string Nonce = "someNonce";
-
+        public const string Realm = "someRealm";
+        
         public const string TestErrCode = "TestErrCode";
         public const string iOSBrokerSuberrCode = "TestSuberrCode";
         public const string iOSBrokerErrDescr = "Test Error Description";

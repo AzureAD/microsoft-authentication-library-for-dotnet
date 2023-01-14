@@ -154,7 +154,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-
         [TestMethod]
         public async Task ConfidentialClientUsingSecretNoInstanceDiscoveryTestAsync()
         {

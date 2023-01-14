@@ -1,0 +1,19 @@
+{
+    "codebaseName": "Unified .NET Core",
+    "notificationAliases": [
+        "IdentityDevExDotnet@microsoft.com"
+    ],
+    "codebaseAdmins": [
+        "EUROPE\\aadidagt"
+    ],
+    "instanceUrl": "https://identitydivision.visualstudio.com",
+    "projectName": "IDDP",
+    "areaPath": "IDDP\\DevEx-Client-SDK\\DotNet",
+    "iterationPath": "IDDP\\Unscheduled",
+    "tools": [
+        "binskim",
+        "credscan",
+        "policheck",
+        "roslynanalyzers"
+    ]
+}

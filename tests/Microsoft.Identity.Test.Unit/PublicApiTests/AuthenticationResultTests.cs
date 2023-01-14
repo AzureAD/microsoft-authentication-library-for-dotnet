@@ -31,7 +31,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .GetProperties()
                 .Where(p => p.GetCustomAttribute(typeof(ObsoleteAttribute)) == null);
 
-            Assert.AreEqual(ctorParameters.Length, classProperties.Count(), "The <for test> constructor should include all properties of AuthenticationObject"); ;
+            // +2 because of the obsolete ExtendedExpires properties
+            Assert.AreEqual(ctorParameters.Length, classProperties.Count() + 2, "The <for test> constructor should include all properties of AuthenticationObject"); ;
         }
 
         [TestMethod]
