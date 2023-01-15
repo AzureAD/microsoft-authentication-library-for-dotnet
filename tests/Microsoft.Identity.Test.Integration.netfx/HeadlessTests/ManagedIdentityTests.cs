@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         //Shared User Assigned Client ID
         private const string UserAssignedClientID = "3b57c42c-3201-4295-ae27-d6baec5b7027";
-        
+
         //Resource ID of the User Assigned Identity 
         private const string Mi_res_id = "/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/" +
             "resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/" +
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             IConfidentialClientApplication cca = CreateCCAWithProxy(s_baseURL);
 
-            var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
+            MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
             {
                 await cca
                 .AcquireTokenForClient(s_msi_scopes)
@@ -64,8 +64,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataRow(MsiAzureResource.Vm, "", DisplayName = "System Identity Virtual Machine")]
         [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, DisplayName = "User Identity Web App")]
         [DataRow(MsiAzureResource.Function, UserAssignedClientID, DisplayName = "User Identity Function App")]
+        [DataRow(MsiAzureResource.Vm, UserAssignedClientID, DisplayName = "User Identity Virtual Machine")]
         [DataRow(MsiAzureResource.WebApp, Mi_res_id, DisplayName = "ResourceID Web App")]
         [DataRow(MsiAzureResource.Function, Mi_res_id, DisplayName = "ResourceID Function App")]
+        [DataRow(MsiAzureResource.Vm, Mi_res_id, DisplayName = "ResourceID Virtual Machine")]
         public async Task AcquireMSITokenAsync(MsiAzureResource azureResource, string userIdentity)
         {
             //Arrange
