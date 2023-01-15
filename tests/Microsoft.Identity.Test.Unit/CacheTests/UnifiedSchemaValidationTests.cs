@@ -31,7 +31,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private const string Scopes = "tasks.read user.read openid profile offline_access";
         private const string RedirectUri = "msalb6c69a37-df96-4db0-9088-2ab96e1d8215://auth";
 
-
         // Our json schemas are flat.  This will NOT work for deeply nested json values.  You could check Assert.IsTrue(JToken.DeepEquals()) if you need that.
         private void AssertAreJsonStringsEquivalent(string expectedJson, string actualJson)
         {

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -225,7 +227,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Assert
             Assert.AreSame(validationException, actualException);
-            _knownMetadataProvider.DidNotReceiveWithAnyArgs();
+            _knownMetadataProvider.DidNotReceiveWithAnyArgs().GetMetadata(Arg.Any<string>(), Arg.Any<IEnumerable<string>>(), Arg.Any<ILoggerAdapter>());
         }
 
         [TestMethod]
@@ -397,13 +399,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             // Arrange
             var validationException = new MsalServiceException(MsalError.InvalidInstance, "authority validation failed");
-            
+
             // Inject authority in service bundle
             var httpManager = new MockHttpManager();
             var appConfig = new ApplicationConfiguration(isConfidentialClient: true)
             {
                 HttpManager = httpManager,
-                Authority = Authority.CreateAuthority (TestAuthority, false)
+                Authority = Authority.CreateAuthority(TestAuthority, false)
             };
 
             var serviceBundle = ServiceBundle.Create(appConfig);
@@ -433,7 +435,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 UseManagedIdentity = true
             };
 
-            var serviceBundle = ServiceBundle.Create (appConfig);
+            var serviceBundle = ServiceBundle.Create(appConfig);
 
             RequestContext requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
 
@@ -445,8 +447,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
                 InstanceDiscoveryMetadataEntry entry = await harness.ServiceBundle.InstanceDiscoveryManager
-                    .GetMetadataEntryAsync(                    
-                        AuthorityInfo.FromAuthorityUri(authority.AbsoluteUri,true),
+                    .GetMetadataEntryAsync(
+                        AuthorityInfo.FromAuthorityUri(authority.AbsoluteUri, true),
                         requestContext ?? new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .ConfigureAwait(false);
 

@@ -132,7 +132,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 
-
         private async Task<MsalTokenResponse> SendTokenRequestToProviderAsync(CancellationToken cancellationToken)
         {
             AppTokenProviderParameters appTokenProviderParameters = new AppTokenProviderParameters
@@ -146,7 +145,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             AppTokenProviderResult externalToken = await ServiceBundle.Config.AppTokenProvider(appTokenProviderParameters).ConfigureAwait(false);
 
-            var tokenResponse =  MsalTokenResponse.CreateFromAppProviderResponse(externalToken);
+            var tokenResponse = MsalTokenResponse.CreateFromAppProviderResponse(externalToken);
             tokenResponse.Scope = appTokenProviderParameters.Scopes.AsSingleString();
             tokenResponse.CorrelationId = appTokenProviderParameters.CorrelationId;
             return tokenResponse;

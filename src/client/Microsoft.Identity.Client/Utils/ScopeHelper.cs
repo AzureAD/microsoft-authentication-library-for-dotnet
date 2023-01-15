@@ -72,12 +72,12 @@ namespace Microsoft.Identity.Client.Utils
         {
             if (scopes == null)
             {
-                throw new MsalClientException(MsalError.ExactlyOneScopeExpected, MsalErrorMessage.ExactlyOneScopeExpected);
+                throw new MsalClientException(MsalError.ExactlyOneScopeExpected, MsalErrorMessage.ManagedIdentityExactlyOneScopeExpected);
             }
 
             if (scopes.Length != 1)
             {
-                throw new MsalClientException(MsalError.ExactlyOneScopeExpected, MsalErrorMessage.ExactlyOneScopeExpected);
+                throw new MsalClientException(MsalError.ExactlyOneScopeExpected, MsalErrorMessage.ManagedIdentityExactlyOneScopeExpected);
             }
 
             if (!scopes[0].EndsWith(DefaultSuffix, StringComparison.Ordinal))

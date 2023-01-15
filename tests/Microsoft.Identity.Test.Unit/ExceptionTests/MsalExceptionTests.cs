@@ -87,7 +87,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 Assert.IsTrue(msalException.IsRetryable);
             }
 
-
             foreach (var code in new[] { 200, 300, 400, 401 })
             {
                 HttpResponse httpResponse2 = new HttpResponse()

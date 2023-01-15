@@ -76,22 +76,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return request;
         }
 
-        public override async Task<ManagedIdentityResponse> AuthenticateAsync(AppTokenProviderParameters parameters, CancellationToken cancellationToken)
-        {
-            try
-            {
-                return await base.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
-            }
-            catch (TaskCanceledException)
-            {
-                _requestContext.Logger.Error(TimeoutError);
-                throw;
-            }
-        }
-
-        protected override ManagedIdentityResponse HandleResponse(
+        protected override async Task<ManagedIdentityResponse> HandleResponseAsync(
             AppTokenProviderParameters parameters, 
-            HttpResponse response)
+            HttpResponse response,
+            CancellationToken cancellationToken)
         {
             // handle error status codes indicating managed identity is not available
             var baseMessage = response.StatusCode switch
@@ -115,7 +103,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             // Default behavior to handle successful scenario and general errors.
-            return base.HandleResponse(parameters, response);
+            return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
         }
 
         internal static string CreateRequestFailedMessage(HttpResponse response, string message)

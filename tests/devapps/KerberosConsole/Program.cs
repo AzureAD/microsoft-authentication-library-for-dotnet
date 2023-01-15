@@ -455,8 +455,6 @@ namespace KerberosConsole
             AADKerberosLogger.Save("           Correlation Id: " + result.CorrelationId);
             AADKerberosLogger.Save("                Unique Id:" + result.UniqueId);
             AADKerberosLogger.Save("                Expres On: " + result.ExpiresOn);
-            AADKerberosLogger.Save("  IsExtendedLifeTimeToken: " + result.IsExtendedLifeTimeToken);
-            AADKerberosLogger.Save("       Extended Expres On: " + result.ExtendedExpiresOn);
             AADKerberosLogger.Save("             Access Token:\n" + result.AccessToken);
             AADKerberosLogger.Save("                 Id Token:\n" + result.IdToken);
 

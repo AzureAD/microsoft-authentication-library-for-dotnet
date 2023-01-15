@@ -16,8 +16,11 @@ jobs: #Build and stage projects
   container: mcr.microsoft.com/windows/servercore:ltsc2022-KB5017316
 
   steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '16.x'
   #Pre build analysis
-  - template: template-prebuild-code-analysis.yaml
+    - template: template-prebuild-code-analysis.yaml
 
 - job: 'BuildAndStageProjects'
   pool:

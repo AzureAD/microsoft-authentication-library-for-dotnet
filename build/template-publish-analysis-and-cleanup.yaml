@@ -3,27 +3,14 @@
 # Should be LAST step of any build it's used in.
 
 steps:
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@3
   displayName: 'Publish Security Analysis Logs'
 
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@1
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@2
   displayName: 'TSA upload to Codebase: Unified .NET Core Stamp: Azure'
   inputs:
-    tsaVersion: TsaV2
-    codebase: NewOrUpdate
-    codeBaseName: 'Unified .NET Core'
-    notificationAlias: 'IdentityDevExDotnet@microsoft.com'
-    codeBaseAdmins: 'EUROPE\\aadidagt'
-    instanceUrlForTsaV2: IDENTITYDIVISION
-    projectNameIDENTITYDIVISION: IDDP
-    areaPath: 'IDDP\DevEx-Client-SDK\DotNet'
-    iterationPath: 'IDDP\Unscheduled'
-    uploadAPIScan: false
-    uploadFortifySCA: false
-    uploadFxCop: false
-    uploadModernCop: false
-    uploadPREfast: false
-    uploadTSLint: false
+    GdnPublishTsaOnboard: false
+    GdnPublishTsaConfigFile: '$(Build.SourcesDirectory)/build/tsaConfig.json'
   continueOnError: true
 
 - task: mspremier.PostBuildCleanup.PostBuildCleanup-task.PostBuildCleanup@3
