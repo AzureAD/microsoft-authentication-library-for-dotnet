@@ -53,6 +53,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             _coreUIParent = new CoreUIParent() { SynchronizationContext = _synchronizationContext };
             ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(isConfidentialClient: false);
             _logger = Substitute.For<ILoggerAdapter>();
+            _logger.PiiLoggingEnabled.Returns(true);
 
             _serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
@@ -202,6 +203,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             const string logMessage = "This is test";
             _logger.IsLoggingEnabled(msalLogLevel).Returns(true);
+            _logger.PiiLoggingEnabled.Returns(false);
 
             Type wamBrokerType = _wamBroker.GetType();
             MethodInfo fireLogMethod = wamBrokerType.GetMethod("LogEventRaised", BindingFlags.NonPublic | BindingFlags.Instance);

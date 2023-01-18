@@ -1,11 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -22,10 +17,11 @@ namespace Microsoft.Identity.Client.Broker
         /// For details about Windows broker, see https://aka.ms/msal-net-wam
         /// </summary>
         /// <remarks>
-        /// No broker integration exists on Mac and Linux yet. 
-        /// Windows broker does not work on Win 8, Win Server 2016 and lower.         
-        /// If a broker does not exist or cannot be used, MSAL will fallback to a browser. 
-        /// Make sure browser auth is enabled (e.g. if using system browser, register the "http://localhost" redirect uri etc.)
+        /// No broker integration exists on Mac and Linux yet.
+        /// Windows broker does not work on Win 8, Win Server 2016 and lower.
+        /// This implementation is not supported on UWP, use <c>WithBroker()</c> from Microsoft.Identity.Client package instead.
+        /// If a broker does not exist or cannot be used, MSAL will fallback to a browser.
+        /// Make sure browser auth is enabled (e.g. if using system browser, register the "http://localhost" redirect URI, etc.)
         /// </remarks>
         public static PublicClientApplicationBuilder WithBrokerPreview(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
@@ -50,7 +46,7 @@ namespace Microsoft.Identity.Client.Broker
                 builder.Config.BrokerCreatorFunc =
                    (uiParent, appConfig, logger) =>
                    {
-                       logger.Info("[WamBroker] Not a Win10 machine. WAM is not available");
+                       logger.Info("[WamBroker] Not a Windows 10 or Server equivalent machine. WAM is not available.");
                        return new NullBroker(logger);
                    };
             }
