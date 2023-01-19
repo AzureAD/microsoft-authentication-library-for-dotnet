@@ -34,20 +34,20 @@ namespace MSIHelperService.Controllers
         /// <summary>
         /// Gets the Managed Service Identity Token of an Azure Resource
         /// </summary>
-        /// <param name="identityHeader">IDENTITY_HEADER of the MSI Endpoint</param>
         /// <param name="uri">URI of the MSI Endpoint</param>
+        /// <param name="identityHeader">IDENTITY_HEADER of the MSI Endpoint</param>
         /// <param name="azureResource">Resource for which you need the MSI Token</param>
         /// <returns>
         /// Returns the MSI token for an azure resource
         /// </returns>
-        [ProducesResponseType(typeof(ManagedIdentityResponse), (int)MSIHelper.HTTPErrorResponseCode.Status200OK)]
+        [ProducesResponseType(typeof(string), (int)MSIHelper.HTTPErrorResponseCode.Status200OK)]
         [HttpGet]
-        [SwaggerResponse(200, "Returns an Azure Resource MSI Token Response", Type = typeof(ManagedIdentityResponse))]
-        [SwaggerResponse(400, "Returns the error object for any validation failures", Type = typeof(ManagedIdentityResponse))]
-        [SwaggerResponse(500, "Returns the error object for any Server Errors", Type = typeof(ManagedIdentityResponse))]
+        [SwaggerResponse(200, "Returns an Azure Resource MSI Token Response", Type = typeof(string))]
+        [SwaggerResponse(400, "Returns the error object for any validation failures", Type = typeof(string))]
+        [SwaggerResponse(500, "Returns the error object for any Server Errors", Type = typeof(string))]
         public async Task<ActionResult?> GetRemoteHttpResponse(
-            [FromHeader(Name = "X-IDENTITY-HEADER")] string identityHeader,
             [FromQuery(Name = "uri")] string uri,
+            [FromHeader(Name = "X-IDENTITY-HEADER")] string? identityHeader = "default",
             [FromQuery(Name = "azureResource")] string azureResource = MSIHelper.DefaultAzureResource)
         {
             _logger.LogInformation("GetMSITokenController called.");
@@ -70,7 +70,11 @@ namespace MSIHelperService.Controllers
                     httpClient,
                     _logger).ConfigureAwait(false),
 
-                MSIHelper.AzureResource.vm => throw new NotImplementedException(),
+                MSIHelper.AzureResource.vm => await MSIHelper.GetVirtualMachineMSIToken(
+                    identityHeader, 
+                    uri, 
+                    httpClient,
+                    _logger).ConfigureAwait(false),
 
                 MSIHelper.AzureResource.azurearc => throw new NotImplementedException(),
 

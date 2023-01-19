@@ -5,11 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Net;
+using System.Text.Json;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.WebSockets;
@@ -44,6 +40,13 @@ namespace MSIHelperService.Helper
 
         //Microsoft authority endpoint
         internal const string Authority = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47";
+
+        //OMS Runbook 
+        internal const string LabSubscription = "https://management.azure.com/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/";
+        internal const string RunbookLocation = "resourceGroups/OperationsManagementSuite/";
+        internal const string RunbookJobProvider = "providers/Microsoft.Automation/automationAccounts/OMSAdmin/jobs/";
+        internal const string AzureRunbook = LabSubscription + RunbookLocation + RunbookJobProvider;
+        internal const string RunbookAPIVersion = "2019-06-01";
 
         //Enum for HTTP Error Response Codes
         internal enum HTTPErrorResponseCode : int
@@ -99,7 +102,9 @@ namespace MSIHelperService.Helper
         {
             logger.LogInformation("GetFunctionAppEnvironmentVariables Function called.");
 
-            string? token = await GetMSALToken(logger)
+            string[] scopes = new string[] { "https://request.msidlab.com/.default" };
+
+            string? token = await GetMSALToken(s_requestAppID, s_requestAppSecret, scopes, logger)
                 .ConfigureAwait(false);
 
             //clear the default request header for each call
@@ -117,11 +122,32 @@ namespace MSIHelperService.Helper
 
             var content = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            Dictionary<string, string>? envValuePairs = JsonConvert.DeserializeObject<Dictionary<string, string>>(content);
+            Dictionary<string, string>? envValuePairs = JsonSerializer.Deserialize<Dictionary<string, string>>(content);
 
             logger.LogInformation("GetFunctionAppEnvironmentVariables call was successful.");
 
             return envValuePairs;
+        }
+
+        /// <summary>
+        /// Gets the Environment Variables for IMDS
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <returns>Returns the environment variable</returns>
+        public static async Task<Dictionary<string, string>> GetVirtualMachineEnvironmentVariables(
+            ILogger logger)
+        {
+            //IMDS endpoint has only one environment variable and the VMs do not have this
+            //MSAL .Net has this value hardcoded for now. So sending a set value
+
+            Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
+            keyValuePairs.Add("IDENTITY_HEADER", "DCD1DE64781F4BD1BC6F9AE0C055CD26");
+            keyValuePairs.Add("AZURE_POD_IDENTITY_AUTHORITY_HOST", "http://169.254.169.254/metadata/identity/oauth2/token");
+            keyValuePairs.Add("IMDS_API_VERSION", "2018-02-01");
+
+            logger.LogInformation("GetVirtualMachineEnvironmentVariables Function called.");
+
+            return await Task.FromResult(keyValuePairs).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -150,10 +176,12 @@ namespace MSIHelperService.Helper
             ClearDefaultRequestHeaders(logger, httpClient);
 
             //send the request
-            HttpResponseMessage? result = await httpClient.SendAsync(requestMessage)
+            HttpResponseMessage? result = await httpClient
+                .SendAsync(requestMessage)
                 .ConfigureAwait(false);
 
-            string body = await result.Content.ReadAsStringAsync()
+            string body = await result.Content
+                .ReadAsStringAsync()
                 .ConfigureAwait(false);
 
             logger.LogInformation("GetWebAppMSIToken Function call was successful.");
@@ -170,14 +198,17 @@ namespace MSIHelperService.Helper
         /// <param name="logger"></param>
         /// <returns>Returns MSI Token</returns>
         public static async Task<ActionResult?> GetFunctionAppMSIToken(
-            string identityHeader,
+            string? identityHeader,
             string uri,
             HttpClient httpClient,
             ILogger logger)
         {
             logger.LogInformation("GetFunctionAppMSIToken Function called.");
 
-            string? token = await GetMSALToken(logger)
+            //Scopes
+            string[] scopes = new string[] { "https://request.msidlab.com/.default" };
+
+            string? token = await GetMSALToken(s_requestAppID, s_requestAppSecret, scopes, logger)
                 .ConfigureAwait(false);
 
             //clear the default request header for each call
@@ -202,6 +233,191 @@ namespace MSIHelperService.Helper
         }
 
         /// <summary>
+        /// Gets the MSI Token from the Azure Virtual Machine
+        /// </summary>
+        /// <param name="identityHeader"></param>
+        /// <param name="uri"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        public static async Task<ActionResult?> GetVirtualMachineMSIToken(
+            string? identityHeader,
+            string uri,
+            HttpClient httpClient,
+            ILogger logger)
+        {
+            logger.LogInformation("GetVirtualMachineMSIToken Function called.");
+            string response;
+            HttpResponseMessage? responseMessage = new HttpResponseMessage();
+
+            try
+            {
+                //Scopes
+                string[] scopes = new string[] { "https://management.core.windows.net/.default" };
+
+                //get the msal token for the client
+                string? token = await GetMSALToken(
+                    "8d09a06d-e74b-4911-8caa-ed9b9eb2c645", //s_oMSAdminClientID,
+                    "byB8Q~aLEd0JjbpbQN5Ot8FBZn6HDHd7ggGBsap9", //s_oMSAdminClientSecret,
+                    scopes,
+                    logger).ConfigureAwait(false);
+
+                //clear the default request header for each call
+                ClearDefaultRequestHeaders(logger, httpClient);
+
+                //Set the Authorization header
+                SetAuthorizationHeader(token, httpClient, logger);
+
+                //Set additional headers
+                SetAdditionalHeader("MSI_Identity_Header", identityHeader, httpClient, logger);
+                SetAdditionalHeader("MSI_URI", uri.ToString(), httpClient, logger);
+
+                //get the job id
+                string? jobId = await StartAzureRunbookandGetJobId(httpClient, logger)
+                    .ConfigureAwait(false);
+
+                if (await AzureRunbookJobStatusIsCompleted(jobId, httpClient, logger).ConfigureAwait(false))
+                {
+                    responseMessage = await httpClient.
+                        GetAsync(
+                        AzureRunbook +
+                        jobId +
+                        "/output?api-version=" +
+                        RunbookAPIVersion).ConfigureAwait(false);
+
+                    //send back the response
+                    response = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                    logger.LogInformation("GetVirtualMachineMSIToken call was successful.");
+                }
+                else
+                {
+                    logger.LogError("Runbook failed to get MSI Token.");
+
+                    //Runbook failed
+                    response = "Azure Runbook failed to execute.";
+                }
+
+                return GetContentResult(response, "application/json", (int)responseMessage.StatusCode);
+            }
+            catch (Exception ex)
+            {
+                //Catch the Azure Runbook exception
+                string errorResponse = ex.Message;
+
+                logger.LogError("GetVirtualMachineMSIToken call failed.");
+                
+                return GetContentResult(errorResponse, "application/json", (int)responseMessage.StatusCode);
+            }
+        }
+
+        /// <summary>
+        /// Get Azure Runbook Job Status
+        /// </summary>
+        /// <param name="jobId"></param>
+        /// <param name="logger"></param>
+        /// <returns>Azure runbook job Status</returns>
+        public static async Task<bool> AzureRunbookJobStatusIsCompleted(
+            string? jobId,
+            HttpClient httpClient,
+            ILogger logger)
+        {
+            logger.LogInformation("AzureRunbookJobStatusIsCompleted Function called.");
+
+            //Get the Job status
+            HttpResponseMessage? jobStatus;
+            RunBookJobStatus? runBookJobStatus;
+            string? currentJobStatus;
+
+            do
+            {
+                //get the current job status based on the job id
+                jobStatus = await httpClient.GetAsync(
+                        AzureRunbook +
+                        jobId +
+                        "?api-version=" +
+                        RunbookAPIVersion).ConfigureAwait(false);
+
+                //get the status
+                runBookJobStatus = await jobStatus.
+                    Content
+                    .ReadFromJsonAsync<RunBookJobStatus>()
+                    .ConfigureAwait(false);
+
+                currentJobStatus = runBookJobStatus?.Properties?.Status;
+
+                //catch runbook failure 
+                if (currentJobStatus == "Failed")
+                {
+                    return false;
+                }
+
+                logger.LogInformation($"Current Job Status is - { currentJobStatus }.");
+            }
+            while (currentJobStatus != "Completed");
+
+            return true;
+        }
+
+        /// <summary>
+        /// Starts the Runbook and gets Azure Runbook Job Id 
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <returns>Azure runbook job ID</returns>
+        public static async Task<string?> StartAzureRunbookandGetJobId(HttpClient httpClient, ILogger logger)
+        {
+            logger.LogInformation("StartAzureRunbookandGetJobId Function called.");
+
+            string payload = "";
+
+            var content = new StringContent(payload, Encoding.UTF8, "application/json");
+
+            //invoke the azure runbook from the webhook
+            HttpResponseMessage? invokeWebHook = await httpClient
+                .PostAsJsonAsync(s_webhookLocation,content)
+                .ConfigureAwait(false);
+
+            //Get the Job ID
+            WebHookResponse? jobResponse = await invokeWebHook.Content
+                .ReadFromJsonAsync<WebHookResponse>()
+                .ConfigureAwait(false);
+
+            string? jobId = jobResponse?.JobIDs[0];
+
+            if (!string.IsNullOrEmpty(jobId))
+            {
+                logger.LogInformation("Job ID retrieved from the Azure Runbook.");
+                logger.LogInformation($"Job Id is - { jobId }.");
+            }
+            else
+            {
+                logger.LogError("Failed to get Job ID from the Azure Runbook.");
+            }
+
+            return jobId;
+        }
+
+        /// <summary>
+        /// Sets the additional headers on the http client
+        /// </summary>
+        /// <param name="token"></param>
+        /// <param name="token"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        private static void SetAdditionalHeader(
+            string key,
+            string? value,
+            HttpClient httpClient,
+            ILogger logger)
+        {
+            logger.LogInformation("SetAdditionalHeader Function called.");
+
+            if (httpClient != null)
+            {
+                httpClient.DefaultRequestHeaders.Add(key, value);
+            }
+        }
+
+        /// <summary>
         /// Get the Client Token 
         /// </summary>
         /// <param name="appID"></param>
@@ -209,16 +425,17 @@ namespace MSIHelperService.Helper
         /// <param name="scopes"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
-        public static async Task<string?> GetMSALToken(ILogger logger)
+        public static async Task<string?> GetMSALToken(
+            string? clientID, 
+            string? secret, 
+            string[] scopes, 
+            ILogger logger)
         {
-            //Scopes
-            string[] scopes = new string[] { "https://request.msidlab.com/.default" };
-
             logger.LogInformation("GetMSALToken Function called.");
 
             //Confidential Client Application Builder
-            IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(s_requestAppID)
-           .WithClientSecret(s_requestAppSecret)
+            IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(clientID)
+           .WithClientSecret(secret)
            .WithAuthority(new Uri(Authority))
            .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
            .Build();
@@ -226,9 +443,13 @@ namespace MSIHelperService.Helper
             //Acquire Token For Client using MSAL
             try
             {
-                AuthenticationResult result = await app.AcquireTokenForClient(scopes).ExecuteAsync().ConfigureAwait(false);
+                AuthenticationResult result = await app.AcquireTokenForClient(scopes)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
                 logger.LogInformation("MSAL Token acquired successfully.");
                 logger.LogInformation($"MSAL Token source is : { result.AuthenticationResultMetadata.TokenSource }");
+                
                 return result.AccessToken;
             }
             catch (MsalException ex)
@@ -267,29 +488,12 @@ namespace MSIHelperService.Helper
             ILogger logger)
         {
             logger.LogInformation("SetAuthorizationHeader Function called.");
-            
-            if(httpClient!=null)
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        }
 
-        /// <summary>
-        /// Gets a JSON String using Newtonsoft JSON Convert
-        /// </summary>
-        /// <param name="content"></param>
-        /// <returns></returns>
-        public static string ConvertToJsonString(object? content)
-        {
-            string json;
-
-            json = JsonConvert.SerializeObject
-                (content, Formatting.Indented, new JsonSerializerSettings()
-                { 
-                    ReferenceLoopHandling = ReferenceLoopHandling.Serialize, 
-                    TypeNameHandling = TypeNameHandling.None 
-                });
-
-            return json.Trim();
-
+            if (httpClient != null)
+            {
+                httpClient.DefaultRequestHeaders.Authorization
+                    = new AuthenticationHeaderValue("Bearer", token);
+            }
         }
 
         /// <summary>
@@ -299,25 +503,16 @@ namespace MSIHelperService.Helper
         /// <param name="contentEncoding"></param>
         /// <param name="statusCode"></param>
         /// <returns></returns>
-        public static ContentResult GetContentResult(string content, string contentEncoding, int statusCode)
+        public static ContentResult GetContentResult(
+            string content, 
+            string contentEncoding, 
+            int statusCode)
         {
-            if (statusCode == (int)MSIHelper.HTTPErrorResponseCode.Status200OK)
-            { 
-                ManagedIdentityResponse? managedIdentityResponse = JsonConvert.DeserializeObject<ManagedIdentityResponse>(content);
-
-                //return ManagedIdentityResponse object so we can trim the access token
-                return new ContentResult { 
-                    Content = ConvertToJsonString(managedIdentityResponse), 
-                    ContentType = contentEncoding, 
-                    StatusCode = statusCode 
-                };
-            }
-
-            //return errors as is from the MSI Endpoints
-            return new ContentResult { 
-                Content = ConvertToJsonString(content),
-                ContentType = contentEncoding, 
-                StatusCode = statusCode 
+            return new ContentResult
+            {
+                Content = content,
+                ContentType = contentEncoding,
+                StatusCode = statusCode
             };
         }
     }
