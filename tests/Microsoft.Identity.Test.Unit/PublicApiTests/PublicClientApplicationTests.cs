@@ -856,6 +856,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         /// <returns></returns>
         [TestMethod]
         [DeploymentItem(@"Resources\TokenCacheWithWamId.json")]
+        //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3859
+        //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3375
+        [Ignore("This test no longer possible since MSAL doesnt return local tokens in acquireTokenSilent anymore.")]
         public async Task WamIdInAccountInAuthResultTestAsync()
         {
             const string tenant1 = "72f988bf-86f1-41af-91ab-2d7cd011db47";
