@@ -81,7 +81,8 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     }
                 }
 
-                _logger.Verbose("Attempting to acquire token using using local cache...");
+                _logger.Verbose("Attempting to acquire token using local cache.");
+
                 return await _clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (MsalException ex)

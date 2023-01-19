@@ -276,15 +276,10 @@ namespace Microsoft.Identity.Client
         private bool ShouldCacheAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem, TokenSource tokenSource)
         {
 #if iOS
-            if (msalAccessTokenCacheItem != null)
+            return msalAccessTokenCacheItem != null;
 #else
-            if (msalAccessTokenCacheItem != null && tokenSource != TokenSource.Broker)
+            return msalAccessTokenCacheItem != null && tokenSource != TokenSource.Broker;
 #endif
-            {
-                return true;
-            }
-
-            return false;
         }
 
         //This method pulls all of the access and refresh tokens from the cache and can therefore be very impactful on performance.
