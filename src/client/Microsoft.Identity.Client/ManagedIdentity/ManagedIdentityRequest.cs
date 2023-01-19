@@ -13,9 +13,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal class ManagedIdentityRequest
     {
-        public Uri Endpoint { get; private set; }
-
-        private Uri BaseEndpoint;
+        private readonly Uri _baseEndpoint;
 
         public HttpMethod Method { get; }
 
@@ -28,17 +26,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public ManagedIdentityRequest(HttpMethod method, Uri endpoint)
         {
             Method = method;
-            BaseEndpoint = endpoint;
+            _baseEndpoint = endpoint;
             Headers = new Dictionary<string, string>();
             BodyParameters = new Dictionary<string, string>();
             QueryParameters = new Dictionary<string, string>();
         }
 
-        public void ComputeUri()
+        public Uri ComputeUri()
         {
-            UriBuilder uriBuilder = new UriBuilder(BaseEndpoint);
+            UriBuilder uriBuilder = new(_baseEndpoint);
             uriBuilder.AppendQueryParameters(QueryParameters);
-            Endpoint= uriBuilder.Uri;
+
+            return uriBuilder.Uri;
         }
     }
 }

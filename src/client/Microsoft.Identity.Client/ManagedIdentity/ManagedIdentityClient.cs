@@ -20,9 +20,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// </summary>
     internal class ManagedIdentityClient
     {
-        internal const string MsiUnavailableError =
-            "Authentication with managed identity is unavailable. No managed identity endpoint found.";
-
         private readonly ManagedIdentitySource _identitySource;
 
         public ManagedIdentityClient(RequestContext requestContext)
@@ -44,7 +41,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private static ManagedIdentitySource SelectManagedIdentitySource(RequestContext requestContext)
         {
             return AppServiceManagedIdentitySource.TryCreate(requestContext) ?? 
-                throw new MsalClientException(MsalError.ManagedIdentityRequestFailed, MsiUnavailableError);
+                AzureArcManagedIdentitySource.TryCreate(requestContext) ??
+                new ImdsManagedIdentitySource(requestContext);
         }
     }
 }

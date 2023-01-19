@@ -2,22 +2,33 @@
 # Run pre-build code analysis (e.g. credscan, policheck)
 
 steps:
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
+- task: NodeTool@0
+  displayName: 'Install NPM'
+  inputs:
+    versionSpec: '16.x'
+
+- task: UseDotNet@2
+  displayName: 'Use .NET SDK 6.x'
+  inputs:
+    version: 6.x
+
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@2
   displayName: 'Run PoliCheck'
   inputs:
     targetType: F
+    optionsUEPATH: '$(Build.SourcesDirectory)/build/policheck_exclusion.xml'
     optionsFTPATH: 'build/policheck_filetypes.xml'
   continueOnError: true
 
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@3
   displayName: 'Run CredScan'
   inputs:
     suppressionsFile: 'build/credscan-exclusion.json'
     toolMajorVersion: V2
     debugMode: false
 
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@2
   displayName: 'Post Analysis'
   inputs:
-    CredScan: true
-    PoliCheck: true
+    GdnBreakGdnToolCredScan: true
+    GdnBreakGdnToolPoliCheck: true

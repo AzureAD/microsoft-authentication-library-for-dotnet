@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             _endpoint = endpoint;
             _secret = secret;
             _clientId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId;
-            _resourceId = requestContext.ServiceBundle.Config.ManagedIdentityIUserAssignedResourceId;
+            _resourceId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId;
         }
 
         private static bool TryValidateEnvVars(string msiEndpoint, string secret, ILoggerAdapter logger, out Uri endpointUri)
@@ -60,19 +60,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
             catch (FormatException ex)
             {
-                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(CultureInfo.InvariantCulture, MsiEndpointInvalidUriError, msiEndpoint), ex);
+                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, msiEndpoint, "App service"), ex);
             }
 
             logger.Info($"[Managed Identity] Environment variables validation passed for app service managed identity. Endpoint uri: {endpointUri}");
             return true;
         }
 
-        protected override ManagedIdentityRequest CreateRequest(string[] scopes)
+        protected override ManagedIdentityRequest CreateRequest(string resource)
         {
-            // convert the scopes to a resource string
-            string resource = ScopeHelper.ScopesToResource(scopes);
-
-            ManagedIdentityRequest request = new ManagedIdentityRequest(System.Net.Http.HttpMethod.Get, _endpoint);
+            ManagedIdentityRequest request = new(System.Net.Http.HttpMethod.Get, _endpoint);
             
             request.Headers.Add(SecretHeaderName, _secret);
             request.QueryParameters["api-version"] = AppServiceMsiApiVersion;
@@ -83,14 +80,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
                 request.QueryParameters[Constants.ManagedIdentityClientId] = _clientId;
             }
-
-            if (!string.IsNullOrEmpty(_resourceId))
+            else if (!string.IsNullOrEmpty(_resourceId))
             {
                 _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
                 request.QueryParameters[Constants.ManagedIdentityResourceId] = _resourceId;
             }
 
-            request.ComputeUri();
             return request;
         }
     }

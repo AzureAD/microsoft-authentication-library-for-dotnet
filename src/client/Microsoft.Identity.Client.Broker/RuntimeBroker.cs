@@ -95,6 +95,11 @@ namespace Microsoft.Identity.Client.Broker
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
+            if(_logger.PiiLoggingEnabled)
+            {
+                s_lazyCore.Value.EnablePii(_logger.PiiLoggingEnabled);
+            }
+
             _parentHandle = GetParentWindow(uiParent);
 
             _wamOptions = appConfig.WindowsBrokerOptions ??
@@ -106,13 +111,14 @@ namespace Microsoft.Identity.Client.Broker
             LogLevel msalLogLevel = LogLevelMap[args.LogLevel];
             if (_logger.IsLoggingEnabled(msalLogLevel))
             {
-                string msgWithPii = string.Empty;
-                string msgNoPii = string.Empty;
-
-                // as of now, there will be no Pii.
-                // TODO change when Pii is added
-                // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3822
-                _logger.Log(msalLogLevel, string.Empty, args.Message);
+                if (_logger.PiiLoggingEnabled)
+                {
+                    _logger.Log(msalLogLevel, args.Message, string.Empty);
+                }
+                else
+                {
+                    _logger.Log(msalLogLevel, string.Empty, args.Message);
+                }
             }
         }
 
@@ -169,8 +175,10 @@ namespace Microsoft.Identity.Client.Broker
                         }
                         else
                         {
-                            _logger?.Warning(
-                                $"[WamBroker] Could not find a WAM account for the selected user {authenticationRequestParameters.Account.Username}");
+                            _logger?.WarningPii(
+                                $"[WamBroker] Could not find a WAM account for the selected user {authenticationRequestParameters.Account.Username}, error: {readAccountResult.Error}",
+                                $"[WamBroker] Could not find a WAM account for the selected user. Error: {readAccountResult.Error}");
+                            
                             _logger?.Info(
                                 $"[WamBroker] Calling SignInInteractivelyAsync this will show the account picker.");
 
@@ -290,12 +298,12 @@ namespace Microsoft.Identity.Client.Broker
                     if (!readAccountResult.IsSuccess)
                     {
                         _logger?.WarningPii(
-                            $"[WamBroker] Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}",
-                            $"[WamBroker] Could not find a WAM account for the selected user {readAccountResult.Error}");
+                            $"[WamBroker] Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}. Error: {readAccountResult.Error}",
+                            $"[WamBroker] Could not find a WAM account for the selected user. Error: {readAccountResult.Error}");
 
                         throw new MsalUiRequiredException(
                             "wam_no_account_for_id",
-                            $"Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}. {readAccountResult.Error}");
+                            $"Could not find a WAM account for the selected user. Error: {readAccountResult.Error}");
                     }
 
                     using (NativeInterop.AuthResult result = await s_lazyCore.Value.AcquireTokenSilentlyAsync(
@@ -418,8 +426,8 @@ namespace Microsoft.Identity.Client.Broker
                     else
                     {
                         _logger?.WarningPii(
-                            $"[WamBroker] Could not find a WAM account for the selected user {account.Username}",
-                            $"[WamBroker] Could not find a WAM account for the selected user {readAccountResult.Error}");
+                            $"[WamBroker] Could not find a WAM account for the selected user {account.Username} - error: {readAccountResult.Error}",
+                            $"[WamBroker] Could not find a WAM account for the selected user, error: {readAccountResult.Error}");
 
                         string errorMessage = $"{readAccountResult.Error} (error code : {readAccountResult.Error.ErrorCode})";
                         throw new MsalServiceException("wam_no_account_found", errorMessage);
@@ -455,7 +463,7 @@ namespace Microsoft.Identity.Client.Broker
                 _logger.Info("[WamBroker] ListWindowsWorkAndSchoolAccounts option was not enabled.");
                 return Array.Empty<IAccount>();
             }
-
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             var requestContext = cacheSessionManager.RequestContext;

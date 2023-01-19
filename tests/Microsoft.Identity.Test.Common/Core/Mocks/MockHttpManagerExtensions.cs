@@ -332,6 +332,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string expectedUrl,
             string resource,
             string response,
+            string apiVersion,
+            ManagedIdentitySourceType managedIdentitySourceType,
             string userAssignedClientIdOrResourceId = null,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             HttpStatusCode statusCode = HttpStatusCode.OK
@@ -344,10 +346,22 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>
                 {
-                    { "api-version", "2019-08-01" },
+                    { "api-version", apiVersion },
                     { "resource", resource }
                 };
-            
+
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+
+            if (managedIdentitySourceType == ManagedIdentitySourceType.AppService)
+            {
+                expectedRequestHeaders.Add("X-IDENTITY-HEADER", "secret");
+            }
+
+            if (managedIdentitySourceType == ManagedIdentitySourceType.IMDS || managedIdentitySourceType == ManagedIdentitySourceType.AzureArc)
+            {
+                expectedRequestHeaders.Add("Metadata", "true");
+            }
+
             if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
             {
                 expectedQueryParams.Add("client_id", userAssignedClientIdOrResourceId);
@@ -364,10 +378,27 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                         ExpectedMethod = HttpMethod.Get,
                         ExpectedUrl = expectedUrl,
                         ExpectedQueryParams = expectedQueryParams,
-                        ExpectedRequestHeaders = new Dictionary<string, string>
-                         {
-                            {"X-IDENTITY-HEADER", "secret"}
-                         },
+                        ExpectedRequestHeaders = expectedRequestHeaders,
+                        ResponseMessage = responseMessage
+                    });
+        }
+
+        public static void AddManagedIdentityWSTrustMockHandler(
+            this MockHttpManager httpManager, 
+            string expectedUrl, 
+            string filePath = null)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            if (filePath != null)
+            {
+                responseMessage.Headers.Add("WWW-Authenticate", $"Basic realm={filePath}");
+            }
+            
+            httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = expectedUrl,
                         ResponseMessage = responseMessage
                     });
         }
@@ -411,4 +442,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         ClientId,
         ResourceId
     }
-}
+
+    public enum ManagedIdentitySourceType
+    {
+        IMDS,
+        AppService,
+        AzureArc
+    }
+ }

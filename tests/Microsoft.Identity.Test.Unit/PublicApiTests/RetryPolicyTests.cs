@@ -86,7 +86,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-
         /// <summary>
         ///  Retry any MsalException marked as retryable - see IsRetryable property and HttpRequestException
         ///  If Retry-After header is present, return the value.

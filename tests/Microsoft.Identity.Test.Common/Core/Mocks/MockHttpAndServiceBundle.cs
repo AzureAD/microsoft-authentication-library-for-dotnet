@@ -21,7 +21,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             bool isExtendedTokenLifetimeEnabled = false,
             string authority = ClientApplicationBase.DefaultAuthority,
             TestContext testContext = null,
-            bool isMultiCloudSupportEnabled = false)
+            bool isMultiCloudSupportEnabled = false,
+            bool isInstanceDiscoveryEnabled = true)
         {
             HttpManager = new MockHttpManager(testContext);
             ServiceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(
@@ -29,7 +30,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 logCallback: logCallback,
                 isExtendedTokenLifetimeEnabled: isExtendedTokenLifetimeEnabled,
                 authority: authority,
-                isMultiCloudSupportEnabled: isMultiCloudSupportEnabled);
+                isMultiCloudSupportEnabled: isMultiCloudSupportEnabled,
+                isInstanceDiscoveryEnabled: isInstanceDiscoveryEnabled);
         }
 
         public IServiceBundle ServiceBundle { get; }

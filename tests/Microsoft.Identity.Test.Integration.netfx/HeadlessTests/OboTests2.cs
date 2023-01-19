@@ -154,8 +154,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                     .WithTestLogging()
                                     .Build();
 
-
-
             var middletierServiceApp = ConfidentialClientApplicationBuilder
                                     .Create(OBOServicePpeClientID)
                                     .WithAuthority(PPEAuthenticationAuthority)

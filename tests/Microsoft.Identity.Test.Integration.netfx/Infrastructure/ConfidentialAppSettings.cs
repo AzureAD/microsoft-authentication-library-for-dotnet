@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
@@ -26,6 +29,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
         Cloud Cloud { get; }
         bool UseAppIdUri { get; set; }
+
+        bool InstanceDiscoveryEndpoint { get; set; }
     }    
 
     public class ConfidentialAppSettings
@@ -45,6 +50,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             public Cloud Cloud => Cloud.Public;
 
             public bool UseAppIdUri { get; set; }
+            public bool InstanceDiscoveryEndpoint { get; set; } = true;
 
             public X509Certificate2 GetCertificate()
             {
@@ -90,6 +96,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             public Cloud Cloud => Cloud.Adfs;
 
             public bool UseAppIdUri { get; set; }
+
+            public bool InstanceDiscoveryEndpoint { get; set; } = true;
         }
 
         private class PpeConfidentialAppSettings : IConfidentialAppSettings
@@ -116,6 +124,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             public Cloud Cloud => Cloud.PPE;
 
             public bool UseAppIdUri { get; set; }
+
+            public bool InstanceDiscoveryEndpoint { get; set; } = true;
         }
 
         private class ArlingtonConfidentialAppSettings : IConfidentialAppSettings
@@ -143,6 +153,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             public Cloud Cloud => Cloud.Arlington;
 
             public bool UseAppIdUri { get; set; }
+
+            public bool InstanceDiscoveryEndpoint { get; set; } = true;
         }   
 
         private static Lazy<IConfidentialAppSettings> s_publicCloudSettings =
