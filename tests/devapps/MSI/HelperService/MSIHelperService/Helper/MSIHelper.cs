@@ -256,8 +256,8 @@ namespace MSIHelperService.Helper
 
                 //get the msal token for the client
                 string? token = await GetMSALToken(
-                    "8d09a06d-e74b-4911-8caa-ed9b9eb2c645", //s_oMSAdminClientID,
-                    "byB8Q~aLEd0JjbpbQN5Ot8FBZn6HDHd7ggGBsap9", //s_oMSAdminClientSecret,
+                    s_oMSAdminClientID,
+                    s_oMSAdminClientSecret,
                     scopes,
                     logger).ConfigureAwait(false);
 
