@@ -15,6 +15,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class CloudShellManagedIdentitySource : ManagedIdentitySource
     {
         private readonly Uri _endpoint;
+        private const string CloudShell = "Cloud Shell";
 
         public static ManagedIdentitySource TryCreate(RequestContext requestContext)
         {
@@ -36,7 +37,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 requestContext.Logger.Error("[Managed Identity] Invalid endpoint found for the environment variable MSI_ENDPOINT: " + msiEndpoint);
                 throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(
-                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "MSI_ENDPOINT", msiEndpoint, "Cloud Shell"), ex);
+                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "MSI_ENDPOINT", msiEndpoint, CloudShell), ex);
             }
 
             requestContext.Logger.Verbose("[Managed Identity] Creating cloud shell managed identity. Endpoint URI: " + msiEndpoint);
@@ -46,9 +47,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private CloudShellManagedIdentitySource(Uri endpoint, RequestContext requestContext) : base(requestContext)
         {
             _endpoint = endpoint;
-            if (!string.IsNullOrEmpty(requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId) || null != requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId)
+            if (!string.IsNullOrEmpty(requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedId))
             {
-                throw new MsalClientException(MsalError.UserAssignedManagedIdentityNotSupported, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported);
+                throw new MsalClientException(MsalError.UserAssignedManagedIdentityNotSupported, 
+                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, CloudShell));
             }
         }
 
