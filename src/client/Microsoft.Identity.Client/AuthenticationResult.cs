@@ -57,10 +57,12 @@ namespace Microsoft.Identity.Client
             string spaAuthCode = null)
         {
             AccessToken = accessToken;
+#pragma warning disable CS0618 // Type or member is obsolete
             IsExtendedLifeTimeToken = isExtendedLifeTimeToken;
+            ExtendedExpiresOn = extendedExpiresOn;
+#pragma warning restore CS0618 // Type or member is obsolete
             UniqueId = uniqueId;
             ExpiresOn = expiresOn;
-            ExtendedExpiresOn = extendedExpiresOn;
             TenantId = tenantId;
             Account = account;
             IdToken = idToken;
@@ -165,9 +167,13 @@ namespace Microsoft.Identity.Client
             {
                 AccessToken = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
                 ExpiresOn = msalAccessTokenCacheItem.ExpiresOn;
-                ExtendedExpiresOn = msalAccessTokenCacheItem.ExtendedExpiresOn;
                 Scopes = msalAccessTokenCacheItem.ScopeSet;
+
+#pragma warning disable CS0618 // Type or member is obsolete
+                ExtendedExpiresOn = msalAccessTokenCacheItem.ExtendedExpiresOn;
                 IsExtendedLifeTimeToken = msalAccessTokenCacheItem.IsExtendedLifeTimeToken;
+#pragma warning restore CS0618 // Type or member is obsolete
+
                 TokenType = msalAccessTokenCacheItem.TokenType;
 
                 if (msalAccessTokenCacheItem.RefreshOn.HasValue)
@@ -195,6 +201,9 @@ namespace Microsoft.Identity.Client
         /// Client applications accept extended life time tokens only if
         /// the ExtendedLifeTimeEnabled Boolean is set to true on ClientApplicationBase.
         /// </summary>
+        /// <remarks>This feature is not in use</remarks>
+        [Obsolete("This feature has been deprecated", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this feature is not in use        
         public bool IsExtendedLifeTimeToken { get; }
 
         /// <summary>
@@ -214,6 +223,8 @@ namespace Microsoft.Identity.Client
         /// Gets the point in time in which the Access Token returned in the AccessToken property ceases to be valid in MSAL's extended LifeTime.
         /// This value is calculated based on current UTC time measured locally and the value ext_expiresIn received from the service.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this feature is not in use
+        [Obsolete("This feature has been deprecated", false)]
         public DateTimeOffset ExtendedExpiresOn { get; }
 
         /// <summary>

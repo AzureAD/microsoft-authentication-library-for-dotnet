@@ -53,15 +53,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
 
-        /// <inheritdoc />
+        /// <remarks>AAD only supports RSA certs for client credentials </remarks>
         public virtual byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
-            if (certificate.GetRSAPublicKey().KeySize < CertificateClientCredential.MinKeySizeInBits)
-            {
-                throw new ArgumentOutOfRangeException(nameof(certificate),
-                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
-                        CertificateClientCredential.MinKeySizeInBits));
-            }
+            // MSAL used to check min key size by looking at certificate.GetRSAPublicKey().KeySize
+            // but this causes sporadic failures in the crypto stack. Rely on AAD to perform key size validations.
 
             if (!s_certificateToRsaMap.TryGetValue(certificate.Thumbprint, out RSA rsa))
             {

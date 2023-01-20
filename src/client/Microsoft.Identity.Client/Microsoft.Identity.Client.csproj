@@ -34,19 +34,26 @@
     <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">21.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <!-- Package that includes all the TFMs https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3863 -->
+  <PropertyGroup Condition="'$(NET_ONLY_INTERNAL_PACKAGE)' == ''">
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Mac);$(TargetFrameworkNet6);$(TargetFrameworkNet6Win);</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Mac);$(TargetFrameworkNet6)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkNet6)</TargetFrameworks>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  
+  <!-- Package excluding Windows Desktop and Mobile TFMs https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3863 -->
+  <PropertyGroup Condition="'$(NET_ONLY_INTERNAL_PACKAGE)' != ''">
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkNet6);</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
     <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.46.0</MsalClientSemVer>
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
-    <Version>$(MsalClientSemVer)</Version>
+    <Version Condition="'$(NET_ONLY_INTERNAL_PACKAGE)' == ''">$(MsalClientSemVer)</Version>
+    <Version Condition="'$(NET_ONLY_INTERNAL_PACKAGE)' != ''">$(MsalClientSemVer)-netonly</Version>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>latest</LangVersion>
 
     <XamarinAndroidSupportSkipVerifyVersions>true</XamarinAndroidSupportSkipVerifyVersions>
 
