@@ -32,9 +32,6 @@ namespace Microsoft.Identity.Client.Utils
 #endif
         }
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
-        [RequiresUnreferencedCode("Calls System.Text.Json.JsonSerializer.Deserialize(String, Type, JsonSerializerOptions)")]
-#endif
         internal static T DeserializeFromJson<T>(string json)
         {
             if (string.IsNullOrEmpty(json))
@@ -42,9 +39,7 @@ namespace Microsoft.Identity.Client.Utils
                 return default;
             }
 #if SUPPORTS_SYSTEM_TEXT_JSON
-            //Workaround for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3892
-            //This also requires the RequiresUnreferencedCode attribute to maintain functionality during trimming.
-            return (T)JsonSerializer.Deserialize(json, typeof(T), MsalJsonSerializerOptions.Options);
+            return (T)JsonSerializer.Deserialize(json, typeof(T), MsalJsonSerializerContext.Custom);
 #else
             return JsonConvert.DeserializeObject<T>(json);
 #endif
