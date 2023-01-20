@@ -18,6 +18,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     {
         private const string Endpoint = "http://localhost:40342/metadata/identity/oauth2/token";
         private const string Resource = "https://management.azure.com";
+        private const string CloudShell = "Cloud Shell";
 
         [TestInitialize]
         public void TestInitialize()
@@ -89,7 +90,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.UserAssignedManagedIdentityNotSupported, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, ex.Message);
+                Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, CloudShell), ex.Message);
             }
         }
 
@@ -200,7 +201,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.InvalidManagedIdentityEndpoint, ex.ErrorCode);
-                Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "MSI_ENDPOINT", "localhost/token", "Cloud Shell"), ex.Message);
+                Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "MSI_ENDPOINT", "localhost/token", CloudShell), ex.Message);
             }
         }
 

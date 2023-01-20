@@ -21,9 +21,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class AzureArcManagedIdentitySource : ManagedIdentitySource
     {
         private const string ArcApiVersion = "2019-11-01";
+        private const string AzureArc = "Azure Arc";
 
-        private readonly string _clientId;
-        private readonly string _resourceId;
         private readonly Uri _endpoint;
 
         public static ManagedIdentitySource TryCreate(RequestContext requestContext)
@@ -41,7 +40,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             if (!Uri.TryCreate(identityEndpoint, UriKind.Absolute, out Uri endpointUri))
             {
                 throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(
-                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", identityEndpoint, "Azure Arc"));
+                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", identityEndpoint, AzureArc));
             }
 
             requestContext.Logger.Verbose("[Managed Identity] Creating Azure Arc managed identity. Endpoint URI: " + endpointUri);
@@ -51,12 +50,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private AzureArcManagedIdentitySource(Uri endpoint, RequestContext requestContext) : base(requestContext)
         {
             _endpoint = endpoint;
-            _clientId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId;
-            _resourceId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId;
 
-            if (!string.IsNullOrEmpty(_clientId) || !string.IsNullOrEmpty(_resourceId))
+            if (!string.IsNullOrEmpty(requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedId))
             {
-                throw new MsalClientException(MsalError.UserAssignedManagedIdentityNotSupported, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported);
+                throw new MsalClientException(MsalError.UserAssignedManagedIdentityNotSupported, 
+                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, AzureArc));
             }
         }
 
