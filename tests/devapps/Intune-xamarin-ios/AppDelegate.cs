@@ -1,8 +1,5 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="AppDelegate.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-// </copyright>
-//-----------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using Microsoft.Intune.MAM;

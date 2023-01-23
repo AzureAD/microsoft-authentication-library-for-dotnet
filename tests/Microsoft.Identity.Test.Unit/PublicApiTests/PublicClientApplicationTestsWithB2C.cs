@@ -282,7 +282,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNull(result.AccessToken);
             Assert.IsNull(result.Scopes);
             Assert.IsTrue(result.ExpiresOn == default);
-            Assert.IsTrue(result.ExtendedExpiresOn == default);
         }
 
         private static void ValidateB2CLoginAuthority(MockHttpAndServiceBundle harness, string authority)

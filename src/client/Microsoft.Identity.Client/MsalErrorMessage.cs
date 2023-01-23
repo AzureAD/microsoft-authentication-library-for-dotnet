@@ -432,6 +432,7 @@ namespace Microsoft.Identity.Client
 
         public const string RequestFailureErrorMessagePii = "=== Token Acquisition ({0}) failed:\n\tAuthority: {1}\n\tClientId: {2}.";
 
+        public const string UnableToParseAuthenticationHeader = "MSAL is unable to parse the authentication header returned from the resource endpoint. This can be a result of a malformed header returned in either the WWW-Authenticate or the Authentication-Info collections acquired from the provided endpoint.";
         public static string InvalidTokenProviderResponseValue(string invalidValueName)
         {
             return string.Format(
@@ -440,8 +441,15 @@ namespace Microsoft.Identity.Client
                                 invalidValueName);
         }
 
-        public const string AuthenticationResponseInvalidFormatError = "[Managed Identity] Invalid response, the authentication response received did not contain the expected fields.";
-        public const string UnexpectedResponse = "[Managed Identity] Response was not in the expected format. See the inner exception for details.";
-        public const string ExactlyOneScopeExpected = "[Managed Identity] To acquire token for managed identity, exactly one scope should be passed.";
+        public const string ManagedIdentityNoResponseReceived = "[Managed Identity] Authentication unavailable. No response received from the managed identity endpoint.";
+        public const string ManagedIdentityInvalidResponse = "[Managed Identity] Invalid response, the authentication response received did not contain the expected fields.";
+        public const string ManagedIdentityUnexpectedResponse = "[Managed Identity] Unexpected exception occurred when parsing the response. See the inner exception for details.";
+        public const string ManagedIdentityExactlyOneScopeExpected = "[Managed Identity] To acquire token for managed identity, exactly one scope must be passed.";
+
+        public const string ManagedIdentityEndpointInvalidUriError = "[Managed Identity] The environment variable {0} contains an invalid Uri {1} in {2} managed identity source.";
+        public const string ManagedIdentityNoChallengeError = "[Managed Identity] Did not receive expected WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint.";
+        public const string ManagedIdentityInvalidChallange = "[Managed Identity] The WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint did not match the expected format.";
+        public const string ManagedIdentityUserAssignedNotSupported = "[Managed Identity] User assigned identity is not supported by the {0} Managed Identity. To authenticate with the system assigned identity omit the client id to .WithManagedIentity().";
+
     }
 }

@@ -16,7 +16,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class AppServiceTests
     {
-        private const string ApiVersion = "2019-08-01";
         private const string DefaultResource = "https://management.azure.com";
 
         [DataTestMethod]
@@ -48,7 +47,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     endpoint,
                     DefaultResource,
                     MockHelpers.GetMsiSuccessfulResponse(),
-                    ApiVersion,
                     ManagedIdentitySourceType.AppService,
                     userAssignedClientIdOrResourceId: userAssignedClientIdOrResourceId,
                     userAssignedIdentityId: userAssignedIdentityId);
@@ -88,9 +86,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Build();
 
                 httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", resource, MockHelpers.GetMsiErrorResponse(),
-                    ApiVersion, ManagedIdentitySourceType.AppService, statusCode: HttpStatusCode.InternalServerError);
+                    ManagedIdentitySourceType.AppService, statusCode: HttpStatusCode.InternalServerError);
                 httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", resource, MockHelpers.GetMsiErrorResponse(),
-                    ApiVersion, ManagedIdentitySourceType.AppService, statusCode: HttpStatusCode.InternalServerError);
+                    ManagedIdentitySourceType.AppService, statusCode: HttpStatusCode.InternalServerError);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await cca.AcquireTokenForClient(new string[] { resource })
@@ -116,9 +114,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures()
                     .Build();
 
-                httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", "scope", "", ApiVersion,
+                httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", "scope", "",
                     ManagedIdentitySourceType.AppService, statusCode: HttpStatusCode.InternalServerError);
-                httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", "scope", "", ApiVersion,
+                httpManager.AddManagedIdentityMockHandler("http://127.0.0.1:41564/msi/token", "scope", "",
                     ManagedIdentitySourceType.AppService, statusCode: HttpStatusCode.InternalServerError);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
@@ -150,7 +148,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     "http://127.0.0.1:41564/msi/token",
                     "https://management.azure.com",
                     "",
-                    ApiVersion,
                     ManagedIdentitySourceType.AppService,
                     statusCode: HttpStatusCode.OK);
 
@@ -161,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.AuthenticationResponseInvalidFormatError, ex.Message);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidResponse, ex.Message);
             }
 
         }

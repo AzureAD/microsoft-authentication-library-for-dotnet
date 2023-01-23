@@ -19,12 +19,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string AppServiceMsiApiVersion = "2019-08-01";
         private const string SecretHeaderName = "X-IDENTITY-HEADER";
 
-        private const string MsiEndpointInvalidUriError = "[Managed Identity] The environment variable IDENTITY_ENDPOINT contains an invalid Uri {0} in app service managed identity source.";
-
         private readonly Uri _endpoint;
         private readonly string _secret;
-        private readonly string _clientId;
-        private readonly string _resourceId;
+        private readonly string _userAssignedId;
 
         public static ManagedIdentitySource TryCreate(RequestContext requestContext)
         {
@@ -39,8 +36,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             _endpoint = endpoint;
             _secret = secret;
-            _clientId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId;
-            _resourceId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId;
+            _userAssignedId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedId;
         }
 
         private static bool TryValidateEnvVars(string msiEndpoint, string secret, ILoggerAdapter logger, out Uri endpointUri)
@@ -60,10 +56,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
             catch (FormatException ex)
             {
-                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(CultureInfo.InvariantCulture, MsiEndpointInvalidUriError, msiEndpoint), ex);
+                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(
+                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", msiEndpoint, "App Service"), ex);
             }
 
-            logger.Info($"[Managed Identity] Environment variables validation passed for app service managed identity. Endpoint uri: {endpointUri}");
+            logger.Info($"[Managed Identity] Environment variables validation passed for app service managed identity. Endpoint URI: {endpointUri}. Creating App Service managed identity.");
             return true;
         }
 
@@ -75,15 +72,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.QueryParameters["api-version"] = AppServiceMsiApiVersion;
             request.QueryParameters["resource"] = resource;
 
-            if (!string.IsNullOrEmpty(_clientId))
+            if (!string.IsNullOrEmpty(_userAssignedId))
             {
-                _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
-                request.QueryParameters[Constants.ManagedIdentityClientId] = _clientId;
-            }
-            else if (!string.IsNullOrEmpty(_resourceId))
-            {
-                _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
-                request.QueryParameters[Constants.ManagedIdentityResourceId] = _resourceId;
+                if (Guid.TryParse(_userAssignedId, out _))
+                {
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
+                    request.QueryParameters[Constants.ManagedIdentityClientId] = _userAssignedId;
+                }
+                else
+                {
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
+                    request.QueryParameters[Constants.ManagedIdentityResourceId] = _userAssignedId;
+                }
+                
             }
 
             return request;

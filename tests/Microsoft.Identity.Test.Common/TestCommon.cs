@@ -6,8 +6,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
-
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Http;
@@ -248,5 +249,24 @@ namespace Microsoft.Identity.Test.Common
             KerberosSupplementalTicket ticket = KerberosSupplementalTicketManager.FromIdToken(token);
             Assert.IsNull(ticket, "Kerberos Ticket exists.");
         }
+
+        public static async Task ValidatePopNonceAsync(string nonce)
+        {
+            var httpClientFactory = PlatformProxyFactory.CreatePlatformProxy(null).CreateDefaultHttpClientFactory();
+            var HttpClient = httpClientFactory.GetHttpClient();
+            var response = await HttpClient.GetAsync($"https://testingsts.azurewebsites.net/servernonce/validate?serverNonce={nonce}").ConfigureAwait(false);
+
+            Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.OK);
+        }
+
+        //Pop SHR validation endpoint is currently not functioning
+        //public static async Task ValidatePopShrAsync(string popShr)
+        //{
+        //    var httpClientFactory = PlatformProxyFactory.CreatePlatformProxy(null).CreateDefaultHttpClientFactory();
+        //    var HttpClient = httpClientFactory.GetHttpClient();
+        //    var response = await HttpClient.GetAsync($"https://testingsts.azurewebsites.net/servernonce/validate?shr={popShr}").ConfigureAwait(false);
+
+        //    Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.OK);
+        //}
     }
 }

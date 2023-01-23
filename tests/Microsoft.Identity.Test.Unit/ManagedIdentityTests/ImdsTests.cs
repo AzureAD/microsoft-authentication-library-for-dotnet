@@ -14,7 +14,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class ImdsTests : TestBase
     {
-        private const string ApiVersion = "2018-02-01";
         private const string ImdsEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token";
         private const string DefaultResource = "https://management.azure.com";
 
@@ -47,7 +46,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     ImdsEndpoint,
                     DefaultResource,
                     MockHelpers.GetMsiImdsSuccessfulResponse(),
-                    ApiVersion,
                     ManagedIdentitySourceType.IMDS,
                     userAssignedClientIdOrResourceId: userAssignedClientIdOrResourceId,
                     userAssignedIdentityId: userAssignedIdentityId);
@@ -87,9 +85,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures()
                     .Build();
 
-                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, resource, MockHelpers.GetMsiImdsErrorResponse(), ApiVersion,
+                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, resource, MockHelpers.GetMsiImdsErrorResponse(),
                     ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
-                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, resource, MockHelpers.GetMsiImdsErrorResponse(), ApiVersion,
+                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, resource, MockHelpers.GetMsiImdsErrorResponse(),
                     ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
@@ -117,8 +115,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         .WithExperimentalFeatures()
                         .Build();
 
-                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "scope", "", ApiVersion, ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
-                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "scope", "", ApiVersion, ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
+                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "scope", "", ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
+                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "scope", "", ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await cca.AcquireTokenForClient(new string[] { "scope" })
@@ -127,6 +125,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityNoResponseReceived, ex.Message);
             }
         }
 
@@ -144,7 +143,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         .WithExperimentalFeatures()
                         .Build();
 
-                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "https://management.azure.com", "", ApiVersion, ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.OK);
+                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "https://management.azure.com", "", ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.OK);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await cca.AcquireTokenForClient(new string[] { "https://management.azure.com" })
@@ -153,14 +152,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.AuthenticationResponseInvalidFormatError, ex.Message);
+                Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidResponse, ex.Message);
             }
         }
 
         [TestMethod]
         public async Task ImdsBadRequestTestAsync()
         {
-
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
 
@@ -173,7 +171,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithExperimentalFeatures()
                 .Build();
 
-                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, DefaultResource, MockHelpers.GetMsiImdsErrorResponse(), ApiVersion,
+                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, DefaultResource, MockHelpers.GetMsiImdsErrorResponse(),
                     ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.BadRequest);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>

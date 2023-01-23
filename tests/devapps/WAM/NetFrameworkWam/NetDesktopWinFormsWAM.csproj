@@ -108,7 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Identity.Client.NativeInterop">
-      <Version>0.13.2</Version>
+      <Version>0.13.3</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
