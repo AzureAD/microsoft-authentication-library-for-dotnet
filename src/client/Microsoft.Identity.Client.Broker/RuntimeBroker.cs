@@ -412,12 +412,9 @@ namespace Microsoft.Identity.Client.Broker
                     }
                     else
                     {
-                        _logger?.WarningPii(
+                        _logger?.ErrorPii(
                             $"[WamBroker] Could not find a WAM account for the selected user {account.Username} - error: {readAccountResult.Error}",
                             $"[WamBroker] Could not find a WAM account for the selected user, error: {readAccountResult.Error}");
-
-                        string errorMessage = $"{readAccountResult.Error} (error code : {readAccountResult.Error.ErrorCode})";
-                        throw new MsalServiceException("wam_no_account_found", errorMessage);
                     }
 
                     using (NativeInterop.SignOutResult result = await s_lazyCore.Value.SignOutSilentlyAsync(
@@ -431,12 +428,9 @@ namespace Microsoft.Identity.Client.Broker
                         }
                         else
                         {
-                            _logger?.WarningPii(
+                            _logger?.ErrorPii(
                             $"[WamBroker] Could not sign out user {account.Username} - error: {result.Error}",
                             $"[WamBroker] Could not sign out user, error: {result.Error}");
-
-                            string errorMessage = $"{result.Error} (error code : {result.Error.ErrorCode})";
-                            throw new MsalServiceException("wam_sign_out_failed", errorMessage);
                         }
                     }
                 }
