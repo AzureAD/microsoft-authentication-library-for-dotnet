@@ -179,7 +179,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             // Acquire token silently
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
-            MsalAssert.AssertAuthResult(result, TokenSource.Cache, labResponse.Lab.TenantId, expectedScopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
 
             await pca.RemoveAsync(account).ConfigureAwait(false);
             // Assert the account is removed
