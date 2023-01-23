@@ -27,6 +27,8 @@ namespace Microsoft.Identity.Client.Broker
         //MSA-PT Auth Params
         private const string NativeInteropMsalRequestType = "msal_request_type";
         private const string ConsumersPassthroughRequest = "consumer_passthrough";
+        private const string MsaMsalIdentityProvider = "msal_identity_provider";
+        private const string IdentityProviderTypeMSA = "msa";
         private const string WamHeaderTitle = "msal_accounts_control_title";
 
         //MSAL Runtime Error Response 
@@ -178,6 +180,7 @@ namespace Microsoft.Identity.Client.Broker
             if (brokerOptions.MsaPassthrough)
             {
                 authParams.Properties[NativeInteropMsalRequestType] = ConsumersPassthroughRequest;
+                authParams.Properties[MsaMsalIdentityProvider] = IdentityProviderTypeMSA;
             }
 
             //WAM Header Title
