@@ -7,7 +7,6 @@
     <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
     <TargetFrameworkNet6>net6.0</TargetFrameworkNet6>
-    <TargetFrameworkNet7>net7.0</TargetFrameworkNet7>
     <TargetFrameworkNet6Win>net6.0-windows10.0.17763.0</TargetFrameworkNet6Win>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
