@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using static Microsoft.Identity.Client.Broker.RuntimeBroker;
 
@@ -240,6 +241,10 @@ namespace Microsoft.Identity.Client.Broker
             NativeInterop.AuthParameters authParams,
             ILoggerAdapter logger)
         {
+            //Set MSAL Identity Provider only for AcquireTokenInteractive API
+            if (authenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenInteractive)
+                return;
+
             //Set MsalIdentityProvider Based on Tenant ID
             if (authenticationRequestParameters?.Account?.HomeAccountId != null)
             {
