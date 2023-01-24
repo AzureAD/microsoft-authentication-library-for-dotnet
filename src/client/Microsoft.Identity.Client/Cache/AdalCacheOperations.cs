@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.IO;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -17,9 +18,10 @@ namespace Microsoft.Identity.Client.Cache
 
         public static byte[] Serialize(ILoggerAdapter logger, IDictionary<AdalTokenCacheKey, AdalResultWrapper> tokenCacheDictionary)
         {
-            using (Stream stream = new MemoryStream())
+            RecyclableMemoryStreamManager recyclableMemoryStreamManager = new RecyclableMemoryStreamManager(131072, 1048576, 134217728, false);
+            using (Stream stream = recyclableMemoryStreamManager.GetStream())
             {
-                BinaryWriter writer = new BinaryWriter(stream);
+                BinaryWriterPlus writer = new BinaryWriterPlus(stream);
                 writer.Write(SchemaVersion);
                 logger.Info($"[AdalCacheOperations] Serializing token cache with {tokenCacheDictionary.Count} items. ");
 
@@ -27,8 +29,8 @@ namespace Microsoft.Identity.Client.Cache
                 foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in tokenCacheDictionary)
                 {
                     writer.Write(string.Format(CultureInfo.InvariantCulture, "{1}{0}{2}{0}{3}{0}{4}", Delimiter,
-                        kvp.Key.Authority, kvp.Key.Resource, kvp.Key.ClientId, (int)kvp.Key.TokenSubjectType));
-                    writer.Write(kvp.Value.Serialize());
+                        kvp.Key.Authority, kvp.Key.Resource, kvp.Key.ClientId, (int)kvp.Key.TokenSubjectType).ToCharArray());
+                    writer.Write(kvp.Value.Serialize().ToCharArray());
                 }
 
                 int length = (int)stream.Position;
@@ -47,15 +49,11 @@ namespace Microsoft.Identity.Client.Cache
                 return dictionary;
             }
 
-            using (Stream stream = new MemoryStream())
+            using (Stream stream = new MemoryStream(state))
             {
-                BinaryWriter writer = new BinaryWriter(stream);
-                writer.Write(state);
-                writer.Flush();
-                stream.Position = 0;
-
                 BinaryReader reader = new BinaryReader(stream);
                 int blobSchemaVersion = reader.ReadInt32();
+
                 if (blobSchemaVersion != SchemaVersion)
                 {
                     logger.Warning("[AdalCacheOperations] The version of the persistent state of the cache does not match the current schema, so skipping deserialization. ");
