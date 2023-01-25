@@ -142,6 +142,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        //TODO: See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3916
+        [Ignore("Not functional due to bug.")]
         public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
