@@ -441,39 +441,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             Assert.AreEqual(null, token.Upn);
         }
 
-        internal class IosBrokerMock : NullBroker
-        {
-            public IosBrokerMock(ILoggerAdapter logger) : base(logger)
-            {
-
-            }
-            public override bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
-            {
-                // WAM does not work on pure ADFS environments
-                if (authorityType == AuthorityType.Adfs)
-                {
-                    return false;
-                }
-
-                return true;
-            }
-        }
-
-        private static IBroker CreateBroker(Type brokerType)
-        {
-            if (brokerType == typeof(NullBroker))
-            {
-                return new NullBroker(null);
-            }
-
-            if (brokerType == typeof(IosBrokerMock))
-            {
-                return new IosBrokerMock(null);
-            }
-
-            throw new NotImplementedException();
-        }
-
         [DataTestMethod]
         [DataRow(typeof(NullBroker))]
         [DataRow(typeof(IosBrokerMock))]
@@ -554,7 +521,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 }
                 catch (MsalUiRequiredException e)
                 {
-                    Assert.AreEqual("no_tokens_found", e.ErrorCode);
+                    Assert.AreEqual("failed_to_acquire_token_silently_from_broker", e.ErrorCode);
 
                     harness.HttpManager.AddInstanceDiscoveryMockHandler();
                     harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();

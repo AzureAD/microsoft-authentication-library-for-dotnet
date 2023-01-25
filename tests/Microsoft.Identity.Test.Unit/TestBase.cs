@@ -4,6 +4,8 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -91,6 +93,38 @@ namespace Microsoft.Identity.Test.Unit
                 WamAccountId = TestConstants.LocalAccountId,
                 TokenSource = TokenSource.Broker
             };
+        }
+
+        internal class IosBrokerMock : NullBroker
+        {
+            public IosBrokerMock(ILoggerAdapter logger) : base(logger)
+            {
+
+            }
+            public override bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
+            {
+                if (authorityType == AuthorityType.Adfs)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+        internal static IBroker CreateBroker(Type brokerType)
+        {
+            if (brokerType == typeof(NullBroker))
+            {
+                return new NullBroker(null);
+            }
+
+            if (brokerType == typeof(IosBrokerMock))
+            {
+                return new IosBrokerMock(null);
+            }
+
+            throw new NotImplementedException();
         }
     }
 }

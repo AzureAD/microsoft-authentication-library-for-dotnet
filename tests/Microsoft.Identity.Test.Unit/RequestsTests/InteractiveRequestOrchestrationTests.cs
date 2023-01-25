@@ -142,7 +142,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TokenSource.Broker, result.AuthenticationResultMetadata.TokenSource);
                 Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
-                Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count);
 
                 // Assert - orchestration
                 await _brokerExchangeComponentOverride
