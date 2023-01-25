@@ -412,7 +412,7 @@ namespace Microsoft.Identity.Client.Broker
                     }
                     else
                     {
-                        _logger?.ErrorPii(
+                        _logger?.WarningPii(
                             $"[WamBroker] Could not find a WAM account for the selected user {account.Username} - error: {readAccountResult.Error}",
                             $"[WamBroker] Could not find a WAM account for the selected user, error: {readAccountResult.Error}");
                     }
@@ -428,7 +428,7 @@ namespace Microsoft.Identity.Client.Broker
                         }
                         else
                         {
-                            _logger?.ErrorPii(
+                            _logger?.WarningPii(
                             $"[WamBroker] Could not sign out user {account.Username} - error: {result.Error}",
                             $"[WamBroker] Could not sign out user, error: {result.Error}");
                         }
