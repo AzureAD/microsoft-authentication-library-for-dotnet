@@ -316,8 +316,11 @@
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' != '$(TargetFrameworkNetDesktop45)' And '$(TargetFramework)' != '$(TargetFrameworkUap)'">
+    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.2.1" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.22.0" />
-    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.2.1" />
   </ItemGroup>
 </Project>
