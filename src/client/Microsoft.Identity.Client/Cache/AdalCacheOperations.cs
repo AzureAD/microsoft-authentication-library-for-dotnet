@@ -7,7 +7,9 @@ using System.Globalization;
 using System.IO;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+#if !NET45 && !WINDOWS10_0_17763_0
 using Microsoft.IO;
+#endif
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -18,8 +20,12 @@ namespace Microsoft.Identity.Client.Cache
 
         public static byte[] Serialize(ILoggerAdapter logger, IDictionary<AdalTokenCacheKey, AdalResultWrapper> tokenCacheDictionary)
         {
+#if NET45 || WINDOWS10_0_17763_0
+            using (Stream stream = new MemoryStream())
+#else
             RecyclableMemoryStreamManager recyclableMemoryStreamManager = new RecyclableMemoryStreamManager(131072, 1048576, 134217728, false);
             using (Stream stream = recyclableMemoryStreamManager.GetStream())
+#endif
             {
                 BinaryWriterPlus writer = new BinaryWriterPlus(stream);
                 writer.Write(SchemaVersion);
