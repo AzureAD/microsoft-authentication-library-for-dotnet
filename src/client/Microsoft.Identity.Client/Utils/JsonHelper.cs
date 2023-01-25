@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using System.Diagnostics.CodeAnalysis;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using Microsoft.Identity.Client.Platforms.net6;
 using System.Text.Json;
