@@ -844,7 +844,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .ConfigureAwait(false);
         }
 
-#if !NET6_0
+#if !NET6_0 && !NET7_0
         /// <summary>
         /// Cache state:
         ///

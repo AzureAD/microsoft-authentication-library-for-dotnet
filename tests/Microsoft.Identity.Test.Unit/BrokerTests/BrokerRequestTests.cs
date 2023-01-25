@@ -198,7 +198,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         null,
                         broker,
                         "install_url");
-#if NET6_WIN
+#if NET6_WIN || NET7_0
                 Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #else
                 Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
@@ -222,7 +222,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         _acquireTokenSilentParameters,
                         broker);
 
-#if NET6_WIN
+#if NET6_WIN || NET7_0
                 Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #else
                 Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
