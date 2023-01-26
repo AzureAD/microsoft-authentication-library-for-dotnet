@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
             _requestContext.Logger.InfoPii(
                 () => $"User with user name '{username}' detected as '{userRealmResponse.AccountType}'. ",
-                () => $"User detected as '{userRealmResponse.AccountType}'. ",);
+                () => $"User detected as '{userRealmResponse.AccountType}'. ");
 
             return userRealmResponse;
         }
