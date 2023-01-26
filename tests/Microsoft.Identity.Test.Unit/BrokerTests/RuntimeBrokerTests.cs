@@ -129,23 +129,23 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                .Build();
 
             // empty scopes
-            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+            var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
                 () => pca
                 .AcquireTokenInteractive(scopeArray)
                 .WithParentActivityOrWindow(new IntPtr(123456))
                 .ExecuteAsync())
                 .ConfigureAwait(false);
 
-            Assert.AreEqual(MsalError.WamScopesRequired, ex.ErrorCode);
+            Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.ScopesRequired));
 
             // empty scopes
-            var ex2 = await AssertException.TaskThrowsAsync<MsalClientException>(
+            var ex2 = await AssertException.TaskThrowsAsync<MsalServiceException>(
                 () => pca
                 .AcquireTokenSilent(scopeArray, new Account("123.123", "user", "env"))                
                 .ExecuteAsync())
                 .ConfigureAwait(false);
 
-            Assert.AreEqual(MsalError.WamScopesRequired, ex2.ErrorCode);
+            Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.ScopesRequired));
 
         }
 

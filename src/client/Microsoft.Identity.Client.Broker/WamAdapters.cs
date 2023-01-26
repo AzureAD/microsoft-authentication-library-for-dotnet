@@ -99,8 +99,8 @@ namespace Microsoft.Identity.Client.Broker
                         $" Possible causes: \n" +
                         $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: " +
                         $"{GetExpectedRedirectUri(authenticationRequestParameters.AppConfig.ClientId)} \n" +
-                        $"- Scopes Required : \n" +
-                        $"{MsalErrorMessage.ScopesRequired}" +
+                        $"- Scopes Required : " +
+                        $"{MsalErrorMessage.ScopesRequired} \n" +
                         $"- No Internet connection : \n" +
                         $"Please see https://aka.ms/msal-net-wam for details about Windows Broker integration";
                     logger.Error($"[WamBroker] WAM_provider_error_{errorCode} {errorMessage}");
