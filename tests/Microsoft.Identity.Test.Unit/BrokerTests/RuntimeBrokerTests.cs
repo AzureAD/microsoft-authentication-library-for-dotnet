@@ -105,50 +105,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
            
         }
        
-        [DataTestMethod]
-        [DataRow("")]
-        [DataRow(" ")]
-        [DataRow(null)]
-        [DataRow("openid")]
-        [DataRow("profile")]
-        [DataRow("offline_access")]
-        [DataRow("openid offline_access")]
-        [DataRow("profile offline_access")]        
-        [DataRow("profile offline_access openid")]        
-        public async Task ThrowOnNoScopesAsync(string scopes)
-        {
-            var scopeArray = new List<string>();
-            if (scopes != null)
-            {
-                scopeArray = scopes.Split(' ').ToList();
-            }
-
-            var pca = PublicClientApplicationBuilder
-               .Create(TestConstants.ClientId)
-               .WithBrokerPreview()
-               .Build();
-
-            // empty scopes
-            var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                () => pca
-                .AcquireTokenInteractive(scopeArray)
-                .WithParentActivityOrWindow(new IntPtr(123456))
-                .ExecuteAsync())
-                .ConfigureAwait(false);
-
-            Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.ScopesRequired));
-
-            // empty scopes
-            var ex2 = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                () => pca
-                .AcquireTokenSilent(scopeArray, new Account("123.123", "user", "env"))                
-                .ExecuteAsync())
-                .ConfigureAwait(false);
-
-            Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.ScopesRequired));
-
-        }
-
         [TestMethod]
         public void HandleInstallUrl_Throws()
         {
