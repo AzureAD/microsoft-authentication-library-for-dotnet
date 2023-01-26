@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             }
             catch (MsalException ex)
             {
-                _logger.Verbose(isBrokerConfigured ? $"Broker could not satisfy silent request." : $"Token cache could not satisfy silent request.");
+                _logger.Verbose(() => isBrokerConfigured ? $"Broker could not satisfy silent request." : $"Token cache could not satisfy silent request.");
                 throw ex;
             }
         }
