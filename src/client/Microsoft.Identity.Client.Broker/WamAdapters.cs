@@ -99,7 +99,9 @@ namespace Microsoft.Identity.Client.Broker
                         $" Possible causes: \n" +
                         $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: " +
                         $"{GetExpectedRedirectUri(authenticationRequestParameters.AppConfig.ClientId)} \n" +
-                        $"- No Internet connection \n" +
+                        $"- Scopes Required : \n" +
+                        $"{MsalErrorMessage.ScopesRequired}" +
+                        $"- No Internet connection : \n" +
                         $"Please see https://aka.ms/msal-net-wam for details about Windows Broker integration";
                     logger.Error($"[WamBroker] WAM_provider_error_{errorCode} {errorMessage}");
                     serviceException = new MsalServiceException($"WAM_provider_error_{errorCode}", errorMessage);
@@ -161,7 +163,6 @@ namespace Microsoft.Identity.Client.Broker
             ILoggerAdapter logger)
         {
             logger.Verbose("[WamBroker] Validating Common Auth Parameters.");
-            ValidateAuthParams(authenticationRequestParameters, logger);
 
             var authParams = new NativeInterop.AuthParameters
                 (authenticationRequestParameters.AppConfig.ClientId,
@@ -403,29 +404,6 @@ namespace Microsoft.Identity.Client.Broker
 
             logger.InfoPii(messageWithPii, builder.ToString());
             logger.Error($"[WamBroker] WAM Account properties are missing. Cannot convert to MSAL Accounts.");
-        }
-
-        /// <summary>
-        /// Validate common auth params
-        /// </summary>
-        /// <param name="authenticationRequestParameters"></param>
-        /// <param name="logger"></param>
-        /// <exception cref="MsalClientException"></exception>
-        private static void ValidateAuthParams(
-            AuthenticationRequestParameters authenticationRequestParameters,
-            ILoggerAdapter logger)
-        {
-            //MSAL Runtime throws an ApiContractViolation Exception with Tag: 0x2039c1cb (InvalidArg)
-            //When no scopes are passed, this will check if user is passing scopes
-            if (!ScopeHelper.HasNonMsalScopes(authenticationRequestParameters.Scope))                
-            {
-                logger.Error($"[WamBroker] {MsalError.WamScopesRequired} " +
-                    $"{MsalErrorMessage.ScopesRequired}");
-
-                throw new MsalClientException(
-                    MsalError.WamScopesRequired,
-                    MsalErrorMessage.ScopesRequired);
-            }
         }
     }
 }
