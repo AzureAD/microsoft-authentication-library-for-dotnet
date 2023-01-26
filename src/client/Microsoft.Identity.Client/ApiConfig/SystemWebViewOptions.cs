@@ -74,15 +74,20 @@ namespace Microsoft.Identity.Client
         {
             logger.Info("DefaultBrowserOptions configured");
 
-            logger.InfoPii("HtmlMessageSuccess " + HtmlMessageSuccess,
-                "HtmlMessageSuccess? " + !String.IsNullOrEmpty(HtmlMessageSuccess));
-            logger.InfoPii("HtmlMessageError " + HtmlMessageError,
-               "HtmlMessageError? " + !String.IsNullOrEmpty(HtmlMessageError));
-            logger.InfoPii("BrowserRedirectSuccess " + BrowserRedirectSuccess,
-               "BrowserRedirectSuccess? " + (BrowserRedirectSuccess != null));
-            logger.InfoPii("BrowserRedirectError " + BrowserRedirectError,
-               "BrowserRedirectError? " + (BrowserRedirectError != null));
-            logger.Info($"HidePrivacyPrompt {iOSHidePrivacyPrompt}");
+            logger.InfoPii(
+                () => "HtmlMessageSuccess " + HtmlMessageSuccess,
+                () => "HtmlMessageSuccess? " + !String.IsNullOrEmpty(HtmlMessageSuccess));
+            logger.InfoPii(
+                () => "HtmlMessageError " + HtmlMessageError,
+                () => "HtmlMessageError? " + !String.IsNullOrEmpty(HtmlMessageError));
+            logger.InfoPii(
+                () => "BrowserRedirectSuccess " + BrowserRedirectSuccess,
+                () => "BrowserRedirectSuccess? " + (BrowserRedirectSuccess != null));
+            logger.InfoPii(
+                () => "BrowserRedirectError " + BrowserRedirectError,
+                () => "BrowserRedirectError? " + (BrowserRedirectError != null));
+            
+            logger.Info(() => $"HidePrivacyPrompt {iOSHidePrivacyPrompt}");
         }
 
         internal static void ValidatePlatformAvailability()

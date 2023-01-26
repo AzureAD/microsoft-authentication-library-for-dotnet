@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // if ONLY the env var MSI_ENDPOINT is set the MsiType is CloudShell
             if (string.IsNullOrEmpty(msiEndpoint))
             {
-                requestContext.Logger.Verbose("[Managed Identity] Cloud shell managed identity is unavailable.");
+                requestContext.Logger.Verbose(()=>"[Managed Identity] Cloud shell managed identity is unavailable.");
                 return null;
             }
 
@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "MSI_ENDPOINT", msiEndpoint, CloudShell), ex);
             }
 
-            requestContext.Logger.Verbose("[Managed Identity] Creating cloud shell managed identity. Endpoint URI: " + msiEndpoint);
+            requestContext.Logger.Verbose(()=>"[Managed Identity] Creating cloud shell managed identity. Endpoint URI: " + msiEndpoint);
             return new CloudShellManagedIdentitySource(endpointUri, requestContext);
         }
 

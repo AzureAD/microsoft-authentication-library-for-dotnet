@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessToken).ConfigureAwait(false);
 
                     logger.Info(
-                        "[OBO Request] Found a valid access token in the cache. ID token also found? " + (cachedIdToken != null));
+                        () => "[OBO Request] Found a valid access token in the cache. ID token also found? " + (cachedIdToken != null));
 
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
 

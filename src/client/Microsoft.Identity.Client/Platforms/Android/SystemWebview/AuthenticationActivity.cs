@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
             }
             else
             {
-                RequestContext.Logger.Info(
+                RequestContext.Logger.Info(() =>
                     string.Format(
                     CultureInfo.CurrentCulture,
                     "Browser with custom tabs package available. Using {0}. ",

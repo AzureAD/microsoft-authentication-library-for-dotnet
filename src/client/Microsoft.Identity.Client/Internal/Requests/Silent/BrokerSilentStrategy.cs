@@ -94,8 +94,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (msalTokenResponse.Error != null)
             {
-                _logger.Info(
-                    LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
+                _logger.Info(() => LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
 
                 if (msalTokenResponse.Error == BrokerResponseConst.AndroidNoTokenFound ||
                     msalTokenResponse.Error == BrokerResponseConst.AndroidNoAccountFound ||

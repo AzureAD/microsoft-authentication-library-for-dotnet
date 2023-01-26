@@ -39,7 +39,9 @@ namespace Microsoft.Identity.Client.WsTrust
                     MsalErrorMessage.UnknownUser);
             }
 
-            _requestContext.Logger.InfoPii($"Logged in user detected with user name '{platformUsername}'", "Logged in user detected. ");
+            _requestContext.Logger.InfoPii(
+                () => $"Logged in user detected with user name '{platformUsername}'",
+                () => "Logged in user detected. ");
             return platformUsername;
         }
 
@@ -58,8 +60,8 @@ namespace Microsoft.Identity.Client.WsTrust
             }
 
             _requestContext.Logger.InfoPii(
-                $"User with user name '{username}' detected as '{userRealmResponse.AccountType}'. ",
-                string.Empty);
+                () => $"User with user name '{username}' detected as '{userRealmResponse.AccountType}'. ",
+                () => $"User detected as '{userRealmResponse.AccountType}'. ",);
 
             return userRealmResponse;
         }
@@ -95,9 +97,9 @@ namespace Microsoft.Identity.Client.WsTrust
                   MsalErrorMessage.WsTrustEndpointNotFoundInMetadataDocument);
             }
 
-            _requestContext.Logger.InfoPii(
-                string.Format(CultureInfo.InvariantCulture, "WS-Trust endpoint '{0}' being used from MEX at '{1}'", wsTrustEndpoint.Uri, federationMetadataUrl),
-                "Fetched and parsed MEX. ");
+            _requestContext.Logger.VerbosePii(
+                () => string.Format(CultureInfo.InvariantCulture, "WS-Trust endpoint '{0}' being used from MEX at '{1}'", wsTrustEndpoint.Uri, federationMetadataUrl),
+                () => "Fetched and parsed MEX. ");
 
             WsTrustResponse wsTrustResponse = await GetWsTrustResponseAsync(
                 userAuthType,
@@ -106,7 +108,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 username,
                 password).ConfigureAwait(false);
 
-            _requestContext.Logger.Info($"Token of type '{wsTrustResponse.TokenType}' acquired from WS-Trust endpoint. ");
+            _requestContext.Logger.Info(() => $"Token of type '{wsTrustResponse.TokenType}' acquired from WS-Trust endpoint. ");
 
             return wsTrustResponse;
         }
@@ -130,7 +132,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 WsTrustResponse wsTrustResponse = await _serviceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(
                     endpoint, wsTrustRequestMessage, _requestContext).ConfigureAwait(false);
 
-                _requestContext.Logger.Info($"Token of type '{wsTrustResponse.TokenType}' acquired from WS-Trust endpoint. ");
+                _requestContext.Logger.Info(() => $"Token of type '{wsTrustResponse.TokenType}' acquired from WS-Trust endpoint. ");
                 return wsTrustResponse;
             }
             catch (Exception ex) when (ex is not MsalClientException)

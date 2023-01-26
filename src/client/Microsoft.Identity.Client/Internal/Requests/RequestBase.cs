@@ -408,9 +408,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 
                 AuthenticationRequestParameters.RequestContext.Logger.Info("\n\t=== Token Acquisition finished successfully:");
                 AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
-                        $" AT expiration time: {result.ExpiresOn}, scopes: {scopes}. " +
+                       () => $" AT expiration time: {result.ExpiresOn}, scopes: {scopes}. " +
                             $"source: {result.AuthenticationResultMetadata.TokenSource}",
-                        $" AT expiration time: {result.ExpiresOn}, scopes: {scopes}. " +
+                       () => $" AT expiration time: {result.ExpiresOn}, scopes: {scopes}. " +
                             $"source: {result.AuthenticationResultMetadata.TokenSource}");
 
                 if (result.AuthenticationResultMetadata.TokenSource != TokenSource.Cache)
@@ -418,8 +418,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     Uri canonicalAuthority = AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority;
 
                     AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
-                        $"Fetched access token from host {canonicalAuthority.Host}. Endpoint: {canonicalAuthority}. ",
-                        $"Fetched access token from host {canonicalAuthority.Host}. ");
+                        () => $"Fetched access token from host {canonicalAuthority.Host}. Endpoint: {canonicalAuthority}. ",
+                        () => $"Fetched access token from host {canonicalAuthority.Host}. ");
                 }
             }
         }

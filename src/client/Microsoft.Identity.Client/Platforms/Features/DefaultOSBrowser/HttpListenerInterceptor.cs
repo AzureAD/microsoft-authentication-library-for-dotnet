@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                 TestBeforeStart?.Invoke(urlToListenTo);
 
                 httpListener.Start();
-                _logger.Info("Listening for authorization code on " + urlToListenTo);
+                _logger.Info(() => "Listening for authorization code on " + urlToListenTo);
 
                 using (cancellationToken.Register(() =>
                 {
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
                     cancellationToken.ThrowIfCancellationRequested();
 
                     Respond(responseProducer, context);
-                    _logger.Verbose("HttpListner received a message on " + urlToListenTo);
+                    _logger.Verbose(()=>"HttpListner received a message on " + urlToListenTo);
 
                     // the request URL should now contain the auth code and pkce
                     return context.Request.Url;
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
             // But this is just cancellation...
             catch (Exception ex) when (ex is HttpListenerException || ex is ObjectDisposedException)
             {
-                _logger.Info("HttpListenerException - cancellation requested? " + cancellationToken.IsCancellationRequested);
+                _logger.Info(() => "HttpListenerException - cancellation requested? " + cancellationToken.IsCancellationRequested);
                 cancellationToken.ThrowIfCancellationRequested();
 
                 if (ex is HttpListenerException)
@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser
         private void Respond(Func<Uri, MessageAndHttpCode> responseProducer, HttpListenerContext context)
         {
             MessageAndHttpCode messageAndCode = responseProducer(context.Request.Url);
-            _logger.Info("Processing a response message to the browser. HttpStatus:" + messageAndCode.HttpCode);
+            _logger.Info(() => "Processing a response message to the browser. HttpStatus:" + messageAndCode.HttpCode);
 
             switch (messageAndCode.HttpCode)
             {

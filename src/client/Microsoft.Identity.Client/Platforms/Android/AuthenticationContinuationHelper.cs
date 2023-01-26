@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         public static void SetAuthenticationContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
-            LastRequestLogger?.Info($"SetAuthenticationContinuationEventArgs - resultCode: {(int)resultCode} requestCode: {requestCode}");
+            LastRequestLogger?.Info(() => $"SetAuthenticationContinuationEventArgs - resultCode: {(int)resultCode} requestCode: {requestCode}");
 
             AuthorizationResult authorizationResult;
 
