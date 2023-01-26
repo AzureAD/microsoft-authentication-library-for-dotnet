@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
@@ -238,6 +239,34 @@ namespace Microsoft.Identity.Test.Integration.Broker
             //it simply validates that the GetAccounts merging works and accounts are returned
             var account = accounts.FirstOrDefault();
             Assert.AreEqual(labResponse.User.Upn, account.Username);
+        }
+
+        [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        public async Task WamNoScopesAsync()
+        {
+            string expectedErrorMessage = "Scopes are a required authentication parameter";
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "" };
+            
+            IntPtr intPtr = GetForegroundWindow();
+
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithParentActivityOrWindow(windowHandleProvider)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithBrokerPreview()
+               .Build();
+
+            //empty scopes
+            var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                () => pca
+                .AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+                .ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.IsTrue(ex.Message.Contains(expectedErrorMessage));
         }
     }
 }
