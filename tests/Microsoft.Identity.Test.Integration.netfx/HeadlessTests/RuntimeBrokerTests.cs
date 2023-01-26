@@ -4,6 +4,7 @@
 #if NET_CORE
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -241,28 +242,30 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreEqual(labResponse.User.Upn, account.Username);
         }
 
+        [DataTestMethod]
+        [DataRow("")]
+        [DataRow(" ")]
+        [DataRow(null)]
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
-        public async Task WamNoScopesAsync()
+        public async Task WamNoScopesAsync(string scopes)
         {
             string expectedErrorMessage = "Scopes are a required authentication parameter";
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            string[] scopes = { "" };
             
             IntPtr intPtr = GetForegroundWindow();
 
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
+               .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
+               .WithAuthority("https://login.microsoftonline.com/organizations")
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithBrokerPreview()
                .Build();
 
-            //empty scopes
             var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
                 () => pca
-                .AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+                .AcquireTokenInteractive(new string[] { scopes })
                 .ExecuteAsync())
                 .ConfigureAwait(false);
 
