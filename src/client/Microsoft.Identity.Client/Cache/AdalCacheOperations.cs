@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using Microsoft.Identity.Client.Core;
@@ -19,7 +20,7 @@ namespace Microsoft.Identity.Client.Cache
         {
             using (Stream stream = new MemoryStream())
             {
-                BinaryWriterPlus writer = new BinaryWriterPlus(stream);
+                BinaryWriter writer = new BinaryWriter(stream);
                 writer.Write(SchemaVersion);
                 logger.Info($"[AdalCacheOperations] Serializing token cache with {tokenCacheDictionary.Count} items. ");
 
@@ -27,8 +28,8 @@ namespace Microsoft.Identity.Client.Cache
                 foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in tokenCacheDictionary)
                 {
                     writer.Write(string.Format(CultureInfo.InvariantCulture, "{1}{0}{2}{0}{3}{0}{4}", Delimiter,
-                        kvp.Key.Authority, kvp.Key.Resource, kvp.Key.ClientId, (int)kvp.Key.TokenSubjectType).ToCharArray());
-                    writer.Write(kvp.Value.Serialize().ToCharArray());
+                        kvp.Key.Authority, kvp.Key.Resource, kvp.Key.ClientId, (int)kvp.Key.TokenSubjectType));
+                    writer.Write(kvp.Value.Serialize());
                 }
 
                 int length = (int)stream.Position;
