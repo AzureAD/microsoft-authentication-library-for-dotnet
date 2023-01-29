@@ -125,12 +125,16 @@ namespace NetDesktopWinForms
                 ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
                 MsaPassthrough = cbxMsaPt.Checked,
                 HeaderText = "MSAL Dev App .NET FX"
-            })
-            .WithLogging((logLevel, message, _) =>
+            });
+
+            if (chxEnableRuntimeLogs.Checked)
             { 
-                Debug.WriteLine($"{logLevel} {message}");
-                Log("***MSAL Log*** " + message);
-            }, LogLevel.Verbose, true);
+                builder = builder.WithLogging((logLevel, message, _) =>
+                 {
+                     Debug.WriteLine($"{logLevel} {message}");
+                     Log("***MSAL Log*** " + message);
+                 }, LogLevel.Verbose, true);
+            }
 
             var pca = builder.Build();
 
