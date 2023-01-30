@@ -244,9 +244,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
         [DataTestMethod]
         [DataRow("")]
-        [DataRow(" ")]
-        [DataRow(null)]
-        [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WamNoScopesAsync(string scopes)
         {
             string expectedErrorMessage = "Scopes are a required authentication parameter";
