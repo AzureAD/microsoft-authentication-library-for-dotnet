@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using static Microsoft.Identity.Client.Broker.RuntimeBroker;
 
@@ -27,6 +28,9 @@ namespace Microsoft.Identity.Client.Broker
         //MSA-PT Auth Params
         private const string NativeInteropMsalRequestType = "msal_request_type";
         private const string ConsumersPassthroughRequest = "consumer_passthrough";
+        private const string MsalIdentityProvider = "msal_identity_provider";
+        private const string IdentityProviderTypeMSA = "msa";
+        private const string IdentityProviderTypeAAD = "aad";
         private const string WamHeaderTitle = "msal_accounts_control_title";
 
         //MSAL Runtime Error Response 
@@ -175,6 +179,9 @@ namespace Microsoft.Identity.Client.Broker
             //this is used internally by the interop to fallback to the browser 
             authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
 
+            //MSAL Identity Provider
+            SetMSALIdentityProvider(authenticationRequestParameters, authParams, logger);
+
             //MSA-PT
             if (brokerOptions.MsaPassthrough)
             {
@@ -227,6 +234,40 @@ namespace Microsoft.Identity.Client.Broker
                 authParams.PopParams.UriHost = authenticationRequestParameters.PopAuthenticationConfiguration.HttpHost;
                 authParams.PopParams.UriPath = authenticationRequestParameters.PopAuthenticationConfiguration.HttpPath;
                 authParams.PopParams.Nonce = authenticationRequestParameters.PopAuthenticationConfiguration.Nonce;
+            }
+        }
+
+        private static void SetMSALIdentityProvider(
+            AuthenticationRequestParameters authenticationRequestParameters, 
+            NativeInterop.AuthParameters authParams,
+            ILoggerAdapter logger)
+        {
+            //Set MSAL Identity Provider only for AcquireTokenInteractive API
+            if (authenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenInteractive)
+                return;
+
+            //Set MsalIdentityProvider Based on Tenant ID
+            if (authenticationRequestParameters?.Account?.HomeAccountId != null)
+            {
+                if (!string.IsNullOrEmpty(authenticationRequestParameters.Account.HomeAccountId.TenantId))
+                {
+                    var tenantObjectId = authenticationRequestParameters.Account.HomeAccountId.TenantId;
+
+                    if (tenantObjectId.Equals(Constants.MsaTenantId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        logger.Verbose($"[WamBroker] MSALRuntime Identity provider set to " +
+                            $"{ IdentityProviderTypeMSA }.");
+
+                        authParams.Properties[MsalIdentityProvider] = IdentityProviderTypeMSA;
+                    }
+                    else
+                    {
+                        logger.Verbose($"[WamBroker] MSALRuntime Identity provider set to " +
+                            $"{ IdentityProviderTypeAAD }.");
+
+                        authParams.Properties[MsalIdentityProvider] = IdentityProviderTypeAAD;
+                    }
+                }
             }
         }
 
