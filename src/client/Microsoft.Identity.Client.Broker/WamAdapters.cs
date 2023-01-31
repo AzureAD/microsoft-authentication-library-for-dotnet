@@ -241,16 +241,12 @@ namespace Microsoft.Identity.Client.Broker
 
                     if (tenantObjectId.Equals(Constants.MsaTenantId, StringComparison.OrdinalIgnoreCase))
                     {
-                        logger.Verbose(() => $"[WamBroker] MSALRuntime Identity provider set to " +
-                            $"{ IdentityProviderTypeMSA }.");
-
+                        logger.Verbose(() => $"[WamBroker] MSALRuntime Identity provider set to MSA.");
                         authParams.Properties[MsalIdentityProvider] = IdentityProviderTypeMSA;
                     }
                     else
                     {
-                        logger.Verbose(() => $"[WamBroker] MSALRuntime Identity provider set to " +
-                            $"{ IdentityProviderTypeAAD }.");
-
+                        logger.Verbose(() => "[WamBroker] MSALRuntime Identity provider set to AAD");
                         authParams.Properties[MsalIdentityProvider] = IdentityProviderTypeAAD;
                     }
                 }
