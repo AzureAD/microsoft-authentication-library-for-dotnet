@@ -277,7 +277,8 @@ namespace Microsoft.Identity.Client.Broker
         {
             MsalTokenResponse msalTokenResponse = null;
 
-            if (authResult.IsSuccess)
+            if (authResult.IsSuccess ||  
+                (ResponseStatus)authResult.Error.Status == ResponseStatus.UserSwitch)
             {
                 msalTokenResponse = ParseRuntimeResponse(authResult, authenticationRequestParameters, logger);
                 logger.Verbose("[WamBroker] Successfully retrieved token.");
