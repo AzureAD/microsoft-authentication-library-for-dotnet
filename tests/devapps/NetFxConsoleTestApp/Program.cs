@@ -127,8 +127,6 @@ namespace NetFx
 #endif
                             .WithLogging(Log, LogLevel.Verbose, true);
 
-            Console.WriteLine($"IsBrokerAvailable: {builder.IsBrokerAvailable()}");
-
             if (s_useBroker)
             {
                 IntPtr consoleWindowHandle = GetConsoleWindow();
