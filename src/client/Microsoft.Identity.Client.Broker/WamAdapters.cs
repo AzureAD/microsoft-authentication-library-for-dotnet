@@ -277,8 +277,7 @@ namespace Microsoft.Identity.Client.Broker
         {
             MsalTokenResponse msalTokenResponse = null;
 
-            if (authResult.IsSuccess ||  
-                (ResponseStatus)authResult.Error.Status == ResponseStatus.UserSwitch)
+            if (TokenReceivedFromWam(authResult, logger))
             {
                 msalTokenResponse = ParseRuntimeResponse(authResult, authenticationRequestParameters, logger);
                 logger.Verbose("[WamBroker] Successfully retrieved token.");
@@ -290,6 +289,29 @@ namespace Microsoft.Identity.Client.Broker
             }
 
             return msalTokenResponse;
+        }
+        
+        /// <summary>
+        /// Token Received from WAM
+        /// </summary>
+        /// <param name="authResult"></param>
+        /// <param name="logger"></param>
+        private static bool TokenReceivedFromWam(
+            NativeInterop.AuthResult authResult,
+            ILoggerAdapter logger)
+        {
+            if (authResult.IsSuccess)
+            {
+                return true;
+            }
+
+            if (authResult.Error != null && (ResponseStatus)authResult.Error.Status == ResponseStatus.UserSwitch)
+            {
+                logger.Info($"[WamBroker] Account Switch : { authResult.Error.Tag }.");
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
