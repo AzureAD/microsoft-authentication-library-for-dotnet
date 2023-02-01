@@ -451,5 +451,7 @@ namespace Microsoft.Identity.Client
         public const string ManagedIdentityInvalidChallange = "[Managed Identity] The WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint did not match the expected format.";
         public const string ManagedIdentityUserAssignedNotSupported = "[Managed Identity] User assigned identity is not supported by the {0} Managed Identity. To authenticate with the system assigned identity omit the client id to .WithManagedIentity().";
 
+        public const string CombinedUserAppCacheNotSupported = "Using a combined flat storage, like a file, to store both app and user tokens is not supported. Use a partitioned token cache (for ex. distributed cache like Redis) or separate files for app and user token caches. See https://aka.ms/msal-net-token-cache-serialization .";
+
     }
 }
