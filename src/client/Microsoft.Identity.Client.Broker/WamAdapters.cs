@@ -300,6 +300,11 @@ namespace Microsoft.Identity.Client.Broker
             NativeInterop.AuthResult authResult,
             ILoggerAdapter logger)
         {
+            //success result from WAM
+            if (authResult.IsSuccess)
+                return true;
+            
+            //user switch result is not success and a token is received from MSALRuntime with an Error Response status    
             if (authResult.Error != null 
                 && (ResponseStatus)authResult.Error.Status == ResponseStatus.UserSwitch)
             {
@@ -314,6 +319,7 @@ namespace Microsoft.Identity.Client.Broker
                 return true;
             }
 
+            //for all other conditions return false and process the error response
             return false;
         }
 
