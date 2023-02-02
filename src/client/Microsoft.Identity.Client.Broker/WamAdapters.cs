@@ -300,14 +300,17 @@ namespace Microsoft.Identity.Client.Broker
             NativeInterop.AuthResult authResult,
             ILoggerAdapter logger)
         {
-            if (authResult.IsSuccess)
+            if (authResult.Error != null 
+                && (ResponseStatus)authResult.Error.Status == ResponseStatus.UserSwitch)
             {
-                return true;
-            }
+                string internalErrorCode = authResult.Error.Tag.ToString(CultureInfo.InvariantCulture);
 
-            if (authResult.Error != null && (ResponseStatus)authResult.Error.Status == ResponseStatus.UserSwitch)
-            {
-                logger.Info($"[WamBroker] Account Switch : { authResult.Error.Context }.");
+                string message =
+                        $" Error Code: {authResult.Error.ErrorCode} \n" +
+                        $" Error Message: {authResult.Error.Context} \n" +
+                        $" Internal Error Code: {internalErrorCode} \n";
+
+                logger.Info($"[WamBroker] Account Switch : { message }.");
                 return true;
             }
 
