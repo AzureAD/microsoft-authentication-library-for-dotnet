@@ -243,9 +243,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [DataTestMethod]
-        [DataRow("")]
+        [DataRow(null)]
         [RunOn(TargetFrameworks.NetCore)]
-        public async Task WamNoScopesAsync(string scopes)
+        public async Task WamAddDefaultScopesWhenNoScopesArePassedAsync(string scopes)
         {
             IntPtr intPtr = GetForegroundWindow();
 
