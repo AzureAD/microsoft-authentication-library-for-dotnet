@@ -247,27 +247,36 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [RunOn(TargetFrameworks.NetCore)]
         public async Task WamNoScopesAsync(string scopes)
         {
-            string expectedErrorMessage = "Scopes are a required authentication parameter";
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            
             IntPtr intPtr = GetForegroundWindow();
 
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
+               .Create("43dfbb29-3683-4673-a66f-baba91798bd2")
                .WithAuthority("https://login.microsoftonline.com/organizations")
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithBrokerPreview()
                .Build();
 
-            var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                () => pca
-                .AcquireTokenInteractive(new string[] { scopes })
-                .ExecuteAsync())
-                .ConfigureAwait(false);
+            // Act
+            try
+            {
+                AuthenticationResult result = await pca.AcquireTokenSilent(
+                    new string[] { scopes },
+                    PublicClientApplication.OperatingSystemAccount)
+                    .ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsTrue(ex.Message.Contains(expectedErrorMessage));
+                Assert.Fail("MsalUiRequiredException should have been thrown.");
+
+            }
+            catch (MsalUiRequiredException ex)
+            {
+                Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+            }
+            catch (MsalServiceException)
+            {
+                Assert.Fail("MsalServiceException should not have been thrown.");
+            }
         }
     }
 }
