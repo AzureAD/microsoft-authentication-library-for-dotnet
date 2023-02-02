@@ -103,8 +103,6 @@ namespace Microsoft.Identity.Client.Broker
                         $" Possible causes: \n" +
                         $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: " +
                         $"{GetExpectedRedirectUri(authenticationRequestParameters.AppConfig.ClientId)} \n" +
-                        $"- Scopes Required : " +
-                        $"{MsalErrorMessage.ScopesRequired} \n" +
                         $"- No Internet connection : \n" +
                         $"Please see https://aka.ms/msal-net-wam for details about Windows Broker integration";
                     logger.Error($"[WamBroker] WAM_provider_error_{errorCode} {errorMessage}");
@@ -172,8 +170,18 @@ namespace Microsoft.Identity.Client.Broker
                 (authenticationRequestParameters.AppConfig.ClientId,
                 authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
 
-            //scopes
-            authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
+            //When no scopes are passed, add the default scopes
+            if (!ScopeHelper.HasNonMsalScopes(authenticationRequestParameters.Scope))
+            {
+                string defaultScopes = "email offline_access openid profile";
+                authParams.RequestedScopes = defaultScopes;
+                logger.Verbose("[WamBroker] No scopes were passed in the request. Adding default scopes.");
+            }
+            else
+            {
+                authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
+                logger.Verbose("[WamBroker] Scopes were passed in the request.");
+            }
 
             //WAM redirect URi does not need to be configured by the user
             //this is used internally by the interop to fallback to the browser 
