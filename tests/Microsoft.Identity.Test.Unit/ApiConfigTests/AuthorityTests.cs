@@ -26,7 +26,6 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         private static readonly Authority s_utidAuthority = Authority.CreateAuthority(TestConstants.AuthorityUtidTenant, true);
         private static readonly Authority s_utid2Authority = Authority.CreateAuthority(TestConstants.AuthorityUtid2Tenant, true);
         private static readonly Authority s_b2cAuthority = Authority.CreateAuthority(TestConstants.B2CAuthority, true);
-        private static readonly Authority s_commonNetAuthority = Authority.CreateAuthority(TestConstants.PrefCacheAuthorityCommonTenant, true);
 
         private MockHttpAndServiceBundle _harness;
         private RequestContext _testRequestContext;
@@ -245,11 +244,11 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             //Checking for aliased authority. Should not throw exception when a developer configures an authority on the application
             //but uses a different authority that is a known alias of the previously configured one.
             //See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2736
-            _harness.HttpManager.AddInstanceDiscoveryMockHandler(TestConstants.PrefCacheAuthorityCommonTenant);
+            _harness.HttpManager.AddInstanceDiscoveryMockHandler(TestConstants.AuthorityCommonTenant);
             _testRequestContext.ServiceBundle.Config.HttpManager = _harness.HttpManager;
-            _testRequestContext.ServiceBundle.Config.Authority = s_commonNetAuthority;
+            _testRequestContext.ServiceBundle.Config.Authority = s_commonAuthority;
             var authority = await Authority.CreateAuthorityForRequestAsync(_testRequestContext, s_commonAuthority.AuthorityInfo).ConfigureAwait(false);
-            Assert.AreEqual(s_commonNetAuthority.AuthorityInfo.CanonicalAuthority, authority.AuthorityInfo.CanonicalAuthority);
+            Assert.AreEqual(s_commonAuthority.AuthorityInfo.CanonicalAuthority, authority.AuthorityInfo.CanonicalAuthority);
         }
 
         [TestMethod]

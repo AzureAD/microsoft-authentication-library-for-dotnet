@@ -519,8 +519,8 @@ namespace Microsoft.Identity.Client
                         }
 
                         return updateEnvironment ?
-                                CreateAuthorityWithTenant(CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment).AuthorityInfo, account?.HomeAccountId?.TenantId) :
-                                CreateAuthorityWithTenant(configAuthorityInfo, account?.HomeAccountId?.TenantId);
+                                CreateAuthorityWithTenant(CreateAuthorityWithEnvironment(requestAuthorityInfo, account.Environment).AuthorityInfo, account?.HomeAccountId?.TenantId) :
+                                CreateAuthorityWithTenant(requestAuthorityInfo, account?.HomeAccountId?.TenantId);
 
                     default:
                         throw new MsalClientException(
