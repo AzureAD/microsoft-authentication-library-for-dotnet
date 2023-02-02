@@ -376,14 +376,8 @@ namespace Microsoft.Identity.Client.Broker
                         authenticationRequestParameters.CorrelationId.ToString("D"),
                         cancellationToken).ConfigureAwait(false))
                 {
-                    if (result.IsSuccess)
-                    {
-                        msalTokenResponse = WamAdapters.ParseRuntimeResponse(result, authenticationRequestParameters, _logger);
-                    }
-                    else
-                    {
-                        WamAdapters.ThrowExceptionFromWamError(result, authenticationRequestParameters, _logger);
-                    }
+                    var errorMessage = "Could not acquire token with username and password.";
+                    msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                 }
             }
 
