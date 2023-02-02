@@ -334,7 +334,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// This method is being deprecated
+        /// This method has been deprecated
+
         /// Returns <c>true</c> if a broker can be used.
         /// This method is only needed to be used in mobile scenarios which support Mobile Application Management. In other supported scenarios, use <c>WithBroker</c> by itself, which will fall back to use a browser if broker is unavailable.
         /// </summary>
