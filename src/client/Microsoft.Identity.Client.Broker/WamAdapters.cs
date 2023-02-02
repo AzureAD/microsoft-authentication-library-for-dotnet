@@ -307,7 +307,7 @@ namespace Microsoft.Identity.Client.Broker
 
             if (authResult.Error != null && (ResponseStatus)authResult.Error.Status == ResponseStatus.UserSwitch)
             {
-                logger.Info($"[WamBroker] Account Switch : { authResult.Error.Tag }.");
+                logger.Info($"[WamBroker] Account Switch : { authResult.Error.Context }.");
                 return true;
             }
 
