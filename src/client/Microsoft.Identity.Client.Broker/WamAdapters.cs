@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Broker
         /// <exception cref="MsalClientException"></exception>
         /// <exception cref="MsalUiRequiredException"></exception>
         /// <exception cref="MsalServiceException"></exception>
-        internal static void ThrowExceptionFromWamError(
+        private static void ThrowExceptionFromWamError(
             NativeInterop.AuthResult authResult,
             AuthenticationRequestParameters authenticationRequestParameters,
             ILoggerAdapter logger)
@@ -130,27 +130,6 @@ namespace Microsoft.Identity.Client.Broker
                     logger.Verbose($"[WamBroker] {MsalError.UnknownBrokerError} {errorMessage}");
                     throw new MsalServiceException(MsalError.UnknownBrokerError, errorMessage);
             }
-        }
-
-        /// <summary>
-        /// Create WAM SignOutResult Error Response
-        /// </summary>
-        /// <param name="signoutResult"></param>
-        /// <param name="logger"></param>
-        /// <exception cref="MsalServiceException"></exception>
-        internal static void ThrowExceptionFromWamError(
-            NativeInterop.SignOutResult signoutResult,
-            ILoggerAdapter logger)
-        {
-            logger.Verbose("[WamBroker] Processing WAM exception");
-            logger.Verbose($"[WamBroker] TelemetryData: {signoutResult.TelemetryData}");
-
-            string internalErrorCode = signoutResult.Error.Tag.ToString(CultureInfo.InvariantCulture);
-            long errorCode = signoutResult.Error.ErrorCode;
-            string errorMessage = $"{signoutResult.Error} (error code {errorCode}) (internal error code {internalErrorCode})";
-
-            logger.Verbose($"[WamBroker] {MsalError.WamFailedToSignout} {errorMessage}");
-            throw new MsalServiceException(MsalError.WamFailedToSignout, errorMessage);
         }
 
         /// <summary>
@@ -304,18 +283,12 @@ namespace Microsoft.Identity.Client.Broker
             if (authResult.IsSuccess)
                 return true;
             
-            //user switch result is not success and a token is received from MSALRuntime with an Error Response status    
+            //user switch result is not success and a token is received
+            //from MSALRuntime with an Error Response status    
             if (authResult.Error != null 
                 && (ResponseStatus)authResult.Error.Status == ResponseStatus.UserSwitch)
             {
-                string internalErrorCode = authResult.Error.Tag.ToString(CultureInfo.InvariantCulture);
-
-                string message =
-                        $" Error Code: {authResult.Error.ErrorCode} \n" +
-                        $" Error Message: {authResult.Error.Context} \n" +
-                        $" Internal Error Code: {internalErrorCode} \n";
-
-                logger.Info($"[WamBroker] Account Switch : { message }.");
+                logger.Info("[WamBroker] WAM response status account switch. Treating as success");
                 return true;
             }
 
@@ -330,7 +303,7 @@ namespace Microsoft.Identity.Client.Broker
         /// <param name="authenticationRequestParameters"></param>
         /// <param name="logger"></param>
         /// <exception cref="MsalServiceException"></exception>
-        public static MsalTokenResponse ParseRuntimeResponse(
+        private static MsalTokenResponse ParseRuntimeResponse(
                 NativeInterop.AuthResult authResult, 
                 AuthenticationRequestParameters authenticationRequestParameters,
                 ILoggerAdapter logger)
