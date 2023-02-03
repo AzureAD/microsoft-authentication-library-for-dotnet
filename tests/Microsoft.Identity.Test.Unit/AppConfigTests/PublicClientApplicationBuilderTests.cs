@@ -623,5 +623,80 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app6.Authority);
         }
+
+#pragma warning disable CS0618
+#if NET6_WIN
+        [TestMethod]
+        public void IsBrokerAvailable_net6()
+        {
+            var appBuilder = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityTenant);
+
+            Assert.AreEqual(DesktopOsHelper.IsWin10OrServerEquivalent(), appBuilder.IsBrokerAvailable());
+        }
+#endif
+
+#if (DESKTOP || NET_CORE) && !NET6_0
+        [TestMethod]
+        public void IsBrokerAvailable_OldDotNet()
+        {
+            var builder1 = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.AuthorityTenant);
+
+            // broker is not available out of the box
+            Assert.IsFalse(builder1.IsBrokerAvailable());
+
+            var builder2 = PublicClientApplicationBuilder
+                   .Create(TestConstants.ClientId)
+                   .WithDesktopFeatures()
+                   .WithAuthority(TestConstants.AuthorityTenant);
+
+            // broker is not available out of the box
+            Assert.AreEqual(DesktopOsHelper.IsWin10OrServerEquivalent(), builder2.IsBrokerAvailable());
+        }
+
+        [TestMethod]
+        public void NoBrokerADFS_OldDotNet()
+        {
+            var builder1 = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(TestConstants.ADFSAuthority);
+
+            // broker is not available out of the box
+            Assert.IsFalse(builder1.IsBrokerAvailable());
+
+            var builder2 = PublicClientApplicationBuilder
+                   .Create(TestConstants.ClientId)
+                   .WithDesktopFeatures()
+                   .WithAuthority(TestConstants.ADFSAuthority);
+
+            // broker is not available on ADFS
+            Assert.IsFalse(builder2.IsBrokerAvailable());
+
+            var builder3 = PublicClientApplicationBuilder
+                   .Create(TestConstants.ClientId)
+                   .WithDesktopFeatures()
+                   .WithAdfsAuthority(TestConstants.ADFSAuthority);
+
+            // broker is not available on ADFS
+            Assert.IsFalse(builder3.IsBrokerAvailable());
+        }
+#endif
+
+        [TestMethod]
+        public void IsBrokerAvailable_NoAuthorityInBuilder()
+        {
+            var builder1 = PublicClientApplicationBuilder
+                .Create(TestConstants.ClientId);
+
+#if DESKTOP || NET_CORE
+            Assert.IsFalse(builder1.IsBrokerAvailable());
+#else
+            Assert.IsTrue(builder1.IsBrokerAvailable());
+#endif
+        }
+#pragma warning restore CS0618
     }
 }
