@@ -17,6 +17,12 @@ steps:
   inputs:
     version: 6.x
 
+# Use the latest .NET SDK
+- task: UseDotNet@2
+  displayName: 'Use .Net Core sdk 7.x'
+  inputs:
+    version: 7.x
+
 - task: PowerShell@2
   displayName: 'Installing Xamarin iOS/macOS components'
   inputs:

@@ -108,7 +108,6 @@ namespace NetFx
 
             //cca.AcquireTokenOnBehalfOf(null, null).WithAuthority
 
-
             BindCache(cca.UserTokenCache, UserCacheFile);
             BindCache(cca.AppTokenCache, UserCacheFile);
 
@@ -127,8 +126,6 @@ namespace NetFx
 #endif
                             .WithLogging(Log, LogLevel.Verbose, true);
 
-            Console.WriteLine($"IsBrokerAvailable: {builder.IsBrokerAvailable()}");
-
             if (s_useBroker)
             {
                 IntPtr consoleWindowHandle = GetConsoleWindow();
@@ -137,8 +134,6 @@ namespace NetFx
                 builder = builder
                     //.WithParentActivityOrWindow(consoleWindowHandleProvider)
                     .WithExperimentalFeatures()
-
-
                     .WithBroker(true);
             }
 
@@ -251,7 +246,6 @@ namespace NetFx
                             var interactiveBuilder = pca
                                 .AcquireTokenInteractive(s_scopes);
                             //.WithParentActivityOrWindow(consoleWindowHandle);
-
 
                             AuthenticationResult authResult = await interactiveBuilder.ExecuteAsync().ConfigureAwait(false);
                             ClaimsPrincipal idTokenClaims = authResult.ClaimsPrincipal;
