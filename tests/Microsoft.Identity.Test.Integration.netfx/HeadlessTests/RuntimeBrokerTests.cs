@@ -259,12 +259,24 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Build();
 
             // Act
-            var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
-                 () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
-                        .ExecuteAsync())
-                        .ConfigureAwait(false);
+            try
+            {
+                AuthenticationResult result = await pca.AcquireTokenSilent(
+                    new string[] { scopes },
+                    PublicClientApplication.OperatingSystemAccount)
+                    .ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+                Assert.Fail("MsalUiRequiredException should have been thrown.");
+
+            }
+            catch (MsalUiRequiredException ex)
+            {
+                Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+            }
+            catch (MsalServiceException)
+            {
+                Assert.Fail("MsalServiceException should not have been thrown.");
+            }
         }
     }
 }
