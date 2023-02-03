@@ -173,8 +173,7 @@ namespace Microsoft.Identity.Client.Broker
             //When no scopes are passed, add the default scopes
             if (!ScopeHelper.HasNonMsalScopes(authenticationRequestParameters.Scope))
             {
-                string defaultScopes = "email offline_access openid profile";
-                authParams.RequestedScopes = defaultScopes;
+                authParams.RequestedScopes = ScopeHelper.GetMsalRuntimeScopes();
                 logger.Verbose("[WamBroker] No scopes were passed in the request. Adding default scopes.");
             }
             else
