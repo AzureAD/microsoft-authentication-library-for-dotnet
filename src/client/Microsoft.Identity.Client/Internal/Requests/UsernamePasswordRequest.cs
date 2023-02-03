@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.WsTrust;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -45,7 +46,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await ResolveAuthorityAsync().ConfigureAwait(false);
             await UpdateUsernameAsync().ConfigureAwait(false);
 
-            MsalTokenResponse msalTokenResponse = await GetTokenResponseAsync(cancellationToken).ConfigureAwait(false);
+            MsalTokenResponse msalTokenResponse = null;
+                
+            try
+            {
+                msalTokenResponse = await GetTokenResponseAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (JsonException ex)
+            {
+                if (_requestParameters.AuthorityInfo.AuthorityType == AuthorityType.B2C)
+                {
+                    throw new MsalServiceException(MsalError.JsonParseError, MsalErrorMessage.JsonParseExceptionB2C, ex);
+                }
+            }
             
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
