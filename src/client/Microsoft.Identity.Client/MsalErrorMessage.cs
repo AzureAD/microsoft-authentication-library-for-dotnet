@@ -197,7 +197,8 @@ namespace Microsoft.Identity.Client
         public const string FederatedServiceReturnedErrorTemplate = "Federated service at {0} returned error: {1} ";
         public const string ParsingWsTrustResponseFailedErrorTemplate = "Federated service at {0} parse error: Body {1} ";
         public const string UnknownUserType = "Unknown User Type";
-        public const string ParsingWsTrustResponseFailedDueToConfiguration = "There was an error parsing WS-Trust response from the endpoint. " +
+        public const string ParsingWsTrustResponseFailedDueToConfiguration = "There was an error parsing the WS-Trust response from the endpoint. " +
+
             "This may occur if there are issues with your ADFS configuration. See https://aka.ms/msal-net-iwa-troubleshooting for more details." +
 
             "Additionally, try enabling logging at Warning level to see the request and response details. See https://aka.ms/msal-net-logging.";
