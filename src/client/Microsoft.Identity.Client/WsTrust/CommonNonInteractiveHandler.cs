@@ -137,8 +137,8 @@ namespace Microsoft.Identity.Client.WsTrust
             {
                 throw new MsalClientException(
                     MsalError.ParsingWsTrustResponseFailed,
-                    "There was an error parsing WS-Trust response from the endpoint. This may occur if there is an issue with your ADFS configuration." 
-                    + " See https://aka.ms/msal-net-iwa-troubleshooting for more details. Error Message: " + ex.Message,
+                    MsalErrorMessage.ParsingWsTrustResponseFailedDueToConfiguration +
+                    " Error Message: " + ex.Message,
                     ex);
             }
         }
