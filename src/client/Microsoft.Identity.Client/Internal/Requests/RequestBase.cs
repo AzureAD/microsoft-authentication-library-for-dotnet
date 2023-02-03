@@ -262,7 +262,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(
                 string.Format(
                     CultureInfo.InvariantCulture,
-                    "Returned user identifiers (uid:{0} utid:{1}) does not match the sent user identifier (uid:{2} utid:{3})",
+                    "User identifier returned by AAD (uid:{0} utid:{1}) does not match the user identifier sent. (uid:{2} utid:{3})",
                     fromServer.UniqueObjectIdentifier,
                     fromServer.UniqueTenantIdentifier,
                     AuthenticationRequestParameters.Account.HomeAccountId.ObjectId,
