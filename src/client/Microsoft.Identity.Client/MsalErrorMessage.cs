@@ -453,7 +453,8 @@ namespace Microsoft.Identity.Client
 
         public const string CombinedUserAppCacheNotSupported = "Using a combined flat storage, like a file, to store both app and user tokens is not supported. Use a partitioned token cache (for ex. distributed cache like Redis) or separate files for app and user token caches. See https://aka.ms/msal-net-token-cache-serialization .";
 
-        public const string JsonParseExceptionB2C = "There might be configuration issues with B2C app or graph scopes are used for B2C application. B2C does not support graph scopes. See inner exception for more details.";
+        public const string JsonParseExceptionB2C = "An error occurred - see inner exception for more details. Possible cause: you are trying to get a token for Microsoft Graph using a B2C identity, which is not supported.";
+
 
     }
 }
