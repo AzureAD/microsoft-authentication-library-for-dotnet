@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (!string.IsNullOrEmpty(managedIdentityErrorResponse.Message))
             { 
-                return $"[Managed Identity] Error Message: {managedIdentityErrorResponse.Message} Correlation Id: {managedIdentityErrorResponse.CorrelationId} Use this correlation id for further investigation.";
+                return $"[Managed Identity] Error Message: {managedIdentityErrorResponse.Message} Managed Identity Correlation ID: {managedIdentityErrorResponse.CorrelationId} Use this Correlation ID for further investigation.";
             }
 
             return $"[Managed Identity] Error Code: {managedIdentityErrorResponse.Error} Error Message: {managedIdentityErrorResponse.ErrorDescription}";
