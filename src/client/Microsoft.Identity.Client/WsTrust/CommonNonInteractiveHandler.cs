@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 _requestContext.Logger.Info($"Token of type '{wsTrustResponse.TokenType}' acquired from WS-Trust endpoint. ");
                 return wsTrustResponse;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not MsalClientException)
             {
                 throw new MsalClientException(
                     MsalError.ParsingWsTrustResponseFailed,

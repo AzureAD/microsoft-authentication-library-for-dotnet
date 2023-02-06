@@ -110,6 +110,9 @@ namespace Microsoft.Identity.Client.WsTrust
                     errorMessage = resp.Body;
                 }
 
+                requestContext.Logger.ErrorPii(LogMessages.WsTrustRequestFailed + $"Status code: {resp.StatusCode} \nError message: {errorMessage}", 
+                    LogMessages.WsTrustRequestFailed + $"Status code: {resp.StatusCode}");
+
                 string message = string.Format(
                         CultureInfo.CurrentCulture,
                         MsalErrorMessage.FederatedServiceReturnedErrorTemplate,
@@ -124,7 +127,15 @@ namespace Microsoft.Identity.Client.WsTrust
 
             try
             {
-                return WsTrustResponse.CreateFromResponse(resp.Body, wsTrustEndpoint.Version);
+                var wsTrustResponse = WsTrustResponse.CreateFromResponse(resp.Body, wsTrustEndpoint.Version);
+
+                if  (wsTrustResponse == null)
+                {
+                    requestContext.Logger.ErrorPii("Token not found in the ws trust response. See response for more details: \n" + resp.Body, "Token not found in ws trust response.");
+                    throw new MsalClientException(MsalError.ParsingWsTrustResponseFailed, MsalErrorMessage.ParsingWsTrustResponseFailedDueToConfiguration);
+                }
+
+                return wsTrustResponse;
             }
             catch (System.Xml.XmlException ex)
             {
