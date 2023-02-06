@@ -56,12 +56,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 msalTokenResponse = await GetTokenResponseAsync(cancellationToken).ConfigureAwait(false);
             }
-            catch (JsonException ex)
+            catch (Exception ex) when (ex is not MsalException && ex is not TaskCanceledException)
             {
                 if (_requestParameters.AuthorityInfo.AuthorityType == AuthorityType.B2C)
                 {
                     throw new MsalServiceException(MsalError.JsonParseError, MsalErrorMessage.JsonParseExceptionB2C, ex);
                 }
+
+                throw;
             }
             
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
