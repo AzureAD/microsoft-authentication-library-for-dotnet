@@ -39,6 +39,12 @@ namespace Microsoft.Identity.Client
 
             switch (AuthorityType)
             {
+                case AuthorityType.Generic:
+                    CanonicalAuthority = new Uri(authorityUri.ToString());
+                    DiscoveryDocumentAddress = 
+                        string.Concat(CanonicalAuthority, GenericAuthority.OpenIdConfigurationEndpointSuffix);
+                    break;
+                    
                 case AuthorityType.B2C:
                     string[] pathSegments = AuthorityInfo.GetPathSegments(authorityUri.AbsolutePath);
 
@@ -104,7 +110,8 @@ namespace Microsoft.Identity.Client
                 other.CanonicalAuthority,
                 other.AuthorityType,
                 other.UserRealmUriPrefix,
-                other.ValidateAuthority)
+                other.ValidateAuthority,
+                other.DiscoveryDocumentAddress)
         {
         }
 
@@ -112,12 +119,14 @@ namespace Microsoft.Identity.Client
             Uri canonicalAuthority,
             AuthorityType authorityType,
             string userRealmUriPrefix,
-            bool validateAuthority)
+            bool validateAuthority,
+            string discoveryDocumentAddress)
         {
             CanonicalAuthority = canonicalAuthority;
             AuthorityType = authorityType;
             UserRealmUriPrefix = userRealmUriPrefix;
             ValidateAuthority = validateAuthority;
+            DiscoveryDocumentAddress = discoveryDocumentAddress;
         }
 
         public string Host => CanonicalAuthority.Host;
@@ -137,17 +146,17 @@ namespace Microsoft.Identity.Client
         internal bool IsTenantOverrideSupported => AuthorityType == AuthorityType.Aad;
         internal bool IsMultiTenantSupported => AuthorityType != AuthorityType.Adfs;
         internal bool IsClientInfoSupported => AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Dsts || AuthorityType == AuthorityType.B2C;
+        internal string DiscoveryDocumentAddress { get; set; }
 
         #region Builders
         internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)
         {
             string canonicalUri = CanonicalizeAuthorityUri(authorityUri);
-            ValidateAuthorityUri(canonicalUri);
-
             var authorityType = GetAuthorityType(canonicalUri);
+            ValidateAuthorityUri(canonicalUri, authorityType);
 
             // If the authority type is B2C, validateAuthority must be false.
-            if (authorityType == AuthorityType.B2C)
+            if (authorityType == AuthorityType.B2C || authorityType == AuthorityType.Generic)
             {
                 validateAuthority = false;
             }
@@ -224,6 +233,17 @@ namespace Microsoft.Identity.Client
         internal static AuthorityInfo FromB2CAuthority(string authorityUri)
         {
             return new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
+        }
+
+        internal static AuthorityInfo FromGenericAuthority(string authorityUri, string discoveryDocumentAddress = null)
+        {
+            var authorityInfo = new AuthorityInfo(AuthorityType.Generic, authorityUri, false);
+            if (!string.IsNullOrEmpty(discoveryDocumentAddress))
+            {
+                authorityInfo.DiscoveryDocumentAddress = discoveryDocumentAddress;
+            }
+
+            return authorityInfo;
         }
 
         #endregion
@@ -305,6 +325,9 @@ namespace Microsoft.Identity.Client
                 case AuthorityType.Dsts:
                     return new DstsAuthority(this);
 
+                case AuthorityType.Generic:
+                    return new GenericAuthority(this);
+                
                 default:
                     throw new MsalClientException(
                         MsalError.InvalidAuthorityType,
@@ -314,7 +337,7 @@ namespace Microsoft.Identity.Client
 
         #endregion
 
-        private static void ValidateAuthorityUri(string authority)
+        private static void ValidateAuthorityUri(string authority, AuthorityType? authorityType = null)
         {
             if (string.IsNullOrWhiteSpace(authority))
             {
@@ -338,10 +361,13 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, nameof(authority));
             }
 
-            string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split('/');
-            if (pathSegments == null || pathSegments.Length == 0)
+            if (authorityType is not AuthorityType.Generic)
             {
-                throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath);
+                string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split('/');
+                if (pathSegments == null || pathSegments.Length == 0)
+                {
+                    throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath);
+                }
             }
         }
 
@@ -439,6 +465,7 @@ namespace Microsoft.Identity.Client
                         return new AadAuthorityValidator(requestContext);
                     case AuthorityType.B2C:
                     case AuthorityType.Dsts:
+                    case AuthorityType.Generic:                        
                         return new NullAuthorityValidator();
                     default:
                         throw new InvalidOperationException("Invalid AuthorityType");
@@ -522,6 +549,9 @@ namespace Microsoft.Identity.Client
                                 CreateAuthorityWithTenant(CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment).AuthorityInfo, account?.HomeAccountId?.TenantId) :
                                 CreateAuthorityWithTenant(configAuthorityInfo, account?.HomeAccountId?.TenantId);
 
+                    case AuthorityType.Generic:
+                        return new GenericAuthority(nonNullAuthInfo);
+                    
                     default:
                         throw new MsalClientException(
                             MsalError.InvalidAuthorityType,
