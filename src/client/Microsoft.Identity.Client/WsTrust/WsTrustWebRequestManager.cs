@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
                 if  (wsTrustResponse == null)
                 {
-                    requestContext.Logger.ErrorPii("Token not found in the ws trust response. See response for more details: \n" + resp.Body, "Token not found in ws trust response.");
+                    requestContext.Logger.ErrorPii("Token not found in the ws trust response. See response for more details: \n" + resp.Body, "Token not found in WS-Trust response.");
                     throw new MsalClientException(MsalError.ParsingWsTrustResponseFailed, MsalErrorMessage.ParsingWsTrustResponseFailedDueToConfiguration);
                 }
 

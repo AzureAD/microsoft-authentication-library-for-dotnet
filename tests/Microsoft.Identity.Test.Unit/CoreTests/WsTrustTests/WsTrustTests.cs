@@ -14,6 +14,8 @@ using Microsoft.Identity.Test.Common;
 using System.Globalization;
 using Microsoft.Identity.Client.Internal;
 using System.Linq;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using NSubstitute.Extensions;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 {
@@ -132,7 +134,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
         }
 
         [TestMethod]
-        [Description("WsTrustRequest encounters a non parseable response from the wsTrust endpoint")]
+        [Description("WsTrustRequest encounters a response with no token from the wsTrust endpoint")]
         public async Task WsTrustRequestTokenNotFoundInResponseTestAsync()
         {
             const string uri = "https://some/address/usernamemixed";
@@ -154,18 +156,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                     });
 
                 var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid());
-                try
-                {
-                    var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
 
-                    WsTrustResponse wstResponse =
-                        await harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, message, requestContext).ConfigureAwait(false);
-                    Assert.Fail("We expect an exception to be thrown here");
-                }
-                catch (MsalException ex)
-                {
-                    Assert.AreEqual(MsalError.ParsingWsTrustResponseFailed, ex.ErrorCode);
-                }
+                var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
+
+                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
+                    harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, message, requestContext)).ConfigureAwait(false);
+                
+                Assert.AreEqual(MsalError.ParsingWsTrustResponseFailed, ex.ErrorCode);
             }
         }
     }
