@@ -83,6 +83,11 @@ namespace Microsoft.Identity.Client.Instance
 
         internal static Authority CreateAuthorityWithEnvironment(AuthorityInfo authorityInfo, string environment)
         {
+            if (authorityInfo.AuthorityType == AuthorityType.Generic)
+            {
+                return CreateAuthority(authorityInfo);
+            }
+
             var uriBuilder = new UriBuilder(authorityInfo.CanonicalAuthority)
             {
                 Host = environment

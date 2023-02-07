@@ -13,7 +13,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
-using Microsoft.Identity.Client.Internal;
+using Microsoft.IdentityModel.Protocols;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -616,6 +616,25 @@ namespace Microsoft.Identity.Client
             return this as T;
         }
 
+        public T WithGenericAuthority(string authorityUri, string discoveryDocumentAddress = null)
+        {
+            var authorityInfo = AuthorityInfo.FromGenericAuthority(authorityUri, discoveryDocumentAddress);
+            Config.Authority = GenericAuthority.CreateAuthority(authorityInfo);
+            return (T)this;
+        }
+        
+        public T WithDocumentRetriever(IDocumentRetriever documentRetriever)
+        {
+            GenericAuthority authority = Config.Authority as GenericAuthority;
+            if (authority is null)
+            {
+                throw new NotSupportedException();
+            }
+
+            authority.DocumentRetriever = documentRetriever;
+            return (T)this;
+        }
+        
         #endregion
 
         private static string GetValueIfNotEmpty(string original, string value)
