@@ -461,7 +461,9 @@ namespace Microsoft.Identity.Client
             ///
             /// - if the authority is not defined at the application level and the request level is not AAD, use the request authority
             /// - if the authority is defined at app level, and the request level authority of is of different type, throw an exception
-            ///
+            /// 
+            /// - if the intended authority is consumers, please define it at the app level and not at the request level. 
+            /// known issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2929
             /// </summary>
             public static async Task<Authority> CreateAuthorityForRequestAsync(RequestContext requestContext,
                 AuthorityInfo requestAuthorityInfo,
