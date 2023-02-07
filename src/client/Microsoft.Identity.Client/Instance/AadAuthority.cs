@@ -61,11 +61,6 @@ namespace Microsoft.Identity.Client.Instance
                 (IsCommonOrOrganizationsTenant(tenantId) || IsConsumers(tenantId));
         }
 
-        internal bool IsCommonOrOrganizationsTenant()
-        {
-            return IsCommonOrOrganizationsTenant(TenantId);
-        }
-
         internal static bool IsCommonOrOrganizationsTenant(string tenantId)
         {
             return !string.IsNullOrEmpty(tenantId) && 

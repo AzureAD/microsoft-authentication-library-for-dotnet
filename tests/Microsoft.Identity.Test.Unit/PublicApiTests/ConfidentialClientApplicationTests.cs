@@ -917,6 +917,35 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public void GetAuthorizationRequestUrl_WithConsumer_ReturnsConsumers()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                const string Tenant = "consumers";
+                ConfidentialClientApplicationOptions applicationOptions;
+                applicationOptions = new ConfidentialClientApplicationOptions();
+                applicationOptions.ClientId = "fakeId";
+                applicationOptions.AadAuthorityAudience = AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount;
+                applicationOptions.Instance = "https://login.microsoftonline.com/common";
+                applicationOptions.RedirectUri = "https://example.com";
+                applicationOptions.ClientSecret = "rwerewrwe";
+
+                var confidentialClientApplicationBuilder = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(applicationOptions);
+                var confidentialClientApplication = confidentialClientApplicationBuilder.Build();
+
+                Uri authorizationRequestUrl = confidentialClientApplication
+                    .GetAuthorizationRequestUrl(new List<string> { "" })
+                    .WithAuthority(AzureCloudInstance.AzurePublic, Tenant)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false)
+                    .GetAwaiter()
+                    .GetResult();
+
+                Assert.IsTrue(authorizationRequestUrl.Segments[1].StartsWith(Tenant));
+            }
+        }
+
+        [TestMethod]
         public async Task DoNotUseNullCcsRoutingHint_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -1687,7 +1716,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 Assert.IsTrue(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
-
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
                 log = string.Empty;
                 result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
