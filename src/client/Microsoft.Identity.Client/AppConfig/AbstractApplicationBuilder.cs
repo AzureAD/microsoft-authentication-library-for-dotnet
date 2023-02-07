@@ -616,6 +616,13 @@ namespace Microsoft.Identity.Client
             return this as T;
         }
 
+        /// <summary>
+        /// Adds a known authority corresponding to a generic OpenIdConnect Provider (OP).
+        /// See https://openid.net/specs/openid-connect-core-1_0.html#Terminology
+        /// </summary>
+        /// <param name="authorityUri">OpenIdConnect authority</param>
+        /// <param name="discoveryDocumentAddress">Address of the discovery endpoint. See https://openid.net/specs/openid-connect-discovery-1_0.html</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithGenericAuthority(string authorityUri, string discoveryDocumentAddress = null)
         {
             var authorityInfo = AuthorityInfo.FromGenericAuthority(authorityUri, discoveryDocumentAddress);
@@ -623,6 +630,12 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
         
+        /// <summary>
+        /// Configure a <see cref="IDocumentRetriever"/> to retrieve the discovery metadata from the OpenIdConnect Provider.
+        /// </summary>
+        /// <param name="documentRetriever"><see cref="IDocumentRetriever"/> instance responsible for retrieving the discovery metadata</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        /// <exception cref="NotSupportedException"> is thrown when not used with <see cref="WithGenericAuthority"/>.</exception>
         public T WithDocumentRetriever(IDocumentRetriever documentRetriever)
         {
             GenericAuthority authority = Config.Authority as GenericAuthority;
