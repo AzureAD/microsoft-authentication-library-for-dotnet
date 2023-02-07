@@ -302,7 +302,7 @@ namespace Microsoft.Identity.Client
         // Not all brokers return the accounts only for the given env
         private async Task<IEnumerable<IAccount>> FilterBrokerAccountsByEnvAsync(IEnumerable<IAccount> brokerAccounts, CancellationToken cancellationToken)
         {
-            ServiceBundle.ApplicationLogger.Verbose(()=>$"Filtering broker accounts by env. Before filtering: " + brokerAccounts.Count());
+            ServiceBundle.ApplicationLogger.Verbose(()=>$"Filtering broker accounts by environment. Before filtering: " + brokerAccounts.Count());
 
             ISet<string> allEnvs = new HashSet<string>(
                 brokerAccounts.Select(aci => aci.Environment),
@@ -335,7 +335,7 @@ namespace Microsoft.Identity.Client
                 else
                 {
                     ServiceBundle.ApplicationLogger.InfoPii(
-                        () => "Account merge eliminated broker account with id: " + account.HomeAccountId,
+                        () => "Account merge eliminated broker account with ID: " + account.HomeAccountId,
                         () => "Account merge eliminated an account");
                 }
             }

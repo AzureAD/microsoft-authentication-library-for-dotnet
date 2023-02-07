@@ -414,7 +414,7 @@ namespace Microsoft.Identity.Client.Broker
                 {
                     if (readAccountResult.IsSuccess)
                     {
-                        _logger?.Verbose(() => "[WamBroker] WAM Account exist and can be removed.");
+                        _logger?.Verbose(() => "[WamBroker] WAM Account exists and can be removed.");
 
                     }
                     else

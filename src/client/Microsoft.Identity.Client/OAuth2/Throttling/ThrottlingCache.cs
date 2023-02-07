@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                 logger.Info(() => $"[Throttling] Entry found. Creation: {entry.CreationTime} Expiration: {entry.ExpirationTime} ");
                 if (entry.IsExpired)
                 {
-                    logger.Info(() => $"[Throttling] Removing entry because it is expired");
+                    logger.Info(() => "[Throttling] Removing entry because it is expired");
                     _cache.TryRemove(key, out _);
                     return false;
                 }
