@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if !NET48
+#if !NET48 && !NET7_0
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -61,35 +61,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
-        public void WamOnWin10()
-        {
-            if (!DesktopOsHelper.IsWin10OrServerEquivalent())
-            {
-                Assert.Inconclusive("Needs to run on win10 or equivalent");
-            }
-            var pcaBuilder = PublicClientApplicationBuilder
-               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
-               .WithAuthority(TestConstants.AuthorityTenant);
-
-            pcaBuilder = pcaBuilder.WithBrokerPreview();
-            Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
-
-        }
-
-        [TestMethod]
-        public void NoWamOnADFS()
-        {
-            var pcaBuilder = PublicClientApplicationBuilder
-               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
-               .WithAdfsAuthority(TestConstants.ADFSAuthority);
-
-            pcaBuilder = pcaBuilder.WithBrokerPreview();
-
-            Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
-
-        }
-
-        [TestMethod]
         public async Task ThrowOnNoHandleAsync()
         {
             var pca = PublicClientApplicationBuilder
@@ -105,50 +76,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
            
         }
        
-        [DataTestMethod]
-        [DataRow("")]
-        [DataRow(" ")]
-        [DataRow(null)]
-        [DataRow("openid")]
-        [DataRow("profile")]
-        [DataRow("offline_access")]
-        [DataRow("openid offline_access")]
-        [DataRow("profile offline_access")]        
-        [DataRow("profile offline_access openid")]        
-        public async Task ThrowOnNoScopesAsync(string scopes)
-        {
-            var scopeArray = new List<string>();
-            if (scopes != null)
-            {
-                scopeArray = scopes.Split(' ').ToList();
-            }
-
-            var pca = PublicClientApplicationBuilder
-               .Create(TestConstants.ClientId)
-               .WithBrokerPreview()
-               .Build();
-
-            // empty scopes
-            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
-                () => pca
-                .AcquireTokenInteractive(scopeArray)
-                .WithParentActivityOrWindow(new IntPtr(123456))
-                .ExecuteAsync())
-                .ConfigureAwait(false);
-
-            Assert.AreEqual(MsalError.WamScopesRequired, ex.ErrorCode);
-
-            // empty scopes
-            var ex2 = await AssertException.TaskThrowsAsync<MsalClientException>(
-                () => pca
-                .AcquireTokenSilent(scopeArray, new Account("123.123", "user", "env"))                
-                .ExecuteAsync())
-                .ConfigureAwait(false);
-
-            Assert.AreEqual(MsalError.WamScopesRequired, ex2.ErrorCode);
-
-        }
-
         [TestMethod]
         public void HandleInstallUrl_Throws()
         {

@@ -27,6 +27,14 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             builder.AppendLine("ForceRefresh: " + ForceRefresh);
             builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
             builder.AppendLine("LongRunningOboCacheKey set: " + !string.IsNullOrWhiteSpace(LongRunningOboCacheKey));
+            if (UserAssertion != null && !string.IsNullOrWhiteSpace(LongRunningOboCacheKey))
+            {
+                builder.AppendLine("InitiateLongRunningProcessInWebApi called: True");
+            }
+            else if (UserAssertion == null && !string.IsNullOrWhiteSpace(LongRunningOboCacheKey))
+            {
+                builder.AppendLine("AcquireTokenInLongRunningProcess called: True");
+            }
             logger.Info(builder.ToString());
         }
     }

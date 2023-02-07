@@ -1132,5 +1132,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string UserAssignedManagedIdentityNotSupported = "user_assigned_managed_identity_not_supported";
 
+        /// <summary>
+        /// Using combined flat storage, like a file, to store both app and user tokens is not supported. Use a partitioned token cache (for ex. distributed cache like Redis) or separate files for app and user token caches. See https://aka.ms/msal-net-token-cache-serialization .
+        /// </summary>
+        public const string CombinedUserAppCacheNotSupported = "combined_user_app_cache_not_supported";
     }
 }

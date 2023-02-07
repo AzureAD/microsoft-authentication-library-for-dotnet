@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using static Microsoft.Identity.Client.Broker.RuntimeBroker;
 
@@ -27,6 +28,9 @@ namespace Microsoft.Identity.Client.Broker
         //MSA-PT Auth Params
         private const string NativeInteropMsalRequestType = "msal_request_type";
         private const string ConsumersPassthroughRequest = "consumer_passthrough";
+        private const string MsalIdentityProvider = "msal_identity_provider";
+        private const string IdentityProviderTypeMSA = "msa";
+        private const string IdentityProviderTypeAAD = "aad";
         private const string WamHeaderTitle = "msal_accounts_control_title";
 
         //MSAL Runtime Error Response 
@@ -99,7 +103,7 @@ namespace Microsoft.Identity.Client.Broker
                         $" Possible causes: \n" +
                         $"- Invalid redirect uri - ensure you have configured the following url in the AAD portal App Registration: " +
                         $"{GetExpectedRedirectUri(authenticationRequestParameters.AppConfig.ClientId)} \n" +
-                        $"- No Internet connection \n" +
+                        $"- No Internet connection : \n" +
                         $"Please see https://aka.ms/msal-net-wam for details about Windows Broker integration";
                     logger.Error($"[WamBroker] WAM_provider_error_{errorCode} {errorMessage}");
                     serviceException = new MsalServiceException($"WAM_provider_error_{errorCode}", errorMessage);
@@ -161,18 +165,29 @@ namespace Microsoft.Identity.Client.Broker
             ILoggerAdapter logger)
         {
             logger.Verbose("[WamBroker] Validating Common Auth Parameters.");
-            ValidateAuthParams(authenticationRequestParameters, logger);
 
             var authParams = new NativeInterop.AuthParameters
                 (authenticationRequestParameters.AppConfig.ClientId,
                 authenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
 
-            //scopes
-            authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
+            //When no scopes are passed, add the default scopes
+            if (!ScopeHelper.HasNonMsalScopes(authenticationRequestParameters.Scope))
+            {
+                authParams.RequestedScopes = ScopeHelper.GetMsalRuntimeScopes();
+                logger.Verbose("[WamBroker] No scopes were passed in the request. Adding default scopes.");
+            }
+            else
+            {
+                authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
+                logger.Verbose("[WamBroker] Scopes were passed in the request.");
+            }
 
             //WAM redirect URi does not need to be configured by the user
             //this is used internally by the interop to fallback to the browser 
             authParams.RedirectUri = authenticationRequestParameters.RedirectUri.ToString();
+
+            //MSAL Identity Provider
+            SetMSALIdentityProvider(authenticationRequestParameters, authParams, logger);
 
             //MSA-PT
             if (brokerOptions.MsaPassthrough)
@@ -226,6 +241,40 @@ namespace Microsoft.Identity.Client.Broker
                 authParams.PopParams.UriHost = authenticationRequestParameters.PopAuthenticationConfiguration.HttpHost;
                 authParams.PopParams.UriPath = authenticationRequestParameters.PopAuthenticationConfiguration.HttpPath;
                 authParams.PopParams.Nonce = authenticationRequestParameters.PopAuthenticationConfiguration.Nonce;
+            }
+        }
+
+        private static void SetMSALIdentityProvider(
+            AuthenticationRequestParameters authenticationRequestParameters, 
+            NativeInterop.AuthParameters authParams,
+            ILoggerAdapter logger)
+        {
+            //Set MSAL Identity Provider only for AcquireTokenInteractive API
+            if (authenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenInteractive)
+                return;
+
+            //Set MsalIdentityProvider Based on Tenant ID
+            if (authenticationRequestParameters?.Account?.HomeAccountId != null)
+            {
+                if (!string.IsNullOrEmpty(authenticationRequestParameters.Account.HomeAccountId.TenantId))
+                {
+                    var tenantObjectId = authenticationRequestParameters.Account.HomeAccountId.TenantId;
+
+                    if (tenantObjectId.Equals(Constants.MsaTenantId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        logger.Verbose($"[WamBroker] MSALRuntime Identity provider set to " +
+                            $"{ IdentityProviderTypeMSA }.");
+
+                        authParams.Properties[MsalIdentityProvider] = IdentityProviderTypeMSA;
+                    }
+                    else
+                    {
+                        logger.Verbose($"[WamBroker] MSALRuntime Identity provider set to " +
+                            $"{ IdentityProviderTypeAAD }.");
+
+                        authParams.Properties[MsalIdentityProvider] = IdentityProviderTypeAAD;
+                    }
+                }
             }
         }
 
@@ -403,29 +452,6 @@ namespace Microsoft.Identity.Client.Broker
 
             logger.InfoPii(messageWithPii, builder.ToString());
             logger.Error($"[WamBroker] WAM Account properties are missing. Cannot convert to MSAL Accounts.");
-        }
-
-        /// <summary>
-        /// Validate common auth params
-        /// </summary>
-        /// <param name="authenticationRequestParameters"></param>
-        /// <param name="logger"></param>
-        /// <exception cref="MsalClientException"></exception>
-        private static void ValidateAuthParams(
-            AuthenticationRequestParameters authenticationRequestParameters,
-            ILoggerAdapter logger)
-        {
-            //MSAL Runtime throws an ApiContractViolation Exception with Tag: 0x2039c1cb (InvalidArg)
-            //When no scopes are passed, this will check if user is passing scopes
-            if (!ScopeHelper.HasNonMsalScopes(authenticationRequestParameters.Scope))                
-            {
-                logger.Error($"[WamBroker] {MsalError.WamScopesRequired} " +
-                    $"{MsalErrorMessage.ScopesRequired}");
-
-                throw new MsalClientException(
-                    MsalError.WamScopesRequired,
-                    MsalErrorMessage.ScopesRequired);
-            }
         }
     }
 }
