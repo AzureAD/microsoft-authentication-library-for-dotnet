@@ -443,7 +443,7 @@ namespace Microsoft.Identity.Test.Unit
         public void CheckJWTHeaderWithCertTrueTest()
         {
             var cert = new X509Certificate2(
-                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
+                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
 
             var header = new JWTHeaderWithCertificate(cert, Base64UrlHelpers.Encode(cert.GetCertHash()), true);
 
@@ -456,7 +456,7 @@ namespace Microsoft.Identity.Test.Unit
         public void CheckJWTHeaderWithCertFalseTest()
         {
             var cert = new X509Certificate2(
-                 ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
+                 ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
 
             var header = new JWTHeaderWithCertificate(cert, Base64UrlHelpers.Encode(cert.GetCertHash()), false);
 
