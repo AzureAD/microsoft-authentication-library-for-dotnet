@@ -4,9 +4,9 @@
     <TargetFrameworkNetDesktop461>net48</TargetFrameworkNetDesktop461>
     <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
     <TargetFrameworkNet6Win>net6.0-windows10.0.17763.0</TargetFrameworkNet6Win>
-    <TargetFrameworkNet7Win>net7.0-windows10.0.18362.0</TargetFrameworkNet7Win>
+    <!-- <TargetFrameworkNet7Win>net7.0-windows10.0.18362.0</TargetFrameworkNet7Win> -->
     
-    <TargetFrameworks>$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetCore);$(TargetFrameworkNet6Win);$(TargetFrameworkNet7Win)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetCore);$(TargetFrameworkNet6Win)<!--;$(TargetFrameworkNet7Win)--></TargetFrameworks>
     <IsPackable>false</IsPackable>
     
     <LangVersion>latest</LangVersion>
@@ -16,9 +16,9 @@
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet7)' or '$(TargetFramework)' == '$(TargetFrameworkNet7Win)'">
+  <!-- <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet7)' or '$(TargetFramework)' == '$(TargetFrameworkNet7Win)'">
     <DefineConstants>$(DefineConstants);SUPPORTS_SYSTEM_TEXT_JSON;</DefineConstants>
-  </PropertyGroup>
+  </PropertyGroup> -->
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
