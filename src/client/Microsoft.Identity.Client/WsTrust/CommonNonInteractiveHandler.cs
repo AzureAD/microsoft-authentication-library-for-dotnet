@@ -133,12 +133,12 @@ namespace Microsoft.Identity.Client.WsTrust
                 _requestContext.Logger.Info($"Token of type '{wsTrustResponse.TokenType}' acquired from WS-Trust endpoint. ");
                 return wsTrustResponse;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not MsalClientException)
             {
                 throw new MsalClientException(
                     MsalError.ParsingWsTrustResponseFailed,
-                    "There was an error parsing WS-Trust response from the endpoint. This may occur if there is an issue with your ADFS configuration." 
-                    + " See https://aka.ms/msal-net-iwa-troubleshooting for more details. Error Message: " + ex.Message,
+                    MsalErrorMessage.ParsingWsTrustResponseFailedDueToConfiguration +
+                    " Error Message: " + ex.Message,
                     ex);
             }
         }
