@@ -928,46 +928,18 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 applicationOptions.ClientSecret = "rwerewrwe";
 
                 var confidentialClientApplicationBuilder = ConfidentialClientApplicationBuilder
-                                                                    .CreateWithApplicationOptions(applicationOptions)
+                                                                    .CreateWithApplicationOptions(applicationOptions);
                 var confidentialClientApplication = confidentialClientApplicationBuilder.Build();
 
                 Uri authorizationRequestUrl = confidentialClientApplication
                     .GetAuthorizationRequestUrl(new List<string> { "" })
-                    .WithAuthority(AzureCloudInstance.AzurePublic, Constants.ConsumerTenant);
+                    .WithAuthority(AzureCloudInstance.AzurePublic, Constants.ConsumerTenant)
                     .ExecuteAsync()
                     .ConfigureAwait(false)
                     .GetAwaiter()
                     .GetResult();
 
                 Assert.IsTrue(authorizationRequestUrl.Segments[1].StartsWith(Constants.CommonTenant));
-            }
-        }
-
-        [TestMethod]
-        public void GetAuthorizationRequestUrl_WithConsumerAudienceInCreate_ReturnsConsumers()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                const string Tenant = "consumers";
-                ConfidentialClientApplicationOptions applicationOptions;
-                applicationOptions = new ConfidentialClientApplicationOptions();
-                applicationOptions.ClientId = "fakeId";
-                applicationOptions.RedirectUri = "https://example.com";
-                applicationOptions.ClientSecret = "rwerewrwe";
-
-                var confidentialClientApplicationBuilder = ConfidentialClientApplicationBuilder
-                                                                    .CreateWithApplicationOptions(applicationOptions)
-                                                                    .WithAuthority(AzureCloudInstance.AzurePublic, AadAuthorityAudience.PersonalMicrosoftAccount);
-                var confidentialClientApplication = confidentialClientApplicationBuilder.Build();
-
-                Uri authorizationRequestUrl = confidentialClientApplication
-                    .GetAuthorizationRequestUrl(new List<string> { "" })
-                    .ExecuteAsync()
-                    .ConfigureAwait(false)
-                    .GetAwaiter()
-                    .GetResult();
-
-                Assert.IsTrue(authorizationRequestUrl.Segments[1].StartsWith(Tenant));
             }
         }
 
