@@ -303,7 +303,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Assert
                 Assert.AreEqual(MsalError.JsonParseError, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.JsonParseExceptionB2C, ex.Message);
+                Assert.AreEqual(MsalErrorMessage.JsonParseErrorMessage, ex.Message);
             }
         }
 

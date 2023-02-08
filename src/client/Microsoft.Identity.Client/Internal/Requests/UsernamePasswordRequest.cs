@@ -13,6 +13,11 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.WsTrust;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using System.Text.Json;
+#else
+using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -51,14 +56,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 msalTokenResponse = await GetTokenResponseAsync(cancellationToken).ConfigureAwait(false);
             }
-            catch (Exception ex) when (ex is not MsalException && ex is not TaskCanceledException)
+            catch (JsonException ex)
             {
-                if (_requestParameters.AuthorityInfo.AuthorityType == AuthorityType.B2C)
-                {
-                    throw new MsalServiceException(MsalError.JsonParseError, MsalErrorMessage.JsonParseExceptionB2C, ex);
-                }
-
-                throw;
+                throw new MsalServiceException(MsalError.JsonParseError, MsalErrorMessage.JsonParseErrorMessage, ex);
             }
             
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
