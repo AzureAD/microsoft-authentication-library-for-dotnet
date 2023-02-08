@@ -17,6 +17,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         private const string LabAccessConfidentialClientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
         private const string LabAccessPublicClientId = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
         private const string LabAccessThumbPrint = "4E87313FD450985A10BC0F14A292859F2DCD6CD3";
+        private const string LabAccessCertName = "AzureADIdentityDivisionTestAgentCert";
         private static LabAccessAuthenticationType s_defaultAuthType = LabAccessAuthenticationType.ClientCertificate;
         private static string s_secret;
         private const string DataFileName = "data.txt";
@@ -72,9 +73,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             {
                 case LabAccessAuthenticationType.ClientCertificate:
                     var clientIdForCertAuth = String.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
-                    var certThumbprintForLab = String.IsNullOrEmpty(clientId) ? LabAccessThumbPrint : certThumbprint;
+                    // var certThumbprintForLab = String.IsNullOrEmpty(clientId) ? LabAccessThumbPrint : certThumbprint;
 
-                    cert = CertificateHelper.FindCertificateByThumbprint(certThumbprintForLab);
+                    cert = CertificateHelper.FindCertificateByName(LabAccessCertName);
                     if (cert == null)
                     {
                         throw new InvalidOperationException(
