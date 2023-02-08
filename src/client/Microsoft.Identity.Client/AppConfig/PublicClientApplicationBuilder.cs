@@ -336,7 +336,8 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// This method is deprecated
         /// </remarks>
-        [Obsolete("This method is obsolete. Applications should rely on the library automatically falling back to a browser if the broker is not available. ", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("This method is obsolete. Applications can rely on the library automatically falling back to a browser if the broker is not available. ", false)]
         public bool IsBrokerAvailable()
         {
             return PlatformProxyFactory.CreatePlatformProxy(null)
