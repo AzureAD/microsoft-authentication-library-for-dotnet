@@ -921,7 +921,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                const string Tenant = "consumers";
                 ConfidentialClientApplicationOptions applicationOptions;
                 applicationOptions = new ConfidentialClientApplicationOptions();
                 applicationOptions.ClientId = "fakeId";
@@ -930,17 +929,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var confidentialClientApplicationBuilder = ConfidentialClientApplicationBuilder
                                                                     .CreateWithApplicationOptions(applicationOptions)
-                                                                    .WithAuthority(AzureCloudInstance.AzurePublic, Tenant);
                 var confidentialClientApplication = confidentialClientApplicationBuilder.Build();
 
                 Uri authorizationRequestUrl = confidentialClientApplication
                     .GetAuthorizationRequestUrl(new List<string> { "" })
+                    .WithAuthority(AzureCloudInstance.AzurePublic, Constants.ConsumerTenant);
                     .ExecuteAsync()
                     .ConfigureAwait(false)
                     .GetAwaiter()
                     .GetResult();
 
-                Assert.IsTrue(authorizationRequestUrl.Segments[1].StartsWith(Tenant));
+                Assert.IsTrue(authorizationRequestUrl.Segments[1].StartsWith(Constants.CommonTenant));
             }
         }
 
