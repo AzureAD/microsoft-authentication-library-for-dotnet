@@ -333,20 +333,8 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        /// <summary>
-        /// This method has been deprecated
-
-        /// Returns <c>true</c> if a broker can be used.
-        /// This method is only needed to be used in mobile scenarios which support Mobile Application Management. In other supported scenarios, use <c>WithBroker</c> by itself, which will fall back to use a browser if broker is unavailable.
-        /// </summary>
         /// <remarks>
-        /// <list type="bullet">
-        /// <item><description>On Windows, the broker (WAM) can be used on Windows 10 and is always installed. See https://aka.ms/msal-net-wam </description></item>
-        /// <item><description>On Mac, Linux, and older versions of Windows a broker is not available.</description></item>
-        /// <item><description>In .NET 6 apps, target <c>net6.0-windows10.0.17763.0</c> for all Windows versions and target <c>net6.0</c> for Linux and Mac.</description></item>
-        /// <item><description>In .NET classic or .NET Core 3.1 apps, install Microsoft.Identity.Client.Desktop first and call <c>WithDesktopFeatures()</c>.</description></item>
-        /// <item><description>In mobile apps, the device must be Intune joined and Authenticator or Company Portal must be installed. See https://aka.ms/msal-brokers </description></item>
-        /// </list>
+        /// This method is deprecated
         /// </remarks>
         [Obsolete("This method is obsolete. Applications should rely on the library automatically falling back to a browser if the broker is not available. ", false)]
         public bool IsBrokerAvailable()

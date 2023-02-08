@@ -140,6 +140,7 @@ namespace Microsoft.Identity.Client.Internal
                 Certificate = certificate;
             }
 
+            [JsonIgnore]
             protected X509Certificate2 Certificate { get; }
 
             [JsonProperty(JsonWebTokenConstants.ReservedHeaderParameters.Type)]
