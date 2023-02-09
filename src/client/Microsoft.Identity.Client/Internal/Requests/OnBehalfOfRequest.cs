@@ -128,9 +128,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private bool IsCachedAssertionTheSame(string userAssertion)
         {
+            //User assertion is null when ILongRunningWebApi.AcquireTokenInLongRunningProcess is called.
+            //In this scenario the cached token should be used.
             if (string.IsNullOrWhiteSpace(userAssertion))
             { 
-                return false;
+                return true;
             }
 
             return AuthenticationRequestParameters.UserAssertion.Assertion.Equals(userAssertion);
