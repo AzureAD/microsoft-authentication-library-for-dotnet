@@ -27,8 +27,8 @@ namespace Microsoft.Identity.Client
         public static bool SetAuthenticationContinuationEventArgs(NSUrl url)
         {
             LastRequestLogger?.InfoPii(
-                "AuthenticationContinuationHelper - SetAuthenticationContinuationEventArgs url: " + url,
-                "AuthenticationContinuationHelper - SetAuthenticationContinuationEventArgs ");            
+                () => "AuthenticationContinuationHelper - SetAuthenticationContinuationEventArgs url: " + url,
+                () => "AuthenticationContinuationHelper - SetAuthenticationContinuationEventArgs ");            
 
             return WebviewBase.ContinueAuthentication(url.AbsoluteString, LastRequestLogger);
         }
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client
         /// <returns>True if the response is from broker, False otherwise.</returns>
         public static bool IsBrokerResponse(string sourceApplication)
         {
-            LastRequestLogger?.Info("IsBrokerResponse called with sourceApplication " + sourceApplication);
+            LastRequestLogger?.Info(() => "IsBrokerResponse called with sourceApplication " + sourceApplication);
 
             if (string.Equals("com.microsoft.azureauthenticator", sourceApplication, StringComparison.OrdinalIgnoreCase))
             {
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client
         /// <param name="url"></param>
         public static void SetBrokerContinuationEventArgs(NSUrl url)
         {
-            LastRequestLogger?.Info("SetBrokercontinuationEventArgs Called with Url " + url);
+            LastRequestLogger?.Info(() => "SetBrokercontinuationEventArgs Called with Url " + url);
 
             string urlString = url.AbsoluteString;
             

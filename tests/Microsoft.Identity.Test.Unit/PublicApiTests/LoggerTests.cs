@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             incrementCounter.Invoke();
 
             _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Verbose(TestConstants.TestMessage);
+            logger.Verbose(()=>TestConstants.TestMessage);
             Assert.AreEqual(validationCounter, counter);
         }
 
@@ -168,8 +168,61 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             incrementCounter.Invoke();
 
             _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.VerbosePii(TestConstants.TestMessage, string.Empty);
+            logger.VerbosePii(() => TestConstants.TestMessage,()=> string.Empty);
             Assert.AreEqual(validationCounter, counter);
+        }
+
+        [TestMethod]
+        public void LogApiWithProducerDoesNotConcatenateStrings()
+        {
+            ILoggerAdapter logger = CreateLogger(LogLevel.Warning, true, false);
+
+            logger.Verbose(() =>
+            {
+                Assert.Fail("Not expecting this function pointer to execute");
+                return "";
+            });
+
+            logger.VerbosePii(() =>
+            {
+                Assert.Fail("Not expecting this function pointer to execute");
+                return "";
+            },
+            () =>
+            {
+                Assert.Fail("Not expecting this function pointer to execute");
+                return "";
+            }
+            );
+            logger.Info(() =>
+            {
+                Assert.Fail("Not expecting this function pointer to execute");
+                return "";
+            });
+
+            logger.InfoPii(() =>
+            {
+                Assert.Fail("Not expecting this function pointer to execute");
+                return "";
+            },
+            () =>
+            {
+                Assert.Fail("Not expecting this function pointer to execute");
+                return "";
+            }
+            );
+
+            ILoggerAdapter logger2 = CreateLogger(LogLevel.Verbose, true, false);
+
+            bool executed = false;
+            logger2.Verbose(() =>
+            {
+                executed = true;
+                return "";
+            });
+
+            Assert.IsTrue(executed, "Expected the string generator to execute because the log is set to verbose");
+
         }
 
         [TestMethod]

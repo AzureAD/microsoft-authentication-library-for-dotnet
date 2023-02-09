@@ -147,19 +147,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ILoggerAdapter logger)
         {
-            var sb = new StringBuilder(250);
-            sb.AppendLine();
-            sb.Append("[LogMetricsFromAuthResult] Cache Refresh Reason: ");
-            sb.AppendLine(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason.ToString());
-            sb.Append("[LogMetricsFromAuthResult] DurationInCacheInMs: ");
-            sb.AppendLine(authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs.ToString());
-            sb.Append("[LogMetricsFromAuthResult] DurationTotalInMs: ");
-            sb.AppendLine(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs.ToString());
-            sb.Append("[LogMetricsFromAuthResult] DurationInHttpInMs: ");
-            sb.AppendLine(authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs.ToString());
-            logger.Always(sb.ToString());
-            logger.AlwaysPii($"[LogMetricsFromAuthResult] TokenEndpoint: {authenticationResult.AuthenticationResultMetadata.TokenEndpoint ?? ""}",
-                                "TokenEndpoint: ****");
+            if (logger.IsLoggingEnabled(LogLevel.Always))
+            {
+                var sb = new StringBuilder(250);
+                sb.AppendLine();
+                sb.Append("[LogMetricsFromAuthResult] Cache Refresh Reason: ");
+                sb.AppendLine(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason.ToString());
+                sb.Append("[LogMetricsFromAuthResult] DurationInCacheInMs: ");
+                sb.AppendLine(authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs.ToString());
+                sb.Append("[LogMetricsFromAuthResult] DurationTotalInMs: ");
+                sb.AppendLine(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs.ToString());
+                sb.Append("[LogMetricsFromAuthResult] DurationInHttpInMs: ");
+                sb.AppendLine(authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs.ToString());
+                logger.Always(sb.ToString());
+                logger.AlwaysPii($"[LogMetricsFromAuthResult] TokenEndpoint: {authenticationResult.AuthenticationResultMetadata.TokenEndpoint ?? ""}",
+                                    "TokenEndpoint: ****");
+            }
         }
 
         private static void UpdateTelemetry(Stopwatch sw, ApiEvent apiEvent, AuthenticationResult authenticationResult)
@@ -262,7 +265,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(
                 string.Format(
                     CultureInfo.InvariantCulture,
-                    "Returned user identifiers (uid:{0} utid:{1}) does not match the sent user identifier (uid:{2} utid:{3})",
+                    "User identifier returned by AAD (uid:{0} utid:{1}) does not match the user identifier sent. (uid:{2} utid:{3})",
                     fromServer.UniqueObjectIdentifier,
                     fromServer.UniqueTenantIdentifier,
                     AuthenticationRequestParameters.Account.HomeAccountId.ObjectId,
@@ -408,9 +411,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 
                 AuthenticationRequestParameters.RequestContext.Logger.Info("\n\t=== Token Acquisition finished successfully:");
                 AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
-                        $" AT expiration time: {result.ExpiresOn}, scopes: {scopes}. " +
+                       () => $" AT expiration time: {result.ExpiresOn}, scopes: {scopes}. " +
                             $"source: {result.AuthenticationResultMetadata.TokenSource}",
-                        $" AT expiration time: {result.ExpiresOn}, scopes: {scopes}. " +
+                       () => $" AT expiration time: {result.ExpiresOn}, scopes: {scopes}. " +
                             $"source: {result.AuthenticationResultMetadata.TokenSource}");
 
                 if (result.AuthenticationResultMetadata.TokenSource != TokenSource.Cache)
@@ -418,8 +421,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     Uri canonicalAuthority = AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority;
 
                     AuthenticationRequestParameters.RequestContext.Logger.InfoPii(
-                        $"Fetched access token from host {canonicalAuthority.Host}. Endpoint: {canonicalAuthority}. ",
-                        $"Fetched access token from host {canonicalAuthority.Host}. ");
+                        () => $"Fetched access token from host {canonicalAuthority.Host}. Endpoint: {canonicalAuthority}. ",
+                        () => $"Fetched access token from host {canonicalAuthority.Host}. ");
                 }
             }
         }

@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics.Tracing;
 using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Core
 {
@@ -67,29 +68,55 @@ namespace Microsoft.Identity.Client.Core
             logger.Log(LogLevel.Info, string.Empty, message);
         }
 
+        /// <summary>
+        /// This method is used to avoid string concatenation when the log level is not enabled.
+        /// </summary>
+        public static void Info(this ILoggerAdapter logger, Func<string> messageProducer)
+        {
+            if (logger.IsLoggingEnabled(LogLevel.Info))
+            {
+                logger.Log(LogLevel.Info, string.Empty, messageProducer());
+            }
+        }
+
         public static void InfoPii(this ILoggerAdapter logger, string messageWithPii, string messageScrubbed)
         {
             logger.Log(LogLevel.Info, messageWithPii, messageScrubbed);
+        }
+
+        /// <summary>
+        /// This method is used to avoid string concatenation when the log level is not enabled.
+        /// </summary>
+        public static void InfoPii(this ILoggerAdapter logger, Func<string> messageWithPiiProducer, Func<string> messageScrubbedProducer)
+        {
+            if (logger.IsLoggingEnabled(LogLevel.Info))
+            {
+                logger.Log(LogLevel.Info, messageWithPiiProducer(), messageScrubbedProducer());
+            }
         }
 
         public static void InfoPii(this ILoggerAdapter logger, Exception exWithPii)
         {
             logger.Log(LogLevel.Info, exWithPii?.ToString(), LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
-
-        public static void InfoPiiWithPrefix(this ILoggerAdapter logger, Exception exWithPii, string prefix)
+       
+        public static void Verbose(this ILoggerAdapter logger, Func<string> messageProducer)
         {
-            logger.Log(LogLevel.Info, prefix + exWithPii.ToString(), prefix + LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+            if (logger.IsLoggingEnabled(LogLevel.Verbose))
+            {
+                logger.Log(LogLevel.Verbose, string.Empty, messageProducer());
+            }
         }
 
-        public static void Verbose(this ILoggerAdapter logger, string message)
+        public static void VerbosePii(
+            this ILoggerAdapter logger, 
+            Func<string> messageWithPiiProducer, 
+            Func<string> messageScrubbedProducer)
         {
-            logger.Log(LogLevel.Verbose, string.Empty, message);
-        }
-
-        public static void VerbosePii(this ILoggerAdapter logger, string messageWithPii, string messageScrubbed)
-        {
-            logger.Log(LogLevel.Verbose, messageWithPii, messageScrubbed);
+            if (logger.IsLoggingEnabled(LogLevel.Verbose))
+            {
+                logger.Log(LogLevel.Verbose, messageWithPiiProducer(), messageScrubbedProducer());
+            }
         }
     }
 }

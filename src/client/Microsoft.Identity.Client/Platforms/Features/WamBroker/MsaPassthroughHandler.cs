@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         public async Task<string> TryFetchTransferTokenInteractiveAsync(AuthenticationRequestParameters authenticationRequestParameters, WebAccountProvider accountProvider)
         {
             // First party apps can have MSA-PT enabled and can configured to allow MSA users
-            _logger.Verbose("WAM MSA-PT - fetching transfer token for interactive flow");
+            _logger.Verbose(() => "WAM MSA-PT - fetching transfer token for interactive flow");
 
             var webTokenRequestMsa = await _msaPlugin.CreateWebTokenRequestAsync(
                 accountProvider,
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         public async Task<string> TryFetchTransferTokenSilentDefaultAccountAsync(AuthenticationRequestParameters authenticationRequestParameters, WebAccountProvider accountProvider)
         {
             // First party apps can have MSA-PT enabled and can configured to allow MSA users
-            _logger.Verbose("WAM MSA-PT - fetching transfer token for silent flow with default OS account");
+            _logger.Verbose(() => "WAM MSA-PT - fetching transfer token for silent flow with default OS account");
 
             var webTokenRequestMsa = await _msaPlugin.CreateWebTokenRequestAsync(
                 accountProvider,
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
         public async Task<string> TryFetchTransferTokenSilentAsync(AuthenticationRequestParameters authenticationRequestParameters, WebAccount account)
         {
-            _logger.Verbose("WAM MSA-PT - fetching transfer token for silent flow");
+            _logger.Verbose(() => "WAM MSA-PT - fetching transfer token for silent flow");
 
             var webTokenRequestMsa = await _msaPlugin.CreateWebTokenRequestAsync(
                 account.WebAccountProvider,
@@ -161,7 +161,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             // Important: cannot use this WebAccount with the AAD provider
             WebAccount msaPtWebAccount = transferResponse.ResponseData[0].WebAccount;
-            _logger.InfoPii($"Obtained a transfer token for {msaPtWebAccount.UserName} ?  {code != null}", $"Obtained a transfer token? {code != null}");
+            _logger.InfoPii(
+                () => $"Obtained a transfer token for {msaPtWebAccount.UserName} ?  {code != null}",
+                () => $"Obtained a transfer token? {code != null}");
 
             return code;
         }

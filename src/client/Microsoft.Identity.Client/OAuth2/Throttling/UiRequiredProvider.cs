@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             {
                 var logger = requestParams.RequestContext.Logger;
 
-                logger.Info($"[Throttling] MsalUiRequiredException encountered - " +
+                logger.Info(() => $"[Throttling] MsalUiRequiredException encountered - " +
                     $"throttling for {s_uiRequiredExpiration.TotalSeconds} seconds. ");
 
                 var thumbprint = GetRequestStrictThumbprint(bodyParams,

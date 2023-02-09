@@ -220,12 +220,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
         {
             if (CheckForEndUrl(new Uri(e.Uri)))
             {
-                _logger.Verbose("[WebView2Control] Redirect URI reached. Stopping the interactive view");
+                _logger.Verbose(() => "[WebView2Control] Redirect URI reached. Stopping the interactive view");
                 e.Cancel = true;
             }
             else
             {
-                _logger.Verbose("[WebView2Control] Navigating to " + e.Uri);
+                _logger.Verbose(() => "[WebView2Control] Navigating to " + e.Uri);
             }
         }
 
@@ -264,7 +264,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
 
         private void WebView2Control_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
         {
-            _logger.Verbose("[WebView2Control] CoreWebView2InitializationCompleted ");
+            _logger.Verbose(() => "[WebView2Control] CoreWebView2InitializationCompleted ");
             _webView2.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
             _webView2.CoreWebView2.Settings.AreDevToolsEnabled = false;
             _webView2.CoreWebView2.Settings.AreHostObjectsAllowed = false;

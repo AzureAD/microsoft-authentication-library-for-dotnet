@@ -285,7 +285,7 @@ namespace Microsoft.Identity.Client
         /// </param>
         /// <returns>The builder to chain the .With methods</returns>
         /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
-        /// was already set on the application builder
+        /// was already set on the application builder        
         public T WithLogging(
             LogCallback loggingCallback,
             LogLevel? logLevel = null,
