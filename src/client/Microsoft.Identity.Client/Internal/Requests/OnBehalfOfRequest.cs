@@ -130,12 +130,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             //User assertion is null when ILongRunningWebApi.AcquireTokenInLongRunningProcess is called.
             //In this scenario the cached token should be used.
-            if (string.IsNullOrWhiteSpace(userAssertion))
+            if (string.IsNullOrWhiteSpace(AuthenticationRequestParameters?.UserAssertion?.Assertion))
             { 
                 return true;
             }
 
-            return AuthenticationRequestParameters.UserAssertion.Assertion.Equals(userAssertion);
+            return userAssertion.Equals(AuthenticationRequestParameters?.UserAssertion?.Assertion);
         }
 
         private async Task<AuthenticationResult> RefreshRtOrFetchNewAccessTokenAsync(CancellationToken cancellationToken)
