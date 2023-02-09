@@ -133,8 +133,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             if (partition == null || !partition.TryRemove(item.CacheKey, out _))
             {
                 _logger.InfoPii(
-                    $"[Internal cache] Cannot delete access token because it was not found in the cache. Key {item.CacheKey}.",
-                    "[Internal cache] Cannot delete access token because it was not found in the cache.");
+                    () => $"[Internal cache] Cannot delete access token because it was not found in the cache. Key {item.CacheKey}.",
+                    () => "[Internal cache] Cannot delete access token because it was not found in the cache.");
             }
         }
 

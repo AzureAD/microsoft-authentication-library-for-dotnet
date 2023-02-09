@@ -127,8 +127,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             if (!envMetadata.Aliases.ContainsOrdinalIgnoreCase(accountEnv))
             {
                 _logger.InfoPii(
-                $"[WAM AAD Provider] Account {webAccount.UserName} environment {accountEnv} does not match input authority environment {envMetadata.PreferredNetwork} or an alias",
-                $"[WAM AAD Provider] Account environment {accountEnv} does not match input authority environment {envMetadata.PreferredNetwork}");
+                () => $"[WAM AAD Provider] Account {webAccount.UserName} environment {accountEnv} does not match input authority environment {envMetadata.PreferredNetwork} or an alias",
+                () => $"[WAM AAD Provider] Account environment {accountEnv} does not match input authority environment {envMetadata.PreferredNetwork}");
 
                 return null;
             }
@@ -136,8 +136,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             if (MatchCacheAccount(webAccount, accountsFromCache, out AccountId homeAccountId))
             {
                 _logger.VerbosePii(
-                    $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync account {webAccount.UserName} matched a cached account",
-                    $"[WAM AAD Provider] Account matched a cache account");
+                    () => $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync account {webAccount.UserName} matched a cached account",
+                    () => $"[WAM AAD Provider] Account matched a cache account");
 
                 return new Account(
                     homeAccountId.Identifier,
@@ -160,8 +160,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 var tuple = await cacheManager.SaveTokenResponseAsync(response).ConfigureAwait(false);
 
                 _logger.InfoPii(
-                      $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync resolved account {webAccount.UserName} via web call? {tuple?.Item3 != null}",
-                      $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync resolved account via web call? {tuple?.Item3 != null}");
+                      () => $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync resolved account {webAccount.UserName} via web call? {tuple?.Item3 != null}",
+                      () => $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync resolved account via web call? {tuple?.Item3 != null}");
 
                 return tuple?.Item3; // Account
             }
@@ -341,8 +341,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             _logger.Info("Result from WAM has client info? " + hasClientInfo);
 
             bool hasScopes = webTokenResponse.Properties.TryGetValue("wamcompat_scopes", out string scopes);
-            _logger.InfoPii("Result from WAM scopes: " + scopes,
-                "Result from WAM has scopes? " + hasScopes);
+            _logger.InfoPii(() => "Result from WAM scopes: " + scopes,
+                () => "Result from WAM has scopes? " + hasScopes);
 
             foreach (var kvp in webTokenResponse.Properties)
             {

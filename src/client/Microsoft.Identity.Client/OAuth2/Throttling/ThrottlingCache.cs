@@ -49,15 +49,15 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             ex = null;
             if (_cache.TryGetValue(key, out var entry))
             {
-                logger.Info($"[Throttling] Entry found. Creation: {entry.CreationTime} Expiration: {entry.ExpirationTime} ");
+                logger.Info(() => $"[Throttling] Entry found. Creation: {entry.CreationTime} Expiration: {entry.ExpirationTime} ");
                 if (entry.IsExpired)
                 {
-                    logger.Info($"[Throttling] Removing entry because it is expired");
+                    logger.Info(() => "[Throttling] Removing entry because it is expired");
                     _cache.TryRemove(key, out _);
                     return false;
                 }
 
-                logger.InfoPii($"[Throttling] Returning valid entry for key {key}", "[Throttling] Returning valid entry.");
+                logger.InfoPii(() => $"[Throttling] Returning valid entry for key {key}", () => "[Throttling] Returning valid entry.");
                 ex = entry.Exception;
                 return true;
             }
@@ -82,20 +82,20 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             if (_lastCleanupTime + s_cleanupCacheInterval < DateTimeOffset.UtcNow &&
                 !_cleanupInProgress)
             {
-                logger.Verbose($"[Throttling] Acquiring lock to cleanup throttling state");
+                logger.Verbose(() => "[Throttling] Acquiring lock to cleanup throttling state");
 
                 lock (_padlock)
                 {
                     if (!_cleanupInProgress)
                     {
-                        logger.Verbose($"[Throttling] Cache size before cleaning up {_cache.Count}");
+                        logger.Verbose(() => $"[Throttling] Cache size before cleaning up {_cache.Count}");
 
                         _cleanupInProgress = true;
                         CleanupCacheNoLocks();
                         _lastCleanupTime = DateTimeOffset.UtcNow;
                         _cleanupInProgress = false;
 
-                        logger.Verbose($"[Throttling] Cache size after cleaning up {_cache.Count}");
+                        logger.Verbose(() => $"[Throttling] Cache size after cleaning up {_cache.Count}");
                     }
                 }
             }

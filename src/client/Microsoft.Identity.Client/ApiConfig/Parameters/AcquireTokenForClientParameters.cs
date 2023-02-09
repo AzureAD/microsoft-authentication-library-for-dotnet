@@ -15,11 +15,14 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// <inheritdoc />
         public void LogParameters(ILoggerAdapter logger)
         {
-            var builder = new StringBuilder();
-            builder.AppendLine("=== AcquireTokenForClientParameters ===");
-            builder.AppendLine("SendX5C: " + SendX5C);
-            builder.AppendLine("ForceRefresh: " + ForceRefresh);
-            logger.Info(builder.ToString());
+            if (logger.IsLoggingEnabled(LogLevel.Info))
+            {
+                var builder = new StringBuilder();
+                builder.AppendLine("=== AcquireTokenForClientParameters ===");
+                builder.AppendLine("SendX5C: " + SendX5C);
+                builder.AppendLine("ForceRefresh: " + ForceRefresh);
+                logger.Info(builder.ToString());
+            }
         }
     }
 }

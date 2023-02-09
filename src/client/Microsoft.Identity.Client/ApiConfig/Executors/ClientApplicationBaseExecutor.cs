@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext,
                 _clientApplicationBase.UserTokenCacheInternal).ConfigureAwait(false);
 
-            requestContext.Logger.Info(LogMessages.UsingXScopesForRefreshTokenRequest(commonParameters.Scopes.Count()));
+            requestContext.Logger.Info(() => LogMessages.UsingXScopesForRefreshTokenRequest(commonParameters.Scopes.Count()));
 
             requestParameters.SendX5C = refreshTokenParameters.SendX5C ?? false;
 

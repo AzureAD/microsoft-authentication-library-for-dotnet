@@ -212,12 +212,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             s_brokerResponseReady = new SemaphoreSlim(0);
 
             string paramsAsQuery = brokerPayload.ToQueryParameter();
-            _logger.Info(iOSBrokerConstants.InvokeTheIosBroker);
+            _logger.Info(() => iOSBrokerConstants.InvokeTheIosBroker);
             NSUrl url = new NSUrl(iOSBrokerConstants.InvokeV2Broker + paramsAsQuery);
 
             _logger.VerbosePii(
-                iOSBrokerConstants.BrokerPayloadPii + paramsAsQuery,
-                iOSBrokerConstants.BrokerPayloadNoPii + brokerPayload.Count);
+                () => iOSBrokerConstants.BrokerPayloadPii + paramsAsQuery,
+                () => iOSBrokerConstants.BrokerPayloadNoPii + brokerPayload.Count);
 
             DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(url));
 
@@ -244,12 +244,13 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                     {
                         responseDictionary[iOSBrokerConstants.Error] = iOSBrokerConstants.BrokerError;
 
-                        _logger.VerbosePii(iOSBrokerConstants.BrokerResponseValuesPii + keyValue.ToString(),
-                        iOSBrokerConstants.BrokerResponseContainsError);
+                        _logger.VerbosePii(
+                            () => iOSBrokerConstants.BrokerResponseValuesPii + keyValue.ToString(),
+                            () => iOSBrokerConstants.BrokerResponseContainsError);
                     }
                 }
 
-                _logger.Verbose(iOSBrokerConstants.ProcessBrokerResponse + responseDictionary.Count);
+                _logger.Verbose(() => iOSBrokerConstants.ProcessBrokerResponse + responseDictionary.Count);
 
                 return ResultFromBrokerResponse(responseDictionary);
             }
@@ -349,7 +350,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 SecStatusCode secStatusCode = iOSTokenCacheAccessor.SaveBrokerApplicationToken(clientId, applicationToken);
 
-                _logger.Info(string.Format(
+                _logger.Info(() => string.Format(
                     CultureInfo.CurrentCulture,
                     iOSBrokerConstants.AttemptToSaveBrokerApplicationToken + "SecStatusCode: {0}",
                     secStatusCode));
@@ -370,7 +371,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {
                 SecStatusCode secStatusCode = iOSTokenCacheAccessor.TryGetBrokerApplicationToken(brokerPayload[BrokerParameter.ClientId], out string appToken);
 
-                _logger.Info(string.Format(
+                _logger.Info(() => string.Format(
                     CultureInfo.CurrentCulture,
                     iOSBrokerConstants.SecStatusCodeFromTryGetBrokerApplicationToken + "SecStatusCode: {0}",
                     secStatusCode));

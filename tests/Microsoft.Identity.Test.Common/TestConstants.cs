@@ -146,6 +146,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string MobileDefaultRedirectUri = "msal4a1aa1d5-c567-49d0-ad0b-cd957a47f842://auth"; // in msidentity-samples-testing tenant -> PublicClientSample
         public const string ClientSecret = "client_secret";
         public const string DefaultPassword = "password";
+        public const string TestCertPassword = "passw0rd!";
         public const string AuthorityTestTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
         public const string DiscoveryEndPoint = "discovery/instance";
         public const string DefaultAuthorizationCode = "DefaultAuthorizationCode";

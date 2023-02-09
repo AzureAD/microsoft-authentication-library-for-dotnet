@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             _authority = authority;
             _isMsaPassthrough = isMsaPassthrough;
             _optionalHeaderText = optionalHeaderText;
-            _logger.Verbose("Is MSA passthrough? " + _isMsaPassthrough);
+            _logger.Verbose(()=>"Is MSA passthrough? " + _isMsaPassthrough);
         }
 
         public async Task<WebAccountProvider> DetermineAccountInteractivelyAsync()
@@ -256,7 +256,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 if (string.Equals("common", _authority.TenantId))
                 {
-                    _logger.Verbose("Displaying selector for common");
+                    _logger.Verbose(()=>"Displaying selector for common");
                     await AddSelectorsAsync(
                         args,
                         addOrgAccounts: true,
@@ -264,7 +264,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 }
                 else if (string.Equals("organizations", _authority.TenantId))
                 {
-                    _logger.Verbose("Displaying selector for organizations");
+                    _logger.Verbose(()=>"Displaying selector for organizations");
                     await AddSelectorsAsync(
                         args,
                         addOrgAccounts: true,
@@ -272,7 +272,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 }
                 else if (string.Equals("consumers", _authority.TenantId))
                 {
-                    _logger.Verbose("Displaying selector for consumers");
+                    _logger.Verbose(() => "Displaying selector for consumers");
                     await AddSelectorsAsync(
                         args,
                         addOrgAccounts: false,
@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 }
                 else
                 {
-                    _logger.Verbose("Displaying selector for tenanted authority");
+                    _logger.Verbose(()=>"Displaying selector for tenanted authority");
                     await AddSelectorsAsync(
                         args,
                         addOrgAccounts: true,

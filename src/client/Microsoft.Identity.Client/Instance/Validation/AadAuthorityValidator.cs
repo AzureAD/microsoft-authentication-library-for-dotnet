@@ -29,12 +29,12 @@ namespace Microsoft.Identity.Client.Instance.Validation
             var authorityUri = authorityInfo.CanonicalAuthority;
             bool isKnownEnv = KnownMetadataProvider.IsKnownEnvironment(authorityUri.Host);
 
-            _requestContext.Logger.Info($"Authority validation enabled? {authorityInfo.ValidateAuthority}. ");
-            _requestContext.Logger.Info($"Authority validation - is known env? {isKnownEnv}. ");
+            _requestContext.Logger.Info(() => $"Authority validation enabled? {authorityInfo.ValidateAuthority}. ");
+            _requestContext.Logger.Info(() => $"Authority validation - is known env? {isKnownEnv}. ");
 
             if (authorityInfo.ValidateAuthority && !isKnownEnv)
             {
-                _requestContext.Logger.Info($"Authority validation is being performed. ");
+                _requestContext.Logger.Info("Authority validation is being performed. ");
 
                 // MSAL will throw if the instance discovery URI does not respond with a valid json
                 await _requestContext.ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(

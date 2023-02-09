@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            AuthenticationRequestParameters.RequestContext.Logger.Verbose(LogMessages.BeginningAcquireByRefreshToken);
+            AuthenticationRequestParameters.RequestContext.Logger.Verbose(()=>LogMessages.BeginningAcquireByRefreshToken);
             await ResolveAuthorityAsync().ConfigureAwait(false);
             var msalTokenResponse = await SendTokenRequestAsync(
                                         GetBodyParameters(_refreshTokenParameters.RefreshToken),
