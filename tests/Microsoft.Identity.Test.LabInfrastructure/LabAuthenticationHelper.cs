@@ -48,7 +48,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 scopes, 
                 LabAccessAuthenticationType.ClientSecret, 
                 labAccessClientId, 
-                String.Empty, 
                 labAccessSecret).ConfigureAwait(false);
         }
 
@@ -59,11 +58,10 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 scopes,
                 s_defaultAuthType,
                 String.Empty,
-                String.Empty,
                 String.Empty).ConfigureAwait(false);
         }
 
-        public static async Task<AccessToken> GetLabAccessTokenAsync(string authority, string[] scopes, LabAccessAuthenticationType authType, string clientId, string certThumbprint, string clientSecret)
+        public static async Task<AccessToken> GetLabAccessTokenAsync(string authority, string[] scopes, LabAccessAuthenticationType authType, string clientId, string clientSecret)
         {
             AuthenticationResult authResult;
             IConfidentialClientApplication confidentialApp;
@@ -73,7 +71,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             {
                 case LabAccessAuthenticationType.ClientCertificate:
                     var clientIdForCertAuth = String.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
-                    // var certThumbprintForLab = String.IsNullOrEmpty(clientId) ? LabAccessThumbPrint : certThumbprint;
 
                     cert = CertificateHelper.FindCertificateByName(LabAccessCertName);
                     if (cert == null)
