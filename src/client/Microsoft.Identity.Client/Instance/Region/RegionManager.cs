@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Region
             var logger = requestContext.Logger;
             if (string.IsNullOrEmpty(azureRegionConfig))
             {
-                logger.Verbose($"[Region discovery] WithAzureRegion not configured. ");
+                logger.Verbose(() => $"[Region discovery] WithAzureRegion not configured. ");
                 return null;
             }
 
@@ -85,20 +85,20 @@ namespace Microsoft.Identity.Client.Region
             {
                 if (discoveredRegion.RegionSource != RegionAutodetectionSource.FailedAutoDiscovery)
                 {
-                    logger.Verbose($"[Region discovery] Discovered Region {discoveredRegion.Region}");
+                    logger.Verbose(() => $"[Region discovery] Discovered Region {discoveredRegion.Region}");
                     requestContext.ApiEvent.RegionUsed = discoveredRegion.Region;
                     requestContext.ApiEvent.AutoDetectedRegion = discoveredRegion.Region;
                     return discoveredRegion.Region;
                 }
                 else
                 {
-                    logger.Verbose($"[Region discovery] {s_regionDiscoveryDetails}");
+                    logger.Verbose(() => $"[Region discovery] {s_regionDiscoveryDetails}");
                     requestContext.ApiEvent.RegionDiscoveryFailureReason = s_regionDiscoveryDetails;
                     return null;
                 }
             }
 
-            logger.Info($"[Region discovery] Returning user provided region: {azureRegionConfig}.");
+            logger.Info(() => $"[Region discovery] Returning user provided region: {azureRegionConfig}.");
             return azureRegionConfig;
         }
 
@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Client.Region
 
                         if (ValidateRegion(region, "REGION_NAME env variable", logger)) // this is just to validate the region string
                         {
-                            logger.Info($"[Region discovery] Region found in environment variable: {region}.");
+                            logger.Info(() => $"[Region discovery] Region found in environment variable: {region}.");
                             result = new RegionInfo(region, RegionAutodetectionSource.EnvVariable, null);
                         }
                         else
@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Client.Region
 
                                 if (ValidateRegion(region, $"IMDS call to {imdsUri.AbsoluteUri}", logger))
                                 {
-                                    logger.Info($"[Region discovery] Call to local IMDS succeeded. Region: {region}. {DateTime.UtcNow}");
+                                    logger.Info(() => $"[Region discovery] Call to local IMDS succeeded. Region: {region}. {DateTime.UtcNow}");
                                     result = new RegionInfo(region, RegionAutodetectionSource.Imds, null);
                                 }
                             }
@@ -263,18 +263,18 @@ namespace Microsoft.Identity.Client.Region
             if (s_failedAutoDiscovery)
             {
                 var autoDiscoveryError = $"[Region discovery] Auto-discovery failed in the past. Not trying again. {s_regionDiscoveryDetails}. {DateTime.UtcNow}";
-                logger.Verbose(autoDiscoveryError);
+                logger.Verbose(() => autoDiscoveryError);
                 return new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery, autoDiscoveryError);
             }
 
             if (s_failedAutoDiscovery == false &&
                 !string.IsNullOrEmpty(s_autoDiscoveredRegion))
             {
-                logger.Info($"[Region discovery] Auto-discovery already ran and found {s_autoDiscoveredRegion}.");
+                logger.Info(() => $"[Region discovery] Auto-discovery already ran and found {s_autoDiscoveredRegion}.");
                 return new RegionInfo(s_autoDiscoveredRegion, RegionAutodetectionSource.Cache, null);
             }
 
-            logger.Verbose($"[Region discovery] Auto-discovery did not run yet.");
+            logger.Verbose(() => $"[Region discovery] Auto-discovery did not run yet.");
             return null;
         }
 
@@ -282,7 +282,7 @@ namespace Microsoft.Identity.Client.Region
         {
             if (string.IsNullOrEmpty(region))
             {
-                logger.Verbose($"[Region discovery] Region from {source} not detected. {DateTime.UtcNow}");
+                logger.Verbose(() => $"[Region discovery] Region from {source} not detected. {DateTime.UtcNow}");
                 return false;
             }
 
@@ -308,14 +308,14 @@ namespace Microsoft.Identity.Client.Region
 
                 if (errorResponse != null && !errorResponse.NewestVersions.IsNullOrEmpty())
                 {
-                    logger.Info($"[Region discovery] Updated the version for IMDS endpoint to: {errorResponse.NewestVersions[0]}.");
+                    logger.Info(() => $"[Region discovery] Updated the version for IMDS endpoint to: {errorResponse.NewestVersions[0]}.");
                     return errorResponse.NewestVersions[0];
                 }
 
-                logger.Info($"[Region discovery] The response is empty or does not contain the newest versions. {DateTime.UtcNow}");
+                logger.Info(() => $"[Region discovery] The response is empty or does not contain the newest versions. {DateTime.UtcNow}");
             }
 
-            logger.Info($"[Region discovery] Failed to get the updated version for IMDS endpoint. HttpStatusCode: {response.StatusCode}. {DateTime.UtcNow}");
+            logger.Info(() => $"[Region discovery] Failed to get the updated version for IMDS endpoint. HttpStatusCode: {response.StatusCode}. {DateTime.UtcNow}");
 
             throw MsalServiceExceptionFactory.FromImdsResponse(
             MsalError.RegionDiscoveryFailed,

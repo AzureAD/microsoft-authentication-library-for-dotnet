@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         public InstanceDiscoveryMetadataEntry GetMetadata(string environment, ILoggerAdapter logger)
         {
             s_cache.TryGetValue(environment, out InstanceDiscoveryMetadataEntry entry);
-            logger.Verbose($"[Instance Discovery] Tried to use network cache provider for {environment}. Success? {entry != null}. ");
+            logger.Verbose(() => $"[Instance Discovery] Tried to use network cache provider for {environment}. Success? {entry != null}. ");
 
             return entry;
         }

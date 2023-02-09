@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         {
             _entries.TryGetValue(environment ?? "", out InstanceDiscoveryMetadataEntry entry);
 
-            logger.Verbose($"[Instance Discovery] Tried to use user metadata provider for {environment}. Success? {entry != null}. ");
+            logger.Verbose(() => $"[Instance Discovery] Tried to use user metadata provider for {environment}. Success? {entry != null}. ");
 
             if (entry == null)
             {

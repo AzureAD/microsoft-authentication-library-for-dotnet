@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client.Http
                     return response;
                 }
 
-                logger.Info(string.Format(CultureInfo.InvariantCulture,
+                logger.Info(() => string.Format(CultureInfo.InvariantCulture,
                     MsalErrorMessage.HttpRequestUnsuccessful,
                     (int)response.StatusCode, response.StatusCode));
 
@@ -251,8 +251,8 @@ namespace Microsoft.Identity.Client.Http
                 requestMessage.Content = body;
 
                 logger.VerbosePii(
-                    $"[HttpManager] Sending request. Method: {method}. URI: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}{endpoint.AbsolutePath}")}. ",
-                    $"[HttpManager] Sending request. Method: {method}. Host: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}")}. ");
+                    () => $"[HttpManager] Sending request. Method: {method}. URI: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}{endpoint.AbsolutePath}")}. ",
+                    () => $"[HttpManager] Sending request. Method: {method}. Host: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}")}. ");
 
                 Stopwatch sw = Stopwatch.StartNew();
 
@@ -262,7 +262,7 @@ namespace Microsoft.Identity.Client.Http
                     await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
                 {
                     LastRequestDurationInMs = sw.ElapsedMilliseconds;
-                    logger.Verbose($"[HttpManager] Received response. Status code: {responseMessage.StatusCode}. ");
+                    logger.Verbose(()=>$"[HttpManager] Received response. Status code: {responseMessage.StatusCode}. ");
 
                     HttpResponse returnValue = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
                     returnValue.UserAgent = requestMessage.Headers.UserAgent.ToString();

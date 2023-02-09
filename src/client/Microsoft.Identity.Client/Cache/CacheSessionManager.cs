@@ -102,9 +102,9 @@ namespace Microsoft.Identity.Client.Cache
             {
                 if (!_cacheRefreshedForRead)
                 {
-                    _requestParams.RequestContext.Logger.Verbose($"[Cache Session Manager] Entering the cache semaphore. { TokenCacheInternal.Semaphore.GetCurrentCountLogMessage()}");
+                    _requestParams.RequestContext.Logger.Verbose(()=>$"[Cache Session Manager] Entering the cache semaphore. { TokenCacheInternal.Semaphore.GetCurrentCountLogMessage()}");
                     await TokenCacheInternal.Semaphore.WaitAsync(_requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
-                    _requestParams.RequestContext.Logger.Verbose("[Cache Session Manager] Entered cache semaphore");
+                    _requestParams.RequestContext.Logger.Verbose(()=>"[Cache Session Manager] Entered cache semaphore");
 
                     Stopwatch stopwatch = new Stopwatch();
                     try
@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client.Cache
                     finally
                     {
                         TokenCacheInternal.Semaphore.Release();
-                        _requestParams.RequestContext.Logger.Verbose("[Cache Session Manager] Released cache semaphore");
+                        _requestParams.RequestContext.Logger.Verbose(()=>"[Cache Session Manager] Released cache semaphore");
                     }
                 }
             }

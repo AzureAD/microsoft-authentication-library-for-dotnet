@@ -67,10 +67,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 };
 
                 var removeResult = SecKeyChain.Remove(recordToRemove);
-                logger.Info("Broker key removal result: " + removeResult);
+                logger.Info(() => "Broker key removal result: " + removeResult);
 
                 result = SecKeyChain.Add(recordToAdd);
-                logger.Info("Broker key re-adding result: " + result);
+                logger.Info(() => "Broker key re-adding result: " + result);
             }
 
             if (result != SecStatusCode.Success)

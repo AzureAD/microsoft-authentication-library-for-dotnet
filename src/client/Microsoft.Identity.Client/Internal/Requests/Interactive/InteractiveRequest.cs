@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<MsalTokenResponse> RunBrokerWithInstallUriAsync(string brokerInstallUri, CancellationToken cancellationToken)
         {
-            _logger.Info("Based on the auth code, the broker flow is required. " +
+            _logger.Info(() => "Based on the auth code, the broker flow is required. " +
                 "Starting broker flow knowing the broker installation app link. ");
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -182,7 +182,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 brokerInstallUri,
                 cancellationToken).ConfigureAwait(false);
 
-            _logger.Info("Broker attempt completed successfully " + (tokenResponse != null));
+            _logger.Info(() => "Broker attempt completed successfully " + (tokenResponse != null));
             Metrics.IncrementTotalAccessTokensFromBroker();
             return tokenResponse;
         }
