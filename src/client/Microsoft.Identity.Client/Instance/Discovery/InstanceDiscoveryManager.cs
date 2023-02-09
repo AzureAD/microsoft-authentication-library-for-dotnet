@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 }
                 if (entry == null)
                 {
-                    requestContext.Logger.Info($"Skipping Instance discovery for {authorityInfo.AuthorityType} authority because is not enabled.");
+                    requestContext.Logger.Info(() => $"Skipping Instance discovery for {authorityInfo.AuthorityType} authority because it is not enabled.");
                     entry = CreateEntryForSingleAuthority(authorityInfo.CanonicalAuthority);
                 }
 
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             }
             else
             {
-                requestContext.Logger.Info($"Skipping Instance discovery for {authorityInfo.AuthorityType} authority because is not supported.");
+                requestContext.Logger.Info(() => $"Skipping Instance discovery for {authorityInfo.AuthorityType} authority because it is not supported.");
                 return await GetMetadataEntryAsync(authorityInfo, requestContext).ConfigureAwait(false);
             }
         }

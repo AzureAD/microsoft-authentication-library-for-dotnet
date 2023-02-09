@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
             AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
             Certificate = configuration.ClientCredentialCertificate;
 
-            this.ServiceBundle.ApplicationLogger.Verbose($"ConfidentialClientApplication {configuration.GetHashCode()} created");
+            this.ServiceBundle.ApplicationLogger.Verbose(()=>$"ConfidentialClientApplication {configuration.GetHashCode()} created");
         }
 
         /// <summary>
