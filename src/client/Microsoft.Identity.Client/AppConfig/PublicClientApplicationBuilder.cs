@@ -344,9 +344,10 @@ namespace Microsoft.Identity.Client
         /// <item><description>In .NET 6 apps, target <c>net6.0-windows10.0.17763.0</c> for all Windows versions and target <c>net6.0</c> for Linux and Mac.</description></item>
         /// <item><description>In .NET classic or .NET Core 3.1 apps, install Microsoft.Identity.Client.Desktop first and call <c>WithDesktopFeatures()</c>.</description></item>
         /// <item><description>In mobile apps, the device must be Intune joined and Authenticator or Company Portal must be installed. See https://aka.ms/msal-brokers </description></item>
+        /// This method is deprecated for mobile platforms.
         /// </list>
         /// </remarks>
-#if _MOBILE_
+#if ANDROID || iOS || WINDOWS_APP || MAC
         [Obsolete("This method is obsolete. Applications should rely on the library automatically falling back to a browser if the broker is not available. ", false)]
 #endif
         public bool IsBrokerAvailable()
