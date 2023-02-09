@@ -152,8 +152,9 @@ namespace Microsoft.Identity.Client
         internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)
         {
             string canonicalUri = CanonicalizeAuthorityUri(authorityUri);
+            ValidateAuthorityUri(canonicalUri);
+
             var authorityType = GetAuthorityType(canonicalUri);
-            ValidateAuthorityUri(canonicalUri, authorityType);
 
             // If the authority type is B2C, validateAuthority must be false.
             if (authorityType == AuthorityType.B2C || authorityType == AuthorityType.Generic)
