@@ -624,7 +624,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app6.Authority);
         }
 
-#pragma warning disable CS0618
 #if NET6_WIN
         [TestMethod]
         public void IsBrokerAvailable_net6()
@@ -697,6 +696,5 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsTrue(builder1.IsBrokerAvailable());
 #endif
         }
-#pragma warning restore CS0618
     }
 }

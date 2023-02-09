@@ -61,6 +61,35 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
+        public void WamOnWin10()
+        {
+            if (!DesktopOsHelper.IsWin10OrServerEquivalent())
+            {
+                Assert.Inconclusive("Needs to run on win10 or equivalent");
+            }
+            var pcaBuilder = PublicClientApplicationBuilder
+               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
+               .WithAuthority(TestConstants.AuthorityTenant);
+
+            pcaBuilder = pcaBuilder.WithBrokerPreview();
+            Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
+
+        }
+
+        [TestMethod]
+        public void NoWamOnADFS()
+        {
+            var pcaBuilder = PublicClientApplicationBuilder
+               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
+               .WithAdfsAuthority(TestConstants.ADFSAuthority);
+
+            pcaBuilder = pcaBuilder.WithBrokerPreview();
+
+            Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
+
+        }
+
+        [TestMethod]
         public async Task ThrowOnNoHandleAsync()
         {
             var pca = PublicClientApplicationBuilder
