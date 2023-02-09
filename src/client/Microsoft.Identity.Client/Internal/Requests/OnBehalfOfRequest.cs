@@ -40,6 +40,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalAccessTokenCacheItem cachedAccessToken = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             AuthenticationResult authResult = null;
+            bool isCachedAccessTokenValid = false;
 
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
             if (!_onBehalfOfParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
@@ -55,7 +56,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     cachedAccessToken = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
                 }
 
-                if (cachedAccessToken != null)
+                isCachedAccessTokenValid = cachedAccessToken != null && IsCachedAssertionTheSame(cachedAccessToken.Secret);
+                if (isCachedAccessTokenValid)
                 {
                     var cachedIdToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessToken).ConfigureAwait(false);
                     var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessToken).ConfigureAwait(false);
@@ -97,7 +99,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // No AT in the cache or AT needs to be refreshed
             try
             {
-                if (cachedAccessToken == null)
+                if (!isCachedAccessTokenValid)
                 {
                     authResult = await RefreshRtOrFetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
                 }
@@ -122,6 +124,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 return await HandleTokenRefreshErrorAsync(e, cachedAccessToken).ConfigureAwait(false);
             }
+        }
+
+        private bool IsCachedAssertionTheSame(string userAssertion)
+        {
+            if (string.IsNullOrWhiteSpace(userAssertion))
+            { 
+                return false;
+            }
+
+            return AuthenticationRequestParameters.UserAssertion.Assertion.Equals(userAssertion);
         }
 
         private async Task<AuthenticationResult> RefreshRtOrFetchNewAccessTokenAsync(CancellationToken cancellationToken)
