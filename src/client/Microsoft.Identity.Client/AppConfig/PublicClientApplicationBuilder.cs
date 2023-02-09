@@ -346,6 +346,9 @@ namespace Microsoft.Identity.Client
         /// <item><description>In mobile apps, the device must be Intune joined and Authenticator or Company Portal must be installed. See https://aka.ms/msal-brokers </description></item>
         /// </list>
         /// </remarks>
+#if _MOBILE_
+        [Obsolete("This method is obsolete. Applications should rely on the library automatically falling back to a browser if the broker is not available. ", false)]
+#endif
         public bool IsBrokerAvailable()
         {
             return PlatformProxyFactory.CreatePlatformProxy(null)
