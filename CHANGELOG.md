@@ -1,3 +1,25 @@
+4.50.0
+==========
+### New Features
+- Extended managed identity experimental functionality with support for Azure Cloud Shell. See [3832](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3832).  
+- Added support for PII logging for WAM preview. See [3845](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3845), [3822](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3822).  
+
+
+### Bug Fixes
+- Fixed JSON serialization issues for apps running on .NET 7. See [3892](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3892).  
+- Improved logging performance. See [3901](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3901).  
+- WAM preview now honors the login hint. See [3301](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3301).  
+- WAM preview now allows to sign in with an account different from the provided login hint. See [3929](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3929).  
+- Fixed an `ApiContractViolation` exception in WAM preview when signing out. See [3685](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3685).  
+- MSAL now allows passing no scopes when using WAM preview. See [3675](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3675).  
+- Added a more descriptive error message when combined flat user and app cache is used. Use a partitioned token cache (for ex. distributed cache like Redis) or separate files for app and user token caches. See [3218](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3218).  
+- When broker is enabled, MSAL will now use the refresh token from the broker instead of a locally cached one. See [3613](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3613).  
+- Fixed an occasional cryptographic exception by removing the RSA public key size check - AAD is better suited to handle this verification. See [3896](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3896).  
+- Fixed JSON parsing errors when receiving an error token response. See [3883](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3883).  
+- Added better handling when receiving WS-Trust error responses. See [3614](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3614).  
+- Deprecated `IsBrokerAvailable` method on mobile platforms. Applications should rely on the library automatically falling back to a browser if the broker is not available. See [3320](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3320).  
+- Deprecated unused extended expiry API. See [1377](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1377).  
+
 4.49.1
 ==========
 ### New Features
