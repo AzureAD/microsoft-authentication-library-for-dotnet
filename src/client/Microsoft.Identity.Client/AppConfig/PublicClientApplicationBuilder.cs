@@ -334,8 +334,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// This method has been deprecated
-
         /// Returns <c>true</c> if a broker can be used.
         /// This method is only needed to be used in mobile scenarios which support Mobile Application Management. In other supported scenarios, use <c>WithBroker</c> by itself, which will fall back to use a browser if broker is unavailable.
         /// </summary>
@@ -348,7 +346,9 @@ namespace Microsoft.Identity.Client
         /// <item><description>In mobile apps, the device must be Intune joined and Authenticator or Company Portal must be installed. See https://aka.ms/msal-brokers </description></item>
         /// </list>
         /// </remarks>
+#if ANDROID || iOS || WINDOWS_APP
         [Obsolete("This method is obsolete. Applications should rely on the library automatically falling back to a browser if the broker is not available. ", false)]
+#endif
         public bool IsBrokerAvailable()
         {
             return PlatformProxyFactory.CreatePlatformProxy(null)
