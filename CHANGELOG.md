@@ -8,6 +8,7 @@
 ### Bug Fixes
 - Fixed JSON serialization issues for apps running on .NET 7. See [3892](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3892).  
 - Improved logging performance. See [3901](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3901).  
+- Fixed `Unable to load DLL 'msalruntime'` exception for apps that use WAM preview and are packaged as MSIX. See [3740](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3740).  
 - WAM preview now honors the login hint. See [3301](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3301).  
 - WAM preview now allows to sign in with an account different from the provided login hint. See [3929](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3929).  
 - Fixed an `ApiContractViolation` exception in WAM preview when signing out. See [3685](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3685).  
