@@ -206,7 +206,7 @@
     See https://docs.microsoft.com/en-us/dotnet/standard/analyzers/platform-compat-analyzer and 
     https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md for details
     -->
-    <SupportedOSPlatformVersion>7</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
