@@ -19,6 +19,7 @@
 - Fixed an occasional cryptographic exception by removing the RSA public key size check - AAD is better suited to handle this verification. See [3896](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3896).  
 - Fixed JSON parsing errors when receiving an error token response. See [3883](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3883).  
 - Added better error handling when receiving WS-Trust responses. See [3614](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3614).  
+- `WithAuthority` methods on the request builders are hidden. Use either `WithTenantId` on the request builders or `WithAuthority` only on the application builder. See [#2929](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2929).  
 - Deprecated `IsBrokerAvailable` method on mobile platforms. Applications should rely on the library automatically falling back to a browser if the broker is not available. See [3320](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3320).  
 - Deprecated unused extended expiry API. See [1377](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1377).  
 
