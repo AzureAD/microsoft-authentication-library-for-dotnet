@@ -57,7 +57,7 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.13.3" IncludeAssets="all" />
+    <PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.13.5" IncludeAssets="all" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
   <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">

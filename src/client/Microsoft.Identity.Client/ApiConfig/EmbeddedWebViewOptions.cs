@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
         {
             logger.Info("WebView2Options configured");
 
-            logger.Info($"Title: {Title}");
+            logger.Info(() => $"Title: {Title}");
         }
 
         internal static void ValidatePlatformAvailability()

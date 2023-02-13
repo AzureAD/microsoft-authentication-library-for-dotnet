@@ -167,48 +167,52 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var logger = RequestContext.Logger;
 
-            // Create PII enabled string builder
-            var builder = new StringBuilder(
-                Environment.NewLine + "=== Request Data ===" + Environment.NewLine + "Authority Provided? - " +
-                (Authority != null) + Environment.NewLine);
-            builder.AppendLine("Client Id - " + AppConfig.ClientId);
-            builder.AppendLine("Scopes - " + Scope?.AsSingleString());
-            builder.AppendLine("Redirect Uri - " + RedirectUri?.OriginalString);
-            builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
-            builder.AppendLine("ClaimsAndClientCapabilities - " + ClaimsAndClientCapabilities);
-            builder.AppendLine("Authority - " + AuthorityInfo?.CanonicalAuthority);
-            builder.AppendLine("ApiId - " + ApiId);
-            builder.AppendLine("IsConfidentialClient - " + AppConfig.IsConfidentialClient);
-            builder.AppendLine("SendX5C - " + SendX5C);
-            builder.AppendLine("LoginHint - " + LoginHint);
-            builder.AppendLine("IsBrokerConfigured - " + AppConfig.IsBrokerEnabled);
-            builder.AppendLine("HomeAccountId - " + HomeAccountId);
-            builder.AppendLine("CorrelationId - " + CorrelationId);
-            builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
-            builder.AppendLine("LongRunningOboCacheKey set: " + !string.IsNullOrWhiteSpace(LongRunningOboCacheKey));
-            builder.AppendLine("Region configured: " + AppConfig.AzureRegion);
+            if (logger.IsLoggingEnabled(LogLevel.Info))
+            {
 
-            string messageWithPii = builder.ToString();
+                // Create PII enabled string builder
+                var builder = new StringBuilder(
+                    Environment.NewLine + "=== Request Data ===" + Environment.NewLine + "Authority Provided? - " +
+                    (Authority != null) + Environment.NewLine);
+                builder.AppendLine("Client Id - " + AppConfig.ClientId);
+                builder.AppendLine("Scopes - " + Scope?.AsSingleString());
+                builder.AppendLine("Redirect Uri - " + RedirectUri?.OriginalString);
+                builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
+                builder.AppendLine("ClaimsAndClientCapabilities - " + ClaimsAndClientCapabilities);
+                builder.AppendLine("Authority - " + AuthorityInfo?.CanonicalAuthority);
+                builder.AppendLine("ApiId - " + ApiId);
+                builder.AppendLine("IsConfidentialClient - " + AppConfig.IsConfidentialClient);
+                builder.AppendLine("SendX5C - " + SendX5C);
+                builder.AppendLine("LoginHint - " + LoginHint);
+                builder.AppendLine("IsBrokerConfigured - " + AppConfig.IsBrokerEnabled);
+                builder.AppendLine("HomeAccountId - " + HomeAccountId);
+                builder.AppendLine("CorrelationId - " + CorrelationId);
+                builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
+                builder.AppendLine("LongRunningOboCacheKey set: " + !string.IsNullOrWhiteSpace(LongRunningOboCacheKey));
+                builder.AppendLine("Region configured: " + AppConfig.AzureRegion);
 
-            // Create no PII enabled string builder
-            builder = new StringBuilder(
-                Environment.NewLine + "=== Request Data ===" +
-                Environment.NewLine + "Authority Provided? - " + (Authority != null) +
-                Environment.NewLine);
-            builder.AppendLine("Scopes - " + Scope?.AsSingleString());
-            builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
-            builder.AppendLine("ApiId - " + ApiId);
-            builder.AppendLine("IsConfidentialClient - " + AppConfig.IsConfidentialClient);
-            builder.AppendLine("SendX5C - " + SendX5C);
-            builder.AppendLine("LoginHint ? " + !string.IsNullOrEmpty(LoginHint));
-            builder.AppendLine("IsBrokerConfigured - " + AppConfig.IsBrokerEnabled);
-            builder.AppendLine("HomeAccountId - " + !string.IsNullOrEmpty(HomeAccountId));
-            builder.AppendLine("CorrelationId - " + CorrelationId);
-            builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
-            builder.AppendLine("LongRunningOboCacheKey set: " + !string.IsNullOrWhiteSpace(LongRunningOboCacheKey));
-            builder.AppendLine("Region configured: " + AppConfig.AzureRegion);
+                string messageWithPii = builder.ToString();
 
-            logger.InfoPii(messageWithPii, builder.ToString());
+                // Create no PII enabled string builder
+                builder = new StringBuilder(
+                    Environment.NewLine + "=== Request Data ===" +
+                    Environment.NewLine + "Authority Provided? - " + (Authority != null) +
+                    Environment.NewLine);
+                builder.AppendLine("Scopes - " + Scope?.AsSingleString());
+                builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
+                builder.AppendLine("ApiId - " + ApiId);
+                builder.AppendLine("IsConfidentialClient - " + AppConfig.IsConfidentialClient);
+                builder.AppendLine("SendX5C - " + SendX5C);
+                builder.AppendLine("LoginHint ? " + !string.IsNullOrEmpty(LoginHint));
+                builder.AppendLine("IsBrokerConfigured - " + AppConfig.IsBrokerEnabled);
+                builder.AppendLine("HomeAccountId - " + !string.IsNullOrEmpty(HomeAccountId));
+                builder.AppendLine("CorrelationId - " + CorrelationId);
+                builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
+                builder.AppendLine("LongRunningOboCacheKey set: " + !string.IsNullOrWhiteSpace(LongRunningOboCacheKey));
+                builder.AppendLine("Region configured: " + AppConfig.AzureRegion);
+
+                logger.InfoPii(messageWithPii, builder.ToString());
+            }
         }
     }
 }

@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             {
                 if (AuthenticationRequestParameters.Account == null)
                 {
-                    _logger.Verbose("No account passed to AcquireTokenSilent.");
+                    _logger.Verbose(()=>"No account passed to AcquireTokenSilent. ");
                     throw new MsalUiRequiredException(
                        MsalError.UserNullError,
                        MsalErrorMessage.MsalUiRequiredMessage,
@@ -67,12 +67,12 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
                     if (brokerResult != null)
                     {
-                        _logger.Verbose("Broker responded to silent request.");
+                        _logger.Verbose(() => "Broker responded to silent request.");
                         return brokerResult;
                     }
                     else
                     {
-                        _logger.Verbose("Broker could not satisfy the silent request.");
+                        _logger.Verbose(() => "Broker could not satisfy the silent request.");
                         throw new MsalUiRequiredException(
                            MsalError.FailedToAcquireTokenSilentlyFromBroker,
                            "Broker could not satisfy the silent request.",
@@ -81,13 +81,13 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     }
                 }
 
-                _logger.Verbose("Attempting to acquire token using local cache.");
+                _logger.Verbose(() => "Attempting to acquire token using local cache.");
 
                 return await _clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (MsalException ex)
             {
-                _logger.Verbose(isBrokerConfigured ? $"Broker could not satisfy silent request." : $"Token cache could not satisfy silent request.");
+                _logger.Verbose(() => isBrokerConfigured ? $"Broker could not satisfy silent request." : $"Token cache could not satisfy silent request.");
                 throw ex;
             }
         }

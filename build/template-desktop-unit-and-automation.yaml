@@ -15,12 +15,6 @@ steps:
     version: 6.x
     includePreviewVersions: true
 
-- task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 7.x'
-  inputs:
-    version: 7.x
-    includePreviewVersions: true
-
 - task: DownloadPipelineArtifact@2
   displayName: 'Download Drop'
   inputs:

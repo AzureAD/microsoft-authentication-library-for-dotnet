@@ -21,21 +21,24 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// <inheritdoc />
         public void LogParameters(ILoggerAdapter logger)
         {
-            var builder = new StringBuilder();
-            builder.AppendLine("=== OnBehalfOfParameters ===");
-            builder.AppendLine("SendX5C: " + SendX5C);
-            builder.AppendLine("ForceRefresh: " + ForceRefresh);
-            builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
-            builder.AppendLine("LongRunningOboCacheKey set: " + !string.IsNullOrWhiteSpace(LongRunningOboCacheKey));
-            if (UserAssertion != null && !string.IsNullOrWhiteSpace(LongRunningOboCacheKey))
+            if (logger.IsLoggingEnabled(LogLevel.Info))
             {
-                builder.AppendLine("InitiateLongRunningProcessInWebApi called: True");
+                var builder = new StringBuilder();
+                builder.AppendLine("=== OnBehalfOfParameters ===");
+                builder.AppendLine("SendX5C: " + SendX5C);
+                builder.AppendLine("ForceRefresh: " + ForceRefresh);
+                builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
+                builder.AppendLine("LongRunningOboCacheKey set: " + !string.IsNullOrWhiteSpace(LongRunningOboCacheKey));
+                if (UserAssertion != null && !string.IsNullOrWhiteSpace(LongRunningOboCacheKey))
+                {
+                    builder.AppendLine("InitiateLongRunningProcessInWebApi called: True");
+                }
+                else if (UserAssertion == null && !string.IsNullOrWhiteSpace(LongRunningOboCacheKey))
+                {
+                    builder.AppendLine("AcquireTokenInLongRunningProcess called: True");
+                }
+                logger.Info(builder.ToString());
             }
-            else if (UserAssertion == null && !string.IsNullOrWhiteSpace(LongRunningOboCacheKey))
-            {
-                builder.AppendLine("AcquireTokenInLongRunningProcess called: True");
-            }
-            logger.Info(builder.ToString());
         }
     }
 }

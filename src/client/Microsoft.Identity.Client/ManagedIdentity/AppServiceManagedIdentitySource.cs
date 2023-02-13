@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // if BOTH the env vars endpoint and secret values are null, this MSI provider is unavailable.
             if (string.IsNullOrEmpty(msiEndpoint) || string.IsNullOrEmpty(secret))
             {
-                logger.Verbose("[Managed Identity] App service managed identity is unavailable.");
+                logger.Verbose(()=>"[Managed Identity] App service managed identity is unavailable.");
                 return false;
             }
 

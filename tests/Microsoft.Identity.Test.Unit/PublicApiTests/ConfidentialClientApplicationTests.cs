@@ -917,6 +917,33 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public void GetAuthorizationRequestUrl_WithConsumerInCreate_ReturnsConsumers()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplicationOptions applicationOptions;
+                applicationOptions = new ConfidentialClientApplicationOptions();
+                applicationOptions.ClientId = "fakeId";
+                applicationOptions.RedirectUri = "https://example.com";
+                applicationOptions.ClientSecret = "rwerewrwe";
+
+                var confidentialClientApplicationBuilder = ConfidentialClientApplicationBuilder
+                                                                    .CreateWithApplicationOptions(applicationOptions);
+                var confidentialClientApplication = confidentialClientApplicationBuilder.Build();
+
+                Uri authorizationRequestUrl = confidentialClientApplication
+                    .GetAuthorizationRequestUrl(new List<string> { "" })
+                    .WithAuthority(AzureCloudInstance.AzurePublic, Constants.ConsumerTenant)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false)
+                    .GetAwaiter()
+                    .GetResult();
+
+                Assert.IsTrue(authorizationRequestUrl.Segments[1].StartsWith(Constants.CommonTenant));
+            }
+        }
+
+        [TestMethod]
         public async Task DoNotUseNullCcsRoutingHint_TestAsync()
         {
             using (var httpManager = new MockHttpManager())

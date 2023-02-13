@@ -75,6 +75,8 @@ namespace NetCoreTestApp
                             .WithExperimentalFeatures()
                             .WithDesktopFeatures();
 
+            Console.WriteLine($"IsBrokerAvailable: {pcaBuilder.IsBrokerAvailable()}");
+
             var pca = pcaBuilder.WithRedirectUri("http://localhost") // required for DefaultOsBrowser
                             .Build();
 

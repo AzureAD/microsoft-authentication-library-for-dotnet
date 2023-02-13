@@ -53,14 +53,14 @@ namespace Microsoft.Identity.Client.Http
             // MSAL style redirect URI - case sensitive
             if (string.Equals(expectedRedirectUri, actualRedirectUriString.TrimEnd('/'), StringComparison.Ordinal))
             {
-                logger.Verbose("Valid MSAL style redirect Uri detected. ");
+                logger.Verbose(() => "Valid MSAL style redirect Uri detected. ");
                 return;
             }
 
             // ADAL style redirect URI - my_scheme://{bundleID} 
             if (redirectUri.Authority.Equals(bundleId, StringComparison.OrdinalIgnoreCase))
             {
-                logger.Verbose("Valid ADAL style redirect Uri detected. ");
+                logger.Verbose(() => "Valid ADAL style redirect Uri detected. ");
                 return;
             }
 
