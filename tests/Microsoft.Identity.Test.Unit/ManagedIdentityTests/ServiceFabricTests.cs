@@ -28,9 +28,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataTestMethod]
         [DataRow(Endpoint, "https://management.azure.com")]
         [DataRow(Endpoint, "https://management.azure.com/.default")]
+        [DataRow(Endpoint, "https://management.azure.com", TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
+        [DataRow(Endpoint, "https://management.azure.com", "resource_id", UserAssignedIdentityId.ResourceId)]
+        [DataRow(Endpoint, "https://management.azure.com", "", UserAssignedIdentityId.None)]
         public async Task ServiceFabricHappyPathAsync(
             string endpoint, 
-            string scope)
+            string scope,
+            string userAssignedId = null,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -47,10 +52,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     endpoint,
                     Resource,
                     MockHelpers.GetMsiSuccessfulResponse(),
-                    ManagedIdentitySourceType.ServiceFabric);
+                    ManagedIdentitySourceType.ServiceFabric,
+                    userAssignedClientIdOrResourceId: userAssignedId,
+                    userAssignedIdentityId: userAssignedIdentityId);
 
                 var result = await cca.AcquireTokenForClient(new string[] { scope })
-                    .WithManagedIdentity()
+                    .WithManagedIdentity(userAssignedId)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
