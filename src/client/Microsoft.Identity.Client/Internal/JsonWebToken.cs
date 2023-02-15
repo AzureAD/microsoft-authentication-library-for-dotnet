@@ -181,9 +181,15 @@ namespace Microsoft.Identity.Client.Internal
             public string Issuer { get; set; }
 
             [JsonProperty(JsonWebTokenConstants.ReservedClaims.NotBefore)]
+#if SUPPORTS_SYSTEM_TEXT_JSON
+            [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+#endif
             public long ValidFrom { get; set; }
 
             [JsonProperty(JsonWebTokenConstants.ReservedClaims.ExpiresOn)]
+#if SUPPORTS_SYSTEM_TEXT_JSON
+            [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+#endif
             public long ValidTo { get; set; }
 
 #if SUPPORTS_SYSTEM_TEXT_JSON

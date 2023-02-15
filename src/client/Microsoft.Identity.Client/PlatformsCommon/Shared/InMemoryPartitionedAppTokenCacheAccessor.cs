@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 
@@ -71,7 +70,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// </summary>
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            throw new NotSupportedException();
+            throw new MsalClientException(MsalError.CombinedUserAppCacheNotSupported, MsalErrorMessage.CombinedUserAppCacheNotSupported);
         }
 
         /// <summary>
@@ -80,7 +79,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// </summary>
         public void SaveIdToken(MsalIdTokenCacheItem item)
         {
-            throw new NotSupportedException();
+            throw new MsalClientException(MsalError.CombinedUserAppCacheNotSupported, MsalErrorMessage.CombinedUserAppCacheNotSupported);
         }
 
         /// <summary>
@@ -89,7 +88,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// </summary>
         public void SaveAccount(MsalAccountCacheItem item)
         {
-            throw new NotSupportedException();
+            throw new MsalClientException(MsalError.CombinedUserAppCacheNotSupported, MsalErrorMessage.CombinedUserAppCacheNotSupported);
         }
 
         public void SaveAppMetadata(MsalAppMetadataCacheItem item)
@@ -106,7 +105,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// </summary>
         public MsalIdTokenCacheItem GetIdToken(MsalAccessTokenCacheItem accessTokenCacheItem)
         {
-            throw new NotSupportedException();
+            throw new MsalClientException(MsalError.CombinedUserAppCacheNotSupported, MsalErrorMessage.CombinedUserAppCacheNotSupported);
         }
 
         /// <summary>
@@ -115,7 +114,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// </summary>
         public MsalAccountCacheItem GetAccount(MsalAccountCacheItem accountCacheItem)
         {
-            throw new NotSupportedException();
+            throw new MsalClientException(MsalError.CombinedUserAppCacheNotSupported, MsalErrorMessage.CombinedUserAppCacheNotSupported);
         }
 
         public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheItem appMetadataItem)
@@ -134,8 +133,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             if (partition == null || !partition.TryRemove(item.CacheKey, out _))
             {
                 _logger.InfoPii(
-                    $"[Internal cache] Cannot delete access token because it was not found in the cache. Key {item.CacheKey}.",
-                    "[Internal cache] Cannot delete access token because it was not found in the cache.");
+                    () => $"[Internal cache] Cannot delete access token because it was not found in the cache. Key {item.CacheKey}.",
+                    () => "[Internal cache] Cannot delete access token because it was not found in the cache.");
             }
         }
 
@@ -145,7 +144,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// </summary>
         public void DeleteRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            throw new NotSupportedException();
+            throw new MsalClientException(MsalError.CombinedUserAppCacheNotSupported, MsalErrorMessage.CombinedUserAppCacheNotSupported);
         }
 
         /// <summary>
@@ -154,7 +153,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// </summary>
         public void DeleteIdToken(MsalIdTokenCacheItem item)
         {
-            throw new NotSupportedException();
+            throw new MsalClientException(MsalError.CombinedUserAppCacheNotSupported, MsalErrorMessage.CombinedUserAppCacheNotSupported);
         }
 
         /// <summary>
@@ -163,7 +162,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// </summary>
         public void DeleteAccount(MsalAccountCacheItem item)
         {
-            throw new NotSupportedException();
+            throw new MsalClientException(MsalError.CombinedUserAppCacheNotSupported, MsalErrorMessage.CombinedUserAppCacheNotSupported);
         }
         #endregion
 

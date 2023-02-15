@@ -108,7 +108,6 @@ namespace NetFx
 
             //cca.AcquireTokenOnBehalfOf(null, null).WithAuthority
 
-
             BindCache(cca.UserTokenCache, UserCacheFile);
             BindCache(cca.AppTokenCache, UserCacheFile);
 
@@ -137,8 +136,6 @@ namespace NetFx
                 builder = builder
                     //.WithParentActivityOrWindow(consoleWindowHandleProvider)
                     .WithExperimentalFeatures()
-
-
                     .WithBroker(true);
             }
 
@@ -251,7 +248,6 @@ namespace NetFx
                             var interactiveBuilder = pca
                                 .AcquireTokenInteractive(s_scopes);
                             //.WithParentActivityOrWindow(consoleWindowHandle);
-
 
                             AuthenticationResult authResult = await interactiveBuilder.ExecuteAsync().ConfigureAwait(false);
                             ClaimsPrincipal idTokenClaims = authResult.ClaimsPrincipal;

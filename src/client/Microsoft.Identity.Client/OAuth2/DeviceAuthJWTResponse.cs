@@ -8,6 +8,7 @@ using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using Microsoft.Identity.Client.Platforms.net6;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+using System.Text.Json.Serialization;
 #else
 using Microsoft.Identity.Json;
 #endif
@@ -50,6 +51,9 @@ namespace Microsoft.Identity.Client.OAuth2
         }
 
         [JsonProperty("iat")]
+#if SUPPORTS_SYSTEM_TEXT_JSON
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+#endif
         public long Iat { get; set; }
 
         [JsonProperty("aud")]

@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.Cache
             {
                 BinaryWriter writer = new BinaryWriter(stream);
                 writer.Write(SchemaVersion);
-                logger.Info($"[AdalCacheOperations] Serializing token cache with {tokenCacheDictionary.Count} items. ");
+                logger.Info(() => $"[AdalCacheOperations] Serializing token cache with {tokenCacheDictionary.Count} items. ");
 
                 writer.Write(tokenCacheDictionary.Count);
                 foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in tokenCacheDictionary)
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Cache
                     dictionary[key] = resultEx;
                 }
 
-                logger.Info($"[AdalCacheOperations] Deserialized {dictionary.Count} items to ADAL token cache. ");
+                logger.Info(() => $"[AdalCacheOperations] Deserialized {dictionary.Count} items to ADAL token cache. ");
             }
 
             return dictionary;

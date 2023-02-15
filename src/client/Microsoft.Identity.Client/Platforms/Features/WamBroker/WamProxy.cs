@@ -37,11 +37,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogBlockDuration("WAM:GetTokenSilentlyAsync:webAccount"))
             {
-                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
-                {
-                    _logger.VerbosePii(webTokenRequest.ToLogString(true), webTokenRequest.ToLogString(false));
-                    _logger.VerbosePii(webAccount.ToLogString(true), webAccount.ToLogString(false));
-                }
+                _logger.VerbosePii(() => webTokenRequest.ToLogString(true), () => webTokenRequest.ToLogString(false));
+                _logger.VerbosePii(() => webAccount.ToLogString(true), () => webAccount.ToLogString(false));
 
                 var wamResult = await WebAuthenticationCoreManager.GetTokenSilentlyAsync(webTokenRequest, webAccount);
                 return new WebTokenRequestResultWrapper(wamResult);
@@ -52,10 +49,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogBlockDuration("WAM:GetTokenSilentlyAsync:"))
             {
-                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
-                {
-                    _logger.VerbosePii(webTokenRequest.ToLogString(true), webTokenRequest.ToLogString(false));
-                }
+                _logger.VerbosePii(() => webTokenRequest.ToLogString(true), () => webTokenRequest.ToLogString(false));
 
                 var wamResult = await WebAuthenticationCoreManager.GetTokenSilentlyAsync(webTokenRequest);
                 return new WebTokenRequestResultWrapper(wamResult);
@@ -68,10 +62,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogBlockDuration("WAM:RequestTokenForWindowAsync:"))
             {
-                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
-                {
-                    _logger.VerbosePii(webTokenRequest.ToLogString(true), webTokenRequest.ToLogString(false));
-                }
+                _logger.VerbosePii(() => webTokenRequest.ToLogString(true), () => webTokenRequest.ToLogString(false));
 #if WINDOWS_APP
                 // UWP requires being on the UI thread
                 await _synchronizationContext;
@@ -93,11 +84,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogBlockDuration("WAM:RequestTokenForWindowAsync:"))
             {
-                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
-                {
-                    _logger.VerbosePii(webTokenRequest.ToLogString(true), webTokenRequest.ToLogString(false));
-                    _logger.VerbosePii(wamAccount.ToLogString(true), wamAccount.ToLogString(false));
-                }
+
+                _logger.VerbosePii(() => webTokenRequest.ToLogString(true), () => webTokenRequest.ToLogString(false));
+                _logger.VerbosePii(() => wamAccount.ToLogString(true), () => wamAccount.ToLogString(false));
+
 #if WINDOWS_APP
 
                 // UWP requires being on the UI thread
@@ -119,11 +109,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogBlockDuration("WAM:FindAccountAsync:"))
             {
-                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
-                {
-                    _logger.VerbosePii(provider.ToLogString(true), provider.ToLogString(false));
-                }
-
+                _logger.VerbosePii(() => provider.ToLogString(true), () => provider.ToLogString(false));
                 return await WebAuthenticationCoreManager.FindAccountAsync(provider, wamAccountId);
             }
         }
@@ -132,10 +118,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogBlockDuration("WAM:FindAllWebAccountsAsync:"))
             {
-                if (_logger.IsLoggingEnabled(LogLevel.Verbose))
-                {
-                    _logger.VerbosePii(provider.ToLogString(true), provider.ToLogString(false));
-                }
+                _logger.VerbosePii(() => provider.ToLogString(true), () => provider.ToLogString(false));
 
                 // Win 10 RS3 release and above
                 if (!ApiInformation.IsMethodPresent(

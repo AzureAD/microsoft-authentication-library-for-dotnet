@@ -25,8 +25,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
         {
             AuthenticationContinuationHelper.LastRequestLogger = requestContext.Logger;
             requestContext.Logger.InfoPii(
-                $"Starting the iOS embedded webui. Start Uri: {authorizationUri} Redirect URI:{redirectUri} ",
-                $"Starting the iOS embedded webui. Redirect URI: {redirectUri}"); 
+                () => $"Starting the iOS embedded webui. Start Uri: {authorizationUri} Redirect URI:{redirectUri} ",
+                () => $"Starting the iOS embedded webui. Redirect URI: {redirectUri}"); 
                 
             s_returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, requestContext);

@@ -36,6 +36,8 @@ namespace Microsoft.Identity.Client
         public const string UserCancelledAuthentication = "Authorization result status returned user cancelled authentication. ";
         public const string AuthorizationResultWasNotSuccessful = "Authorization result was not successful. See error message for more details. ";
 
+        public const string WsTrustRequestFailed = "Ws-Trust request failed. See error message for more details.";
+
         public static string ErrorReturnedInBrokerResponse(string error)
         {
             return string.Format(CultureInfo.InvariantCulture, "Error {0} returned in broker response. ", error);

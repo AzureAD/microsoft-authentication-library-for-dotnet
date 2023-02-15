@@ -48,18 +48,11 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             bool isBrokerConfigured = AuthenticationRequestParameters.AppConfig.IsBrokerEnabled &&
                                       ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth();
 
-            if (isBrokerConfigured && AuthenticationRequestParameters.PopAuthenticationConfiguration != null)
-            {
-                _logger.Info("[Silent Request] Attempting to use broker instead of searching local cache for Proof-of-Possession tokens. ");
-
-                return await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
-            }
-
             try
             {
                 if (AuthenticationRequestParameters.Account == null)
                 {
-                    _logger.Verbose("No account passed to AcquireTokenSilent. ");
+                    _logger.Verbose(()=>"No account passed to AcquireTokenSilent. ");
                     throw new MsalUiRequiredException(
                        MsalError.UserNullError,
                        MsalErrorMessage.MsalUiRequiredMessage,
@@ -67,40 +60,36 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                        UiRequiredExceptionClassification.AcquireTokenSilentFailed);
                 }
 
-                _logger.Verbose("Attempting to acquire token using using local cache...");
-                return await _clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
-
-            }
-            catch (MsalException ex)
-            {
-                _logger.Verbose($"Token cache could not satisfy silent request.");
-
-                if (isBrokerConfigured && ShouldTryWithBrokerError(ex.ErrorCode))
+                if (isBrokerConfigured)
                 {
-                    _logger.Info("Attempting to use broker instead. ");
+                    _logger.Info("Broker is configured and enabled, attempting to use broker instead.");
                     var brokerResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
+
                     if (brokerResult != null)
                     {
-                        _logger.Verbose("Broker responded to silent request");
+                        _logger.Verbose(() => "Broker responded to silent request.");
                         return brokerResult;
+                    }
+                    else
+                    {
+                        _logger.Verbose(() => "Broker could not satisfy the silent request.");
+                        throw new MsalUiRequiredException(
+                           MsalError.FailedToAcquireTokenSilentlyFromBroker,
+                           "Broker could not satisfy the silent request.",
+                           null,
+                           UiRequiredExceptionClassification.AcquireTokenSilentFailed);
                     }
                 }
 
-                throw;
+                _logger.Verbose(() => "Attempting to acquire token using local cache.");
+
+                return await _clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
             }
-        }
-
-        private static HashSet<string> s_tryWithBrokerErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
-            MsalError.InvalidGrantError,
-            MsalError.InteractionRequired,
-            MsalError.NoTokensFoundError,
-            MsalError.NoAccountForLoginHint,
-            MsalError.CurrentBrokerAccount
-        };
-
-        private static bool ShouldTryWithBrokerError(string errorCode)
-        {
-            return s_tryWithBrokerErrors.Contains(errorCode);
+            catch (MsalException ex)
+            {
+                _logger.Verbose(() => isBrokerConfigured ? $"Broker could not satisfy silent request." : $"Token cache could not satisfy silent request.");
+                throw ex;
+            }
         }
 
         internal new async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse response)

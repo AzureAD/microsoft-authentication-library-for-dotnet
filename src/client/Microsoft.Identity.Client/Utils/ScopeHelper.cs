@@ -30,6 +30,11 @@ namespace Microsoft.Identity.Client.Utils
             return new HashSet<string>(userScopes.Concat(OAuth2Value.ReservedScopes));
         }
 
+        public static string GetMsalRuntimeScopes()
+        {
+            return string.Join(" ", OAuth2Value.ReservedScopes);
+        }
+
         public static bool HasNonMsalScopes(HashSet<string> userScopes)
         {
             if (userScopes == null)
