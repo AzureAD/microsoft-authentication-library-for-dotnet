@@ -125,12 +125,16 @@ namespace NetDesktopWinForms
                 ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
                 MsaPassthrough = cbxMsaPt.Checked,
                 HeaderText = "MSAL Dev App .NET FX"
-            })
-            .WithLogging((logLevel, message, _) =>
+            });
+
+            if (chxEnableRuntimeLogs.Checked)
             { 
-                Debug.WriteLine($"{logLevel} {message}");
-                Log("***MSAL Log*** " + message);
-            }, LogLevel.Verbose, true);
+                builder = builder.WithLogging((logLevel, message, _) =>
+                 {
+                     Debug.WriteLine($"{logLevel} {message}");
+                     Log("***MSAL Log*** " + message);
+                 }, LogLevel.Verbose, true);
+            }
 
             var pca = builder.Build();
 
@@ -432,7 +436,8 @@ namespace NetDesktopWinForms
                 string msg = "Accounts " + Environment.NewLine +
                     string.Join(
                          Environment.NewLine,
-                        accounts.Select(acc => $"{acc.Username} {acc.Environment} {acc.HomeAccountId.TenantId}"));
+                        accounts.Select(acc => 
+                        $"{acc.Username} {acc.Environment} {acc.HomeAccountId.TenantId} - {acc.GetTenantProfiles()?.Count() ?? 0} tenant profiles: {string.Join(" ", acc.GetTenantProfiles().Select(tp=>tp.TenantId))}"));
                 Log(msg);
             }
             catch (Exception ex)
@@ -644,8 +649,13 @@ namespace NetDesktopWinForms
                 "" :
                 $"({Account.Environment})";
             string homeTenantId = account?.HomeAccountId?.TenantId?.Substring(0, 5);
+            string tenantProfileString = null;
+            if (account.GetTenantProfiles()?.Count() > 1)
+            {
+                tenantProfileString = $"({account.GetTenantProfiles()?.Count()} tenants)";
+            }
 
-            DisplayValue = displayValue ?? $"{Account.Username} {env} {homeTenantId}";
+            DisplayValue = displayValue ?? $"{Account.Username} {env} {homeTenantId} {tenantProfileString}";
         }
     }
 

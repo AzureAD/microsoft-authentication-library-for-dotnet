@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                 retryAfterTimespan = GetSafeValue(retryAfterTimespan);
 
                 var logger = requestParams.RequestContext.Logger;
-                logger.Info($"[Throttling] Retry-After header detected, " +
+                logger.Info(() => $"[Throttling] Retry-After header detected, " +
                     $"value: {retryAfterTimespan.TotalSeconds} seconds");
 
                 string thumbprint = ThrottleCommon.GetRequestStrictThumbprint(

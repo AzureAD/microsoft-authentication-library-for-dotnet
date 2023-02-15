@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.OAuth2;
 #if SUPPORTS_SYSTEM_TEXT_JSON
+using System.Text.Json.Serialization;
 using Microsoft.Identity.Client.Platforms.net6;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
@@ -32,9 +33,15 @@ namespace Microsoft.Identity.Client.Internal
         public string VerificationUri { get; set; }
 
         [JsonProperty("expires_in")]
+#if SUPPORTS_SYSTEM_TEXT_JSON
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+#endif
         public long ExpiresIn { get; set; }
 
         [JsonProperty("interval")]
+#if SUPPORTS_SYSTEM_TEXT_JSON
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+#endif
         public long Interval { get; set; }
 
         [JsonProperty("message")]

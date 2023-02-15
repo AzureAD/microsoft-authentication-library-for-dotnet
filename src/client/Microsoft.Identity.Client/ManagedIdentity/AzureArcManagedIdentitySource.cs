@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // if BOTH the env vars IDENTITY_ENDPOINT and IMDS_ENDPOINT are set the MsiType is Azure Arc
             if (string.IsNullOrEmpty(identityEndpoint) || string.IsNullOrEmpty(imdsEndpoint))
             {
-                requestContext.Logger.Verbose("[Managed Identity] Azure Arc managed identity is unavailable.");
+                requestContext.Logger.Verbose(()=>"[Managed Identity] Azure Arc managed identity is unavailable.");
                 return null;
             }
 
@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", identityEndpoint, AzureArc));
             }
 
-            requestContext.Logger.Verbose("[Managed Identity] Creating Azure Arc managed identity. Endpoint URI: " + endpointUri);
+            requestContext.Logger.Verbose(()=>"[Managed Identity] Creating Azure Arc managed identity. Endpoint URI: " + endpointUri);
             return new AzureArcManagedIdentitySource(endpointUri, requestContext);
         }
 
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             HttpResponse response,
             CancellationToken cancellationToken)
         {
-            _requestContext.Logger.Verbose($"[Managed Identity] Response received. Status code: {response.StatusCode}");
+            _requestContext.Logger.Verbose(()=>$"[Managed Identity] Response received. Status code: {response.StatusCode}");
 
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 ManagedIdentityRequest request = CreateRequest(ScopeHelper.ScopesToResource(parameters.Scopes.ToArray()));
 
-                _requestContext.Logger.Verbose("[Managed Identity] Adding authorization header to the request.");
+                _requestContext.Logger.Verbose(()=>"[Managed Identity] Adding authorization header to the request.");
                 request.Headers.Add("Authorization", authHeaderValue);
 
                 response = await _requestContext.ServiceBundle.HttpManager.SendGetAsync(request.ComputeUri(), request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);

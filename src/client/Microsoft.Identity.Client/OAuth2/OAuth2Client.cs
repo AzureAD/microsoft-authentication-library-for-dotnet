@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
             if (response.StatusCode != HttpStatusCode.OK || expectErrorsOn200OK)
             {
-                requestContext.Logger.Verbose("[Oauth2Client] Processing error response ");
+                requestContext.Logger.Verbose(() => "[Oauth2Client] Processing error response ");
 
                 try
                 {

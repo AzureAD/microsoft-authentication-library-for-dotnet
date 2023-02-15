@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             if (!string.IsNullOrEmpty(negotiatedBrokerProtocalKey))
             {
-                _logger.Info("[Android broker] Using broker protocol version: " + negotiatedBrokerProtocalKey);
+                _logger.Info(() => "[Android broker] Using broker protocol version: " + negotiatedBrokerProtocalKey);
                 return negotiatedBrokerProtocalKey;
             }
 
@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             using (_logger.LogMethodDuration())
             {
-                _logger.Verbose("[Android broker] Starting interactive authentication. ");
+                _logger.Verbose(()=>"[Android broker] Starting interactive authentication. ");
 
                 Bundle bundleResult = await PerformContentResolverOperationAsync(ContentResolverOperation.acquireTokenInteractive, null).ConfigureAwait(false);
 
@@ -173,7 +173,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             string brokerRequestJson = JsonHelper.SerializeToJson(brokerRequest);
             bundle.PutString(BrokerConstants.BrokerRequestV2, brokerRequestJson);
             bundle.PutInt(BrokerConstants.CallerInfoUID, Binder.CallingUid);
-            _logger.InfoPii("[Android broker] GetInteractiveBrokerBundle: " + brokerRequestJson, "Enable PII to see the broker request. ");
+            _logger.InfoPii(
+                () => "[Android broker] GetInteractiveBrokerBundle: " + brokerRequestJson, 
+                () => "Enable PII to see the broker request. ");
             return bundle;
         }
 
@@ -207,7 +209,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             using (_logger.LogMethodDuration())
             {
-                _logger.Verbose("[Android broker] User is specified for silent token request. Starting silent request. ");
+                _logger.Verbose(()=>"[Android broker] User is specified for silent token request. Starting silent request. ");
 
                 var accountData = await GetBrokerAccountDataAsync(brokerRequest).ConfigureAwait(false);
 
@@ -316,7 +318,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             ContentResolver resolver = GetContentResolver();
 
             var contentResolverUri = GetContentProviderUriForOperation(Enum.GetName(typeof(ContentResolverOperation), operation));
-            _logger.Info($"[Android broker] Executing content resolver operation: {operation} URI: {contentResolverUri}");
+            _logger.Info(() => $"[Android broker] Executing content resolver operation: {operation} URI: {contentResolverUri}");
 
             ICursor resultCursor = null;
 
@@ -340,7 +342,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
             if (resultBundle != null)
             {
-                _logger.Verbose($"[Android broker] Content resolver operation completed successfully. Operation: {operation} URI: {contentResolverUri}");
+                _logger.Verbose(()=>$"[Android broker] Content resolver operation completed successfully. Operation: {operation} URI: {contentResolverUri}");
             }
 
             return resultBundle;
