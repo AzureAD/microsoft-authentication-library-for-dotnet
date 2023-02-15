@@ -60,10 +60,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
             Assert.AreEqual(
                 "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/authorize",
-                instance.GetAuthorizationEndpoint());
+                instance.GetAuthorizationEndpointAsync(default, default, default).Result);
             Assert.AreEqual(
                 "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/token",
-                instance.GetTokenEndpoint());
+                instance.GetTokenEndpointAsync(default, default, default).Result);
         }
 
         [TestMethod]

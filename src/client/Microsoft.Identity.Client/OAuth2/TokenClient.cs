@@ -55,7 +55,11 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                string tokenEndpoint = tokenEndpointOverride ?? _requestParams.Authority.GetTokenEndpoint();
+                string tokenEndpoint = tokenEndpointOverride;
+                if (tokenEndpoint == null)
+                {
+                    tokenEndpoint = await _requestParams.GetTokenEndpointAsync(cancellationToken).ConfigureAwait(false);
+                }
                 Debug.Assert(_requestParams.RequestContext.ApiEvent != null, "The Token Client must only be called by requests.");
                 _requestParams.RequestContext.ApiEvent.TokenEndpoint = tokenEndpoint;
 
@@ -133,12 +137,13 @@ namespace Microsoft.Identity.Client.OAuth2
                 _requestParams.RequestContext.Logger.Verbose(
                     () => "[TokenClient] Before adding the client assertion / secret");
 
+                var tokenEndpoint = await _requestParams.GetTokenEndpointAsync(cancellationToken).ConfigureAwait(false);
                 await _serviceBundle.Config.ClientCredential.AddConfidentialClientParametersAsync(
                     _oAuth2Client,
                     _requestParams.RequestContext.Logger,
                     _serviceBundle.PlatformProxy.CryptographyManager,
                     _requestParams.AppConfig.ClientId,
-                    _requestParams.Authority.GetTokenEndpoint(),
+                    tokenEndpoint,
                     _requestParams.SendX5C,
                     cancellationToken).ConfigureAwait(false);
 

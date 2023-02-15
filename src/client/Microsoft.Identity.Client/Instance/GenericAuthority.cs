@@ -3,7 +3,11 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
@@ -11,9 +15,7 @@ namespace Microsoft.Identity.Client.Instance
 {
     internal class GenericAuthority : Authority
     {
-        internal const string OpenIdConfigurationEndpointSuffix = ".well-known/openid-configuration";
-        private static readonly ConcurrentDictionary<string, OpenIdConnectConfiguration> s_openIdConnectConfigurations = new();
-           
+
         internal GenericAuthority(AuthorityInfo authorityInfo)
             : base(authorityInfo)
         {
@@ -21,36 +23,44 @@ namespace Microsoft.Identity.Client.Instance
         }
 
         internal override string TenantId => null;
-    
-        internal IDocumentRetriever DocumentRetriever { get; set; } = new HttpDocumentRetriever();
+
 
         internal override string GetTenantedAuthority(string tenantId, bool forceTenantless = false)
         {
             throw new NotImplementedException();
         }
 
-        internal override string GetTokenEndpoint()
+        internal override async Task<string> GetTokenEndpointAsync(
+            IHttpManager httpManager,
+            ILoggerAdapter logger,
+            CancellationToken cancellationToken)
         {
-            string cacheKey = AuthorityInfo.CanonicalAuthority.ToString();
-            var configuration = s_openIdConnectConfigurations.GetOrAdd(cacheKey, RetrieveOpenIdConnectConfiguration);
+            var configuration = await OidcRetrieverWithCache.GetOidcAsync(
+                AuthorityInfo.CanonicalAuthority.AbsoluteUri, 
+                httpManager, 
+                logger, 
+                cancellationToken).ConfigureAwait(false);
+
             return configuration.TokenEndpoint;
         }
 
-        private OpenIdConnectConfiguration RetrieveOpenIdConnectConfiguration(string canonicalizedAuthority)
+        internal override async Task<string> GetAuthorizationEndpointAsync(
+            IHttpManager httpManager,
+            ILoggerAdapter logger,
+            CancellationToken cancellationToken)
         {
-            var configuration = OpenIdConnectConfigurationRetriever.GetAsync(AuthorityInfo.DiscoveryDocumentAddress, DocumentRetriever, CancellationToken.None)
-                .GetAwaiter()
-                .GetResult();
-            return configuration;
+            var configuration = await OidcRetrieverWithCache.GetOidcAsync(
+               AuthorityInfo.CanonicalAuthority.AbsoluteUri,
+               httpManager,
+               logger,
+               cancellationToken).ConfigureAwait(false);
+
+            return configuration.AuthorizationEndpoint;
         }
 
-        internal override string GetAuthorizationEndpoint()
-        {
-            // prevents authorization_code flow which requires knowledge of the authorization_endpoint. 
-            throw new NotImplementedException();
-        }
-
-        internal override string GetDeviceCodeEndpoint()
+        internal override Task<string> GetDeviceCodeEndpointAsync(IHttpManager httpManager,
+            ILoggerAdapter logger,
+            CancellationToken cancellationToken)
         {
             // prevents device_code flow which requires knowledge of the device_authorization_endpoint.
             throw new NotImplementedException();

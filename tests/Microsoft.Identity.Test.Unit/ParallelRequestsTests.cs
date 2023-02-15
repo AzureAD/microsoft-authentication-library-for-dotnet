@@ -305,5 +305,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             throw new NotImplementedException();
         }
+
+        public HttpClient GetHttpClient()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

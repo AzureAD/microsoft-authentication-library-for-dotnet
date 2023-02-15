@@ -42,15 +42,25 @@ namespace Microsoft.Identity.Client.Internal
             return await FetchAuthCodeAndPkceInternalAsync(webUi, cancellationToken).ConfigureAwait(false);
         }
 
-        public Uri GetAuthorizationUriWithoutPkce()
+        public async Task<Uri> GetAuthorizationUriWithoutPkceAsync(CancellationToken cancellationToken)
         {
-            var result = CreateAuthorizationUri(false);
+            string authEndpoint = await _requestParams.Authority.GetAuthorizationEndpointAsync(
+                _requestParams.RequestContext.ServiceBundle.HttpManager,
+                _requestParams.RequestContext.Logger,
+                cancellationToken).ConfigureAwait(false);
+
+            var result = CreateAuthorizationUri(authEndpoint, false);
             return result.Item1;
         }
 
-        public Uri GetAuthorizationUriWithPkce(string codeVerifier)
+        public async Task<Uri> GetAuthorizationUriWithPkceAsync(string codeVerifier, CancellationToken cancellationToken)
         {
-            var result = CreateAuthorizationUriWithCodeChallenge(codeVerifier);
+            string authEndpoint = await _requestParams.Authority.GetAuthorizationEndpointAsync(
+               _requestParams.RequestContext.ServiceBundle.HttpManager,
+               _requestParams.RequestContext.Logger,
+               cancellationToken).ConfigureAwait(false);
+
+            var result = CreateAuthorizationUriWithCodeChallenge(authEndpoint, codeVerifier);
             return result.Item1;
         }
 
@@ -62,7 +72,12 @@ namespace Microsoft.Identity.Client.Internal
 
             _requestParams.RedirectUri = webUi.UpdateRedirectUri(_requestParams.RedirectUri);
 
-            Tuple<Uri, string, string> authorizationTuple = CreateAuthorizationUri(true);
+            string authEndpoint = await _requestParams.Authority.GetAuthorizationEndpointAsync(
+               _requestParams.RequestContext.ServiceBundle.HttpManager,
+               _requestParams.RequestContext.Logger,
+               cancellationToken).ConfigureAwait(false);
+
+            Tuple<Uri, string, string> authorizationTuple = CreateAuthorizationUri(authEndpoint, true);
             Uri authorizationUri = authorizationTuple.Item1;
             string state = authorizationTuple.Item2;
             string codeVerifier = authorizationTuple.Item3;
@@ -80,7 +95,7 @@ namespace Microsoft.Identity.Client.Internal
         }
 
         private Tuple<Uri, string> CreateAuthorizationUriWithCodeChallenge(
-            string codeVerifier)
+            string authEndpoint, string codeVerifier)
         {
             IDictionary<string, string> requestParameters = CreateAuthorizationRequestParameters();
 
@@ -88,12 +103,12 @@ namespace Microsoft.Identity.Client.Internal
             requestParameters[OAuth2Parameter.CodeChallenge] = codeChallenge;
             requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
 
-            UriBuilder builder = CreateInteractiveRequestParameters(requestParameters);
+            UriBuilder builder = CreateInteractiveRequestParameters(authEndpoint, requestParameters);
 
             return new Tuple<Uri, string>(builder.Uri, codeVerifier);
         }
 
-        private Tuple<Uri, string, string> CreateAuthorizationUri(bool addPkceAndState = false)
+        private Tuple<Uri, string, string> CreateAuthorizationUri(string authEndpoint, bool addPkceAndState = false)
         {
             IDictionary<string, string> requestParameters = CreateAuthorizationRequestParameters();
             string codeVerifier = null;
@@ -112,12 +127,12 @@ namespace Microsoft.Identity.Client.Internal
             }
 
             requestParameters[OAuth2Parameter.ClientInfo] = "1";
-            UriBuilder builder = CreateInteractiveRequestParameters(requestParameters);
+            UriBuilder builder = CreateInteractiveRequestParameters(authEndpoint, requestParameters);
 
             return new Tuple<Uri, string, string>(builder.Uri, state, codeVerifier);
         }
 
-        private UriBuilder CreateInteractiveRequestParameters(IDictionary<string, string> requestParameters)
+        private UriBuilder CreateInteractiveRequestParameters(string authEndpoint, IDictionary<string, string> requestParameters)
         {
             // Add uid/utid values to QP if user object was passed in.
             if (_interactiveParameters.Account != null)
@@ -143,7 +158,7 @@ namespace Microsoft.Identity.Client.Internal
             CheckForDuplicateQueryParameters(_requestParams.ExtraQueryParameters, requestParameters);
 
             string qp = requestParameters.ToQueryParameter();
-            var builder = new UriBuilder(new Uri(_requestParams.Authority.GetAuthorizationEndpoint()));
+            var builder = new UriBuilder(authEndpoint);
             builder.AppendQueryParameters(qp);
             return builder;
         }

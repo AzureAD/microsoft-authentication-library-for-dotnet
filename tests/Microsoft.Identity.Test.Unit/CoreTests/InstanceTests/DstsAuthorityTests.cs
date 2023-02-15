@@ -87,9 +87,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             var instance = Authority.CreateAuthority(authority);
 
-            Assert.AreEqual($"{authority}/oauth2/v2.0/token", instance.GetTokenEndpoint());
-            Assert.AreEqual($"{authority}/oauth2/v2.0/authorize", instance.GetAuthorizationEndpoint());
-            Assert.AreEqual($"{authority}/oauth2/v2.0/devicecode", instance.GetDeviceCodeEndpoint());
+            Assert.AreEqual($"{authority}/oauth2/v2.0/token", instance.GetTokenEndpointAsync(default, default, default).Result);
+            Assert.AreEqual($"{authority}/oauth2/v2.0/authorize", instance.GetAuthorizationEndpointAsync(default, default, default).Result);
+            Assert.AreEqual($"{authority}/oauth2/v2.0/devicecode", instance.GetDeviceCodeEndpointAsync(default, default, default).Result);
             Assert.AreEqual($"https://some.url.dsts.core.azure-test.net/dstsv2/common/userrealm/", instance.AuthorityInfo.UserRealmUriPrefix);
         }
 

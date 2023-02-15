@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -88,6 +89,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public AuthorityInfo AuthorityInfo => AuthorityManager.Authority.AuthorityInfo;
 
         public AuthorityInfo AuthorityOverride => _commonParameters.AuthorityOverride;
+
+        /// <summary>
+        /// Gets the token endpoint of the "current" authority, as tracked by the AuthorityManager
+        /// </summary>
+        /// <returns></returns>
+        public Task<string> GetTokenEndpointAsync(CancellationToken cancellationToken)
+        {
+            return AuthorityManager.Authority.GetTokenEndpointAsync(
+                _serviceBundle.HttpManager, 
+                RequestContext.Logger, 
+                cancellationToken);
+        }
 
         #endregion
 

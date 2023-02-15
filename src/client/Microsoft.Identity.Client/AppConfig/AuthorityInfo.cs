@@ -41,8 +41,6 @@ namespace Microsoft.Identity.Client
             {
                 case AuthorityType.Generic:
                     CanonicalAuthority = new Uri(authorityUri.ToString());
-                    DiscoveryDocumentAddress = 
-                        string.Concat(CanonicalAuthority, GenericAuthority.OpenIdConfigurationEndpointSuffix);
                     break;
                     
                 case AuthorityType.B2C:
@@ -110,8 +108,7 @@ namespace Microsoft.Identity.Client
                 other.CanonicalAuthority,
                 other.AuthorityType,
                 other.UserRealmUriPrefix,
-                other.ValidateAuthority,
-                other.DiscoveryDocumentAddress)
+                other.ValidateAuthority)
         {
         }
 
@@ -119,14 +116,12 @@ namespace Microsoft.Identity.Client
             Uri canonicalAuthority,
             AuthorityType authorityType,
             string userRealmUriPrefix,
-            bool validateAuthority,
-            string discoveryDocumentAddress)
+            bool validateAuthority)
         {
             CanonicalAuthority = canonicalAuthority;
             AuthorityType = authorityType;
             UserRealmUriPrefix = userRealmUriPrefix;
-            ValidateAuthority = validateAuthority;
-            DiscoveryDocumentAddress = discoveryDocumentAddress;
+            ValidateAuthority = validateAuthority;            
         }
 
         public string Host => CanonicalAuthority.Host;
@@ -146,7 +141,6 @@ namespace Microsoft.Identity.Client
         internal bool IsTenantOverrideSupported => AuthorityType == AuthorityType.Aad;
         internal bool IsMultiTenantSupported => AuthorityType != AuthorityType.Adfs;
         internal bool IsClientInfoSupported => AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Dsts || AuthorityType == AuthorityType.B2C;
-        internal string DiscoveryDocumentAddress { get; set; }
 
         #region Builders
         internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)
@@ -236,14 +230,9 @@ namespace Microsoft.Identity.Client
             return new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
         }
 
-        internal static AuthorityInfo FromGenericAuthority(string authorityUri, string discoveryDocumentAddress = null)
+        internal static AuthorityInfo FromGenericAuthority(string authorityUri)
         {
             var authorityInfo = new AuthorityInfo(AuthorityType.Generic, authorityUri, false);
-            if (!string.IsNullOrEmpty(discoveryDocumentAddress))
-            {
-                authorityInfo.DiscoveryDocumentAddress = discoveryDocumentAddress;
-            }
-
             return authorityInfo;
         }
 

@@ -282,14 +282,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return AuthenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync();
         }
 
-        internal Task<MsalTokenResponse> SendTokenRequestAsync(
+        internal async Task<MsalTokenResponse> SendTokenRequestAsync(
             IDictionary<string, string> additionalBodyParameters,
             CancellationToken cancellationToken)
         {
-            var tokenResponse = SendTokenRequestAsync(
-                AuthenticationRequestParameters.Authority.GetTokenEndpoint(),
+            var tokenEndpoint = await AuthenticationRequestParameters.GetTokenEndpointAsync(cancellationToken).ConfigureAwait(false);
+
+            var tokenResponse = await SendTokenRequestAsync(
+                tokenEndpoint,
                 additionalBodyParameters,
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
+
             Metrics.IncrementTotalAccessTokensFromIdP();
             return tokenResponse;
         }

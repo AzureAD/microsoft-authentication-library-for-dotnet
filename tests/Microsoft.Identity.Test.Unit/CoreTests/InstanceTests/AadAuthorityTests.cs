@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        public void CreateEndpointsWithCommonTenantTest()
+        public async Task CreateEndpointsWithCommonTenantAsync()
         {
             using var harness = CreateTestHarness();
 
@@ -42,8 +42,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.IsNotNull(instance);
             Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
 
-            Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/authorize", instance.GetAuthorizationEndpoint());
-            Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", instance.GetTokenEndpoint());
+            Assert.AreEqual(
+                "https://login.microsoftonline.com/common/oauth2/v2.0/authorize", 
+                await instance.GetAuthorizationEndpointAsync(default, default, default).ConfigureAwait(false));
+            Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", 
+                await instance.GetTokenEndpointAsync(default, default, default).ConfigureAwait(false));
         }
 
         [TestMethod]

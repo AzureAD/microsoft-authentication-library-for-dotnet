@@ -14,6 +14,12 @@ namespace Microsoft.Identity.Client.Http
     {
         long LastRequestDurationInMs { get; }
 
+        /// <summary>
+        /// Should be used only for APIs from 3rd party libraries which require HttpClient. Otherwise use 
+        /// the methods below, which will performing logging and some retries.
+        /// </summary>        
+        public HttpClient GetHttpClient();
+
         Task<HttpResponse> SendPostAsync(
             Uri endpoint,
             IDictionary<string, string> headers,

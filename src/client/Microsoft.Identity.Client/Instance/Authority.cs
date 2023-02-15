@@ -4,7 +4,11 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance
@@ -107,11 +111,14 @@ namespace Microsoft.Identity.Client.Instance
         /// </summary>
         internal abstract string GetTenantedAuthority(string tenantId, bool forceTenantless = false);
 
-        internal abstract string GetTokenEndpoint();
+        internal abstract Task<string> GetTokenEndpointAsync(
+            IHttpManager httpManager, 
+            ILoggerAdapter logger, 
+            CancellationToken cancellationToken);
 
-        internal abstract string GetAuthorizationEndpoint();
+        internal abstract Task<string> GetAuthorizationEndpointAsync(IHttpManager httpManager, ILoggerAdapter logger, CancellationToken cancellationToken);
 
-        internal abstract string GetDeviceCodeEndpoint();
+        internal abstract Task<string> GetDeviceCodeEndpointAsync(IHttpManager httpManager, ILoggerAdapter logger, CancellationToken cancellationToken);
         #endregion
 
         internal static string GetEnvironment(string authority)

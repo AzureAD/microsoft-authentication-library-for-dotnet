@@ -3,6 +3,10 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -24,33 +28,42 @@ namespace Microsoft.Identity.Client.Instance
             return AuthorityInfo.CanonicalAuthority.ToString();
         }
 
-        internal override string GetTokenEndpoint()
+        internal override Task<string> GetTokenEndpointAsync(
+           IHttpManager httpManager,
+           ILoggerAdapter logger,
+           CancellationToken cancellationToken)
         {
             string tokenEndpoint = string.Format(
                               CultureInfo.InvariantCulture,
                               TokenEndpointTemplate,
                              AuthorityInfo.CanonicalAuthority);
-            return tokenEndpoint;
+            return Task.FromResult(tokenEndpoint);
         }
 
-        internal override string GetAuthorizationEndpoint()
+        internal override Task<string> GetAuthorizationEndpointAsync(
+            IHttpManager httpManager,
+            ILoggerAdapter logger,
+            CancellationToken cancellationToken)
         {
             string authEndpoint = string.Format(CultureInfo.InvariantCulture,
                     AuthorizationEndpointTemplate,
                     AuthorityInfo.CanonicalAuthority);
 
-            return authEndpoint;
+            return Task.FromResult(authEndpoint);
 
         }
 
-        internal override string GetDeviceCodeEndpoint()
+        internal override Task<string> GetDeviceCodeEndpointAsync(
+            IHttpManager httpManager,
+            ILoggerAdapter logger,
+            CancellationToken cancellationToken)
         {
             string deviceEndpoint = string.Format(
                   CultureInfo.InvariantCulture,
                   DeviceCodeEndpointTemplate,
                   AuthorityInfo.CanonicalAuthority);
 
-            return deviceEndpoint;  
+            return Task.FromResult(deviceEndpoint);  
         }
 
         internal override string TenantId => null;

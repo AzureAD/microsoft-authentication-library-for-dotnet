@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Http
             _retryConfig = retry;
         }
 
-        protected virtual HttpClient GetHttpClient()
+        public virtual HttpClient GetHttpClient()
         {
             return _httpClientFactory.GetHttpClient();
         }

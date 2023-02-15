@@ -17,7 +17,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
     [TestClass]
-    public class GenericAuthorityTests : TestBase
+    public class GenericAuthorityTests 
     {
         private const string DemoDuendeSoftwareDotCom = "https://demo.duendesoftware.com";
 
@@ -34,8 +34,15 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             Assert.AreEqual("api", response.Scopes.AsSingleString());
             Assert.AreEqual("Bearer", response.TokenType);
+            Assert.AreEqual(TokenSource.IdentityProvider, response.AuthenticationResultMetadata.TokenSource);
+
+            var response2 = await app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual("api", response.Scopes.AsSingleString());
+            Assert.AreEqual("Bearer", response.TokenType);
+            Assert.AreEqual(TokenSource.Cache, response2.AuthenticationResultMetadata.TokenSource);
         }
-        
+
         [TestMethod]
         public async Task ShouldSupportClientCredentialsPrivateKeyJwtWithDuendeDemoInstanceAsync()
         {
@@ -49,74 +56,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             Assert.AreEqual("api", response.Scopes.AsSingleString());
             Assert.AreEqual("Bearer", response.TokenType);
-        }
 
-        [TestMethod]
-        public async Task ShouldSupportClientCredentialsWithUserProvidedDiscoveryEndpointWithDuendeDemoInstanceAsync()
-        {
-            var applicationConfiguration = new ApplicationConfiguration(true);
-            ConfidentialClientApplicationBuilder builder = new(applicationConfiguration);
-            var app = builder.WithGenericAuthority(DemoDuendeSoftwareDotCom, 
-                    DemoDuendeSoftwareDotCom + "/.well-known/openid-configuration")
-                .WithClientId("m2m")
-                .WithClientSecret("secret")
-                .Build();
-            var response = await app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync().ConfigureAwait(false);
+            var response2 = await app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync().ConfigureAwait(false);
 
             Assert.AreEqual("api", response.Scopes.AsSingleString());
             Assert.AreEqual("Bearer", response.TokenType);
-        }
-        
-        [TestMethod]
-        public async Task ShouldSupportClientCredentialsWithPrivatyeKeyJwtAndUserProvidedDiscoveryEndpointWithDuendeDemoInstanceAsync()
-        {
-            var applicationConfiguration = new ApplicationConfiguration(true);
-            ConfidentialClientApplicationBuilder builder = new(applicationConfiguration);
-            var app = builder.WithGenericAuthority(DemoDuendeSoftwareDotCom, 
-                    DemoDuendeSoftwareDotCom + "/.well-known/openid-configuration")
-                .WithClientId("m2m.jwt")
-                .WithClientAssertion(options => GetPrivateKeyJwtClientAssertionAsync(options.ClientID, options.TokenEndpoint, options.CancellationToken))
-                .Build();
-            var response = await app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync().ConfigureAwait(false);
-
-            Assert.AreEqual("api", response.Scopes.AsSingleString());
-            Assert.AreEqual("Bearer", response.TokenType);
-        }
-
-        [TestMethod]
-        [DeploymentItem("Resources\\demo_duendesoftware_com_well-known_openid_configuration.json")]
-        public async Task ShouldSupportClientCredentialsWithUserProvidedDocumentRetrieverWithDuendeDemoInstanceAsync()
-        {
-            var applicationConfiguration = new ApplicationConfiguration(true);
-            ConfidentialClientApplicationBuilder builder = new(applicationConfiguration);
-            var app = builder.WithGenericAuthority(DemoDuendeSoftwareDotCom,
-                    "Resources\\demo_duendesoftware_com_well-known_openid_configuration.json")
-                .WithDocumentRetriever(new FileDocumentRetriever())
-                .WithClientId("m2m")
-                .WithClientSecret("secret")
-                .Build();
-            var response = await app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync().ConfigureAwait(false);
-
-            Assert.AreEqual("api", response.Scopes.AsSingleString());
-            Assert.AreEqual("Bearer", response.TokenType);
-        }
-        
-        [TestMethod]
-        [DeploymentItem("Resources\\demo_duendesoftware_com_well-known_openid_configuration.json")]
-        public async Task ShouldSupportClientCredentialsWithPrivateKeyJwtUserProvidedDocumentRetrieverWithDuendeDemoInstanceAsync()
-        {
-            var applicationConfiguration = new ApplicationConfiguration(true);
-            ConfidentialClientApplicationBuilder builder = new(applicationConfiguration);
-            var app = builder.WithGenericAuthority(DemoDuendeSoftwareDotCom,
-                    "Resources\\demo_duendesoftware_com_well-known_openid_configuration.json")
-                .WithDocumentRetriever(new FileDocumentRetriever())
-                .WithClientId("m2m.jwt")
-                .WithClientAssertion(options => GetPrivateKeyJwtClientAssertionAsync(options.ClientID, options.TokenEndpoint, options.CancellationToken))
-                .Build();
-            var response = await app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync().ConfigureAwait(false);
-
-            Assert.AreEqual("api", response.Scopes.AsSingleString());
-            Assert.AreEqual("Bearer", response.TokenType);
+            Assert.AreEqual(TokenSource.Cache, response2.AuthenticationResultMetadata.TokenSource);
         }
         
         private Task<string> GetPrivateKeyJwtClientAssertionAsync(string optionsClientId, string optionsTokenEndpoint, CancellationToken optionsCancellationToken)
