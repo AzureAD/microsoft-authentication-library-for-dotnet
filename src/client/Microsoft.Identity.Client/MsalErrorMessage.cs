@@ -448,7 +448,7 @@ namespace Microsoft.Identity.Client
 
         public const string ManagedIdentityEndpointInvalidUriError = "[Managed Identity] The environment variable {0} contains an invalid Uri {1} in {2} managed identity source.";
         public const string ManagedIdentityNoChallengeError = "[Managed Identity] Did not receive expected WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint.";
-        public const string ManagedIdentityInvalidChallange = "[Managed Identity] The WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint did not match the expected format.";
+        public const string ManagedIdentityInvalidChallenge = "[Managed Identity] The WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint did not match the expected format.";
         public const string ManagedIdentityUserAssignedNotSupported = "[Managed Identity] User assigned identity is not supported by the {0} Managed Identity. To authenticate with the system assigned identity omit the client id to .WithManagedIentity().";
         public const string ManagedIdentityUserAssignedNotConfigurableAtRuntime = "[Managed Identity] Service Fabric user assigned managed identity ClientId or ResourceId is not configurable at runtime.";
     }

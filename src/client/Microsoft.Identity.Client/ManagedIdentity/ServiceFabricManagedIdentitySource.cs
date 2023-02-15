@@ -18,8 +18,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         private readonly Uri _endpoint;
         private readonly string _identityHeaderValue;
-        private readonly string _clientId;
-        private readonly string _resourceId;
+        private readonly string _userAssignedId;
 
         public ServiceFabricManagedIdentitySource(RequestContext requestContext) : base(requestContext)
         {
@@ -50,13 +49,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             _endpoint = endpoint;
             _identityHeaderValue = identityHeaderValue;
-            _clientId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId;
-            _resourceId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId;
+            _userAssignedId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedId;
 
-            if (!string.IsNullOrEmpty(requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId) || 
-                !string.IsNullOrEmpty(requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId))
+            if (!string.IsNullOrEmpty(_userAssignedId))
             {
-                throw new MsalClientException(MsalError.UserAssignedManagedIdentityNotConfigurableAtRuntime, MsalErrorMessage.ManagedIdentityUserAssignedNotConfigurableAtRuntime);
+                requestContext.Logger.Warning(MsalErrorMessage.ManagedIdentityUserAssignedNotConfigurableAtRuntime);
             }
         }
 
@@ -69,13 +66,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.QueryParameters["api-version"] = ServiceFabricMsiApiVersion;
             request.QueryParameters["resource"] = resource;
 
-            if (!string.IsNullOrEmpty(_clientId))
+            if (!string.IsNullOrEmpty(_userAssignedId))
             {
-                request.QueryParameters[Constants.ManagedIdentityClientId] = _clientId;
-            }
-            if (!string.IsNullOrEmpty(_resourceId))
-            {
-                request.QueryParameters[Constants.ManagedIdentityResourceId] = _resourceId;
+                if (Guid.TryParse(_userAssignedId, out _))
+                {
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
+                    request.QueryParameters[Constants.ManagedIdentityClientId] = _userAssignedId;
+                }
+                else
+                {
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
+                    request.QueryParameters[Constants.ManagedIdentityResourceId] = _userAssignedId;
+                }
             }
 
             return request;
