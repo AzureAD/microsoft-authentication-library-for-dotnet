@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (string.IsNullOrEmpty(identityEndpoint) || string.IsNullOrEmpty(identityHeader) || string.IsNullOrEmpty(identityServerThumbprint))
             {
-                requestContext.Logger.Verbose("[Managed Identity] Service Fabric managed identity unavailable.");
+                requestContext.Logger.Verbose(() => "[Managed Identity] Service Fabric managed identity unavailable.");
                 return null;
             }
 
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", identityEndpoint, "Service Fabric"));
             }
 
-            requestContext.Logger.Verbose("[Managed Identity] Creating Service Fabric managed identity. Endpoint URI: " + identityEndpoint);
+            requestContext.Logger.Verbose(() => "[Managed Identity] Creating Service Fabric managed identity. Endpoint URI: " + identityEndpoint);
             return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, identityHeader);
         }
 
