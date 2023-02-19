@@ -40,9 +40,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalAccessTokenCacheItem cachedAccessToken = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             AuthenticationResult authResult = null;
-            bool isCachedAccessTokenValid = false;
 
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
+
+            //Check if initiating a long running process
+            if (AuthenticationRequestParameters.UserAssertion != null && !string.IsNullOrEmpty(AuthenticationRequestParameters.LongRunningOboCacheKey))
+            {
+                //Long running process should not use cached tokens
+                logger.Info("[OBO Request] Initiating long running process. Fetching OBO token from ESTS.");
+                return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+            }
+
             if (!_onBehalfOfParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 // look for access token in the cache first.
@@ -56,8 +64,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     cachedAccessToken = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
                 }
 
-                isCachedAccessTokenValid = cachedAccessToken != null && IsCachedAssertionTheSame(cachedAccessToken.Secret);
-                if (isCachedAccessTokenValid)
+                if (cachedAccessToken != null)
                 {
                     var cachedIdToken = await CacheManager.GetIdTokenCacheItemAsync(cachedAccessToken).ConfigureAwait(false);
                     var account = await CacheManager.GetAccountAssociatedWithAccessTokenAsync(cachedAccessToken).ConfigureAwait(false);
@@ -99,7 +106,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // No AT in the cache or AT needs to be refreshed
             try
             {
-                if (!isCachedAccessTokenValid)
+                if (cachedAccessToken == null)
                 {
                     authResult = await RefreshRtOrFetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
                 }
@@ -124,18 +131,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 return await HandleTokenRefreshErrorAsync(e, cachedAccessToken).ConfigureAwait(false);
             }
-        }
-
-        private bool IsCachedAssertionTheSame(string userAssertion)
-        {
-            //User assertion is null when ILongRunningWebApi.AcquireTokenInLongRunningProcess is called.
-            //In this scenario the cached token should be used.
-            if (string.IsNullOrWhiteSpace(AuthenticationRequestParameters?.UserAssertion?.Assertion))
-            { 
-                return true;
-            }
-
-            return userAssertion.Equals(AuthenticationRequestParameters?.UserAssertion?.Assertion);
         }
 
         private async Task<AuthenticationResult> RefreshRtOrFetchNewAccessTokenAsync(CancellationToken cancellationToken)

@@ -226,6 +226,53 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
+        public async Task InitiateLongRunningProcessWithExistingKey_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                AddMockHandlerAadSuccess(httpManager);
+
+                var cca = BuildCCA(httpManager);
+
+                var userCacheAccess = cca.UserTokenCache.RecordAccess();
+
+                string oboCacheKey = null;
+                var result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                // Token's not in cache, searched by user assertion hash, retrieved from IdP, saved with the provided OBO cache key
+                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                MsalAccessTokenCacheItem cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+                MsalRefreshTokenCacheItem cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single();
+                Assert.AreEqual(oboCacheKey, cachedAccessToken.OboCacheKey);
+                Assert.AreEqual(oboCacheKey, cachedRefreshToken.OboCacheKey);
+                userCacheAccess.AssertAccessCounts(0, 1);
+
+                //AddMockHandlerAadSuccess(httpManager);
+
+                AddMockHandlerAadSuccess(httpManager,
+                    responseMessage: MockHelpers.CreateSuccessTokenResponseMessage(accessToken: TestConstants.ATSecret2));
+
+                //Initiate another process using the same cache key
+                //MSAL should ignore the token in the cache, fetch a new token and overrite the existing one
+                result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TestConstants.ATSecret2, result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+                cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single();
+                Assert.AreEqual(oboCacheKey, cachedAccessToken.OboCacheKey);
+                Assert.AreEqual(oboCacheKey, cachedRefreshToken.OboCacheKey);
+                Assert.AreEqual(TestConstants.ATSecret2, cachedAccessToken.Secret);
+                userCacheAccess.AssertAccessCounts(0, 2);
+            }
+        }
+
+        [TestMethod]
         public async Task AcquireTokenByObo_InitiateLongRunningProcessInWebApi_CacheKeyAlreadyExists_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
