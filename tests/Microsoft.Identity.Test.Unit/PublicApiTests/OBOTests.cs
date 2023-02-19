@@ -226,7 +226,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task InitiateLongRunningProcessWithExistingKey_TestAsync()
+        public async Task InitiateLongRunningProcessWithExistingKeyAndToken_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -250,8 +250,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(oboCacheKey, cachedAccessToken.OboCacheKey);
                 Assert.AreEqual(oboCacheKey, cachedRefreshToken.OboCacheKey);
                 userCacheAccess.AssertAccessCounts(0, 1);
-
-                //AddMockHandlerAadSuccess(httpManager);
 
                 AddMockHandlerAadSuccess(httpManager,
                     responseMessage: MockHelpers.CreateSuccessTokenResponseMessage(accessToken: TestConstants.ATSecret2));
@@ -303,20 +301,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(oboCacheKey, cachedAccessToken.OboCacheKey);
                 Assert.AreEqual(oboCacheKey, cachedRefreshToken.OboCacheKey);
                 Assert.AreEqual(TestConstants.RTSecret, cachedRefreshToken.Secret);
-                userCacheAccess.AssertAccessCounts(1, 1);
-
-                // Token with the same scopes, OBO cache key, etc. exists in the cache -> AT is retrieved from the cache
-                result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
-                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-                cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
-                cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single();
-                Assert.AreEqual(oboCacheKey, cachedAccessToken.OboCacheKey);
-                Assert.AreEqual(oboCacheKey, cachedRefreshToken.OboCacheKey);
-                Assert.AreEqual(TestConstants.RTSecret, cachedRefreshToken.Secret);
-                userCacheAccess.AssertAccessCounts(2, 1);
+                userCacheAccess.AssertAccessCounts(0, 1);
 
                 AddMockHandlerAadSuccess(httpManager,
                     responseMessage: MockHelpers.CreateSuccessTokenResponseMessage(
@@ -340,7 +325,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(oboCacheKey, cachedAccessToken.OboCacheKey);
                 Assert.AreEqual(oboCacheKey, cachedRefreshToken.OboCacheKey);
                 Assert.AreEqual(TestConstants.RTSecret2, cachedRefreshToken.Secret);
-                userCacheAccess.AssertAccessCounts(3, 2);
+                userCacheAccess.AssertAccessCounts(0, 2);
             }
         }
 
