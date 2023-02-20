@@ -96,6 +96,13 @@ steps:
     Contents: '**/bin/**/*'
     TargetFolder: '$(build.artifactstagingdirectory)/DeviceAuth'
 
+- task: CopyFiles@2
+  displayName: 'Stage WAM DevApp Dlls'
+  inputs:
+    SourceFolder: tests/devapps/wam
+    Contents: '**/*'
+    TargetFolder: '$(build.artifactstagingdirectory)/WAM'
+
 - task: PublishPipelineArtifact@1
   displayName: 'Publish Artifact: drop'
   inputs:
