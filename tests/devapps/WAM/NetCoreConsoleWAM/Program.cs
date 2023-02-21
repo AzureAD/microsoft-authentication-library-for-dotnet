@@ -31,13 +31,21 @@ try
 }
 catch (MsalUiRequiredException)
 {
-    result = await pca
-        .AcquireTokenInteractive(s_scopes)
-        .WithParentActivityOrWindow(hWnd)
-        .ExecuteAsync()
-        .ConfigureAwait(false);
+    try
+    {
+        result = await pca
+            .AcquireTokenInteractive(s_scopes)
+            .WithParentActivityOrWindow(hWnd)
+            .ExecuteAsync()
+            .ConfigureAwait(false);
+
+        Console.WriteLine(result.AccessToken);
+    }
+    catch (MsalException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
 }
 
-Console.WriteLine(result.AccessToken);
 Console.Read();
 
