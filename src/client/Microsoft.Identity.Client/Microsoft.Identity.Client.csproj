@@ -317,6 +317,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The floating version exlcudes previews, see https://learn.microsoft.com/en-us/nuget/concepts/package-versioning#version-ranges -->
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.*" />
   </ItemGroup>
 </Project>
