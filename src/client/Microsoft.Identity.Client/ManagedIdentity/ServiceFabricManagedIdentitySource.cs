@@ -20,10 +20,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private readonly string _identityHeaderValue;
         private readonly string _userAssignedId;
 
-        public ServiceFabricManagedIdentitySource(RequestContext requestContext) : base(requestContext)
-        {
-        }
-
         public static ManagedIdentitySource TryCreate(RequestContext requestContext)
         {
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
