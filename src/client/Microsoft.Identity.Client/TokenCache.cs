@@ -65,14 +65,16 @@ namespace Microsoft.Identity.Client
         /// </summary>
         [Obsolete("The recommended way to get a cache is by using IClientApplicationBase.UserTokenCache or IClientApplicationBase.AppTokenCache")]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public TokenCache() : this((IServiceBundle)null, false, null)
+        public TokenCache() : this(null, false, null)
         {
         }
 
         internal TokenCache(IServiceBundle serviceBundle, bool isApplicationTokenCache, ICacheSerializationProvider optionalDefaultSerializer = null)
         {
             if (serviceBundle == null)
+            {
                 throw new ArgumentNullException(nameof(serviceBundle));
+            }
 
             // useRealSemaphore= false for MyApps and potentially for all apps when using non-singleton MSAL
             _semaphoreSlim = new OptionalSemaphoreSlim(useRealSemaphore: serviceBundle.Config.CacheSynchronizationEnabled);
@@ -192,7 +194,7 @@ namespace Microsoft.Identity.Client
 
         private bool RtMatchesAccount(MsalRefreshTokenCacheItem rtItem, MsalAccountCacheItem account)
         {
-            bool homeAccIdMatch = rtItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase);
+            bool homeAccIdMatch = rtItem.HomeAccountId != null && rtItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase);
             bool clientIdMatch =
                 rtItem.IsFRT || // Cannot filter by client ID if the RT can be used by multiple clients
                 rtItem.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase);

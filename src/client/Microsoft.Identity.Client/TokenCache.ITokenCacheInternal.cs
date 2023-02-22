@@ -201,7 +201,7 @@ namespace Microsoft.Identity.Client
                         Accessor.SaveAccessToken(msalAccessTokenCacheItem);
                     }
 
-                    if (idToken != null)
+                    if (idToken != null && homeAccountId != null)
                     {
                         logger.Info("[SaveTokenResponseAsync] Saving Id Token and Account in cache ...");
                         Accessor.SaveIdToken(msalIdTokenCacheItem);
@@ -410,9 +410,9 @@ namespace Microsoft.Identity.Client
             var existingWamAccountIds = existingAccount?.WamAccountIds;
             msalAccountCacheItem.WamAccountIds.MergeDifferentEntries(existingWamAccountIds);
         }
-#endregion
+        #endregion
 
-#region FindAccessToken
+        #region FindAccessToken
         /// <summary>
         /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performance.
         /// More information about how to test and what data to look for is in https://aka.ms/msal-net-performance-testing.
@@ -706,7 +706,7 @@ namespace Microsoft.Identity.Client
                         requestKid));
             return null;
         }
-#endregion
+        #endregion
 
         private void FilterTokensByClientId<T>(List<T> tokenCacheItems) where T : MsalCredentialCacheItemBase
         {

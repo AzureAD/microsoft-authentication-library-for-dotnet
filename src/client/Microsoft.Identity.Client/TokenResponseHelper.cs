@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -38,7 +39,7 @@ namespace Microsoft.Identity.Client
             }
 
             return idToken.PreferredUsername.NullIfWhiteSpace() ??
-                   idToken.Upn.NullIfWhiteSpace() ??                     
+                   idToken.Upn.NullIfWhiteSpace() ??
                    NullPreferredUsernameDisplayLabel;
         }
 
@@ -47,9 +48,14 @@ namespace Microsoft.Identity.Client
             ClientInfo clientInfo = response.ClientInfo != null ? ClientInfo.CreateFromJson(response.ClientInfo) : null;
             string homeAccountId = clientInfo?.ToAccountIdentifier() ?? idToken?.Subject; // ADFS does not have client info, so we use subject
 
+            if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf && clientInfo == null) // Service principal OBO
+            {
+                homeAccountId = null;
+            }
+
             if (homeAccountId == null)
             {
-                requestParams.RequestContext.Logger.Info("Cannot determine home account id - or id token or no client info and no subject ");
+                requestParams.RequestContext.Logger.Info("Cannot determine home account ID - missing client info, ID token, or ID token subject.");
             }
             return homeAccountId;
         }
