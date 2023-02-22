@@ -39,10 +39,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(endpoint);
 
-                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
-                    .Create("clientId")
+                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
+                    .Create()
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures()
                     .Build();
 
                 httpManager.AddManagedIdentityWSTrustMockHandler(endpoint,
@@ -54,16 +53,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     MockHelpers.GetMsiSuccessfulResponse(),
                     ManagedIdentitySourceType.AzureArc);
 
-                var result = await cca.AcquireTokenForClient(new string[] { scope })
-                    .WithManagedIdentity()
+                var result = await mia.AcquireTokenForManagedIdentity(scope)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-                result = await cca.AcquireTokenForClient(new string[] { scope })
-                    .WithManagedIdentity()
+                result = await mia.AcquireTokenForManagedIdentity(scope)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -81,15 +78,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(Endpoint);
 
-                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
-                    .Create("clientId")
+                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
+                    .Create()
+                    .WithUserAssignedManagedIdentity(userAssignedClientId)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures()
                     .Build();
 
                 MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                    await cca.AcquireTokenForClient(new string[] { "scope" })
-                    .WithManagedIdentity(userAssignedClientId)
+                    await mia.AcquireTokenForManagedIdentity("scope")
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
@@ -106,17 +102,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(Endpoint);
 
-                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
-                    .Create("clientId")
+                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
+                    .Create()
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures()
                     .Build();
 
                 httpManager.AddManagedIdentityWSTrustMockHandler(Endpoint);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await cca.AcquireTokenForClient(new string[] { "scope" })
-                    .WithManagedIdentity()
+                    await mia.AcquireTokenForManagedIdentity("scope")
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
@@ -133,17 +127,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(Endpoint);
 
-                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
-                    .Create("clientId")
+                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
+                    .Create()
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures()
                     .Build();
 
                 httpManager.AddManagedIdentityWSTrustMockHandler(Endpoint, "somevalue=filepath");
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await cca.AcquireTokenForClient(new string[] { "scope" })
-                    .WithManagedIdentity()
+                    await mia.AcquireTokenForManagedIdentity("scope")
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
@@ -162,10 +154,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(Endpoint);
-                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
-                    .Create("clientId")
+                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
+                    .Create()
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures()
                     .Build();
 
                 httpManager.AddManagedIdentityWSTrustMockHandler(Endpoint, 
@@ -178,8 +169,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.InternalServerError);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await cca.AcquireTokenForClient(new string[] { resource })
-                    .WithManagedIdentity()
+                    await mia.AcquireTokenForManagedIdentity(resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
@@ -195,18 +185,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(Endpoint);
 
-                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
-                    .Create("clientId")
+                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
+                    .Create()
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures()
                     .Build();
 
                 httpManager.AddManagedIdentityMockHandler(Endpoint, "scope", "", ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.InternalServerError);
                 httpManager.AddManagedIdentityMockHandler(Endpoint, "scope", "", ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.InternalServerError);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await cca.AcquireTokenForClient(new string[] { "scope" })
-                    .WithManagedIdentity()
+                    await mia.AcquireTokenForManagedIdentity("scope")
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
@@ -223,17 +211,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(Endpoint);
 
-                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
-                    .Create("clientId")
+                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
+                    .Create()
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures()
                     .Build();
 
-                httpManager.AddManagedIdentityMockHandler(Endpoint, "https://management.azure.com", "", ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.OK);
+                httpManager.AddManagedIdentityMockHandler(Endpoint, Resource, "", ManagedIdentitySourceType.AzureArc, statusCode: HttpStatusCode.OK);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await cca.AcquireTokenForClient(new string[] { "https://management.azure.com" })
-                    .WithManagedIdentity()
+                    await mia.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
@@ -250,15 +236,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables("localhost/token");
 
-                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
-                    .Create("clientId")
+                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
+                    .Create()
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures()
                     .Build();
 
                 MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                    await cca.AcquireTokenForClient(new string[] { "https://management.azure.com" })
-                    .WithManagedIdentity()
+                    await mia.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);

@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
         /// </summary>
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync()
+        public virtual async Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
             return await GetAccountsAsync(default(CancellationToken)).ConfigureAwait(false);
         }
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
         /// </summary>
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync(CancellationToken cancellationToken = default)
+        public virtual async Task<IEnumerable<IAccount>> GetAccountsAsync(CancellationToken cancellationToken = default)
         {
             return await GetAccountsInternalAsync(ApiIds.GetAccounts, null, cancellationToken).ConfigureAwait(false);
         }
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="userFlow">The identifier is the user flow being targeted by the specific B2C authority/>.
         /// </param>
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow)
+        public virtual async Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow)
         {
             return await GetAccountsAsync(userFlow, default(CancellationToken)).ConfigureAwait(false);
         }
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client
         /// <param name="userFlow">The identifier is the user flow being targeted by the specific B2C authority/>.
         /// </param>
         /// <param name="cancellationToken">Cancellation token </param>
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow, CancellationToken cancellationToken = default)
+        public virtual async Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(userFlow))
             {
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Client
         /// You typically get the account id from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property>
         /// </param>
         /// <param name="cancellationToken">Cancellation token </param>
-        public async Task<IAccount> GetAccountAsync(string accountId, CancellationToken cancellationToken = default)
+        public virtual async Task<IAccount> GetAccountAsync(string accountId, CancellationToken cancellationToken = default)
         {
             var accounts = await GetAccountsInternalAsync(ApiIds.GetAccountById, accountId, cancellationToken).ConfigureAwait(false);
             return accounts.SingleOrDefault();
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Client
         /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>.
         /// You typically get the account id from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property>
         /// </param>
-        public async Task<IAccount> GetAccountAsync(string accountId)
+        public virtual async Task<IAccount> GetAccountAsync(string accountId)
         {
             if (!string.IsNullOrWhiteSpace(accountId))
             {
@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Client
         /// Removes all tokens in the cache for the specified account.
         /// </summary>
         /// <param name="account">Instance of the account that needs to be removed</param>
-        public async Task RemoveAsync(IAccount account)
+        public virtual async Task RemoveAsync(IAccount account)
         {
             await RemoveAsync(account, default(CancellationToken)).ConfigureAwait(false);
         }
@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="account">Instance of the account that needs to be removed</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        public async Task RemoveAsync(IAccount account, CancellationToken cancellationToken = default)
+        public virtual async Task RemoveAsync(IAccount account, CancellationToken cancellationToken = default)
         {
             Guid correlationId = Guid.NewGuid();
             RequestContext requestContext = CreateRequestContext(correlationId, cancellationToken);
@@ -378,7 +378,7 @@ namespace Microsoft.Identity.Client
         /// specify extra query parameters
         ///
         /// </remarks>
-        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account)
+        public virtual AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account)
         {
             return AcquireTokenSilentParameterBuilder.Create(
                 ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
@@ -413,7 +413,7 @@ namespace Microsoft.Identity.Client
         /// specify extra query parameters
         ///
         /// </remarks>
-        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint)
+        public virtual AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint)
         {
             if (string.IsNullOrWhiteSpace(loginHint))
             {

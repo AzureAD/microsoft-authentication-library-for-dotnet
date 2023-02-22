@@ -85,7 +85,14 @@ namespace Microsoft.Identity.Client
 
             if (!userAssignedClientIdOrResourceId.IsNullOrEmpty())
             {
-                ServiceBundle.Config.ManagedIdentityUserAssignedId = userAssignedClientIdOrResourceId;
+                if (Guid.TryParse(userAssignedClientIdOrResourceId, out _))
+                {
+                    ServiceBundle.Config.ManagedIdentityUserAssignedClientId = userAssignedClientIdOrResourceId;
+                }
+                else
+                {
+                    ServiceBundle.Config.ManagedIdentityUserAssignedResourceId = userAssignedClientIdOrResourceId;
+                }
             }
 
             return this;

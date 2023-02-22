@@ -563,6 +563,7 @@ namespace Microsoft.Identity.Client
 
             // Only AcquireTokenSilent has an IAccount in the request that can be used for filtering
             if (requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForClient &&
+                requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForManagedIdentity && 
                 requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
             {
                 tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(

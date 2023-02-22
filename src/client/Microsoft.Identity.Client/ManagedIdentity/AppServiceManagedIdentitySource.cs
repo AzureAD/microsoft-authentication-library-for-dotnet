@@ -21,7 +21,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         private readonly Uri _endpoint;
         private readonly string _secret;
-        private readonly string _userAssignedId;
 
         public static ManagedIdentitySource TryCreate(RequestContext requestContext)
         {
@@ -36,7 +35,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             _endpoint = endpoint;
             _secret = secret;
-            _userAssignedId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedId;
         }
 
         private static bool TryValidateEnvVars(string msiEndpoint, string secret, ILoggerAdapter logger, out Uri endpointUri)
@@ -72,21 +70,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.QueryParameters["api-version"] = AppServiceMsiApiVersion;
             request.QueryParameters["resource"] = resource;
 
-            if (!string.IsNullOrEmpty(_userAssignedId))
+            if (!string.IsNullOrEmpty(_requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId))
             {
-                if (Guid.TryParse(_userAssignedId, out _))
-                {
-                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
-                    request.QueryParameters[Constants.ManagedIdentityClientId] = _userAssignedId;
-                }
-                else
-                {
-                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
-                    request.QueryParameters[Constants.ManagedIdentityResourceId] = _userAssignedId;
-                }
-                
+
+                _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
+                request.QueryParameters[Constants.ManagedIdentityClientId] = _requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId;
             }
 
+            if (!string.IsNullOrEmpty(_requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId))   
+            {
+                _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
+                request.QueryParameters[Constants.ManagedIdentityResourceId] = _requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId;
+            }
+                
             return request;
         }
     }

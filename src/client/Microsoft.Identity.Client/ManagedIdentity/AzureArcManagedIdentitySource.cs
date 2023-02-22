@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
@@ -51,7 +52,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             _endpoint = endpoint;
 
-            if (!string.IsNullOrEmpty(requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedId))
+            if (!string.IsNullOrEmpty(requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId) ||
+                !string.IsNullOrEmpty(requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId))
             {
                 throw new MsalClientException(MsalError.UserAssignedManagedIdentityNotSupported, 
                     string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, AzureArc));
@@ -67,6 +69,45 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.QueryParameters["resource"] = resource;
 
             return request;
+        }
+
+        protected override async Task<ManagedIdentityResponse> HandleResponseAsync(
+            AcquireTokenForManagedIdentityParameters parameters,
+            HttpResponse response,
+            CancellationToken cancellationToken)
+        {
+            _requestContext.Logger.Verbose(() => $"[Managed Identity] Response received. Status code: {response.StatusCode}");
+
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                if (!response.HeadersAsDictionary.TryGetValue("WWW-Authenticate", out string challenge))
+                {
+                    _requestContext.Logger.Error("[Managed Identity] WWW-Authenticate header is expected but not found.");
+                    throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.ManagedIdentityNoChallengeError);
+                }
+
+                var splitChallenge = challenge.Split(new char[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (splitChallenge.Length != 2)
+                {
+                    _requestContext.Logger.Error("[Managed Identity] The WWW-Authenticate header for Azure arc managed identity is not an expected format.");
+                    throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.ManagedIdentityInvalidChallange);
+                }
+
+                var authHeaderValue = "Basic " + File.ReadAllText(splitChallenge[1]);
+
+                ManagedIdentityRequest request = CreateRequest(parameters.Resource);
+
+                _requestContext.Logger.Verbose(() => "[Managed Identity] Adding authorization header to the request.");
+                request.Headers.Add("Authorization", authHeaderValue);
+
+                response = await _requestContext.ServiceBundle.HttpManager.SendGetAsync(request.ComputeUri(), request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
+
+                return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
+            }
+
+
+            return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
         }
 
         protected override async Task<ManagedIdentityResponse> HandleResponseAsync(

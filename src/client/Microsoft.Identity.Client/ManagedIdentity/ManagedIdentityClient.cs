@@ -11,6 +11,8 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -28,6 +30,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 _identitySource = SelectManagedIdentitySource(requestContext);
             }
+        }
+
+        internal async Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(AcquireTokenForManagedIdentityParameters parameters, CancellationToken cancellationToken)
+        {
+            return await _identitySource.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
         }
 
         internal async Task<AppTokenProviderResult> AppTokenProviderImplAsync(AppTokenProviderParameters parameters)

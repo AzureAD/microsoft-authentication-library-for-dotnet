@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json.Serialization;
@@ -180,6 +181,33 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 
             return response;
+        }
+
+        internal static MsalTokenResponse CreateFromManagedIdentityResponse(ManagedIdentityResponse managedIdentityResponse)
+        {
+            ValidateManagedIdenitityResult(managedIdentityResponse);
+
+            return new MsalTokenResponse
+            {
+                AccessToken = managedIdentityResponse.AccessToken,
+                ExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(managedIdentityResponse.ExpiresOn),
+                TokenType = managedIdentityResponse.TokenType,
+                TokenSource = TokenSource.IdentityProvider
+            };
+        }
+
+        private static void ValidateManagedIdenitityResult(ManagedIdentityResponse response)
+        {
+            if (string.IsNullOrEmpty(response.AccessToken))
+            {
+                HandleInvalidExternalValueError(nameof(response.AccessToken));
+            }
+
+            long expiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(response.ExpiresOn);
+            if (expiresIn == 0 || expiresIn < 0)
+            {
+                HandleInvalidExternalValueError(nameof(response.ExpiresOn));
+            }
         }
 
         internal static MsalTokenResponse CreateFromAppProviderResponse(AppTokenProviderResult tokenProviderResponse)

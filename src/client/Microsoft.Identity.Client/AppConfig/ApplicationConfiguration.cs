@@ -109,7 +109,9 @@ namespace Microsoft.Identity.Client
 
         public bool UseManagedIdentity { get; internal set; }
 
-        public string ManagedIdentityUserAssignedId {  get; internal set; }
+        public string ManagedIdentityUserAssignedClientId {  get; internal set; }
+
+        public string ManagedIdentityUserAssignedResourceId { get; internal set; }
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
