@@ -73,7 +73,7 @@ namespace NetCoreTestApp
                             .WithAuthority(GetAuthority())
                             .WithLogging(Log, LogLevel.Verbose, true)
                             .WithExperimentalFeatures()
-                            .WithDesktopFeatures();
+                            .WithWindowsDesktopFeatures();
 
             Console.WriteLine($"IsBrokerAvailable: {pcaBuilder.IsBrokerAvailable()}");
 

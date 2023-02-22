@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -25,6 +26,7 @@ namespace Microsoft.Identity.Client.Broker
         /// </remarks>
         public static PublicClientApplicationBuilder WithBrokerPreview(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
+            // deprecate this method
             builder.Config.IsBrokerEnabled = enableBroker;
             AddRuntimeSupportForWam(builder);
             return builder;

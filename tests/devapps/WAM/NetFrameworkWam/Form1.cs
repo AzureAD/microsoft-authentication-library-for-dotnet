@@ -104,10 +104,9 @@ namespace NetDesktopWinForms
                     builder = builder.WithWindowsBroker();
                     break;
                 case AuthMethod.WAMRuntime:
-                    builder = builder.WithBrokerPreview();
+                    builder = builder.WithWindowsBroker();
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder = builder.WithBrokerPreview(false);
                     builder = builder.WithWindowsBroker(false);
                     builder = builder.WithRedirectUri("http://localhost");
                     break;
