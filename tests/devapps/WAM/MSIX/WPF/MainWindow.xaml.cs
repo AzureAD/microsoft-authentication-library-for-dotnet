@@ -1,5 +1,5 @@
 ﻿using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Desktop;
+using Microsoft.Identity.Client.Broker;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -35,7 +35,7 @@ namespace WPF
             IPublicClientApplication pca = PublicClientApplicationBuilder
               .Create(clientId)
               .WithAuthority("https://login.microsoftonline.com/common")
-              .WithWindowsBroker(true)   // this method exists in Microsoft.Identity.Client.Broker package
+              .WithBrokerPreview(true)   // this method exists in Microsoft.Identity.Client.Broker package
               .Build();
 
             IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(true);

@@ -3,7 +3,6 @@
 
     <TargetFrameworkNetDesktop>net461</TargetFrameworkNetDesktop>
     <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
-    <TargetFrameworkNet6Win>net6.0-windows10.0.17763.0</TargetFrameworkNet6Win>
     <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetCore)</TargetFrameworks>
 
     <PathToMsalSources>$(MSBuildThisFileDirectory)../Microsoft.Identity.Client/</PathToMsalSources>
@@ -46,18 +45,18 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
   
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
     <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'  or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)' or '$(TargetFramework)' == '$(TargetFrameworkNetCore)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)' or '$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" LinkBase="Features/WAM" />
     <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.17763.1000" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WebView2WebUi\**\*.cs" LinkBase="Features/WebView2WebUi" />
@@ -65,7 +64,7 @@
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.864.35" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" LinkBase="Features\WinFormsLegacyWebUi" />
   </ItemGroup>
 

@@ -120,14 +120,14 @@ namespace NetDesktopWinForms
                     builder = ToggleOldBroker(builder, true);
                     break;
                 case AuthMethod.WAMRuntime:
-                    builder = builder.WithWindowsBroker();
+                    builder = builder.WithBrokerPreview().WithExperimentalFeatures();
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder = builder.WithWindowsBroker(false);
+                    builder = builder.WithBrokerPreview(false).WithExperimentalFeatures();
                     builder = ToggleOldBroker(builder, false);
                     break;
                 case AuthMethod.EmbeddedBrowser:
-                    builder = builder.WithWindowsBroker(false);
+                    builder = builder.WithBrokerPreview(false).WithExperimentalFeatures();
                     builder = ToggleOldBroker(builder, false);
 
                     break;
