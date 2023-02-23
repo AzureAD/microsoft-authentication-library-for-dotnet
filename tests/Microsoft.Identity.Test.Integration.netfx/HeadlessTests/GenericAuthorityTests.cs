@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -46,7 +47,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         /// Based on the publicly available https://demo.duendesoftware.com/
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task BadSecret_Duende_Async()
         {
             var app = ConfidentialClientApplicationBuilder.Create("m2m")
@@ -65,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         /// Based on the publicly available https://demo.duendesoftware.com/
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ShouldSupportClientCredentialsPrivateKeyJwtWithDuendeDemoInstanceAsync()
         {
             var applicationConfiguration = new ApplicationConfiguration(true);
