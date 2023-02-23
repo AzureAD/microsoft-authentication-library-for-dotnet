@@ -37,10 +37,9 @@ namespace Microsoft.Identity.Client.Utils
             string logPrefix,
             bool updateOriginalCollection = true)
         {
-            if (logger.IsLoggingEnabled(LogLevel.Verbose))
-            {
-                logger.Verbose($"{logPrefix} - item count before: {list.Count} ");
-            }
+
+            logger.Verbose(() => $"{logPrefix} - item count before: {list.Count} ");
+
             if (updateOriginalCollection)
             {
                 list.RemoveAll(e => !predicate(e));
@@ -50,10 +49,9 @@ namespace Microsoft.Identity.Client.Utils
                 list = list.Where(predicate).ToList();
             }
 
-            if (logger.IsLoggingEnabled(LogLevel.Verbose))
-            {
-                logger.Verbose($"{logPrefix} - item count after: {list.Count} ");
-            }
+
+            logger.Verbose(() => $"{logPrefix} - item count after: {list.Count} ");
+
 
             return list;
         }

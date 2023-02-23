@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             if (authenticationRequestParameters.Account != null ||
                 !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint))
             {
-                _logger.Verbose("[WamBroker] AcquireTokenIntractive - account information provided. Trying to find a Windows account that matches.");
+                _logger.Verbose(() => "[WamBroker] AcquireTokenIntractive - account information provided. Trying to find a Windows account that matches.");
 
                 bool isMsaPassthrough = _wamOptions.MsaPassthrough;
                 bool isMsa = await IsMsaRequestAsync(
@@ -179,19 +179,19 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                         isInteractive: true);
                 }
 
-                _logger.Verbose("[WamBroker] AcquireTokenIntractive - account information provided but no matching account was found ");
+                _logger.Verbose(() => "[WamBroker] AcquireTokenIntractive - account information provided but no matching account was found ");
             }
 
             // no account information available, need an account picker
             if (CanSkipAccountPicker(authenticationRequestParameters.Authority))
             {
-                _logger.Verbose("[WamBroker] Using AAD plugin account picker");
+                _logger.Verbose(() => "[WamBroker] Using AAD plugin account picker");
                 return await AcquireInteractiveWithAadBrowserAsync(
                     authenticationRequestParameters,
                     acquireTokenInteractiveParameters.Prompt).ConfigureAwait(false);
             }
 
-            _logger.Verbose("[WamBroker] Using Windows account picker (AccountsSettingsPane)");
+            _logger.Verbose(() => "[WamBroker] Using Windows account picker (AccountsSettingsPane)");
             return await AcquireInteractiveWithPickerAsync(
                 authenticationRequestParameters,
                 acquireTokenInteractiveParameters.Prompt)
@@ -898,7 +898,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 var webAccount = await FindWamAccountForMsalAccountAsync(provider, wamPlugin, account, null, appConfig.ClientId)
                     .ConfigureAwait(false);
-                _logger.Info("Found a webAccount? " + (webAccount != null));
+                _logger.Info(() => "Found a webAccount? " + (webAccount != null));
 
                 if (webAccount != null)
                 {
@@ -912,7 +912,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             if (!string.IsNullOrEmpty(homeTenantId))
             {
                 bool result = IsConsumerTenantId(homeTenantId);
-                _logger.Info("[WAM Broker] Deciding plugin based on home tenant Id ... MSA? " + result);
+                _logger.Info(() => "[WAM Broker] Deciding plugin based on home tenant Id ... MSA? " + result);
                 return result;
             }
 

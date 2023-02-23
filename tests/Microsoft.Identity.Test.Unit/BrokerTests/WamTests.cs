@@ -77,6 +77,37 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [TestMethod]
+        public void WamOnWin10()
+        {
+            if (!DesktopOsHelper.IsWin10OrServerEquivalent())
+            {
+                Assert.Inconclusive("Needs to run on win10 or equivalent");
+            }
+            var pcaBuilder = PublicClientApplicationBuilder
+               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
+               .WithAuthority(TestConstants.AuthorityTenant);
+
+#if !NET6_WIN
+            pcaBuilder = pcaBuilder.WithWindowsBroker();
+#endif
+
+            Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
+        }
+
+        [TestMethod]
+        public void NoWamOnADFS()
+        {
+            var pcaBuilder = PublicClientApplicationBuilder
+               .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
+               .WithAdfsAuthority(TestConstants.ADFSAuthority);
+#if !NET6_WIN
+            pcaBuilder = pcaBuilder.WithWindowsBroker();
+#endif
+
+            Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
+        }
+
+        [TestMethod]
         public void HandleInstallUrl_Throws()
         {
             AssertException.Throws<NotImplementedException>(() => _wamBroker.HandleInstallUrl("http://app"));

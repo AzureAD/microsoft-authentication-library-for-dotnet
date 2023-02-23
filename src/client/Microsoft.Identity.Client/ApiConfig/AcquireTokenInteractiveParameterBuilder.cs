@@ -150,6 +150,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
         /// <returns>The builder to chain the .With methods</returns>
+        /// <remarks>An exception will be thrown If AAD returns a different account than the one that is being requested for.</remarks>
         public AcquireTokenInteractiveParameterBuilder WithAccount(IAccount account)
         {
             Parameters.Account = account;
