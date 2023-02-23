@@ -4,11 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -19,6 +21,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     {
         private const string DemoDuendeSoftwareDotCom = "https://demo.duendesoftware.com";
 
+        /// Based on the publicly available https://demo.duendesoftware.com/
         [TestMethod]
         public async Task ShouldSupportClientCredentialsWithDuendeDemoInstanceAsync()
         {
@@ -42,6 +45,26 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(TokenSource.Cache, response2.AuthenticationResultMetadata.TokenSource);
         }
 
+        /// Based on the publicly available https://demo.duendesoftware.com/
+        [TestMethod]
+        public async Task BadSecret_Duende_Async()
+        {
+            var app = ConfidentialClientApplicationBuilder.Create("m2m")
+                .WithExperimentalFeatures(true)
+                .WithGenericAuthority(DemoDuendeSoftwareDotCom)
+                .WithClientSecret("bad_secret")
+                .Build();
+
+            var response = await app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync().ConfigureAwait(false);
+
+            var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync()).ConfigureAwait(false);
+
+            Assert.AreEqual(ex.ErrorCode, "invalid_client");
+            Assert.AreEqual(ex.StatusCode, HttpStatusCode.BadRequest);
+        }
+
+        /// Based on the publicly available https://demo.duendesoftware.com/
         [TestMethod]
         public async Task ShouldSupportClientCredentialsPrivateKeyJwtWithDuendeDemoInstanceAsync()
         {
