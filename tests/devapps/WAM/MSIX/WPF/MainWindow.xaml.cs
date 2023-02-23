@@ -35,7 +35,7 @@ namespace WPF
             IPublicClientApplication pca = PublicClientApplicationBuilder
               .Create(clientId)
               .WithAuthority("https://login.microsoftonline.com/common")
-              .WithBrokerPreview(true)   // this method exists in Microsoft.Identity.Client.Broker package
+              .WithBrokerNew(true)   // this method exists in Microsoft.Identity.Client.Broker package
               .Build();
 
             IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(true);

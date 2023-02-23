@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             {
                 PublicClientApplication app =
                     PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                              .WithBrokerPreview()
+                                                              .WithBrokerNew()
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
@@ -285,7 +285,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 mockBroker.IsPopSupported.Returns(true);
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithBrokerPreview()
+                    .WithBrokerNew()
                     .WithTestBroker(mockBroker)
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
@@ -318,7 +318,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithExperimentalFeatures(true)
-                .WithBrokerPreview()
+                .WithBrokerNew()
                 .WithTestBroker(mockBroker)
                 .BuildConcrete();
 
@@ -350,7 +350,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithExperimentalFeatures(true)
                     .WithAdfsAuthority(TestConstants.ADFSAuthority, false)
-                    .WithBrokerPreview()
+                    .WithBrokerNew()
                     .WithTestBroker(mockBroker)
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
@@ -391,7 +391,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithExperimentalFeatures(true)
-                    .WithBrokerPreview()
+                    .WithBrokerNew()
                     .WithTestBroker(mockBroker)
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
@@ -430,7 +430,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithExperimentalFeatures(true)
-                .WithBrokerPreview()
+                .WithBrokerNew()
                 .WithTestBroker(mockBroker)
                 .BuildConcrete();
 
@@ -498,7 +498,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             //Broker enabled
             IPublicClientApplication app = PublicClientApplicationBuilder
                                             .Create(TestConstants.ClientId)
-                                            .WithBrokerPreview()
+                                            .WithBrokerNew()
                                             .Build();
 
             Assert.IsTrue(app.IsProofOfPossessionSupportedByClient());
@@ -506,7 +506,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             //Broker disabled
             app = PublicClientApplicationBuilder
                                 .Create(TestConstants.ClientId)
-                                .WithBrokerPreview(false)
+                                .WithBrokerNew(false)
                                 .Build();
 
             Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());

@@ -466,7 +466,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithExperimentalFeatures()
                .WithLogging(wastestLogger)
-               .WithBrokerPreview()
+               .WithBrokerNew()
                .Build();
 
             Assert.IsTrue(pca.IsProofOfPossessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");

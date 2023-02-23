@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithExperimentalFeatures(true)
-                    .WithBrokerPreview()
+                    .WithBrokerNew()
                     .WithTestBroker(mockBroker)
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();

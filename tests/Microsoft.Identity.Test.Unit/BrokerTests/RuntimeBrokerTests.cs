@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAuthority(TestConstants.AuthorityTenant);
 
-            pcaBuilder = pcaBuilder.WithBrokerPreview();
+            pcaBuilder = pcaBuilder.WithBrokerNew();
             Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
 
         }
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAdfsAuthority(TestConstants.ADFSAuthority);
 
-            pcaBuilder = pcaBuilder.WithBrokerPreview();
+            pcaBuilder = pcaBuilder.WithBrokerNew();
 
             Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
 
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             var pca = PublicClientApplicationBuilder
                .Create(TestConstants.ClientId)
-               .WithBrokerPreview()
+               .WithBrokerNew()
                .Build();
 
             // no window handle - throw
