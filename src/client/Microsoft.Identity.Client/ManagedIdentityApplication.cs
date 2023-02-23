@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
 #endif
     public sealed partial class ManagedIdentityApplication
-        : ClientApplicationBase,
+        : ApplicationBase,
             IManagedIdentityApplication
     {
         internal ManagedIdentityApplication(
@@ -62,74 +62,6 @@ namespace Microsoft.Identity.Client
             return requestParams;
         }
 
-        ///<inheritdoc />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public override Task<IEnumerable<IAccount>> GetAccountsAsync()
-        {
-            throw new NotImplementedException();
-        }
 
-        ///<inheritdoc />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public override Task<IEnumerable<IAccount>> GetAccountsAsync(CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        ///<inheritdoc />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public override Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow)
-        {
-            throw new NotImplementedException();
-        }
-
-        ///<inheritdoc />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public override Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        ///<inheritdoc />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public override Task<IAccount> GetAccountAsync(string accountId, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        ///<inheritdoc />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public override Task<IAccount> GetAccountAsync(string accountId)
-        {
-            throw new NotImplementedException();
-        }
-
-        ///<inheritdoc />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public override Task RemoveAsync(IAccount account)
-        {
-            throw new NotImplementedException();
-        }
-
-        ///<inheritdoc />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public override Task RemoveAsync(IAccount account, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        ///<inheritdoc />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public override AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account)
-        {
-            throw new NotImplementedException();
-        }
-
-        ///<inheritdoc />
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public override AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

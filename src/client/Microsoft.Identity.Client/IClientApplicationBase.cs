@@ -11,24 +11,8 @@ namespace Microsoft.Identity.Client
     /// Abstract class containing common API methods and properties. Both <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/>
     /// extend this class. For details see https://aka.ms/msal-net-client-applications.
     /// </summary>
-    public partial interface IClientApplicationBase
-    {
-        /// <summary>
-        /// Details on the configuration of the ClientApplication for debugging purposes.
-        /// </summary>
-        IAppConfig AppConfig { get; }
-
-        /// <summary>
-        /// User token cache. This case holds id tokens, access tokens and refresh tokens for accounts. It's used
-        /// and updated silently if needed when calling <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
-        /// It is updated by each AcquireTokenXXX method, with the exception of <c>AcquireTokenForClient</c> which only uses the application
-        /// cache (see <c>IConfidentialClientApplication</c>).
-        /// </summary>
-        /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.
-        /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms.
-        /// </remarks>
-        ITokenCache UserTokenCache { get; }
-
+    public partial interface IClientApplicationBase : IApplicationBase
+    { 
         /// <summary>
         /// Gets the URL of the authority, or the security token service (STS) from which MSAL.NET will acquire security tokens.
         /// The return value of this property is either the value provided by the developer in the constructor of the application, or otherwise

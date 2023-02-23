@@ -24,19 +24,8 @@ namespace Microsoft.Identity.Client
     /// ConfidentialClientApplication
     /// extend this class. For details see https://aka.ms/msal-net-client-applications
     /// </summary>
-    public abstract partial class ClientApplicationBase : IClientApplicationBase
+    public abstract partial class ClientApplicationBase : ApplicationBase, IClientApplicationBase
     {
-        /// <summary>
-        /// Default Authority used for interactive calls.
-        /// </summary>
-        internal const string DefaultAuthority = "https://login.microsoftonline.com/common/";
-
-        internal IServiceBundle ServiceBundle { get; }
-
-        /// <summary>
-        /// Details on the configuration of the ClientApplication for debugging purposes.
-        /// </summary>
-        public IAppConfig AppConfig => ServiceBundle.Config;
 
         /// <summary>
         /// Gets the URL of the authority, or security token service (STS) from which MSAL.NET will acquire security tokens
@@ -47,52 +36,7 @@ namespace Microsoft.Identity.Client
 
         internal AuthorityInfo AuthorityInfo => ServiceBundle.Config.Authority.AuthorityInfo;
 
-        /// <summary>
-        /// User token cache. It holds access tokens, id tokens and refresh tokens for accounts. It's used
-        /// and updated silently if needed when calling <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
-        /// or one of the overrides of <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>.
-        /// It is updated by each AcquireTokenXXX method, with the exception of <c>AcquireTokenForClient</c> which only uses the application
-        /// cache (see <c>IConfidentialClientApplication</c>).
-        /// </summary>
-        /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.
-        /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on mobile platforms and on UWP.
-        /// It is recommended to use token cache serialization for web site and web api scenarios.
-        /// </remarks>
-        public ITokenCache UserTokenCache => UserTokenCacheInternal;
-
-        internal ITokenCacheInternal UserTokenCacheInternal { get; }
-
-        internal ClientApplicationBase(ApplicationConfiguration config)
-        {
-            ServiceBundle = Internal.ServiceBundle.Create(config);
-            ICacheSerializationProvider defaultCacheSerialization = ServiceBundle.PlatformProxy.CreateTokenCacheBlobStorage();
-
-            if (config.UserTokenLegacyCachePersistenceForTest != null)
-            {
-                UserTokenCacheInternal = new TokenCache(ServiceBundle, config.UserTokenLegacyCachePersistenceForTest, false, defaultCacheSerialization);
-            }
-            else
-            {
-                UserTokenCacheInternal = config.UserTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, false, defaultCacheSerialization);
-            }
-        }
-
-        internal virtual async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(
-            AcquireTokenCommonParameters commonParameters,
-            RequestContext requestContext,
-            ITokenCacheInternal cache)
-        {
-            var authority = await Instance.Authority.CreateAuthorityForRequestAsync(
-               requestContext,
-               commonParameters.AuthorityOverride).ConfigureAwait(false);
-
-            return new AuthenticationRequestParameters(
-                ServiceBundle,
-                cache,
-                commonParameters,
-                requestContext,
-                authority);
-        }
+        internal ClientApplicationBase(ApplicationConfiguration config) : base(config) { }
 
         #region Accounts
         /// <summary>
