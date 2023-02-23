@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Test.Unit
             if (s_httpResponse == null)
             {
                 s_httpResponse = new HttpResponse();
+                HttpResponse x = new();
                 s_httpResponse.Headers = MockHelpers.CreatePKeyAuthChallengeResponse().Headers;
             }
         }
