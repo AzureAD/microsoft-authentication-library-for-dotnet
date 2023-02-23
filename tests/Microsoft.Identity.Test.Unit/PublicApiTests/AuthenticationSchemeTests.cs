@@ -113,8 +113,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures(true)
-                    .WithBrokerNew()
+                    .WithWindowsBroker()
                     .WithTestBroker(mockBroker)
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();

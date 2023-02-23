@@ -176,8 +176,7 @@ namespace UWP_standalone
             var pca = PublicClientApplicationBuilder.Create(s_clientID)
                 .WithAuthority(s_authority)
                 .WithBroker(chkUseBroker.IsChecked.Value)
-                // .WithWindowsBroker(true) Does not let you add the project 👍
-                // .WithMsalRTBroker() does nto make difference
+                .WithWindowsBroker() // should not affect
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 

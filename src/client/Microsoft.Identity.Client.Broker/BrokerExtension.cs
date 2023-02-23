@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Broker
         /// Make sure browser auth is enabled (e.g. if using system browser, register the "http://localhost" redirect URI, etc.)
         /// </remarks>
         // The name to change later
-        public static PublicClientApplicationBuilder WithBrokerNew(this PublicClientApplicationBuilder builder, bool enableBroker = true)
+        public static PublicClientApplicationBuilder WithWindowsBroker(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
             builder.Config.IsBrokerEnabled = enableBroker;
             AddRuntimeSupportForWam(builder);
@@ -43,9 +43,9 @@ namespace Microsoft.Identity.Client.Broker
         /// If a broker does not exist or cannot be used, MSAL will fallback to a browser.
         /// Make sure browser auth is enabled (e.g. if using system browser, register the "http://localhost" redirect URI, etc.)
         /// </remarks>
+        [Obsolete("Thanks for trying the preview. This method has been deperecated. Please use WithWindowsBroker now. And WithExperimentalFeatures need not be used.")]
         public static PublicClientApplicationBuilder WithBrokerPreview(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
-            // deprecate this method
             builder.Config.IsBrokerEnabled = enableBroker;
             AddRuntimeSupportForWam(builder);
             return builder;
