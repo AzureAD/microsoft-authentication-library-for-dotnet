@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 #if NET_CORE
 using Microsoft.Identity.Client.Broker;
+using Microsoft.Identity.Client.Desktop;
 #endif
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
@@ -158,7 +159,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithBrokerPreview().Build();
+               .WithWindowsBroker().Build();
 
             Assert.IsTrue(pca.IsProofOfPossessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");
 

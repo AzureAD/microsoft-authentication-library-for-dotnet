@@ -112,7 +112,6 @@ namespace NetDesktopWinForms
                     break;
                 case AuthMethod.EmbeddedBrowser:
                     builder = builder.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}");
-                    builder = builder.WithBrokerPreview(false);
                     builder = builder.WithWindowsBroker(false);
                     break;
                 default:

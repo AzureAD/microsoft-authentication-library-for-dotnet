@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Broker;
+using Microsoft.Identity.Client.Desktop;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
                .WithAuthority("https://login.microsoftonline.com/organizations");
 
-            IPublicClientApplication pca = pcaBuilder.WithBrokerPreview().Build();
+            IPublicClientApplication pca = pcaBuilder.WithWindowsBroker().Build();
 
             // Act
             try
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
                .WithAuthority("https://login.microsoftonline.com/organizations");
 
-            IPublicClientApplication pca = pcaBuilder.WithBrokerPreview().Build();
+            IPublicClientApplication pca = pcaBuilder.WithWindowsBroker().Build();
 
             // Act
             try
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithLogging(testLogger)
-               .WithBrokerPreview().Build();
+               .WithWindowsBroker().Build();
 
             // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithLogging(testLogger, enablePiiLogging: true)
-               .WithBrokerPreview().Build();
+               .WithWindowsBroker().Build();
 
             // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithBrokerPreview()
+               .WithWindowsBroker()
                .WithWindowsBrokerOptions(
                 new WindowsBrokerOptions() 
                 {
@@ -255,7 +255,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create("43dfbb29-3683-4673-a66f-baba91798bd2")
                .WithAuthority("https://login.microsoftonline.com/organizations")
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithBrokerPreview()
+               .WithWindowsBroker()
                .Build();
 
             // Act
