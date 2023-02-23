@@ -14,7 +14,7 @@ using Microsoft.Identity.Client.Utils;
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
 #endif
     internal class ManagedIdentityExecutor : AbstractExecutor, IManagedIdentityApplicationExecutor
     {
@@ -39,9 +39,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 commonParameters,
                 requestContext,
                 _managedIdentityApplication.AppTokenCacheInternal).ConfigureAwait(false);
-               
-            ManagedIdentityClient managedIdentityClient = new ManagedIdentityClient(requestContext);
-            ServiceBundle.Config.AppTokenProvider = managedIdentityClient.AppTokenProviderImplAsync;
 
             var handler = new ManagedIdentityAuthenticationRequest(
                 ServiceBundle,

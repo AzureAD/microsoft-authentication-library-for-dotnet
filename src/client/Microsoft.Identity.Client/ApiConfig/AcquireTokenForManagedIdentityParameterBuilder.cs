@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client
     /// See https://aka.ms/msal-net-managed-identity
     /// </summary>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
 #endif
     public sealed class AcquireTokenForManagedIdentityParameterBuilder :
         AbstractManagedIdentityParameterBuilder<AcquireTokenForManagedIdentityParameterBuilder>

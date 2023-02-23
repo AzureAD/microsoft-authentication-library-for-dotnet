@@ -37,13 +37,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return await _identitySource.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
         }
 
-        internal async Task<AppTokenProviderResult> AppTokenProviderImplAsync(AppTokenProviderParameters parameters)
-        {
-            ManagedIdentityResponse response = await _identitySource.AuthenticateAsync(parameters, parameters.CancellationToken).ConfigureAwait(false);
-
-            return new AppTokenProviderResult() { AccessToken = response.AccessToken, ExpiresInSeconds = DateTimeHelpers.GetDurationFromNowInSeconds(response.ExpiresOn) };
-        }
-
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
         private static ManagedIdentitySource SelectManagedIdentitySource(RequestContext requestContext)
         {

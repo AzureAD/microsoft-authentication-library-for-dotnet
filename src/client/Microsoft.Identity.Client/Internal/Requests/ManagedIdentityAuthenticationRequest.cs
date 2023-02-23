@@ -37,13 +37,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     MsalErrorMessage.ScopesRequired);
             }
 
-            MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
             if (!_managedIdentityParameters.ForceRefresh)
             {
-                cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+                MsalAccessTokenCacheItem cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
                 if (cachedAccessTokenItem != null)
                 {

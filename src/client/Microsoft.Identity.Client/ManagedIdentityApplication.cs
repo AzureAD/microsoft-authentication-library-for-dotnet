@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Client
 {
@@ -21,7 +22,7 @@ namespace Microsoft.Identity.Client
     /// Managed identity can be enabled on Azure resources as a system assigned managed identity or a user assigned managed identity.
     /// </remarks>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
 #endif
     public sealed partial class ManagedIdentityApplication
         : ClientApplicationBase,
@@ -38,26 +39,13 @@ namespace Microsoft.Identity.Client
             this.ServiceBundle.ApplicationLogger.Verbose(()=>$"ManagedIdentityApplication {configuration.GetHashCode()} created");
         }
 
-        /// <summary>
-        /// Application token cache. This case holds access tokens for the application. It's maintained
-        /// and updated silently if needed when calling <see cref="AcquireTokenForManagedIdentity(string)"/>
-        /// </summary>
-        /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.
-        /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms
-        /// </remarks>
+        /// <inheritdoc />
         public ITokenCache AppTokenCache => AppTokenCacheInternal;
 
         // Stores all app tokens
         internal ITokenCacheInternal AppTokenCacheInternal { get; }
 
-        /// <summary>
-        /// Acquires token for managed identity for the specified resource.
-        /// See https://aka.ms/msal-net-managed-identity.
-        /// </summary>
-        /// <param name="resource">resource requested to access a protected API. 
-        /// For managed identity the resource should be of the form "{ResourceIdUri}" or "{ResourceIdUri/.default}" for instance
-        /// <c>https://management.azure.net</c>, <c>https://graph.microsoft.com/.default</c></param>
-        /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
+        /// <inheritdoc />
         public AcquireTokenForManagedIdentityParameterBuilder AcquireTokenForManagedIdentity(string resource)
         {
             return AcquireTokenForManagedIdentityParameterBuilder.Create(

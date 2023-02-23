@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// </summary>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
 #endif
     public sealed class ManagedIdentityApplicationBuilder : BaseAbstractApplicationBuilder<ManagedIdentityApplicationBuilder>
     {
@@ -30,14 +30,14 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Constructor of a ConfidentialClientApplicationBuilder from application configuration options.
+        /// Constructor of a ManagedIdentityApplicationBuilder from application configuration options.
         /// See https://aka.ms/msal-net-application-configuration
         /// </summary>
-        /// <param name="options">Confidential client applications configuration options</param>
-        /// <returns>A <see cref="ConfidentialClientApplicationBuilder"/> from which to set more
-        /// parameters, and to create a confidential client application instance</returns>
+        /// <param name="options">Managed identity applications configuration options</param>
+        /// <returns>A <see cref="ManagedIdentityApplicationBuilder"/> from which to set more
+        /// parameters, and to create a managed identity application instance</returns>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
 #endif
         public static ManagedIdentityApplicationBuilder CreateWithApplicationOptions(
             ManagedIdentityApplicationOptions options)
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A <see cref="ManagedIdentityApplicationBuilder"/> from which to set more
         /// parameters, and to create a managed identity application instance</returns>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
 #endif
         public static ManagedIdentityApplicationBuilder Create()
         {
@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Client
         {
             Config.RedirectUri = Constants.DefaultConfidentialClientRedirectUri;
             Config.ClientId = "ManagedIdentityDefault";
-            Config.IsInstanceDiscoveryEnabled = false;
+            Config.IsInstanceDiscoveryEnabled = false; // Disable instance discovery for managed identity
         }
     }
 }
