@@ -65,7 +65,5 @@ namespace Microsoft.Identity.Client.Instance
                 s_lockOidcRetrieval.Release();
             }
         }
-
-       
     }
 }
