@@ -4,12 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Client
 {
@@ -164,6 +167,47 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreateConfidentialClientExecutor(this),
                 scopes,
                 longRunningProcessSessionKey);
+        }
+
+        /// <summary>
+        /// Stops an in progress long running OBO session by removing the tokens associated with the provided cache key.
+        /// </summary>
+        /// <param name="longRunningProcessSessionKey">OBO cache key used to remove the tokens</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="longRunningProcessSessionKey"/> is not set.</exception>
+        public async Task StopLongRunningWebApiAsync(string longRunningProcessSessionKey, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrEmpty(longRunningProcessSessionKey))
+            {
+                throw new ArgumentNullException(nameof(longRunningProcessSessionKey));
+            }
+
+            Guid correlationId = Guid.NewGuid();
+            RequestContext requestContext = base.CreateRequestContext(correlationId, cancellationToken);
+            requestContext.ApiEvent = new ApiEvent(correlationId);
+            requestContext.ApiEvent.ApiId = ApiIds.RemoveAccount;
+
+            var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
+              requestContext,
+              null).ConfigureAwait(false);
+
+            var authParameters = new AuthenticationRequestParameters(
+                   ServiceBundle,
+                   UserTokenCacheInternal,
+                   new AcquireTokenCommonParameters() { ApiId = requestContext.ApiEvent.ApiId },
+                   requestContext,
+                   authority);
+
+            if (UserTokenCacheInternal != null)
+            {
+                await UserTokenCacheInternal.RemoveLongRunningOboAccountAsync(longRunningProcessSessionKey, authParameters).ConfigureAwait(false);
+            }
+        }
+
+        private RequestContext CreateRequestContext(Guid correlationId, object cancellationToken)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>

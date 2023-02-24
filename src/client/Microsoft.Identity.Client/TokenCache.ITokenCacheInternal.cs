@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -410,9 +411,9 @@ namespace Microsoft.Identity.Client
             var existingWamAccountIds = existingAccount?.WamAccountIds;
             msalAccountCacheItem.WamAccountIds.MergeDifferentEntries(existingWamAccountIds);
         }
-#endregion
+        #endregion
 
-#region FindAccessToken
+        #region FindAccessToken
         /// <summary>
         /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performance.
         /// More information about how to test and what data to look for is in https://aka.ms/msal-net-performance-testing.
@@ -706,7 +707,7 @@ namespace Microsoft.Identity.Client
                         requestKid));
             return null;
         }
-#endregion
+        #endregion
 
         private void FilterTokensByClientId<T>(List<T> tokenCacheItems) where T : MsalCredentialCacheItemBase
         {
@@ -1146,7 +1147,17 @@ namespace Microsoft.Identity.Client
                 tenantProfiles?.Values);
         }
 
+        async Task ITokenCacheInternal.RemoveLongRunningOboAccountAsync(string longRunningOboCacheKey, AuthenticationRequestParameters requestParameters)
+        {
+            await RemoveAccountAsync(null, longRunningOboCacheKey, requestParameters).ConfigureAwait(false);
+        }
+
         async Task ITokenCacheInternal.RemoveAccountAsync(IAccount account, AuthenticationRequestParameters requestParameters)
+        {
+            await RemoveAccountAsync(account, account.HomeAccountId?.Identifier, requestParameters).ConfigureAwait(false);
+        }
+
+        async Task RemoveAccountAsync(IAccount account, string cacheKey, AuthenticationRequestParameters requestParameters)
         {
             requestParameters.RequestContext.Logger.Verbose(() => $"[RemoveAccountAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}");
             await _semaphoreSlim.WaitAsync(requestParameters.RequestContext.UserCancellationToken).ConfigureAwait(false);
@@ -1154,7 +1165,7 @@ namespace Microsoft.Identity.Client
 
             try
             {
-                requestParameters.RequestContext.Logger.Info("[RemoveAccountAsync] Removing user from cache.");
+                requestParameters.RequestContext.Logger.Info("[RemoveAccountAsync] Removing account from cache.");
 
                 ITokenCacheInternal tokenCacheInternal = this;
 
@@ -1168,7 +1179,7 @@ namespace Microsoft.Identity.Client
                             account: account,
                             hasStateChanged: true,
                             tokenCacheInternal.IsApplicationCache,
-                            suggestedCacheKey: account.HomeAccountId.Identifier,
+                            suggestedCacheKey: cacheKey,
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                             suggestedCacheExpiry: null,
                             cancellationToken: requestParameters.RequestContext.UserCancellationToken,
@@ -1182,15 +1193,23 @@ namespace Microsoft.Identity.Client
                         await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
                     }
 
-                    RemoveAccountInternal(account, requestParameters.RequestContext);
+                    if (account != null)
+                    {
+                        RemoveAccountInternal(account, requestParameters.RequestContext);
+                    }
+                    else
+                    {
+                        RemoveOboAccountInternal(cacheKey, requestParameters.RequestContext);
+                    }
+                    
                     if (IsLegacyAdalCacheEnabled(requestParameters))
                     {
                         CacheFallbackOperations.RemoveAdalUser(
                            requestParameters.RequestContext.Logger,
                            LegacyCachePersistence,
                            ClientId,
-                           account.Username,
-                           account.HomeAccountId?.Identifier);
+                           account?.Username,
+                           cacheKey);
                     }
                 }
                 finally
@@ -1203,7 +1222,7 @@ namespace Microsoft.Identity.Client
                            account: account,
                            hasStateChanged: true,
                            tokenCacheInternal.IsApplicationCache,
-                           suggestedCacheKey: account.HomeAccountId.Identifier,
+                           suggestedCacheKey: cacheKey,
                            hasTokens: tokenCacheInternal.HasTokensNoLocks(),
                            suggestedCacheExpiry: null,
                            cancellationToken: requestParameters.RequestContext.UserCancellationToken,
@@ -1232,6 +1251,22 @@ namespace Microsoft.Identity.Client
             return Accessor.HasAccessOrRefreshTokens();
         }
 
+        internal /* internal for test only */ void RemoveOboAccountInternal(string partitionKey, RequestContext requestContext)
+        {
+            ILoggerAdapter logger = requestContext.Logger;
+
+            //Filter and remove tokens based on OBO Cache Key
+            var refreshTokens = Accessor.GetAllRefreshTokens(partitionKey);
+            refreshTokens.RemoveAll(item => !item.OboCacheKey.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
+
+            RemoveRefreshTokens(refreshTokens, logger, out bool filterByClientId);
+
+            var accessTokens = Accessor.GetAllAccessTokens(partitionKey);
+            accessTokens.RemoveAll(item => !item.OboCacheKey.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
+
+            RemoveAccessTokens(accessTokens, logger, filterByClientId);
+        }
+
         internal /* internal for test only */ void RemoveAccountInternal(IAccount account, RequestContext requestContext)
         {
             if (account.HomeAccountId == null)
@@ -1242,12 +1277,28 @@ namespace Microsoft.Identity.Client
 
             string partitionKey = account.HomeAccountId.Identifier;
 
-            var refreshTokens = Accessor.GetAllRefreshTokens(partitionKey);
-            refreshTokens.RemoveAll(item => !item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase));
+            ILoggerAdapter logger = requestContext.Logger;
 
+            var refreshTokens = Accessor.GetAllRefreshTokens(partitionKey);
+            refreshTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
+
+            RemoveRefreshTokens(refreshTokens, logger, out bool filterByClientId);
+
+            var accessTokens = Accessor.GetAllAccessTokens(partitionKey);
+            accessTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
+
+            RemoveAccessTokens(accessTokens, logger, filterByClientId);
+
+            RemoveIdTokens(partitionKey, logger, filterByClientId);
+
+            RemoveAccounts(account, logger, filterByClientId);
+        }
+
+        private void RemoveRefreshTokens(List<MsalRefreshTokenCacheItem> refreshTokens, ILoggerAdapter logger, out bool filterByClientId)
+        {
             // To maintain backward compatibility with other MSALs, filter all credentials by clientID if
             // FOCI is disabled or if an FRT is not present
-            bool filterByClientId = !_featureFlags.IsFociEnabled || !FrtExists(refreshTokens);
+            filterByClientId = !_featureFlags.IsFociEnabled || !FrtExists(refreshTokens);
 
             // Delete all credentials associated with this IAccount
             if (filterByClientId)
@@ -1260,10 +1311,11 @@ namespace Microsoft.Identity.Client
                 Accessor.DeleteRefreshToken(refreshTokenCacheItem);
             }
 
-            requestContext.Logger.Info(() => $"[RemoveAccountAsync] Deleted {refreshTokens.Count} refresh tokens.");
+            logger.Info(() => $"[RemoveRefreshTokens] Deleted {refreshTokens.Count} refresh tokens.");
+        }
 
-            var accessTokens = Accessor.GetAllAccessTokens(partitionKey);
-            accessTokens.RemoveAll(item => !item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase));
+        private void RemoveAccessTokens(List<MsalAccessTokenCacheItem> accessTokens, ILoggerAdapter logger, bool filterByClientId)
+        {
             if (filterByClientId)
             {
                 FilterTokensByClientId(accessTokens);
@@ -1274,10 +1326,13 @@ namespace Microsoft.Identity.Client
                 Accessor.DeleteAccessToken(accessTokenCacheItem);
             }
 
-            requestContext.Logger.Info(() => $"[RemoveAccountAsync] Deleted {accessTokens.Count} access tokens.");
+            logger.Info(() => $"[RemoveAccessTokens] Deleted {accessTokens.Count} access tokens.");
+        }
 
+        private void RemoveIdTokens(string partitionKey, ILoggerAdapter logger, bool filterByClientId)
+        {
             var idTokens = Accessor.GetAllIdTokens(partitionKey);
-            idTokens.RemoveAll(item => !item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase));
+            idTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
             if (filterByClientId)
             {
                 FilterTokensByClientId(idTokens);
@@ -1288,15 +1343,21 @@ namespace Microsoft.Identity.Client
                 Accessor.DeleteIdToken(idTokenCacheItem);
             }
 
-            requestContext.Logger.Info(() => $"[RemoveAccountAsync] Deleted {idTokens.Count} ID tokens.");
+            logger.Info(() => $"[RemoveIdTokens] Deleted {idTokens.Count} ID tokens.");
+        }
 
-            var accounts = Accessor.GetAllAccounts(partitionKey);
-            accounts.RemoveAll(item => !(item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
-                               item.PreferredUsername.Equals(account.Username, StringComparison.OrdinalIgnoreCase)));
-
-            foreach (MsalAccountCacheItem accountCacheItem in accounts)
+        private void RemoveAccounts(IAccount account, ILoggerAdapter logger, bool filterByClientId)
+        {
+            if (account != null)
             {
-                Accessor.DeleteAccount(accountCacheItem);
+                var accounts = Accessor.GetAllAccounts(account.HomeAccountId.Identifier);
+                accounts.RemoveAll(item => !(item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
+                                   item.PreferredUsername.Equals(account.Username, StringComparison.OrdinalIgnoreCase)));
+
+                foreach (MsalAccountCacheItem accountCacheItem in accounts)
+                {
+                    Accessor.DeleteAccount(accountCacheItem);
+                }
             }
         }
     }
