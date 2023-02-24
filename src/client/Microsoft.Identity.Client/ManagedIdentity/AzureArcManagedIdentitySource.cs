@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 if (splitChallenge.Length != 2)
                 {
                     _requestContext.Logger.Error("[Managed Identity] The WWW-Authenticate header for Azure arc managed identity is not an expected format.");
-                    throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.ManagedIdentityInvalidChallange);
+                    throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.ManagedIdentityInvalidChallenge);
                 }
 
                 var authHeaderValue = "Basic " + File.ReadAllText(splitChallenge[1]);
