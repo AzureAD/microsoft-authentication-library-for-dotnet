@@ -240,7 +240,6 @@ namespace NetCoreTestApp
 
                             var optionsChrome = new SystemWebViewOptions()
                             {
-                                //BrowserRedirectSuccess = new Uri("https://www.bing.com?q=why+is+42+the+meaning+of+life")
                                 OpenBrowserAsync = SystemWebViewOptions.OpenWithChromeEdgeBrowserAsync
                             };
 
@@ -285,7 +284,6 @@ namespace NetCoreTestApp
                             {
                                 var optionsbroker = new SystemWebViewOptions()
                                 {
-                                    //BrowserRedirectSuccess = new Uri("https://www.bing.com?q=why+is+42+the+meaning+of+life")
                                     OpenBrowserAsync = SystemWebViewOptions.OpenWithEdgeBrowserAsync
                                 };
 
