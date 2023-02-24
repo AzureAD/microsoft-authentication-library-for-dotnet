@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client
         private void DefaultConfiguration()
         {
             Config.RedirectUri = Constants.DefaultConfidentialClientRedirectUri;
-            Config.ClientId = "ManagedIdentityDefault";
+            Config.ClientId = Constants.ManagedIdentityDefaultClientId;
             Config.IsInstanceDiscoveryEnabled = false; // Disable instance discovery for managed identity
         }
     }
