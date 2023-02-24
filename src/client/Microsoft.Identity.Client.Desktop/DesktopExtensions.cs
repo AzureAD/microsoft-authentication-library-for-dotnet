@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.Desktop
         /// - WebView2 embedded web view, based on Microsoft Edge - https://aka.ms/msal-net-webview2
         /// </summary>
         /// <remarks>These extensions live in a separate package to avoid adding dependencies to MSAL</remarks>
-        [Obsolete("This method has been deprecated. Please use equivalent method WithWindowsDesktopFeatures")]
+        [Obsolete("This method has been deprecated. Use WithWindowsDesktopFeatures. For Windows Broker support only, use WithWindowsBroker API from Microsoft.Identity.Client.Broker package.", false)]
         public static PublicClientApplicationBuilder WithDesktopFeatures(this PublicClientApplicationBuilder builder)
         {
             WamExtension.AddSupportForWam(builder);
