@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Broker
                 builder.Config.BrokerCreatorFunc =
                      (uiParent, appConfig, logger) =>
                      {
-                         logger.Info("[WamBroker] WAM supported OS.");
+                         logger.Info("[RuntimeBroker] WAM supported OS.");
                          return new RuntimeBroker(uiParent, appConfig, logger);
                      };
             }
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Broker
                 builder.Config.BrokerCreatorFunc =
                    (uiParent, appConfig, logger) =>
                    {
-                       logger.Info("[WamBroker] Not a Windows 10 or Server equivalent machine. WAM is not available.");
+                       logger.Info("[RuntimeBroker] Not a Windows 10 or Server equivalent machine. WAM is not available.");
                        return new NullBroker(logger);
                    };
             }

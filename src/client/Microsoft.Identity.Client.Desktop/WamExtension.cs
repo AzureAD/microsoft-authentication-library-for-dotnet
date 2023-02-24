@@ -19,33 +19,8 @@ namespace Microsoft.Identity.Client.Desktop
         /// </summary>
         public static PublicClientApplicationBuilder WithWindowsBroker(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
-            builder.Config.IsBrokerEnabled = enableBroker;
-            AddRuntimeSupportForWam(builder);
-            return builder;
-        }
-
-        // this is for msal_runtime WAM
-        private static void AddRuntimeSupportForWam(PublicClientApplicationBuilder builder)
-        {
-
-            if (DesktopOsHelper.IsWin10OrServerEquivalent())
-            {
-                builder.Config.BrokerCreatorFunc =
-                     (uiParent, appConfig, logger) =>
-                     {
-                         logger.Info("[WamBroker] WAM supported OS.");
-                         return new RuntimeBroker(uiParent, appConfig, logger);
-                     };
-            }
-            else
-            {
-                builder.Config.BrokerCreatorFunc =
-                   (uiParent, appConfig, logger) =>
-                   {
-                       logger.Info("[WamBroker] Not a Windows 10 or Server equivalent machine. WAM is not available.");
-                       return new NullBroker(logger);
-                   };
-            }
+            builder.Config.IdentityLogger?.Log(new IdentityModel.Abstractions.LogEntry() { EventLogLevel = IdentityModel.Abstractions.EventLogLevel.Informational, Message = "WAM Broker extension calling RuntimeBroker extension" });
+            return BrokerExtension.WithWindowsBroker(builder, enableBroker);
         }
 
         // this is for legacy WAM
