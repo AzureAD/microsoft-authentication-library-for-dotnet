@@ -649,7 +649,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             var builder2 = PublicClientApplicationBuilder
                    .Create(TestConstants.ClientId)
-                   .WithDesktopFeatures()
+                   .WithWindowsDesktopFeatures()
                    .WithAuthority(TestConstants.AuthorityTenant);
 
             // broker is not available out of the box
@@ -668,7 +668,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             var builder2 = PublicClientApplicationBuilder
                    .Create(TestConstants.ClientId)
-                   .WithDesktopFeatures()
+                   .WithWindowsDesktopFeatures()
                    .WithAuthority(TestConstants.ADFSAuthority);
 
             // broker is not available on ADFS
@@ -676,7 +676,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             var builder3 = PublicClientApplicationBuilder
                    .Create(TestConstants.ClientId)
-                   .WithDesktopFeatures()
+                   .WithWindowsDesktopFeatures()
                    .WithAdfsAuthority(TestConstants.ADFSAuthority);
 
             // broker is not available on ADFS

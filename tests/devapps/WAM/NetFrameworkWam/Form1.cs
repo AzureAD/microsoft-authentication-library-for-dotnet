@@ -101,20 +101,20 @@ namespace NetDesktopWinForms
             switch (authMethod)
             {
                 case AuthMethod.WAM:
-                    builder = builder.WithWindowsBroker();
+                    builder = WamExtension.WithWindowsBroker(builder);
                     break;
                 case AuthMethod.WAMRuntime:
-                    builder = builder.WithBrokerPreview();
+                    builder = BrokerExtension.WithWindowsBroker(builder);
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder = builder.WithBrokerPreview(false);
-                    builder = builder.WithWindowsBroker(false);
+                    builder = BrokerExtension.WithWindowsBroker(builder, false);
+                    builder = WamExtension.WithWindowsBroker(builder, false);
                     builder = builder.WithRedirectUri("http://localhost");
                     break;
                 case AuthMethod.EmbeddedBrowser:
                     builder = builder.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}");
-                    builder = builder.WithBrokerPreview(false);
-                    builder = builder.WithWindowsBroker(false);
+                    builder = BrokerExtension.WithWindowsBroker(builder, false);
+                    builder = WamExtension.WithWindowsBroker(builder, false);
                     break;
                 default:
                     throw new NotImplementedException();
