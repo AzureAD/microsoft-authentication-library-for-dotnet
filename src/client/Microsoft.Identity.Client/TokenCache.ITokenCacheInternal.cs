@@ -1127,7 +1127,7 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParameters,
             MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            Debug.Assert(msalAccessTokenCacheItem.HomeAccountId != null);
+            // Debug.Assert(msalAccessTokenCacheItem.HomeAccountId != null);
 
             var tenantProfiles = await GetTenantProfilesAsync(requestParameters, msalAccessTokenCacheItem.HomeAccountId).ConfigureAwait(false);
 

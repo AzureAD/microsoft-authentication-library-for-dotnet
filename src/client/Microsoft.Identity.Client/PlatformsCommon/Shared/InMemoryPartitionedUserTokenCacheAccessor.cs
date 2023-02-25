@@ -115,12 +115,15 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public MsalIdTokenCacheItem GetIdToken(MsalAccessTokenCacheItem accessTokenCacheItem)
         {
-            string partitionKey = CacheKeyFactory.GetIdTokenKeyFromCachedItem(accessTokenCacheItem);
-
-            IdTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
-            if (partition != null && partition.TryGetValue(accessTokenCacheItem.GetIdTokenItem().CacheKey, out var idToken))
+            if (accessTokenCacheItem.HomeAccountId != null)
             {
-                return idToken;
+                string partitionKey = CacheKeyFactory.GetIdTokenKeyFromCachedItem(accessTokenCacheItem);
+
+                IdTokenCacheDictionary.TryGetValue(partitionKey, out var partition);
+                if (partition != null && partition.TryGetValue(accessTokenCacheItem.GetIdTokenItem().CacheKey, out var idToken))
+                {
+                    return idToken;
+                }
             }
 
             _logger.WarningPii(
@@ -131,11 +134,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public MsalAccountCacheItem GetAccount(MsalAccountCacheItem accountCacheItem)
         {
-            string partitionKey = CacheKeyFactory.GetKeyFromAccount(accountCacheItem);
-
-            AccountCacheDictionary.TryGetValue(partitionKey, out var partition);
             MsalAccountCacheItem cacheItem = null;
-            partition?.TryGetValue(accountCacheItem.CacheKey, out cacheItem);
+
+            if (accountCacheItem.HomeAccountId != null)
+            {
+                string partitionKey = CacheKeyFactory.GetKeyFromAccount(accountCacheItem);
+
+                AccountCacheDictionary.TryGetValue(partitionKey, out var partition);
+                partition?.TryGetValue(accountCacheItem.CacheKey, out cacheItem);
+            }
+
             return cacheItem;
         }
 

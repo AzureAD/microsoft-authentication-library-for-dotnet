@@ -175,8 +175,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 "The cache expiry is not set because there is an RT in the cache");
             Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count);
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccounts().Count);
+            Assert.AreEqual(0, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count);
+            Assert.AreEqual(0, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccounts().Count);
 
             Trace.WriteLine("3. Later, mid-tier needs the token again, and one is in the cache");
             authenticationResult = await middletierServiceApp
@@ -204,8 +204,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 "The cache expiry is not set because there is an RT in the cache");
             Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count);
-            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccounts().Count);
+            Assert.AreEqual(0, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count);
+            Assert.AreEqual(0, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccounts().Count);
         }
 
         [RunOn(TargetFrameworks.NetCore)]

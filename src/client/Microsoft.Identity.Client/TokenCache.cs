@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client
 
             requestParams.RequestContext.Logger.Info(() => "Intersecting scope entries count - " + accessTokensToDelete.Count);
 
-            if (!requestParams.IsClientCredentialRequest)
+            if (!requestParams.IsClientCredentialRequest && requestParams.ApiId != TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenOnBehalfOf && requestParams.UserAssertion == null)
             {
                 // filter by identifier of the user instead
                 accessTokensToDelete.RemoveAll(
