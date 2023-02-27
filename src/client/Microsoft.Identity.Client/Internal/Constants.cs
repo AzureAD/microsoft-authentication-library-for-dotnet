@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public const string ManagedIdentityClientId = "client_id";
         public const string ManagedIdentityResourceId = "mi_res_id";
-        public const string ManagedIdentityDefaultClientId = "ManagedIdentityDefaultClientId";
+        public const string ManagedIdentityDefaultClientId = "ManagedIdentityClient";
 
         public static string FormatEnterpriseRegistrationOnPremiseUri(string domain)
         {

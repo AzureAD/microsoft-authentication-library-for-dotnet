@@ -48,24 +48,54 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(false, mi.AppConfig.IsDefaultPlatformLoggingEnabled);
         }
 
-        public void TestConstructor_WithUserAssignedManagedIdentity_ClientId()
+        [TestMethod]
+        public void TestConstructor_WithCreateUserAssignedId()
         {
-            var mi = ManagedIdentityApplicationBuilder.Create()
-                .WithUserAssignedManagedIdentity(TestConstants.ClientId)
-                .BuildConcrete();
+            var mi = ManagedIdentityApplicationBuilder.Create(TestConstants.ClientId).BuildConcrete();
+
+            // Assert defaults
+            Assert.AreEqual(TestConstants.ClientId, mi.AppConfig.ClientId);
+            Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, mi.AppConfig.RedirectUri);
+
+            Assert.IsNotNull(mi.UserTokenCache);
+            Assert.IsNotNull(mi.AppConfig.ClientName);
+            Assert.IsNotNull(mi.AppConfig.ClientVersion);
 
             Assert.IsNotNull(mi.ServiceBundle.Config.ManagedIdentityUserAssignedClientId);
             Assert.AreEqual(TestConstants.ClientId, mi.ServiceBundle.Config.ManagedIdentityUserAssignedClientId);
+
+            Assert.IsNull(mi.AppConfig.HttpClientFactory);
+            Assert.IsNull(mi.AppConfig.LoggingCallback);
+            Assert.IsNull(mi.AppConfig.TenantId);
+
+            // Validate Defaults
+            Assert.AreEqual(LogLevel.Info, mi.AppConfig.LogLevel);
+            Assert.AreEqual(false, mi.AppConfig.EnablePiiLogging);
+            Assert.AreEqual(false, mi.AppConfig.IsDefaultPlatformLoggingEnabled);
         }
 
-        public void TestConstructor_WithUserAssignedManagedIdentity_ResourceId()
+        [DataTestMethod]
+        [DataRow(TestConstants.ClientId)]
+        [DataRow("resourceId", false)]
+        [DataRow("resourceId/subscription", false)]
+        public void TestConstructor_WithUserAssignedManagedIdentity_ResourceId(string userAssignedId, bool isClientId = true)
         {
             var mi = ManagedIdentityApplicationBuilder.Create()
-                .WithUserAssignedManagedIdentity("resourceId")
+                .WithUserAssignedManagedIdentity(userAssignedId)
                 .BuildConcrete();
 
-            Assert.IsNotNull(mi.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId);
-            Assert.AreEqual("resourceId", mi.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId);
+            if (isClientId)
+            {
+                Assert.AreEqual(userAssignedId, mi.AppConfig.ClientId);
+                Assert.IsNotNull(mi.ServiceBundle.Config.ManagedIdentityUserAssignedClientId);
+                Assert.AreEqual(userAssignedId, mi.ServiceBundle.Config.ManagedIdentityUserAssignedClientId);
+            }
+            else
+            {
+                Assert.AreEqual(Constants.ManagedIdentityDefaultClientId + userAssignedId.GetHashCode(), mi.AppConfig.ClientId);
+                Assert.IsNotNull(mi.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId);
+                Assert.AreEqual(userAssignedId, mi.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId);
+            }
         }
 
         [DataTestMethod]

@@ -76,6 +76,26 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Creates a ManagedIdentityApplicationBuilder from a user assigned managed identity clientID / resourceId.
+        /// See https://aka.ms/msal-net-application-configuration
+        /// </summary>
+        /// <param name="userAssignedId">Client ID / Resource ID of the user assigned managed identity assigned to the resource.</param>
+        /// <returns>A <see cref="ManagedIdentityApplicationBuilder"/> from which to set more
+        /// parameters, and to create a managed identity application instance</returns>
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
+#endif
+        public static ManagedIdentityApplicationBuilder Create(string userAssignedId)
+        {
+            ClientApplicationBase.GuardMobileFrameworks();
+
+            var config = new ApplicationConfiguration(isConfidentialClient: true);
+            return new ManagedIdentityApplicationBuilder(config)
+                .WithUserAssignedManagedIdentity(userAssignedId)
+                .WithCacheSynchronization(false);
+        }
+
+        /// <summary>
         /// Sets the user assigned client id. User can alternatively pass resource id for the user assigned managed identity if client id is not yet generated.
         /// </summary>
         /// <param name="userAssignedId"></param>
@@ -183,9 +203,26 @@ namespace Microsoft.Identity.Client
 
         private void DefaultConfiguration()
         {
+            ComputeClientIdForCaching();
+
             Config.RedirectUri = Constants.DefaultConfidentialClientRedirectUri;
-            Config.ClientId = Constants.ManagedIdentityDefaultClientId;
             Config.IsInstanceDiscoveryEnabled = false; // Disable instance discovery for managed identity
+        }
+
+        private void ComputeClientIdForCaching()
+        {
+            if (!string.IsNullOrEmpty(Config.ManagedIdentityUserAssignedClientId))
+            {
+                Config.ClientId = Config.ManagedIdentityUserAssignedClientId;
+            }
+            else if (!string.IsNullOrEmpty(Config.ManagedIdentityUserAssignedResourceId))
+            {
+                Config.ClientId = Constants.ManagedIdentityDefaultClientId + Config.ManagedIdentityUserAssignedResourceId.GetHashCode();
+            }
+            else
+            {
+                Config.ClientId = Constants.ManagedIdentityDefaultClientId;
+            }
         }
     }
 }
