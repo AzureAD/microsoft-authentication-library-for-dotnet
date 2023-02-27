@@ -1147,22 +1147,85 @@ namespace Microsoft.Identity.Client
                 tenantProfiles?.Values);
         }
 
-        async Task ITokenCacheInternal.RemoveLongRunningOboAccountAsync(string longRunningOboCacheKey, AuthenticationRequestParameters requestParameters)
+        async Task ITokenCacheInternal.StopLongRunningOboProcessAsync(string longRunningOboCacheKey, AuthenticationRequestParameters requestParameters)
         {
-            await RemoveAccountAsync(null, longRunningOboCacheKey, requestParameters).ConfigureAwait(false);
+            requestParameters.RequestContext.Logger.Verbose(() => $"[StopLongRunningOboProcessAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}");
+            await _semaphoreSlim.WaitAsync(requestParameters.RequestContext.UserCancellationToken).ConfigureAwait(false);
+            requestParameters.RequestContext.Logger.Verbose(() => "[StopLongRunningOboProcessAsync] Entered token cache semaphore");
+
+            try
+            {
+                requestParameters.RequestContext.Logger.Info("[StopLongRunningOboProcessAsync] Stopping long running OBO process by removing tokens from cache.");
+
+                ITokenCacheInternal tokenCacheInternal = this;
+
+                try
+                {
+                    if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
+                    {
+                        var args = new TokenCacheNotificationArgs(
+                            tokenCache: this,
+                            clientId: ClientId,
+                            account: null,
+                            hasStateChanged: true,
+                            tokenCacheInternal.IsApplicationCache,
+                            suggestedCacheKey: longRunningOboCacheKey,
+                            hasTokens: tokenCacheInternal.HasTokensNoLocks(),
+                            suggestedCacheExpiry: null,
+                            cancellationToken: requestParameters.RequestContext.UserCancellationToken,
+                            correlationId: requestParameters.RequestContext.CorrelationId,
+                            requestScopes: requestParameters.Scope,
+                            requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId,
+                            identityLogger: requestParameters.RequestContext.Logger.IdentityLogger,
+                            piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
+
+                        await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
+                        await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
+                    }
+
+                    RemoveOboTokensInternal(longRunningOboCacheKey, requestParameters.RequestContext);
+                }
+                finally
+                {
+                    if (tokenCacheInternal.IsAppSubscribedToSerializationEvents())
+                    {
+                        var args = new TokenCacheNotificationArgs(
+                           tokenCache: this,
+                           clientId: ClientId,
+                           account: null,
+                           hasStateChanged: true,
+                           tokenCacheInternal.IsApplicationCache,
+                           suggestedCacheKey: longRunningOboCacheKey,
+                           hasTokens: tokenCacheInternal.HasTokensNoLocks(),
+                           suggestedCacheExpiry: null,
+                           cancellationToken: requestParameters.RequestContext.UserCancellationToken,
+                           correlationId: requestParameters.RequestContext.CorrelationId,
+                           requestScopes: requestParameters.Scope,
+                           requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId,
+                           identityLogger: requestParameters.RequestContext.Logger.IdentityLogger,
+                            piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
+
+                        await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
+                    }
+                }
+            }
+            finally
+            {
+#pragma warning disable CS0618 // Type or member is obsolete
+                HasStateChanged = false;
+#pragma warning restore CS0618 // Type or member is obsolete
+
+                _semaphoreSlim.Release();
+            }
         }
 
         async Task ITokenCacheInternal.RemoveAccountAsync(IAccount account, AuthenticationRequestParameters requestParameters)
-        {
-            await RemoveAccountAsync(account, account.HomeAccountId?.Identifier, requestParameters).ConfigureAwait(false);
-        }
-
-        async Task RemoveAccountAsync(IAccount account, string cacheKey, AuthenticationRequestParameters requestParameters)
         {
             requestParameters.RequestContext.Logger.Verbose(() => $"[RemoveAccountAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}");
             await _semaphoreSlim.WaitAsync(requestParameters.RequestContext.UserCancellationToken).ConfigureAwait(false);
             requestParameters.RequestContext.Logger.Verbose(() => "[RemoveAccountAsync] Entered token cache semaphore");
 
+            var cacheKey = account.HomeAccountId?.Identifier;
             try
             {
                 requestParameters.RequestContext.Logger.Info("[RemoveAccountAsync] Removing account from cache.");
@@ -1193,14 +1256,7 @@ namespace Microsoft.Identity.Client
                         await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
                     }
 
-                    if (account != null)
-                    {
-                        RemoveAccountInternal(account, requestParameters.RequestContext);
-                    }
-                    else
-                    {
-                        RemoveOboAccountInternal(cacheKey, requestParameters.RequestContext);
-                    }
+                    RemoveAccountInternal(account, requestParameters.RequestContext);
                     
                     if (IsLegacyAdalCacheEnabled(requestParameters))
                     {
@@ -1251,19 +1307,17 @@ namespace Microsoft.Identity.Client
             return Accessor.HasAccessOrRefreshTokens();
         }
 
-        internal /* internal for test only */ void RemoveOboAccountInternal(string partitionKey, RequestContext requestContext)
+        internal /* internal for test only */ void RemoveOboTokensInternal(string partitionKey, RequestContext requestContext)
         {
             ILoggerAdapter logger = requestContext.Logger;
 
             //Filter and remove tokens based on OBO Cache Key
             var refreshTokens = Accessor.GetAllRefreshTokens(partitionKey);
             refreshTokens.RemoveAll(item => !item.OboCacheKey.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
-
             RemoveRefreshTokens(refreshTokens, logger, out bool filterByClientId);
 
             var accessTokens = Accessor.GetAllAccessTokens(partitionKey);
             accessTokens.RemoveAll(item => !item.OboCacheKey.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
-
             RemoveAccessTokens(accessTokens, logger, filterByClientId);
         }
 
@@ -1275,6 +1329,7 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
+            //Filter and remove tokens based on account identifier as 
             string partitionKey = account.HomeAccountId.Identifier;
 
             ILoggerAdapter logger = requestContext.Logger;

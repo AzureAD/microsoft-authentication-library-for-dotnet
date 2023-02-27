@@ -201,7 +201,7 @@ namespace Microsoft.Identity.Client
 
             if (UserTokenCacheInternal != null)
             {
-                await UserTokenCacheInternal.RemoveLongRunningOboAccountAsync(longRunningProcessSessionKey, authParameters).ConfigureAwait(false);
+                await UserTokenCacheInternal.StopLongRunningOboProcessAsync(longRunningProcessSessionKey, authParameters).ConfigureAwait(false);
             }
         }
 

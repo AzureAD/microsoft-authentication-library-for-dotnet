@@ -792,6 +792,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
+        /// <summary>
+        /// This test performs an initiation of a long running obo process, then validated that the remove long running process api deletes the tokens
+        /// in the cache associated with the provided obo cache key.
+        /// </summary>
         [TestMethod]
         public async Task AcquireTokenByObo_LongRunningThenRemoveTokens_TestAsync()
         {
@@ -799,8 +803,31 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
+                string oboCacheKey = "someCacheKey";
+                bool validateCacheIsEmpty = false;
+
                 var cca = BuildCCA(httpManager);
                 var oboCca = cca as ILongRunningWebApi;
+
+                cca.UserTokenCache.SetBeforeAccess((args) => 
+                {
+                    if (validateCacheIsEmpty)
+                    {
+                        Assert.AreEqual(true, args.HasTokens);
+                        Assert.AreEqual(true, args.HasStateChanged);
+                        Assert.AreEqual(oboCacheKey, args.SuggestedCacheKey);
+                    }
+                });
+
+                cca.UserTokenCache.SetAfterAccess((args) =>
+                {
+                    if (validateCacheIsEmpty)
+                    {
+                        Assert.AreEqual(true, args.HasStateChanged);
+                        Assert.AreEqual(false, args.HasTokens);
+                        Assert.AreEqual(oboCacheKey, args.SuggestedCacheKey);
+                    }
+                });
 
                 AddMockHandlerAadSuccess(httpManager,
                     responseMessage: MockHelpers.CreateSuccessTokenResponseMessage(
@@ -812,7 +839,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         refreshToken: "refresh-token-1"),
                     expectedPostData: new Dictionary<string, string> { { OAuth2Parameter.GrantType, OAuth2GrantType.JwtBearer } });
 
-                string oboCacheKey = null;
                 string userToken = "user-token";
                 UserAssertion userAssertion = new UserAssertion(userToken);
 
@@ -829,6 +855,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual("access-token-1", cachedAccessToken.Secret);
                 Assert.AreEqual("refresh-token-1", cachedRefreshToken.Secret);
 
+                validateCacheIsEmpty = true;
                 await oboCca.StopLongRunningWebApiAsync(oboCacheKey).ConfigureAwait(false);
 
                 var cachedAccessTokens = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
@@ -838,6 +865,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(0, cachedRefreshTokens.Count);
             }
         }
+
+
 
         [DataTestMethod]
         [DataRow(true)]
