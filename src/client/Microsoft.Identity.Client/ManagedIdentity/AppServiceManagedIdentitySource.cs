@@ -72,7 +72,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (!string.IsNullOrEmpty(_requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId))
             {
-
                 _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
                 request.QueryParameters[Constants.ManagedIdentityClientId] = _requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId;
             }
