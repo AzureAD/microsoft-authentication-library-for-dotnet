@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             {
                 PublicClientApplication app =
                     PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                              .WithBrokerPreview()
+                                                              .WithWindowsBroker()
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
@@ -285,7 +285,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 mockBroker.IsPopSupported.Returns(true);
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithBrokerPreview()
+                    .WithWindowsBroker()
                     .WithTestBroker(mockBroker)
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
@@ -317,8 +317,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             mockBroker.IsPopSupported.Returns(false);
 
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithExperimentalFeatures(true)
-                .WithBrokerPreview()
+                .WithWindowsBroker()
                 .WithTestBroker(mockBroker)
                 .BuildConcrete();
 
@@ -348,9 +347,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 mockBroker.AcquireTokenSilentAsync(Arg.Any<AuthenticationRequestParameters>(), Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalPopTokenResponse());
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures(true)
                     .WithAdfsAuthority(TestConstants.ADFSAuthority, false)
-                    .WithBrokerPreview()
+                    .WithWindowsBroker()
                     .WithTestBroker(mockBroker)
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
@@ -390,8 +388,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
 
                 var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures(true)
-                    .WithBrokerPreview()
+                    .WithWindowsBroker()
                     .WithTestBroker(mockBroker)
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
@@ -429,8 +426,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalPopTokenResponse(brokerAccessToken));
 
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithExperimentalFeatures(true)
-                .WithBrokerPreview()
+                .WithWindowsBroker()
                 .WithTestBroker(mockBroker)
                 .BuildConcrete();
 
@@ -498,7 +494,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             //Broker enabled
             IPublicClientApplication app = PublicClientApplicationBuilder
                                             .Create(TestConstants.ClientId)
-                                            .WithBrokerPreview()
+                                            .WithWindowsBroker()
                                             .Build();
 
             Assert.IsTrue(app.IsProofOfPossessionSupportedByClient());
@@ -506,7 +502,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             //Broker disabled
             app = PublicClientApplicationBuilder
                                 .Create(TestConstants.ClientId)
-                                .WithBrokerPreview(false)
+                                .WithWindowsBroker(false)
                                 .Build();
 
             Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());

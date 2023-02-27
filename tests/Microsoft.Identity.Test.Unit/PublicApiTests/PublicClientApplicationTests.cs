@@ -1046,7 +1046,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #if NET5_0_OR_GREATER
                 pcaBuilder.WithBroker();
 #else
-                pcaBuilder.WithWindowsBroker();
+                WamExtension.WithWindowsBroker(pcaBuilder);
 #endif
             }
 
