@@ -205,11 +205,6 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private RequestContext CreateRequestContext(Guid correlationId, object cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
         /// the user's name. The URL targets the /authorize endpoint of the authority configured in the application.
