@@ -103,6 +103,11 @@ namespace Microsoft.Identity.Client
         /// parameters, and to create a managed identity application instance</returns>
         public ManagedIdentityApplicationBuilder WithUserAssignedManagedIdentity(string userAssignedId)
         {
+            if (string.IsNullOrWhiteSpace(userAssignedId))
+            {
+                throw new ArgumentNullException(nameof(userAssignedId));
+            }
+
             if (Guid.TryParse(userAssignedId, out _))
             {
                 Config.ManagedIdentityUserAssignedClientId = userAssignedId;
