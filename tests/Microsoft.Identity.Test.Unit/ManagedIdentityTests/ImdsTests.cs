@@ -14,140 +14,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class ImdsTests : TestBase
     {
-        private const string ImdsEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token";
-        private const string DefaultResource = "https://management.azure.com";
-
-        [DataTestMethod]
-        [DataRow("http://169.254.169.254", DefaultResource, null)]
-        [DataRow(null, DefaultResource, null)] 
-        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", null)] // default IMDS endpoint will be used if environment variable is not set.
-        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", "resource_id", UserAssignedIdentityId.ResourceId)]
-        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", "", UserAssignedIdentityId.None)]
-        [DataRow("http://169.254.169.254", "https://management.azure.com/.default", "  ", UserAssignedIdentityId.None)]
-        public async Task ImdsHappyPathAsync(
-            string endpoint,
-            string scope,
-            string userAssignedClientIdOrResourceId,
-            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables(endpoint);
-
-                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
-                    .Create()
-                    .WithUserAssignedManagedIdentity(userAssignedClientIdOrResourceId)
-                    .WithHttpManager(httpManager)
-                    .Build();
-
-                httpManager.AddManagedIdentityMockHandler(
-                    ImdsEndpoint,
-                    DefaultResource,
-                    MockHelpers.GetMsiImdsSuccessfulResponse(),
-                    ManagedIdentitySourceType.IMDS,
-                    userAssignedClientIdOrResourceId: userAssignedClientIdOrResourceId,
-                    userAssignedIdentityId: userAssignedIdentityId);
-
-                var result = await mia.AcquireTokenForManagedIdentity(scope)
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-
-                result = await mia.AcquireTokenForManagedIdentity(scope)
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-            }
-        }
-
-        [DataTestMethod]
-        [DataRow("user.read")]
-        [DataRow("https://management.core.windows.net//user_impersonation")]
-        [DataRow("s")]
-        public async Task ImdsTestWrongScopeAsync(string resource)
-        {
-
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables("http://169.254.169.254");
-
-                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
-                    .Create()
-                    .WithHttpManager(httpManager)
-                    .Build();
-
-                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, resource, MockHelpers.GetMsiImdsErrorResponse(),
-                    ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
-                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, resource, MockHelpers.GetMsiImdsErrorResponse(),
-                    ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
-
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mia.AcquireTokenForManagedIdentity(resource)
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
-
-                Assert.IsNotNull(ex);
-                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-            }
-
-        }
-
-        [TestMethod]
-        public async Task ImdsErrorResponseNoPayloadTestAsync()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables("http://169.254.169.254");
-
-                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
-                    .Create()
-                    .WithHttpManager(httpManager)
-                    .Build();
-
-                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "scope", "", ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
-                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, "scope", "", ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.InternalServerError);
-
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mia.AcquireTokenForManagedIdentity("scope")
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
-
-                Assert.IsNotNull(ex);
-                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.ManagedIdentityNoResponseReceived, ex.Message);
-            }
-        }
-
-        [TestMethod]
-        public async Task ImdsNullResponseAsync()
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables("http://169.254.169.254");
-
-                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
-                    .Create()
-                    .WithHttpManager(httpManager)
-                    .Build();
-
-                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, DefaultResource, "", ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.OK);
-
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mia.AcquireTokenForManagedIdentity(DefaultResource)
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
-
-                Assert.IsNotNull(ex);
-                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidResponse, ex.Message);
-            }
-        }
-
         [TestMethod]
         public async Task ImdsBadRequestTestAsync()
         {
@@ -155,29 +21,21 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
 
             {
-                SetEnvironmentVariables("http://169.254.169.254");
+                ManagedIdentityTests.SetEnvironmentVariables(ManagedIdentitySourceType.IMDS, "http://169.254.169.254");
 
-                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
-                    .Create()
-                    .WithHttpManager(httpManager)
-                    .Build();
+                IManagedIdentityApplication mi = ManagedIdentityTests.CreateManagedIdentityApplication(httpManager);
 
-                httpManager.AddManagedIdentityMockHandler(ImdsEndpoint, DefaultResource, MockHelpers.GetMsiImdsErrorResponse(),
+                httpManager.AddManagedIdentityMockHandler(ManagedIdentityTests.ImdsEndpoint, ManagedIdentityTests.Resource, MockHelpers.GetMsiImdsErrorResponse(),
                     ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.BadRequest);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mia.AcquireTokenForManagedIdentity(DefaultResource)
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.IsTrue(ex.Message.Contains("The requested identity has not been assigned to this resource."));
             }
-        }
-
-        private void SetEnvironmentVariables(string endpoint)
-        {
-            Environment.SetEnvironmentVariable("AZURE_POD_IDENTITY_AUTHORITY_HOST", endpoint);
         }
     }
 }

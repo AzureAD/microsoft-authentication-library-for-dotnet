@@ -16,7 +16,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class ServiceFabricTests
     {
-        private const string Endpoint = "http://localhost:40342/metadata/identity/oauth2/token";
         private const string Resource = "https://management.azure.com";
 
         [TestInitialize]
@@ -25,166 +24,24 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-        [DataTestMethod]
-        [DataRow(Endpoint, Resource)]
-        [DataRow(Endpoint, "https://management.azure.com/.default")]
-        [DataRow(Endpoint, Resource, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow(Endpoint, Resource, "resource_id", UserAssignedIdentityId.ResourceId)]
-        [DataRow(Endpoint, Resource, "", UserAssignedIdentityId.None)]
-        public async Task ServiceFabricHappyPathAsync(
-            string endpoint, 
-            string scope,
-            string userAssignedId = null,
-            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables(endpoint);
-
-                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
-                    .Create()
-                    .WithUserAssignedManagedIdentity(userAssignedId)
-                    .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures()
-                    .Build();
-
-                httpManager.AddManagedIdentityMockHandler(
-                    endpoint,
-                    Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(),
-                    ManagedIdentitySourceType.ServiceFabric,
-                    userAssignedClientIdOrResourceId: userAssignedId,
-                    userAssignedIdentityId: userAssignedIdentityId);
-
-                var result = await mia.AcquireTokenForManagedIdentity(scope)
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-
-                result = await mia.AcquireTokenForManagedIdentity(scope)
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-            }
-        }
-
-        [DataTestMethod]
-        [DataRow("user.read")]
-        [DataRow("https://management.core.windows.net//user_impersonation")]
-        [DataRow("s")]
-        public async Task ServiceFabricTestWrongScopeAsync(string resource)
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables(Endpoint);
-                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
-                    .Create()
-                    .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures()
-                    .Build();
-
-                httpManager.AddManagedIdentityMockHandler(Endpoint, resource, MockHelpers.GetMsiErrorResponse(), 
-                    ManagedIdentitySourceType.ServiceFabric, statusCode: HttpStatusCode.InternalServerError);
-                httpManager.AddManagedIdentityMockHandler(Endpoint, resource, MockHelpers.GetMsiErrorResponse(), 
-                    ManagedIdentitySourceType.ServiceFabric, statusCode: HttpStatusCode.InternalServerError);
-
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mia.AcquireTokenForManagedIdentity(resource)
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
-
-                Assert.IsNotNull(ex);
-                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-            }
-        }
-
-        [TestMethod]
-        public async Task ServiceFabricErrorResponseNoPayloadTestAsync()
-        {
-            using(new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables(Endpoint);
-
-                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
-                    .Create()
-                    .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures()
-                    .Build();
-
-                httpManager.AddManagedIdentityMockHandler(Endpoint, "scope", "", ManagedIdentitySourceType.ServiceFabric, statusCode: HttpStatusCode.InternalServerError);
-                httpManager.AddManagedIdentityMockHandler(Endpoint, "scope", "", ManagedIdentitySourceType.ServiceFabric, statusCode: HttpStatusCode.InternalServerError);
-
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mia.AcquireTokenForManagedIdentity("scope")
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
-
-                Assert.IsNotNull(ex);
-                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.ManagedIdentityNoResponseReceived, ex.Message);
-            }
-        }
-
-        [TestMethod]
-        public async Task ServiceFabricNullResponseAsync()
-        {
-            using(new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
-            {
-                SetEnvironmentVariables(Endpoint);
-
-                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
-                    .Create()
-                    .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures()
-                    .Build();
-
-                httpManager.AddManagedIdentityMockHandler(Endpoint, Resource, "", ManagedIdentitySourceType.ServiceFabric, statusCode: HttpStatusCode.OK);
-
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mia.AcquireTokenForManagedIdentity(Resource)
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
-
-                Assert.IsNotNull(ex);
-                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidResponse, ex.Message);
-            }
-        }
-
         [TestMethod]
         public async Task ServiceFabricInvalidEndpointAsync()
         {
             using(new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables("localhost/token");
+                ManagedIdentityTests.SetEnvironmentVariables(ManagedIdentitySourceType.ServiceFabric, "localhost/token");
 
-                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
-                    .Create()
-                    .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures()
-                    .Build();
+                IManagedIdentityApplication mi = ManagedIdentityTests.CreateManagedIdentityApplication(httpManager);
 
                 MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                    await mia.AcquireTokenForManagedIdentity(Resource)
+                    await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.InvalidManagedIdentityEndpoint, ex.ErrorCode);
                 Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", "localhost/token", "Service Fabric"), ex.Message);
             }
-        }
-
-        private void SetEnvironmentVariables(string endpoint)
-        {
-            Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", endpoint);
-            Environment.SetEnvironmentVariable("IDENTITY_HEADER", "secret");
-            Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", "thumbprint");
-
         }
     }
 }
