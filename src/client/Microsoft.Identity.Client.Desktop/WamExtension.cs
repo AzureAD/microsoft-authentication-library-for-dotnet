@@ -22,28 +22,5 @@ namespace Microsoft.Identity.Client.Desktop
             builder.Config.IdentityLogger?.Log(new IdentityModel.Abstractions.LogEntry() { EventLogLevel = IdentityModel.Abstractions.EventLogLevel.Informational, Message = "Desktop WAM Broker extension calling RuntimeBroker extension" });
             return BrokerExtension.WithWindowsBroker(builder, enableBroker);
         }
-
-        // this is for legacy WAM
-        internal static void AddSupportForLegacyWam(PublicClientApplicationBuilder builder)
-        {
-            if (DesktopOsHelper.IsWin10OrServerEquivalent())
-            {
-                builder.Config.BrokerCreatorFunc =
-                     (uiParent, appConfig, logger) =>
-                     {
-                         logger.Info("WAM supported OS.");
-                         return new Platforms.Features.WamBroker.WamBroker(uiParent, appConfig, logger);
-                     };
-            }
-            else
-            {
-                builder.Config.BrokerCreatorFunc =
-                   (uiParent, appConfig, logger) =>
-                   {
-                       logger.Info("Not a Win10 machine. WAM is not available");
-                       return new NullBroker(logger);
-                   };
-            }
-        }
     }
 }

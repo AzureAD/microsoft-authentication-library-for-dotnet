@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
 
 namespace Microsoft.Identity.Client.Desktop
@@ -23,7 +24,7 @@ namespace Microsoft.Identity.Client.Desktop
         [Obsolete("This method has been deprecated. Use WithWindowsDesktopFeatures. For Windows Broker support only, use WithWindowsBroker API from Microsoft.Identity.Client.Broker package.", false)]
         public static PublicClientApplicationBuilder WithDesktopFeatures(this PublicClientApplicationBuilder builder)
         {
-            WamExtension.AddSupportForLegacyWam(builder);
+            BrokerExtension.WithWindowsBroker(builder);
             AddSupportForWebView2(builder);
 
             return builder;
@@ -40,7 +41,7 @@ namespace Microsoft.Identity.Client.Desktop
         /// <remarks>These extensions live in a separate package to avoid adding dependencies to MSAL</remarks>
         public static PublicClientApplicationBuilder WithWindowsDesktopFeatures(this PublicClientApplicationBuilder builder)
         {
-            WamExtension.AddSupportForLegacyWam(builder);
+            BrokerExtension.WithWindowsBroker(builder);
             AddSupportForWebView2(builder);
 
             return builder;
