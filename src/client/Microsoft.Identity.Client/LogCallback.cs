@@ -5,7 +5,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Callback delegate that allows application developers to consume logs, and handle them in a custom manner. This
-    /// callback is set using <see cref="AbstractApplicationBuilder{T}.WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>.
+    /// callback is set using <see cref="BaseAbstractApplicationBuilder{T}.WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>.
     /// If <c>PiiLoggingEnabled</c> is set to <c>true</c>, when registering the callback this method will receive the messages twice:
     /// once with the <c>containsPii</c> parameter equals <c>false</c> and the message without PII,
     /// and a second time with the <c>containsPii</c> parameter equals to <c>true</c> and the message might contain PII.

@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the URL of the authority, or security token service (STS) from which MSAL.NET will acquire security tokens
         /// The return value of this property is either the value provided by the developer in the constructor of the application, or otherwise
-        /// the value of the <see cref="DefaultAuthority"/> static member (that is <c>https://login.microsoftonline.com/common/</c>)
+        /// the value of the <see cref="ApplicationBase.DefaultAuthority"/> static member (that is <c>https://login.microsoftonline.com/common/</c>)
         /// </summary>
         public string Authority => ServiceBundle.Config.Authority.AuthorityInfo.CanonicalAuthority?.ToString(); // Do not use in MSAL, use AuthorityInfo instead to avoid re-parsing
 
@@ -368,15 +368,6 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
                 scopes,
                 loginHint);
-        }
-
-        internal static void GuardMobileFrameworks()
-        {
-#if ANDROID || iOS || WINDOWS_APP || MAC
-            throw new PlatformNotSupportedException(
-                "Confidential Client flows are not available on mobile platforms or on Mac." +
-                "See https://aka.ms/msal-net-confidential-availability for details.");
-#endif
         }
     }
 }

@@ -36,8 +36,8 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// User token cache. It holds access tokens, id tokens and refresh tokens for accounts. It's used
-        /// and updated silently if needed when calling <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
-        /// or one of the overrides of <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>.
+        /// and updated silently if needed when calling <see cref="ClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
+        /// or one of the overrides of <see cref="ClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>.
         /// It is updated by each AcquireTokenXXX method, with the exception of <c>AcquireTokenForClient</c> which only uses the application
         /// cache (see <c>IConfidentialClientApplication</c>).
         /// </summary>

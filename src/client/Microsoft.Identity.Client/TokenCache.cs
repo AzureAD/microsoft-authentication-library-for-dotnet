@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Constructor of a token cache. This constructor is left for compatibility with MSAL 2.x.
-        /// The recommended way to get a cache is by using <see cref="IClientApplicationBase.UserTokenCache"/>
+        /// The recommended way to get a cache is by using <see cref="IApplicationBase.UserTokenCache"/>
         /// and <c>IConfidentialClientApplication.AppTokenCache</c> once the app is created.
         /// </summary>
         [Obsolete("The recommended way to get a cache is by using IClientApplicationBase.UserTokenCache or IClientApplicationBase.AppTokenCache")]
