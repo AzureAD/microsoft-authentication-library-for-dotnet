@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Broker;
 #if NET47
 using Microsoft.Identity.Client.Desktop;
 #endif
@@ -134,8 +135,9 @@ namespace NetFx
                 Func<IntPtr> consoleWindowHandleProvider = () => consoleWindowHandle;
 
                 builder = builder
-                    //.WithParentActivityOrWindow(consoleWindowHandleProvider)
-                    .WithExperimentalFeatures()
+                    .WithParentActivityOrWindow(consoleWindowHandleProvider)
+                    // .WithExperimentalFeatures()
+                    .WithWindowsBroker()
                     .WithBroker(true);
             }
 

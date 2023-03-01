@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Desktop
         }
 
         // this is for legacy WAM
-        internal static void AddSupportForWam(PublicClientApplicationBuilder builder)
+        internal static void AddSupportForLegacyWam(PublicClientApplicationBuilder builder)
         {
             if (DesktopOsHelper.IsWin10OrServerEquivalent())
             {
