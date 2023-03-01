@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Platforms.net6win
 
                 return appConfig.BrokerCreatorFunc != null ?
                     appConfig.BrokerCreatorFunc(uiParent, appConfig, Logger) :
-                    new Features.WamBroker.WamBroker(uiParent, appConfig, Logger);
+                    new Features.RuntimeBroker.RuntimeBroker(uiParent, appConfig, Logger);
             }
             else
             {

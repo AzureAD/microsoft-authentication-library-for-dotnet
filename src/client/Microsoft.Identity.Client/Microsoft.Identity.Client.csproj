@@ -188,12 +188,14 @@
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
     <Compile Include="$(PathToMsalSources)\Platforms\net6win\**\*.cs" LinkBase="Platforms\net6win" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\RuntimeBroker\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WebView2WebUi\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
 
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.864.35" />
+    <!-- TODO use single variable for the interop package version -->
+    <PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.13.5" IncludeAssets="all" />
 
     <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
@@ -318,5 +320,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.22.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Platforms\Features\RuntimeBroker\" />
   </ItemGroup>
 </Project>

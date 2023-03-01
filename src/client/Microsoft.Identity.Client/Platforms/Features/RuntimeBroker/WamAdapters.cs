@@ -17,9 +17,8 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
-using static Microsoft.Identity.Client.Broker.RuntimeBroker;
 
-namespace Microsoft.Identity.Client.Broker
+namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 {
     internal class WamAdapters
     {

@@ -19,7 +19,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.Broker
+namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 {
     internal class RuntimeBroker : IBroker
     {
