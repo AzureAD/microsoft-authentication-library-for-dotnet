@@ -93,8 +93,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 .SendTokenRequestForManagedIdentityAsync(_managedIdentityParameters, cancellationToken)
                 .ConfigureAwait(false);
 
-            return await CacheTokenResponseAndCreateAuthenticationResultAsync(
-                MsalTokenResponse.CreateFromManagedIdentityResponse(managedIdentityResponse)).ConfigureAwait(false);
+            var msalTokenResponse = MsalTokenResponse.CreateFromManagedIdentityResponse(managedIdentityResponse);
+            msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
+
+            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 
         protected override KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)

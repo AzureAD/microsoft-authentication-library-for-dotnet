@@ -112,6 +112,60 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
+        [DataRow(AppServiceEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySourceType.AppService)]
+        [DataRow(ImdsEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySourceType.IMDS)]
+        [DataRow(AzureArcEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySourceType.AzureArc)]
+        [DataRow(CloudShellEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySourceType.CloudShell)]
+        [DataRow(ServiceFabricEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySourceType.ServiceFabric)]
+        public async Task ManagedIdentityHappyPathAsync(
+            string endpoint,
+            string scope,
+            string anotherScope,
+            ManagedIdentitySourceType managedIdentitySource)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
+
+                var mi = CreateManagedIdentityApplication(httpManager);
+
+                httpManager.AddManagedIdentityMockHandler(
+                    endpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    managedIdentitySource);
+
+                var result = await mi.AcquireTokenForManagedIdentity(scope).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // Acquire token for same scope
+                result = await mi.AcquireTokenForManagedIdentity(scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+
+                httpManager.AddManagedIdentityMockHandler(
+                    endpoint,
+                    anotherScope,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    managedIdentitySource);
+
+                // Acquire token for another scope
+                result = await mi.AcquireTokenForManagedIdentity(anotherScope).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [DataTestMethod]
         [DataRow("user.read", ManagedIdentitySourceType.AppService, AppServiceEndpoint)]
         [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySourceType.AppService, AppServiceEndpoint)]
         [DataRow("s", ManagedIdentitySourceType.AppService, AppServiceEndpoint)]

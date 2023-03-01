@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
         public AcquireTokenForManagedIdentityParameterBuilder WithResource(string resource)
         {
             Parameters.Resource = ScopeHelper.RemoveDefaultSuffixIfPresent(resource);
-            CommonParameters.Scopes = new string[] { resource };
+            CommonParameters.Scopes = new string[] { Parameters.Resource };
             return this;
         }
 
