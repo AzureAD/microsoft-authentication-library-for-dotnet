@@ -10,13 +10,6 @@ using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 
-#if NET6_WIN
-using Microsoft.Identity.Client.Platforms.net6win;
-using WebAuthenticationCoreManagerInterop = Microsoft.Identity.Client.Platforms.net6win.WebAuthenticationCoreManagerInterop;
-#elif DESKTOP || NET_CORE
-using Microsoft.Identity.Client.Platforms;
-#endif
-
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
 #if NET6_WIN

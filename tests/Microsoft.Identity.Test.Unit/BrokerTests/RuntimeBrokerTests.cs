@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if !NET48 && !NET7_0
+#if !NET6_WIN
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,14 +11,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Broker;
+using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Platforms.Features.WamBroker;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.UI;
@@ -29,6 +28,7 @@ using Microsoft.IdentityModel.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Account = Microsoft.Identity.Client.Account;
+using Microsoft.Identity.Client.Broker;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAuthority(TestConstants.AuthorityTenant);
 
-            pcaBuilder = pcaBuilder.WithWindowsBroker();
+            pcaBuilder = BrokerExtension.WithWindowsBroker(pcaBuilder);
             Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
 
         }
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAdfsAuthority(TestConstants.ADFSAuthority);
 
-            pcaBuilder = pcaBuilder.WithWindowsBroker();
+            pcaBuilder = BrokerExtension.WithWindowsBroker(pcaBuilder);
 
             Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
 

@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if SUPPORTS_BROKER
+#if false
 using System;
 using System.Collections.Generic;
 using System.IO;

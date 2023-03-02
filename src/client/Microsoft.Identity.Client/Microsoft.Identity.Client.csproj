@@ -298,14 +298,6 @@
     <PackageReference Include="Microsoft.CodeAnalysis.RulesetToEditorconfigConverter" Version="3.3.3" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Platforms\Features\WamBroker\win32\Splash.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Splash.resx</DependentUpon>
-    </None>
-  </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet6Android)' And '$(MAUI_SUPPORT)' != ''">
     <Compile Include="$(PathToMsalSources)\Platforms\Android\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
