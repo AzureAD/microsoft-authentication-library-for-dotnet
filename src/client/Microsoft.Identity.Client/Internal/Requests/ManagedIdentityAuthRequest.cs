@@ -15,11 +15,11 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class ManagedIdentityAuthenticationRequest : RequestBase
+    internal class ManagedIdentityAuthRequest : RequestBase
     {
         private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
 
-        public ManagedIdentityAuthenticationRequest(
+        public ManagedIdentityAuthRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenForManagedIdentityParameters managedIdentityParameters)

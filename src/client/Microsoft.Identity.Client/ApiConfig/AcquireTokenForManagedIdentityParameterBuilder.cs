@@ -39,8 +39,9 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Specifies the resource to acquire token for managed identity. 
-        /// The format of the resource should be of the format 
+        /// Specifies the resource to use when acquiring token for managed identity. 
+        /// The resource should be of the form "{ResourceIdUri}" or {ResourceIdUri/.default} for instance 
+        /// <c>https://management.azure.net</c> or, for Microsoft Graph, <c>https://graph.microsoft.com/.default</c>.
         /// </summary>
         /// <param name="resource"></param>
         /// <returns></returns>

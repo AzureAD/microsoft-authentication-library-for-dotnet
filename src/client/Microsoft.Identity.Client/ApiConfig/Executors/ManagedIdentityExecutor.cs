@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext,
                 _managedIdentityApplication.AppTokenCacheInternal).ConfigureAwait(false);
 
-            var handler = new ManagedIdentityAuthenticationRequest(
+            var handler = new ManagedIdentityAuthRequest(
                 ServiceBundle,
                 requestParams,
                 managedIdentityParameters);
