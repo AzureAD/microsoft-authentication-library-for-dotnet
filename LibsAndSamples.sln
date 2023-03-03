@@ -236,7 +236,7 @@ Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "WPF.Package", "tests\devapp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreConsoleWAM", "tests\devapps\WAM\NetCoreConsoleWAM\NetCoreConsoleWAM.csproj", "{7CA7CBEA-8F8E-48EF-8003-AB645B9DBD75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetFxConsoleWAM", "tests\devapps\WAM\NetFxConsoleWAM\NetFxConsoleWAM\NetFxConsoleWAM.csproj", "{5CBA39DF-AE9A-449A-808C-57476B78A7F6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetFxConsoleWAM", "tests\devapps\WAM\NetFxConsoleWAM\NetFxConsoleWAM.csproj", "{5CBA39DF-AE9A-449A-808C-57476B78A7F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
