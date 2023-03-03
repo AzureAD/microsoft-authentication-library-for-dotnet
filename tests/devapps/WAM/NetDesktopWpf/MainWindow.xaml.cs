@@ -41,9 +41,9 @@ namespace NetDesktopWpf
 
         private IPublicClientApplication CreatePublicClient()
         {
-            var pca = PublicClientApplicationBuilder.Create(s_clientID)
+            var pca = WamExtension.WithWindowsBroker(PublicClientApplicationBuilder.Create(s_clientID)
                 .WithAuthority(s_authority)
-                .WithWindowsBroker(true)
+, true)
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 
@@ -54,9 +54,9 @@ namespace NetDesktopWpf
 
         private IPublicClientApplication CreatePublicClientForRuntime()
         {
-            var pca = PublicClientApplicationBuilder.Create(s_clientID)
+            var pca = BrokerExtension.WithWindowsBroker(PublicClientApplicationBuilder.Create(s_clientID)
                 .WithAuthority(s_authority)
-                .WithBrokerPreview(true)
+, true)
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 
