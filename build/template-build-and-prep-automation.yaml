@@ -108,3 +108,54 @@ steps:
   inputs:
     targetPath: $(Build.artifactstagingdirectory)
     artifactName: drop
+
+- task: PowerShell@2
+  displayName: 'Verifying MSAL Runtime Dlls exist in WAM Dev Apps'
+  inputs:
+    targetType: 'inline'
+    script: |
+        #Search Folder
+        $SearchInFolder = 'F:\SearchPS\drop\WAM\'
+
+        #runtime path with file name
+        $runtimes = @('runtimes\win-x64\native\msalruntime_x64.dll', 
+                      'runtimes\win-x86\native\msalruntime_x86.dll', 
+                      'runtimes\win-arm64\native\msalruntime_arm64.dll');
+
+        #msalruntime x64 check
+        $AppsToCheck = @('MSIX\WPF\bin\Release\', 
+                         'WPF.Package\bin\AnyCPU\Release\WPF\', 
+                         'NetCoreWinFormsWam\bin\Release\net6.0-windows10.0.17763.0\', 
+                         'NetCoreWinFormsWam\bin\Release\netcoreapp3.1\', 
+                         'NetDesktopWpf\bin\Release\', 
+                         'NetFrameworkWam\bin\Release\');
+
+        $BuildFolders = Get-ChildItem $SearchInFolder -recurse | Where-Object {$_.Name -match 'msalruntime.*'} | Select-Object -Property FullName
+
+        #Check if runtime files for each arch exist in the Dev Apps
+        $errors = '';
+
+        foreach ($runtime in $runtimes) 
+        {
+            foreach ($app in $AppsToCheck) 
+            {
+                $appFullPath = $SearchInFolder+$app+$runtimeFolderx86
+
+
+                if ($BuildFolders.FullName -notcontains $appFullPath)
+                 {
+                      $errors += "Failed to find runtime files in : " + $SearchInFolder + $app + "`n";
+
+                 }
+            }
+        }
+
+        #exit if there are errors
+        IF (![string]::IsNullOrWhitespace($errors))
+        {
+            $errors;
+            Exit 1;
+        } 
+
+
+
