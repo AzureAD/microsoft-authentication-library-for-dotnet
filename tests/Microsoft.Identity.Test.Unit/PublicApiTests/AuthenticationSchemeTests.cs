@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme;
-using Microsoft.Identity.Client.Broker;
+using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -22,6 +22,7 @@ using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Test.Unit.BrokerTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using Microsoft.Identity.Client.Broker;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -113,10 +114,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
 
                 var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithWindowsBroker()
                     .WithTestBroker(mockBroker)
                     .WithHttpManager(harness.HttpManager);
 
+                pcaBuilder = BrokerExtension.WithWindowsBroker(pcaBuilder);
                 var pca = pcaBuilder.BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);

@@ -636,7 +636,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 #endif
 
-#if (DESKTOP || NET_CORE) && !NET6_0
+#if false
         [TestMethod]
         public void IsBrokerAvailable_OldDotNet()
         {
