@@ -542,7 +542,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 #if NET6_WIN
             pcaBuilder = pcaBuilder.WithBroker(true);
 #else
-            pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder);
+            pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder, false);
 #endif
             app = pcaBuilder.Build();
 
