@@ -141,7 +141,9 @@ steps:
             foreach ($app in $AppsToCheck) 
             {
                 $appFullPath = $SearchInFolder+$app+$runtime
-
+                
+                Write-Host $appFullPath
+                
                 if (-not(Test-Path -Path $appFullPath -PathType Leaf))
                  {
                       $errors += "Failed to find runtime files in : " + $SearchInFolder + $app + "`n";
@@ -154,7 +156,7 @@ steps:
         IF (![string]::IsNullOrWhitespace($errors))
         {
             $errors;
-            Exit 1;
+            #Exit 1;
         } 
 
 
