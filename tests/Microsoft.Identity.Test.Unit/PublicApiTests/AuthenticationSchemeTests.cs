@@ -22,7 +22,6 @@ using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Test.Unit.BrokerTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using Microsoft.Identity.Client.Broker;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -117,7 +116,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithTestBroker(mockBroker)
                     .WithHttpManager(harness.HttpManager);
 
-                pcaBuilder = BrokerExtension.WithWindowsBroker(pcaBuilder);
+#if NET6_WIN
+                pcaBuilder = pcaBuilder.WithBroker(true);
+#else
+                pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder);
+#endif
                 var pca = pcaBuilder.BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);

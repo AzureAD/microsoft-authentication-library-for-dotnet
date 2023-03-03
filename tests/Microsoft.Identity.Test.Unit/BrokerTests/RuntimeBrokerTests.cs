@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if !NET48 && !NET6_WIN
+#if !NET48 && !NET7_0
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,8 +11,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Broker;
+
+#if NET6_WIN || NETCOREAPP3_1
 using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
+#endif
+
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
@@ -71,7 +74,12 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAuthority(TestConstants.AuthorityTenant);
 
-            pcaBuilder = BrokerExtension.WithWindowsBroker(pcaBuilder);
+#if NET6_WIN
+            pcaBuilder = pcaBuilder.WithBroker(true);
+#else
+            pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder);
+#endif
+
             Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
 
         }
@@ -83,7 +91,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAdfsAuthority(TestConstants.ADFSAuthority);
 
-            pcaBuilder = BrokerExtension.WithWindowsBroker(pcaBuilder);
+#if NET6_WIN
+            pcaBuilder = pcaBuilder.WithBroker(true);
+#else
+            pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder);
+#endif
 
             Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
 
@@ -92,10 +104,15 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         [TestMethod]
         public async Task ThrowOnNoHandleAsync()
         {
-            var pca = PublicClientApplicationBuilder
-               .Create(TestConstants.ClientId)
-               .WithWindowsBroker()
-               .Build();
+            var pcaBuilder = PublicClientApplicationBuilder
+               .Create(TestConstants.ClientId);
+
+#if NET6_WIN
+            pcaBuilder = pcaBuilder.WithBroker(true);
+#else
+            pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder);
+#endif
+            var pca = pcaBuilder.Build();
 
             // no window handle - throw
             var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
