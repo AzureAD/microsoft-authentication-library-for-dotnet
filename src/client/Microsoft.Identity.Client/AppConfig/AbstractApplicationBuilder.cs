@@ -721,7 +721,23 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(authorityUri);
             }
 
-            Config.Authority = Authority.CreateAuthority(authorityUri, validateAuthority);
+            if (authorityUri.Contains("ciamlogin.com"))
+            {
+                Uri uriCiam = new(authorityUri);
+                string ciamAuthorityUri = authorityUri;
+                string host = uriCiam.Host;
+                if (!host.Contains('/'))
+                {
+                    string ciamTenant = host.Substring(0, host.IndexOf(".ciamlogin.com", StringComparison.OrdinalIgnoreCase));
+                    ciamAuthorityUri = "https://login.ciamlogin.com/" + ciamTenant + ".onmicrosoft.com";
+                }
+                WithInstanceDiscoveryMetadata("{\"api-version\": \"1.1\",\"metadata\": [{\"preferred_network\": \"login.windows.net\",\"preferred_cache\": \"login.windows.net\",\"aliases\": [\"login.windows.net\",\"login.ciamlogin.com\"]}]}");
+                Config.Authority = Authority.CreateAuthority(ciamAuthorityUri, false);
+            }
+            else
+            {
+                Config.Authority = Authority.CreateAuthority(authorityUri, validateAuthority);
+            }
 
             return (T)this;
         }
