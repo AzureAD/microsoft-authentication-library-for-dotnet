@@ -121,7 +121,7 @@ steps:
         Write-Host $SearchInFolder 
 
         #runtime path with file name
-        $runtimes = @('runtimes\win-x64\native\msalruntime_x64.dll', 
+        $runtimes = @('runtimes\win-x64\native\msalruntime.dll', 
                       'runtimes\win-x86\native\msalruntime_x86.dll', 
                       'runtimes\win-arm64\native\msalruntime_arm64.dll');
 
@@ -133,8 +133,6 @@ steps:
                          'NetDesktopWpf\bin\Release\', 
                          'NetFrameworkWam\bin\Release\');
 
-        $BuildFolders = Get-ChildItem $SearchInFolder -recurse | Where-Object {$_.Name -match 'msalruntime.*'} | Select-Object -Property FullName
-
         #Check if runtime files for each arch exist in the Dev Apps
         $errors = '';
 
@@ -142,10 +140,9 @@ steps:
         {
             foreach ($app in $AppsToCheck) 
             {
-                $appFullPath = $SearchInFolder+$app+$runtimeFolderx86
+                $appFullPath = $SearchInFolder+$app+$runtime
 
-
-                if ($BuildFolders.FullName -notcontains $appFullPath)
+                if (-not(Test-Path -Path $appFullPath -PathType Leaf))
                  {
                       $errors += "Failed to find runtime files in : " + $SearchInFolder + $app + "`n";
 
