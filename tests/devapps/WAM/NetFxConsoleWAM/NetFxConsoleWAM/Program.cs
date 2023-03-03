@@ -60,7 +60,7 @@ namespace NetFxConsoleWAM
         {
             var pca = PublicClientApplicationBuilder.Create("4b0db8c2-9f26-4417-8bde-3f0e3656f8e0")
                 .WithAuthority(s_authority)
-                .WithBrokerPreview(true)
+                .WithWindowsBroker(true)
                 .WithLogging((x, y, z) => Console.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 
