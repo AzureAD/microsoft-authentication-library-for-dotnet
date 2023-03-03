@@ -115,13 +115,9 @@ steps:
     targetType: 'inline'
     script: |
         #Search Folder
-        $SearchInFolder = '$(build.artifactstagingdirectory)\drop\WAM\'
+        $SearchInFolder = $(build.artifactstagingdirectory)\drop\WAM\
 
         Write-Host $SearchInFolder 
-
-        $SearchInFolder1 = ''$(build.artifactstagingdirectory)\drop\WAM\''
-
-        Write-Host $SearchInFolder1
 
         #runtime path with file name
         $runtimes = @('runtimes\win-x64\native\msalruntime_x64.dll', 
