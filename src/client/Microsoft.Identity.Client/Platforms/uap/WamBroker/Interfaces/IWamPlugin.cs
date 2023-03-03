@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 
-namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
+namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 {
     internal interface IWamPlugin
     {

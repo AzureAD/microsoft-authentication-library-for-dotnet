@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Security.Authentication.Web.Core;
 
-namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
+namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 {
 
     /// <summary>

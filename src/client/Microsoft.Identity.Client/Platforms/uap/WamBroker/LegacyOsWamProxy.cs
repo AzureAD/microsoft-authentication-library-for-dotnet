@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.Core;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 
-namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
+namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 {
     /// <summary>
     /// Some Windows APIs do not exist in all versions of Windows, such as WebAuthenticationCoreManager.FindAllAccountsAsync

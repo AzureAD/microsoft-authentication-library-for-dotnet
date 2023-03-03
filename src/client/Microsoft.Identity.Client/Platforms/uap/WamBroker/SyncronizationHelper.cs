@@ -4,7 +4,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
+namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 {
     /// <summary>
     /// Based on https://thomaslevesque.com/2015/11/11/explicitly-switch-to-the-ui-thread-in-an-async-method/

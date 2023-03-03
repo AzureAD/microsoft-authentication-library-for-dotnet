@@ -3,7 +3,7 @@
 using System.Threading.Tasks;
 using Windows.Security.Credentials;
 
-namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
+namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 {
     internal interface IWebAccountProviderFactory
     {

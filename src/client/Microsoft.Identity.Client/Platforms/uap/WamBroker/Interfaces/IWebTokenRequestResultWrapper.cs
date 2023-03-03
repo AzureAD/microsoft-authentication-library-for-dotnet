@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Windows.Security.Authentication.Web.Core;
 
-namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
+namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 {
     internal interface IWebTokenRequestResultWrapper
     {

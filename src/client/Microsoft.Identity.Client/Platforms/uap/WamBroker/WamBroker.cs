@@ -21,7 +21,7 @@ using Windows.Foundation.Metadata;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 
-namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
+namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 {
     /// <summary>
     /// Important: all the WAM code has Win10 specific types and MUST be guarded against

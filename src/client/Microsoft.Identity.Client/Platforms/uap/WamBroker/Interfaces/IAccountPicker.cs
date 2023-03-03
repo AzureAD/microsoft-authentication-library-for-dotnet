@@ -7,7 +7,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Windows.Security.Credentials;
 
-namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
+namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 {
     internal interface IAccountPicker
     {

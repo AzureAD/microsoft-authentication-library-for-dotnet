@@ -10,7 +10,7 @@ using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.Platforms.Features.WamBroker;
+using Microsoft.Identity.Client.Platforms.uap.WamBroker;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal;
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {
-            return new WamBroker(uiParent, appConfig, Logger);
+            return new WamBroker.WamBroker(uiParent, appConfig, Logger);
         }
 
         /// <inheritdoc />

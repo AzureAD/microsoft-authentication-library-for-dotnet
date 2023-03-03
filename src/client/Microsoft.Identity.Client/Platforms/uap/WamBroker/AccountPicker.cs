@@ -21,7 +21,7 @@ using AccountsSettingsPaneInterop = Microsoft.Identity.Client.Platforms.net6win.
 using Microsoft.Identity.Client.Platforms;
 #endif
 
-namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
+namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 {
 #if NET6_WIN
     [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]

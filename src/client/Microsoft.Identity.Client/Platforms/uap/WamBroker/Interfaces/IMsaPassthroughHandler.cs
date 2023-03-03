@@ -6,7 +6,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 
-namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
+namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 {
     internal interface IMsaPassthroughHandler
     {
