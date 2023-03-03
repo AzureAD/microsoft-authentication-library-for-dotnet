@@ -106,46 +106,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
             }
 
-
-            return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
-        }
-
-        protected override async Task<ManagedIdentityResponse> HandleResponseAsync(
-            AppTokenProviderParameters parameters,
-            HttpResponse response,
-            CancellationToken cancellationToken)
-        {
-            _requestContext.Logger.Verbose(()=>$"[Managed Identity] Response received. Status code: {response.StatusCode}");
-
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            {
-                if (!response.HeadersAsDictionary.TryGetValue("WWW-Authenticate", out string challenge))
-                {
-                    _requestContext.Logger.Error("[Managed Identity] WWW-Authenticate header is expected but not found.");
-                    throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.ManagedIdentityNoChallengeError);
-                }
-
-                var splitChallenge = challenge.Split(new char[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
-
-                if (splitChallenge.Length != 2)
-                {
-                    _requestContext.Logger.Error("[Managed Identity] The WWW-Authenticate header for Azure arc managed identity is not an expected format.");
-                    throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.ManagedIdentityInvalidChallenge);
-                }
-
-                var authHeaderValue = "Basic " + File.ReadAllText(splitChallenge[1]);
-
-                ManagedIdentityRequest request = CreateRequest(ScopeHelper.ScopesToResource(parameters.Scopes.ToArray()));
-
-                _requestContext.Logger.Verbose(()=>"[Managed Identity] Adding authorization header to the request.");
-                request.Headers.Add("Authorization", authHeaderValue);
-
-                response = await _requestContext.ServiceBundle.HttpManager.SendGetAsync(request.ComputeUri(), request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
-
-                return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
-            }
-
-            
             return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
         }
     }
