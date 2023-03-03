@@ -115,7 +115,8 @@ steps:
     targetType: 'inline'
     script: |
         #Search Folder
-        $SearchInFolder = $(build.artifactstagingdirectory)\drop\WAM\
+        $SearchInFolder = "\drop\WAM\";
+        $SearchInFolder = Join-Path $(build.artifactstagingdirectory) $SearchInFolder 
 
         Write-Host $SearchInFolder 
 
