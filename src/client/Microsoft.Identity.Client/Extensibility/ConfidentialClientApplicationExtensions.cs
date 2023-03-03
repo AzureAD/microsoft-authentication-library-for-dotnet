@@ -17,6 +17,7 @@ namespace Microsoft.Identity.Client.Extensibility
     {
         /// <summary>
         /// Stops an in progress long running OBO session by removing the tokens associated with the provided cache key.
+        /// See https://aka.ms/msal-net-on-behalf-of.
         /// </summary>
         /// <param name="clientApp">Client app to remove tokens from</param>
         /// <param name="longRunningProcessSessionKey">OBO cache key used to remove the tokens</param>

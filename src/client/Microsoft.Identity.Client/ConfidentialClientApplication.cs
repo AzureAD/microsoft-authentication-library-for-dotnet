@@ -171,6 +171,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Stops an in progress long running OBO session by removing the tokens associated with the provided cache key.
+        /// See https://aka.ms/msal-net-on-behalf-of.
         /// </summary>
         /// <param name="longRunningProcessSessionKey">OBO cache key used to remove the tokens</param>
         /// <param name="cancellationToken">Cancellation token</param>
@@ -186,7 +187,7 @@ namespace Microsoft.Identity.Client
             Guid correlationId = Guid.NewGuid();
             RequestContext requestContext = base.CreateRequestContext(correlationId, cancellationToken);
             requestContext.ApiEvent = new ApiEvent(correlationId);
-            requestContext.ApiEvent.ApiId = ApiIds.RemoveAccount;
+            requestContext.ApiEvent.ApiId = ApiIds.RemoveOboTokens;
 
             var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
               requestContext,

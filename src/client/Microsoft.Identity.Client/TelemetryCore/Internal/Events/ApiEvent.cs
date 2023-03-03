@@ -25,7 +25,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             GetAccounts = 1010,
             GetAccountById = 1011,
             GetAccountsByUserFlow = 1012,
-            RemoveAccount = 1013
+            RemoveAccount = 1013,
+            RemoveOboTokens = 1014
         }
 
         public ApiEvent(Guid correlationId)

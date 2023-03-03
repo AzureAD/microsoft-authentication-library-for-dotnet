@@ -1167,7 +1167,7 @@ namespace Microsoft.Identity.Client
                             tokenCache: this,
                             clientId: ClientId,
                             account: null,
-                            hasStateChanged: true,
+                            hasStateChanged: false,
                             tokenCacheInternal.IsApplicationCache,
                             suggestedCacheKey: longRunningOboCacheKey,
                             hasTokens: tokenCacheInternal.HasTokensNoLocks(),
@@ -1307,17 +1307,20 @@ namespace Microsoft.Identity.Client
             return Accessor.HasAccessOrRefreshTokens();
         }
 
-        internal /* internal for test only */ void RemoveOboTokensInternal(string partitionKey, RequestContext requestContext)
+        /// <summary>
+        /// Removes obo tokens stored in the cache. Note that the cache is internally and externally partitioned by the oboKey.
+        /// </summary>
+        internal /* internal for test only */ void RemoveOboTokensInternal(string oboPartitionKey, RequestContext requestContext)
         {
             ILoggerAdapter logger = requestContext.Logger;
 
             //Filter and remove tokens based on OBO Cache Key
-            var refreshTokens = Accessor.GetAllRefreshTokens(partitionKey);
-            refreshTokens.RemoveAll(item => !item.OboCacheKey.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
+            var refreshTokens = Accessor.GetAllRefreshTokens(oboPartitionKey);
+            refreshTokens.RemoveAll(item => !(bool)item?.OboCacheKey.Equals(oboPartitionKey, StringComparison.OrdinalIgnoreCase));
             RemoveRefreshTokens(refreshTokens, logger, out bool filterByClientId);
 
-            var accessTokens = Accessor.GetAllAccessTokens(partitionKey);
-            accessTokens.RemoveAll(item => !item.OboCacheKey.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
+            var accessTokens = Accessor.GetAllAccessTokens(oboPartitionKey);
+            accessTokens.RemoveAll(item => !(bool)item?.OboCacheKey.Equals(oboPartitionKey, StringComparison.OrdinalIgnoreCase));
             RemoveAccessTokens(accessTokens, logger, filterByClientId);
         }
 
@@ -1336,12 +1339,10 @@ namespace Microsoft.Identity.Client
 
             var refreshTokens = Accessor.GetAllRefreshTokens(partitionKey);
             refreshTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
-
             RemoveRefreshTokens(refreshTokens, logger, out bool filterByClientId);
 
             var accessTokens = Accessor.GetAllAccessTokens(partitionKey);
             accessTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
-
             RemoveAccessTokens(accessTokens, logger, filterByClientId);
 
             RemoveIdTokens(partitionKey, logger, filterByClientId);
