@@ -110,28 +110,30 @@ steps:
     artifactName: drop
 
 - task: PowerShell@2
-  displayName: 'Verifying MSAL Runtime Dlls exist in WAM Dev Apps'
+  displayName: 'Verify Existence of Runtime Dlls'
   inputs:
     targetType: 'inline'
     script: |
         #Search Folder
-        $SearchInFolder = "\WAM\";
-        $SearchInFolder = Join-Path $(build.artifactstagingdirectory) $SearchInFolder 
+        $searchInFolder = "\WAM\";
+        $searchInFolder = Join-Path $(build.artifactstagingdirectory) $searchInFolder 
 
-        Write-Host $SearchInFolder 
+        Write-Host $searchInFolder 
 
         #runtime path with file name
         $runtimes = @('runtimes\win-x64\native\msalruntime.dll', 
                       'runtimes\win-x86\native\msalruntime_x86.dll', 
                       'runtimes\win-arm64\native\msalruntime_arm64.dll');
 
-        #msalruntime x64 check
+        #dev apps to check
         $AppsToCheck = @('MSIX\WPF\bin\Release\', 
                          'MSIX\WPF.Package\bin\AnyCPU\Release\WPF\', 
                          'NetCoreWinFormsWam\bin\Release\net6.0-windows10.0.17763.0\', 
                          'NetCoreWinFormsWam\bin\Release\netcoreapp3.1\', 
                          'NetDesktopWpf\bin\Release\', 
-                         'NetFrameworkWam\bin\Release\');
+                         'NetFrameworkWam\bin\Release\',
+                         'NetCoreConsoleWAM\bin\Release\net6.0\',
+                         'NetFXConsoleWAM\bin\Release\');
 
         #Check if runtime files for each arch exist in the Dev Apps
         $errors = '';
@@ -140,14 +142,13 @@ steps:
         {
             foreach ($app in $AppsToCheck) 
             {
-                $appFullPath = $SearchInFolder+$app+$runtime
+                $appFullPath = $searchInFolder+$app+$runtime
                 
                 Write-Host $appFullPath
                 
                 if (-not(Test-Path -Path $appFullPath -PathType Leaf))
                  {
                       $errors += "Failed to find runtime files in : " + $SearchInFolder + $app + "`n";
-
                  }
             }
         }
