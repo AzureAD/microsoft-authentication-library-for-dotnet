@@ -725,8 +725,8 @@ namespace Microsoft.Identity.Client
             {
                 Uri uriCiam = new(authorityUri);
                 string ciamAuthorityUri = authorityUri;
-                string host = uriCiam.Host;
-                if (!host.Contains('/'))
+                string host = uriCiam.Host + uriCiam.AbsolutePath;
+                if (string.Equals(uriCiam.AbsolutePath, "/"))
                 {
                     string ciamTenant = host.Substring(0, host.IndexOf(".ciamlogin.com", StringComparison.OrdinalIgnoreCase));
                     ciamAuthorityUri = "https://login.ciamlogin.com/" + ciamTenant + ".onmicrosoft.com";
