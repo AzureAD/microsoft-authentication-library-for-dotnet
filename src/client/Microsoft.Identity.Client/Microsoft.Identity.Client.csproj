@@ -194,8 +194,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
 
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.864.35" />
-    <!-- TODO use single variable for the interop package version -->
-    <PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="0.13.5" IncludeAssets="all" />
+    <PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="$(NativeInteropVersion)" IncludeAssets="all" />
 
     <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
