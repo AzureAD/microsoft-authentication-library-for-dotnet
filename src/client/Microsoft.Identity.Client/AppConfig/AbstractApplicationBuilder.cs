@@ -446,9 +446,20 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         protected T WithOptions(ApplicationOptions applicationOptions)
         {
+            if (applicationOptions.Instance.Contains("ciamlogin.com"))
+            {
+                CiamAuthorityAdapter ciamAuthorityAdapter = new(applicationOptions.Instance, applicationOptions.TenantId);
+                WithInstanceDiscoveryMetadata(ciamAuthorityAdapter.TransformedMetadata);
+                WithTenantId(ciamAuthorityAdapter.TransformedTenant);
+                Config.Instance = ciamAuthorityAdapter.TransformedInstance;
+            }
+            else
+            {
+                WithTenantId(applicationOptions.TenantId);
+                Config.Instance = applicationOptions.Instance;
+            }
             WithClientId(applicationOptions.ClientId);
             WithRedirectUri(applicationOptions.RedirectUri);
-            WithTenantId(applicationOptions.TenantId);
             WithClientName(applicationOptions.ClientName);
             WithClientVersion(applicationOptions.ClientVersion);
             WithClientCapabilities(applicationOptions.ClientCapabilities);
@@ -459,8 +470,7 @@ namespace Microsoft.Identity.Client
                 applicationOptions.LogLevel,
                 applicationOptions.EnablePiiLogging,
                 applicationOptions.IsDefaultPlatformLoggingEnabled);
-
-            Config.Instance = applicationOptions.Instance;
+           
             Config.AadAuthorityAudience = applicationOptions.AadAuthorityAudience;
             Config.AzureCloudInstance = applicationOptions.AzureCloudInstance;
 
@@ -723,16 +733,9 @@ namespace Microsoft.Identity.Client
 
             if (authorityUri.Contains("ciamlogin.com"))
             {
-                Uri uriCiam = new(authorityUri);
-                string ciamAuthorityUri = authorityUri;
-                string host = uriCiam.Host + uriCiam.AbsolutePath;
-                if (string.Equals(uriCiam.AbsolutePath, "/"))
-                {
-                    string ciamTenant = host.Substring(0, host.IndexOf(".ciamlogin.com", StringComparison.OrdinalIgnoreCase));
-                    ciamAuthorityUri = "https://login.ciamlogin.com/" + ciamTenant + ".onmicrosoft.com";
-                }
-                WithInstanceDiscoveryMetadata("{\"api-version\": \"1.1\",\"metadata\": [{\"preferred_network\": \"login.windows.net\",\"preferred_cache\": \"login.windows.net\",\"aliases\": [\"login.windows.net\",\"login.ciamlogin.com\"]}]}");
-                Config.Authority = Authority.CreateAuthority(ciamAuthorityUri, false);
+                CiamAuthorityAdapter ciamAuthorityAdapter = new(authorityUri);
+                WithInstanceDiscoveryMetadata(ciamAuthorityAdapter.TransformedMetadata);
+                Config.Authority = Authority.CreateAuthority(ciamAuthorityAdapter.TransformedAuthority, false);
             }
             else
             {
