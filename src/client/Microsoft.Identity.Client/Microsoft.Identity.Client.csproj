@@ -312,8 +312,4 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.22.0" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Platforms\Features\RuntimeBroker\" />
-  </ItemGroup>
 </Project>
