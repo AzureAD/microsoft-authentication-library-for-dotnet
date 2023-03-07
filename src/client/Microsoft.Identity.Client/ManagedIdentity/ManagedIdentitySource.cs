@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        protected virtual async Task<ManagedIdentityResponse> HandleResponseAsync(
+        protected virtual Task<ManagedIdentityResponse> HandleResponseAsync(
             AppTokenProviderParameters parameters,
             HttpResponse response,
             CancellationToken cancellationToken)
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     _requestContext.Logger.Info("[Managed Identity] Successful response received.");
-                    return GetSuccessfulResponse(response);
+                    return Task.FromResult(GetSuccessfulResponse(response));
                 }
 
                 message = GetMessageFromErrorResponse(response);

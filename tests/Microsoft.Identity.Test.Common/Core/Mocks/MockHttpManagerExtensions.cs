@@ -393,6 +393,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     expectedRequestHeaders.Add("ContentType", "application/x-www-form-urlencoded");
                     httpMessageHandler.ExpectedPostData = new Dictionary<string, string> { { "resource", resource } };
                     break;
+                case ManagedIdentitySourceType.ServiceFabric:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedRequestHeaders.Add("secret", "secret");
+                    expectedQueryParams.Add("api-version", "2019-07-01-preview");
+                    expectedQueryParams.Add("resource", resource);
+                    break;
             }
 
             if (managedIdentitySourceType != ManagedIdentitySourceType.CloudShell)
