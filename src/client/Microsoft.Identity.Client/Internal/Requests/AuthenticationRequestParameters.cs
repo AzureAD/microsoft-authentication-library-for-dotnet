@@ -94,12 +94,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// Gets the token endpoint of the "current" authority, as tracked by the AuthorityManager
         /// </summary>
         /// <returns></returns>
-        public Task<string> GetTokenEndpointAsync(CancellationToken cancellationToken)
+        public Task<string> GetTokenEndpointAsync(RequestContext requestContext)
         {
             return AuthorityManager.Authority.GetTokenEndpointAsync(
-                _serviceBundle.HttpManager, 
-                RequestContext.Logger, 
-                cancellationToken);
+                requestContext);
         }
 
         #endregion

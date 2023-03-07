@@ -286,7 +286,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IDictionary<string, string> additionalBodyParameters,
             CancellationToken cancellationToken)
         {
-            var tokenEndpoint = await AuthenticationRequestParameters.GetTokenEndpointAsync(cancellationToken).ConfigureAwait(false);
+            var tokenEndpoint = await AuthenticationRequestParameters.GetTokenEndpointAsync(AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
 
             var tokenResponse = await SendTokenRequestAsync(
                 tokenEndpoint,

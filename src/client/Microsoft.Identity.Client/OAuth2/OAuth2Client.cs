@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
@@ -73,6 +74,11 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             return await ExecuteRequestAsync<InstanceDiscoveryResponse>(endPoint, HttpMethod.Get, requestContext)
                        .ConfigureAwait(false);
+        }
+
+        public async Task<OidcMetadata> DiscoverOidcMetadataAsync(Uri endPoint, RequestContext requestContext)
+        {
+            return await ExecuteRequestAsync<OidcMetadata>(endPoint, HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
 
         internal async Task<MsalTokenResponse> GetTokenAsync(

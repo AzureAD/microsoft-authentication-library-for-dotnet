@@ -7,6 +7,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using System.Threading.Tasks;
 using System.Threading;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -28,10 +29,7 @@ namespace Microsoft.Identity.Client.Instance
             return AuthorityInfo.CanonicalAuthority.ToString();
         }
 
-        internal override Task<string> GetTokenEndpointAsync(
-           IHttpManager httpManager,
-           ILoggerAdapter logger,
-           CancellationToken cancellationToken)
+        internal override Task<string> GetTokenEndpointAsync(RequestContext requestContext)
         {
             string tokenEndpoint = string.Format(
                               CultureInfo.InvariantCulture,
@@ -40,10 +38,7 @@ namespace Microsoft.Identity.Client.Instance
             return Task.FromResult(tokenEndpoint);
         }
 
-        internal override Task<string> GetAuthorizationEndpointAsync(
-            IHttpManager httpManager,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken)
+        internal override Task<string> GetAuthorizationEndpointAsync(RequestContext requestContext)
         {
             string authEndpoint = string.Format(CultureInfo.InvariantCulture,
                     AuthorizationEndpointTemplate,
@@ -53,10 +48,7 @@ namespace Microsoft.Identity.Client.Instance
 
         }
 
-        internal override Task<string> GetDeviceCodeEndpointAsync(
-            IHttpManager httpManager,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken)
+        internal override Task<string> GetDeviceCodeEndpointAsync(RequestContext requestContext)
         {
             string deviceEndpoint = string.Format(
                   CultureInfo.InvariantCulture,

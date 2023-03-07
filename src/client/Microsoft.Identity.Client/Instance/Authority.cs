@@ -111,14 +111,11 @@ namespace Microsoft.Identity.Client.Instance
         /// </summary>
         internal abstract string GetTenantedAuthority(string tenantId, bool forceTenantless = false);
 
-        internal abstract Task<string> GetTokenEndpointAsync(
-            IHttpManager httpManager, 
-            ILoggerAdapter logger, 
-            CancellationToken cancellationToken);
+        internal abstract Task<string> GetTokenEndpointAsync(RequestContext requestContext);
 
-        internal abstract Task<string> GetAuthorizationEndpointAsync(IHttpManager httpManager, ILoggerAdapter logger, CancellationToken cancellationToken);
+        internal abstract Task<string> GetAuthorizationEndpointAsync(RequestContext requestContext);
 
-        internal abstract Task<string> GetDeviceCodeEndpointAsync(IHttpManager httpManager, ILoggerAdapter logger, CancellationToken cancellationToken);
+        internal abstract Task<string> GetDeviceCodeEndpointAsync(RequestContext requestContext);
         #endregion
 
         internal static string GetEnvironment(string authority)

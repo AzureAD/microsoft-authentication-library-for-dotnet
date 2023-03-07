@@ -8,8 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
-using Microsoft.IdentityModel.Protocols;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.Identity.Client.Instance.Oidc;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -24,43 +24,31 @@ namespace Microsoft.Identity.Client.Instance
 
         internal override string TenantId => null;
 
-
         internal override string GetTenantedAuthority(string tenantId, bool forceTenantless = false)
         {
             throw new NotImplementedException();
         }
 
-        internal override async Task<string> GetTokenEndpointAsync(
-            IHttpManager httpManager,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken)
+        internal override async Task<string> GetTokenEndpointAsync(RequestContext requestContext)
         {
             var configuration = await OidcRetrieverWithCache.GetOidcAsync(
-                AuthorityInfo.CanonicalAuthority.AbsoluteUri, 
-                httpManager, 
-                logger, 
-                cancellationToken).ConfigureAwait(false);
+                AuthorityInfo.CanonicalAuthority.AbsoluteUri, requestContext)
+                    .ConfigureAwait(false);
 
             return configuration.TokenEndpoint;
         }
 
         internal override async Task<string> GetAuthorizationEndpointAsync(
-            IHttpManager httpManager,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken)
+            RequestContext requestContext)
         {
-            var configuration = await OidcRetrieverWithCache.GetOidcAsync(
-               AuthorityInfo.CanonicalAuthority.AbsoluteUri,
-               httpManager,
-               logger,
-               cancellationToken).ConfigureAwait(false);
+            OidcMetadata configuration = await OidcRetrieverWithCache.GetOidcAsync(
+               AuthorityInfo.CanonicalAuthority.AbsoluteUri, requestContext)
+                .ConfigureAwait(false);
 
             return configuration.AuthorizationEndpoint;
         }
 
-        internal override Task<string> GetDeviceCodeEndpointAsync(IHttpManager httpManager,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken)
+        internal override Task<string> GetDeviceCodeEndpointAsync(RequestContext requestContext)
         {
             // prevents device_code flow which requires knowledge of the device_authorization_endpoint.
             throw new NotImplementedException();

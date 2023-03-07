@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -55,15 +56,19 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             Authority instance = Authority.CreateAuthority(
                 "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/");
+            var _harness = base.CreateTestHarness();
+            var _testRequestContext = new RequestContext(
+                _harness.ServiceBundle,
+                Guid.NewGuid());
 
             Assert.IsNotNull(instance);
             Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.B2C);
             Assert.AreEqual(
                 "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/authorize",
-                instance.GetAuthorizationEndpointAsync(default, default, default).Result);
+                instance.GetAuthorizationEndpointAsync(_testRequestContext).Result);
             Assert.AreEqual(
                 "https://sometenantid.b2clogin.com/tfp/6babcaad-604b-40ac-a9d7-9fd97c0b779f/b2c_1_susi/oauth2/v2.0/token",
-                instance.GetTokenEndpointAsync(default, default, default).Result);
+                instance.GetTokenEndpointAsync(_testRequestContext).Result);
         }
 
         [TestMethod]

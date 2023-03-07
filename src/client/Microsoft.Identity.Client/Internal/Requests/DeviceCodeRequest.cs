@@ -42,9 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.Claims, AuthenticationRequestParameters.ClaimsAndClientCapabilities);
 
             var deviceCodeEndpoint = await AuthenticationRequestParameters.Authority.GetDeviceCodeEndpointAsync(
-                ServiceBundle.HttpManager,
-                AuthenticationRequestParameters.RequestContext.Logger,
-                cancellationToken).ConfigureAwait(false);
+                AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
 
             var builder = new UriBuilder(deviceCodeEndpoint);
             builder.AppendQueryParameters(AuthenticationRequestParameters.ExtraQueryParameters);
@@ -78,7 +76,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 try
                 {
-                    var tokenEndpoint = await AuthenticationRequestParameters.GetTokenEndpointAsync(cancellationToken).ConfigureAwait(false);
+                    var tokenEndpoint = await AuthenticationRequestParameters.GetTokenEndpointAsync(AuthenticationRequestParameters.RequestContext)
+                        .ConfigureAwait(false);
 
                     var tokenResponse = await SendTokenRequestAsync(
                         tokenEndpoint,

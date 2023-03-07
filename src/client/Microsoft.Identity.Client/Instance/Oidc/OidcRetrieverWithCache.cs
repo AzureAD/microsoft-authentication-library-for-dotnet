@@ -3,31 +3,29 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Http;
-using Microsoft.IdentityModel.Protocols;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.OAuth2;
 
-namespace Microsoft.Identity.Client.Instance
+namespace Microsoft.Identity.Client.Instance.Oidc
 {
     internal static class OidcRetrieverWithCache
     {
-        private static readonly ConcurrentDictionary<string, OpenIdConnectConfiguration> s_cache = new();
+        private static readonly ConcurrentDictionary<string, OidcMetadata> s_cache = new();
         private static readonly SemaphoreSlim s_lockOidcRetrieval = new SemaphoreSlim(1);
 
         internal const string OpenIdConfigurationEndpointSuffix = ".well-known/openid-configuration";
 
-        public static async Task<OpenIdConnectConfiguration> GetOidcAsync(
-            string authority, 
-            IHttpManager httpManager, 
-            ILoggerAdapter logger, 
-            CancellationToken cancellationToken)
+        public static async Task<OidcMetadata> GetOidcAsync(
+            string authority,
+            RequestContext requestContext)
         {
+            OidcMetadata configuration = null;
+
             // Conccurent dictionary get or add
-            if (s_cache.TryGetValue(authority, out var configuration))
+            if (s_cache.TryGetValue(authority, out configuration))
                 return configuration;
 
             await s_lockOidcRetrieval.WaitAsync().ConfigureAwait(false);
@@ -38,23 +36,23 @@ namespace Microsoft.Identity.Client.Instance
                 if (s_cache.TryGetValue(authority, out configuration))
                     return configuration;
 
-                HttpClient httpClient = httpManager.GetHttpClient();
-                HttpDocumentRetriever httpDocumentRetriever = new HttpDocumentRetriever(httpClient);
+                Uri oidcMetadataEndpoint = new Uri(authority + OpenIdConfigurationEndpointSuffix);
 
-                configuration = await OpenIdConnectConfigurationRetriever.GetAsync(
-                        authority + OpenIdConfigurationEndpointSuffix,
-                        httpDocumentRetriever,
-                        cancellationToken).ConfigureAwait(false);
+                var client = new OAuth2Client(requestContext.Logger, requestContext.ServiceBundle.HttpManager);
+                configuration = await client.DiscoverOidcMetadataAsync(oidcMetadataEndpoint, requestContext).ConfigureAwait(false);
 
-                
                 s_cache[authority] = configuration;
                 return configuration;
             }
             catch (Exception ex)
             {
-                logger.Error(
+                requestContext.Logger.Error(
                     $"Failed to retrieve OpenId configuration from the OpenId endpoint {authority + OpenIdConfigurationEndpointSuffix} " +
                     $"due to {ex}");
+                
+                if (ex is MsalServiceException)
+                    throw;
+
                 throw new MsalServiceException(
                     "oidc_failure",
                     $"Failed to retrieve OIDC configuration from {authority + OpenIdConfigurationEndpointSuffix}. See inner exception. ",
@@ -64,6 +62,12 @@ namespace Microsoft.Identity.Client.Instance
             {
                 s_lockOidcRetrieval.Release();
             }
+        }
+
+        // For testing purposes only
+        public static void ResetCacheForTest()
+        {
+            s_cache.Clear();
         }
     }
 }

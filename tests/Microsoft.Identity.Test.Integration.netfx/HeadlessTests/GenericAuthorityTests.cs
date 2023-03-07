@@ -15,7 +15,7 @@ using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
+namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     [TestClass]
     public class GenericAuthorityTests 
@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         private const string DemoDuendeSoftwareDotCom = "https://demo.duendesoftware.com";
 
         /// Based on the publicly available https://demo.duendesoftware.com/
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ShouldSupportClientCredentialsWithDuendeDemoInstanceAsync()
         {
             var app = ConfidentialClientApplicationBuilder.Create("m2m")
@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         /// Based on the publicly available https://demo.duendesoftware.com/
-        [RunOn(TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore | TargetFrameworks.NetFx)]
         public async Task ShouldSupportClientCredentialsPrivateKeyJwtWithDuendeDemoInstanceAsync()
         {
             var applicationConfiguration = new ApplicationConfiguration(true);

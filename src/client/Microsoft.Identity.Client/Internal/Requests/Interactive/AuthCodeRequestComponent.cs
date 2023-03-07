@@ -45,9 +45,7 @@ namespace Microsoft.Identity.Client.Internal
         public async Task<Uri> GetAuthorizationUriWithoutPkceAsync(CancellationToken cancellationToken)
         {
             string authEndpoint = await _requestParams.Authority.GetAuthorizationEndpointAsync(
-                _requestParams.RequestContext.ServiceBundle.HttpManager,
-                _requestParams.RequestContext.Logger,
-                cancellationToken).ConfigureAwait(false);
+                _requestParams.RequestContext).ConfigureAwait(false);
 
             var result = CreateAuthorizationUri(authEndpoint, false);
             return result.Item1;
@@ -55,10 +53,8 @@ namespace Microsoft.Identity.Client.Internal
 
         public async Task<Uri> GetAuthorizationUriWithPkceAsync(string codeVerifier, CancellationToken cancellationToken)
         {
-            string authEndpoint = await _requestParams.Authority.GetAuthorizationEndpointAsync(
-               _requestParams.RequestContext.ServiceBundle.HttpManager,
-               _requestParams.RequestContext.Logger,
-               cancellationToken).ConfigureAwait(false);
+            string authEndpoint = await _requestParams.Authority.GetAuthorizationEndpointAsync(_requestParams.RequestContext)
+                .ConfigureAwait(false);
 
             var result = CreateAuthorizationUriWithCodeChallenge(authEndpoint, codeVerifier);
             return result.Item1;
@@ -72,10 +68,8 @@ namespace Microsoft.Identity.Client.Internal
 
             _requestParams.RedirectUri = webUi.UpdateRedirectUri(_requestParams.RedirectUri);
 
-            string authEndpoint = await _requestParams.Authority.GetAuthorizationEndpointAsync(
-               _requestParams.RequestContext.ServiceBundle.HttpManager,
-               _requestParams.RequestContext.Logger,
-               cancellationToken).ConfigureAwait(false);
+            string authEndpoint = await _requestParams.Authority.GetAuthorizationEndpointAsync(_requestParams.RequestContext)
+                .ConfigureAwait(false);
 
             Tuple<Uri, string, string> authorizationTuple = CreateAuthorizationUri(authEndpoint, true);
             Uri authorizationUri = authorizationTuple.Item1;

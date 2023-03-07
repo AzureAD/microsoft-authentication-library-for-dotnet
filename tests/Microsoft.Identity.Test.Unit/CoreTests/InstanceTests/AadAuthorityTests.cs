@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public async Task CreateEndpointsWithCommonTenantAsync()
         {
             using var harness = CreateTestHarness();
+            RequestContext requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid());
 
             Authority instance = Authority.CreateAuthority("https://login.microsoftonline.com/common");
             Assert.IsNotNull(instance);
@@ -44,9 +45,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             Assert.AreEqual(
                 "https://login.microsoftonline.com/common/oauth2/v2.0/authorize", 
-                await instance.GetAuthorizationEndpointAsync(default, default, default).ConfigureAwait(false));
+                await instance.GetAuthorizationEndpointAsync(requestContext).ConfigureAwait(false));
             Assert.AreEqual("https://login.microsoftonline.com/common/oauth2/v2.0/token", 
-                await instance.GetTokenEndpointAsync(default, default, default).ConfigureAwait(false));
+                await instance.GetTokenEndpointAsync(requestContext).ConfigureAwait(false));
         }
 
         [TestMethod]

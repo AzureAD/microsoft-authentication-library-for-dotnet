@@ -93,10 +93,7 @@ namespace Microsoft.Identity.Client.Instance
             return AuthorityInfo.CanonicalAuthority.AbsoluteUri;
         }
 
-        internal override Task<string> GetTokenEndpointAsync(
-            IHttpManager httpManager,
-           ILoggerAdapter logger,
-           CancellationToken cancellationToken)
+        internal override Task<string> GetTokenEndpointAsync(RequestContext requestContext)
         {
             string tokenEndpoint = string.Format(
                     CultureInfo.InvariantCulture,
@@ -106,10 +103,7 @@ namespace Microsoft.Identity.Client.Instance
             return Task.FromResult(tokenEndpoint);
         }
 
-        internal override Task<string> GetAuthorizationEndpointAsync(
-           IHttpManager httpManager,
-           ILoggerAdapter logger,
-           CancellationToken cancellationToken)
+        internal override Task<string> GetAuthorizationEndpointAsync(RequestContext requestContext)
         {
             string authorizationEndpoint = string.Format(CultureInfo.InvariantCulture,
                   AuthorizationEndpointTemplate,
@@ -118,10 +112,7 @@ namespace Microsoft.Identity.Client.Instance
             return Task.FromResult(authorizationEndpoint);
         }
 
-        internal override Task<string> GetDeviceCodeEndpointAsync(
-            IHttpManager httpManager,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken)
+        internal override Task<string> GetDeviceCodeEndpointAsync(RequestContext requestContext)
         {
             string deviceEndpoint = string.Format(
                 CultureInfo.InvariantCulture,

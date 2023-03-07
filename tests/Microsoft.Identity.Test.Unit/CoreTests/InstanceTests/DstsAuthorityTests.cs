@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -25,11 +26,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
         private static MockHttpMessageHandler CreateTokenResponseHttpHandler(string authority)
         {
-            IDictionary<string, string> expectedRequestBody = new Dictionary<string, string>();
-            expectedRequestBody.Add("scope", TestConstants.ScopeStr);
-            expectedRequestBody.Add("grant_type", "client_credentials");
-            expectedRequestBody.Add("client_id", TestConstants.ClientId);
-            expectedRequestBody.Add("client_secret", TestConstants.ClientSecret);
+            IDictionary<string, string> expectedRequestBody = new Dictionary<string, string>
+            {
+                { "scope", TestConstants.ScopeStr },
+                { "grant_type", "client_credentials" },
+                { "client_id", TestConstants.ClientId },
+                { "client_secret", TestConstants.ClientSecret }
+            };
 
             return new MockHttpMessageHandler()
             {
@@ -86,10 +89,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public void DstsEndpointsTest(string authority)
         {
             var instance = Authority.CreateAuthority(authority);
+            var _harness = base.CreateTestHarness();
+            var _testRequestContext = new RequestContext(
+                _harness.ServiceBundle,
+                Guid.NewGuid());
 
-            Assert.AreEqual($"{authority}/oauth2/v2.0/token", instance.GetTokenEndpointAsync(default, default, default).Result);
-            Assert.AreEqual($"{authority}/oauth2/v2.0/authorize", instance.GetAuthorizationEndpointAsync(default, default, default).Result);
-            Assert.AreEqual($"{authority}/oauth2/v2.0/devicecode", instance.GetDeviceCodeEndpointAsync(default, default, default).Result);
+            Assert.AreEqual($"{authority}/oauth2/v2.0/token", instance.GetTokenEndpointAsync(_testRequestContext).Result);
+            Assert.AreEqual($"{authority}/oauth2/v2.0/authorize", instance.GetAuthorizationEndpointAsync(_testRequestContext).Result);
+            Assert.AreEqual($"{authority}/oauth2/v2.0/devicecode", instance.GetDeviceCodeEndpointAsync(_testRequestContext).Result);
             Assert.AreEqual($"https://some.url.dsts.core.azure-test.net/dstsv2/common/userrealm/", instance.AuthorityInfo.UserRealmUriPrefix);
         }
 
