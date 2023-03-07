@@ -21,10 +21,23 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             Assert.AreEqual("hi common !", "hi {tenant_id} !".Replace("{tenant_ID}", "common", StringComparison.OrdinalIgnoreCase));
             Assert.AreEqual("hi {tenant_id} !", "hi {tenant_id} !".Replace("nothing", "common", StringComparison.OrdinalIgnoreCase));
-           
+
             Assert.AreEqual("", "".Replace("nothing", "common", StringComparison.OrdinalIgnoreCase));
             AssertException.Throws<ArgumentException>(() =>
                 "hi {tenant} !".Replace("", "common", StringComparison.OrdinalIgnoreCase));
+        }
+
+        [TestMethod]
+        public void NullIfEmpty()
+        {
+            string nullString = null;
+
+            Assert.IsNull("".NullIfEmpty());
+            Assert.IsNull(nullString.NullIfEmpty());
+
+            Assert.IsNull("".NullIfWhiteSpace());
+            Assert.IsNull(" ".NullIfWhiteSpace());
+            Assert.IsNull(nullString.NullIfWhiteSpace());
         }
     }
 }

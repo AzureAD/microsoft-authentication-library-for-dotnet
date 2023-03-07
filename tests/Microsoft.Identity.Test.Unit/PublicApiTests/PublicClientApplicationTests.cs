@@ -360,7 +360,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
 
                 //Validate new default redirect uri
-#if DESKTOP || NET5_WIN
+#if DESKTOP || NET6_WIN
                 Assert.AreEqual(Constants.NativeClientRedirectUri, app.AppConfig.RedirectUri);
 #elif NET_CORE 
                 Assert.AreEqual(app.AppConfig.RedirectUri, "http://localhost");
@@ -844,64 +844,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .ConfigureAwait(false);
         }
 
-#if !NET6_0
-        /// <summary>
-        /// Cache state:
-        ///
-        /// 2 users have acquired tokens
-        /// 1 of them is a guest in another tenant => 1 request for each tenant
-        /// No refresh tokens since this was a response from WAM
-        /// The 2 accounts have WAM IDs in account in the response
-        /// </summary>
-        /// <returns></returns>
-        [TestMethod]
-        [DeploymentItem(@"Resources\TokenCacheWithWamId.json")]
-        public async Task WamIdInAccountInAuthResultTestAsync()
-        {
-            const string tenant1 = "72f988bf-86f1-41af-91ab-2d7cd011db47";
-            const string tenant2 = "49f548d0-12b7-4169-a390-bb5304d24462";
-            string tenantedAuthority1 = $"https://login.microsoftonline.com/{tenant1}/";
-            string tenantedAuthority2 = $"https://login.microsoftonline.com/{tenant2}/";
-
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange
-                PublicClientApplication pca = CreatePcaFromFileWithAuthority(httpManager, tokenCacheFile: "TokenCacheWithWamId.json", enableBroker: true);
-
-                // Act
-                var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-                var account = accounts.Single(a => a.HomeAccountId.TenantId == tenant1);
-                var tenantProfiles = account.GetTenantProfiles();
-
-                AuthenticationResult response = await
-                    pca.AcquireTokenSilent(new[] { "User.Read" }, account)
-                    .WithAuthority(tenantedAuthority1)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(tenant1, response.TenantId);
-                AssertWamIds(response.Account as Account, 1, "wamId1");
-                AssertTenantProfiles(tenantProfiles, tenant1, tenant2);
-                AssertTenantProfiles(response.Account.GetTenantProfiles(), tenant1, tenant2);
-                Assert.AreEqual(tenant1, response.ClaimsPrincipal.FindFirst("tid").Value);
-
-                // Act
-                accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-                account = accounts.Single(a => a.HomeAccountId.TenantId == tenant2);
-                response = await
-                    pca.AcquireTokenSilent(new[] { "User.Read" }, account)
-                    .WithTenantId(tenant2)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-                // Assert
-                AssertWamIds(response.Account as Account, 1, "wamId2");
-                Assert.AreEqual(tenant2, response.TenantId);
-                Assert.AreEqual(tenant2, response.ClaimsPrincipal.FindFirst("tid").Value);
-            }
-        }
-#endif
         /// <summary>
         /// Cache state:
         ///
@@ -1104,7 +1046,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #if NET5_0_OR_GREATER
                 pcaBuilder.WithBroker();
 #else
-                pcaBuilder.WithWindowsBroker();
+                WamExtension.WithWindowsBroker(pcaBuilder);
 #endif
             }
 

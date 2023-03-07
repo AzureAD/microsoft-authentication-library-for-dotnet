@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. 
 // Licensed under the MIT License.
 
+using System.Linq;
 using System.Net;
 using System.Security;
 using System.Threading;
@@ -29,15 +30,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         }
 
+        // If test fails with "user needs to consent to the application, do an interactive request" error,
+        // Do the following: 
+        // 1) Add in code to pull the user's password, and put a breakpoint there.
+        // string password = ((LabUser)user).GetPassword();
+        // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
+        // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
+        // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
         [RunOn(TargetFrameworks.NetCore)]
         public async Task ROPC_B2C_Async()
         {
             var labResponse = await LabUserHelper.GetB2CLocalAccountAsync().ConfigureAwait(false);
-            await RunB2CHappyPathTestAsync(labResponse).ConfigureAwait(false);
-        }
-
-        private async Task RunB2CHappyPathTestAsync(LabResponse labResponse)
-        {
             var user = labResponse.User;
 
             var msalPublicClient = PublicClientApplicationBuilder
@@ -56,13 +59,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
             TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(authResult);
-            // If test fails with "user needs to consent to the application, do an interactive request" error,
-            // Do the following: 
-            // 1) Add in code to pull the user's password, and put a breakpoint there.
-            // string password = ((LabUser)user).GetPassword();
-            // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
-            // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
-            // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
+
+            var acc = (await msalPublicClient.GetAccountsAsync().ConfigureAwait(false)).Single();
+            var claimsPrincipal = acc.GetTenantProfiles().Single().ClaimsPrincipal;
+
+            Assert.AreEqual(TokenResponseHelper.NullPreferredUsernameDisplayLabel, acc.Username);
+            Assert.IsNotNull(claimsPrincipal.FindFirst("Name"));
+            Assert.IsNotNull(claimsPrincipal.FindFirst("nbf"));
+            Assert.IsNotNull(claimsPrincipal.FindFirst("exp"));
+
         }
     }
 }

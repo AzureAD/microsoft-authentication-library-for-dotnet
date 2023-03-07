@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Cache
                 return key;
             }
 
-            if (requestParameters.IsConfidentialClient ||
+            if (requestParameters.AppConfig.IsConfidentialClient ||
                 requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenSilent)
             {
                 return homeAccountIdFromResponse;
@@ -124,9 +124,9 @@ namespace Microsoft.Identity.Client.Cache
             return accessTokenCacheItem.HomeAccountId;
         }
 
-        public static string GetKeyFromAccount(MsalAccountCacheKey accountKey)
+        public static string GetKeyFromAccount(MsalAccountCacheItem accountCacheItem)
         {
-            return accountKey.HomeAccountId;
+            return accountCacheItem.HomeAccountId;
         }
 
         public static string GetKeyFromCachedItem(MsalIdTokenCacheItem idTokenCacheItem)

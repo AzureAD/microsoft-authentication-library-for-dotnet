@@ -30,8 +30,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             _testContext = testContext;
         }
 
-        public MockHttpManager(bool retry, TestContext testContext = null) :
-            base(new SimpleHttpClientFactory(), retry)
+        public MockHttpManager(bool retryOnceOn5xx, TestContext testContext = null) :
+            base(new SimpleHttpClientFactory(), retryOnceOn5xx)
         {
             _testContext = testContext;
         }

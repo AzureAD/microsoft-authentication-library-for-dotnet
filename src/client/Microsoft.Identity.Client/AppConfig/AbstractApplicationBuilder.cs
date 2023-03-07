@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
+using Microsoft.Identity.Client.Internal;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -33,7 +34,6 @@ namespace Microsoft.Identity.Client
         }
 
         internal ApplicationConfiguration Config { get; }
-
 
         /// <summary>
         /// Uses a specific <see cref="IMsalHttpClientFactory"/> to communicate
@@ -285,7 +285,7 @@ namespace Microsoft.Identity.Client
         /// </param>
         /// <returns>The builder to chain the .With methods</returns>
         /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
-        /// was already set on the application builder
+        /// was already set on the application builder        
         public T WithLogging(
             LogCallback loggingCallback,
             LogLevel? logLevel = null,
@@ -386,12 +386,13 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets the redirect URI of the application. See https://aka.ms/msal-net-application-configuration
+        /// Sets the redirect URI of the application. The URI must also be registered in the application portal. 
+        /// See https://aka.ms/msal-net-application-configuration
         /// </summary>
         /// <param name="redirectUri">URL where the STS will call back the application with the security token.
-        /// This parameter is not required for desktop or UWP applications (as a default is used).
-        /// It's not required for mobile applications that don't use a broker
-        /// It is required for web apps</param>
+        /// Public Client Applications - desktop, mobile, console apps - use different browsers (system browser, embedded browses) and brokers
+        /// and each has its own rules.
+        /// </param>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithRedirectUri(string redirectUri)
         {
@@ -524,6 +525,23 @@ namespace Microsoft.Identity.Client
             {
                 Config.ClientCapabilities = clientCapabilities;
             }
+
+            return (T)this;
+        }
+
+        /// <summary>
+        /// Determines whether or not instance discovery is performed when attempting to authenticate. Setting this to false will completely disable
+        /// instance discovery and authority validation. This will not affect the behavior of application configured with regional endpoints however.
+        /// </summary>
+        /// <remarks>If instance discovery is disabled and no user metadata is provided, MSAL will use the provided authority without any checks.
+        /// <see cref="WithInstanceDiscoveryMetadata(string)"/> takes priority over <paramref name="enableInstanceDiscovery"/>
+        /// so instance metadata can be provided regardless of this configuration.
+        /// </remarks>
+        /// <param name="enableInstanceDiscovery">Determines if instance discovery/Authority validation is performed</param>
+        /// <returns></returns>
+        public T WithInstanceDiscovery(bool enableInstanceDiscovery)
+        {
+            Config.IsInstanceDiscoveryEnabled = enableInstanceDiscovery;
 
             return (T)this;
         }

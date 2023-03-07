@@ -25,6 +25,11 @@ namespace Microsoft.Identity.Client
 {
     internal sealed class ApplicationConfiguration : IAppConfig
     {
+        public ApplicationConfiguration(bool isConfidentialClient) 
+        {
+            IsConfidentialClient = isConfidentialClient;
+        }
+        
         public const string DefaultClientName = "UnknownClient";
         public const string DefaultClientVersion = "0.0.0.0";
 
@@ -101,6 +106,10 @@ namespace Microsoft.Identity.Client
         public bool MultiCloudSupportEnabled { get; set; } = false;
 
         public bool RetryOnServerErrors { get; set; } = true;
+
+        public bool UseManagedIdentity { get; internal set; }
+
+        public string ManagedIdentityUserAssignedId {  get; internal set; }
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
@@ -183,7 +192,9 @@ namespace Microsoft.Identity.Client
         public ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
-#endregion
+        public bool IsConfidentialClient { get; }
+        public bool IsInstanceDiscoveryEnabled { get; internal set; } = true;
+        #endregion
 
     }
 }

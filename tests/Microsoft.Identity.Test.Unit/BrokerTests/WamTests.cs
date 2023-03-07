@@ -26,7 +26,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common;
 
-#if !NET5_WIN
+#if !NET6_WIN
 using Microsoft.Identity.Client.Desktop;
 #endif
 
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             _synchronizationContext = new DedicatedThreadSynchronizationContext();
 
             _coreUIParent = new CoreUIParent() { SynchronizationContext = _synchronizationContext };
-            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
+            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(isConfidentialClient: true);
             _logger = Substitute.For<ILoggerAdapter>();
             _aadPlugin = Substitute.For<IWamPlugin>();
             _msaPlugin = Substitute.For<IWamPlugin>();
@@ -87,8 +87,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAuthority(TestConstants.AuthorityTenant);
 
-#if !NET5_WIN
-            pcaBuilder = pcaBuilder.WithWindowsBroker();
+#if !NET6_WIN
+            // this ensures that legacy broker is called
+            DesktopExtensions.WithWindowsDesktopFeatures(pcaBuilder);
 #endif
 
             Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
@@ -100,7 +101,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             var pcaBuilder = PublicClientApplicationBuilder
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAdfsAuthority(TestConstants.ADFSAuthority);
-#if !NET5_WIN
+#if !NET6_WIN
             pcaBuilder = pcaBuilder.WithWindowsBroker();
 #endif
 

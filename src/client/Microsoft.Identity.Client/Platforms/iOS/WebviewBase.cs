@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
 
             s_authorizationResult = AuthorizationResult.FromUri(url);
-            logger?.Verbose("Response url parsed and the result is " + s_authorizationResult.Status);
+            logger?.Verbose(() => "Response url parsed and the result is " + s_authorizationResult.Status);
 
             s_returnedUriReady.Release();
 

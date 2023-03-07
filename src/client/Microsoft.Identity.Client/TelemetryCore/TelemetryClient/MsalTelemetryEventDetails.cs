@@ -7,9 +7,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.TelemetryClient
 {
     internal class MsalTelemetryEventDetails : TelemetryEventDetails
     {
-        public MsalTelemetryEventDetails()
+        public MsalTelemetryEventDetails(string eventName)
         {
-            Name = TelemetryConstants.AcquireTokenEventName;
+            Name = eventName;
         }
     }
 }

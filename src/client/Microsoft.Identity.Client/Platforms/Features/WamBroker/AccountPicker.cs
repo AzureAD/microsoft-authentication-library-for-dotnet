@@ -9,22 +9,21 @@ using Microsoft.Identity.Client.Instance;
 using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Windows.UI.ApplicationSettings;
-using System.Runtime.InteropServices;
 
 #if !UAP10_0_17763
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 #endif
 
-#if NET5_WIN
-using Microsoft.Identity.Client.Platforms.net5win;
-using AccountsSettingsPaneInterop = Microsoft.Identity.Client.Platforms.net5win.AccountsSettingsPaneInterop;
+#if NET6_WIN
+using Microsoft.Identity.Client.Platforms.net6win;
+using AccountsSettingsPaneInterop = Microsoft.Identity.Client.Platforms.net6win.AccountsSettingsPaneInterop;
 #elif DESKTOP || NET_CORE
 using Microsoft.Identity.Client.Platforms;
 #endif
 
 namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 {
-#if NET5_WIN
+#if NET6_WIN
     [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
 #endif
     internal class AccountPicker : IAccountPicker
@@ -42,7 +41,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             ILoggerAdapter logger,
             SynchronizationContext synchronizationContext,
             Authority authority,
-            bool isMsaPassthrough, 
+            bool isMsaPassthrough,
             string optionalHeaderText)
         {
             _parentHandle = parentHandle;
@@ -51,13 +50,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             _authority = authority;
             _isMsaPassthrough = isMsaPassthrough;
             _optionalHeaderText = optionalHeaderText;
-            _logger.Verbose("Is MSA passthrough? " + _isMsaPassthrough);
+            _logger.Verbose(()=>"Is MSA passthrough? " + _isMsaPassthrough);
         }
 
         public async Task<WebAccountProvider> DetermineAccountInteractivelyAsync()
         {
 #if WINDOWS_APP
-            await ShowPicker_UWPAsync().ConfigureAwait(true);                    
+            await ShowPicker_UWPAsync().ConfigureAwait(true);
 #else
             await ShowPicker_Win32Async().ConfigureAwait(false);
 #endif
@@ -257,35 +256,35 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
                 if (string.Equals("common", _authority.TenantId))
                 {
-                    _logger.Verbose("Displaying selector for common");
+                    _logger.Verbose(()=>"Displaying selector for common");
                     await AddSelectorsAsync(
-                        args, 
-                        addOrgAccounts: true, 
+                        args,
+                        addOrgAccounts: true,
                         addMsaAccounts: true).ConfigureAwait(true);
                 }
                 else if (string.Equals("organizations", _authority.TenantId))
                 {
-                    _logger.Verbose("Displaying selector for organizations");
+                    _logger.Verbose(()=>"Displaying selector for organizations");
                     await AddSelectorsAsync(
-                        args, 
-                        addOrgAccounts: true, 
+                        args,
+                        addOrgAccounts: true,
                         addMsaAccounts: _isMsaPassthrough).ConfigureAwait(true);
                 }
                 else if (string.Equals("consumers", _authority.TenantId))
                 {
-                    _logger.Verbose("Displaying selector for consumers");
+                    _logger.Verbose(() => "Displaying selector for consumers");
                     await AddSelectorsAsync(
-                        args, 
-                        addOrgAccounts: false, 
+                        args,
+                        addOrgAccounts: false,
                         addMsaAccounts: true).ConfigureAwait(true);
                 }
                 else
                 {
-                    _logger.Verbose("Displaying selector for tenanted authority");
+                    _logger.Verbose(()=>"Displaying selector for tenanted authority");
                     await AddSelectorsAsync(
-                        args, 
-                        addOrgAccounts: true, 
-                        addMsaAccounts: _isMsaPassthrough, 
+                        args,
+                        addOrgAccounts: true,
+                        addMsaAccounts: _isMsaPassthrough,
                         tenantId: _authority.AuthorityInfo.CanonicalAuthority.ToString()).ConfigureAwait(true);
                 }
             }
@@ -298,16 +297,20 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private async Task AddSelectorsAsync(AccountsSettingsPaneCommandsRequestedEventArgs args, bool addOrgAccounts, bool addMsaAccounts, string tenantId = null)
         {
             if (addOrgAccounts)
+            {
                 args.WebAccountProviderCommands.Add(
                     new WebAccountProviderCommand(
                         await WebAuthenticationCoreManager.FindAccountProviderAsync("https://login.microsoft.com", tenantId ?? "organizations"),
                         WebAccountProviderCommandInvoked));
+            }
 
             if (addMsaAccounts)
+            {
                 args.WebAccountProviderCommands.Add(
                     new WebAccountProviderCommand(
                         await WebAuthenticationCoreManager.FindAccountProviderAsync("https://login.microsoft.com", "consumers"),
                         WebAccountProviderCommandInvoked));
+            }
         }
 
         private void WebAccountProviderCommandInvoked(WebAccountProviderCommand command)

@@ -50,6 +50,13 @@ namespace Microsoft.Identity.Client
             return new AcquireTokenSilentParameterBuilder(clientApplicationBaseExecutor).WithScopes(scopes).WithLoginHint(loginHint);
         }
 
+        /// <summary>
+        /// Sets the account for which the token will be retrieved. This method is mutually exclusive
+        /// with <see cref="WithLoginHint(string)"/>. If both are used, an exception will be thrown
+        /// </summary>
+        /// <param name="account">Account to use for the silent token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        /// <remarks>An exception will be thrown If AAD returns a different account than the one that is being requested for.</remarks>
         private AcquireTokenSilentParameterBuilder WithAccount(IAccount account)
         {
             Parameters.Account = account;
@@ -192,7 +199,15 @@ namespace Microsoft.Identity.Client
 #endif
         public AcquireTokenSilentParameterBuilder WithProofOfPossession(string nonce, HttpMethod httpMethod, Uri requestUri)
         {
-            ValidateUseOfExperimentalFeature();
+            if (ServiceBundle.Config.IsConfidentialClient)
+                ValidateUseOfExperimentalFeature();
+
+            // On public client, we only support POP via the broker
+            if (!ServiceBundle.Config.IsConfidentialClient &&
+                !ServiceBundle.Config.IsBrokerEnabled)
+            {
+                throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerRequiredForPop);
+            }
 
             ClientApplicationBase.GuardMobileFrameworks();
             var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);

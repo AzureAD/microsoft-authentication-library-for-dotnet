@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             {
                 var logger = requestParams.RequestContext.Logger;
 
-                logger.Info($"[Throttling] MsalUiRequiredException encountered - " +
+                logger.Info(() => $"[Throttling] MsalUiRequiredException encountered - " +
                     $"throttling for {s_uiRequiredExpiration.TotalSeconds} seconds. ");
 
                 var thumbprint = GetRequestStrictThumbprint(bodyParams,
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         /// </summary>
         private static bool IsRequestSupported(AuthenticationRequestParameters requestParams)
         {            
-            return !requestParams.IsConfidentialClient &&
+            return !requestParams.AppConfig.IsConfidentialClient &&
                 requestParams.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenSilent;
         }
 

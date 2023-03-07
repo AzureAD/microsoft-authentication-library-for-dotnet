@@ -143,13 +143,13 @@ namespace Microsoft.Identity.Client
             if (requestParams.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
             {
                 requestParams.RequestContext.Logger.Info(
-                    "Looking for scopes for the authority in the cache which intersect with " +
+                    () => "Looking for scopes for the authority in the cache which intersect with " +
                     requestParams.Scope.AsSingleString());
             }
 
             var accessTokensToDelete = new List<MsalAccessTokenCacheItem>();
             var partitionKeyFromResponse = CacheKeyFactory.GetInternalPartitionKeyFromResponse(requestParams, homeAccountId);
-            Debug.Assert(partitionKeyFromResponse != null || !requestParams.IsConfidentialClient, "On confidential client, cache must be partitioned.");
+            Debug.Assert(partitionKeyFromResponse != null || !requestParams.AppConfig.IsConfidentialClient, "On confidential client, cache must be partitioned.");
 
             foreach (var accessToken in Accessor.GetAllAccessTokens(partitionKeyFromResponse))
             {
@@ -159,19 +159,19 @@ namespace Microsoft.Identity.Client
                     string.Equals(accessToken.TenantId, tenantId, StringComparison.OrdinalIgnoreCase) &&
                     accessToken.ScopeSet.Overlaps(scopeSet))
                 {
-                    requestParams.RequestContext.Logger.Verbose("Intersecting scopes found");
+                    requestParams.RequestContext.Logger.Verbose(() => $"Intersecting scopes found: {scopeSet}");
                     accessTokensToDelete.Add(accessToken);
                 }
             }
 
-            requestParams.RequestContext.Logger.Info("Intersecting scope entries count - " + accessTokensToDelete.Count);
+            requestParams.RequestContext.Logger.Info(() => "Intersecting scope entries count - " + accessTokensToDelete.Count);
 
             if (!requestParams.IsClientCredentialRequest)
             {
                 // filter by identifier of the user instead
                 accessTokensToDelete.RemoveAll(
                             item => !item.HomeAccountId.Equals(homeAccountId, StringComparison.OrdinalIgnoreCase));
-                requestParams.RequestContext.Logger.Info("Matching entries after filtering by user - " + accessTokensToDelete.Count);
+                requestParams.RequestContext.Logger.Info(() => "Matching entries after filtering by user - " + accessTokensToDelete.Count);
             }
 
             foreach (var cacheItem in accessTokensToDelete)

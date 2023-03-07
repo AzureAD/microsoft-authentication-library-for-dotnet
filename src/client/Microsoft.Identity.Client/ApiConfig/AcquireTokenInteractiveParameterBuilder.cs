@@ -23,7 +23,7 @@ using UIKit;
 using Android.App;
 #endif
 
-#if DESKTOP || NET5_WIN
+#if DESKTOP || NET6_WIN
 using System.Windows.Forms;
 #endif
 
@@ -150,6 +150,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
         /// <returns>The builder to chain the .With methods</returns>
+        /// <remarks>An exception will be thrown If AAD returns a different account than the one that is being requested for.</remarks>
         public AcquireTokenInteractiveParameterBuilder WithAccount(IAccount account)
         {
             Parameters.Account = account;
@@ -223,14 +224,14 @@ namespace Microsoft.Identity.Client
                 Parameters.UiParent.CallerWindow = nsWindow;
             }
 
-#elif DESKTOP || NET5_WIN
+#elif DESKTOP || NET6_WIN
             if (parent is IWin32Window win32Window)
             {
                 Parameters.UiParent.OwnerWindow = win32Window.Handle;
                 return this;
             }
 #endif
-#if DESKTOP || NET5_WIN || NET_CORE || NETSTANDARD
+#if DESKTOP || NET6_WIN || NET_CORE || NETSTANDARD
 
             if (parent is IntPtr intPtrWindow)
             {
@@ -277,7 +278,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if DESKTOP || NET5_WIN
+#if DESKTOP || NET6_WIN
         /// <summary>
         /// Sets a reference to the current IWin32Window that triggers the browser to be shown.
         /// Used to center the browser (embedded web view and Windows broker) that pop-up onto this window.        
@@ -296,7 +297,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if DESKTOP || NET5_WIN || NET_CORE || NETSTANDARD
+#if DESKTOP || NET6_WIN || NET_CORE || NETSTANDARD
 
         /// <summary>
         /// Sets a reference to the IntPtr to a window that triggers the browser to be shown.
@@ -358,7 +359,6 @@ namespace Microsoft.Identity.Client
 #endif
         public AcquireTokenInteractiveParameterBuilder WithProofOfPossession(string nonce, HttpMethod httpMethod, Uri requestUri)
         {
-            ValidateUseOfExperimentalFeature();
             ClientApplicationBase.GuardMobileFrameworks();
 
             if (!ServiceBundle.Config.IsBrokerEnabled)

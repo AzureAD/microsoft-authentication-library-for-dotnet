@@ -12,6 +12,11 @@ namespace Microsoft.Identity.Client.AuthScheme
     internal interface IAuthenticationScheme
     {
         /// <summary>
+        /// Value to log to telemetry to indicate pop usage.
+        /// </summary>
+        TokenType TelemetryTokenType { get; }
+
+        /// <summary>
         /// Prefix for the HTTP header that has the token. E.g. "Bearer" or "POP"
         /// </summary>
         string AuthorizationHeaderPrefix { get; }

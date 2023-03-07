@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
@@ -43,7 +45,7 @@ namespace Microsoft.Identity.Client
         {
             ClientApplicationBase.GuardMobileFrameworks();
 
-            var config = new ApplicationConfiguration();
+            var config = new ApplicationConfiguration(isConfidentialClient: true);
             var builder = new ConfidentialClientApplicationBuilder(config).WithOptions(options);
 
             if (!string.IsNullOrWhiteSpace(options.ClientSecret))
@@ -76,7 +78,7 @@ namespace Microsoft.Identity.Client
         {
             ClientApplicationBase.GuardMobileFrameworks();
 
-            var config = new ApplicationConfiguration();
+            var config = new ApplicationConfiguration(isConfidentialClient: true);
             return new ConfidentialClientApplicationBuilder(config)
                 .WithClientId(clientId)
                 .WithCacheSynchronization(false);
@@ -267,22 +269,19 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Instructs MSAL.NET to use an Azure regional token service.
+        /// Instructs MSAL.NET to use an Azure regional token service. This feature is currently available to 
+        /// first party applications only. 
         /// </summary>
         /// <param name="azureRegion">Either the string with the region (preferred) or        
         /// use <see cref="ConfidentialClientApplication.AttemptRegionDiscovery"/> and MSAL.NET will attempt to auto-detect the region.                
         /// </param>
         /// <remarks>
-        /// Region names as per https://azure.microsoft.com/en-ca/global-infrastructure/geographies/.
-        /// See https://aka.ms/region-map for more details on region names.
         /// The region value should be short region name for the region where the service is deployed. 
         /// For example "centralus" is short name for region Central US.
-        /// Not all auth flows can use the regional token service. 
         /// Service To Service (client credential flow) tokens can be obtained from the regional service.
         /// Requires configuration at the tenant level.
         /// Auto-detection works on a limited number of Azure artifacts (VMs, Azure functions). 
         /// If auto-detection fails, the non-regional endpoint will be used.
-        /// If an invalid region name is provided, the non-regional endpoint MIGHT be used or the token request MIGHT fail.
         /// See https://aka.ms/msal-net-region-discovery for more details.        
         /// </remarks>
         /// <returns>The builder to chain the .With methods</returns>
@@ -343,7 +342,20 @@ namespace Microsoft.Identity.Client
                 Config.TelemetryClients = telemetryClients;
             }
 
+            TelemetryClientLogMsalVersion();
+
             return this;
+        }
+
+        private void TelemetryClientLogMsalVersion()
+        {
+            if (Config.TelemetryClients.HasEnabledClients(TelemetryConstants.ConfigurationUpdateEventName))
+            {
+                MsalTelemetryEventDetails telemetryEventDetails = new MsalTelemetryEventDetails(TelemetryConstants.ConfigurationUpdateEventName);
+                telemetryEventDetails.SetProperty(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion());
+
+                Config.TelemetryClients.TrackEvent(telemetryEventDetails);
+            }
         }
 
         internal ConfidentialClientApplicationBuilder WithAppTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)

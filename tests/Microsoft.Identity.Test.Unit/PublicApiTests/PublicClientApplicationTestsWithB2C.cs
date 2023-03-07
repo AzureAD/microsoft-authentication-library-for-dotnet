@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -274,6 +275,38 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        [TestMethod]
+        public async Task B2CSomeExceptionAsync()
+        {
+
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(TestConstants.B2CLoginAuthority), true)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle,
+                                        AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
+
+                // Arrange AcquireTokenWithUsernamePassword
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    TestConstants.B2CLoginAuthority,
+                    responseMessage: MockHelpers.CreateSuccessResponseMessage("non json response"));
+
+                // Act 
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() => 
+                    app.AcquireTokenByUsernamePassword(new[] { "user.read" }, "username", "password" ) // no scopes -> no Access Token!
+                    .ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(MsalError.JsonParseError, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.JsonParseErrorMessage, ex.Message);
+            }
+        }
+
         private static void AssertNoAccessToken(AuthenticationResult result)
         {
             Assert.IsNotNull(result);
@@ -282,7 +315,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNull(result.AccessToken);
             Assert.IsNull(result.Scopes);
             Assert.IsTrue(result.ExpiresOn == default);
-            Assert.IsTrue(result.ExtendedExpiresOn == default);
         }
 
         private static void ValidateB2CLoginAuthority(MockHttpAndServiceBundle harness, string authority)

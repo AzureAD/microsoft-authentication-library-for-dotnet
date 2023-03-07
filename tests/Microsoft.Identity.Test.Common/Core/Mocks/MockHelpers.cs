@@ -87,6 +87,39 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ",\"id_token_expires_in\":\"3600\"}";
         }
 
+        public static string GetMsiSuccessfulResponse()
+        {
+            string expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(1));
+            return
+          "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"expires_on\":\"" + expiresOn + "\",\"resource\":\"https://management.azure.com/\",\"token_type\":" +
+          "\"Bearer\",\"client_id\":\"client_id\"}";
+        }
+
+        public static string GetMsiImdsSuccessfulResponse()
+        {
+            string expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(1));
+            return
+          "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"client_id\":\"client-id\"," +
+          "\"expires_in\":\"12345\",\"expires_on\":\"" + expiresOn + "\",\"resource\":\"https://management.azure.com/\"," +
+          "\"ext_expires_in\":\"12345\",\"token_type\":\"Bearer\"}";
+        }
+
+        public static string GetMsiErrorResponse()
+        {
+            return "{\"statusCode\":\"500\",\"message\":\"An unexpected error occured while fetching the AAD Token.\",\"correlationId\":\"7d0c9763-ff1d-4842-a3f3-6d49e64f4513\"}";
+        }
+
+        public static string GetMsiImdsErrorResponse()
+        {
+            return "{\"error\":\"invalid_resource\"," +
+                "\"error_description\":\"AADSTS500011: The resource principal named user.read was not found in the tenant named Microsoft. " +
+                "This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant. " +
+                "You might have sent your authentication request to the wrong tenant.\r\nTrace ID: 2dff494a-0226-4f41-8859-d9f560ca8903" +
+                "\r\nCorrelation ID: 77145480-bc5a-4ebe-ae4d-e4a8b7d727cf\r\nTimestamp: 2022-11-10 23:12:37Z\"," +
+                "\"error_codes\":[500011],\"timestamp\":\"2022-11-10 23:12:37Z\",\"trace_id\":\"2dff494a-0226-4f41-8859-d9f560ca8903\"," +
+                "\"correlation_id\":\"77145480-bc5a-4ebe-ae4d-e4a8b7d727cf\",\"error_uri\":\"https://westus2.login.microsoft.com/error?code=500011\"}";
+        }
+
         public static string CreateClientInfo(string uid = TestConstants.Uid, string utid = TestConstants.Utid)
         {
             return Base64UrlHelpers.Encode("{\"uid\":\"" + uid + "\",\"utid\":\"" + utid + "\"}");
@@ -102,9 +135,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return stream;
         }
 
-        public static HttpResponseMessage CreateResiliencyMessage(HttpStatusCode statusCode)
+        public static HttpResponseMessage CreateServerErrorMessage(HttpStatusCode statusCode, int? retryAfter = null)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
+            if (retryAfter != null)
+            {
+                responseMessage.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(retryAfter.Value));
+            }
             responseMessage.Content = new StringContent("Server Error 500-599");
             return responseMessage;
         }

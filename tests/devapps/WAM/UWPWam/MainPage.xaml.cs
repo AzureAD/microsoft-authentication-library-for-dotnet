@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +13,7 @@ using Windows.Security.Authentication.Web;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using Microsoft.Identity.Client.Broker;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 namespace UWP_standalone
@@ -165,6 +169,40 @@ namespace UWP_standalone
                 return;
             }
 
+        }
+
+        private async void ATIDesktop_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            var pca = PublicClientApplicationBuilder.Create(s_clientID)
+                .WithAuthority(s_authority)
+                .WithBroker(chkUseBroker.IsChecked.Value)
+                .WithWindowsBroker() // should not affect
+                .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
+                .Build();
+
+            SynchronizedEncryptedFileMsalCache cache = new SynchronizedEncryptedFileMsalCache();
+            cache.Initialize(pca.UserTokenCache);
+
+            var upnPrefix = tbxUpn.Text;
+
+            IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(true); // stay on UI thread
+            var acc = accounts.SingleOrDefault(a => a.Username.StartsWith(upnPrefix));
+
+            try
+            {
+                var result = await pca.AcquireTokenInteractive(s_scopes)
+                    .WithAccount(acc)
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                await DisplayResultAsync(result).ConfigureAwait(false);
+
+            }
+            catch (Exception ex)
+            {
+                await DisplayErrorAsync(ex).ConfigureAwait(false);
+                return;
+            }
         }
 
         private async Task DisplayErrorAsync(Exception ex)

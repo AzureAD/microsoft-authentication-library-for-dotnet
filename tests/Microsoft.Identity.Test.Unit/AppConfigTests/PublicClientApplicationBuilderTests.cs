@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Identity.Client;
-#if !NET5_WIN && !NET6_0
+#if !NET6_WIN && !NET7_0
 using Microsoft.Identity.Client.Desktop;
 #endif
 using Microsoft.Identity.Client.Internal;
@@ -624,9 +624,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app6.Authority);
         }
 
-#if NET5_WIN
+#if NET6_WIN
         [TestMethod]
-        public void IsBrokerAvailable_net5()
+        public void IsBrokerAvailable_net6()
         {
             var appBuilder = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId)
@@ -649,7 +649,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             var builder2 = PublicClientApplicationBuilder
                    .Create(TestConstants.ClientId)
-                   .WithDesktopFeatures()
+                   .WithWindowsDesktopFeatures()
                    .WithAuthority(TestConstants.AuthorityTenant);
 
             // broker is not available out of the box
@@ -668,7 +668,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             var builder2 = PublicClientApplicationBuilder
                    .Create(TestConstants.ClientId)
-                   .WithDesktopFeatures()
+                   .WithWindowsDesktopFeatures()
                    .WithAuthority(TestConstants.ADFSAuthority);
 
             // broker is not available on ADFS
@@ -676,7 +676,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             var builder3 = PublicClientApplicationBuilder
                    .Create(TestConstants.ClientId)
-                   .WithDesktopFeatures()
+                   .WithWindowsDesktopFeatures()
                    .WithAdfsAuthority(TestConstants.ADFSAuthority);
 
             // broker is not available on ADFS

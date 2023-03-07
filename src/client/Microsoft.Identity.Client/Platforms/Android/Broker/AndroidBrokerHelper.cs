@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             _androidContext = androidContext ?? throw new ArgumentNullException(nameof(androidContext));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            _logger.Verbose("[Android broker] Getting the Android context for broker request. ");
+            _logger.Verbose(()=>"[Android broker] Getting the Android context for broker request. ");
             AndroidAccountManager = AccountManager.Get(_androidContext);
         }
 
@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             using (_logger.LogMethodDuration())
             {
                 bool canInvoke = CanSwitchToBroker();
-                _logger.Verbose("[Android broker] Can invoke broker? " + canInvoke);
+                _logger.Verbose(()=>"[Android broker] Can invoke broker? " + canInvoke);
 
                 return canInvoke;
             }
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             string responseJson = bundleResult.GetString(BrokerConstants.BrokerResultV2);
 
             bool success = bundleResult.GetBoolean(BrokerConstants.BrokerRequestV2Success);
-            _logger.Info($"[Android broker] Silent call result - success? {success}. ");
+            _logger.Info(() => $"[Android broker] Silent call result - success? {success}. ");
 
             if (!success)
             {
@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 }
             }
 
-            _logger.Info("[Android broker] Found " + brokerAccounts.Count + " accounts in the account manager. ");
+            _logger.Info(() => "[Android broker] Found " + brokerAccounts.Count + " accounts in the account manager. ");
 
             return brokerAccounts;
         }
@@ -250,7 +250,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             ValidateBrokerRedirectUri(brokerRequest);
             Bundle bundle = new Bundle();
             string brokerRequestJson = JsonHelper.SerializeToJson(brokerRequest);
-            _logger.InfoPii("[Android broker] CreateSilentBrokerBundle: " + brokerRequestJson, "Enable PII to see the silent broker request. ");
+            _logger.InfoPii(() => "[Android broker] CreateSilentBrokerBundle: " + brokerRequestJson, () => "Enable PII to see the silent broker request. ");
             bundle.PutString(BrokerConstants.BrokerRequestV2, brokerRequestJson);
             bundle.PutInt(BrokerConstants.CallerInfoUID, Binder.CallingUid);
 
@@ -259,7 +259,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         public Bundle CreateBrokerAccountBundle(BrokerRequest brokerRequest)
         {
-            _logger.InfoPii("[Android broker] CreateBrokerAccountBundle: " + JsonHelper.SerializeToJson(brokerRequest), "Enable PII to see the broker account bundle request. ");
+            _logger.InfoPii(
+                () => "[Android broker] CreateBrokerAccountBundle: " + JsonHelper.SerializeToJson(brokerRequest), 
+                () => "Enable PII to see the broker account bundle request. ");
             Bundle bundle = new Bundle();
 
             bundle.PutString(BrokerConstants.AccountClientIdKey, brokerRequest.ClientId);
@@ -385,7 +387,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                     if (authenticator.Type.Equals(BrokerConstants.BrokerAccountType, StringComparison.OrdinalIgnoreCase)
                         && VerifySignature(authenticator.PackageName))
                     {
-                        _logger.Verbose("[Android broker] Found the Authenticator on the device. ");
+                        _logger.Verbose(()=>"[Android broker] Found the Authenticator on the device. ");
                         return authenticator;
                     }
                 }
@@ -415,7 +417,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             try
             {
                 _logger.Info(
-                    "[Android broker] Calling activity pid:" + Process.MyPid()
+                    () => "[Android broker] Calling activity pid:" + Process.MyPid()
                     + " tid:" + Process.MyTid() + "uid:"
                     + Process.MyUid());
 
@@ -453,7 +455,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         public void HandleInstallUrl(string appLink, Activity activity)
         {
-            _logger.Info("[Android broker] Starting ActionView activity to " + appLink);
+            _logger.Info(() => "[Android broker] Starting ActionView activity to " + appLink);
             activity.StartActivity(new Intent(Intent.ActionView, AndroidNative.Net.Uri.Parse(appLink)));
 
             throw new MsalClientException(

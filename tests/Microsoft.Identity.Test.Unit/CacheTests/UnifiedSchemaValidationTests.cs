@@ -31,7 +31,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private const string Scopes = "tasks.read user.read openid profile offline_access";
         private const string RedirectUri = "msalb6c69a37-df96-4db0-9088-2ab96e1d8215://auth";
 
-
         // Our json schemas are flat.  This will NOT work for deeply nested json values.  You could check Assert.IsTrue(JToken.DeepEquals()) if you need that.
         private void AssertAreJsonStringsEquivalent(string expectedJson, string actualJson)
         {
@@ -92,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
             // 2. Verify cache key
-            MsalAccessTokenCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "accesstoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-calendars.read openid profile tasks.read user.read email";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -131,7 +130,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
-            MsalIdTokenCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "idtoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -169,7 +168,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
-            MsalRefreshTokenCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "refreshtoken-b6c69a37-df96-4db0-9088-2ab96e1d8215--";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -213,7 +212,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
-            MsalAccountCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "f645ad92-e38d-4d1a-b510-d1b09a74a8ca";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -265,7 +264,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
             // 2. Verify cache key
-            MsalAccessTokenCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "accesstoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-9188040d-6c67-4c5b-b112-36a304b66dad-tasks.read user.read openid profile";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -305,7 +304,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
-            MsalIdTokenCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "idtoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-9188040d-6c67-4c5b-b112-36a304b66dad-";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -343,7 +342,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
-            MsalRefreshTokenCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "refreshtoken-b6c69a37-df96-4db0-9088-2ab96e1d8215--";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -395,7 +394,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
             // 2. Verify cache key
-            MsalAccessTokenCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "accesstoken-0a7f52dd-260e-432f-94de-b47828c3f372-ba6c0d94-a8da-45b2-83ae-33871f9c2dd8-https://iosmsalb2c.onmicrosoft.com/webapitest/user.read";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -435,7 +434,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
-            MsalIdTokenCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "idtoken-0a7f52dd-260e-432f-94de-b47828c3f372-ba6c0d94-a8da-45b2-83ae-33871f9c2dd8-";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -473,7 +472,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
-            MsalRefreshTokenCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "refreshtoken-0a7f52dd-260e-432f-94de-b47828c3f372--";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -519,7 +518,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
-            MsalAccountCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "ba6c0d94-a8da-45b2-83ae-33871f9c2dd8";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -570,7 +569,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
             // 2. Verify cache key
-            MsalAccessTokenCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "accesstoken-0a7f52dd-260e-432f-94de-b47828c3f372-ba6c0d94-a8da-45b2-83ae-33871f9c2dd8-https://iosmsalb2c.onmicrosoft.com/webapitest/user.read";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -610,7 +609,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
-            MsalIdTokenCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "idtoken-0a7f52dd-260e-432f-94de-b47828c3f372-ba6c0d94-a8da-45b2-83ae-33871f9c2dd8-";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -648,7 +647,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
-            MsalRefreshTokenCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "refreshtoken-0a7f52dd-260e-432f-94de-b47828c3f372--";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -693,7 +692,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
-            MsalAccountCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "ba6c0d94-a8da-45b2-83ae-33871f9c2dd8";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -745,7 +744,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
             // 2. Verify cache key
-            MsalAccessTokenCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "accesstoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-calendars.read openid profile tasks.read user.read email";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -785,7 +784,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
-            MsalIdTokenCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "idtoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -819,7 +818,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
-            MsalRefreshTokenCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "refreshtoken-b6c69a37-df96-4db0-9088-2ab96e1d8215--";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -858,7 +857,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
-            MsalRefreshTokenCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "refreshtoken-1--";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -901,7 +900,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
-            MsalAccountCacheKey key = credential.GetKey();
+            IiOSKey key = credential.iOSCacheKey;
 
             string expectedServiceKey = "f645ad92-e38d-4d1a-b510-d1b09a74a8ca";
             Assert.AreEqual(expectedServiceKey, key.iOSService);
@@ -929,18 +928,18 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             AssertAreJsonStringsEquivalent(expectedJsonObject.ToString(), credential.ToJsonString());
 
-            MsalAppMetadataCacheKey key = credential.GetKey();
+            IiOSKey iOSKey = credential.iOSCacheKey;
 
             string expectedServiceKey = "appmetadata-b6c69a37-df96-4db0-9088-2ab96e1d8215";
-            Assert.AreEqual(expectedServiceKey, key.iOSService);
+            Assert.AreEqual(expectedServiceKey, iOSKey.iOSService);
 
             string expectedAccountKey = "login.microsoftonline.com";
-            Assert.AreEqual(expectedAccountKey, key.iOSAccount);
+            Assert.AreEqual(expectedAccountKey, iOSKey.iOSAccount);
 
             string expectedGenericKey = "1";
-            Assert.AreEqual(expectedGenericKey, key.iOSGeneric);
+            Assert.AreEqual(expectedGenericKey, iOSKey.iOSGeneric);
 
-            Assert.AreEqual(3001, key.iOSType);
+            Assert.AreEqual(3001, iOSKey.iOSType);
         }
     }
 }

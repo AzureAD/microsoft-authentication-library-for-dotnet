@@ -51,14 +51,14 @@ namespace Microsoft.Identity.Client
         {
             logger.Info("WebView2Options configured");
 
-            logger.Info($"Title: {Title}");
+            logger.Info(() => $"Title: {Title}");
         }
 
         internal static void ValidatePlatformAvailability()
         {
 #if !SUPPORTS_WIN32
             throw new PlatformNotSupportedException(
-                "EmbeddedWebViewOptions API is only supported on .NET Fx, .NET Core and .NET5 ");
+                "EmbeddedWebViewOptions API is only supported on .NET Fx, .NET Core and .NET6 ");
 #endif
         }
     }

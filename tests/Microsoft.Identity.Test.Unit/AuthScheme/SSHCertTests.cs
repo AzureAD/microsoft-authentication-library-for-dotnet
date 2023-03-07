@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.SSHCertificates;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -39,6 +40,7 @@ namespace Microsoft.Identity.Test.Unit
                 scheme.GetTokenRequestParams()[OAuth2Parameter.TokenType]);
             Assert.AreEqual("jwk",
                 scheme.GetTokenRequestParams()[OAuth2Parameter.RequestConfirmation]);
+            Assert.AreEqual(TokenType.SshCert, scheme.TelemetryTokenType);
 
         }
     }

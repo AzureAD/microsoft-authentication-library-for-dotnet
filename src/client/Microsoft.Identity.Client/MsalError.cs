@@ -563,7 +563,7 @@ namespace Microsoft.Identity.Client
         public const string B2CAuthorityHostMismatch = "B2C_authority_host_mismatch";
 
         /// <summary>
-        /// The cloud (authority url host) defined at the application level cannot be different than the cloud at the request level.
+        /// The cloud (authority URL host) defined at the application level cannot be different than the cloud at the request level.
         /// <para>What happens?</para>You did not define an authority at the application level, so it defaults to the public cloud (login.microsoft.com), but the authority at the request level is for a different cloud. Only the tenant can be changed at the request level.
         /// <para>Mitigation</para>Add .WithAuthority("https://login.windows-ppe.net/common) at the application level and specify the tenant at the request level: .WithAuthority("https://login.windows-ppe.net/1234-567-890-12345678). 
         /// </summary>
@@ -1093,8 +1093,53 @@ namespace Microsoft.Identity.Client
         public const string OboCacheKeyNotInCacheError = "obo_cache_key_not_in_cache_error";
 
         /// <summary>
-        /// A required value is missing from the token providerresponse
+        /// A required value is missing from the token provider response
         /// </summary>
         public const string InvalidTokenProviderResponseValue = "invalid_token_provider_response_value";
+
+        /// <summary>
+        /// MSAL is unable to parse the authentication header returned from the endpoint. This can be a result of a malformed header returned in either the WWW-Authenticate or the Authentication-Info collections.
+        /// </summary>
+        public const string UnableToParseAuthenticationHeader = "unable_to_parse_authentication_header";
+
+        /// <summary>
+        /// A required value is missing from the managed identity response.
+        /// </summary>
+        public const string InvalidManagedIdentityResponse = "invalid_managed_identity_response";
+
+        /// <summary>
+        /// Managed Identity error response was received.
+        /// </summary>
+        public const string ManagedIdentityRequestFailed = "managed_identity_request_failed";
+
+        /// <summary>
+        /// Unknown error response received.
+        /// </summary>
+        public const string UnknownManagedIdentityError = "unknown_managed_identity_error";
+
+        /// <summary>
+        /// Invalid managed identity endpoint.
+        /// </summary>
+        public const string InvalidManagedIdentityEndpoint = "invalid_managed_identity_endpoint";
+
+        /// <summary>
+        /// Exactly one scope is expected.
+        /// </summary>
+        public const string ExactlyOneScopeExpected = "exactly_one_scope_expected";
+
+        /// <summary>
+        /// User assigned managed identity is not supported for this source.
+        /// </summary>
+        public const string UserAssignedManagedIdentityNotSupported = "user_assigned_managed_identity_not_supported";
+
+        /// <summary>
+        /// User assigned managed identity is not configurable at runtime for service fabric.
+        /// </summary>
+        public const string UserAssignedManagedIdentityNotConfigurableAtRuntime = "user_assigned_managed_identity_not_configurable_at_runtime";
+
+        /// <summary>
+        /// Using combined flat storage, like a file, to store both app and user tokens is not supported. Use a partitioned token cache (for ex. distributed cache like Redis) or separate files for app and user token caches. See https://aka.ms/msal-net-token-cache-serialization .
+        /// </summary>
+        public const string CombinedUserAppCacheNotSupported = "combined_user_app_cache_not_supported";
     }
 }

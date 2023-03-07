@@ -19,6 +19,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
 #region Telemetry Client Constants
 
         public const string AcquireTokenEventName = "acquire_token";
+        public const string ConfigurationUpdateEventName = "config_update";
+        public const string MsalVersion = "MsalVersion";
         public const string RemainingLifetime = "RemainingLifetime";
         public const string PopToken = "PopToken";
         public const string TokenSource = "TokenSource";

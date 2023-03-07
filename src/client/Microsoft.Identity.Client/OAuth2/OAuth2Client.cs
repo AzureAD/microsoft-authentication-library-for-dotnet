@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client.OAuth2
                             _headers,
                             _bodyParameters,
                             requestContext.Logger,
-                            requestContext.UserCancellationToken)
+                            cancellationToken: requestContext.UserCancellationToken)
                                  .ConfigureAwait(false);
                     }
                     else
@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
             if (response.StatusCode != HttpStatusCode.OK || expectErrorsOn200OK)
             {
-                requestContext.Logger.Verbose("[Oauth2Client] Processing error response ");
+                requestContext.Logger.Verbose(() => "[Oauth2Client] Processing error response ");
 
                 try
                 {

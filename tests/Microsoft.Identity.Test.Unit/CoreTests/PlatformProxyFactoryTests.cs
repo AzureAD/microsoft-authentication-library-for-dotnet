@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 client1.MaxResponseContentBufferSize);
         }
 
-#if NET_CORE || NET5_WIN || DESKTOP
+#if NET_CORE || NET6_WIN || DESKTOP
         [TestMethod]
         public void PlatformProxy_HttpClient_NetCore()
         {
@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 Constants.DefaultRedirectUri,
                 proxy.GetDefaultRedirectUri("cid", false));
 
-#if DESKTOP || NET5_WIN
+#if DESKTOP || NET6_WIN || NET7_0
 
             Assert.AreSame(
                 Constants.NativeClientRedirectUri,

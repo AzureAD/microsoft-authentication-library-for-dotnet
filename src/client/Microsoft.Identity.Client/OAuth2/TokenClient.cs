@@ -3,20 +3,20 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.TelemetryCore;
-using System.Net;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.OAuth2.Throttling;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Kerberos;
-using System.Diagnostics;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.Kerberos;
+using Microsoft.Identity.Client.OAuth2.Throttling;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client.OAuth2
             if (_serviceBundle.Config.ClientCredential != null)
             {
                 _requestParams.RequestContext.Logger.Verbose(
-                    "[TokenClient] Before adding the client assertion / secret");
+                    () => "[TokenClient] Before adding the client assertion / secret");
 
                 await _serviceBundle.Config.ClientCredential.AddConfidentialClientParametersAsync(
                     _oAuth2Client,
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     cancellationToken).ConfigureAwait(false);
 
                 _requestParams.RequestContext.Logger.Verbose(
-                    "[TokenClient] After adding the client assertion / secret");
+                    () => "[TokenClient] After adding the client assertion / secret");
             }
 
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 resolvedClaims = _requestParams.ClaimsAndClientCapabilities;
             }
             else
-            {          
+            {
                 if (!string.IsNullOrEmpty(_requestParams.ClaimsAndClientCapabilities))
                 {
                     var existingClaims = JsonHelper.ParseIntoJsonObject(_requestParams.ClaimsAndClientCapabilities);
@@ -208,21 +208,19 @@ namespace Microsoft.Identity.Client.OAuth2
 
                     resolvedClaims = JsonHelper.JsonObjectToString(mergedClaims);
                     _requestParams.RequestContext.Logger.Verbose(
-                        $"Adding kerberos claim + Claims/ClientCapabilities to request: {resolvedClaims}");
+                        () => $"Adding kerberos claim + Claims/ClientCapabilities to request: {resolvedClaims}");
                 }
                 else
                 {
                     resolvedClaims = kerberosClaim;
                     _requestParams.RequestContext.Logger.Verbose(
-                        $"Adding kerberos claim to request: {resolvedClaims}");
+                        () => $"Adding kerberos claim to request: {resolvedClaims}");
                 }
             }
 
             // no-op if resolvedClaims is null
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, resolvedClaims);
         }
-
-
         private void AddExtraHttpHeaders()
         {
             if (_requestParams.ExtraHttpHeaders != null)
@@ -231,7 +229,9 @@ namespace Microsoft.Identity.Client.OAuth2
                 {
                     if (!string.IsNullOrEmpty(pair.Key) &&
                         !string.IsNullOrEmpty(pair.Value))
+                    {
                         _oAuth2Client.AddHeader(pair.Key, pair.Value);
+                    }
                 }
             }
         }
@@ -249,7 +249,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
             try
             {
-                logger.Verbose("[Token Client] Fetching MsalTokenResponse .... ");
+                logger.Verbose(() => "[Token Client] Fetching MsalTokenResponse .... ");
                 MsalTokenResponse msalTokenResponse =
                     await _oAuth2Client
                         .GetTokenAsync(tokenEndpointWithQueryParams,

@@ -81,58 +81,58 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 #region SaveItem
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            IiOSKey key = item.GetKey();
+            IiOSKey key = item.iOSCacheKey;
             Save(key, item.ToJsonString());
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            Save(item.GetKey(), item.ToJsonString());
+            Save(item.iOSCacheKey, item.ToJsonString());
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
         {
-            Save(item.GetKey(), item.ToJsonString());
+            Save(item.iOSCacheKey, item.ToJsonString());
         }
 
         public void SaveAccount(MsalAccountCacheItem item)
         {
-            Save(item.GetKey(), item.ToJsonString());
+            Save(item.iOSCacheKey, item.ToJsonString());
         }
 #endregion
 
 #region GetItem
         public MsalIdTokenCacheItem GetIdToken(MsalAccessTokenCacheItem accessTokenCacheItem)
         {
-            var idTokenKey = accessTokenCacheItem.GetIdTokenItemKey();
-            return MsalIdTokenCacheItem.FromJsonString(GetPayload(idTokenKey));
+            var idTokenItem = accessTokenCacheItem.GetIdTokenItem();
+            return MsalIdTokenCacheItem.FromJsonString(GetPayload(idTokenItem.iOSCacheKey));
         }
 
-        public MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey)
+        public MsalAccountCacheItem GetAccount(MsalAccountCacheItem accountCacheItem)
         {
-            return MsalAccountCacheItem.FromJsonString(GetPayload(accountKey));
+            return MsalAccountCacheItem.FromJsonString(GetPayload(accountCacheItem.iOSCacheKey));
         }
 #endregion
 
 #region DeleteItem
         public void DeleteAccessToken(MsalAccessTokenCacheItem item)
         {
-            Remove(item.GetKey());
+            Remove(item.iOSCacheKey);
         }
 
         public void DeleteRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            Remove(item.GetKey());
+            Remove(item.iOSCacheKey);
         }
 
         public void DeleteIdToken(MsalIdTokenCacheItem item)
         {
-            Remove(item.GetKey());
+            Remove(item.iOSCacheKey);
         }
 
         public void DeleteAccount(MsalAccountCacheItem item)
         {
-            Remove(item.GetKey());
+            Remove(item.iOSCacheKey);
         }
 
 #endregion
@@ -350,7 +350,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         }
    
         #region AppMetadata - not implemented on iOS
-        public MsalAppMetadataCacheItem ReadAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
+        public MsalAppMetadataCacheItem ReadAppMetadata(MsalAppMetadataCacheItem appMetadataItem)
         {
             //return MsalAppMetadataCacheItem.FromJsonString(GetPayload(appMetadataKey));
             throw new NotImplementedException();
@@ -372,7 +372,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             throw new NotImplementedException();
         }
 
-        public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
+        public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheItem appMetadataItem)
         {
             throw new NotImplementedException();
         }     

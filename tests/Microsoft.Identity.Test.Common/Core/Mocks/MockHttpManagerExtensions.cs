@@ -135,9 +135,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static HttpResponseMessage AddResiliencyMessageMockHandler(
             this MockHttpManager httpManager,
             HttpMethod httpMethod,
-            HttpStatusCode httpStatusCode)
+            HttpStatusCode httpStatusCode, 
+            int? retryAfter = null)
         {
-            var response = MockHelpers.CreateResiliencyMessage(httpStatusCode);
+            var response = MockHelpers.CreateServerErrorMessage(httpStatusCode, retryAfter);
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler()
                 {
@@ -326,6 +327,110 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     });
         }
 
+        public static void AddManagedIdentityMockHandler(
+            this MockHttpManager httpManager,
+            string expectedUrl,
+            string resource,
+            string response,
+            ManagedIdentitySourceType managedIdentitySourceType,
+            string userAssignedClientIdOrResourceId = null,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            HttpStatusCode statusCode = HttpStatusCode.OK
+            )
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
+            HttpContent content = new StringContent(response);
+            responseMessage.Content = content;
+
+            MockHttpMessageHandler httpMessageHandler = BuildMockHandlerForManagedIdentitySource(managedIdentitySourceType, resource);
+
+            if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
+            {
+                httpMessageHandler.ExpectedQueryParams.Add("client_id", userAssignedClientIdOrResourceId);
+            }
+
+            if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
+            {
+                httpMessageHandler.ExpectedQueryParams.Add("mi_res_id", userAssignedClientIdOrResourceId);
+            }
+
+            httpMessageHandler.ResponseMessage = responseMessage;
+            httpMessageHandler.ExpectedUrl = expectedUrl;
+
+            httpManager.AddMockHandler(httpMessageHandler);
+        }
+
+        private static MockHttpMessageHandler BuildMockHandlerForManagedIdentitySource(ManagedIdentitySourceType managedIdentitySourceType, string resource)
+        {
+            MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+
+            switch (managedIdentitySourceType)
+            {
+            
+                case ManagedIdentitySourceType.AppService:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedQueryParams.Add("api-version", "2019-08-01");
+                    expectedQueryParams.Add("resource", resource);
+                    expectedRequestHeaders.Add("X-IDENTITY-HEADER", "secret");
+                    break;
+                case ManagedIdentitySourceType.AzureArc:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedQueryParams.Add("api-version", "2019-11-01");
+                    expectedQueryParams.Add("resource", resource);
+                    expectedRequestHeaders.Add("Metadata", "true");
+                    break;
+                case ManagedIdentitySourceType.IMDS:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedQueryParams.Add("api-version", "2018-02-01");
+                    expectedQueryParams.Add("resource", resource);
+                    expectedRequestHeaders.Add("Metadata", "true");
+                    break;
+                case ManagedIdentitySourceType.CloudShell:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Post;
+                    expectedRequestHeaders.Add("Metadata", "true");
+                    expectedRequestHeaders.Add("ContentType", "application/x-www-form-urlencoded");
+                    httpMessageHandler.ExpectedPostData = new Dictionary<string, string> { { "resource", resource } };
+                    break;
+                case ManagedIdentitySourceType.ServiceFabric:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedRequestHeaders.Add("secret", "secret");
+                    expectedQueryParams.Add("api-version", "2019-07-01-preview");
+                    expectedQueryParams.Add("resource", resource);
+                    break;
+            }
+
+            if (managedIdentitySourceType != ManagedIdentitySourceType.CloudShell)
+            {
+                httpMessageHandler.ExpectedQueryParams = expectedQueryParams;
+            }
+            
+            httpMessageHandler.ExpectedRequestHeaders = expectedRequestHeaders;
+
+            return httpMessageHandler;
+        }
+
+        public static void AddManagedIdentityWSTrustMockHandler(
+            this MockHttpManager httpManager, 
+            string expectedUrl, 
+            string filePath = null)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            if (filePath != null)
+            {
+                responseMessage.Headers.Add("WWW-Authenticate", $"Basic realm={filePath}");
+            }
+            
+            httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = expectedUrl,
+                        ResponseMessage = responseMessage
+                    });
+        }
+
         public static void AddRegionDiscoveryMockHandlerNotFound(
             this MockHttpManager httpManager)
         {
@@ -358,4 +463,20 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// </summary>
         InvalidClient
     }
-}
+
+    public enum UserAssignedIdentityId
+    {
+        None,
+        ClientId,
+        ResourceId
+    }
+
+    public enum ManagedIdentitySourceType
+    {
+        IMDS,
+        AppService,
+        AzureArc,
+        CloudShell,
+        ServiceFabric
+    }
+ }

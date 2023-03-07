@@ -459,11 +459,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string[] scopes = { "User.Read" };
             string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
 
+            WamLoggerValidator wastestLogger = new WamLoggerValidator();
+
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithExperimentalFeatures()
-               .WithBrokerPreview().Build();
+               .WithLogging(wastestLogger)
+               .WithWindowsBroker()
+               .Build();
 
             Assert.IsTrue(pca.IsProofOfPossessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");
 
@@ -476,6 +479,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync().ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes, true);
+
+            Assert.IsTrue(wastestLogger.HasLogged);
 
             await VerifyPoPTokenAsync(
                 labResponse.App.AppId,
@@ -588,7 +593,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class RSACertificatePopCryptoProvider : IPoPCryptoProvider
     {
         private readonly X509Certificate2 _cert;
-
 
         public RSACertificatePopCryptoProvider(X509Certificate2 cert)
         {

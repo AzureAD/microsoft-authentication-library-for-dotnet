@@ -1,37 +1,34 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
-#if NET_CORE && !NET6_0
+#if !NET48 && !NET7_0
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.Features.WamBroker;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using Windows.Security.Authentication.Web.Core;
-using Windows.Security.Credentials;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using Microsoft.Identity.Client.Broker;
-using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Client.Internal.Logger;
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
-using System.Runtime.InteropServices;
-using System.Linq;
+using Account = Microsoft.Identity.Client.Account;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -46,17 +43,21 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
         private MsalTokenResponse _msalTokenResponse = TokenCacheHelper.CreateMsalTokenResponse();
 
+        private IServiceBundle _serviceBundle;
+
         [TestInitialize]
         public void Init()
         {
             _synchronizationContext = new DedicatedThreadSynchronizationContext();
 
             _coreUIParent = new CoreUIParent() { SynchronizationContext = _synchronizationContext };
-            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
+            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(isConfidentialClient: false);
             _logger = Substitute.For<ILoggerAdapter>();
+            _logger.PiiLoggingEnabled.Returns(true);
+
+            _serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
             _wamBroker = new RuntimeBroker(_coreUIParent, applicationConfiguration, _logger);
-
         }
 
         [TestMethod]
@@ -70,7 +71,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAuthority(TestConstants.AuthorityTenant);
 
-            pcaBuilder = pcaBuilder.WithBrokerPreview();
+            pcaBuilder = pcaBuilder.WithWindowsBroker();
             Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
 
         }
@@ -82,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAdfsAuthority(TestConstants.ADFSAuthority);
 
-            pcaBuilder = pcaBuilder.WithBrokerPreview();
+            pcaBuilder = pcaBuilder.WithWindowsBroker();
 
             Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
 
@@ -93,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             var pca = PublicClientApplicationBuilder
                .Create(TestConstants.ClientId)
-               .WithBrokerPreview()
+               .WithWindowsBroker()
                .Build();
 
             // no window handle - throw
@@ -104,56 +105,90 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
            
         }
        
-        [DataTestMethod]
-        [DataRow("")]
-        [DataRow(" ")]
-        [DataRow(null)]
-        [DataRow("openid")]
-        [DataRow("profile")]
-        [DataRow("offline_access")]
-        [DataRow("openid offline_access")]
-        [DataRow("profile offline_access")]        
-        [DataRow("profile offline_access openid")]        
-        public async Task ThrowOnNoScopesAsync(string scopes)
-        {
-            var scopeArray = new List<string>();
-            if (scopes != null)
-            {
-                scopeArray = scopes.Split(" ").ToList();
-            }
-
-            var pca = PublicClientApplicationBuilder
-               .Create(TestConstants.ClientId)
-               .WithBrokerPreview()
-               .Build();
-
-            // empty scopes
-            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
-                () => pca
-                .AcquireTokenInteractive(scopeArray)
-                .WithParentActivityOrWindow(new IntPtr(123456))
-                .ExecuteAsync())
-                .ConfigureAwait(false);
-
-            Assert.AreEqual(MsalError.WamScopesRequired, ex.ErrorCode);
-
-            // empty scopes
-            var ex2 = await AssertException.TaskThrowsAsync<MsalClientException>(
-                () => pca
-                .AcquireTokenSilent(scopeArray, new Account("123.123", "user", "env"))                
-                .ExecuteAsync())
-                .ConfigureAwait(false);
-
-            Assert.AreEqual(MsalError.WamScopesRequired, ex2.ErrorCode);
-
-        }
-
         [TestMethod]
         public void HandleInstallUrl_Throws()
         {
             AssertException.Throws<NotImplementedException>(() => _wamBroker.HandleInstallUrl("http://app"));
         }
+
+        [TestMethod]
+        public async Task ATS_CallsLog_When_CalledAsync()
+        {
+            // Arrange
+            var appTokenCache = new TokenCache(_serviceBundle, isApplicationTokenCache: false);
+            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid());
+            var tenantAuthority = AuthorityInfo.FromAadAuthority(AzureCloudInstance.AzurePublic, tenant: TestConstants.AadTenantId, validateAuthority: false);
+            var acquireTokenCommonParameters = new AcquireTokenCommonParameters
+            {
+                ApiId = ApiEvent.ApiIds.AcquireTokenSilent,
+                AuthorityOverride = tenantAuthority
+            };
+
+            var authRequestParams = new AuthenticationRequestParameters(
+                _serviceBundle,
+                appTokenCache,
+                acquireTokenCommonParameters,
+                requestContext,
+                Authority.CreateAuthority(tenantAuthority));
+            authRequestParams.Scope.Add("User.Read");
+
+            AcquireTokenSilentParameters silentParams = new AcquireTokenSilentParameters();
+            silentParams.Account = PublicClientApplication.OperatingSystemAccount;
+            authRequestParams.Account = PublicClientApplication.OperatingSystemAccount;
+
+            // Act
+            try
+            {
+                _ = await _wamBroker.AcquireTokenSilentAsync(authRequestParams, silentParams).ConfigureAwait(false);
+            }
+            catch (MsalUiRequiredException)
+            {
+                // Assert
+                _logger.Received().Log(Arg.Any<Client.LogLevel>(), Arg.Any<string>(), Arg.Any<string>());
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(Client.NativeInterop.LogLevel.Trace, Client.LogLevel.Verbose)]
+        [DataRow(Client.NativeInterop.LogLevel.Debug, Client.LogLevel.Verbose)]
+        [DataRow(Client.NativeInterop.LogLevel.Info, Client.LogLevel.Info)]
+        [DataRow(Client.NativeInterop.LogLevel.Warning, Client.LogLevel.Warning)]
+        [DataRow(Client.NativeInterop.LogLevel.Error, Client.LogLevel.Error)]
+        [DataRow(Client.NativeInterop.LogLevel.Fatal, Client.LogLevel.Error)]
+        public void LogEventRaised_MapsEvents_Correctly_When_No_Pii(Client.NativeInterop.LogLevel nativeLogLevel, Client.LogLevel msalLogLevel)
+        {
+            const string logMessage = "This is test";
+            _logger.IsLoggingEnabled(msalLogLevel).Returns(true);
+            _logger.PiiLoggingEnabled.Returns(false);
+
+            Type wamBrokerType = _wamBroker.GetType();
+            MethodInfo fireLogMethod = wamBrokerType.GetMethod("LogEventRaised", BindingFlags.NonPublic | BindingFlags.Instance);
+            fireLogMethod.Invoke(_wamBroker, new object[] { null, new LogEventArgs(nativeLogLevel, logMessage) });
+
+            // Assert
+            _logger.Received().Log(msalLogLevel, string.Empty, logMessage);
+        }
+
+        [DataTestMethod]
+        [DataRow(Client.NativeInterop.LogLevel.Trace, Client.LogLevel.Verbose)]
+        [DataRow(Client.NativeInterop.LogLevel.Debug, Client.LogLevel.Verbose)]
+        [DataRow(Client.NativeInterop.LogLevel.Info, Client.LogLevel.Info)]
+        [DataRow(Client.NativeInterop.LogLevel.Warning, Client.LogLevel.Warning)]
+        [DataRow(Client.NativeInterop.LogLevel.Error, Client.LogLevel.Error)]
+        [DataRow(Client.NativeInterop.LogLevel.Fatal, Client.LogLevel.Error)]
+        public void LogEventRaised_DoesNotLog_When_NotForLevel(Client.NativeInterop.LogLevel nativeLogLevel, Client.LogLevel msalLogLevel)
+        {
+            const string logMessage = "This is test";
+            _logger.IsLoggingEnabled(msalLogLevel).Returns(false);
+            _logger.PiiLoggingEnabled.Returns(true);
+
+            Type wamBrokerType = _wamBroker.GetType();
+            MethodInfo fireLogMethod = wamBrokerType.GetMethod("LogEventRaised", BindingFlags.NonPublic | BindingFlags.Instance);
+            fireLogMethod.Invoke(_wamBroker, new object[] { null, new LogEventArgs(nativeLogLevel, logMessage) });
+
+            // Assert
+            _logger.DidNotReceiveWithAnyArgs().Log(Arg.Any<Client.LogLevel>(), Arg.Any<string>(), Arg.Any<String>());
+        }
     }
 }
-
 #endif

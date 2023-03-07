@@ -27,10 +27,11 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string ScopeStr = "r1/scope1 r1/scope2";
         public const string ScopeStrFormat = "r{0}/scope1 r{0}/scope2";
+        public const string MsiResource = "scope";
         public static readonly string[] s_graphScopes = new[] { "user.read" };
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
         public const string ClientCredentialAudience = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0";
-        public const string AutomationTestThumbprint = "4E87313FD450985A10BC0F14A292859F2DCD6CD3";
+        public const string AutomationTestThumbprint = "444B697D869032F29F9A162D711AF3E2791AD748";
 
         public static readonly SortedSet<string> s_scopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" }, StringComparer.OrdinalIgnoreCase);
         public static readonly SortedSet<string> s_cacheMissScope = new SortedSet<string>(new[] { "r3/scope1", "r3/scope2" }, StringComparer.OrdinalIgnoreCase);
@@ -64,8 +65,8 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string ProductionPrefNetworkEnvironment = "login.microsoftonline.com";
         public const string ProductionPrefCacheEnvironment = "login.windows.net";
-        public const string ProductionPrefRegionalEnvironment = "centralus.r.login.microsoftonline.com";
-        public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.r.login.microsoftonline.com";
+        public const string ProductionPrefRegionalEnvironment = "centralus.login.microsoft.com";
+        public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.login.microsoft.com";
         public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
         public const string SovereignNetworkEnvironmentDE = "login.microsoftonline.de";
         public const string SovereignNetworkEnvironmentCN = "login.partner.microsoftonline.cn";
@@ -145,6 +146,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string MobileDefaultRedirectUri = "msal4a1aa1d5-c567-49d0-ad0b-cd957a47f842://auth"; // in msidentity-samples-testing tenant -> PublicClientSample
         public const string ClientSecret = "client_secret";
         public const string DefaultPassword = "password";
+        public const string TestCertPassword = "passw0rd!";
         public const string AuthorityTestTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
         public const string DiscoveryEndPoint = "discovery/instance";
         public const string DefaultAuthorizationCode = "DefaultAuthorizationCode";
@@ -175,6 +177,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string CodeVerifier = "someCodeVerifier";
 
         public const string Nonce = "someNonce";
+        public const string Realm = "someRealm";
         
         public const string TestErrCode = "TestErrCode";
         public const string iOSBrokerSuberrCode = "TestSuberrCode";

@@ -197,6 +197,10 @@ namespace Microsoft.Identity.Client
         public const string FederatedServiceReturnedErrorTemplate = "Federated service at {0} returned error: {1} ";
         public const string ParsingWsTrustResponseFailedErrorTemplate = "Federated service at {0} parse error: Body {1} ";
         public const string UnknownUserType = "Unknown User Type";
+        public const string ParsingWsTrustResponseFailedDueToConfiguration = "There was an error parsing the WS-Trust response from the endpoint. " +
+            "\nThis may occur if there are issues with your ADFS configuration. See https://aka.ms/msal-net-iwa-troubleshooting for more details." +
+            "\nEnable logging to see more details. See https://aka.ms/msal-net-logging.";
+
 
         public const string InternalErrorCacheEmptyUsername =
             "Internal error - trying to remove an MSAL user with an empty username. Possible cache corruption. See https://aka.ms/adal_token_cache_serialization. ";
@@ -432,6 +436,7 @@ namespace Microsoft.Identity.Client
 
         public const string RequestFailureErrorMessagePii = "=== Token Acquisition ({0}) failed:\n\tAuthority: {1}\n\tClientId: {2}.";
 
+        public const string UnableToParseAuthenticationHeader = "MSAL is unable to parse the authentication header returned from the resource endpoint. This can be a result of a malformed header returned in either the WWW-Authenticate or the Authentication-Info collections acquired from the provided endpoint.";
         public static string InvalidTokenProviderResponseValue(string invalidValueName)
         {
             return string.Format(
@@ -440,5 +445,17 @@ namespace Microsoft.Identity.Client
                                 invalidValueName);
         }
 
+        public const string ManagedIdentityNoResponseReceived = "[Managed Identity] Authentication unavailable. No response received from the managed identity endpoint.";
+        public const string ManagedIdentityInvalidResponse = "[Managed Identity] Invalid response, the authentication response received did not contain the expected fields.";
+        public const string ManagedIdentityUnexpectedResponse = "[Managed Identity] Unexpected exception occurred when parsing the response. See the inner exception for details.";
+        public const string ManagedIdentityExactlyOneScopeExpected = "[Managed Identity] To acquire token for managed identity, exactly one scope must be passed.";
+
+        public const string ManagedIdentityEndpointInvalidUriError = "[Managed Identity] The environment variable {0} contains an invalid Uri {1} in {2} managed identity source.";
+        public const string ManagedIdentityNoChallengeError = "[Managed Identity] Did not receive expected WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint.";
+        public const string ManagedIdentityInvalidChallenge = "[Managed Identity] The WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint did not match the expected format.";
+        public const string ManagedIdentityUserAssignedNotSupported = "[Managed Identity] User assigned identity is not supported by the {0} Managed Identity. To authenticate with the system assigned identity omit the client id to .WithManagedIentity().";
+        public const string ManagedIdentityUserAssignedNotConfigurableAtRuntime = "[Managed Identity] Service Fabric user assigned managed identity ClientId or ResourceId is not configurable at runtime.";
+        public const string CombinedUserAppCacheNotSupported = "Using a combined flat storage, like a file, to store both app and user tokens is not supported. Use a partitioned token cache (for ex. distributed cache like Redis) or separate files for app and user token caches. See https://aka.ms/msal-net-token-cache-serialization .";
+        public const string JsonParseErrorMessage = "There was an error parsing the response from the token endpoint, see inner exception for details. Verify that your app is configured correctly. If this is a B2C app, one possible cause is acquiring a token for Microsoft Graph, which is not supported. See https://aka.ms/msal-net-up";
     }
 }

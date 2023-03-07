@@ -28,8 +28,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
         {
             AuthenticationContinuationHelper.LastRequestLogger = requestContext.Logger;
             requestContext.Logger.InfoPii(
-              $"Starting the iOS system webui. Start Uri: {authorizationUri} Redirect URI:{redirectUri} ",
-              $"Starting the iOS system webui. Redirect URI: {redirectUri}");
+              () => $"Starting the iOS system webui. Start Uri: {authorizationUri} Redirect URI:{redirectUri} ",
+              () => $"Starting the iOS system webui. Redirect URI: {redirectUri}");
 
             s_viewController = null;
             InvokeOnMainThread(() =>

@@ -120,14 +120,14 @@ namespace NetDesktopWinForms
                     builder = ToggleOldBroker(builder, true);
                     break;
                 case AuthMethod.WAMRuntime:
-                    builder = builder.WithBrokerPreview().WithExperimentalFeatures();
+                    builder = BrokerExtension.WithWindowsBroker(builder);
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder = builder.WithExperimentalFeatures().WithBrokerPreview(false);
+                    builder = BrokerExtension.WithWindowsBroker(builder, false);
                     builder = ToggleOldBroker(builder, false);
                     break;
                 case AuthMethod.EmbeddedBrowser:
-                    builder = builder.WithExperimentalFeatures().WithBrokerPreview(false);
+                    builder = BrokerExtension.WithWindowsBroker(builder, false);
                     builder = ToggleOldBroker(builder, false);
 
                     break;
@@ -141,7 +141,7 @@ namespace NetDesktopWinForms
                 MsaPassthrough = cbxMsaPt.Checked,
                 HeaderText = "MSAL Dev App .NET FX"
             })
-            .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true);
+            .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true, true);
 
             var pca = builder.Build();
 
@@ -152,7 +152,7 @@ namespace NetDesktopWinForms
         private static PublicClientApplicationBuilder ToggleOldBroker(PublicClientApplicationBuilder builder, bool enable)
         {
 #if NETCOREAPP3_1
-            builder = builder.WithWindowsBroker(enable);
+            builder = WamExtension.WithWindowsBroker(builder, enable);
 #else
             builder = builder.WithBroker(enable);
 #endif
@@ -208,13 +208,6 @@ namespace NetDesktopWinForms
 
             if (!string.IsNullOrEmpty(loginHint))
             {
-                if (IsMsaPassthroughConfigured())
-                {
-                    // TODO: bogavril - move this exception in WAM
-                    throw new InvalidOperationException(
-                        "[TEST APP FAILURE] Do not use login hint on AcquireTokenSilent for MSA-Passthrough. Use the IAccount overload.");
-                }
-
                 Log($"ATS with login hint: " + loginHint);
                 var builder = pca.AcquireTokenSilent(GetScopes(), loginHint);
 
@@ -306,7 +299,7 @@ namespace NetDesktopWinForms
             return result;
         }
 
-        private async Task LogResultAndRefreshAccountsAsync(AuthenticationResult ar, bool refresAccounts = true)
+        private async Task LogResultAndRefreshAccountsAsync(AuthenticationResult ar, bool refreshAccounts = true)
         {
             string message =
 
@@ -326,7 +319,7 @@ namespace NetDesktopWinForms
 
             Log("Refreshing accounts");
 
-            if(refresAccounts)
+            if(refreshAccounts)
                 await RefreshAccountsAsync().ConfigureAwait(true);
         }
 

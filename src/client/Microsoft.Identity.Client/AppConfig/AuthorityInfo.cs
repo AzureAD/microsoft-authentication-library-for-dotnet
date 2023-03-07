@@ -130,12 +130,13 @@ namespace Microsoft.Identity.Client
         public string UserRealmUriPrefix { get; }
         public bool ValidateAuthority { get; }
 
-        internal bool IsInstanceDiscoverySupported => (AuthorityType == AuthorityType.Aad);
+        internal bool IsInstanceDiscoverySupported => AuthorityType == AuthorityType.Aad;
 
-        internal bool IsUserAssertionSupported => (AuthorityType != AuthorityType.Adfs && AuthorityType != AuthorityType.B2C);
+        internal bool IsUserAssertionSupported => AuthorityType != AuthorityType.Adfs && AuthorityType != AuthorityType.B2C;
 
-        internal bool IsTenantOverrideSupported => (AuthorityType == AuthorityType.Aad);
-        internal bool IsClientInfoSupported => (AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Dsts || AuthorityType == AuthorityType.B2C);
+        internal bool IsTenantOverrideSupported => AuthorityType == AuthorityType.Aad;
+        internal bool IsMultiTenantSupported => AuthorityType != AuthorityType.Adfs;
+        internal bool IsClientInfoSupported => AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Dsts || AuthorityType == AuthorityType.B2C;
 
         #region Builders
         internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)
@@ -153,7 +154,7 @@ namespace Microsoft.Identity.Client
 
             return new AuthorityInfo(authorityType, canonicalUri, validateAuthority);
         }
-        
+
         internal static AuthorityInfo FromAadAuthority(Uri cloudInstanceUri, Guid tenantId, bool validateAuthority)
         {
 #pragma warning disable CA1305 // Specify IFormatProvider
@@ -271,7 +272,7 @@ namespace Microsoft.Identity.Client
         {
             if (!string.IsNullOrWhiteSpace(uri) && !uri.EndsWith("/", StringComparison.OrdinalIgnoreCase))
             {
-                uri = uri + "/";
+                uri += "/";
             }
 
             return uri?.ToLowerInvariant() ?? string.Empty;
@@ -389,7 +390,7 @@ namespace Microsoft.Identity.Client
             throw new InvalidOperationException(MsalErrorMessage.DstsAuthorityDoesNotHaveThreeSegments);
         }
 
-        private static AuthorityType GetAuthorityType(string authority) 
+        private static AuthorityType GetAuthorityType(string authority)
         {
             string firstPathSegment = GetFirstPathSegment(authority);
 
@@ -410,7 +411,7 @@ namespace Microsoft.Identity.Client
 
             return AuthorityType.Aad;
         }
-        
+
         private static string[] GetPathSegments(string absolutePath)
         {
             string[] pathSegments = absolutePath.Substring(1).Split(
@@ -447,7 +448,7 @@ namespace Microsoft.Identity.Client
             /// <summary>
             /// Figures out the authority based on the authority from the config and the authority from the request,
             /// and optionally the homeAccountTenantId, which has an impact on AcquireTokenSilent
-            ///
+            /// If the request authority is consumers, organizations, or common, it should just be set an the app level.
             /// The algorithm is:
             ///
             /// 1. If there is no request authority (i.e. no authority override), use the config authority.
@@ -459,8 +460,10 @@ namespace Microsoft.Identity.Client
             /// Special cases:
             ///
             /// - if the authority is not defined at the application level and the request level is not AAD, use the request authority
-            /// - if the authority is defined at app level, and the request level authority of is of different type, throw an exception
-            ///
+            /// - if the authority is defined at app level, and the request level authority is of different type, throw an exception
+            /// 
+            /// - if the intended authority is consumers, please define it at the app level and not at the request level. 
+            /// known issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2929
             /// </summary>
             public static async Task<Authority> CreateAuthorityForRequestAsync(RequestContext requestContext,
                 AuthorityInfo requestAuthorityInfo,
@@ -493,7 +496,7 @@ namespace Microsoft.Identity.Client
 
                     case AuthorityType.Aad:
 
-                        bool updateEnvironment = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null;
+                        bool updateEnvironment = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null && !PublicClientApplication.IsOperatingSystemAccount(account);
 
                         if (requestAuthorityInfo == null)
                         {

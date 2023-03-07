@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Region
     internal class RegionDiscoveryProvider : IRegionDiscoveryProvider
     {
         private readonly IRegionManager _regionManager;
-        public const string PublicEnvForRegional = "r.login.microsoftonline.com";
+        public const string PublicEnvForRegional = "login.microsoft.com";
 
         public RegionDiscoveryProvider(IHttpManager httpManager, bool clearCache)
         {
@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.Region
 
             if (KnownMetadataProvider.IsPublicEnvironment(host))
             {
-                requestContext.Logger.Info($"[Region discovery] Regionalized Environment is : {region}.{PublicEnvForRegional}. ");
+                requestContext.Logger.Info(() => $"[Region discovery] Regionalized Environment is : {region}.{PublicEnvForRegional}. ");
                 return $"{region}.{PublicEnvForRegional}";
             }
 
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Region
                 host = preferredNetworkEnv;
             }
 
-            requestContext.Logger.Info($"[Region discovery] Regionalized Environment is : {region}.{host}. ");
+            requestContext.Logger.Info(() => $"[Region discovery] Regionalized Environment is : {region}.{host}. ");
             return $"{region}.{host}";
         }
     }

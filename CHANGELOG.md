@@ -1,3 +1,87 @@
+4.50.0
+==========
+### New Features
+- Extended managed identity experimental functionality with support for Azure Cloud Shell. See [3832](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3832).  
+- Added support for PII logging for WAM preview. See [3845](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3845), [3822](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3822).  
+
+
+### Bug Fixes
+- Fixed JSON serialization issues for apps running on .NET 7. See [3892](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3892).  
+- Improved logging performance to only create logs when a specified log level is enabled. See [3901](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3901).  
+- Fixed `Unable to load DLL 'msalruntime'` exception for apps that use WAM preview and are packaged as MSIX. See [3740](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3740).  
+- WAM preview now honors the login hint. See [3301](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3301) and [WAM docs](https://aka.ms/msal-net-wam).  
+- WAM preview now allows to sign in with an account different from the provided login hint. See [3929](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3929).  
+- Fixed an `ApiContractViolation` exception in WAM preview when signing out. See [3685](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3685).  
+- MSAL now allows passing no scopes when using WAM preview. See [3675](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3675).  
+- When broker is enabled, MSAL will now use the refresh token from the broker instead of a locally cached one. See [3613](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3613). 
+- Added a more descriptive error message when combined flat user and app cache is used. Use a partitioned token cache (for ex. distributed cache like Redis) or separate files for app and user token caches. See [3218](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3218).   
+- Updated logs to clarify that managed identity correlation ID differs from MSAL one. See [#3908](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3908).  
+- Fixed an occasional cryptographic exception by removing the RSA public key size check - AAD is better suited to handle this verification. See [3896](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3896).  
+- Fixed JSON parsing errors when receiving an error token response. See [3883](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3883).  
+- Added better error handling when receiving WS-Trust responses. See [3614](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3614).  
+- `WithAuthority` methods on the request builders are hidden. Use either `WithTenantId` on the request builders or `WithAuthority` only on the application builder. See [#2929](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2929).  
+- Deprecated `IsBrokerAvailable` method on mobile platforms. Applications should rely on the library automatically falling back to a browser if the broker is not available. See [3320](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3320).  
+- Deprecated unused extended expiry API. See [1377](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1377).  
+
+4.49.1
+==========
+### New Features
+- Extended managed identity experimental functionality with support for Azure Arc. See [3862](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3862)  
+
+### Bug Fixes
+- Updated the Broker package to use Microsoft.Identity.Client.NativeInterop 0.13.3 to resolve crash related to garbage collection when using new WAM broker preview. See [3868](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3868)  
+- Disabled additional logging in new WAM broker introduced in MSAL 4.49.0. See [3875](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3875)  
+
+4.49.0
+==========
+### New Features
+- MSAL will now use `<region>.login.microsoft.com` when using regional ESTS-R for public cloud. See [3252](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3252)
+- Added support for acquiring Work and School accounts when calling `GetAccounts` using the new Broker preview. See [3458](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3458)
+- Added the ability to disable Instance Discovery/Authority validation using `WithInstanceDiscovery(bool enableInstanceDiscovery)`. See [3775](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3775)
+- Added new APIs to acquire authentication data from WWW-Authenticate and Authentication-Info request headers. This will provide additional support for Proof-of-Possession. See [3026](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3026)
+
+### Experimental Features
+- [Managed identities for Azure resources](https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) provide Azure services with an automatically managed identity in Azure Active Directory. You can use this identity to authenticate to any service that supports Azure AD authentication, without having credentials in your code. MSAL now supports acquiring token for managed identities for Azure App Services and Azure Virtual Machines. Use `WithManagedIdentity()` method on the `AcquireTokenForClient` API to get an MSI token. This is an experimental feature and may change in the future versions of MSAL. See [3754](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3754) and [3829](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3829)
+
+### Supportability
+- Enabled more logging for new WAM broker. See [3575](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3575)
+
+### Bug Fixes
+- Optimized MSAL cache key logic to improve performance. See [3393](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3393)
+
+4.48.1
+==========
+
+### Supportability
+- Fixes an internal (Microsoft 1P only) MSA-PT issue for the new WAM preview broker. See [VS#1809364](https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1809364) and [VS#1643652](https://devdiv.visualstudio.com/DevDiv/_workitems/edit/1643652)
+
+### Bug Fixes
+- Added header title to the Account Picker for the new WAM preview broker. See [3803](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3769).  
+
+
+4.48.0
+==========
+
+### New Features
+- Removed support for deprecated `net5.0-windows10.0.17763.0` target. See [3770](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3770) and note below.  
+- Added support for `net6.0` and `net6.0-windows10.0.17763.0` targets. See [3682](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3682) and note below.  
+- Removed support for old `xamarinmac20` target. See [3722](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3722).  
+- `WithProofOfPossession` for public client applications is now generally available. See [3767](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3767).  
+- Added telemetry to log Proof-of-Possession usage. See [3718](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3718).  
+- Exposed tenant profiles for all authorities which are tenanted (B2C and dSTS). See [3703](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3703).  
+- Now logging MSAL version to common telemetry client. See [3745](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/3745).  
+- Updated guidance on retry policies. See [Retry Policy wiki](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Retry-Policy) and [3561](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3561).  
+
+### Bug Fixes
+- Fixed a `NullReferenceException` related to authority URLs when calling `AcquireTokenSilent` with an Operating System account in apps using WAM. See [3769](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3769).  
+- Fixed a `NullReferenceException` when using preview broker and calling `AcquireTokenSilent` with MSA account and MSA-PT enabled. See [3743](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3743).  
+- Added an `Exported` attribute to Android activities to be compliant with Android OS 12.1 (API 32) and above requirements. See [3680](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3680).  
+- Fixed incorrect home account details in `AuthenticationResult` of `AcquireTokenByRefreshToken`. See [3736](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3736).  
+
+### .NET 5 and .NET 6 public client applications
+If you have a Windows application which targets `net5.0`, `net5.0-windows`, `net5.0-windowsX`, `net6.0`, or `net6.0-windows` and would like to use either WAM or embedded browser, you must change the app target to at least `net6.0-windows10.0.17763.0`.  System browser works on all of the above targets.  
+The recommendation is to use new Windows broker preview, as it offers better experience than current WAM implementation and will be generally available in the near future. If you want to try the new broker preview, install the NuGet package Microsoft.Identity.Client.Broker and call the `.WithBrokerPreview()` method. For details, see https://aka.ms/msal-net-wam.
+
 
 4.47.2
 ==========

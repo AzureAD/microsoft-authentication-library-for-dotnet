@@ -28,21 +28,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenSilentParameters silentParameters,
             CancellationToken cancellationToken)
         {
-            //Since the AcquireTokenSilentParameterBuilder api is shared between public and confidential clients,
-            //We need some way to validate that MSAL is not performing AcquireTokenSilent with POP on public clients without Broker
-            if (commonParameters.PopAuthenticationConfiguration != null &&
-                ServiceBundle?.Config.IsBrokerEnabled == false &&
-                //Validates that we are not on CCA
-                //TODO: Find a better way to determine this
-                ServiceBundle?.Config.ClientCredential == null &&
-                commonParameters.OnBeforeTokenRequestHandler == null &&
-                ServiceBundle?.Config.AppTokenProvider == null
-                )
-            {
-                throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerRequiredForPop);
-            }
 
-                var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
             var requestParameters = await _clientApplicationBase.CreateRequestParametersAsync(
                 commonParameters,
@@ -75,7 +62,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext,
                 _clientApplicationBase.UserTokenCacheInternal).ConfigureAwait(false);
 
-            requestContext.Logger.Info(LogMessages.UsingXScopesForRefreshTokenRequest(commonParameters.Scopes.Count()));
+            requestContext.Logger.Info(() => LogMessages.UsingXScopesForRefreshTokenRequest(commonParameters.Scopes.Count()));
 
             requestParameters.SendX5C = refreshTokenParameters.SendX5C ?? false;
 
