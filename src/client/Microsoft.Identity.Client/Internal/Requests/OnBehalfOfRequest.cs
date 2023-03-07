@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
             //Check if initiating a long running process
-            if (AuthenticationRequestParameters.UserAssertion != null && !string.IsNullOrEmpty(AuthenticationRequestParameters.LongRunningOboCacheKey))
+            if (IsLongOboInitialize())
             {
                 //Long running process should not use cached tokens
                 logger.Info("[OBO Request] Initiating long running process. Fetching OBO token from ESTS.");
@@ -131,6 +131,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 return await HandleTokenRefreshErrorAsync(e, cachedAccessToken).ConfigureAwait(false);
             }
+        }
+
+        private bool IsLongOboInitialize()
+        {
+            return AuthenticationRequestParameters.UserAssertion != null && !string.IsNullOrEmpty(AuthenticationRequestParameters.LongRunningOboCacheKey);
         }
 
         private async Task<AuthenticationResult> RefreshRtOrFetchNewAccessTokenAsync(CancellationToken cancellationToken)

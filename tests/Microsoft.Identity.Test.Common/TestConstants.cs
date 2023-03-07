@@ -60,6 +60,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string ATSecret = "some-access-token";
         public const string RTSecret2 = "someRT2";
         public const string ATSecret2 = "some-access-token2";
+        public const string RTSecret3 = "someRT3";
+        public const string ATSecret3 = "some-access-token3";
 
         public const string HomeAccountId = Uid + "." + Utid;
 
