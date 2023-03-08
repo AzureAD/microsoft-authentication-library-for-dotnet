@@ -100,7 +100,7 @@ steps:
   displayName: 'Stage WAM DevApp Dlls'
   inputs:
     SourceFolder: tests/devapps/wam
-    Contents: '**\bin\**\**'
+    Contents: '**/bin/**/**'
     TargetFolder: '$(build.artifactstagingdirectory)/WAM'
 
 - task: PublishPipelineArtifact@1
