@@ -27,7 +27,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 ManagedIdentityTests.SetEnvironmentVariables(ManagedIdentitySourceType.AppService, "127.0.0.1:41564/msi/token");
 
-                IManagedIdentityApplication mi = ManagedIdentityTests.CreateManagedIdentityApplication(httpManager);
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithHttpManager(httpManager)
+                    .Build();
 
                 MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)

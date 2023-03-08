@@ -23,7 +23,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 ManagedIdentityTests.SetEnvironmentVariables(ManagedIdentitySourceType.IMDS, "http://169.254.169.254");
 
-                IManagedIdentityApplication mi = ManagedIdentityTests.CreateManagedIdentityApplication(httpManager);
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithHttpManager(httpManager)
+                    .Build();
 
                 httpManager.AddManagedIdentityMockHandler(ManagedIdentityTests.ImdsEndpoint, ManagedIdentityTests.Resource, MockHelpers.GetMsiImdsErrorResponse(),
                     ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.BadRequest);

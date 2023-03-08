@@ -46,7 +46,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                var mi = CreateManagedIdentityApplication(httpManager);
+                var mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithHttpManager(httpManager)
+                    .Build();
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -86,7 +88,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                var mi = CreateManagedIdentityApplication(httpManager, userAssignedId, userAssignedIdentityId);
+                var mi = ManagedIdentityApplicationBuilder.Create(userAssignedId)
+                    .WithHttpManager(httpManager)
+                    .Build();
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -128,7 +132,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                var mi = CreateManagedIdentityApplication(httpManager);
+                var mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithHttpManager(httpManager)
+                    .Build();
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -188,7 +194,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                IManagedIdentityApplication mi = CreateManagedIdentityApplication(httpManager);
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithHttpManager(httpManager).Build();
 
                 httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiErrorResponse(),
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
@@ -217,7 +224,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                IManagedIdentityApplication mi = CreateManagedIdentityApplication(httpManager);
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithHttpManager(httpManager).Build();
 
                 httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
@@ -247,7 +255,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                IManagedIdentityApplication mi = CreateManagedIdentityApplication(httpManager);
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithHttpManager(httpManager).Build();
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -264,20 +273,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidResponse, ex.Message);
             }
-        }
-
-        internal static IManagedIdentityApplication CreateManagedIdentityApplication(MockHttpManager httpManager, string userAssignedId = null, UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
-        {
-            var miAppBuilder = ManagedIdentityApplicationBuilder
-                    .Create()
-                    .WithHttpManager(httpManager);
-
-            if (userAssignedIdentityId != UserAssignedIdentityId.None)
-            {
-                miAppBuilder.WithUserAssignedManagedIdentity(userAssignedId);
-            }
-
-            return miAppBuilder.Build();
         }
 
         internal static void SetEnvironmentVariables(ManagedIdentitySourceType managedIdentitySource, string endpoint, string secret = "secret")

@@ -32,7 +32,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 ManagedIdentityTests.SetEnvironmentVariables(ManagedIdentitySourceType.ServiceFabric, "localhost/token");
 
-                IManagedIdentityApplication mi = ManagedIdentityTests.CreateManagedIdentityApplication(httpManager);
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithHttpManager(httpManager)
+                    .Build();
 
                 MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)

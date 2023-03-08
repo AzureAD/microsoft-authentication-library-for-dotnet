@@ -35,7 +35,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 ManagedIdentityTests.SetEnvironmentVariables(ManagedIdentitySourceType.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
 
-                IManagedIdentityApplication mi = ManagedIdentityTests.CreateManagedIdentityApplication(httpManager, userAssignedClientId, userAssignedIdentityId);
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(userAssignedClientId)
+                    .WithHttpManager(httpManager)
+                    .Build();
 
                 MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("scope")

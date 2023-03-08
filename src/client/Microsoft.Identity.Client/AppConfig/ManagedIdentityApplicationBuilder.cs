@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client
         internal ManagedIdentityApplicationBuilder(ApplicationConfiguration configuration)
             : base(configuration)
         {
-            ClientApplicationBase.GuardMobileFrameworks();
+            ApplicationBase.GuardMobileFrameworks();
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
         public static ManagedIdentityApplicationBuilder CreateWithApplicationOptions(
             ManagedIdentityApplicationOptions options)
         {
-            ClientApplicationBase.GuardMobileFrameworks();
+            ApplicationBase.GuardMobileFrameworks();
 
             var config = new ApplicationConfiguration(isConfidentialClient: true);
             var builder = new ManagedIdentityApplicationBuilder(config).WithOptions(options);
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client
 #endif
         public static ManagedIdentityApplicationBuilder Create()
         {
-            ClientApplicationBase.GuardMobileFrameworks();
+            ApplicationBase.GuardMobileFrameworks();
 
             var config = new ApplicationConfiguration(isConfidentialClient: false);
             return new ManagedIdentityApplicationBuilder(config)
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Creates a ManagedIdentityApplicationBuilder from a user assigned managed identity clientID / resourceId.
-        /// See https://aka.ms/msal-net-application-configuration
+        /// See https://aka.ms/msal-net-managed-identity
         /// </summary>
         /// <param name="userAssignedId">Client ID / Resource ID of the user assigned managed identity assigned to the resource.</param>
         /// <returns>A <see cref="ManagedIdentityApplicationBuilder"/> from which to set more
@@ -87,7 +87,12 @@ namespace Microsoft.Identity.Client
 #endif
         public static ManagedIdentityApplicationBuilder Create(string userAssignedId)
         {
-            ClientApplicationBase.GuardMobileFrameworks();
+            ApplicationBase.GuardMobileFrameworks();
+
+            if (string.IsNullOrWhiteSpace(userAssignedId))
+            {
+                throw new ArgumentNullException(nameof(userAssignedId));
+            }
 
             var config = new ApplicationConfiguration(isConfidentialClient: true);
             return new ManagedIdentityApplicationBuilder(config)
@@ -95,19 +100,8 @@ namespace Microsoft.Identity.Client
                 .WithCacheSynchronization(false);
         }
 
-        /// <summary>
-        /// Sets the user assigned client id. User can alternatively pass resource id for the user assigned managed identity if client id is not yet generated.
-        /// </summary>
-        /// <param name="userAssignedId"></param>
-        /// <returns>A <see cref="ManagedIdentityApplicationBuilder"/> from which to set more
-        /// parameters, and to create a managed identity application instance</returns>
-        public ManagedIdentityApplicationBuilder WithUserAssignedManagedIdentity(string userAssignedId)
+        private ManagedIdentityApplicationBuilder WithUserAssignedManagedIdentity(string userAssignedId)
         {
-            if (string.IsNullOrWhiteSpace(userAssignedId))
-            {
-                throw new ArgumentNullException(nameof(userAssignedId));
-            }
-
             if (Guid.TryParse(userAssignedId, out _))
             {
                 Config.ManagedIdentityUserAssignedClientId = userAssignedId;

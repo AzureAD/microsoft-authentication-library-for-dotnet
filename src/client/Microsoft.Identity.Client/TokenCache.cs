@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -166,7 +167,8 @@ namespace Microsoft.Identity.Client
 
             requestParams.RequestContext.Logger.Info(() => "Intersecting scope entries count - " + accessTokensToDelete.Count);
 
-            if (!requestParams.IsClientCredentialRequest)
+            if (!requestParams.IsClientCredentialRequest ||
+                !(requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenForManagedIdentity))
             {
                 // filter by identifier of the user instead
                 accessTokensToDelete.RemoveAll(

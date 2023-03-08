@@ -80,8 +80,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [DataRow("resourceId/subscription", false)]
         public void TestConstructor_WithUserAssignedManagedIdentity_ResourceId(string userAssignedId, bool isClientId = true)
         {
-            var mi = ManagedIdentityApplicationBuilder.Create()
-                .WithUserAssignedManagedIdentity(userAssignedId)
+            var mi = ManagedIdentityApplicationBuilder.Create(userAssignedId)
                 .BuildConcrete();
 
             if (isClientId)
