@@ -136,7 +136,6 @@ namespace NetFx
 
                 builder = builder
                     .WithParentActivityOrWindow(consoleWindowHandleProvider)
-                    // .WithExperimentalFeatures()
                     .WithWindowsBroker()
                     .WithBroker(true);
             }

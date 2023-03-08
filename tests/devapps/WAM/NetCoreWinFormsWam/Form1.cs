@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Broker;
 
 #if NETCOREAPP3_1
@@ -118,9 +119,24 @@ namespace NetDesktopWinForms
             {
                 case AuthMethod.WAM:
                     builder = ToggleOldBroker(builder, true);
+                    builder = builder.WithWindowsBrokerOptions(new WindowsBrokerOptions()
+                    {
+                        ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
+                        MsaPassthrough = cbxMsaPt.Checked,
+                        HeaderText = "MSAL Dev App .NET FX"
+                    });
                     break;
                 case AuthMethod.WAMRuntime:
-                    builder = BrokerExtension.WithWindowsBroker(builder);
+                    {
+                        BrokerOptions options = BrokerOptions.CreateDefault();
+                        options.Title = "new Runtime broker";
+                        options.WindowsOSOptions.ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked;
+                        options.MsaPassthrough= cbxMsaPt.Checked;
+
+                        builder.WithBroker(options);
+
+                        builder = BrokerExtension.WithWindowsBroker(builder);
+                    }
                     break;
                 case AuthMethod.SystemBrowser:
                     builder = BrokerExtension.WithWindowsBroker(builder, false);
@@ -135,13 +151,8 @@ namespace NetDesktopWinForms
                     throw new NotImplementedException();
             }
 
-            builder = builder.WithWindowsBrokerOptions(new WindowsBrokerOptions()
-            {
-                ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
-                MsaPassthrough = cbxMsaPt.Checked,
-                HeaderText = "MSAL Dev App .NET FX"
-            })
-            .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true, true);
+
+            builder.WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true, true);
 
             var pca = builder.Build();
 

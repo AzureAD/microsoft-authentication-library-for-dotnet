@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.ApiConfig;
 
 namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 {
@@ -26,7 +27,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
         private readonly ILoggerAdapter _logger;
         private readonly IntPtr _parentHandle = IntPtr.Zero;
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
-        private readonly WindowsBrokerOptions _wamOptions;
+        private readonly BrokerOptions _wamOptions;
         private static Exception s_initException;
 
         private static Dictionary<NativeInterop.LogLevel, LogLevel> LogLevelMap = new Dictionary<NativeInterop.LogLevel, LogLevel>()
@@ -102,8 +103,21 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             _parentHandle = GetParentWindow(uiParent);
 
-            _wamOptions = appConfig.WindowsBrokerOptions ??
-                WindowsBrokerOptions.CreateDefault();
+            if(appConfig.BrokerOptions != null)
+            {
+                _wamOptions = appConfig.BrokerOptions;
+            }
+            else
+            {                
+                if (appConfig.WindowsBrokerOptions != null)
+                {
+                    _wamOptions = BrokerOptions.CreateFromWindowsOptions(appConfig.WindowsBrokerOptions);
+                }
+                else
+                {
+                    _wamOptions = BrokerOptions.CreateDefault();
+                }
+            }
         }
 
         private void LogEventRaised(NativeInterop.Core sender, LogEventArgs args)
@@ -135,7 +149,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             {
                 throw new MsalClientException(
                     "window_handle_required",
-                    "Desktop applications wanting to use the broker need to provide their window handle. See https://aka.ms/msal-net-wam#parent-window-handles");
+                    "Desktop applications now need to provide parent window handle to the broker. See https://aka.ms/msal-net-wam#parent-window-handles");
             }
 
             //if OperatingSystemAccount is passed then we use the user signed-in on the machine
@@ -451,7 +465,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             ICacheSessionManager cacheSessionManager,
             IInstanceDiscoveryManager instanceDiscoveryManager)
         {
-            if (!_wamOptions.ListWindowsWorkAndSchoolAccounts)
+            if (!_wamOptions.WindowsOSOptions.ListWindowsWorkAndSchoolAccounts)
             {
                 _logger.Info("[WamBroker] ListWindowsWorkAndSchoolAccounts option was not enabled.");
                 return Array.Empty<IAccount>();

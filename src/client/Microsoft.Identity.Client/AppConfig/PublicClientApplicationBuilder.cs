@@ -3,6 +3,7 @@
 
 using System;
 using System.ComponentModel;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
@@ -139,6 +140,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// For new applications, it is recommended to use the new WithBroker that accepts BrokerOptions as parameter
         /// Brokers enable Single-Sign-On, device identification,
         /// and application identification verification. To enable one of these features,
         /// you need to set the WithBroker() parameters to true. See https://aka.ms/msal-net-brokers 
@@ -191,6 +193,27 @@ namespace Microsoft.Identity.Client
             Config.IsBrokerEnabled = enableBroker;
             return this;
 #pragma warning restore CS0162 // Unreachable code detected
+        }
+
+        /// <summary>
+        /// Brokers enable Single-Sign-On, device identification,
+        /// and application identification verification. To enable one of these features,
+        /// you need to set the WithBroker() parameters to true. See https://aka.ms/msal-net-brokers 
+        /// for more information on platform specific settings required to enable the broker.
+        /// 
+        /// On iOS and Android, Authenticator and Company Portal serve as brokers.
+        /// On Windows, WAM (Windows Account Manager) serves as broker. See https://aka.ms/msal-net-wam
+        /// </summary>
+        /// <param name="brokerOptions">This provides cross platform options for broker.</param>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
+        /// <remarks>If your app uses .NET classic or .NET Core 3.x, and you wish to use the Windows broker, 
+        /// please install the NuGet package Microsoft.Identity.Client.Desktop and call .WithDesktopFeatures()</remarks>
+        public PublicClientApplicationBuilder WithBroker(BrokerOptions brokerOptions)
+        {
+            WithBroker(true);
+            Config.BrokerOptions= brokerOptions;
+            return this;
         }
 
         /// <summary>

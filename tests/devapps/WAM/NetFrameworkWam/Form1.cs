@@ -433,11 +433,12 @@ namespace NetDesktopWinForms
                     s_accounts.Add(new AccountModel(acc));
                 }
 
+                string[] strEmptyList= new string[0];
                 string msg = "Accounts " + Environment.NewLine +
                     string.Join(
                          Environment.NewLine,
                         accounts.Select(acc => 
-                        $"{acc.Username} {acc.Environment} {acc.HomeAccountId.TenantId} - {acc.GetTenantProfiles()?.Count() ?? 0} tenant profiles: {string.Join(" ", acc.GetTenantProfiles().Select(tp=>tp.TenantId))}"));
+                        $"{acc.Username} {acc.Environment} {acc.HomeAccountId.TenantId} - {acc.GetTenantProfiles()?.Count() ?? 0} tenant profiles: {string.Join(" ", acc.GetTenantProfiles()?.Select(tp => tp.TenantId) ?? strEmptyList)}"));
                 Log(msg);
             }
             catch (Exception ex)

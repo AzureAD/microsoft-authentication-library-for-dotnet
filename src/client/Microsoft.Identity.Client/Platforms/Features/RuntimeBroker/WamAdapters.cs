@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
@@ -139,10 +140,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
         /// <param name="logger"></param>
         public static NativeInterop.AuthParameters GetCommonAuthParameters(
             AuthenticationRequestParameters authenticationRequestParameters, 
-            WindowsBrokerOptions brokerOptions,
+            BrokerOptions brokerOptions,
             ILoggerAdapter logger)
         {
-            logger.Verbose(() => "[WamBroker] Validating Common Auth Parameters.");
+            logger.Verbose(() => "[RuntimeBroker] Validating Common Auth Parameters.");
+            brokerOptions?.Validate();
 
             var authParams = new NativeInterop.AuthParameters
                 (authenticationRequestParameters.AppConfig.ClientId,
@@ -174,9 +176,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             }
 
             //WAM Header Title
-            if (!string.IsNullOrEmpty(brokerOptions.HeaderText))
+            if (!string.IsNullOrEmpty(brokerOptions.Title))
             {
-                authParams.Properties[WamHeaderTitle] = brokerOptions.HeaderText;
+                authParams.Properties[WamHeaderTitle] = brokerOptions.Title;
             }
 
             //Client Claims

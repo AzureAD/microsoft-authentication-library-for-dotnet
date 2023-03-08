@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
@@ -59,6 +60,8 @@ namespace Microsoft.Identity.Client
         public bool IsBrokerEnabled { get; internal set; }
 
         public WindowsBrokerOptions WindowsBrokerOptions { get; set; }
+
+        public BrokerOptions BrokerOptions { get; set; }
 
         public Func<CoreUIParent, ApplicationConfiguration, ILoggerAdapter, IBroker> BrokerCreatorFunc { get; set; }
         public Func<IWebUIFactory> WebUiFactoryCreator { get; set; }

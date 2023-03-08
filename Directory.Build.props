@@ -8,7 +8,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsPackable>false</IsPackable>
-    <NativeInteropVersion>0.13.5</NativeInteropVersion>
+    <NativeInteropVersion>0.13.6</NativeInteropVersion>
   </PropertyGroup>
 
   <ItemGroup Label="For ContinuousIntegrationBuild support">
