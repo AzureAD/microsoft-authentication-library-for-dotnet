@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             };
 
             var cert = new X509Certificate2(
-               ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
+               ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
 
             var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options)
                                                           .WithCertificate(cert)
@@ -340,7 +340,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithCertificate_X509Certificate2()
         {
             var cert = new X509Certificate2(
-                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
+                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
 
             var cca = ConfidentialClientApplicationBuilder
                       .Create(TestConstants.ClientId)
@@ -375,7 +375,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithCertificate_SendX5C()
         {
             var cert = new X509Certificate2(
-                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
+                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
 
             var app = ConfidentialClientApplicationBuilder
                       .Create(TestConstants.ClientId)

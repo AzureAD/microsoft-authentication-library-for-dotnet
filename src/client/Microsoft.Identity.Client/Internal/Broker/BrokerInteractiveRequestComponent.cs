@@ -70,8 +70,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             _logger.Info(LogMessages.CheckMsalTokenResponseReturnedFromBroker);
             if (!string.IsNullOrEmpty(msalTokenResponse.AccessToken))
             {
-                _logger.Info(
-                    "Success. Broker response contains an access token. ");
+                _logger.Info("Success. Broker response contains an access token. ");
                 return;
             }
 

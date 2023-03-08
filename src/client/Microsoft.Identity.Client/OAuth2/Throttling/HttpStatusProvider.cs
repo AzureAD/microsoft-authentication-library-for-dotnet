@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                 // if a retry-after header is present, another provider will take care of this
                 !RetryAfterProvider.TryGetRetryAfterValue(ex.Headers, out _)) 
             {
-                logger.Info($"[Throttling] HTTP status code {ex.StatusCode} encountered - " +
+                logger.Info(() => $"[Throttling] HTTP status code {ex.StatusCode} encountered - " +
                     $"throttling for {s_throttleDuration.TotalSeconds} seconds. ");
 
                 var thumbprint = ThrottleCommon.GetRequestStrictThumbprint(bodyParams,

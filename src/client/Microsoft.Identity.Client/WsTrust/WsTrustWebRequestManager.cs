@@ -35,8 +35,7 @@ namespace Microsoft.Identity.Client.WsTrust
             if (!string.IsNullOrEmpty(federationMetadata))
             {
                 mexDoc = new MexDocument(federationMetadata);
-                requestContext.Logger.Info(
-                    $"MEX document fetched and parsed from provided federation metadata");
+                requestContext.Logger.Info(() => $"MEX document fetched and parsed from provided federation metadata");
                 return mexDoc;
             }
 
@@ -71,8 +70,8 @@ namespace Microsoft.Identity.Client.WsTrust
             mexDoc = new MexDocument(httpResponse.Body);
 
             requestContext.Logger.InfoPii(
-                $"MEX document fetched and parsed from '{federationMetadataUrl}'",
-                "Fetched and parsed MEX");
+                () => $"MEX document fetched and parsed from '{federationMetadataUrl}'",
+                () => "Fetched and parsed MEX");
 
             return mexDoc;
         }
@@ -110,6 +109,9 @@ namespace Microsoft.Identity.Client.WsTrust
                     errorMessage = resp.Body;
                 }
 
+                requestContext.Logger.ErrorPii(LogMessages.WsTrustRequestFailed + $"Status code: {resp.StatusCode} \nError message: {errorMessage}", 
+                    LogMessages.WsTrustRequestFailed + $"Status code: {resp.StatusCode}");
+
                 string message = string.Format(
                         CultureInfo.CurrentCulture,
                         MsalErrorMessage.FederatedServiceReturnedErrorTemplate,
@@ -124,7 +126,15 @@ namespace Microsoft.Identity.Client.WsTrust
 
             try
             {
-                return WsTrustResponse.CreateFromResponse(resp.Body, wsTrustEndpoint.Version);
+                var wsTrustResponse = WsTrustResponse.CreateFromResponse(resp.Body, wsTrustEndpoint.Version);
+
+                if  (wsTrustResponse == null)
+                {
+                    requestContext.Logger.ErrorPii("Token not found in the ws trust response. See response for more details: \n" + resp.Body, "Token not found in WS-Trust response.");
+                    throw new MsalClientException(MsalError.ParsingWsTrustResponseFailed, MsalErrorMessage.ParsingWsTrustResponseFailedDueToConfiguration);
+                }
+
+                return wsTrustResponse;
             }
             catch (System.Xml.XmlException ex)
             {

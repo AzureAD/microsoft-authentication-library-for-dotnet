@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Client
         public CacheData SerializeUnifiedAndAdalCache()
         {
             Validate();
-            this.ServiceBundle.ApplicationLogger.Info($"[ADAL Caching] Legacy SerializeUnifiedAndAdalCache being called. {_semaphoreSlim.GetCurrentCountLogMessage()}.");
+            this.ServiceBundle.ApplicationLogger.Info(() => $"[ADAL Caching] Legacy SerializeUnifiedAndAdalCache being called. {_semaphoreSlim.GetCurrentCountLogMessage()}.");
             // reads the underlying in-memory dictionary and dumps out the content as a JSON
             _semaphoreSlim.Wait();
             this.ServiceBundle.ApplicationLogger.Info("[ADAL Caching] Acquired semaphore");

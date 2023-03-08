@@ -35,8 +35,9 @@ namespace Microsoft.Identity.Client.UI
 
             try
             {
-                requestContext.Logger.InfoPii(LogMessages.CustomWebUiCallingAcquireAuthorizationCodePii(authorizationUri, redirectUri),
-                                              LogMessages.CustomWebUiCallingAcquireAuthorizationCodeNoPii);
+                requestContext.Logger.InfoPii(
+                    () => LogMessages.CustomWebUiCallingAcquireAuthorizationCodePii(authorizationUri, redirectUri),
+                    () => LogMessages.CustomWebUiCallingAcquireAuthorizationCodeNoPii);
                 var uri = await _customWebUi.AcquireAuthorizationCodeAsync(authorizationUri, redirectUri, cancellationToken)
                                             .ConfigureAwait(false);
                 if (uri == null || String.IsNullOrWhiteSpace(uri.Query))

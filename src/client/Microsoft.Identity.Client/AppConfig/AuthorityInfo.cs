@@ -448,7 +448,7 @@ namespace Microsoft.Identity.Client
             /// <summary>
             /// Figures out the authority based on the authority from the config and the authority from the request,
             /// and optionally the homeAccountTenantId, which has an impact on AcquireTokenSilent
-            ///
+            /// If the request authority is consumers, organizations, or common, it should just be set an the app level.
             /// The algorithm is:
             ///
             /// 1. If there is no request authority (i.e. no authority override), use the config authority.
@@ -460,8 +460,10 @@ namespace Microsoft.Identity.Client
             /// Special cases:
             ///
             /// - if the authority is not defined at the application level and the request level is not AAD, use the request authority
-            /// - if the authority is defined at app level, and the request level authority of is of different type, throw an exception
-            ///
+            /// - if the authority is defined at app level, and the request level authority is of different type, throw an exception
+            /// 
+            /// - if the intended authority is consumers, please define it at the app level and not at the request level. 
+            /// known issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2929
             /// </summary>
             public static async Task<Authority> CreateAuthorityForRequestAsync(RequestContext requestContext,
                 AuthorityInfo requestAuthorityInfo,
