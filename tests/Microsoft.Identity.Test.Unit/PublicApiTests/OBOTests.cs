@@ -804,29 +804,31 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 string oboCacheKey = "someCacheKey";
-                bool validateCacheIsEmpty = false;
+                bool validateCacheProperties = false;
 
                 var cca = BuildCCA(httpManager);
                 var oboCca = cca as ILongRunningWebApi;
 
                 cca.UserTokenCache.SetBeforeAccess((args) => 
                 {
-                    if (validateCacheIsEmpty)
+                    if (validateCacheProperties)
                     {
                         Assert.AreEqual(true, args.HasTokens);
-                        Assert.AreEqual(true, args.HasStateChanged);
+                        Assert.AreEqual(false, args.HasStateChanged);
                         Assert.AreEqual(oboCacheKey, args.SuggestedCacheKey);
                     }
                 });
 
                 cca.UserTokenCache.SetAfterAccess((args) =>
                 {
-                    if (validateCacheIsEmpty)
+                    if (validateCacheProperties)
                     {
                         Assert.AreEqual(true, args.HasStateChanged);
                         Assert.AreEqual(false, args.HasTokens);
                         Assert.AreEqual(oboCacheKey, args.SuggestedCacheKey);
                     }
+
+                    validateCacheProperties = false;
                 });
 
                 AddMockHandlerAadSuccess(httpManager,
@@ -849,24 +851,34 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
                 Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
-                MsalAccessTokenCacheItem cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
-                MsalRefreshTokenCacheItem cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().First(t => t.OboCacheKey.Equals(oboCacheKey));
+                MsalAccessTokenCacheItem cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single(t => t.OboCacheKey.Equals(oboCacheKey));
+                MsalRefreshTokenCacheItem cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single(t => t.OboCacheKey.Equals(oboCacheKey));
                 Assert.AreEqual("access-token-1", result.AccessToken);
                 Assert.AreEqual("access-token-1", cachedAccessToken.Secret);
                 Assert.AreEqual("refresh-token-1", cachedRefreshToken.Secret);
 
-                validateCacheIsEmpty = true;
-                await oboCca.StopLongRunningWebApiAsync(oboCacheKey).ConfigureAwait(false);
+                //remove tokens
+                validateCacheProperties = true;
+                var tokensRemoved = await oboCca.StopLongRunningWebApiAsync(oboCacheKey).ConfigureAwait(false);
 
                 var cachedAccessTokens = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
                 var cachedRefreshTokens = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens();
 
                 Assert.AreEqual(0, cachedAccessTokens.Count);
                 Assert.AreEqual(0, cachedRefreshTokens.Count);
+                Assert.IsTrue(tokensRemoved);
+
+                //validate that no more tokens are removed
+                tokensRemoved = await oboCca.StopLongRunningWebApiAsync(oboCacheKey).ConfigureAwait(false);
+
+                cachedAccessTokens = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
+                cachedRefreshTokens = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens();
+
+                Assert.AreEqual(0, cachedAccessTokens.Count);
+                Assert.AreEqual(0, cachedRefreshTokens.Count);
+                Assert.IsFalse(tokensRemoved);
             }
         }
-
-
 
         [DataTestMethod]
         [DataRow(true)]

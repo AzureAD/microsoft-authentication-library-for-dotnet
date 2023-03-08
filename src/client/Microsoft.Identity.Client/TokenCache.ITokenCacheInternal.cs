@@ -1147,8 +1147,10 @@ namespace Microsoft.Identity.Client
                 tenantProfiles?.Values);
         }
 
-        async Task ITokenCacheInternal.StopLongRunningOboProcessAsync(string longRunningOboCacheKey, AuthenticationRequestParameters requestParameters)
+        async Task<bool> ITokenCacheInternal.StopLongRunningOboProcessAsync(string longRunningOboCacheKey, AuthenticationRequestParameters requestParameters)
         {
+            bool tokensRemoved = false;
+
             requestParameters.RequestContext.Logger.Verbose(() => $"[StopLongRunningOboProcessAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}");
             await _semaphoreSlim.WaitAsync(requestParameters.RequestContext.UserCancellationToken).ConfigureAwait(false);
             requestParameters.RequestContext.Logger.Verbose(() => "[StopLongRunningOboProcessAsync] Entered token cache semaphore");
@@ -1183,7 +1185,7 @@ namespace Microsoft.Identity.Client
                         await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
                     }
 
-                    RemoveOboTokensInternal(longRunningOboCacheKey, requestParameters.RequestContext);
+                    tokensRemoved = RemoveOboTokensInternal(longRunningOboCacheKey, requestParameters.RequestContext);
                 }
                 finally
                 {
@@ -1217,6 +1219,8 @@ namespace Microsoft.Identity.Client
 
                 _semaphoreSlim.Release();
             }
+
+            return tokensRemoved;
         }
 
         async Task ITokenCacheInternal.RemoveAccountAsync(IAccount account, AuthenticationRequestParameters requestParameters)
@@ -1310,18 +1314,20 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Removes obo tokens stored in the cache. Note that the cache is internally and externally partitioned by the oboKey.
         /// </summary>
-        internal /* internal for test only */ void RemoveOboTokensInternal(string oboPartitionKey, RequestContext requestContext)
+        private bool RemoveOboTokensInternal(string oboPartitionKey, RequestContext requestContext)
         {
             ILoggerAdapter logger = requestContext.Logger;
 
             //Filter and remove tokens based on OBO Cache Key
-            var refreshTokens = Accessor.GetAllRefreshTokens(oboPartitionKey);
+            var refreshTokens = Accessor.GetAllRefreshTokens(oboPartitionKey, logger);
             refreshTokens.RemoveAll(item => !(bool)item?.OboCacheKey.Equals(oboPartitionKey, StringComparison.OrdinalIgnoreCase));
-            RemoveRefreshTokens(refreshTokens, logger, out bool filterByClientId);
+            var rtsRemoved = RemoveRefreshTokens(refreshTokens, logger, out bool filterByClientId);
 
-            var accessTokens = Accessor.GetAllAccessTokens(oboPartitionKey);
+            var accessTokens = Accessor.GetAllAccessTokens(oboPartitionKey, logger);
             accessTokens.RemoveAll(item => !(bool)item?.OboCacheKey.Equals(oboPartitionKey, StringComparison.OrdinalIgnoreCase));
-            RemoveAccessTokens(accessTokens, logger, filterByClientId);
+            var atsRemoved = RemoveAccessTokens(accessTokens, logger, filterByClientId);
+
+            return rtsRemoved > 0 || atsRemoved > 0;
         }
 
         internal /* internal for test only */ void RemoveAccountInternal(IAccount account, RequestContext requestContext)
@@ -1337,11 +1343,11 @@ namespace Microsoft.Identity.Client
 
             ILoggerAdapter logger = requestContext.Logger;
 
-            var refreshTokens = Accessor.GetAllRefreshTokens(partitionKey);
+            var refreshTokens = Accessor.GetAllRefreshTokens(partitionKey, logger);
             refreshTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
             RemoveRefreshTokens(refreshTokens, logger, out bool filterByClientId);
 
-            var accessTokens = Accessor.GetAllAccessTokens(partitionKey);
+            var accessTokens = Accessor.GetAllAccessTokens(partitionKey, logger);
             accessTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
             RemoveAccessTokens(accessTokens, logger, filterByClientId);
 
@@ -1350,7 +1356,7 @@ namespace Microsoft.Identity.Client
             RemoveAccounts(account, logger, filterByClientId);
         }
 
-        private void RemoveRefreshTokens(List<MsalRefreshTokenCacheItem> refreshTokens, ILoggerAdapter logger, out bool filterByClientId)
+        private int RemoveRefreshTokens(List<MsalRefreshTokenCacheItem> refreshTokens, ILoggerAdapter logger, out bool filterByClientId)
         {
             // To maintain backward compatibility with other MSALs, filter all credentials by clientID if
             // FOCI is disabled or if an FRT is not present
@@ -1368,9 +1374,11 @@ namespace Microsoft.Identity.Client
             }
 
             logger.Info(() => $"[RemoveRefreshTokens] Deleted {refreshTokens.Count} refresh tokens.");
+
+            return refreshTokens.Count;
         }
 
-        private void RemoveAccessTokens(List<MsalAccessTokenCacheItem> accessTokens, ILoggerAdapter logger, bool filterByClientId)
+        private int RemoveAccessTokens(List<MsalAccessTokenCacheItem> accessTokens, ILoggerAdapter logger, bool filterByClientId)
         {
             if (filterByClientId)
             {
@@ -1383,9 +1391,11 @@ namespace Microsoft.Identity.Client
             }
 
             logger.Info(() => $"[RemoveAccessTokens] Deleted {accessTokens.Count} access tokens.");
+
+            return accessTokens.Count;
         }
 
-        private void RemoveIdTokens(string partitionKey, ILoggerAdapter logger, bool filterByClientId)
+        private int RemoveIdTokens(string partitionKey, ILoggerAdapter logger, bool filterByClientId)
         {
             var idTokens = Accessor.GetAllIdTokens(partitionKey);
             idTokens.RemoveAll(item => !item.HomeAccountId.Equals(partitionKey, StringComparison.OrdinalIgnoreCase));
@@ -1400,6 +1410,8 @@ namespace Microsoft.Identity.Client
             }
 
             logger.Info(() => $"[RemoveIdTokens] Deleted {idTokens.Count} ID tokens.");
+
+            return idTokens.Count;
         }
 
         private void RemoveAccounts(IAccount account, ILoggerAdapter logger, bool filterByClientId)

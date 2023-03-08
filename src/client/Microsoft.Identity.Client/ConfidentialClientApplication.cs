@@ -175,9 +175,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="longRunningProcessSessionKey">OBO cache key used to remove the tokens</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns></returns>
+        /// <returns>Returns true if tokens are removed from the cache. False otherwise.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="longRunningProcessSessionKey"/> is not set.</exception>
-        public async Task StopLongRunningWebApiAsync(string longRunningProcessSessionKey, CancellationToken cancellationToken = default)
+        public async Task<bool> StopLongRunningWebApiAsync(string longRunningProcessSessionKey, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(longRunningProcessSessionKey))
             {
@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Client
             requestContext.ApiEvent = new ApiEvent(correlationId);
             requestContext.ApiEvent.ApiId = ApiIds.RemoveOboTokens;
 
-            var authority = await Microsoft.Identity.Client.Instance.Authority.CreateAuthorityForRequestAsync(
+            var authority = await Instance.Authority.CreateAuthorityForRequestAsync(
               requestContext,
               null).ConfigureAwait(false);
 
@@ -202,8 +202,10 @@ namespace Microsoft.Identity.Client
 
             if (UserTokenCacheInternal != null)
             {
-                await UserTokenCacheInternal.StopLongRunningOboProcessAsync(longRunningProcessSessionKey, authParameters).ConfigureAwait(false);
+                return await UserTokenCacheInternal.StopLongRunningOboProcessAsync(longRunningProcessSessionKey, authParameters).ConfigureAwait(false);
             }
+
+            return false;
         }
 
         /// <summary>

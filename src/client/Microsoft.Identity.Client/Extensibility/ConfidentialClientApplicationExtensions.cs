@@ -22,10 +22,11 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="clientApp">Client app to remove tokens from</param>
         /// <param name="longRunningProcessSessionKey">OBO cache key used to remove the tokens</param>
         /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Returns true if tokens are removed from the cache. False otherwise.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="longRunningProcessSessionKey"/> is not set.</exception>
-        public static async Task StopLongRunningWebApiAsync(this ILongRunningWebApi clientApp, string longRunningProcessSessionKey, CancellationToken cancellationToken = default)
+        public static async Task<bool> StopLongRunningWebApiAsync(this ILongRunningWebApi clientApp, string longRunningProcessSessionKey, CancellationToken cancellationToken = default)
         {
-            await (clientApp as ConfidentialClientApplication).StopLongRunningWebApiAsync(longRunningProcessSessionKey, cancellationToken).ConfigureAwait(false);
+            return await (clientApp as ConfidentialClientApplication).StopLongRunningWebApiAsync(longRunningProcessSessionKey, cancellationToken).ConfigureAwait(false);
         }
     }
 }
