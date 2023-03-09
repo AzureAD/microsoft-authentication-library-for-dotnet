@@ -465,7 +465,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             ICacheSessionManager cacheSessionManager,
             IInstanceDiscoveryManager instanceDiscoveryManager)
         {
-            if (!_wamOptions.WindowsOSOptions.ListWindowsWorkAndSchoolAccounts)
+            if (!_wamOptions.ListOperatingSystemAccounts)
             {
                 _logger.Info("[WamBroker] ListWindowsWorkAndSchoolAccounts option was not enabled.");
                 return Array.Empty<IAccount>();

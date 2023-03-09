@@ -7,17 +7,17 @@ using System.ComponentModel;
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
-    /// The class specifies the options for broker across OSs
+    /// The class specifies the options for broker across OperatingSystems
     /// The common properties are direct members
     /// Platform specific properties (if they exist) are part of the corresponding options
     /// </summary>
     public class BrokerOptions
     {
         /// <summary>
-        /// Supported OSs
+        /// Supported OperatingSystems
         /// </summary>
         [Flags]
-        public enum OSs
+        public enum OperatingSystems
         {
             /// <summary>
             /// No OS specified - Invalid options
@@ -27,38 +27,17 @@ namespace Microsoft.Identity.Client.ApiConfig
             /// Use broker on Windows OS
             /// </summary>
             Windows = 0b_0000_0001,  // 1
-            /// <summary>
-            /// Use broker on Mac OS
-            /// </summary>
-            MacOS = 0b_0000_0010,  // 2
-
-            /// <summary>
-            /// Use broker on Mac and Windows OS
-            /// </summary>
-            WindowsAndMac = Windows | MacOS,
-        }
-
-        /// <summary>
-        /// Class specifying options for windows platform
-        /// </summary>
-        public class WindowsOptions
-        {
-            /// <summary>
-            /// Allow the Windows broker to list Work and School accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>
-            /// </summary>
-            /// <remarks>On UWP, accounts are not listed due to privacy concerns</remarks>
-            public bool ListWindowsWorkAndSchoolAccounts { get; set; } = false;
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="osChoices">Choices of OSs</param>
+        /// <param name="osChoices">Choices of OperatingSystems</param>
         /// <param name="title">Title of the broker</param>
         /// <param name="msaPassthrough">is this MsaPasstorugh</param>
-        public BrokerOptions(OSs osChoices, string title = "", bool msaPassthrough = false)
+        public BrokerOptions(OperatingSystems osChoices, string title = "", bool msaPassthrough = false)
         {
-            if (osChoices == OSs.None)
+            if (osChoices == OperatingSystems.None)
             {
                 throw new ArgumentException($"osChoices should not be none");
             }
@@ -75,19 +54,18 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        /// Creates default options that can be modified except the choice of OS
+        /// Creates default options that can be modified later except the choice of OS
         /// </summary>
         /// <param name="osChoice">Choice of OS platforms</param>
         /// <param name="listWorkAndSchoolAccts">List wokr and school accounts</param>
         /// <returns></returns>
-        public static BrokerOptions CreateDefault(OSs osChoice = OSs.Windows, bool listWorkAndSchoolAccts = true)
+        public static BrokerOptions CreateDefault(OperatingSystems osChoice = OperatingSystems.Windows, bool listWorkAndSchoolAccts = true)
         {
             BrokerOptions ret = new BrokerOptions(osChoice);
             var winBrokerDefaultOptions = WindowsBrokerOptions.CreateDefault();
             ret.Title = winBrokerDefaultOptions.HeaderText;
             ret.MsaPassthrough = winBrokerDefaultOptions.MsaPassthrough;
-            ret.WindowsOSOptions = new WindowsOptions();
-            ret.WindowsOSOptions.ListWindowsWorkAndSchoolAccounts = listWorkAndSchoolAccts;
+            ret.ListOperatingSystemAccounts = listWorkAndSchoolAccts;
             
             return ret;
         }
@@ -98,13 +76,12 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <param name="winOptions"></param>
         /// <param name="osChoice"></param>
         /// <returns></returns>
-        public static BrokerOptions CreateFromWindowsOptions(WindowsBrokerOptions winOptions, OSs osChoice = OSs.Windows)
+        public static BrokerOptions CreateFromWindowsOptions(WindowsBrokerOptions winOptions, OperatingSystems osChoice = OperatingSystems.Windows)
         {
             BrokerOptions ret = new BrokerOptions(osChoice);
             ret.Title = winOptions.HeaderText;
             ret.MsaPassthrough = winOptions.MsaPassthrough;
-            ret.WindowsOSOptions = new WindowsOptions();
-            ret.WindowsOSOptions.ListWindowsWorkAndSchoolAccounts = winOptions.ListWindowsWorkAndSchoolAccounts;
+            ret.ListOperatingSystemAccounts = winOptions.ListWindowsWorkAndSchoolAccounts;
 
             return ret;
         }
@@ -112,17 +89,12 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <summary>
         /// This is a required property to determine the supported OS
         /// </summary>
-        public OSs OSChoices { get; private set; }
+        public OperatingSystems OSChoices { get; private set; }
 
         /// <summary>
         /// Title of the broker
         /// </summary>
         public string Title { get; set; }
-
-        /// <summary>
-        /// Options specific to windows platform
-        /// </summary>
-        public WindowsOptions WindowsOSOptions { get; set; }
 
         /// <summary>
         /// A legacy option available only to Microsoft applications. Should be avoided where possible.
@@ -132,13 +104,20 @@ namespace Microsoft.Identity.Client.ApiConfig
         public bool MsaPassthrough { get; set; } = false;
 
         /// <summary>
+        /// Currently only supported on the !!Windows!!
+        /// Allow the Windows broker to list Work and School accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>
+        /// </summary>
+        /// <remarks>On UWP, accounts are not listed due to privacy concerns</remarks>/// 
+        public bool ListOperatingSystemAccounts { get; set; }
+
+        /// <summary>
         /// This is to validate the options
         /// </summary>
         internal void Validate()
         { 
-            if(OSChoices == OSs.None)
+            if(OSChoices == OperatingSystems.None)
             {
-                throw new InvalidOperationException($"");
+                throw new InvalidOperationException($"OS choice must be set.");
             }
         }
     }

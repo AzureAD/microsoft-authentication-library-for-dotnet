@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,6 +50,9 @@ namespace NetCoreTestApp
 
         private static int s_currentTid = 0;
 
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetConsoleWindow();
+
         public static void Main(string[] args)
         {
             var ccaSettings = ConfidentialAppSettings.GetSettings(Cloud.Public);
@@ -75,8 +79,11 @@ namespace NetCoreTestApp
 
             if(withWamBroker)
             {
+                IntPtr consoleWindowHandle = GetConsoleWindow();
+                Func<IntPtr> consoleWindowHandleProvider = () => consoleWindowHandle;
                 pcaBuilder.WithWindowsDesktopFeatures()
-                            .WithBroker();
+                          .WithParentActivityOrWindow(consoleWindowHandleProvider)
+                          .WithBroker();
             }
 
             Console.WriteLine($"IsBrokerAvailable: {pcaBuilder.IsBrokerAvailable()}");
@@ -129,7 +136,7 @@ namespace NetCoreTestApp
                         9. Rotate Tenant ID
                        10. Acquire Token Interactive with Chrome
                        11. AcquireTokenForClient with multiple threads
-                       12. Acquire Token Interactive with Legacy Broker
+                       12. Acquire Token Interactive with Broker
                         0. Exit App
                     Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);

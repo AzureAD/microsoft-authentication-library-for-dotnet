@@ -130,7 +130,7 @@ namespace NetDesktopWinForms
                     {
                         BrokerOptions options = BrokerOptions.CreateDefault();
                         options.Title = "new Runtime broker";
-                        options.WindowsOSOptions.ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked;
+                        options.ListOperatingSystemAccounts = cbxListOsAccounts.Checked;
                         options.MsaPassthrough= cbxMsaPt.Checked;
 
                         builder.WithBroker(options);
