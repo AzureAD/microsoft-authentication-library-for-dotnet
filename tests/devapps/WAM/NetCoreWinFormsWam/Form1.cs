@@ -120,14 +120,14 @@ namespace NetDesktopWinForms
                     builder = ToggleOldBroker(builder, true);
                     break;
                 case AuthMethod.WAMRuntime:
-                    builder = BrokerExtension.WithWindowsBroker(builder);
+                    builder = builder.WithBrokerPreview().WithExperimentalFeatures();
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder = BrokerExtension.WithWindowsBroker(builder, false);
+                    builder = builder.WithExperimentalFeatures().WithBrokerPreview(false);
                     builder = ToggleOldBroker(builder, false);
                     break;
                 case AuthMethod.EmbeddedBrowser:
-                    builder = BrokerExtension.WithWindowsBroker(builder, false);
+                    builder = builder.WithExperimentalFeatures().WithBrokerPreview(false);
                     builder = ToggleOldBroker(builder, false);
 
                     break;
@@ -152,7 +152,7 @@ namespace NetDesktopWinForms
         private static PublicClientApplicationBuilder ToggleOldBroker(PublicClientApplicationBuilder builder, bool enable)
         {
 #if NETCOREAPP3_1
-            builder = WamExtension.WithWindowsBroker(builder, enable);
+            builder = builder.WithWindowsBroker(enable);
 #else
             builder = builder.WithBroker(enable);
 #endif

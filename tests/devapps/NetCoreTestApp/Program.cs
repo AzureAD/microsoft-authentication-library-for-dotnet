@@ -66,18 +66,14 @@ namespace NetCoreTestApp
             return $"https://login.microsoftonline.com/{tenant}";
         }
 
-        private static IPublicClientApplication CreatePca(bool withWamBroker = false)
+        private static IPublicClientApplication CreatePca()
         {
             var pcaBuilder = PublicClientApplicationBuilder
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
-                            .WithLogging(Log, LogLevel.Verbose, true);
-
-            if(withWamBroker)
-            {
-                pcaBuilder.WithWindowsDesktopFeatures()
-                            .WithBroker();
-            }
+                            .WithLogging(Log, LogLevel.Verbose, true)
+                            .WithExperimentalFeatures()
+                            .WithDesktopFeatures();
 
             Console.WriteLine($"IsBrokerAvailable: {pcaBuilder.IsBrokerAvailable()}");
 
@@ -129,7 +125,6 @@ namespace NetCoreTestApp
                         9. Rotate Tenant ID
                        10. Acquire Token Interactive with Chrome
                        11. AcquireTokenForClient with multiple threads
-                       12. Acquire Token Interactive with Legacy Broker
                         0. Exit App
                     Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);
@@ -240,6 +235,7 @@ namespace NetCoreTestApp
 
                             var optionsChrome = new SystemWebViewOptions()
                             {
+                                //BrowserRedirectSuccess = new Uri("https://www.bing.com?q=why+is+42+the+meaning+of+life")
                                 OpenBrowserAsync = SystemWebViewOptions.OpenWithChromeEdgeBrowserAsync
                             };
 
@@ -279,25 +275,6 @@ namespace NetCoreTestApp
                             }
 
                             break;
-
-                        case 12: // acquire token interactive with WamBroker
-                            {
-                                var optionsbroker = new SystemWebViewOptions()
-                                {
-                                    OpenBrowserAsync = SystemWebViewOptions.OpenWithEdgeBrowserAsync
-                                };
-
-                                var pcaBroker = CreatePca(true);
-
-                                var ctsBroker = new CancellationTokenSource();
-                                authTask = pcaBroker.AcquireTokenInteractive(s_scopes)
-                                    .WithSystemWebViewOptions(optionsbroker)
-                                    .ExecuteAsync(ctsBroker.Token);
-
-                                await FetchTokenAndCallGraphAsync(pcaBroker, authTask).ConfigureAwait(false);
-                            }
-                            break;
-
                         case 0:
                             return;
 
