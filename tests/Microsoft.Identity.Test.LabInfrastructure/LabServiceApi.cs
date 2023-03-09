@@ -19,13 +19,16 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     {
         private string _labAccessAppId;
         private string _labAccessClientSecret;
+        private string _msiHelperServiceSecret;
         private AccessToken? _labApiAccessToken;
+        private AccessToken? _msiHelperApiAccessToken;
 
         public LabServiceApi()
         {
             KeyVaultSecretsProvider _keyVaultSecretsProvider = new KeyVaultSecretsProvider();
             _labAccessAppId = _keyVaultSecretsProvider.GetSecretByName("LabVaultAppID").Value;
             _labAccessClientSecret = _keyVaultSecretsProvider.GetSecretByName("LabVaultAppSecret").Value;
+            _msiHelperServiceSecret = _keyVaultSecretsProvider.GetSecretByName("MSIHelperServiceSecret").Value;
         }
 
         /// <summary>
@@ -164,14 +167,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public async Task<string> GetMSIHelperServiceTokenAsync()
         {
-            if (_labApiAccessToken == null)
+            if (_msiHelperApiAccessToken == null)
             {
-                _labApiAccessToken = await LabAuthenticationHelper
-                    .GetAccessTokenForLabAPIAsync(_labAccessAppId, _labAccessClientSecret)
+                _msiHelperApiAccessToken = await LabAuthenticationHelper
+                    .GetAccessTokenForLabAPIAsync(_labAccessAppId, _msiHelperServiceSecret)
                     .ConfigureAwait(false);
             }
 
-            return _labApiAccessToken.Value.Token;
+            return _msiHelperApiAccessToken.Value.Token;
         }
     }
 }
