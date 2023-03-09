@@ -97,7 +97,7 @@ steps:
     TargetFolder: '$(build.artifactstagingdirectory)/DeviceAuth'
 
 - task: CopyFiles@2
-  displayName: 'Stage WAM DevApp Dlls'
+  displayName: 'Copy WAM DevApp Dlls'
   inputs:
     SourceFolder: tests/devapps/wam
     Contents: '**/bin/**/**'
@@ -154,7 +154,7 @@ steps:
         }
 
         #exit if there are errors
-        IF ([string]::IsNullOrWhitespace($errors))
+        IF (![string]::IsNullOrWhitespace($errors))
         {
             Write-Host $errors;
             echo "##vso[task.logissue type=error]Verify Existence of Runtime Dlls Task Failed."
