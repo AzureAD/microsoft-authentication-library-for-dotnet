@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Stops an in progress long running OBO session by removing the tokens associated with the provided cache key.
-        /// See https://aka.ms/msal-net-on-behalf-of.
+        /// See https://aka.ms/msal-net-long-running-obo.
         /// </summary>
         /// <param name="longRunningProcessSessionKey">OBO cache key used to remove the tokens</param>
         /// <param name="cancellationToken">Cancellation token</param>
