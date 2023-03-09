@@ -22,6 +22,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using System.Net.Http;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -207,11 +208,27 @@ namespace Microsoft.Identity.Client.Internal.Requests
             apiEvent.IsLegacyCacheEnabled = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
             apiEvent.CacheInfo = CacheRefreshReason.NotApplicable;
             apiEvent.TokenType = AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
+            apiEvent.AssertionType = (int)GetAssertionType();
 
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
             EnrichTelemetryApiEvent(apiEvent);
 
             return apiEvent;
+        }
+
+        private AssertionType GetAssertionType()
+        {
+            if (ServiceBundle.Config.UseManagedIdentity)
+            {
+                return AssertionType.MSI;
+            }
+
+            if (AuthenticationRequestParameters.OnBeforeTokenRequestHandler != null)
+            {
+                return AssertionType.TokenRequestHandler;
+            }
+
+            return (AssertionType)ServiceBundle.Config.ClientCredential.AssertionType;
         }
 
         protected async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse msalTokenResponse)

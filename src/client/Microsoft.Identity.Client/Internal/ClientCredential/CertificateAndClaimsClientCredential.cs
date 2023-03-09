@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -17,7 +18,10 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         private readonly IDictionary<string, string> _claimsToSign;
         private readonly bool _appendDefaultClaims;
         private readonly string _base64EncodedThumbprint; // x5t
+        private bool _sendX5c;
         public X509Certificate2 Certificate { get; }
+
+        public AssertionType AssertionType => _sendX5c ? AssertionType.CertificateWithSNI : AssertionType.Certificate;
 
         public CertificateAndClaimsClientCredential(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool appendDefaultClaims)
         {
@@ -42,7 +46,9 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 tokenEndpoint,
                 _claimsToSign,
                 _appendDefaultClaims);
-            
+
+            _sendX5c = sendX5C;
+
             string assertion = jwtToken.Sign(Certificate, _base64EncodedThumbprint, sendX5C);
 
             oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);

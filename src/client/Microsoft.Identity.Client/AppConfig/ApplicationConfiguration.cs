@@ -149,6 +149,8 @@ namespace Microsoft.Identity.Client
             }
         }
 
+
+
 #endregion
 
 #region Region

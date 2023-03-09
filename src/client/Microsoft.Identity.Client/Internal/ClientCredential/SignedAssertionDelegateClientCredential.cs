@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -14,6 +15,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     {
         internal Func<CancellationToken, Task<string>> _signedAssertionDelegate { get; }
         internal Func<AssertionRequestOptions, Task<string>> _signedAssertionWithInfoDelegate { get; }
+        public AssertionType AssertionType => AssertionType.UserProvided;
 
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public SignedAssertionDelegateClientCredential(Func<CancellationToken, Task<string>> signedAssertionDelegate)
