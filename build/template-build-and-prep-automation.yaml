@@ -96,8 +96,74 @@ steps:
     Contents: '**/bin/**/*'
     TargetFolder: '$(build.artifactstagingdirectory)/DeviceAuth'
 
+- task: CopyFiles@2
+  displayName: 'Copy WAM DevApp Dlls'
+  inputs:
+    SourceFolder: tests/devapps/wam
+    Contents: '**/bin/**/**'
+    TargetFolder: '$(Build.SourcesDirectory)/WAM'
+
 - task: PublishPipelineArtifact@1
   displayName: 'Publish Artifact: drop'
   inputs:
     targetPath: $(Build.artifactstagingdirectory)
     artifactName: drop
+
+- task: PowerShell@2
+  displayName: 'Verify Existence of Runtime Dlls'
+  inputs:
+    targetType: 'inline'
+    script: |
+        #Search Folder
+        $searchInFolder = "\WAM\";
+        $searchInFolder = Join-Path $(Build.SourcesDirectory) $searchInFolder 
+
+        Write-Host $searchInFolder 
+
+        #runtime path with file name
+        $runtimes = @('runtimes\win-x64\native\msalruntime.dll', 
+                      'runtimes\win-x86\native\msalruntime_x86.dll', 
+                      'runtimes\win-arm64\native\msalruntime_arm64.dll');
+
+        #dev apps to check
+        $AppsToCheck = @('MSIX\WPF\bin\Release\', 
+                         'MSIX\WPF.Package\bin\AnyCPU\Release\WPF\', 
+                         'NetCoreWinFormsWam\bin\Release\net6.0-windows10.0.17763.0\', 
+                         'NetCoreWinFormsWam\bin\Release\netcoreapp3.1\', 
+                         'NetDesktopWpf\bin\Release\', 
+                         'NetFrameworkWam\bin\Release\',
+                         'NetCoreConsoleWAM\bin\Release\net6.0\',
+                         'NetFXConsoleWAM\bin\Release\');
+
+        #Check if runtime files for each arch exist in the Dev Apps
+        $errors = '';
+
+        foreach ($runtime in $runtimes) 
+        {
+            foreach ($app in $AppsToCheck) 
+            {
+                $appFullPath = $searchInFolder+$app+$runtime
+                
+                Write-Host $appFullPath
+                
+                if (-not(Test-Path -Path $appFullPath -PathType Leaf))
+                 {
+                      $errors += "Failed to find runtime files in : " + $SearchInFolder + $app + "`n";
+                 }
+            }
+        }
+
+        #exit if there are errors
+        IF (![string]::IsNullOrWhitespace($errors))
+        {
+            Write-Host $errors;
+            echo "##vso[task.logissue type=error]Verify Existence of Runtime Dlls Task Failed."
+            echo "##vso[task.complete result=Failed;]Failed"
+        }
+        Else
+        {
+            Write-Host "File check complete. All msalruntime dlls are present."
+        }
+
+
+

@@ -148,9 +148,9 @@ namespace Microsoft.Identity.Client
 
             #endregion
 
-            logger.Verbose($"[SaveTokenResponseAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}.");
+            logger.Verbose(() => $"[SaveTokenResponseAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}.");
             await _semaphoreSlim.WaitAsync(requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
-            logger.Verbose("[SaveTokenResponseAsync] Entered token cache semaphore. ");
+            logger.Verbose(() => "[SaveTokenResponseAsync] Entered token cache semaphore. ");
             ITokenCacheInternal tokenCacheInternal = this;
 
             try
@@ -186,8 +186,8 @@ namespace Microsoft.Identity.Client
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
                     }
 
-                    // Don't cache PoP access tokens from broker
-                    if (msalAccessTokenCacheItem != null && !(response.TokenSource == TokenSource.Broker && response.TokenType == Constants.PoPAuthHeaderPrefix))
+                    // Don't cache access tokens from broker
+                    if (ShouldCacheAccessToken(msalAccessTokenCacheItem, response.TokenSource))
                     {
                         logger.Info("[SaveTokenResponseAsync] Saving AT in cache and removing overlapping ATs...");
                         DeleteAccessTokensWithIntersectingScopes(
@@ -268,8 +268,17 @@ namespace Microsoft.Identity.Client
             finally
             {
                 _semaphoreSlim.Release();
-                logger.Verbose("[SaveTokenResponseAsync] Released token cache semaphore. ");
+                logger.Verbose(() => "[SaveTokenResponseAsync] Released token cache semaphore. ");
             }
+        }
+
+        private bool ShouldCacheAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem, TokenSource tokenSource)
+        {
+#if iOS
+            return msalAccessTokenCacheItem != null;
+#else
+            return msalAccessTokenCacheItem != null && tokenSource != TokenSource.Broker;
+#endif
         }
 
         //This method pulls all of the access and refresh tokens from the cache and can therefore be very impactful on performance.
@@ -294,7 +303,7 @@ namespace Microsoft.Identity.Client
                     tokenCacheKeyDump.AppendLine($"AT Cache Key: {cacheItem.ToLogString(requestParameters.RequestContext.Logger.PiiLoggingEnabled)}");
                 }
 
-                requestParameters.RequestContext.Logger.Verbose(tokenCacheKeyDump.ToString());
+                requestParameters.RequestContext.Logger.Verbose(() => tokenCacheKeyDump.ToString());
             }
         }
 
@@ -358,7 +367,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                requestParams.RequestContext.Logger.Verbose("Not saving to ADAL legacy cache. ");
+                requestParams.RequestContext.Logger.Verbose(() => "Not saving to ADAL legacy cache. ");
             }
         }
 
@@ -401,9 +410,9 @@ namespace Microsoft.Identity.Client
             var existingWamAccountIds = existingAccount?.WamAccountIds;
             msalAccountCacheItem.WamAccountIds.MergeDifferentEntries(existingWamAccountIds);
         }
-        #endregion
+#endregion
 
-        #region FindAccessToken
+#region FindAccessToken
         /// <summary>
         /// IMPORTANT: this class is performance critical; any changes must be benchmarked using Microsoft.Identity.Test.Performance.
         /// More information about how to test and what data to look for is in https://aka.ms/msal-net-performance-testing.
@@ -434,7 +443,7 @@ namespace Microsoft.Identity.Client
             if (accessTokens.Count == 0)
             {
 
-                logger.Verbose("[FindAccessTokenAsync] No access tokens found in the cache. Skipping filtering. ");
+                logger.Verbose(() => "[FindAccessTokenAsync] No access tokens found in the cache. Skipping filtering. ");
                 requestParams.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
 
                 return null;
@@ -451,7 +460,7 @@ namespace Microsoft.Identity.Client
             // no match
             if (accessTokens.Count == 0)
             {
-                logger.Verbose("[FindAccessTokenAsync] No tokens found for matching authority, client_id, user and scopes. ");
+                logger.Verbose(() => "[FindAccessTokenAsync] No tokens found for matching authority, client_id, user and scopes. ");
                 return null;
             }
 
@@ -476,7 +485,7 @@ namespace Microsoft.Identity.Client
             var logger = requestParams.RequestContext.Logger;
             if (tokenCacheItems.Count == 0)
             {
-                logger.Verbose("Not filtering by scopes, because there are no candidates");
+                logger.Verbose(() => "Not filtering by scopes, because there are no candidates");
                 return;
             }
 
@@ -490,8 +499,7 @@ namespace Microsoft.Identity.Client
 
                     if (logger.IsLoggingEnabled(LogLevel.Verbose))
                     {
-                        logger.Verbose($"Access token with scopes {string.Join(" ", item.ScopeSet)} " +
-                            $"passes scope filter? {accepted} ");
+                        logger.Verbose(() => $"Access token with scopes {string.Join(" ", item.ScopeSet)} " + $"passes scope filter? {accepted} ");
                     }
                     return accepted;
                 },
@@ -583,12 +591,9 @@ namespace Microsoft.Identity.Client
                         return null;
                     }
 
-                    if (logger.IsLoggingEnabled(LogLevel.Info))
-                    {
-                        logger.Info(
-                            "Access token is not expired. Returning the found cache entry. " +
-                            GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
-                    }
+                    logger.Info(
+                        () => "Access token is not expired. Returning the found cache entry. " +
+                        GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
 
                     return msalAccessTokenCacheItem;
                 }
@@ -596,23 +601,18 @@ namespace Microsoft.Identity.Client
                 if (ServiceBundle.Config.IsExtendedTokenLifetimeEnabled &&
                     msalAccessTokenCacheItem.ExtendedExpiresOn > DateTime.UtcNow + Constants.AccessTokenExpirationBuffer)
                 {
-                    if (logger.IsLoggingEnabled(LogLevel.Info))
-                    {
-                        logger.Info(
-                            "Access token is expired.  IsExtendedLifeTimeEnabled=TRUE and ExtendedExpiresOn is not exceeded.  Returning the found cache entry. " +
-                            GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
-                    }
+
+                    logger.Info(() =>
+                        "Access token is expired.  IsExtendedLifeTimeEnabled=TRUE and ExtendedExpiresOn is not exceeded.  Returning the found cache entry. " +
+                        GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
 
                     msalAccessTokenCacheItem.IsExtendedLifeTimeToken = true;
                     return msalAccessTokenCacheItem;
                 }
 
-                if (logger.IsLoggingEnabled(LogLevel.Info))
-                {
-                    logger.Info(
-                        "Access token has expired or about to expire. " +
-                        GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
-                }
+                logger.Info(() =>
+                    "Access token has expired or about to expire. " +
+                    GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
             }
 
             return null;
@@ -642,7 +642,7 @@ namespace Microsoft.Identity.Client
 
             if (tokenCacheItems.Count == 0)
             {
-                logger.Verbose("Not filtering AT by environment, because there are no candidates");
+                logger.Verbose(() => "Not filtering AT by environment, because there are no candidates");
                 return tokenCacheItems;
             }
 
@@ -666,7 +666,7 @@ namespace Microsoft.Identity.Client
             {
                 if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
-                    logger.Verbose($"Filtered AT by preferred alias returning {itemsFilteredByAlias.Count} tokens.");
+                    logger.Verbose(() => $"Filtered AT by preferred alias returning {itemsFilteredByAlias.Count} tokens.");
                 }
 
                 return itemsFilteredByAlias;
@@ -688,25 +688,25 @@ namespace Microsoft.Identity.Client
             string requestKid = authenticationRequest.AuthenticationScheme.KeyId;
             if (string.IsNullOrEmpty(item.KeyId) && string.IsNullOrEmpty(requestKid))
             {
-                authenticationRequest.RequestContext.Logger.Verbose("Bearer token found");
+                authenticationRequest.RequestContext.Logger.Verbose(() => "Bearer token found");
                 return item;
             }
 
             if (string.Equals(item.KeyId, requestKid, StringComparison.OrdinalIgnoreCase))
             {
-                authenticationRequest.RequestContext.Logger.Verbose("Keyed token found");
+                authenticationRequest.RequestContext.Logger.Verbose(() => "Keyed token found");
                 return item;
             }
 
             authenticationRequest.RequestContext.Logger.Info(
-                    string.Format(
+                    () => string.Format(
                         CultureInfo.InvariantCulture,
                         "A token bound to the wrong key was found. Token key id: {0} Request key id: {1}",
                         item.KeyId,
                         requestKid));
             return null;
         }
-        #endregion
+#endregion
 
         private void FilterTokensByClientId<T>(List<T> tokenCacheItems) where T : MsalCredentialCacheItemBase
         {
@@ -780,7 +780,7 @@ namespace Microsoft.Identity.Client
                         item => !aliases.ContainsOrdinalIgnoreCase(item.Environment));
                 }
 
-                requestParams.RequestContext.Logger.Info("[FindRefreshTokenAsync] Refresh token found in the cache? - " + (refreshTokens.Count != 0));
+                requestParams.RequestContext.Logger.Info(() => "[FindRefreshTokenAsync] Refresh token found in the cache? - " + (refreshTokens.Count != 0));
 
                 if (refreshTokens.Count > 0)
                 {
@@ -789,10 +789,10 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                requestParams.RequestContext.Logger.Verbose("[FindRefreshTokenAsync] No RTs found in the MSAL cache ");
+                requestParams.RequestContext.Logger.Verbose(() => "[FindRefreshTokenAsync] No RTs found in the MSAL cache ");
             }
 
-            requestParams.RequestContext.Logger.Verbose("[FindRefreshTokenAsync] Checking ADAL cache for matching RT. ");
+            requestParams.RequestContext.Logger.Verbose(() => "[FindRefreshTokenAsync] Checking ADAL cache for matching RT. ");
 
             if (IsLegacyAdalCacheEnabled(requestParams) &&
                 requestParams.Account != null &&
@@ -918,7 +918,7 @@ namespace Microsoft.Identity.Client
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
             {
-                logger.Verbose($"[GetAccounts] Found {refreshTokenCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache. ");
+                logger.Verbose(() => $"[GetAccounts] Found {refreshTokenCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache. ");
             }
 
             // Multi-cloud support - must filter by environment.
@@ -953,7 +953,7 @@ namespace Microsoft.Identity.Client
 
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
             {
-                logger.Verbose($"[GetAccounts] Found {refreshTokenCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache after environment filtering. ");
+                logger.Verbose(() => $"[GetAccounts] Found {refreshTokenCacheItems.Count} RTs and {accountCacheItems.Count} accounts in MSAL cache after environment filtering. ");
             }
 
             IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
@@ -1029,7 +1029,7 @@ namespace Microsoft.Identity.Client
 
                 if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
-                    logger.Verbose($"Filtered by home account id. Remaining accounts {accounts.Count()} ");
+                    logger.Verbose(() => $"Filtered by home account id. Remaining accounts {accounts.Count()} ");
                 }
             }
 
@@ -1148,9 +1148,9 @@ namespace Microsoft.Identity.Client
 
         async Task ITokenCacheInternal.RemoveAccountAsync(IAccount account, AuthenticationRequestParameters requestParameters)
         {
-            requestParameters.RequestContext.Logger.Verbose($"[RemoveAccountAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}");
+            requestParameters.RequestContext.Logger.Verbose(() => $"[RemoveAccountAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}");
             await _semaphoreSlim.WaitAsync(requestParameters.RequestContext.UserCancellationToken).ConfigureAwait(false);
-            requestParameters.RequestContext.Logger.Verbose("[RemoveAccountAsync] Entered token cache semaphore");
+            requestParameters.RequestContext.Logger.Verbose(() => "[RemoveAccountAsync] Entered token cache semaphore");
 
             try
             {
@@ -1260,7 +1260,7 @@ namespace Microsoft.Identity.Client
                 Accessor.DeleteRefreshToken(refreshTokenCacheItem);
             }
 
-            requestContext.Logger.Info($"[RemoveAccountAsync] Deleted {refreshTokens.Count} refresh tokens.");
+            requestContext.Logger.Info(() => $"[RemoveAccountAsync] Deleted {refreshTokens.Count} refresh tokens.");
 
             var accessTokens = Accessor.GetAllAccessTokens(partitionKey);
             accessTokens.RemoveAll(item => !item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase));
@@ -1274,7 +1274,7 @@ namespace Microsoft.Identity.Client
                 Accessor.DeleteAccessToken(accessTokenCacheItem);
             }
 
-            requestContext.Logger.Info($"[RemoveAccountAsync] Deleted {accessTokens.Count} access tokens.");
+            requestContext.Logger.Info(() => $"[RemoveAccountAsync] Deleted {accessTokens.Count} access tokens.");
 
             var idTokens = Accessor.GetAllIdTokens(partitionKey);
             idTokens.RemoveAll(item => !item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase));
@@ -1288,7 +1288,7 @@ namespace Microsoft.Identity.Client
                 Accessor.DeleteIdToken(idTokenCacheItem);
             }
 
-            requestContext.Logger.Info($"[RemoveAccountAsync] Deleted {idTokens.Count} ID tokens.");
+            requestContext.Logger.Info(() => $"[RemoveAccountAsync] Deleted {idTokens.Count} ID tokens.");
 
             var accounts = Accessor.GetAllAccounts(partitionKey);
             accounts.RemoveAll(item => !(item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&

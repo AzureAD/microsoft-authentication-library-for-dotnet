@@ -29,15 +29,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal const string IdentityUnavailableError = "[Managed Identity] Authentication unavailable. The requested identity has not been assigned to this resource.";
         internal const string GatewayError = "[Managed Identity] Authentication unavailable. The request failed due to a gateway error.";
 
-        private readonly string _clientId;
-        private readonly string _resourceId;
+        private readonly string _userAssignedId;
         private readonly Uri _imdsEndpoint;
 
         internal ImdsManagedIdentitySource(RequestContext requestContext) : base(requestContext)
         {
             if (!string.IsNullOrEmpty(EnvironmentVariables.PodIdentityEndpoint))
 			{
-                requestContext.Logger.Verbose("[Managed Identity] Environment variable for IMDS returned endpoint: " + EnvironmentVariables.PodIdentityEndpoint);
+                requestContext.Logger.Verbose(() => "[Managed Identity] Environment variable AZURE_POD_IDENTITY_AUTHORITY_HOST for IMDS returned endpoint: " + EnvironmentVariables.PodIdentityEndpoint);
                 var builder = new UriBuilder(EnvironmentVariables.PodIdentityEndpoint)
                 {
                     Path = ImdsTokenPath
@@ -46,12 +45,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 			}
 			else
 			{
-                requestContext.Logger.Verbose("[Managed Identity] Unable to find AZURE_POD_IDENTITY_AUTHORITY_HOST environment variable for IMDS, using the default endpoint.");
+                requestContext.Logger.Verbose(() => "[Managed Identity] Unable to find AZURE_POD_IDENTITY_AUTHORITY_HOST environment variable for IMDS, using the default endpoint.");
             	_imdsEndpoint = s_imdsEndpoint;
 			}
 
-            _clientId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId;
-            _resourceId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId;
+            _userAssignedId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedId;
+
+            requestContext.Logger.Verbose(() => "[Managed Identity] Creating IMDS managed identity source. Endpoint URI: " + _imdsEndpoint);
         }
 
         protected override ManagedIdentityRequest CreateRequest(string resource)
@@ -62,15 +62,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.QueryParameters["api-version"] = ImdsApiVersion;
             request.QueryParameters["resource"] = resource;
 
-            if (!string.IsNullOrEmpty(_clientId))
+            if (!string.IsNullOrEmpty(_userAssignedId))
             {
-                _requestContext.Logger.Verbose("[Managed Identity] Adding user assigned client id to the request.");
-                request.QueryParameters[Constants.ManagedIdentityClientId] = _clientId;
-            }
-            else if (!string.IsNullOrEmpty(_resourceId))
-            {
-                _requestContext.Logger.Verbose("[Managed Identity] Adding user assigned resource id to the request.");
-                request.QueryParameters[Constants.ManagedIdentityResourceId] = _resourceId;
+                if (Guid.TryParse(_userAssignedId, out _))
+                {
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
+                    request.QueryParameters[Constants.ManagedIdentityClientId] = _userAssignedId;
+                }
+                else
+                {
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
+                    request.QueryParameters[Constants.ManagedIdentityResourceId] = _userAssignedId;
+                }
+
             }
 
             return request;

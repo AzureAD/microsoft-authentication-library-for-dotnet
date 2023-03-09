@@ -8,6 +8,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -22,7 +23,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string authority = ClientApplicationBase.DefaultAuthority,
             TestContext testContext = null,
             bool isMultiCloudSupportEnabled = false,
-            bool isInstanceDiscoveryEnabled = true)
+            bool isInstanceDiscoveryEnabled = true,
+            IPlatformProxy platformProxy = null)
         {
             HttpManager = new MockHttpManager(testContext);
             ServiceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(
@@ -31,7 +33,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 isExtendedTokenLifetimeEnabled: isExtendedTokenLifetimeEnabled,
                 authority: authority,
                 isMultiCloudSupportEnabled: isMultiCloudSupportEnabled,
-                isInstanceDiscoveryEnabled: isInstanceDiscoveryEnabled);
+                isInstanceDiscoveryEnabled: isInstanceDiscoveryEnabled,
+                platformProxy: platformProxy);
         }
 
         public IServiceBundle ServiceBundle { get; }

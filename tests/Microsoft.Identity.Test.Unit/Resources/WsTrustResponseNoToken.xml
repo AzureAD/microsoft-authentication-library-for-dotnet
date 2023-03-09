@@ -1,0 +1,28 @@
+﻿<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+  <s:Header>
+    <a:Action s:mustUnderstand="1">http://www.w3.org/2005/08/addressing/soap/fault</a:Action>
+    <a:RelatesTo>urn:uuid:a4444a44-aaaa-4444-4444-aaaaaaaaaa</a:RelatesTo>
+    <o:Security s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+      <u:Timestamp u:Id="_0">
+        <u:Created>2022-10-18T13:54:59.751Z</u:Created>
+        <u:Expires>2022-10-18T13:59:59.751Z</u:Expires>
+      </u:Timestamp>
+    </o:Security>
+  </s:Header>
+  <s:Body>
+    <s:Fault>
+      <s:Code>
+        <s:Value>s:Sender</s:Value>
+        <s:Subcode>
+          <s:Value xmlns:a="http://schemas.xmlsoap.org/ws/2005/02/trust">a:FailedAuthentication</s:Value>
+        </s:Subcode>
+      </s:Code>
+      <s:Reason>
+        <s:Text xml:lang="en-US">MSIS7068: Access denied.</s:Text>
+      </s:Reason>
+      <s:Detail>
+
+      </s:Detail>
+    </s:Fault>
+  </s:Body>
+</s:Envelope>

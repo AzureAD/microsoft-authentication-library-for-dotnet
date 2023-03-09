@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
+using System.Text.Json.Serialization;
 using System.Text.Json;
 using Microsoft.Identity.Client.Platforms.net6;
 using JObject = System.Text.Json.Nodes.JsonObject;
@@ -76,11 +77,20 @@ namespace Microsoft.Identity.Client.OAuth2
         public string IdToken { get; set; }
 
         [JsonProperty(TokenResponseClaim.ExpiresIn)]
+#if SUPPORTS_SYSTEM_TEXT_JSON
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+#endif
         public long ExpiresIn { get; set; }
 
+#if SUPPORTS_SYSTEM_TEXT_JSON
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+#endif
         [JsonProperty(TokenResponseClaim.ExtendedExpiresIn)]
         public long ExtendedExpiresIn { get; set; }
 
+#if SUPPORTS_SYSTEM_TEXT_JSON
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+#endif
         [JsonProperty(TokenResponseClaim.RefreshIn)]
         public long? RefreshIn { get; set; }
 

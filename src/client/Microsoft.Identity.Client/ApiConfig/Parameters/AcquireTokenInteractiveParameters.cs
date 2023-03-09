@@ -30,16 +30,19 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public void LogParameters(ILoggerAdapter logger)
         {
-            var builder = new StringBuilder();
-            builder.AppendLine("=== InteractiveParameters Data ===");
-            builder.AppendLine("LoginHint provided: " + !string.IsNullOrEmpty(LoginHint));
-            builder.AppendLine("User provided: " + (Account != null));
-            builder.AppendLine("UseEmbeddedWebView: " + UseEmbeddedWebView);
-            builder.AppendLine("ExtraScopesToConsent: " + string.Join(";", ExtraScopesToConsent ?? CollectionHelpers.GetEmptyReadOnlyList<string>()));
-            builder.AppendLine("Prompt: " + Prompt.PromptValue);
-            builder.AppendLine("HasCustomWebUi: " + (CustomWebUi != null));
-            UiParent.SystemWebViewOptions?.LogParameters(logger);
-            logger.Info(builder.ToString());
+            if (logger.IsLoggingEnabled(LogLevel.Info))
+            {
+                var builder = new StringBuilder();
+                builder.AppendLine("=== InteractiveParameters Data ===");
+                builder.AppendLine("LoginHint provided: " + !string.IsNullOrEmpty(LoginHint));
+                builder.AppendLine("User provided: " + (Account != null));
+                builder.AppendLine("UseEmbeddedWebView: " + UseEmbeddedWebView);
+                builder.AppendLine("ExtraScopesToConsent: " + string.Join(";", ExtraScopesToConsent ?? CollectionHelpers.GetEmptyReadOnlyList<string>()));
+                builder.AppendLine("Prompt: " + Prompt.PromptValue);
+                builder.AppendLine("HasCustomWebUi: " + (CustomWebUi != null));
+                UiParent.SystemWebViewOptions?.LogParameters(logger);
+                logger.Info(builder.ToString());
+            }
         }
     }
 }
