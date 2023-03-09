@@ -101,7 +101,7 @@ steps:
   inputs:
     SourceFolder: tests/devapps/wam
     Contents: '**/bin/**/**'
-    TargetFolder: '$(build.artifactstagingdirectory)/WAM'
+    TargetFolder: '$(Build.SourcesDirectory)/WAM'
 
 - task: PublishPipelineArtifact@1
   displayName: 'Publish Artifact: drop'
@@ -116,7 +116,7 @@ steps:
     script: |
         #Search Folder
         $searchInFolder = "\WAM\";
-        $searchInFolder = Join-Path $(build.artifactstagingdirectory) $searchInFolder 
+        $searchInFolder = Join-Path $(Build.SourcesDirectory) $searchInFolder 
 
         Write-Host $searchInFolder 
 
@@ -157,7 +157,8 @@ steps:
         IF ([string]::IsNullOrWhitespace($errors))
         {
             Write-Host $errors;
-            echo "##vso[task.logissue type=error result=Failed;]Verify Existence of Runtime Dlls Task Failed."
+            echo "##vso[task.logissue type=error]Verify Existence of Runtime Dlls Task Failed."
+            echo "##vso[task.complete result=Failed;]Failed"
         }
         Else
         {
