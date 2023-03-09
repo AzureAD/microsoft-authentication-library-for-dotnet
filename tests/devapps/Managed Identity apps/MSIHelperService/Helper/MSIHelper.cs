@@ -141,7 +141,6 @@ namespace MSIHelperService.Helper
             //MSAL .Net has this value hardcoded for now. So sending a set value
 
             Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
-            keyValuePairs.Add("IDENTITY_HEADER", "DCD1DE64781F4BD1BC6F9AE0C055CD26");
             keyValuePairs.Add("AZURE_POD_IDENTITY_AUTHORITY_HOST", "http://169.254.169.254/metadata/identity/oauth2/token");
             keyValuePairs.Add("IMDS_API_VERSION", "2018-02-01");
 
@@ -381,7 +380,7 @@ namespace MSIHelperService.Helper
                 .ReadFromJsonAsync<WebHookResponse>()
                 .ConfigureAwait(false);
 
-            string? jobId = jobResponse?.JobIDs[0];
+            string? jobId = jobResponse?.JobIDs?[0];
 
             if (!string.IsNullOrEmpty(jobId))
             {
