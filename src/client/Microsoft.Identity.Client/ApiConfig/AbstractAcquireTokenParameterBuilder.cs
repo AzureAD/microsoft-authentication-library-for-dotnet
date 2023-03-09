@@ -257,6 +257,7 @@ namespace Microsoft.Identity.Client
         /// accounts.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods.</returns>
+        [EditorBrowsable(EditorBrowsableState.Never)] // Soft deprecate
         public T WithAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(azureCloudInstance, authorityAudience, validateAuthority);

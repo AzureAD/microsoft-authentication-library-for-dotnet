@@ -2,9 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -14,5 +11,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public static string IdentityHeader => Environment.GetEnvironmentVariable("IDENTITY_HEADER");
         public static string PodIdentityEndpoint => Environment.GetEnvironmentVariable("AZURE_POD_IDENTITY_AUTHORITY_HOST");
         public static string ImdsEndpoint => Environment.GetEnvironmentVariable("IMDS_ENDPOINT");
+        public static string MsiEndpoint => Environment.GetEnvironmentVariable("MSI_ENDPOINT");
+        public static string IdentityServerThumbprint => Environment.GetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT");
     }
 }

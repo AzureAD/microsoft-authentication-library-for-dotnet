@@ -332,7 +332,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string expectedUrl,
             string resource,
             string response,
-            string apiVersion,
             ManagedIdentitySourceType managedIdentitySourceType,
             string userAssignedClientIdOrResourceId = null,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
@@ -340,47 +339,76 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             )
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
-            HttpContent content =
-                new StringContent(response);
+            HttpContent content = new StringContent(response);
             responseMessage.Content = content;
 
-            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>
-                {
-                    { "api-version", apiVersion },
-                    { "resource", resource }
-                };
-
-            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
-
-            if (managedIdentitySourceType == ManagedIdentitySourceType.AppService)
-            {
-                expectedRequestHeaders.Add("X-IDENTITY-HEADER", "secret");
-            }
-
-            if (managedIdentitySourceType == ManagedIdentitySourceType.IMDS || managedIdentitySourceType == ManagedIdentitySourceType.AzureArc)
-            {
-                expectedRequestHeaders.Add("Metadata", "true");
-            }
+            MockHttpMessageHandler httpMessageHandler = BuildMockHandlerForManagedIdentitySource(managedIdentitySourceType, resource);
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
             {
-                expectedQueryParams.Add("client_id", userAssignedClientIdOrResourceId);
-            } 
-                
-            if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
-            {
-                expectedQueryParams.Add("mi_res_id", userAssignedClientIdOrResourceId);
+                httpMessageHandler.ExpectedQueryParams.Add("client_id", userAssignedClientIdOrResourceId);
             }
 
-            httpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = expectedUrl,
-                        ExpectedQueryParams = expectedQueryParams,
-                        ExpectedRequestHeaders = expectedRequestHeaders,
-                        ResponseMessage = responseMessage
-                    });
+            if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
+            {
+                httpMessageHandler.ExpectedQueryParams.Add("mi_res_id", userAssignedClientIdOrResourceId);
+            }
+
+            httpMessageHandler.ResponseMessage = responseMessage;
+            httpMessageHandler.ExpectedUrl = expectedUrl;
+
+            httpManager.AddMockHandler(httpMessageHandler);
+        }
+
+        private static MockHttpMessageHandler BuildMockHandlerForManagedIdentitySource(ManagedIdentitySourceType managedIdentitySourceType, string resource)
+        {
+            MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+
+            switch (managedIdentitySourceType)
+            {
+            
+                case ManagedIdentitySourceType.AppService:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedQueryParams.Add("api-version", "2019-08-01");
+                    expectedQueryParams.Add("resource", resource);
+                    expectedRequestHeaders.Add("X-IDENTITY-HEADER", "secret");
+                    break;
+                case ManagedIdentitySourceType.AzureArc:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedQueryParams.Add("api-version", "2019-11-01");
+                    expectedQueryParams.Add("resource", resource);
+                    expectedRequestHeaders.Add("Metadata", "true");
+                    break;
+                case ManagedIdentitySourceType.IMDS:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedQueryParams.Add("api-version", "2018-02-01");
+                    expectedQueryParams.Add("resource", resource);
+                    expectedRequestHeaders.Add("Metadata", "true");
+                    break;
+                case ManagedIdentitySourceType.CloudShell:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Post;
+                    expectedRequestHeaders.Add("Metadata", "true");
+                    expectedRequestHeaders.Add("ContentType", "application/x-www-form-urlencoded");
+                    httpMessageHandler.ExpectedPostData = new Dictionary<string, string> { { "resource", resource } };
+                    break;
+                case ManagedIdentitySourceType.ServiceFabric:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedRequestHeaders.Add("secret", "secret");
+                    expectedQueryParams.Add("api-version", "2019-07-01-preview");
+                    expectedQueryParams.Add("resource", resource);
+                    break;
+            }
+
+            if (managedIdentitySourceType != ManagedIdentitySourceType.CloudShell)
+            {
+                httpMessageHandler.ExpectedQueryParams = expectedQueryParams;
+            }
+            
+            httpMessageHandler.ExpectedRequestHeaders = expectedRequestHeaders;
+
+            return httpMessageHandler;
         }
 
         public static void AddManagedIdentityWSTrustMockHandler(
@@ -447,6 +475,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
     {
         IMDS,
         AppService,
-        AzureArc
+        AzureArc,
+        CloudShell,
+        ServiceFabric
     }
  }

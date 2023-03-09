@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     throw new MsalClientException(MsalError.BrokerApplicationRequired, MsalErrorMessage.CannotInvokeBrokerForPop);
                 }
 
-                _logger.Warning("Broker is not installed or authority type is incorrecr. Cannot respond to silent request.");
+                _logger.Warning("Broker is not installed or authority type is incorrect. Cannot respond to silent request.");
                 return null;
             }
 
@@ -94,8 +94,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (msalTokenResponse.Error != null)
             {
-                _logger.Info(
-                    LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
+                _logger.Info(() => LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
 
                 if (msalTokenResponse.Error == BrokerResponseConst.AndroidNoTokenFound ||
                     msalTokenResponse.Error == BrokerResponseConst.AndroidNoAccountFound ||

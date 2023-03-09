@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
                 // onActivityResult will receive the response for this activity.
                 // Launching this activity will switch to the broker app.
 
-                _logger.Verbose("[Android broker] Starting Android Broker interactive authentication. ");
+                _logger.Verbose(()=>"[Android broker] Starting Android Broker interactive authentication. ");
                 Intent brokerIntent = await GetIntentForInteractiveBrokerRequestAsync(brokerRequest).ConfigureAwait(false);
 
                 if (brokerIntent != null)
@@ -177,7 +177,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             _brokerHelper.ValidateBrokerRedirectUri(brokerRequest);
             string brokerRequestJson = JsonHelper.SerializeToJson(brokerRequest);
-            _logger.InfoPii("[Android broker] GetInteractiveBrokerIntent: " + brokerRequestJson, "Enable PII to see the broker request. ");
+            _logger.InfoPii(
+                () => "[Android broker] GetInteractiveBrokerIntent: " + brokerRequestJson, 
+                () => "Enable PII to see the broker request. ");
             brokerIntent.PutExtra(BrokerConstants.BrokerRequestV2, brokerRequestJson);
 
             return brokerIntent;
@@ -188,7 +190,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             // Don't send silent background request if account information is not provided
             using (_logger.LogMethodDuration())
             {
-                _logger.Verbose("[Android broker] User is specified for silent token request. Starting silent Android broker request. ");
+                _logger.Verbose(()=>"[Android broker] User is specified for silent token request. Starting silent Android broker request. ");
                 string silentResult = await GetBrokerAuthTokenSilentlyAsync(brokerRequest).ConfigureAwait(false);
                 return _brokerHelper.HandleSilentAuthenticationResult(silentResult, brokerRequest.CorrelationId);
             }
@@ -319,12 +321,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             var myLooper = Looper.MyLooper();
             if (myLooper != null && callerActivity != null && callerActivity.MainLooper != myLooper)
             {
-                _logger.Info("[Android broker] myLooper returned. Calling thread is associated with a Looper: " + myLooper.ToString());
+                _logger.Info(() => "[Android broker] myLooper returned. Calling thread is associated with a Looper: " + myLooper.ToString());
                 return new Handler(myLooper);
             }
             else
             {
-                _logger.Info("[Android broker] Looper.MainLooper returned: " + Looper.MainLooper.ToString());
+                _logger.Info(() => "[Android broker] Looper.MainLooper returned: " + Looper.MainLooper.ToString());
                 return new Handler(Looper.MainLooper);
             }
         }
@@ -346,7 +348,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
                         if (!string.IsNullOrEmpty(bpKey))
                         {
-                            _logger.Info("[Android broker] Using broker protocol version: " + bpKey);
+                            _logger.Info(() => "[Android broker] Using broker protocol version: " + bpKey);
                             return;
                         }
 

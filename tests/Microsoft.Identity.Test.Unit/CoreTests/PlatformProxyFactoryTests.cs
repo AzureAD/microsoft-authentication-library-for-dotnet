@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 Constants.DefaultRedirectUri,
                 proxy.GetDefaultRedirectUri("cid", false));
 
-#if DESKTOP || NET6_WIN
+#if DESKTOP || NET6_WIN || NET7_0
 
             Assert.AreSame(
                 Constants.NativeClientRedirectUri,

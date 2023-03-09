@@ -35,12 +35,12 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         private async Task OnBeforeAccessAsync(TokenCacheNotificationArgs args)
         {
-            _logger.Verbose($"OnBeforeAccessAsync - before getting the lock " + _semaphoreSlim.CurrentCount);
+            _logger.Verbose(() => $"OnBeforeAccessAsync - before getting the lock " + _semaphoreSlim.CurrentCount);
 
             // prevent other threads / background tasks from reading the file            
             await _semaphoreSlim.WaitAsync().ConfigureAwait(true);
 
-            _logger.Verbose($"OnBeforeAccessAsync - acquired the lock");
+            _logger.Verbose(() => $"OnBeforeAccessAsync - acquired the lock");
 
             IStorageFile cacheFile = await ApplicationData.Current.LocalFolder.TryGetItemAsync(CacheFileName) as IStorageFile;
 
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             }
             finally
             {
-                _logger.Verbose($"{DateTime.UtcNow} OnAfterAccessAsync - released the lock");
+                _logger.Verbose(() => "OnAfterAccessAsync - released the lock");
                 _semaphoreSlim.Release();
             }
         }
