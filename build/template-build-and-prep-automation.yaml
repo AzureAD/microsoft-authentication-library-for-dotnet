@@ -156,8 +156,8 @@ steps:
         #exit if there are errors
         IF (![string]::IsNullOrWhitespace($errors))
         {
-            $errors;
-            Exit 1;
+            Write-Host $errors;
+            echo "##vso[task.logissue type=error]Verify Existence of Runtime Dlls Task Failed."
         }
         Else
         {
