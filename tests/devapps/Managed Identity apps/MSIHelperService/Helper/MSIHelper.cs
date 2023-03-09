@@ -49,7 +49,7 @@ namespace MSIHelperService.Helper
         internal const string RunbookAPIVersion = "2019-06-01";
 
         //Enum for HTTP Error Response Codes
-        internal enum HTTPErrorResponseCode : int
+        internal enum HTTPErrorResponseCode
         {
             Status200OK = StatusCodes.Status200OK,
             Status201Created = StatusCodes.Status201Created,
@@ -62,12 +62,12 @@ namespace MSIHelperService.Helper
         //Azure Resources
         internal enum AzureResource
         {
-            webapp,
-            function,
-            vm,
-            azurearc,
-            servicefabric,
-            cloudshell
+            WebApp,
+            Function,
+            VM,
+            AzureArc,
+            ServiceFabric,
+            CloudShell
         }
 
         /// <summary>
@@ -301,7 +301,7 @@ namespace MSIHelperService.Helper
             catch (Exception ex)
             {
                 //Catch the Azure Runbook exception
-                string errorResponse = ex.Message;
+                var errorResponse = ex.Message;
 
                 logger.LogError("GetVirtualMachineMSIToken call failed.");
                 
@@ -315,7 +315,7 @@ namespace MSIHelperService.Helper
         /// <param name="jobId"></param>
         /// <param name="logger"></param>
         /// <returns>Azure runbook job Status</returns>
-        public static async Task<bool> AzureRunbookJobStatusIsCompleted(
+        private static async Task<bool> AzureRunbookJobStatusIsCompleted(
             string? jobId,
             HttpClient httpClient,
             ILogger logger)
@@ -362,7 +362,7 @@ namespace MSIHelperService.Helper
         /// </summary>
         /// <param name="logger"></param>
         /// <returns>Azure runbook job ID</returns>
-        public static async Task<string?> StartAzureRunbookandGetJobId(HttpClient httpClient, ILogger logger)
+        private static async Task<string?> StartAzureRunbookandGetJobId(HttpClient httpClient, ILogger logger)
         {
             logger.LogInformation("StartAzureRunbookandGetJobId Function called.");
 
@@ -424,7 +424,7 @@ namespace MSIHelperService.Helper
         /// <param name="scopes"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
-        public static async Task<string?> GetMSALToken(
+        private static async Task<string?> GetMSALToken(
             string? clientID, 
             string? secret, 
             string[] scopes, 
@@ -471,7 +471,7 @@ namespace MSIHelperService.Helper
             logger.LogInformation("ClearDefaultRequestHeaders Function called.");
 
             if (httpClient != null)
-                httpClient?.DefaultRequestHeaders.Clear();
+                httpClient.DefaultRequestHeaders.Clear();
         }
 
         /// <summary>
@@ -502,7 +502,7 @@ namespace MSIHelperService.Helper
         /// <param name="contentEncoding"></param>
         /// <param name="statusCode"></param>
         /// <returns></returns>
-        public static ContentResult GetContentResult(
+        private static ContentResult GetContentResult(
             string content, 
             string contentEncoding, 
             int statusCode)

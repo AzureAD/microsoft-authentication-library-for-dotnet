@@ -25,17 +25,13 @@ namespace MSIHelperService.AzureFunction
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
-            string name = req.Query["variableName"];
+            string? name = req.Query["variableName"];
 
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync().ConfigureAwait(false);
+            string? requestBody = await new StreamReader(req.Body).ReadToEndAsync().ConfigureAwait(false);
             dynamic? data = JsonConvert.DeserializeObject(requestBody);
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-            name = name ?? data?.variableName;
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+            name ??= data?.variableName;
 
-#pragma warning disable CA2254 // Template should be a static expression
-            log.LogInformation($"Querysting value for  variableName is : { name } ");
-#pragma warning restore CA2254 // Template should be a static expression
+            log.LogInformation("Querystring value for  variableName is : ", name);
 
             if (string.IsNullOrEmpty(name))
             {
@@ -50,9 +46,7 @@ namespace MSIHelperService.AzureFunction
             else
             {
                 string? responseMessage = Environment.GetEnvironmentVariable(name);
-#pragma warning disable CA2254 // Template should be a static expression
-                log.LogInformation($"Returning Environment Variables Based on the variable name : { name } ");
-#pragma warning restore CA2254 // Template should be a static expression
+                log.LogInformation("Returning Environment Variable Based on the variable name : " , name);
                 return new OkObjectResult(responseMessage);
             }
         }

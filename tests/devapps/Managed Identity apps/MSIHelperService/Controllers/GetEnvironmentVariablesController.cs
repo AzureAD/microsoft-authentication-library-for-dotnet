@@ -53,22 +53,22 @@ namespace MSIHelperService.Controllers
             //Call the MSIHelper method based on the resource
             Dictionary<string, string>? response = Enum.Parse<MSIHelper.AzureResource>(resource) switch
             {
-                MSIHelper.AzureResource.webapp => await MSIHelper.GetWebAppEnvironmentVariablesAsync(
+                MSIHelper.AzureResource.WebApp => await MSIHelper.GetWebAppEnvironmentVariablesAsync(
                     _logger).ConfigureAwait(false),
 
-                MSIHelper.AzureResource.function => await MSIHelper.GetFunctionAppEnvironmentVariablesAsync(httpClient,
+                MSIHelper.AzureResource.Function => await MSIHelper.GetFunctionAppEnvironmentVariablesAsync(httpClient,
                     _logger).ConfigureAwait(false),
 
-                MSIHelper.AzureResource.vm => await MSIHelper.GetVirtualMachineEnvironmentVariables(
+                MSIHelper.AzureResource.VM => await MSIHelper.GetVirtualMachineEnvironmentVariables(
                     _logger).ConfigureAwait(false),
 
-                MSIHelper.AzureResource.azurearc => throw new NotImplementedException(),
+                MSIHelper.AzureResource.AzureArc => throw new NotImplementedException(),
 
-                MSIHelper.AzureResource.servicefabric => throw new NotImplementedException(),
+                MSIHelper.AzureResource.ServiceFabric => throw new NotImplementedException(),
 
-                MSIHelper.AzureResource.cloudshell => throw new NotImplementedException(),
+                MSIHelper.AzureResource.CloudShell => throw new NotImplementedException(),
 
-                _ => null,
+                _ => throw new Exception("Provided Option does not exist"),
             };
 
             _logger.LogInformation("GetEnvironmentVariablesController returned a response.");

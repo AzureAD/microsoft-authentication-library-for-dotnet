@@ -58,31 +58,31 @@ namespace MSIHelperService.Controllers
             //Call the MSIHelper method based on the resource
             ActionResult? msiEndpointResult = Enum.Parse<MSIHelper.AzureResource>(azureResource) switch
             {
-                MSIHelper.AzureResource.webapp => await MSIHelper.GetWebAppMSIToken(
+                MSIHelper.AzureResource.WebApp => await MSIHelper.GetWebAppMSIToken(
                     identityHeader,
                     uri,
                     httpClient,
                     _logger).ConfigureAwait(false),
 
-                MSIHelper.AzureResource.function => await MSIHelper.GetFunctionAppMSIToken(
+                MSIHelper.AzureResource.Function => await MSIHelper.GetFunctionAppMSIToken(
                     identityHeader,
                     uri,
                     httpClient,
                     _logger).ConfigureAwait(false),
 
-                MSIHelper.AzureResource.vm => await MSIHelper.GetVirtualMachineMSIToken(
+                MSIHelper.AzureResource.VM => await MSIHelper.GetVirtualMachineMSIToken(
                     identityHeader, 
                     uri, 
                     httpClient,
                     _logger).ConfigureAwait(false),
 
-                MSIHelper.AzureResource.azurearc => throw new NotImplementedException(),
+                MSIHelper.AzureResource.AzureArc => throw new NotImplementedException(),
 
-                MSIHelper.AzureResource.servicefabric => throw new NotImplementedException(),
+                MSIHelper.AzureResource.ServiceFabric => throw new NotImplementedException(),
 
-                MSIHelper.AzureResource.cloudshell => throw new NotImplementedException(),
-
-                _ => null,
+                MSIHelper.AzureResource.CloudShell => throw new NotImplementedException(),
+                
+                _ => throw new Exception("Provided Option does not exist"),
             };
 
             _logger.LogInformation("GetMSITokenController returned a response.");
