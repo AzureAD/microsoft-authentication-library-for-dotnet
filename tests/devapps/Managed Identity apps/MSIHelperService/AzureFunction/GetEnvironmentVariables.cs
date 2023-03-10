@@ -2,12 +2,13 @@
 // Licensed under the MIT License.
 
 //#r "Newtonsoft.Json" //uncomment this on the function app 
+//This is the Azure Function App Code - not related to this solution 
+//The contents of this file is copied to the Azure Function 
 
 using System.Net;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
-using Newtonsoft.Json;
 
 /// <summary>
 /// Name space is not required while updating this code in the function app
@@ -27,11 +28,7 @@ namespace MSIHelperService.AzureFunction
 
             string? name = req.Query["variableName"];
 
-            string? requestBody = await new StreamReader(req.Body).ReadToEndAsync().ConfigureAwait(false);
-            dynamic? data = JsonConvert.DeserializeObject(requestBody);
-            name ??= data?.variableName;
-
-            log.LogInformation("Querystring value for  variableName is : ", name);
+            log.LogInformation("Querystring value for variableName is : ", name);
 
             if (string.IsNullOrEmpty(name))
             {
@@ -39,7 +36,7 @@ namespace MSIHelperService.AzureFunction
                 _envVariables.Add("IDENTITY_HEADER", Environment.GetEnvironmentVariable("IDENTITY_HEADER"));
                 _envVariables.Add("IDENTITY_ENDPOINT", Environment.GetEnvironmentVariable("IDENTITY_ENDPOINT"));
                 _envVariables.Add("IDENTITY_API_VERSION", Environment.GetEnvironmentVariable("IDENTITY_API_VERSION"));
-
+                await Task.Delay(1).ConfigureAwait(true);
                 log.LogInformation("Returning All Environment Variables");
                 return new OkObjectResult(_envVariables);
             }

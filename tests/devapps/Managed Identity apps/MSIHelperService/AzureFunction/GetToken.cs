@@ -2,11 +2,12 @@
 // Licensed under the MIT License.
 
 //#r "Newtonsoft.Json" //uncomment this line in the function app
+//This is the Azure Function App Code - not related to this solution 
+//The contents of this file is copied to the Azure Function 
 
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
-using Newtonsoft.Json;
 
 namespace MSIHelperService.AzureFunction
 {
@@ -31,7 +32,7 @@ namespace MSIHelperService.AzureFunction
 
             try
             {
-                log.LogInformation(uri);
+                log.LogInformation("uri : ", uri);
 
                 //set the http get method and the required headers for a web app
                 var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
