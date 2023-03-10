@@ -13,7 +13,7 @@ namespace MSIHelperService.Controllers
     [ApiController]
     [Route("[controller]")]
     [SwaggerTag(description: "Gets MSI Token")]
-    public class GetMSITokenController : ControllerBase
+    public class MSITokenController : ControllerBase
     {
         private readonly ILogger _logger;
         private readonly IHttpClientFactory? _httpClientFactory;
@@ -23,8 +23,8 @@ namespace MSIHelperService.Controllers
         /// Inject Logger and IHttpClientFactory instance 
         /// </summary>
         /// <param name="logger"></param>
-        public GetMSITokenController(
-            ILogger<GetMSITokenController> logger, 
+        public MSITokenController(
+            ILogger<MSITokenController> logger, 
             IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
@@ -40,12 +40,12 @@ namespace MSIHelperService.Controllers
         /// <returns>
         /// Returns the MSI token for an azure resource
         /// </returns>
-        [ProducesResponseType(typeof(string), (int)MSIHelper.HTTPErrorResponseCode.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [HttpGet]
         [SwaggerResponse(200, "Returns an Azure Resource MSI Token Response", Type = typeof(string))]
         [SwaggerResponse(400, "Returns the error object for any validation failures", Type = typeof(string))]
         [SwaggerResponse(500, "Returns the error object for any Server Errors", Type = typeof(string))]
-        public async Task<ActionResult?> GetRemoteHttpResponse(
+        public async Task<ActionResult?> RemoteHttpResponse(
             [FromQuery(Name = "uri")] string uri,
             [FromHeader(Name = "X-IDENTITY-HEADER")] string? identityHeader = "default",
             [FromQuery(Name = "azureResource")] string azureResource = MSIHelper.DefaultAzureResource)

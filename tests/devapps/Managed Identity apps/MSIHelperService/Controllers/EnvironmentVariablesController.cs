@@ -13,7 +13,7 @@ namespace MSIHelperService.Controllers
     [ApiController]
     [Route("[controller]")]
     [SwaggerTag(description: "Gets All Environment Variables")]
-    public class GetEnvironmentVariablesController : ControllerBase
+    public class EnvironmentVariablesController : ControllerBase
     {
         private readonly ILogger _logger;
         private readonly IHttpClientFactory? _httpClientFactory;
@@ -23,8 +23,8 @@ namespace MSIHelperService.Controllers
         /// Inject Logger and IHttpClientFactory instance 
         /// </summary>
         /// <param name="logger"></param>
-        public GetEnvironmentVariablesController(
-            ILogger<GetEnvironmentVariablesController> logger, 
+        public EnvironmentVariablesController(
+            ILogger<EnvironmentVariablesController> logger, 
             IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
@@ -42,7 +42,7 @@ namespace MSIHelperService.Controllers
         [SwaggerResponse(400, "Returns the error object for any validation failures", Type = typeof(string))]
         [SwaggerResponse(500, "Returns the error object for any Server Errors", Type = typeof(string))]
         [HttpGet]
-        public async Task<Dictionary<string, string>?> GetEnvValues([FromQuery(Name = "resource")]
+        public async Task<Dictionary<string, string>?> EnvValues([FromQuery(Name = "resource")]
         string resource = MSIHelper.DefaultAzureResource)
         {
             _logger.LogInformation("GetEnvironmentVariablesController called.");
