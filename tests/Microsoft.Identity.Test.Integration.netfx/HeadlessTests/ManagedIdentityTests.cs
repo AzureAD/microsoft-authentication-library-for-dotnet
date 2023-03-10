@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string WrongScopesErrorMessage = "An unexpected error occured while fetching the AAD Token";
 
         //Resource ID of the User Assigned Identity 
-        private const string Mi_res_id = "/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/" +
+        private const string UamiResourceId = "/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/" +
             "resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/" +
             "MSAL_MSI_USERID";
 
