@@ -116,6 +116,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             get => TokenType.HasValue ? TokenType.Value.ToString("D") : null;
         }
 
-        public int AssertionType { get; set; }
+        public AssertionType AssertionType { get; set; }
     }
 }

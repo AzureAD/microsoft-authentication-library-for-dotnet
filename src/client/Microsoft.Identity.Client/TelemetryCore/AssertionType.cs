@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client.TelemetryCore
 {
     internal enum AssertionType
     {

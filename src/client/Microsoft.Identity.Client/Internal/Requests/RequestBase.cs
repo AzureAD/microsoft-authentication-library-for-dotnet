@@ -22,7 +22,6 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using System.Net.Http;
-using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -140,24 +139,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 telemetryEventDetails.SetProperty(TelemetryConstants.DurationInCache, authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs);
                 telemetryEventDetails.SetProperty(TelemetryConstants.DurationInHttp, authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs);
                 telemetryEventDetails.SetProperty(TelemetryConstants.Succeeded, true);
-                telemetryEventDetails.SetProperty(TelemetryConstants.PopToken, authenticationResult.TokenType.Equals(Constants.PoPTokenType));
+                telemetryEventDetails.SetProperty(TelemetryConstants.TokenType, nameof(AuthenticationRequestParameters.RequestContext.ApiEvent.TokenType));
                 telemetryEventDetails.SetProperty(TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds);
                 telemetryEventDetails.SetProperty(TelemetryConstants.ActivityId, authenticationResult.CorrelationId);
                 telemetryEventDetails.SetProperty(TelemetryConstants.RefreshOn, 
                     authenticationResult.AuthenticationResultMetadata.RefreshOn.HasValue ?
                     DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value)
                     : 0);
-
-                LogDatapointsToTelemetryClient(telemetryDatapoints, telemetryEventDetails);
+                telemetryEventDetails.SetProperty(TelemetryConstants.AssertionType, nameof(AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType));
+                telemetryEventDetails.SetProperty(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
+                if (telemetryDatapoints.CacheTypeUsed != null)
+                {
+                    telemetryEventDetails.SetProperty(TelemetryConstants.CacheUsed, nameof(telemetryDatapoints.CacheTypeUsed));
+                }
+                
             }
-        }
-
-        private void LogDatapointsToTelemetryClient(TelemetryDatapoints telemetryDatapoints, MsalTelemetryEventDetails telemetryEventDetails)
-        {
-            if (telemetryDatapoints == null) return;
-
-            telemetryEventDetails.SetProperty(TelemetryConstants.L1Latency, telemetryDatapoints.L1Latency);
-            telemetryEventDetails.SetProperty(TelemetryConstants.L2Latency, telemetryDatapoints.L2Latency);
         }
 
         private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ILoggerAdapter logger)
@@ -208,7 +204,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             apiEvent.IsLegacyCacheEnabled = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
             apiEvent.CacheInfo = CacheRefreshReason.NotApplicable;
             apiEvent.TokenType = AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
-            apiEvent.AssertionType = (int)GetAssertionType();
+            apiEvent.AssertionType = GetAssertionType();
 
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
             EnrichTelemetryApiEvent(apiEvent);
