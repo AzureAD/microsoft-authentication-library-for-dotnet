@@ -33,6 +33,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityTests.SetEnvironmentVariables(ManagedIdentitySourceType.ServiceFabric, "localhost/token");
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
 

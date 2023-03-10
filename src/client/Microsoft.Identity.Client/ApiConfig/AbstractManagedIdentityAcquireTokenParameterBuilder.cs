@@ -20,15 +20,16 @@ namespace Microsoft.Identity.Client
     /// Abstract base class for managed identity application token request builders.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class AbstractManagedIdentityParameterBuilder<T> : BaseAbstractAcquireTokenParameterBuilder<T>
+    public abstract class AbstractManagedIdentityAcquireTokenParameterBuilder<T> : BaseAbstractAcquireTokenParameterBuilder<T>
         where T : BaseAbstractAcquireTokenParameterBuilder<T>
     {
         /// <summary>
         /// Default constructor for AbstractManagedIdentityParameterBuilder.
         /// </summary>
-        protected AbstractManagedIdentityParameterBuilder() : base() { }
+        protected AbstractManagedIdentityAcquireTokenParameterBuilder() : base() { }
 
-        internal AbstractManagedIdentityParameterBuilder(IManagedIdentityApplicationExecutor managedIdentityApplicationExecutor) : base(managedIdentityApplicationExecutor.ServiceBundle) 
+        internal AbstractManagedIdentityAcquireTokenParameterBuilder(IManagedIdentityApplicationExecutor managedIdentityApplicationExecutor) : 
+            base(managedIdentityApplicationExecutor.ServiceBundle) 
         {
             ClientApplicationBase.GuardMobileFrameworks();
             ManagedIdentityApplicationExecutor = managedIdentityApplicationExecutor;
@@ -41,7 +42,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         public override Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            ClientApplicationBase.GuardMobileFrameworks();
+            ApplicationBase.GuardMobileFrameworks();
             ValidateAndCalculateApiId();
             return ExecuteInternalAsync(cancellationToken);
         }

@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
 #endif
-    public sealed partial class ManagedIdentityApplication
+    public sealed class ManagedIdentityApplication
         : ApplicationBase,
             IManagedIdentityApplication
     {
@@ -52,16 +52,5 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreateManagedIdentityExecutor(this),
                 resource);
         }
-
-        internal override async Task<AuthenticationRequestParameters> CreateRequestParametersAsync(
-            AcquireTokenCommonParameters commonParameters,
-            RequestContext requestContext,
-            ITokenCacheInternal cache)
-        {
-            AuthenticationRequestParameters requestParams = await base.CreateRequestParametersAsync(commonParameters, requestContext, cache).ConfigureAwait(false);
-            return requestParams;
-        }
-
-
     }
 }

@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
                 var builder = new StringBuilder();
                 builder.AppendLine("=== AcquireTokenForManagedIdentityParameters ===");
                 builder.AppendLine("ForceRefresh: " + ForceRefresh);
+                builder.AppendLine("Resource: " + Resource);
                 logger.Info(builder.ToString());
             }
         }

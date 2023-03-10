@@ -167,8 +167,9 @@ namespace Microsoft.Identity.Client
 
             requestParams.RequestContext.Logger.Info(() => "Intersecting scope entries count - " + accessTokensToDelete.Count);
 
-            if (!requestParams.IsClientCredentialRequest ||
-                !(requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenForManagedIdentity))
+            if (!requestParams.IsClientCredentialRequest &&
+                requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity &&
+                requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity)
             {
                 // filter by identifier of the user instead
                 accessTokensToDelete.RemoveAll(

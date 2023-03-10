@@ -26,7 +26,10 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             GetAccountById = 1011,
             GetAccountsByUserFlow = 1012,
             RemoveAccount = 1013,
-            AcquireTokenForManagedIdentity = 1014
+            // The API Ids for managed identity will not be found in Http telemetry,
+            // as we don't hit eSTS for managed identity calls.
+            AcquireTokenForSystemAssignedManagedIdentity = 1014,
+            AcquireTokenForUserAssignedManagedIdentity = 1015
         }
 
         public ApiEvent(Guid correlationId)

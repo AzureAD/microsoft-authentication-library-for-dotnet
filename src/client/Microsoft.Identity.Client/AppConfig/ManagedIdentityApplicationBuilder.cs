@@ -16,6 +16,7 @@ using Microsoft.IdentityModel.Abstractions;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
+    /// Builder for managed identity applications.
     /// </summary>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
@@ -102,6 +103,8 @@ namespace Microsoft.Identity.Client
 
         private ManagedIdentityApplicationBuilder WithUserAssignedManagedIdentity(string userAssignedId)
         {
+            Config.IsUserAssignedManagedIdentity = true;
+
             if (Guid.TryParse(userAssignedId, out _))
             {
                 Config.ManagedIdentityUserAssignedClientId = userAssignedId;
@@ -196,6 +199,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         internal ManagedIdentityApplication BuildConcrete()
         {
+            ValidateUseOfExperimentalFeature("ManagedIdentity");
             DefaultConfiguration();
             return new ManagedIdentityApplication(BuildConfiguration());
         }
@@ -212,7 +216,7 @@ namespace Microsoft.Identity.Client
         {
             if (!string.IsNullOrEmpty(Config.ManagedIdentityUserAssignedClientId))
             {
-                Config.ClientId = Config.ManagedIdentityUserAssignedClientId;
+                Config.ClientId = Constants.ManagedIdentityDefaultClientId + Config.ManagedIdentityUserAssignedClientId;
             }
             else if (!string.IsNullOrEmpty(Config.ManagedIdentityUserAssignedResourceId))
             {

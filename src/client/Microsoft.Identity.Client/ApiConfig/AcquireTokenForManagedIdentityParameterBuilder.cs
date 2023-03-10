@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
 #endif
     public sealed class AcquireTokenForManagedIdentityParameterBuilder :
-        AbstractManagedIdentityParameterBuilder<AcquireTokenForManagedIdentityParameterBuilder>
+        AbstractManagedIdentityAcquireTokenParameterBuilder<AcquireTokenForManagedIdentityParameterBuilder>
     {
         private AcquireTokenForManagedIdentityParameters Parameters { get; } = new AcquireTokenForManagedIdentityParameters();
 
@@ -38,14 +38,7 @@ namespace Microsoft.Identity.Client
             return new AcquireTokenForManagedIdentityParameterBuilder(managedIdentityApplicationExecutor).WithResource(resource);
         }
 
-        /// <summary>
-        /// Specifies the resource to use when acquiring token for managed identity. 
-        /// The resource should be of the form "{ResourceIdUri}" or {ResourceIdUri/.default} for instance 
-        /// <c>https://management.azure.net</c> or, for Microsoft Graph, <c>https://graph.microsoft.com/.default</c>.
-        /// </summary>
-        /// <param name="resource"></param>
-        /// <returns></returns>
-        public AcquireTokenForManagedIdentityParameterBuilder WithResource(string resource)
+        private AcquireTokenForManagedIdentityParameterBuilder WithResource(string resource)
         {
             Parameters.Resource = ScopeHelper.RemoveDefaultSuffixIfPresent(resource);
             CommonParameters.Scopes = new string[] { Parameters.Resource };
@@ -81,7 +74,12 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            return ApiEvent.ApiIds.AcquireTokenForManagedIdentity;
+            if (ServiceBundle.Config.IsUserAssignedManagedIdentity)
+            {
+                return ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity;
+            }
+
+            return ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity;
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
 #endif
-    public partial interface IManagedIdentityApplication : IApplicationBase
+    public interface IManagedIdentityApplication : IApplicationBase
     {
         /// <summary>
         /// Application token cache. This case holds access tokens for the application. It's maintained

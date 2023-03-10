@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
 
     [TestClass]
-    public class AppServiceTests
+    public class AppServiceTests : TestBase
     {
         private const string AppService = "App Service";
 
@@ -28,6 +28,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityTests.SetEnvironmentVariables(ManagedIdentitySourceType.AppService, "127.0.0.1:41564/msi/token");
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
 

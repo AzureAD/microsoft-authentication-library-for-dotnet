@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
 
     [TestClass]
-    public class ManagedIdentityTests
+    public class ManagedIdentityTests : TestBase
     {
         internal const string Resource = "https://management.azure.com";
         internal const string ResourceDefaultSuffix = "https://management.azure.com/.default";
@@ -47,6 +47,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
 
@@ -89,6 +90,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var mi = ManagedIdentityApplicationBuilder.Create(userAssignedId)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
 
@@ -121,7 +123,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(AzureArcEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySourceType.AzureArc)]
         [DataRow(CloudShellEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySourceType.CloudShell)]
         [DataRow(ServiceFabricEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySourceType.ServiceFabric)]
-        public async Task ManagedIdentityHappyPathAsync(
+        public async Task ManagedIdentityDifferentScopesTestAsync(
             string endpoint,
             string scope,
             string anotherScope,
@@ -133,6 +135,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
 
@@ -172,6 +175,63 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
+        [DataRow(AppServiceEndpoint, Resource, ManagedIdentitySourceType.AppService)]
+        [DataRow(ImdsEndpoint, Resource, ManagedIdentitySourceType.IMDS)]
+        [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySourceType.AzureArc)]
+        [DataRow(CloudShellEndpoint, Resource, ManagedIdentitySourceType.CloudShell)]
+        [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySourceType.ServiceFabric)]
+        public async Task ManagedIdentityForceRefreshTestAsync(
+            string endpoint,
+            string scope,
+            ManagedIdentitySourceType managedIdentitySource)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager)
+                    .Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    endpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    managedIdentitySource);
+
+                var result = await mi.AcquireTokenForManagedIdentity(scope).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // Acquire token from cache
+                result = await mi.AcquireTokenForManagedIdentity(scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+
+                httpManager.AddManagedIdentityMockHandler(
+                    endpoint,
+                    scope,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    managedIdentitySource);
+
+                // Acquire token with force refresh
+                result = await mi.AcquireTokenForManagedIdentity(scope).WithForceRefresh(true)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [DataTestMethod]
         [DataRow("user.read", ManagedIdentitySourceType.AppService, AppServiceEndpoint)]
         [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySourceType.AppService, AppServiceEndpoint)]
         [DataRow("s", ManagedIdentitySourceType.AppService, AppServiceEndpoint)]
@@ -195,6 +255,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager).Build();
 
                 httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiErrorResponse(),
@@ -225,6 +286,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager).Build();
 
                 httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
@@ -256,6 +318,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager).Build();
 
                 httpManager.AddManagedIdentityMockHandler(

@@ -14,7 +14,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
     [TestClass]
-    public class CloudShellTests
+    public class CloudShellTests : TestBase
     {
         private const string CloudShell = "Cloud Shell";
 
@@ -35,6 +35,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityTests.SetEnvironmentVariables(ManagedIdentitySourceType.CloudShell, ManagedIdentityTests.CloudShellEndpoint);
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(userAssignedClientId)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
 
@@ -56,13 +57,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 ManagedIdentityTests.SetEnvironmentVariables(ManagedIdentitySourceType.CloudShell, "localhost/token");
 
-                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
-                    .Create()
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
 
                 MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                    await mia.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);

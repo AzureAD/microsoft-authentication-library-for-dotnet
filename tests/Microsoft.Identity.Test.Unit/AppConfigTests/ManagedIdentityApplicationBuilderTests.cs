@@ -28,7 +28,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor()
         {
-            var mi = ManagedIdentityApplicationBuilder.Create().Build();
+            var mi = ManagedIdentityApplicationBuilder.Create()
+                .WithExperimentalFeatures().Build();
 
             // Assert defaults
             Assert.AreEqual(Constants.ManagedIdentityDefaultClientId, mi.AppConfig.ClientId);
@@ -51,7 +52,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithCreateUserAssignedId()
         {
-            var mi = ManagedIdentityApplicationBuilder.Create(TestConstants.ClientId).BuildConcrete();
+            var mi = ManagedIdentityApplicationBuilder.Create(TestConstants.ClientId)
+                .WithExperimentalFeatures().BuildConcrete();
 
             // Assert defaults
             Assert.AreEqual(TestConstants.ClientId, mi.AppConfig.ClientId);
@@ -81,6 +83,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithUserAssignedManagedIdentity_ResourceId(string userAssignedId, bool isClientId = true)
         {
             var mi = ManagedIdentityApplicationBuilder.Create(userAssignedId)
+                .WithExperimentalFeatures()
                 .BuildConcrete();
 
             if (isClientId)
@@ -109,7 +112,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 UserAssignedClientId = TestConstants.ClientId,
                 EnableCacheSynchronization = optionFlag
             };
-            var mi = ManagedIdentityApplicationBuilder.CreateWithApplicationOptions(options).WithCacheSynchronization(builderFlag).Build();
+            var mi = ManagedIdentityApplicationBuilder.CreateWithApplicationOptions(options).WithExperimentalFeatures()
+                .WithCacheSynchronization(builderFlag).Build();
             Assert.AreEqual(result, (mi.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
         }
 
@@ -117,6 +121,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithDebugLoggingCallback()
         {
             var mi = ManagedIdentityApplicationBuilder.Create()
+                .WithExperimentalFeatures()
                 .WithDebugLoggingCallback()
                 .Build();
             Assert.IsNotNull(mi.AppConfig.LoggingCallback);
@@ -127,6 +132,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             var httpClientFactory = NSubstitute.Substitute.For<IMsalHttpClientFactory>();
             var mi = ManagedIdentityApplicationBuilder.Create()
+                .WithExperimentalFeatures()
                 .WithHttpClientFactory(httpClientFactory)
                 .Build();
             Assert.AreEqual(httpClientFactory, mi.AppConfig.HttpClientFactory);
@@ -137,6 +143,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             var mi = ManagedIdentityApplicationBuilder
                 .Create()
+                .WithExperimentalFeatures()
                 .WithLogging((level, message, pii) => { }).Build();
 
             Assert.IsNotNull(mi.AppConfig.LoggingCallback);

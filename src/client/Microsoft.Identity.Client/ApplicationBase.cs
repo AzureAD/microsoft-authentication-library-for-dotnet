@@ -20,7 +20,7 @@ using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 namespace Microsoft.Identity.Client
 {
     /// <inheritdoc />
-    public abstract partial class ApplicationBase : IApplicationBase
+    public abstract class ApplicationBase : IApplicationBase
     {
         /// <summary>
         /// Default Authority used for interactive calls.
@@ -85,8 +85,8 @@ namespace Microsoft.Identity.Client
         {
 #if ANDROID || iOS || WINDOWS_APP || MAC
             throw new PlatformNotSupportedException(
-                "Confidential Client flows are not available on mobile platforms or on Mac." +
-                "See https://aka.ms/msal-net-confidential-availability for details.");
+                "Confidential client and managed identity flows are not available on mobile platforms and on Mac." +
+                "See https://aka.ms/msal-net-confidential-availability and https://aka.ms/msal-net-managed-identity for details.");
 #endif
         }
     }

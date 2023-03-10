@@ -204,7 +204,7 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 
             long expiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(response.ExpiresOn);
-            if (expiresIn == 0 || expiresIn < 0)
+            if (expiresIn <= 0)
             {
                 HandleInvalidExternalValueError(nameof(response.ExpiresOn));
             }

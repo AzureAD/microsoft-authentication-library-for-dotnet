@@ -15,15 +15,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
     [TestClass]
     [DeploymentItem("Resources\\ManagedIdentityAzureArcSecret.txt")]
-    public class AzureArcTests
+    public class AzureArcTests : TestBase
     {
         private const string AzureArc = "Azure Arc";
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
 
         [DataTestMethod]
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
@@ -36,6 +30,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityTests.SetEnvironmentVariables(ManagedIdentitySourceType.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(userAssignedClientId)
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
 
@@ -57,15 +52,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 ManagedIdentityTests.SetEnvironmentVariables(ManagedIdentitySourceType.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
 
-                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
-                    .Create()
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
 
                 httpManager.AddManagedIdentityWSTrustMockHandler(ManagedIdentityTests.AzureArcEndpoint);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mia.AcquireTokenForManagedIdentity("scope")
+                    await mi.AcquireTokenForManagedIdentity("scope")
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
@@ -82,15 +77,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 ManagedIdentityTests.SetEnvironmentVariables(ManagedIdentitySourceType.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
 
-                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
-                    .Create()
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
 
                 httpManager.AddManagedIdentityWSTrustMockHandler(ManagedIdentityTests.AzureArcEndpoint, "somevalue=filepath");
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mia.AcquireTokenForManagedIdentity("scope")
+                    await mi.AcquireTokenForManagedIdentity("scope")
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
@@ -107,13 +102,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 ManagedIdentityTests.SetEnvironmentVariables(ManagedIdentitySourceType.AzureArc, "localhost/token");
 
-                IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
-                    .Create()
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
 
                 MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                    await mia.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);

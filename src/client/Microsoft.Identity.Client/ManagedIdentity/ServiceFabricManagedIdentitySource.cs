@@ -45,8 +45,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             _endpoint = endpoint;
             _identityHeaderValue = identityHeaderValue;
 
-            if (!string.IsNullOrEmpty(requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId) || 
-                !string.IsNullOrEmpty(requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId))
+            if (requestContext.ServiceBundle.Config.IsUserAssignedManagedIdentity)
             {
                 requestContext.Logger.Warning(MsalErrorMessage.ManagedIdentityUserAssignedNotConfigurableAtRuntime);
             }
