@@ -93,6 +93,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordRequestAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -127,30 +128,25 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.IsTrue(testLogger.HasLogged);
             Assert.IsFalse(testLogger.HasPiiLogged);
 
-            try
-            {
-                // Acquire token silently
-                result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
+            // Acquire token silently
+            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
-                MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
 
-                // Remove Account
-                await pca.RemoveAsync(account).ConfigureAwait(false);
+            // Remove Account
+            await pca.RemoveAsync(account).ConfigureAwait(false);
 
-                // Assert the account is removed
-                accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            // Assert the account is removed
+            accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 
-                Assert.IsNotNull(accounts);
-                Assert.AreEqual(0, accounts.Count());
-            }
-            catch (MsalUiRequiredException)
-            {
-                //TODO: See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3916
-                //this failure is occuring outside of MSAL and is being investigated.
-            }
+            Assert.IsNotNull(accounts);
+
+            // this should throw MsalUiRequiredException
+            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -184,24 +180,19 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             Assert.IsTrue(testLogger.HasLogged);
             Assert.IsTrue(testLogger.HasPiiLogged);
-            try
-            {
-                // Acquire token silently
-                result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
-                MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            // Acquire token silently
+            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
-                await pca.RemoveAsync(account).ConfigureAwait(false);
-                // Assert the account is removed
-                accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-                Assert.IsNotNull(accounts);
-                Assert.AreEqual(0, accounts.Count());
-            }
-            catch (MsalUiRequiredException)
-            {
-                //TODO: See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3916
-                //this failure is occuring outside of MSAL and is being investigated.
-            }
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+
+            await pca.RemoveAsync(account).ConfigureAwait(false);
+            // Assert the account is removed
+            accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            Assert.IsNotNull(accounts);
+
+            // this should throw MsalUiRequiredException
+            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
