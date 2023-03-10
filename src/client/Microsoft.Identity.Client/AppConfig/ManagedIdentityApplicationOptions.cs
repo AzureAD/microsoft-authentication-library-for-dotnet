@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client
     public class ManagedIdentityApplicationOptions : BaseApplicationOptions
     {
         /// <summary>
-        /// User assigned client id or resource id for the managed identity resource. 
+        /// User assigned client id or resource id of the managed identity resource. 
         /// </summary>
         public string UserAssignedClientId { get; set; }
 
