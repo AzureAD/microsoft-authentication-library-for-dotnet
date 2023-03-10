@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
@@ -847,6 +848,94 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual("access-token-3", result.AccessToken);
                 Assert.AreEqual("access-token-3", cachedAccessToken.Secret);
                 Assert.AreEqual("refresh-token-3", cachedRefreshToken.Secret);
+            }
+        }
+
+        /// <summary>
+        /// This test performs an initiation of a long running obo process, then validated that the remove long running process api deletes the tokens
+        /// in the cache associated with the provided obo cache key.
+        /// </summary>
+        [TestMethod]
+        public async Task AcquireTokenByObo_LongRunningThenRemoveTokens_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                string oboCacheKey = "someCacheKey";
+                bool validateCacheProperties = false;
+
+                var cca = BuildCCA(httpManager);
+                var oboCca = cca as ILongRunningWebApi;
+
+                cca.UserTokenCache.SetBeforeAccess((args) => 
+                {
+                    if (validateCacheProperties)
+                    {
+                        Assert.AreEqual(true, args.HasTokens);
+                        Assert.AreEqual(false, args.HasStateChanged);
+                        Assert.AreEqual(oboCacheKey, args.SuggestedCacheKey);
+                    }
+                });
+
+                cca.UserTokenCache.SetAfterAccess((args) =>
+                {
+                    if (validateCacheProperties)
+                    {
+                        Assert.AreEqual(true, args.HasStateChanged);
+                        Assert.AreEqual(false, args.HasTokens);
+                        Assert.AreEqual(oboCacheKey, args.SuggestedCacheKey);
+                    }
+
+                    validateCacheProperties = false;
+                });
+
+                AddMockHandlerAadSuccess(httpManager,
+                    responseMessage: MockHelpers.CreateSuccessTokenResponseMessage(
+                        TestConstants.Uid,
+                        TestConstants.DisplayableId,
+                        TestConstants.s_scope.ToArray(),
+                        utid: TestConstants.Utid,
+                        accessToken: "access-token-1",
+                        refreshToken: "refresh-token-1"),
+                    expectedPostData: new Dictionary<string, string> { { OAuth2Parameter.GrantType, OAuth2GrantType.JwtBearer } });
+
+                string userToken = "user-token";
+                UserAssertion userAssertion = new UserAssertion(userToken);
+
+                // InitiateLR - Empty cache - AT via OBO flow (new AT, RT cached)
+                var result = await oboCca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, userToken, ref oboCacheKey)
+                                        .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+                MsalAccessTokenCacheItem cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single(t => t.OboCacheKey.Equals(oboCacheKey));
+                MsalRefreshTokenCacheItem cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single(t => t.OboCacheKey.Equals(oboCacheKey));
+                Assert.AreEqual("access-token-1", result.AccessToken);
+                Assert.AreEqual("access-token-1", cachedAccessToken.Secret);
+                Assert.AreEqual("refresh-token-1", cachedRefreshToken.Secret);
+
+                //remove tokens
+                validateCacheProperties = true;
+                var tokensRemoved = await oboCca.StopLongRunningWebApiAsync(oboCacheKey).ConfigureAwait(false);
+
+                var cachedAccessTokens = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
+                var cachedRefreshTokens = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens();
+
+                Assert.AreEqual(0, cachedAccessTokens.Count);
+                Assert.AreEqual(0, cachedRefreshTokens.Count);
+                Assert.IsTrue(tokensRemoved);
+
+                //validate that no more tokens are removed
+                tokensRemoved = await oboCca.StopLongRunningWebApiAsync(oboCacheKey).ConfigureAwait(false);
+
+                cachedAccessTokens = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
+                cachedRefreshTokens = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens();
+
+                Assert.AreEqual(0, cachedAccessTokens.Count);
+                Assert.AreEqual(0, cachedRefreshTokens.Count);
+                Assert.IsFalse(tokensRemoved);
             }
         }
 
