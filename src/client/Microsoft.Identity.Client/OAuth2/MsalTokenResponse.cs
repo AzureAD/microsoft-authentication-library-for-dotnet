@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Client.OAuth2
             };
         }
 
-        private static void ValidateManagedIdenitityResult(ManagedIdentityResponse response)
+        private static void ValidateManagedIdentityResult(ManagedIdentityResponse response)
         {
             if (string.IsNullOrEmpty(response.AccessToken))
             {
