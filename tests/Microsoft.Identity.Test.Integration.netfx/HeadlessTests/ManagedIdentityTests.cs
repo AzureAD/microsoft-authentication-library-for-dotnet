@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 SetEnvironmentVariables(envVariables);
 
                 //form the http proxy URI 
-                string uri = s_baseURL + $"GetMSIToken?" +
+                string uri = s_baseURL + $"MSIToken?" +
                     $"azureresource={azureResource}&uri=";
 
                 //Create CCA with Proxy
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 SetEnvironmentVariables(envVariables);
 
                 //form the http proxy URI 
-                string uri = s_baseURL + $"GetMSIToken?" +
+                string uri = s_baseURL + $"MSIToken?" +
                     $"azureresource={azureResource}&uri=";
 
                 //Create CCA with Proxy
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 SetEnvironmentVariables(envVariables);
 
                 //form the http proxy URI 
-                string uri = s_baseURL + $"GetMSIToken?" +
+                string uri = s_baseURL + $"MSIToken?" +
                     $"azureresource={azureResource}&uri=";
 
                 //Create CCA with Proxy
@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Dictionary<string, string> environmentVariables = new Dictionary<string, string>();
 
             //Get the Environment Variables from the MSI Helper Service
-            string uri = s_baseURL + "GetEnvironmentVariables?resource=" + resource;
+            string uri = s_baseURL + "EnvironmentVariables?resource=" + resource;
 
             var environmentVariableResponse = await LabUserHelper
                 .GetMSIEnvironmentVariablesAsync(uri)
