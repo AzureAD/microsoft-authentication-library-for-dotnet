@@ -13,7 +13,6 @@ using Windows.Security.Authentication.Web;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
-using Microsoft.Identity.Client.Broker;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 namespace UWP_standalone
@@ -176,7 +175,6 @@ namespace UWP_standalone
             var pca = PublicClientApplicationBuilder.Create(s_clientID)
                 .WithAuthority(s_authority)
                 .WithBroker(chkUseBroker.IsChecked.Value)
-                .WithWindowsBroker() // should not affect
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 

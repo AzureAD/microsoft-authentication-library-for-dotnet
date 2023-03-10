@@ -14,8 +14,11 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Broker;
+#if NET48
+using Microsoft.Identity.Client.Desktop;
+#endif
 #if NET47
 using Microsoft.Identity.Client.Desktop;
 #endif
@@ -136,8 +139,11 @@ namespace NetFx
 
                 builder = builder
                     .WithParentActivityOrWindow(consoleWindowHandleProvider)
-                    .WithWindowsBroker()
-                    .WithBroker(true);
+#if NET48
+                    .WithWindowsBroker();
+#else
+                    .WithBroker(BrokerOptions.CreateDefault());
+#endif
             }
 
             var pca = builder.Build();

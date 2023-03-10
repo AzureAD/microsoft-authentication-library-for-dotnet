@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Client
 
                     "\n\r\n\rIf you have a .NET 6 cross-platform (Windows, Mac, Linux) application, dual target net6.0 and net6.0-windows10.0.17763.0. Your installer should deploy the net6.0 version on Mac and Linux and the net6.0-window10.0.17763.0 on Windows." +
 
-                    "\n\r\n\rIf you want to try the new broker preview, install the NuGet package Microsoft.Identity.Client.Broker and call the extension method .WithBrokerPreview(). " +
+                    "\n\r\n\rIf you want to run .NET6 application not targeting net6.0-windows10.0.17763.0, install the NuGet package Microsoft.Identity.Client.Broker and call the extension method .WithWindowsBroker(). " +
                     "\n\rFor details, see https://aka.ms/msal-net-wam and https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md ");
             }
 #endif
