@@ -23,7 +23,7 @@ namespace MSIHelperService.Helper
         internal const string ContentTypeMulipartOrFormData = "multipart/form-data";
 
         //default azure resource if nothing is passed in the controllers
-        internal const string DefaultAzureResource = "webapp";
+        internal const string DefaultAzureResource = "WebApp";
 
         //IDENTITY_HEADER in the App Service
         internal const string ManagedIdentityAuthenticationHeader = "X-IDENTITY-HEADER";

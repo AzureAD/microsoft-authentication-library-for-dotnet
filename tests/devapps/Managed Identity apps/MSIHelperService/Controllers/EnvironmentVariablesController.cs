@@ -34,10 +34,11 @@ namespace MSIHelperService.Controllers
         /// <summary>
         /// Gets all the Environment Variables of the Azure Resource
         /// </summary>
-        /// <param name="resource">Allowed Values : "webapp", "function", "vm", "azurearc", "servicefabric"</param>
+        /// <param name="resource">Allowed Values :  "WebApp", "Function", "VM", "AzureArc", "ServiceFabric"</param>
         /// <returns>
         /// Returns the environment variables of an azure resource
         /// </returns>
+        [SwaggerOperation(Summary = "Gets the Environment Variables from an Azure Resource")]
         [SwaggerResponse(200, "Returns Azure Web App Environment Variables", Type = typeof(string))]
         [SwaggerResponse(400, "Returns the error object for any validation failures", Type = typeof(string))]
         [SwaggerResponse(500, "Returns the error object for any Server Errors", Type = typeof(string))]

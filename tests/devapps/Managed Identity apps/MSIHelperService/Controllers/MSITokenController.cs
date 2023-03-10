@@ -36,12 +36,13 @@ namespace MSIHelperService.Controllers
         /// </summary>
         /// <param name="uri">URI of the MSI Endpoint</param>
         /// <param name="identityHeader">IDENTITY_HEADER of the MSI Endpoint</param>
-        /// <param name="azureResource">Resource for which you need the MSI Token</param>
+        /// <param name="azureResource">Allowed Values :  "WebApp", "Function", "VM", "AzureArc", "ServiceFabric"</param>
         /// <returns>
         /// Returns the MSI token for an azure resource
         /// </returns>
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [HttpGet]
+        [SwaggerOperation(Summary = "Gets the MSI Token from an Azure Resource")]
         [SwaggerResponse(200, "Returns an Azure Resource MSI Token Response", Type = typeof(string))]
         [SwaggerResponse(400, "Returns the error object for any validation failures", Type = typeof(string))]
         [SwaggerResponse(500, "Returns the error object for any Server Errors", Type = typeof(string))]
