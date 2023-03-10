@@ -468,7 +468,7 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
     {
         WebApp,
         Function,
-        Vm,
+        VM,
         AzureArc,
         CloudShell,
         ServiceFabric

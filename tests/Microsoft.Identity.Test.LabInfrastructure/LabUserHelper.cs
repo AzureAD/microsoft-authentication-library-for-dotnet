@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static async Task<string> GetMSIEnvironmentVariablesAsync(string uri)
         {
-            string result = await s_labService.GetLabResponseAsync(uri.ToLowerInvariant()).ConfigureAwait(false);
+            string result = await s_labService.GetLabResponseAsync(uri).ConfigureAwait(false);
             return result;
         }
 

@@ -72,13 +72,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System Identity Web App")]
         [DataRow(MsiAzureResource.Function, "", DisplayName = "System Identity Function App")]
-        [DataRow(MsiAzureResource.Vm, "", DisplayName = "System Identity Virtual Machine")]
+        [DataRow(MsiAzureResource.VM, "", DisplayName = "System Identity Virtual Machine")]
         [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, DisplayName = "User Identity Web App")]
         [DataRow(MsiAzureResource.Function, UserAssignedClientID, DisplayName = "User Identity Function App")]
-        [DataRow(MsiAzureResource.Vm, UserAssignedClientID, DisplayName = "User Identity Virtual Machine")]
+        [DataRow(MsiAzureResource.VM, UserAssignedClientID, DisplayName = "User Identity Virtual Machine")]
         [DataRow(MsiAzureResource.WebApp, Mi_res_id, DisplayName = "ResourceID Web App")]
         [DataRow(MsiAzureResource.Function, Mi_res_id, DisplayName = "ResourceID Function App")]
-        [DataRow(MsiAzureResource.Vm, Mi_res_id, DisplayName = "ResourceID Virtual Machine")]
+        [DataRow(MsiAzureResource.VM, Mi_res_id, DisplayName = "ResourceID Virtual Machine")]
         public async Task AcquireMSITokenAsync(MsiAzureResource azureResource, string userIdentity)
         {
             //Arrange
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //form the http proxy URI 
                 string uri = s_baseURL + $"GetMSIToken?" +
-                    $"azureresource={azureResource.ToString().ToLowerInvariant()}&uri=";
+                    $"azureresource={azureResource}&uri=";
 
                 //Create CCA with Proxy
                 IConfidentialClientApplication cca = CreateCCAWithProxy(uri);
@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //form the http proxy URI 
                 string uri = s_baseURL + $"GetMSIToken?" +
-                    $"azureresource={azureResource.ToString().ToLowerInvariant()}&uri=";
+                    $"azureresource={azureResource}&uri=";
 
                 //Create CCA with Proxy
                 IConfidentialClientApplication cca = CreateCCAWithProxy(uri);
@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //form the http proxy URI 
                 string uri = s_baseURL + $"GetMSIToken?" +
-                    $"azureresource={azureResource.ToString().ToLowerInvariant()}&uri=";
+                    $"azureresource={azureResource}&uri=";
 
                 //Create CCA with Proxy
                 IConfidentialClientApplication cca = CreateCCAWithProxy(uri);
