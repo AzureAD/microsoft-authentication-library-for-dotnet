@@ -32,9 +32,6 @@ namespace Microsoft.Identity.Client.Desktop
 
         /// <summary>
         /// Adds enhanced support for desktop applications, e.g. CLI, WinForms, WPF apps.
-        /// 
-        /// Support added is around: 
-        /// 
         /// - Windows Authentication Manager (WAM) broker, the recommended authentication mechanism on Windows 10 - https://aka.ms/msal-net-wam
         /// - Embedded web view. AAD applications use the older WebBrowser control. B2C applications use WebView2, an embedded browser based on Microsoft Edge - https://aka.ms/msal-net-webview2
         /// </summary>
@@ -49,8 +46,6 @@ namespace Microsoft.Identity.Client.Desktop
 
         /// <summary>
         /// Enables Windows broker flows on older platforms, such as .NET framework, where these are not available in the box with Microsoft.Identity.Client
-        /// For details about Windows broker, see https://aka.ms/msal-net-wam
-        /// </summary>
         private static void AddSupportForWebView2(PublicClientApplicationBuilder builder)
         {
             builder.Config.WebUiFactoryCreator = () => new WebView2WebUiFactory();

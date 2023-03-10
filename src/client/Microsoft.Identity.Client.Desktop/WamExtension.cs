@@ -2,9 +2,6 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.Broker;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.Desktop
 {

@@ -128,12 +128,12 @@ namespace NetDesktopWinForms
             });
 
             if (chxEnableRuntimeLogs.Checked)
-            { 
+            {
                 builder = builder.WithLogging((logLevel, message, _) =>
-                 {
-                     Debug.WriteLine($"{logLevel} {message}");
-                     Log("***MSAL Log*** " + message);
-                 }, LogLevel.Verbose, true);
+                {
+                    Debug.WriteLine($"{logLevel} {message}");
+                    Log("***MSAL Log*** " + message);
+                }, LogLevel.Verbose, true);
             }
 
             var pca = builder.Build();
@@ -201,7 +201,7 @@ namespace NetDesktopWinForms
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
 
                 var builder = pca.AcquireTokenSilent(GetScopes(), acc);
-                if (IsMsaPassthroughConfigured() )
+                if (IsMsaPassthroughConfigured())
                 {
                     // this is the same in all clouds
                     const string PersonalTenantIdV2AAD = "9188040d-6c67-4c5b-b112-36a304b66dad";
@@ -433,11 +433,11 @@ namespace NetDesktopWinForms
                     s_accounts.Add(new AccountModel(acc));
                 }
 
-                string[] strEmptyList= new string[0];
+                string[] strEmptyList = new string[0];
                 string msg = "Accounts " + Environment.NewLine +
                     string.Join(
                          Environment.NewLine,
-                        accounts.Select(acc => 
+                        accounts.Select(acc =>
                         $"{acc.Username} {acc.Environment} {acc.HomeAccountId.TenantId} - {acc.GetTenantProfiles()?.Count() ?? 0} tenant profiles: {string.Join(" ", acc.GetTenantProfiles()?.Select(tp => tp.TenantId) ?? strEmptyList)}"));
                 Log(msg);
             }
