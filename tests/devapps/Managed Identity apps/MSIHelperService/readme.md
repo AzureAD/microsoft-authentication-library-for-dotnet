@@ -20,9 +20,11 @@ Developers / Applications wanting to test managed identity can use this test ser
 
 To gain access to the MSI Helper service you will need access to [Identity Labs](https://docs.msidlab.com/)
 
+
 ## How Auth SDKs teams can take advantage of this service for testing? 
 
 Your code running from any dev box or CI pipeline will get service credentials from the lab vault and connect to the protected helper service, and then proxy all environment variable reads and http requests to this web service hosted on an Azure Web App. Depending upon what resource is being testing the Helper service will make calls to the Azure Resources under test and get the Managed Identity token response back to MSAL.
+
 
 ## Managed identity types support
 
@@ -38,9 +40,11 @@ There are two types of managed identities, and both are supported by this servic
     - User-assigned identities can be used by multiple resources.
     - MSI Helper service uses a single user identity shared across all azure resources
 
+
 ## What Azure services support the feature?<a name="which-azure-services-support-managed-identity"></a>
 
 Managed identities for Azure resources can be used to authenticate to services that support Azure AD authentication. For a list of supported Azure services, see [services that support managed identities for Azure resources](https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/services-support-managed-identities).
+
 
 ## What managed identity sources does MSAL .Net support?
 
@@ -52,20 +56,25 @@ MSAL .Net supports the following Managed Identity sources:
 4. Azure ARC
 5. Cloud Shell
 
+
 ## How can I test these different sources?
 
 MSAL .Net team has deployed a Managed Identity helper service called the MSIHelper service, using which you should be able to test the following sources. 
 
-1. App Service (version : 2019-08-01)
-2. Virtual Machine (IMDS)
-3. Service Fabric
-4. Azure ARC
+1. Web App (version : 2019-08-01)
+2. Function App (version : 2019-08-01)
+3. Virtual Machine (IMDS)
+4. Service Fabric (wil be available soon)
+5. Azure ARC (wil be available soon)
+
 
 # Troubleshooting the test service
+
 
 ## Where is this service deployed?
 
 The protected test service can be accessed by going to [https://service.msidlab.com/](https://service.msidlab.com/). You can also use the [MSI Helper Swagger](https://service.msidlab.com/swagger/index.html) to test this service. 
+
 
 ## What are the different endpoints the MSI Helper service exposes?
 
@@ -80,7 +89,7 @@ A sample request to the `GetEnvironmentVariables`
 
 ```http
 curl -X 'GET' \
-  'https://service.msidlab.com/GetEnvironmentVariables?resource=webapp' \
+  'https://service.msidlab.com/EnvironmentVariables?resource=webapp' \
   -H 'accept: text/plain'
 ```
 
@@ -110,13 +119,14 @@ You should also be able to test for exceptions that the MSI endpoint throws
 "An attempt was made to access a socket in a way forbidden by its access permissions. (127.0.0.1:41292) \n\nAn attempt was made to access a socket in a way forbidden by its access permissions."
 ```
 
+
 ## How to get a token from the MSI Helper service
 
 From the earlier example, you saw how to send an environment variable request for an Azure resource using the `GetEnvironmentVariables` endpoint. Once you get the environment variables, you will need to form the URI as how you would send the request to the actual MSI endpoint. Let's take a look at the below example to understand this better. We have used the environment variables we received from the earlier request to form the URI below and send the request to the `GetMSIToken` endpoint
 
 ```http
 curl -X 'GET' \
-  'https://service.msidlab.com/GetMSIToken?uri=http%3A%2F%2F127.0.0.1%3A41292%2Fmsi%2Ftoken%2F%3Fresource%3Dhttps%3A%2F%2Fvault.azure.net%26api-version%3D2019-08-01&azureResource=webapp' \
+  'https://service.msidlab.com/MSIToken?uri=http%3A%2F%2F127.0.0.1%3A41292%2Fmsi%2Ftoken%2F%3Fresource%3Dhttps%3A%2F%2Fvault.azure.net%26api-version%3D2019-08-01&azureResource=webapp' \
   -H 'accept: text/plain' \
   -H 'X-IDENTITY-HEADER: 69C62B109AAF4EB7B01061197C14F550'
 ```
@@ -133,9 +143,11 @@ And here is a successful response from the service.
 }
 ```
 
+
 ## How does this service work?
 
 The service is deployed to an Azure Web App and it exposes the Azure Web Apps MSI endpoint for testing. i.e. it exposes it's own MSI endpoint so the Web App resource can be tested. In addition to that it also calls into other Azure resources like Azure Function, ServiceFabric, AzureARC and IMDS and exposes their MSI endpoints as well. 
+
 
 ### How to build and deploy the helper service (exposes Web App MSI)
 
@@ -212,7 +224,7 @@ Following are some useful information to test the User Identity.
 | Client Id      | 3b57c42c-3201-4295-ae27-d6baec5b7027       |
 
 
-## Troubleshooting 
+## Troubleshooting with logs
 
 The MSI Helper Service has been deployed with Application Insights and a good amount of logging for troubleshooting. You can go to the Azure Portal and select the [MSI Helper Service App Insights](https://ms.portal.azure.com/#view/AppInsightsExtension/DetailsV2Blade/ComponentId~/%7B%22SubscriptionId%22%3A%22c1686c51-b717-4fe0-9af3-24a20a41fb0c%22%2C%22ResourceGroup%22%3A%22MSAL_MSI%22%2C%22Name%22%3A%22msihelperservice%22%2C%22LinkedApplicationType%22%3A0%2C%22ResourceId%22%3A%22%252Fsubscriptions%252Fc1686c51-b717-4fe0-9af3-24a20a41fb0c%252FresourceGroups%252FMSAL_MSI%252Fproviders%252Fmicrosoft.insights%252Fcomponents%252Fmsihelperservice%22%2C%22ResourceType%22%3A%22microsoft.insights%252Fcomponents%22%2C%22IsAzureFirst%22%3Afalse%7D/DataModel~/%7B%22eventId%22%3A%22e83141d4-78ec-11ed-9983-000d3a54144f%22%2C%22timestamp%22%3A%222022-12-11T00%3A43%3A16.617Z%22%2C%22cacheId%22%3A%2283de9b73-774b-4ec7-94cf-2663b362e6f6%22%2C%22eventTable%22%3A%22requests%22%2C%22timeContext%22%3A%7B%22durationMs%22%3A86400000%2C%22endTime%22%3A%222022-12-11T01%3A13%3A14.404Z%22%7D%7D) and see the transaction logs 
 
