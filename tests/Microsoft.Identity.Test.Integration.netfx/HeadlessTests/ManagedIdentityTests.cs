@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 }).ConfigureAwait(false);
 
                 //Assert
-                Assert.IsTrue(ex.Message.Contains(WrongScopesErrorMessage));
+                Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
             }
         }
 
