@@ -10,6 +10,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
@@ -17,12 +18,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     public class CloudShellTests : TestBase
     {
         private const string CloudShell = "Cloud Shell";
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
 
         [DataTestMethod]
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
@@ -32,7 +27,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                ManagedIdentityTests.SetEnvironmentVariables(ManagedIdentitySourceType.CloudShell, ManagedIdentityTests.CloudShellEndpoint);
+                SetEnvironmentVariables(ManagedIdentitySourceType.CloudShell, ManagedIdentityTests.CloudShellEndpoint);
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(userAssignedClientId)
                     .WithExperimentalFeatures()
@@ -55,7 +50,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using(new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                ManagedIdentityTests.SetEnvironmentVariables(ManagedIdentitySourceType.CloudShell, "localhost/token");
+                SetEnvironmentVariables(ManagedIdentitySourceType.CloudShell, "localhost/token");
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
                     .WithExperimentalFeatures()

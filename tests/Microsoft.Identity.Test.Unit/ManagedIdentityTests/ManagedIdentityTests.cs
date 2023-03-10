@@ -9,6 +9,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
@@ -335,36 +336,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidResponse, ex.Message);
-            }
-        }
-
-        internal static void SetEnvironmentVariables(ManagedIdentitySourceType managedIdentitySource, string endpoint, string secret = "secret")
-        {
-            switch (managedIdentitySource)
-            {
-                case ManagedIdentitySourceType.AppService:
-                    Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", endpoint);
-                    Environment.SetEnvironmentVariable("IDENTITY_HEADER", secret);
-                    break;
-
-                case ManagedIdentitySourceType.IMDS:
-                    Environment.SetEnvironmentVariable("AZURE_POD_IDENTITY_AUTHORITY_HOST", endpoint);
-                    break;
-
-                case ManagedIdentitySourceType.AzureArc:
-                    Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", endpoint);
-                    Environment.SetEnvironmentVariable("IMDS_ENDPOINT", "http://localhost:40342");
-                    break;
-
-                case ManagedIdentitySourceType.CloudShell:
-                    Environment.SetEnvironmentVariable("MSI_ENDPOINT", endpoint);
-                    break;
-
-                case ManagedIdentitySourceType.ServiceFabric:
-                    Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", endpoint);
-                    Environment.SetEnvironmentVariable("IDENTITY_HEADER", secret);
-                    Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", "thumbprint");
-                    break;
             }
         }
     }

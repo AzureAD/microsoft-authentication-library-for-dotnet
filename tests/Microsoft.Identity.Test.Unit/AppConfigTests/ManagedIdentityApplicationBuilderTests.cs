@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 .WithExperimentalFeatures().BuildConcrete();
 
             // Assert defaults
-            Assert.AreEqual(TestConstants.ClientId, mi.AppConfig.ClientId);
+            Assert.AreEqual(Constants.ManagedIdentityDefaultClientId + TestConstants.ClientId, mi.AppConfig.ClientId);
             Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, mi.AppConfig.RedirectUri);
 
             Assert.IsNotNull(mi.UserTokenCache);
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             if (isClientId)
             {
-                Assert.AreEqual(userAssignedId, mi.AppConfig.ClientId);
+                Assert.AreEqual(Constants.ManagedIdentityDefaultClientId + userAssignedId, mi.AppConfig.ClientId);
                 Assert.IsNotNull(mi.ServiceBundle.Config.ManagedIdentityUserAssignedClientId);
                 Assert.AreEqual(userAssignedId, mi.ServiceBundle.Config.ManagedIdentityUserAssignedClientId);
             }
