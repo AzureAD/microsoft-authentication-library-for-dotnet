@@ -76,9 +76,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, DisplayName = "User Identity Web App")]
         [DataRow(MsiAzureResource.Function, UserAssignedClientID, DisplayName = "User Identity Function App")]
         [DataRow(MsiAzureResource.VM, UserAssignedClientID, DisplayName = "User Identity Virtual Machine")]
-        [DataRow(MsiAzureResource.WebApp, Mi_res_id, DisplayName = "ResourceID Web App")]
-        [DataRow(MsiAzureResource.Function, Mi_res_id, DisplayName = "ResourceID Function App")]
-        [DataRow(MsiAzureResource.VM, Mi_res_id, DisplayName = "ResourceID Virtual Machine")]
+        [DataRow(MsiAzureResource.WebApp, UamiResourceId, DisplayName = "ResourceID Web App")]
+        [DataRow(MsiAzureResource.Function, UamiResourceId, DisplayName = "ResourceID Function App")]
+        [DataRow(MsiAzureResource.VM, UamiResourceId, DisplayName = "ResourceID Virtual Machine")]
         public async Task AcquireMSITokenAsync(MsiAzureResource azureResource, string userIdentity)
         {
             //Arrange
@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System Identity Web App")]
         [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, DisplayName = "User Identity Web App")]
-        [DataRow(MsiAzureResource.WebApp, Mi_res_id, DisplayName = "ResourceID Web App")]
+        [DataRow(MsiAzureResource.WebApp, UamiResourceId, DisplayName = "ResourceID Web App")]
         public async Task MSIWrongScopesAsync(MsiAzureResource azureResource, string userIdentity)
         {
             //Arrange
