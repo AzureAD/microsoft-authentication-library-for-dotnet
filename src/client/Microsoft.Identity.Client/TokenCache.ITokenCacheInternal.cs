@@ -1157,7 +1157,7 @@ namespace Microsoft.Identity.Client
 
             try
             {
-                requestParameters.RequestContext.Logger.Info("[StopLongRunningOboProcessAsync] Stopping long running OBO process by removing tokens from cache.");
+                requestParameters.RequestContext.Logger.Info(() => "[StopLongRunningOboProcessAsync] Stopping long running OBO process by removing tokens from cache.");
 
                 ITokenCacheInternal tokenCacheInternal = this;
 
@@ -1312,7 +1312,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Removes obo tokens stored in the cache. Note that the cache is internally and externally partitioned by the oboKey.
+        /// Removes OBO tokens stored in the cache. Note that the cache is internally and externally partitioned by the oboKey.
         /// </summary>
         private bool RemoveOboTokensInternal(string oboPartitionKey, RequestContext requestContext)
         {
