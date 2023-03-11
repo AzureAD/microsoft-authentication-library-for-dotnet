@@ -40,7 +40,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         //Error Messages
         private const string UserAssignedIdDoesNotExist = "[Managed Identity] Error Message: No User Assigned or Delegated Managed Identity found for specified ClientId/ResourceId/PrincipalId.";
-        private const string WrongScopesErrorMessage = "An unexpected error occured while fetching the AAD Token";
 
         //Resource ID of the User Assigned Identity 
         private const string UamiResourceId = "/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/" +
@@ -48,7 +47,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             "MSAL_MSI_USERID";
 
         //non existent Resource ID of the User Assigned Identity 
-        private const string Non_Existent_Mi_res_id = "/subscriptions/userAssignedIdentities/NO_ID";
+        private const string Non_Existent_UamiResourceId = "/subscriptions/userAssignedIdentities/NO_ID";
 
         [TestMethod]
         public async Task ManagedIdentity_WithoutEnvironmentVariables_ThrowsAsync()
@@ -133,7 +132,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, NonExistentUserAssignedClientID, DisplayName = "User Identity Web App")]
-        [DataRow(MsiAzureResource.WebApp, Non_Existent_Mi_res_id, DisplayName = "ResourceID Web App")]
+        [DataRow(MsiAzureResource.WebApp, Non_Existent_UamiResourceId, DisplayName = "ResourceID Web App")]
         public async Task MSIWrongClientIDAsync(MsiAzureResource azureResource, string userIdentity)
         {
             //Arrange
