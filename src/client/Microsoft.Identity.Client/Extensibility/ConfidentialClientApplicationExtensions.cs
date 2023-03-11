@@ -21,9 +21,9 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Returns true if tokens are removed from the cache. False otherwise.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="longRunningProcessSessionKey"/> is not set.</exception>
-        public static async Task<bool> StopLongRunningProcessWebApiAsync(this ILongRunningWebApi clientApp, string longRunningProcessSessionKey, CancellationToken cancellationToken = default)
+        public static async Task<bool> StopLongRunningProcessInWebApiAsync(this ILongRunningWebApi clientApp, string longRunningProcessSessionKey, CancellationToken cancellationToken = default)
         {
-            return await (clientApp as ConfidentialClientApplication).StopLongRunningWebApiAsync(longRunningProcessSessionKey, cancellationToken).ConfigureAwait(false);
+            return await (clientApp as ConfidentialClientApplication).StopLongRunningProcessInWebApiAsync(longRunningProcessSessionKey, cancellationToken).ConfigureAwait(false);
         }
     }
 }

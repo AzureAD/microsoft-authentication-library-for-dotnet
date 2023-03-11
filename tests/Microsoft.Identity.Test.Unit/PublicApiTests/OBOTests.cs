@@ -918,7 +918,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 //remove tokens
                 validateCacheProperties = true;
-                var tokensRemoved = await oboCca.StopLongRunningProcessWebApiAsync(oboCacheKey).ConfigureAwait(false);
+                var tokensRemoved = await oboCca.StopLongRunningProcessInWebApiAsync(oboCacheKey).ConfigureAwait(false);
 
                 var cachedAccessTokens = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
                 var cachedRefreshTokens = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens();
@@ -928,7 +928,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsTrue(tokensRemoved);
 
                 //validate that no more tokens are removed
-                tokensRemoved = await oboCca.StopLongRunningProcessWebApiAsync(oboCacheKey).ConfigureAwait(false);
+                tokensRemoved = await oboCca.StopLongRunningProcessInWebApiAsync(oboCacheKey).ConfigureAwait(false);
 
                 cachedAccessTokens = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens();
                 cachedRefreshTokens = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens();
