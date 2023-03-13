@@ -32,19 +32,13 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="osChoices">Choices of OperatingSystems</param>
-        /// <param name="title">Title of the broker</param>
-        /// <param name="msaPassthrough">is this MsaPasstorugh</param>
-        public BrokerOptions(OperatingSystems osChoices, string title = "", bool msaPassthrough = false)
+        /// <param name="operatingSystems">Choices of OperatingSystems</param>
+        public BrokerOptions(OperatingSystems operatingSystems)
         {
-            if (osChoices == OperatingSystems.None)
+            if (operatingSystems == OperatingSystems.None)
             {
-                throw new ArgumentException($"osChoices should not be none");
+                throw new ArgumentException($"Operating system must be specified.");
             }
-
-            OSChoices = osChoices;
-            Title = title;
-            MsaPassthrough = msaPassthrough;
         }
 
         // The default constructor is private. So developer is forced to set the OS choice(s)
