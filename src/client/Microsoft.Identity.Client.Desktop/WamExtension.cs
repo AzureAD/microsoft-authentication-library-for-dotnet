@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.Desktop
         public static PublicClientApplicationBuilder WithWindowsBroker(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
             builder.Config.IdentityLogger?.Log(new IdentityModel.Abstractions.LogEntry() { EventLogLevel = IdentityModel.Abstractions.EventLogLevel.Informational, Message = "Desktop WAM Broker extension calling RuntimeBroker extension" });
-            return BrokerExtension.WithWindowsBroker(builder, enableBroker);
+            return DesktopExtensions.WithWindowsDesktopFeatures(builder, enableBroker);
         }
     }
 }

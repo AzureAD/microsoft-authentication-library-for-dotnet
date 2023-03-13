@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 #if NET6_WIN
             pcaBuilder = pcaBuilder.WithBroker(true);
 #else
-            pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder);
+            pcaBuilder = pcaBuilder.WithBroker();
 #endif
 
             Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 #if NET6_WIN
             pcaBuilder = pcaBuilder.WithBroker(true);
 #else
-            pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder);
+            pcaBuilder = pcaBuilder.WithBroker(true);
 #endif
 
             Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 #if NET6_WIN
             pcaBuilder = pcaBuilder.WithBroker(true);
 #else
-            pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder);
+            pcaBuilder = pcaBuilder.WithBroker();
 #endif
             var pca = pcaBuilder.Build();
 

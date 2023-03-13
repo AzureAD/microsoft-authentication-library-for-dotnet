@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
                .WithAuthority("https://login.microsoftonline.com/organizations");
 
-            IPublicClientApplication pca = pcaBuilder.WithWindowsBroker().Build();
+            IPublicClientApplication pca = pcaBuilder.WithBroker().Build();
 
             // Act
             try
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
                .WithAuthority("https://login.microsoftonline.com/organizations");
 
-            IPublicClientApplication pca = pcaBuilder.WithWindowsBroker().Build();
+            IPublicClientApplication pca = pcaBuilder.WithBroker().Build();
 
             // Act
             try
@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithLogging(testLogger)
-               .WithWindowsBroker().Build();
+               .WithBroker().Build();
 
             // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithLogging(testLogger, enablePiiLogging: true)
-               .WithWindowsBroker().Build();
+               .WithBroker().Build();
 
             // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithWindowsBroker()
+               .WithBroker()
                .WithWindowsBrokerOptions(
                 new WindowsBrokerOptions() 
                 {
@@ -246,7 +246,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create("43dfbb29-3683-4673-a66f-baba91798bd2")
                .WithAuthority("https://login.microsoftonline.com/organizations")
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithWindowsBroker()
+               .WithBroker()
                .Build();
 
             // Act

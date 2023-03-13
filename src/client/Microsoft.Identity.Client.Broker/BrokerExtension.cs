@@ -25,25 +25,7 @@ namespace Microsoft.Identity.Client.Broker
         /// If a broker does not exist or cannot be used, MSAL will fallback to a browser.
         /// Make sure browser auth is enabled (e.g. if using system browser, register the "http://localhost" redirect URI, etc.)
         /// </remarks>
-        public static PublicClientApplicationBuilder WithWindowsBroker(this PublicClientApplicationBuilder builder, bool enableBroker = true)
-        {
-            builder.Config.IsBrokerEnabled = enableBroker;
-            AddRuntimeSupportForWam(builder);
-            return builder;
-        }
-
-        /// <summary>
-        /// Enables MSAL to use Broker flows, which are more secure than browsers. 
-        /// For details about Windows broker, see https://aka.ms/msal-net-wam
-        /// </summary>
-        /// <remarks>
-        /// No broker integration exists on Mac and Linux yet.
-        /// Windows broker does not work on Win 8, Win Server 2016 and lower.
-        /// This implementation is not supported on UWP, use <c>WithBroker()</c> from Microsoft.Identity.Client package instead.
-        /// If a broker does not exist or cannot be used, MSAL will fallback to a browser.
-        /// Make sure browser auth is enabled (e.g. if using system browser, register the "http://localhost" redirect URI, etc.)
-        /// </remarks>
-        [Obsolete("Use WithWindowsBroker instead.", false)]
+        [Obsolete("Use WithBroker instead.", false)]
         public static PublicClientApplicationBuilder WithBrokerPreview(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
             builder.Config.IsBrokerEnabled = enableBroker;

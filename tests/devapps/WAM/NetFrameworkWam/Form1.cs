@@ -104,16 +104,16 @@ namespace NetDesktopWinForms
                     builder = WamExtension.WithWindowsBroker(builder);
                     break;
                 case AuthMethod.WAMRuntime:
-                    builder = BrokerExtension.WithWindowsBroker(builder);
+                    builder.WithBroker();
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder = BrokerExtension.WithWindowsBroker(builder, false);
+                    builder.WithBroker(false);
                     builder = WamExtension.WithWindowsBroker(builder, false);
                     builder = builder.WithRedirectUri("http://localhost");
                     break;
                 case AuthMethod.EmbeddedBrowser:
                     builder = builder.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}");
-                    builder = BrokerExtension.WithWindowsBroker(builder, false);
+                    builder.WithBroker(false);
                     builder = WamExtension.WithWindowsBroker(builder, false);
                     break;
                 default:

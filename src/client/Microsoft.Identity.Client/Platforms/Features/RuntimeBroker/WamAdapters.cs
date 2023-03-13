@@ -144,7 +144,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             ILoggerAdapter logger)
         {
             logger.Verbose(() => "[RuntimeBroker] Validating Common Auth Parameters.");
-            brokerOptions?.Validate();
 
             var authParams = new NativeInterop.AuthParameters
                 (authenticationRequestParameters.AppConfig.ClientId,

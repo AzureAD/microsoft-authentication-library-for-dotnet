@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 #if NET6_WIN
                 pcaBuilder = pcaBuilder.WithBroker(true);
 #else
-                pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder);
+                pcaBuilder = pcaBuilder.WithBroker();
 #endif
                 PublicClientApplication app = pcaBuilder.BuildConcrete();
 
@@ -297,7 +297,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 #if NET6_WIN
                 pcaBuilder = pcaBuilder.WithBroker(true);
 #else
-                pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder);
+                pcaBuilder = pcaBuilder.WithBroker();
 #endif
                 PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
@@ -334,7 +334,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 #if NET6_WIN
             pcaBuilder = pcaBuilder.WithBroker(true);
 #else
-            pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder);
+            pcaBuilder = pcaBuilder.WithBroker();
 #endif
             PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
@@ -371,7 +371,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 #if NET6_WIN
                 pcaBuilder = pcaBuilder.WithBroker(true);
 #else
-                pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder);
+                pcaBuilder = pcaBuilder.WithBroker();
 #endif
                 PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
@@ -416,7 +416,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 #if NET6_WIN
                 pcaBuilder = pcaBuilder.WithBroker(true);
 #else
-                pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder);
+                pcaBuilder = pcaBuilder.WithBroker();
 #endif
                 PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
@@ -458,7 +458,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 #if NET6_WIN
             pcaBuilder = pcaBuilder.WithBroker(true);
 #else
-            pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder);
+            pcaBuilder = pcaBuilder.WithBroker();
 #endif
             PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
@@ -529,7 +529,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 #if NET6_WIN
             pcaBuilder = pcaBuilder.WithBroker(true);
 #else
-            pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder);
+            pcaBuilder = pcaBuilder.WithBroker(true);
 #endif
             IPublicClientApplication app = pcaBuilder.Build();
 
@@ -542,7 +542,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 #if NET6_WIN
             pcaBuilder = pcaBuilder.WithBroker(true);
 #else
-            pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder, false);
+            pcaBuilder = pcaBuilder.WithBroker(false);
 #endif
             app = pcaBuilder.Build();
 

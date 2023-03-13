@@ -53,11 +53,11 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <param name="osChoice">Choice of OS platforms</param>
         /// <param name="listWorkAndSchoolAccts">List wokr and school accounts</param>
         /// <returns></returns>
-        public static BrokerOptions CreateDefault()
+        internal static BrokerOptions CreateDefault()
         {
-            return new BrokerOptions(osChoice)
+            return new BrokerOptions()
             {
-                 OSChoice = OperatingSystems.Windows,
+                OSChoices = OperatingSystems.Windows,
                  ListOperatingSystemAccounts = true,
             };
         }
@@ -101,16 +101,5 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// </summary>
         /// <remarks>On UWP, accounts are not listed due to privacy concerns</remarks>/// 
         public bool ListOperatingSystemAccounts { get; set; }
-
-        /// <summary>
-        /// This is to validate the options
-        /// </summary>
-        internal void Validate()
-        { 
-            if(OSChoices == OperatingSystems.None)
-            {
-                throw new InvalidOperationException($"Operating system must be specified.");
-            }
-        }
     }
 }

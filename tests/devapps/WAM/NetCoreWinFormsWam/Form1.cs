@@ -134,16 +134,14 @@ namespace NetDesktopWinForms
                         options.MsaPassthrough= cbxMsaPt.Checked;
 
                         builder.WithBroker(options);
-
-                        builder = BrokerExtension.WithWindowsBroker(builder);
                     }
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder = BrokerExtension.WithWindowsBroker(builder, false);
+                    builder.WithBroker(false);
                     builder = ToggleOldBroker(builder, false);
                     break;
                 case AuthMethod.EmbeddedBrowser:
-                    builder = BrokerExtension.WithWindowsBroker(builder, false);
+                    builder.WithBroker(false);
                     builder = ToggleOldBroker(builder, false);
 
                     break;

@@ -3,7 +3,11 @@
 
 using System;
 using Microsoft.Identity.Client.Broker;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
 using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.Desktop
 {
@@ -24,7 +28,7 @@ namespace Microsoft.Identity.Client.Desktop
         [Obsolete("This method has been deprecated. Use WithWindowsDesktopFeatures. For Windows Broker support only, use WithWindowsBroker API from Microsoft.Identity.Client.Broker package.", false)]
         public static PublicClientApplicationBuilder WithDesktopFeatures(this PublicClientApplicationBuilder builder)
         {
-            BrokerExtension.WithWindowsBroker(builder);
+            builder.WithBroker();
             AddSupportForWebView2(builder);
 
             return builder;
@@ -36,11 +40,10 @@ namespace Microsoft.Identity.Client.Desktop
         /// - Embedded web view. AAD applications use the older WebBrowser control. B2C applications use WebView2, an embedded browser based on Microsoft Edge - https://aka.ms/msal-net-webview2
         /// </summary>
         /// <remarks>These extensions live in a separate package to avoid adding dependencies to MSAL</remarks>
-        public static PublicClientApplicationBuilder WithWindowsDesktopFeatures(this PublicClientApplicationBuilder builder)
+        public static PublicClientApplicationBuilder WithWindowsDesktopFeatures(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
-            BrokerExtension.WithWindowsBroker(builder);
-            AddSupportForWebView2(builder);
-
+            builder.Config.IsBrokerEnabled = enableBroker;
+            AddRuntimeSupportForWam(builder);
             return builder;
         }
 
@@ -50,6 +53,28 @@ namespace Microsoft.Identity.Client.Desktop
         private static void AddSupportForWebView2(PublicClientApplicationBuilder builder)
         {
             builder.Config.WebUiFactoryCreator = () => new WebView2WebUiFactory();
+        }
+
+        private static void AddRuntimeSupportForWam(PublicClientApplicationBuilder builder)
+        {
+            if (DesktopOsHelper.IsWin10OrServerEquivalent())
+            {
+                builder.Config.BrokerCreatorFunc =
+                     (uiParent, appConfig, logger) =>
+                     {
+                         logger.Info("[RuntimeBroker] WAM supported OS.");
+                         return new RuntimeBroker(uiParent, appConfig, logger);
+                     };
+            }
+            else
+            {
+                builder.Config.BrokerCreatorFunc =
+                   (uiParent, appConfig, logger) =>
+                   {
+                       logger.Info("[RuntimeBroker] Not a Windows 10 or Server equivalent machine. WAM is not available.");
+                       return new NullBroker(logger);
+                   };
+            }
         }
     }
 }

@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #if NET6_WIN
                 pcaBuilder = pcaBuilder.WithBroker(true);
 #else
-                pcaBuilder = Client.Broker.BrokerExtension.WithWindowsBroker(pcaBuilder);
+                pcaBuilder = pcaBuilder.WithBroker();
 #endif
                 var pca = pcaBuilder.BuildConcrete();
 
