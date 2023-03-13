@@ -53,11 +53,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                                         "\"trace_id\":\"dd25f4fb-3e8d-458e-90e7-179524ce0000\",\"correlation_id\":" +
                                         "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}";
 
-        public static string GetDefaultTokenResponse()
+        public static string GetDefaultTokenResponse(string accessToken = TestConstants.ATSecret)
         {
               return
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
-            "\"r1/scope1 r1/scope2\",\"access_token\":\"" + TestConstants.ATSecret + "\"" +
+            "\"r1/scope1 r1/scope2\",\"access_token\":\"" + accessToken + "\"" +
             ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
             ":\"" + CreateClientInfo() + "\",\"id_token\"" +
             ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
@@ -181,10 +181,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 scopes, idToken, clientInfo));
         }
 
-        public static HttpResponseMessage CreateSuccessTokenResponseMessage(bool foci = false)
+        public static HttpResponseMessage CreateSuccessTokenResponseMessage(bool foci = false, string accessToken = TestConstants.ATSecret)
         {
             return CreateSuccessResponseMessage(
-                foci ? GetFociTokenResponse() : GetDefaultTokenResponse());
+                foci ? GetFociTokenResponse() : GetDefaultTokenResponse(accessToken));
         }
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessageWithUid(
