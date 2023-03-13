@@ -167,6 +167,42 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [DataTestMethod]
+        [DataRow(MsiAzureResource.Function, NonExistentUserAssignedClientID, DisplayName = "User Identity Function App")]
+        [DataRow(MsiAzureResource.Function, Non_Existent_UamiResourceId, DisplayName = "ResourceID Function App")]
+        public async Task FunctionAppErrorNotInExpectedFormatAsync(MsiAzureResource azureResource, string userIdentity)
+        {
+            //Arrange
+            using (new EnvVariableContext())
+            {
+                //Get the Environment Variables
+                Dictionary<string, string> envVariables =
+                    await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
+
+                //Set the Environment Variables
+                SetEnvironmentVariables(envVariables);
+
+                //form the http proxy URI 
+                string uri = s_baseURL + $"MSIToken?" +
+                    $"azureresource={azureResource}&uri=";
+
+                //Create CCA with Proxy
+                IConfidentialClientApplication cca = CreateCCAWithProxy(uri);
+
+                //Act
+                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
+                {
+                    await cca
+                    .AcquireTokenForClient(s_msi_scopes)
+                    .WithManagedIdentity(userIdentity)
+                    .ExecuteAsync().ConfigureAwait(false);
+                }).ConfigureAwait(false);
+
+                //Assert
+                Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
+            }
+        }
+
+        [DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System Identity Web App")]
         [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, DisplayName = "User Identity Web App")]
         [DataRow(MsiAzureResource.WebApp, UamiResourceId, DisplayName = "ResourceID Web App")]
