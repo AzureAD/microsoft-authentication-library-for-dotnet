@@ -29,24 +29,23 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor()
         {
             var mi = ManagedIdentityApplicationBuilder.Create()
-                .WithExperimentalFeatures().Build();
+                .WithExperimentalFeatures().BuildConcrete();
 
             // Assert defaults
-            Assert.AreEqual(Constants.ManagedIdentityDefaultClientId, mi.AppConfig.ClientId);
-            Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, mi.AppConfig.RedirectUri);
+            Assert.AreEqual(Constants.ManagedIdentityDefaultClientId, mi.ServiceBundle.Config.ClientId);
+            Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, mi.ServiceBundle.Config.ClientId);
 
-            Assert.IsNotNull(mi.UserTokenCache);
-            Assert.IsNotNull(mi.AppConfig.ClientName);
-            Assert.IsNotNull(mi.AppConfig.ClientVersion);
+            Assert.IsNotNull(mi.ServiceBundle.Config.ClientName);
+            Assert.IsNotNull(mi.ServiceBundle.Config.ClientVersion);
 
-            Assert.IsNull(mi.AppConfig.HttpClientFactory);
-            Assert.IsNull(mi.AppConfig.LoggingCallback);
-            Assert.IsNull(mi.AppConfig.TenantId);
+            Assert.IsNull(mi.ServiceBundle.Config.HttpClientFactory);
+            Assert.IsNull(mi.ServiceBundle.Config.LoggingCallback);
+            Assert.IsNull(mi.ServiceBundle.Config.TenantId);
 
             // Validate Defaults
-            Assert.AreEqual(LogLevel.Info, mi.AppConfig.LogLevel);
-            Assert.AreEqual(false, mi.AppConfig.EnablePiiLogging);
-            Assert.AreEqual(false, mi.AppConfig.IsDefaultPlatformLoggingEnabled);
+            Assert.AreEqual(LogLevel.Info, mi.ServiceBundle.Config.LogLevel);
+            Assert.AreEqual(false, mi.ServiceBundle.Config.EnablePiiLogging);
+            Assert.AreEqual(false, mi.ServiceBundle.Config.IsDefaultPlatformLoggingEnabled);
         }
 
         [TestMethod]
@@ -55,25 +54,24 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var mi = ManagedIdentityApplicationBuilder.Create(TestConstants.ClientId)
                 .WithExperimentalFeatures().BuildConcrete();
 
-            // Assert defaults
-            Assert.AreEqual(Constants.ManagedIdentityDefaultClientId + TestConstants.ClientId, mi.AppConfig.ClientId);
-            Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, mi.AppConfig.RedirectUri);
+            //Assert defaults
+            Assert.AreEqual(Constants.ManagedIdentityDefaultClientId + TestConstants.ClientId, mi.ServiceBundle.Config.ClientId);
+            Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, mi.ServiceBundle.Config.RedirectUri);
 
-            Assert.IsNotNull(mi.UserTokenCache);
-            Assert.IsNotNull(mi.AppConfig.ClientName);
-            Assert.IsNotNull(mi.AppConfig.ClientVersion);
+            Assert.IsNotNull(mi.ServiceBundle.Config.ClientName);
+            Assert.IsNotNull(mi.ServiceBundle.Config.ClientVersion);
 
             Assert.IsNotNull(mi.ServiceBundle.Config.ManagedIdentityUserAssignedClientId);
             Assert.AreEqual(TestConstants.ClientId, mi.ServiceBundle.Config.ManagedIdentityUserAssignedClientId);
 
-            Assert.IsNull(mi.AppConfig.HttpClientFactory);
-            Assert.IsNull(mi.AppConfig.LoggingCallback);
-            Assert.IsNull(mi.AppConfig.TenantId);
+            Assert.IsNull(mi.ServiceBundle.Config.HttpClientFactory);
+            Assert.IsNull(mi.ServiceBundle.Config.LoggingCallback);
+            Assert.IsNull(mi.ServiceBundle.Config.TenantId);
 
             // Validate Defaults
-            Assert.AreEqual(LogLevel.Info, mi.AppConfig.LogLevel);
-            Assert.AreEqual(false, mi.AppConfig.EnablePiiLogging);
-            Assert.AreEqual(false, mi.AppConfig.IsDefaultPlatformLoggingEnabled);
+            Assert.AreEqual(LogLevel.Info, mi.ServiceBundle.Config.LogLevel);
+            Assert.AreEqual(false, mi.ServiceBundle.Config.EnablePiiLogging);
+            Assert.AreEqual(false, mi.ServiceBundle.Config.IsDefaultPlatformLoggingEnabled);
         }
 
         [DataTestMethod]
@@ -88,13 +86,13 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             if (isClientId)
             {
-                Assert.AreEqual(Constants.ManagedIdentityDefaultClientId + userAssignedId, mi.AppConfig.ClientId);
+                Assert.AreEqual(userAssignedId, mi.ServiceBundle.Config.ClientId);
                 Assert.IsNotNull(mi.ServiceBundle.Config.ManagedIdentityUserAssignedClientId);
                 Assert.AreEqual(userAssignedId, mi.ServiceBundle.Config.ManagedIdentityUserAssignedClientId);
             }
             else
             {
-                Assert.AreEqual(Constants.ManagedIdentityDefaultClientId + userAssignedId.GetHashCode(), mi.AppConfig.ClientId);
+                Assert.AreEqual(Constants.ManagedIdentityDefaultClientId + userAssignedId.GetHashCode(), mi.ServiceBundle.Config.ClientId);
                 Assert.IsNotNull(mi.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId);
                 Assert.AreEqual(userAssignedId, mi.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId);
             }
@@ -113,8 +111,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 EnableCacheSynchronization = optionFlag
             };
             var mi = ManagedIdentityApplicationBuilder.CreateWithApplicationOptions(options).WithExperimentalFeatures()
-                .WithCacheSynchronization(builderFlag).Build();
-            Assert.AreEqual(result, (mi.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+                .WithCacheSynchronization(builderFlag).BuildConcrete();
+            Assert.AreEqual(result, mi.ServiceBundle.Config.CacheSynchronizationEnabled);
         }
 
         [TestMethod]
@@ -123,8 +121,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var mi = ManagedIdentityApplicationBuilder.Create()
                 .WithExperimentalFeatures()
                 .WithDebugLoggingCallback()
-                .Build();
-            Assert.IsNotNull(mi.AppConfig.LoggingCallback);
+                .BuildConcrete();
+            Assert.IsNotNull(mi.ServiceBundle.Config.LoggingCallback);
         }
 
         [TestMethod]
@@ -134,8 +132,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var mi = ManagedIdentityApplicationBuilder.Create()
                 .WithExperimentalFeatures()
                 .WithHttpClientFactory(httpClientFactory)
-                .Build();
-            Assert.AreEqual(httpClientFactory, mi.AppConfig.HttpClientFactory);
+                .BuildConcrete();
+            Assert.AreEqual(httpClientFactory, mi.ServiceBundle.Config.HttpClientFactory);
         }
 
         [TestMethod]
@@ -144,9 +142,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var mi = ManagedIdentityApplicationBuilder
                 .Create()
                 .WithExperimentalFeatures()
-                .WithLogging((level, message, pii) => { }).Build();
+                .WithLogging((level, message, pii) => { })
+                .BuildConcrete();
 
-            Assert.IsNotNull(mi.AppConfig.LoggingCallback);
+            Assert.IsNotNull(mi.ServiceBundle.Config.LoggingCallback);
         }
 
     }

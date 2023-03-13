@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
         internal static MsalTokenResponse CreateFromManagedIdentityResponse(ManagedIdentityResponse managedIdentityResponse)
         {
-            ValidateManagedIdenitityResult(managedIdentityResponse);
+            ValidateManagedIdentityResult(managedIdentityResponse);
 
             return new MsalTokenResponse
             {

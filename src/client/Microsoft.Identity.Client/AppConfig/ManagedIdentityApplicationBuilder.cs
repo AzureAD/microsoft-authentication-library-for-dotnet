@@ -216,11 +216,11 @@ namespace Microsoft.Identity.Client
         {
             if (!string.IsNullOrEmpty(Config.ManagedIdentityUserAssignedClientId))
             {
-                Config.ClientId = Constants.ManagedIdentityDefaultClientId + Config.ManagedIdentityUserAssignedClientId;
+                Config.ClientId = Config.ManagedIdentityUserAssignedClientId;
             }
             else if (!string.IsNullOrEmpty(Config.ManagedIdentityUserAssignedResourceId))
             {
-                Config.ClientId = Constants.ManagedIdentityDefaultClientId + Config.ManagedIdentityUserAssignedResourceId.GetHashCode();
+                Config.ClientId = Config.ManagedIdentityUserAssignedResourceId;
             }
             else
             {

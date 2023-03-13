@@ -20,6 +20,9 @@ namespace Microsoft.Identity.Client
     /// Abstract base class for managed identity application token request builders.
     /// </summary>
     /// <typeparam name="T"></typeparam>
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
+#endif
     public abstract class AbstractManagedIdentityAcquireTokenParameterBuilder<T> : BaseAbstractAcquireTokenParameterBuilder<T>
         where T : BaseAbstractAcquireTokenParameterBuilder<T>
     {
