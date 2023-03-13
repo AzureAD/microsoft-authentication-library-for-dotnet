@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Client
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Returns true if tokens are removed from the cache. False otherwise.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="longRunningProcessSessionKey"/> is not set.</exception>
-        public async Task<bool> StopLongRunningWebApiAsync(string longRunningProcessSessionKey, CancellationToken cancellationToken = default)
+        public async Task<bool> StopLongRunningProcessInWebApiAsync(string longRunningProcessSessionKey, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(longRunningProcessSessionKey))
             {
