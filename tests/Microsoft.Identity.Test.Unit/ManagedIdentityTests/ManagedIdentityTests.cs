@@ -2,14 +2,19 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
@@ -400,6 +405,42 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
                 Assert.AreEqual(ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity, builder.CommonParameters.ApiId);
+            }
+        }
+
+        [TestMethod]
+        public async Task ManagedIdentityCacheTestAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySourceType.AppService, AppServiceEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+                CancellationTokenSource cts = new CancellationTokenSource();
+                var cancellationToken = cts.Token;
+
+                var appTokenCacheRecoder = mi.AppTokenCache.RecordAccess((args) =>
+                {
+                    Assert.AreEqual(Constants.ManagedIdentityDefaultTenant, args.RequestTenantId);
+                    Assert.AreEqual(Constants.ManagedIdentityDefaultClientId, args.ClientId);
+                    Assert.IsNull(args.Account);
+                    Assert.IsTrue(args.IsApplicationCache);
+                    Assert.AreEqual(cancellationToken, args.CancellationToken);
+                });
+
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySourceType.AppService);
+
+                var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync(cancellationToken).ConfigureAwait(false);
+
+                appTokenCacheRecoder.AssertAccessCounts(1, 1);
             }
         }
     }
