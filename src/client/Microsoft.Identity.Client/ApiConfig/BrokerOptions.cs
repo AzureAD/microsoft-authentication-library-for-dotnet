@@ -53,15 +53,13 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <param name="osChoice">Choice of OS platforms</param>
         /// <param name="listWorkAndSchoolAccts">List wokr and school accounts</param>
         /// <returns></returns>
-        public static BrokerOptions CreateDefault(OperatingSystems osChoice = OperatingSystems.Windows, bool listWorkAndSchoolAccts = true)
+        public static BrokerOptions CreateDefault()
         {
-            BrokerOptions ret = new BrokerOptions(osChoice);
-            var winBrokerDefaultOptions = WindowsBrokerOptions.CreateDefault();
-            ret.Title = winBrokerDefaultOptions.HeaderText;
-            ret.MsaPassthrough = winBrokerDefaultOptions.MsaPassthrough;
-            ret.ListOperatingSystemAccounts = listWorkAndSchoolAccts;
-            
-            return ret;
+            return new BrokerOptions(osChoice)
+            {
+                 OSChoice = OperatingSystems.Windows,
+                 ListOperatingSystemAccounts = true,
+            };
         }
 
         /// <summary>
