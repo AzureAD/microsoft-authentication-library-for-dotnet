@@ -33,14 +33,14 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Assert defaults
             Assert.AreEqual(Constants.ManagedIdentityDefaultClientId, mi.ServiceBundle.Config.ClientId);
-            Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, mi.ServiceBundle.Config.ClientId);
+            Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, mi.ServiceBundle.Config.RedirectUri);
+            Assert.AreEqual(Constants.ManagedIdentityDefaultTenant, mi.ServiceBundle.Config.TenantId);
 
             Assert.IsNotNull(mi.ServiceBundle.Config.ClientName);
             Assert.IsNotNull(mi.ServiceBundle.Config.ClientVersion);
 
             Assert.IsNull(mi.ServiceBundle.Config.HttpClientFactory);
             Assert.IsNull(mi.ServiceBundle.Config.LoggingCallback);
-            Assert.IsNull(mi.ServiceBundle.Config.TenantId);
 
             // Validate Defaults
             Assert.AreEqual(LogLevel.Info, mi.ServiceBundle.Config.LogLevel);
@@ -55,8 +55,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 .WithExperimentalFeatures().BuildConcrete();
 
             //Assert defaults
-            Assert.AreEqual(Constants.ManagedIdentityDefaultClientId + TestConstants.ClientId, mi.ServiceBundle.Config.ClientId);
+            Assert.AreEqual(TestConstants.ClientId, mi.ServiceBundle.Config.ClientId);
             Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, mi.ServiceBundle.Config.RedirectUri);
+            Assert.AreEqual(Constants.ManagedIdentityDefaultTenant, mi.ServiceBundle.Config.TenantId);
 
             Assert.IsNotNull(mi.ServiceBundle.Config.ClientName);
             Assert.IsNotNull(mi.ServiceBundle.Config.ClientVersion);
@@ -66,7 +67,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             Assert.IsNull(mi.ServiceBundle.Config.HttpClientFactory);
             Assert.IsNull(mi.ServiceBundle.Config.LoggingCallback);
-            Assert.IsNull(mi.ServiceBundle.Config.TenantId);
 
             // Validate Defaults
             Assert.AreEqual(LogLevel.Info, mi.ServiceBundle.Config.LogLevel);
@@ -84,15 +84,15 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 .WithExperimentalFeatures()
                 .BuildConcrete();
 
+            Assert.AreEqual(userAssignedId, mi.ServiceBundle.Config.ClientId);
+
             if (isClientId)
             {
-                Assert.AreEqual(userAssignedId, mi.ServiceBundle.Config.ClientId);
                 Assert.IsNotNull(mi.ServiceBundle.Config.ManagedIdentityUserAssignedClientId);
                 Assert.AreEqual(userAssignedId, mi.ServiceBundle.Config.ManagedIdentityUserAssignedClientId);
             }
             else
             {
-                Assert.AreEqual(Constants.ManagedIdentityDefaultClientId + userAssignedId.GetHashCode(), mi.ServiceBundle.Config.ClientId);
                 Assert.IsNotNull(mi.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId);
                 Assert.AreEqual(userAssignedId, mi.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId);
             }

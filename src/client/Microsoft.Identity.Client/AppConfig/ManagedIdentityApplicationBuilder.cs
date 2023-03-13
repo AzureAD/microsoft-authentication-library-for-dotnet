@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
@@ -208,6 +209,7 @@ namespace Microsoft.Identity.Client
         {
             ComputeClientIdForCaching();
 
+            Config.TenantId = Constants.ManagedIdentityDefaultTenant;
             Config.RedirectUri = Constants.DefaultConfidentialClientRedirectUri;
             Config.IsInstanceDiscoveryEnabled = false; // Disable instance discovery for managed identity
         }
