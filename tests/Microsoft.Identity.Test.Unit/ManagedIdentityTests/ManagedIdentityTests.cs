@@ -5,6 +5,7 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -73,12 +74,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
+        [DataTestMethod]
         [DataRow(AppServiceEndpoint, ManagedIdentitySourceType.AppService, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow(AppServiceEndpoint, ManagedIdentitySourceType.AppService, "resource_id", UserAssignedIdentityId.ResourceId)]
+        [DataRow(AppServiceEndpoint, ManagedIdentitySourceType.AppService, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
         [DataRow(ImdsEndpoint, ManagedIdentitySourceType.IMDS, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow(ImdsEndpoint, ManagedIdentitySourceType.IMDS, "resource_id", UserAssignedIdentityId.ResourceId)]
+        [DataRow(ImdsEndpoint, ManagedIdentitySourceType.IMDS, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySourceType.ServiceFabric, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow(ServiceFabricEndpoint, ManagedIdentitySourceType.ServiceFabric, "resource_id", UserAssignedIdentityId.ResourceId)]
+        [DataRow(ServiceFabricEndpoint, ManagedIdentitySourceType.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
         public async Task ManagedIdentityUserAssignedHappyPathAsync(
             string endpoint,
             ManagedIdentitySourceType managedIdentitySource,
@@ -336,6 +338,68 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidResponse, ex.Message);
+            }
+        }
+
+        [TestMethod] 
+        public async Task SystemAssignedManagedIdentityApiIdTestAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySourceType.AppService, AppServiceEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager)
+                    .Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySourceType.AppService);
+
+                var builder = mi.AcquireTokenForManagedIdentity(Resource);
+                var result = await builder.ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                Assert.AreEqual(ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity, builder.CommonParameters.ApiId);
+            }
+        }
+
+        [TestMethod]
+        public async Task UserAssignedManagedIdentityApiIdTestAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySourceType.AppService, AppServiceEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager)
+                    .Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    ManagedIdentitySourceType.AppService,
+                    userAssignedClientIdOrResourceId: TestConstants.ClientId,
+                    userAssignedIdentityId: UserAssignedIdentityId.ClientId);
+
+                var builder = mi.AcquireTokenForManagedIdentity(Resource);
+                var result = await builder.ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                Assert.AreEqual(ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity, builder.CommonParameters.ApiId);
             }
         }
     }
