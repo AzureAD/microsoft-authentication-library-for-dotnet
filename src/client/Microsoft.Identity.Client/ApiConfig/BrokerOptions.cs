@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <param name="winOptions"></param>
         /// <param name="osChoice"></param>
         /// <returns></returns>
-        public static BrokerOptions CreateFromWindowsOptions(WindowsBrokerOptions winOptions, OperatingSystems osChoice = OperatingSystems.Windows)
+        internal static BrokerOptions CreateFromWindowsOptions(WindowsBrokerOptions winOptions, OperatingSystems osChoice = OperatingSystems.Windows)
         {
             BrokerOptions ret = new BrokerOptions(osChoice);
             ret.Title = winOptions.HeaderText;
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         public OperatingSystems OSChoices { get; private set; }
 
         /// <summary>
-        /// Title of the broker
+        /// Title of the broker window
         /// </summary>
         public string Title { get; set; }
 
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         public bool MsaPassthrough { get; set; } = false;
 
         /// <summary>
-        /// Currently only supported on the !!Windows!!
+        /// Currently only supported on Windows
         /// Allow the Windows broker to list Work and School accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>
         /// </summary>
         /// <remarks>On UWP, accounts are not listed due to privacy concerns</remarks>/// 
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         { 
             if(OSChoices == OperatingSystems.None)
             {
-                throw new InvalidOperationException($"OS choice must be set.");
+                throw new InvalidOperationException($"Operating system must be specified.");
             }
         }
     }
