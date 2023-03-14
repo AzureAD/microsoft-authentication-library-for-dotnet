@@ -440,6 +440,7 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         [Description("Check the JWTHeader when sendCert is true")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Your SDL exception information goes here.")]
         public void CheckJWTHeaderWithCertTrueTest()
         {
             var cert = new X509Certificate2(
@@ -453,6 +454,7 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         [Description("Check the JWTHeader when sendCert is false")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Your SDL exception information goes here.")]
         public void CheckJWTHeaderWithCertFalseTest()
         {
             var cert = new X509Certificate2(
