@@ -1572,7 +1572,7 @@ namespace Microsoft.Identity.Client
     {
 #if SUPPORTS_CONFIDENTIAL_CLIENT
         /// <summary>
-        /// [V2 API] Constructor for a confidential client application requesting tokens with the default authority (<see cref="ClientApplicationBase.DefaultAuthority"/>)
+        /// [V2 API] Constructor for a confidential client application requesting tokens with the default authority (<see cref="ApplicationBase.DefaultAuthority"/>)
         /// </summary>
         /// <param name="clientId">Client ID (also known as App ID) of the application as registered in the
         /// application registration portal (https://aka.ms/msal-net-register-app)/. REQUIRED</param>

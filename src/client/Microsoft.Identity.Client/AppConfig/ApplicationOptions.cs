@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client
     /// See also derived classes <see cref="PublicClientApplicationOptions"/>
     /// and <see cref="ConfidentialClientApplicationOptions"/>
     /// </summary>
-    public abstract class ApplicationOptions
+    public abstract class ApplicationOptions : BaseApplicationOptions
     {
         /// <summary>
         /// Client ID (also known as App ID) of the application as registered in the
@@ -72,29 +72,6 @@ namespace Microsoft.Identity.Client
         /// you then need to add the reply URL of the deployed application in the application registration portal
         /// </remarks>
         public string RedirectUri { get; set; }
-
-        /// <summary>
-        /// Enables you to configure the level of logging you want. The default value is <see cref="LogLevel.Info"/>. Setting it to <see cref="LogLevel.Error"/> will only get errors
-        /// Setting it to <see cref="LogLevel.Warning"/> will get errors and warning, etc..
-        /// See https://aka.ms/msal-net-logging
-        /// </summary>
-        public LogLevel LogLevel { get; set; }
-
-        /// <summary>
-        /// Flag to enable/disable logging of Personally Identifiable Information (PII).
-        /// PII logs are never written to default outputs like Console, Logcat or NSLog
-        /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR. You can set
-        /// it to <c>true</c> for advanced debugging requiring PII. See https://aka.ms/msal-net-logging
-        /// </summary>
-        /// <seealso cref="IsDefaultPlatformLoggingEnabled"/>
-        public bool EnablePiiLogging { get; set; }
-
-        /// <summary>
-        /// Flag to enable/disable logging to platform defaults. In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
-        /// In Android, logcat is used. The default value is <c>false</c>. See https://aka.ms/msal-net-logging
-        /// </summary>
-        /// <seealso cref="EnablePiiLogging"/>
-        public bool IsDefaultPlatformLoggingEnabled { get; set; }
 
         /// <summary>
         /// Identifier of the component (libraries/SDK) consuming MSAL.NET.

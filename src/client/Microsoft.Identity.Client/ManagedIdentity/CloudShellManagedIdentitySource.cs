@@ -47,7 +47,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private CloudShellManagedIdentitySource(Uri endpoint, RequestContext requestContext) : base(requestContext)
         {
             _endpoint = endpoint;
-            if (!string.IsNullOrEmpty(requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedId))
+
+            if (requestContext.ServiceBundle.Config.IsUserAssignedManagedIdentity)
             {
                 throw new MsalClientException(MsalError.UserAssignedManagedIdentityNotSupported, 
                     string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, CloudShell));

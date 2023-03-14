@@ -74,7 +74,9 @@ namespace Microsoft.Identity.Client.Cache
                 return true;
             }
 
-            if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient)
+            if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient || 
+                requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity ||
+                requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity)
             {
                 string tenantId = requestParameters.Authority.TenantId ?? "";
                 key = GetClientCredentialKey(requestParameters.AppConfig.ClientId, tenantId, requestParameters.AuthenticationScheme?.KeyId);
