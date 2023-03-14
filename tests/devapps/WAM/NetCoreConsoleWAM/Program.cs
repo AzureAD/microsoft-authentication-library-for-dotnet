@@ -18,17 +18,20 @@ public class Program
     static readonly IEnumerable<string> s_scopes = new[] { "user.read" };
     const string Authority = "https://login.microsoftonline.com/common/";
 
-    [Obsolete]
+    
     public static async Task Main()
     {
-        //IntPtr hWnd = GetConsoleWindow();
+        //var pca = PublicClientApplicationBuilder.Create("4b0db8c2-9f26-4417-8bde-3f0e3656f8e0")
+        //        .WithAuthority(Authority)
+        //        .WithBrokerPreview(true)
+        //        .WithParentActivityOrWindow(() => GetConsoleWindow())
+        //        .Build();
 
         var pca = PublicClientApplicationBuilder.Create("4b0db8c2-9f26-4417-8bde-3f0e3656f8e0")
                 .WithAuthority(Authority)
                 //.WithBroker(true)
                 .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows) {  Title = "new"})
-                .WithWindowsBrokerOptions(new WindowsBrokerOptions() { HeaderText = "foo" })
-
+                //.WithWindowsBrokerOptions(new WindowsBrokerOptions() { HeaderText = "foo" })
                 .WithLogging((x, y, z) => Console.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .WithRedirectUri("http://localhost")
                 .WithParentActivityOrWindow(() => GetConsoleWindow())

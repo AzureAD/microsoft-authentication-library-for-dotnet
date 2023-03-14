@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("This API has been replaced with WithBroker(BrokerOptions), which can be found in Microsoft.Identity.Client.Broker package", false)]
+        [Obsolete("This API has been replaced with WithBroker(BrokerOptions), which can be found in Microsoft.Identity.Client.Broker package. See https://aka.ms/msal-net-wam for details.", false)]
         public PublicClientApplicationBuilder WithWindowsBrokerOptions(WindowsBrokerOptions options)
         {
             WindowsBrokerOptions.ValidatePlatformAvailability();
