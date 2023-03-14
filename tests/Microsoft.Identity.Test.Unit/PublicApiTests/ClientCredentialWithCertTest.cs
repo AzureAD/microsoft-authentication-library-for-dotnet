@@ -162,6 +162,7 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow(false, false, false)]
         [DataRow(true, false, false)] // request overrides
         [DataRow(false, true, true)] // request overrides
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Your SDL exception information goes here.")]
         public async Task JsonWebTokenWithX509PublicCertSendCertificateWithClaimsTestSendX5cCombinationsAsync(
             bool? appFlag, 
             bool? requestFlag, 
@@ -397,6 +398,7 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         [Description("Test for acqureTokenSilent with X509 public certificate using sendCertificate")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Your SDL exception information goes here.")]
         public async Task JsonWebTokenWithX509PublicCertSendCertificateSilentTestAsync()
         {
             using (var harness = CreateTestHarness())
