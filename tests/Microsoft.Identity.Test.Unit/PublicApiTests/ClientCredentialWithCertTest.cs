@@ -162,6 +162,7 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow(false, false, false)]
         [DataRow(true, false, false)] // request overrides
         [DataRow(false, true, true)] // request overrides
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Suppressing RoslynAnalyzers: Rule: IA5352 - Do Not Misuse Cryptographic APIs in test only code")]
         public async Task JsonWebTokenWithX509PublicCertSendCertificateWithClaimsTestSendX5cCombinationsAsync(
             bool? appFlag, 
             bool? requestFlag, 
@@ -396,7 +397,8 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [Description("Test for acqureTokenSilent with X509 public certificate using sendCertificate")]
+        [Description("Test for acquireTokenSilent with X509 public certificate using sendCertificate")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Fake password only used for tests.")]
         public async Task JsonWebTokenWithX509PublicCertSendCertificateSilentTestAsync()
         {
             using (var harness = CreateTestHarness())
@@ -440,6 +442,7 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         [Description("Check the JWTHeader when sendCert is true")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Suppressing RoslynAnalyzers: Rule: IA5352 - Do Not Misuse Cryptographic APIs in test only code")]
         public void CheckJWTHeaderWithCertTrueTest()
         {
             var cert = new X509Certificate2(
@@ -453,6 +456,7 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         [Description("Check the JWTHeader when sendCert is false")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Suppressing RoslynAnalyzers: Rule: IA5352 - Do Not Misuse Cryptographic APIs in test only code")]
         public void CheckJWTHeaderWithCertFalseTest()
         {
             var cert = new X509Certificate2(
