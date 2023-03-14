@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
@@ -29,7 +30,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal const string IdentityUnavailableError = "[Managed Identity] Authentication unavailable. The requested identity has not been assigned to this resource.";
         internal const string GatewayError = "[Managed Identity] Authentication unavailable. The request failed due to a gateway error.";
 
-        private readonly string _userAssignedId;
         private readonly Uri _imdsEndpoint;
 
         internal ImdsManagedIdentitySource(RequestContext requestContext) : base(requestContext)
@@ -49,8 +49,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             	_imdsEndpoint = s_imdsEndpoint;
 			}
 
-            _userAssignedId = requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedId;
-
             requestContext.Logger.Verbose(() => "[Managed Identity] Creating IMDS managed identity source. Endpoint URI: " + _imdsEndpoint);
         }
 
@@ -62,26 +60,23 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.QueryParameters["api-version"] = ImdsApiVersion;
             request.QueryParameters["resource"] = resource;
 
-            if (!string.IsNullOrEmpty(_userAssignedId))
+            if (!string.IsNullOrEmpty(_requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId))
             {
-                if (Guid.TryParse(_userAssignedId, out _))
-                {
-                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
-                    request.QueryParameters[Constants.ManagedIdentityClientId] = _userAssignedId;
-                }
-                else
-                {
-                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
-                    request.QueryParameters[Constants.ManagedIdentityResourceId] = _userAssignedId;
-                }
-
+                _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
+                request.QueryParameters[Constants.ManagedIdentityClientId] = _requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId;
+            }
+            
+            if (!string.IsNullOrEmpty(_requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId))
+            {
+                _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
+                request.QueryParameters[Constants.ManagedIdentityResourceId] = _requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId;
             }
 
             return request;
         }
 
         protected override async Task<ManagedIdentityResponse> HandleResponseAsync(
-            AppTokenProviderParameters parameters, 
+            AcquireTokenForManagedIdentityParameters parameters,
             HttpResponse response,
             CancellationToken cancellationToken)
         {

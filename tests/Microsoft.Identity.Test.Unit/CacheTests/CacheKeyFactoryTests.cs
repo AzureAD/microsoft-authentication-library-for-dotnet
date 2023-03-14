@@ -28,6 +28,37 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        public void TestCacheKeyForManagedIdentity()
+        {
+            // Arrange
+            var appTokenCache = new TokenCache(_serviceBundle, isApplicationTokenCache: true);
+            var requestContext = new RequestContext(_serviceBundle, Guid.NewGuid());
+            var authority = Authority.CreateAuthority("https://login.microsoft.com/managed_identity", true);
+            requestContext.ServiceBundle.Config.Authority = authority;
+            requestContext.ServiceBundle.Config.ClientId = Constants.ManagedIdentityDefaultClientId;
+
+            var acquireTokenCommonParameters = new AcquireTokenCommonParameters
+            {
+                ApiId = ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity,
+            };
+
+            var parameters = new AuthenticationRequestParameters(
+                _serviceBundle,
+                appTokenCache,
+                acquireTokenCommonParameters,
+                requestContext,
+                authority);
+
+            // Act
+            var actualKey = CacheKeyFactory.GetKeyFromRequest(parameters);
+
+            // Assert
+            Assert.IsNotNull(actualKey);
+            var expectedKey = $"{Constants.ManagedIdentityDefaultClientId}_{Constants.ManagedIdentityDefaultTenant}_AppTokenCache";
+            Assert.AreEqual(expectedKey, actualKey);
+        }
+
+        [TestMethod]
         public void TestCacheKeyForADFSAuthority()
         {
             // Arrange
