@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         [TestCategory("CryptographyTests")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Fake password only used for tests.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Suppressing RoslynAnalyzers: Rule: IA5352 - Do Not Misuse Cryptographic APIs in test only code")]
         public void SignWithCertificate()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
