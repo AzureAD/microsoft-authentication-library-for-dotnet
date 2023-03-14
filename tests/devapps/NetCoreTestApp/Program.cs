@@ -81,7 +81,7 @@ namespace NetCoreTestApp
             {
                 IntPtr consoleWindowHandle = GetConsoleWindow();
                 Func<IntPtr> consoleWindowHandleProvider = () => consoleWindowHandle;
-                pcaBuilder.WithWindowsDesktopFeatures()
+                pcaBuilder.WithWindowsBroker()
                           .WithParentActivityOrWindow(consoleWindowHandleProvider)
                           .WithBroker();
             }

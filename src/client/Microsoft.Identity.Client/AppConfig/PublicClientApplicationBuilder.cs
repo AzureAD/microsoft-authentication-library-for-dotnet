@@ -193,9 +193,10 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Allows customization of the Windows 10 Broker experience
         /// </summary>
-
         [EditorBrowsable(EditorBrowsableState.Never)]
+#if !NET6_WIN
         [Obsolete("This API has been replaced with WithBroker(BrokerOptions), which can be found in Microsoft.Identity.Client.Broker package. See https://aka.ms/msal-net-wam for details.", false)]
+#endif
         public PublicClientApplicationBuilder WithWindowsBrokerOptions(WindowsBrokerOptions options)
         {
             WindowsBrokerOptions.ValidatePlatformAvailability();

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -40,9 +41,11 @@ namespace Microsoft.Identity.Client.Desktop
         /// - Embedded web view. AAD applications use the older WebBrowser control. B2C applications use WebView2, an embedded browser based on Microsoft Edge - https://aka.ms/msal-net-webview2
         /// </summary>
         /// <remarks>These extensions live in a separate package to avoid adding dependencies to MSAL</remarks>
-        public static PublicClientApplicationBuilder WithWindowsDesktopFeatures(this PublicClientApplicationBuilder builder, bool enableBroker = true)
+        public static PublicClientApplicationBuilder WithWindowsDesktopFeatures(this PublicClientApplicationBuilder builder, BrokerOptions brokerOptions)
         {
-            builder.Config.IsBrokerEnabled = enableBroker;
+            builder.Config.BrokerOptions = brokerOptions;
+            builder.Config.IsBrokerEnabled = brokerOptions.IsBrokerEnabledOnCurrentOs();
+
             AddRuntimeSupportForWam(builder);
             return builder;
         }

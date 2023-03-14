@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Broker;
 
 namespace Microsoft.Identity.Client.Desktop
@@ -17,7 +18,10 @@ namespace Microsoft.Identity.Client.Desktop
         public static PublicClientApplicationBuilder WithWindowsBroker(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
             builder.Config.IdentityLogger?.Log(new IdentityModel.Abstractions.LogEntry() { EventLogLevel = IdentityModel.Abstractions.EventLogLevel.Informational, Message = "Desktop WAM Broker extension calling RuntimeBroker extension" });
-            return DesktopExtensions.WithWindowsDesktopFeatures(builder, enableBroker);
+            
+            BrokerOptions options = new BrokerOptions(enableBroker ? BrokerOptions.OperatingSystems.Windows : BrokerOptions.OperatingSystems.None);
+            
+            return DesktopExtensions.WithWindowsDesktopFeatures(builder, options);
         }
     }
 }
