@@ -68,6 +68,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
         [TestMethod]
         [DeploymentItem(@"Resources\testCert.crtfile")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Your SDL exception information goes here.")]
         public void TestBuildWithNoClientSecretButUsingCert()
         {
             var options = new ConfidentialClientApplicationOptions()
@@ -337,6 +338,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
         [TestMethod]
         [DeploymentItem(@"Resources\testCert.crtfile")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Your SDL exception information goes here.")]
         public void TestConstructor_WithCertificate_X509Certificate2()
         {
             var cert = new X509Certificate2(
@@ -372,6 +374,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
         [TestMethod]
         [DeploymentItem(@"Resources\testCert.crtfile")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Your SDL exception information goes here.")]
         public void TestConstructor_WithCertificate_SendX5C()
         {
             var cert = new X509Certificate2(
