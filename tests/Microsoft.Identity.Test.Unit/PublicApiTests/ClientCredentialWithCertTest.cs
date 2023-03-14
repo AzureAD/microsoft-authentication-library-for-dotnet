@@ -397,8 +397,9 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [Description("Test for acqureTokenSilent with X509 public certificate using sendCertificate")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Suppressing RoslynAnalyzers: Rule: IA5352 - Do Not Misuse Cryptographic APIs in test only code")]
+        [Description("Test for acquireTokenSilent with X509 public certificate using sendCertificate")]
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Fake password only used for tests.")]
         public async Task JsonWebTokenWithX509PublicCertSendCertificateSilentTestAsync()
         {
             using (var harness = CreateTestHarness())
