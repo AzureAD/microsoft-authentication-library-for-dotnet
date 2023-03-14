@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <summary>
         /// This is a required property to determine the supported OS
         /// </summary>
-        public OperatingSystems EnabledOn { get; private set; }
+        public OperatingSystems EnabledOn { get; }
 
         /// <summary>
         /// Title of the broker window

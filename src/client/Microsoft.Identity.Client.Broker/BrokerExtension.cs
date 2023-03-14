@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ComponentModel;
 using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -26,6 +27,7 @@ namespace Microsoft.Identity.Client.Broker
         /// If a broker does not exist or cannot be used, MSAL will fallback to a browser.
         /// Make sure browser auth is enabled (e.g. if using system browser, register the "http://localhost" redirect URI, etc.)
         /// </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("Use WithBroker(BrokerOptions) instead. This API can be found in Microsoft.Identity.Client.Broker package. See https://aka.ms/msal-net-wam for details.", false)]
         public static PublicClientApplicationBuilder WithBrokerPreview(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
