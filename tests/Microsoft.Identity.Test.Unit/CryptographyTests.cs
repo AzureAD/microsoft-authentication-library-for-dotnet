@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         [TestCategory("CryptographyTests")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Your SDL exception information goes here.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Fake password only used for tests.")]
         public void SignWithCertificate()
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
