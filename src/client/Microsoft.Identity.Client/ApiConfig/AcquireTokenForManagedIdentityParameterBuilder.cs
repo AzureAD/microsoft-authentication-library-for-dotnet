@@ -65,12 +65,6 @@ namespace Microsoft.Identity.Client
             return ManagedIdentityApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
-        /// <inheritdoc/>
-        protected override void Validate()
-        {
-            base.Validate();
-        }
-
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
