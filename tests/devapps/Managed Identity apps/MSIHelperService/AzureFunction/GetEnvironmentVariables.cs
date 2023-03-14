@@ -36,7 +36,7 @@ namespace MSIHelperService.AzureFunction
                 _envVariables.Add("IDENTITY_HEADER", Environment.GetEnvironmentVariable("IDENTITY_HEADER"));
                 _envVariables.Add("IDENTITY_ENDPOINT", Environment.GetEnvironmentVariable("IDENTITY_ENDPOINT"));
                 _envVariables.Add("IDENTITY_API_VERSION", Environment.GetEnvironmentVariable("IDENTITY_API_VERSION"));
-                await Task.Delay(1).ConfigureAwait(true);
+
                 log.LogInformation("Returning All Environment Variables");
                 return new OkObjectResult(_envVariables);
             }

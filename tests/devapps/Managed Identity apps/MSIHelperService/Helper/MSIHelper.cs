@@ -48,17 +48,6 @@ namespace MSIHelperService.Helper
         internal const string AzureRunbook = LabSubscription + RunbookLocation + RunbookJobProvider;
         internal const string RunbookAPIVersion = "2019-06-01";
 
-        //Enum for HTTP Error Response Codes
-        internal enum HTTPErrorResponseCode
-        {
-            Status200OK = StatusCodes.Status200OK,
-            Status201Created = StatusCodes.Status201Created,
-            Status400BadRequest = StatusCodes.Status400BadRequest,
-            Status404NotFound = StatusCodes.Status404NotFound,
-            Status500InternalServerError = StatusCodes.Status500InternalServerError,
-            Status503ServiceUnavailable = StatusCodes.Status503ServiceUnavailable
-        }
-
         //Azure Resources
         internal enum AzureResource
         {

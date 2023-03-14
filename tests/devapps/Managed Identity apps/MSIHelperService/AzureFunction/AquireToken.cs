@@ -14,7 +14,7 @@ namespace MSIHelperService.AzureFunction
     /// <summary>
     /// Gets the function app token
     /// </summary>
-    public class GetToken
+    public class AquireToken
     {
         private static readonly HttpClient s_httpClient = new HttpClient();
 
