@@ -119,16 +119,16 @@ namespace NetDesktopWinForms
             {
                 case AuthMethod.WAM:
                     builder = ToggleOldBroker(builder, true);
-                    builder = builder.WithWindowsBrokerOptions(new WindowsBrokerOptions()
+                    builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
                     {
-                        ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
+                        ListOperatingSystemAccounts = cbxListOsAccounts.Checked,
                         MsaPassthrough = cbxMsaPt.Checked,
-                        HeaderText = "MSAL Dev App .NET FX"
+                        Title = "MSAL Dev App .NET FX"
                     });
                     break;
                 case AuthMethod.WAMRuntime:
                     {
-                        BrokerOptions options = BrokerOptions.CreateDefault();
+                        BrokerOptions options = new BrokerOptions(BrokerOptions.OperatingSystems.Windows);
                         options.Title = "new Runtime broker";
                         options.ListOperatingSystemAccounts = cbxListOsAccounts.Checked;
                         options.MsaPassthrough= cbxMsaPt.Checked;

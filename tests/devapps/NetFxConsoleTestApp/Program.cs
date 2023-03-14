@@ -142,7 +142,7 @@ namespace NetFx
 #if NET48
                     .WithWindowsBroker();
 #else
-                    .WithBroker(BrokerOptions.CreateDefault());
+                    .WithBroker();
 #endif
             }
 

@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Desktop;
 
@@ -120,11 +121,11 @@ namespace NetDesktopWinForms
                     throw new NotImplementedException();
             }
 
-            builder = builder.WithWindowsBrokerOptions(new WindowsBrokerOptions()
+            builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
             {
-                ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
+                ListOperatingSystemAccounts = cbxListOsAccounts.Checked,
                 MsaPassthrough = cbxMsaPt.Checked,
-                HeaderText = "MSAL Dev App .NET FX"
+                Title = "MSAL Dev App .NET FX"
             });
 
             if (chxEnableRuntimeLogs.Checked)

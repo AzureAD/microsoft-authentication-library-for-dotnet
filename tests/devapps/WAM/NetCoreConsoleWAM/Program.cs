@@ -21,17 +21,10 @@ public class Program
     
     public static async Task Main()
     {
-        //var pca = PublicClientApplicationBuilder.Create("4b0db8c2-9f26-4417-8bde-3f0e3656f8e0")
-        //        .WithAuthority(Authority)
-        //        .WithBrokerPreview(true)
-        //        .WithParentActivityOrWindow(() => GetConsoleWindow())
-        //        .Build();
-
         var pca = PublicClientApplicationBuilder.Create("4b0db8c2-9f26-4417-8bde-3f0e3656f8e0")
                 .WithAuthority(Authority)
-                //.WithBroker(true)
+                // .WithWindowsBrokerOptions(new WindowsBrokerOptions() { HeaderText = "foo" }) This API will give warning. Replace as below.
                 .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows) {  Title = "new"})
-                //.WithWindowsBrokerOptions(new WindowsBrokerOptions() { HeaderText = "foo" })
                 .WithLogging((x, y, z) => Console.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .WithRedirectUri("http://localhost")
                 .WithParentActivityOrWindow(() => GetConsoleWindow())

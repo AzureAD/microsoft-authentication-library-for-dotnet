@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
@@ -210,13 +211,12 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithBroker()
-               .WithWindowsBrokerOptions(
-                new WindowsBrokerOptions() 
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
                 {
-                    ListWindowsWorkAndSchoolAccounts = true
+                    ListOperatingSystemAccounts = true,
                 })
                .Build();
+
 
             // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
