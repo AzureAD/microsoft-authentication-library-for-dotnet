@@ -25,8 +25,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class ManagedIdentityTests
     {
-        private static readonly string[] s_msi_scopes = { "https://management.azure.com" };
-        private static readonly string[] s_wrong_msi_scopes = { "https://managements.azure.com" };
+        private static readonly string s_msi_scopes = "https://management.azure.com";
+        private static readonly string s_wrong_msi_scopes = "https://managements.azure.com";
         private static readonly string s_clientId = "client_id";
 
         //http proxy base URL 
@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string UserAssignedClientID = "3b57c42c-3201-4295-ae27-d6baec5b7027";
 
         //Non Existent User Assigned Client ID 
-        private const string NonExistentUserAssignedClientID = "3b57c42c-9999-9999-zz99-d6baec5b7027";
+        private const string NonExistentUserAssignedClientID = "72f988bf-86f1-41af-91ab-2d7cd011db47";
 
         //Error Messages
         private const string UserAssignedIdDoesNotExist = "[Managed Identity] Error Message: No User Assigned or Delegated Managed Identity found for specified ClientId/ResourceId/PrincipalId.";
@@ -55,13 +55,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Arrange
             string result = string.Empty;
 
-            IConfidentialClientApplication cca = CreateCCAWithProxy(s_baseURL);
+            IManagedIdentityApplication mia = CreateMIAWithProxy(s_baseURL);
 
             MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
             {
-                await cca
-                .AcquireTokenForClient(s_msi_scopes)
-                .WithManagedIdentity()
+                await mia
+                .AcquireTokenForManagedIdentity(s_msi_scopes)
                 .ExecuteAsync().ConfigureAwait(false);
             }).ConfigureAwait(false);
 
@@ -95,13 +94,20 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     $"azureresource={azureResource}&uri=";
 
                 //Create CCA with Proxy
-                IConfidentialClientApplication cca = CreateCCAWithProxy(uri);
+                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity);
 
+                AuthenticationResult result = null;
                 //Act
-                AuthenticationResult result = await cca
-                        .AcquireTokenForClient(s_msi_scopes)
-                        .WithManagedIdentity(userIdentity)
-                        .ExecuteAsync().ConfigureAwait(false);
+                try
+                {
+                    result = await mia
+                            .AcquireTokenForManagedIdentity(s_msi_scopes)
+                            .ExecuteAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                { 
+                
+                }
             
                 //Assert
                 //1. Access token
@@ -116,14 +122,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                 result.ExpiresOn,
                                 TimeSpan.FromHours(24));
 
-                result = await cca
-                    .AcquireTokenForClient(s_msi_scopes)
-                    .WithManagedIdentity(userIdentity)
+                result = await mia
+                    .AcquireTokenForManagedIdentity(s_msi_scopes)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 //4. Validate the scope
-                Assert.IsTrue(s_msi_scopes.All(result.Scopes.Contains));
+                Assert.IsTrue(result.Scopes.All(s_msi_scopes.Contains));
 
                 //5. Validate the second call to token endpoint gets returned from the cache
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
@@ -150,14 +155,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     $"azureresource={azureResource}&uri=";
 
                 //Create CCA with Proxy
-                IConfidentialClientApplication cca = CreateCCAWithProxy(uri);
+                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity);
 
                 //Act
                 MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
                 {
-                    await cca
-                    .AcquireTokenForClient(s_msi_scopes)
-                    .WithManagedIdentity(userIdentity)
+                    await mia
+                    .AcquireTokenForManagedIdentity(s_msi_scopes)
                     .ExecuteAsync().ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
@@ -186,14 +190,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     $"azureresource={azureResource}&uri=";
 
                 //Create CCA with Proxy
-                IConfidentialClientApplication cca = CreateCCAWithProxy(uri);
+                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity);
 
                 //Act
                 MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
                 {
-                    await cca
-                    .AcquireTokenForClient(s_msi_scopes)
-                    .WithManagedIdentity(userIdentity)
+                    await mia
+                    .AcquireTokenForManagedIdentity(s_msi_scopes)
                     .ExecuteAsync().ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
@@ -223,14 +226,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     $"azureresource={azureResource}&uri=";
 
                 //Create CCA with Proxy
-                IConfidentialClientApplication cca = CreateCCAWithProxy(uri);
+                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity);
 
                 //Act
                 MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
                 {
-                    await cca
-                    .AcquireTokenForClient(s_wrong_msi_scopes)
-                    .WithManagedIdentity(userIdentity)
+                    await mia
+                    .AcquireTokenForManagedIdentity(s_wrong_msi_scopes)
                     .ExecuteAsync().ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
@@ -283,19 +285,29 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// Create the CCA with the http proxy
         /// </summary>
         /// <param name="url"></param>
+        /// <param name="userAssignedId"></param>
         /// <returns></returns>
-        private IConfidentialClientApplication CreateCCAWithProxy(string url)
+        private IManagedIdentityApplication CreateMIAWithProxy(string url, string userAssignedId = "")
         {
             //Proxy the MSI token request 
             ProxyHttpManager proxyHttpManager = new ProxyHttpManager(url);
 
-            ConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
-               .Create(s_clientId)
+            var builder = ManagedIdentityApplicationBuilder
+               .Create()
                .WithExperimentalFeatures()
-               .WithHttpManager(proxyHttpManager)
-               .BuildConcrete();
+               .WithHttpManager(proxyHttpManager);
 
-            return cca;
+            if (!string.IsNullOrEmpty(userAssignedId))
+            {
+                builder = ManagedIdentityApplicationBuilder
+               .Create(userAssignedId)
+               .WithExperimentalFeatures()
+               .WithHttpManager(proxyHttpManager);
+            }
+
+            IManagedIdentityApplication mia = builder.Build();
+
+            return mia;
         }
     }
 }
