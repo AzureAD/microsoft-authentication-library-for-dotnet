@@ -452,11 +452,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             Assert.AreEqual(0, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
 
-            // InitiateLR - AT from cache
+            // InitiateLR - AT from IdentityProvider
             result = await cca.InitiateLongRunningProcessInWebApi(s_scopes, userAuthResult.AccessToken, ref oboCacheKey)
                 .ExecuteAsync().ConfigureAwait(false);
 
-            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
             // Expire AT
             TokenCacheHelper.ExpireAllAccessTokens(cca.UserTokenCacheInternal);

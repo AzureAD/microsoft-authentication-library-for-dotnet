@@ -15,52 +15,18 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
-    /// <summary>
-    /// Base class for builders of token requests, which attempt to acquire a token
-    /// based on the provided parameters.
-    /// </summary>
+    /// <inheritdoc />
     /// <typeparam name="T"></typeparam>
-    public abstract class AbstractAcquireTokenParameterBuilder<T>
-        where T : AbstractAcquireTokenParameterBuilder<T>
+    public abstract class AbstractAcquireTokenParameterBuilder<T> : BaseAbstractAcquireTokenParameterBuilder<T>
+        where T : BaseAbstractAcquireTokenParameterBuilder<T>
     {
-
-        internal IServiceBundle ServiceBundle { get; }
 
         /// <summary>
         /// Default constructor for AbstractAcquireTokenParameterBuilder.
         /// </summary>
-        protected AbstractAcquireTokenParameterBuilder() { }
+        protected AbstractAcquireTokenParameterBuilder() : base() { }
 
-        internal AbstractAcquireTokenParameterBuilder(IServiceBundle serviceBundle)
-        {
-            ServiceBundle = serviceBundle;
-        }
-
-        internal AcquireTokenCommonParameters CommonParameters { get; } = new AcquireTokenCommonParameters();
-
-        /// <summary>
-        /// Executes the Token request asynchronously, with a possibility of canceling the
-        /// asynchronous method.
-        /// </summary>
-        /// <param name="cancellationToken">Cancellation token. See <see cref="CancellationToken"/> </param>
-        /// <returns>Authentication result containing a token for the requested scopes and parameters
-        /// set in the builder.</returns>
-        /// <remarks>Cancellation is not guaranteed, it is best effort. If the operation reaches a point of no return, e.g.
-        /// tokens are acquired and written to the cache, the task will complete even if cancellation was requested.
-        /// Do not rely on cancellation tokens for strong consistency.</remarks>
-        public abstract Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken);
-
-        internal abstract ApiEvent.ApiIds CalculateApiEventId();
-
-        /// <summary>
-        /// Executes the Token request asynchronously.
-        /// </summary>
-        /// <returns>Authentication result containing a token for the requested scopes and parameters
-        /// set in the builder.</returns>
-        public Task<AuthenticationResult> ExecuteAsync()
-        {
-            return ExecuteAsync(CancellationToken.None);
-        }
+        internal AbstractAcquireTokenParameterBuilder(IServiceBundle serviceBundle) : base(serviceBundle) { }
 
         /// <summary>
         /// Specifies which scopes to request. This method is used when your application needs
@@ -75,7 +41,7 @@ namespace Microsoft.Identity.Client
         protected T WithScopes(IEnumerable<string> scopes)
         {
             CommonParameters.Scopes = scopes;
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -89,7 +55,7 @@ namespace Microsoft.Identity.Client
         {
             CommonParameters.ExtraQueryParameters = extraQueryParameters ??
                 new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -103,7 +69,7 @@ namespace Microsoft.Identity.Client
         public T WithClaims(string claims)
         {
             CommonParameters.Claims = claims;
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -119,7 +85,7 @@ namespace Microsoft.Identity.Client
             {
                 return WithExtraQueryParameters(CoreHelpers.ParseKeyValueList(extraQueryParameters, '&', true, null));
             }
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -144,7 +110,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(authorityUri));
             }
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAuthorityUri(authorityUri, validateAuthority);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -168,7 +134,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(cloudInstanceUri));
             }
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(new Uri(cloudInstanceUri), tenantId, validateAuthority);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -199,7 +165,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(cloudInstanceUri));
             }
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(new Uri(cloudInstanceUri), tenant, validateAuthority);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -221,7 +187,7 @@ namespace Microsoft.Identity.Client
             bool validateAuthority = true)
         {
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(azureCloudInstance, tenantId, validateAuthority);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -243,7 +209,7 @@ namespace Microsoft.Identity.Client
             bool validateAuthority = true)
         {
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(azureCloudInstance, tenant, validateAuthority);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -261,7 +227,7 @@ namespace Microsoft.Identity.Client
         public T WithAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(azureCloudInstance, authorityAudience, validateAuthority);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -279,7 +245,7 @@ namespace Microsoft.Identity.Client
         public T WithAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(authorityAudience, validateAuthority);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -316,7 +282,7 @@ namespace Microsoft.Identity.Client
 
             CommonParameters.AuthorityOverride = newAuthorityInfo;
 
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -365,7 +331,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(authorityUri));
             }
             CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.Adfs, authorityUri, validateAuthority);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -382,50 +348,13 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(authorityUri));
             }
             CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Sets the correlation id to be used in the authentication request. Used to track a request in the logs of both the SDK and the Identity Provider service.
-        /// If not set, a random one will be generated. 
-        /// </summary>
-        /// <param name="correlationId">Correlation id of the authentication request.</param>
-        /// <returns>The builder to chain the .With methods.</returns>
-        public T WithCorrelationId(Guid correlationId)
-        {
-            CommonParameters.UserProvidedCorrelationId = correlationId;
-            CommonParameters.UseCorrelationIdFromUser = true;
-            return (T)this;
+            return this as T;
         }
 
         internal /* for testing */ T WithAuthenticationScheme(IAuthenticationScheme scheme)
         {
             CommonParameters.AuthenticationScheme = scheme ?? throw new ArgumentNullException(nameof(scheme));
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Validates the parameters of the AcquireToken operation.
-        /// </summary>
-        protected virtual void Validate()
-        {
-        }
-
-        internal void ValidateAndCalculateApiId()
-        {
-            Validate();
-            CommonParameters.ApiId = CalculateApiEventId();
-            CommonParameters.CorrelationId = CommonParameters.UseCorrelationIdFromUser ? CommonParameters.UserProvidedCorrelationId : Guid.NewGuid();
-        }
-
-        internal void ValidateUseOfExperimentalFeature([System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
-        {
-            if (!ServiceBundle.Config.ExperimentalFeaturesEnabled)
-            {
-                throw new MsalClientException(
-                    MsalError.ExperimentalFeature,
-                    MsalErrorMessage.ExperimentalFeature(memberName));
-            }
+            return this as T;
         }
     }
 }

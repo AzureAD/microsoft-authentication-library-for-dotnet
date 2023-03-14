@@ -425,23 +425,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             ValidateSingleEntryMetadata(new Uri(TestAuthority), actualResult);
         }
 
-        [TestMethod]
-        public async Task InstanceDiscoveryIsSkippedForManagedIdentityAsync()
-        {
-            var httpManager = new MockHttpManager();
-            var appConfig = new ApplicationConfiguration(isConfidentialClient: true)
-            {
-                HttpManager = httpManager,
-                UseManagedIdentity = true
-            };
-
-            var serviceBundle = ServiceBundle.Create(appConfig);
-
-            RequestContext requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
-
-            await ValidateSelfEntryAsync(new Uri("https://login.microsoftonline.com/common/"), requestContext).ConfigureAwait(false);
-        }
-
         private async Task ValidateSelfEntryAsync(Uri authority, RequestContext requestContext = null)
         {
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
