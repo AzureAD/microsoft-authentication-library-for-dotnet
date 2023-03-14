@@ -3,6 +3,7 @@
 
 using System;
 using System.ComponentModel;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
@@ -32,13 +33,10 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="operatingSystems">Choices of OperatingSystems</param>
-        public BrokerOptions(OperatingSystems operatingSystems)
+        /// <param name="enabledOn">Choices of OperatingSystems</param>
+        public BrokerOptions(OperatingSystems enabledOn)
         {
-            if (operatingSystems == OperatingSystems.None)
-            {
-                throw new ArgumentException($"Operating system must be specified.");
-            }
+            EnabledOn = enabledOn;
         }
 
         // The default constructor is private. So developer is forced to set the OS choice(s)
@@ -50,27 +48,22 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <summary>
         /// Creates default options that can be modified later except the choice of OS
         /// </summary>
-        /// <param name="osChoice">Choice of OS platforms</param>
-        /// <param name="listWorkAndSchoolAccts">List wokr and school accounts</param>
         /// <returns></returns>
         internal static BrokerOptions CreateDefault()
         {
             return new BrokerOptions()
             {
-                OSChoices = OperatingSystems.Windows,
-                 ListOperatingSystemAccounts = true,
+                EnabledOn = OperatingSystems.Windows,
+                ListOperatingSystemAccounts = true,
             };
         }
 
         /// <summary>
         /// Creates BrokerOptions from WindowsBrokerOptions
         /// </summary>
-        /// <param name="winOptions"></param>
-        /// <param name="osChoice"></param>
-        /// <returns></returns>
-        internal static BrokerOptions CreateFromWindowsOptions(WindowsBrokerOptions winOptions, OperatingSystems osChoice = OperatingSystems.Windows)
+        internal static BrokerOptions CreateFromWindowsOptions(WindowsBrokerOptions winOptions)
         {
-            BrokerOptions ret = new BrokerOptions(osChoice);
+            BrokerOptions ret = new BrokerOptions(OperatingSystems.Windows);
             ret.Title = winOptions.HeaderText;
             ret.MsaPassthrough = winOptions.MsaPassthrough;
             ret.ListOperatingSystemAccounts = winOptions.ListWindowsWorkAndSchoolAccounts;
@@ -81,7 +74,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <summary>
         /// This is a required property to determine the supported OS
         /// </summary>
-        public OperatingSystems OSChoices { get; private set; }
+        public OperatingSystems EnabledOn { get; private set; }
 
         /// <summary>
         /// Title of the broker window
@@ -98,8 +91,17 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <summary>
         /// Currently only supported on Windows
         /// Allow the Windows broker to list Work and School accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>
-        /// </summary>
-        /// <remarks>On UWP, accounts are not listed due to privacy concerns</remarks>/// 
+        /// </summary>        
         public bool ListOperatingSystemAccounts { get; set; }
+
+        internal bool IsBrokerEnabledOnCurrentOs()
+        {
+            if (EnabledOn.HasFlag(OperatingSystems.Windows) && DesktopOsHelper.IsWindows())
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

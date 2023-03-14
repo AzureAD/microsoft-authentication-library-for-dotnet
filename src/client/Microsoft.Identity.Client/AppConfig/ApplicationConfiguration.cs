@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client
 
         public bool IsBrokerEnabled { get; internal set; }
 
-        public WindowsBrokerOptions WindowsBrokerOptions { get; set; }
+        public WindowsBrokerOptions LegacyBrokerOptions { get; set; } // TODO: bogavril - can we get rid of this? 
 
         public BrokerOptions BrokerOptions { get; set; }
 

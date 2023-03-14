@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
@@ -25,11 +26,29 @@ namespace Microsoft.Identity.Client.Broker
         /// If a broker does not exist or cannot be used, MSAL will fallback to a browser.
         /// Make sure browser auth is enabled (e.g. if using system browser, register the "http://localhost" redirect URI, etc.)
         /// </remarks>
-        [Obsolete("Use WithBroker instead.", false)]
+        [Obsolete("Use WithBroker(BrokerOptions) instead.", false)]
         public static PublicClientApplicationBuilder WithBrokerPreview(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
-            builder.Config.IsBrokerEnabled = enableBroker;
+            WithBroker(builder, new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+            return builder;
+        }
+
+        /// <summary>
+        /// Brokers enable Single-Sign-On, device identification,and application identification verification, 
+        /// while increasing the security of applications. Use this API to enable brokers on desktop platforms.
+        /// 
+        /// See https://aka.ms/msal-net-wam for more information on platform specific settings required to enable the broker such as redirect URIs.
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="brokerOptions">This provides cross platform options for broker.</param>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
+        public static PublicClientApplicationBuilder WithBroker(this PublicClientApplicationBuilder builder, BrokerOptions brokerOptions)
+        {
             AddRuntimeSupportForWam(builder);
+            builder.Config.BrokerOptions = brokerOptions;
+            builder.Config.IsBrokerEnabled = brokerOptions.IsBrokerEnabledOnCurrentOs();
             return builder;
         }
 

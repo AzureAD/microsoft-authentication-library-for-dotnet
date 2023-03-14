@@ -109,9 +109,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             }
             else
             {                
-                if (appConfig.WindowsBrokerOptions != null)
+                if (appConfig.LegacyBrokerOptions != null)
                 {
-                    _wamOptions = BrokerOptions.CreateFromWindowsOptions(appConfig.WindowsBrokerOptions);
+                    _wamOptions = BrokerOptions.CreateFromWindowsOptions(appConfig.LegacyBrokerOptions);
                 }
                 else
                 {

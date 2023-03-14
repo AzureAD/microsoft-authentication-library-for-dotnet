@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
             _msaPassthroughHandler = msaPassthroughHandler ??
                 new MsaPassthroughHandler(_logger, _msaPlugin, _wamProxy, _parentHandle);
 
-            _wamOptions = appConfig.WindowsBrokerOptions ??
+            _wamOptions = appConfig.LegacyBrokerOptions ??
                 WindowsBrokerOptions.CreateDefault();
         }
 

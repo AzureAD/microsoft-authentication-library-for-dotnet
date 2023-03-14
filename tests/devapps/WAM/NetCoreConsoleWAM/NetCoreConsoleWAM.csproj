@@ -1,11 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <!--<TargetFrameworks>net6.0;net48;net6.0-windows</TargetFrameworks>-->
     <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
+    <!--<LangVersion>preview</LangVersion>-->
+
   </PropertyGroup>
 
   <ItemGroup>
