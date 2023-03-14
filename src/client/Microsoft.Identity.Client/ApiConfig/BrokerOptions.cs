@@ -43,20 +43,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         private BrokerOptions()
         {
 
-        }
-
-        /// <summary>
-        /// Creates default options that can be modified later except the choice of OS
-        /// </summary>
-        /// <returns></returns>
-        internal static BrokerOptions CreateDefault()
-        {
-            return new BrokerOptions()
-            {
-                EnabledOn = OperatingSystems.Windows,
-                ListOperatingSystemAccounts = true,
-            };
-        }
+        }       
 
         /// <summary>
         /// Creates BrokerOptions from WindowsBrokerOptions

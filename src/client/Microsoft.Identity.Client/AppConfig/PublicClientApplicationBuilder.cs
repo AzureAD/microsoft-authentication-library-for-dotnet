@@ -8,6 +8,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using System.Runtime.CompilerServices;
 
 #if iOS
 using UIKit;
@@ -192,13 +193,18 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Allows customization of the Windows 10 Broker experience
         /// </summary>
-#if !SUPPORTS_BROKER || __MOBILE__
+
         [EditorBrowsable(EditorBrowsableState.Never)]
-#endif
+        [Obsolete("This API has been replaced with WithBroker(BrokerOptions), which can be found in Microsoft.Identity.Client.Broker package", false)]
         public PublicClientApplicationBuilder WithWindowsBrokerOptions(WindowsBrokerOptions options)
         {
             WindowsBrokerOptions.ValidatePlatformAvailability();
-            Config.LegacyBrokerOptions = options;
+            if (Config.BrokerOptions != null)
+            {
+                throw new NotSupportedException("Broker options are already set. Use WithBroker(BrokerOptions) API instead.");
+            }
+            var newOptions = BrokerOptions.CreateFromWindowsOptions(options);
+            Config.BrokerOptions = newOptions; 
             return this;
         }
 

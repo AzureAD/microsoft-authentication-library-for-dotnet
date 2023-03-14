@@ -96,28 +96,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            if(_logger.PiiLoggingEnabled)
+            if (_logger.PiiLoggingEnabled)
             {
                 s_lazyCore.Value.EnablePii(_logger.PiiLoggingEnabled);
             }
 
             _parentHandle = GetParentWindow(uiParent);
 
-            if(appConfig.BrokerOptions != null)
-            {
-                _wamOptions = appConfig.BrokerOptions;
-            }
-            else
-            {                
-                if (appConfig.LegacyBrokerOptions != null)
-                {
-                    _wamOptions = BrokerOptions.CreateFromWindowsOptions(appConfig.LegacyBrokerOptions);
-                }
-                else
-                {
-                    _wamOptions = BrokerOptions.CreateDefault();
-                }
-            }
+            // Broker options cannot be null
+            _wamOptions = appConfig.BrokerOptions;
         }
 
         private void LogEventRaised(NativeInterop.Core sender, LogEventArgs args)
@@ -165,8 +152,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             if (authenticationRequestParameters?.Account?.HomeAccountId?.ObjectId != null)
             {
                 using (var authParams = WamAdapters.GetCommonAuthParameters(
-                    authenticationRequestParameters, 
-                    _wamOptions, 
+                    authenticationRequestParameters,
+                    _wamOptions,
                     _logger))
                 {
                     using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
@@ -192,7 +179,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                             _logger?.WarningPii(
                                 $"[WamBroker] Could not find a WAM account for the selected user {authenticationRequestParameters.Account.Username}, error: {readAccountResult.Error}",
                                 $"[WamBroker] Could not find a WAM account for the selected user. Error: {readAccountResult.Error}");
-                            
+
                             _logger?.Info(
                                 $"[WamBroker] Calling SignInInteractivelyAsync this will show the account picker.");
 
@@ -223,7 +210,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
-                authenticationRequestParameters, 
+                authenticationRequestParameters,
                 _wamOptions,
                 _logger))
             {
@@ -259,7 +246,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             _logger?.Verbose(() => "[WamBroker] Signing in with the default user account.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
-                authenticationRequestParameters, 
+                authenticationRequestParameters,
                 _wamOptions,
                 _logger))
             {
@@ -300,7 +287,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             _logger?.Verbose(() => "[WamBroker] Acquiring token silently.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
-                authenticationRequestParameters, 
+                authenticationRequestParameters,
                 _wamOptions,
                 _logger))
             {
@@ -348,7 +335,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             _logger?.Verbose(() => "[WamBroker] Acquiring token silently for default account.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
-                authenticationRequestParameters, 
+                authenticationRequestParameters,
                 _wamOptions,
                 _logger))
             {
@@ -378,7 +365,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             _logger?.Verbose(() => "[WamBroker] Acquiring token with Username Password flow.");
 
             using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(
-                authenticationRequestParameters, 
+                authenticationRequestParameters,
                 _wamOptions,
                 _logger))
             {
@@ -402,7 +389,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
         {
             using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
-            
+
             if (account == null)
             {
                 _logger?.Verbose(() => "[WamBroker] No valid account was passed to RemoveAccountAsync. ");
@@ -477,7 +464,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             using (var discoverAccountsResult = await s_lazyCore.Value.DiscoverAccountsAsync(
                 clientID,
-                cacheSessionManager.RequestContext.CorrelationId.ToString("D"), 
+                cacheSessionManager.RequestContext.CorrelationId.ToString("D"),
                 cacheSessionManager.RequestContext.UserCancellationToken).ConfigureAwait(false))
             {
                 if (discoverAccountsResult.IsSuccess)
@@ -529,9 +516,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         $" Error Code: {discoverAccountsResult.Error.ErrorCode} \n" +
                         $" Error Message: {discoverAccountsResult.Error.Context} \n" +
                         $" Internal Error Code: {discoverAccountsResult.Error.Tag.ToString(CultureInfo.InvariantCulture)} \n" +
-                        $" Telemetry Data: {discoverAccountsResult.TelemetryData } \n";
+                        $" Telemetry Data: {discoverAccountsResult.TelemetryData} \n";
 
-                    _logger.ErrorPii($"[WamBroker] {errorMessagePii}", 
+                    _logger.ErrorPii($"[WamBroker] {errorMessagePii}",
                         $"[WamBroker] DiscoverAccounts Error. " +
                         $"Error Code : {discoverAccountsResult.Error.ErrorCode}. " +
                         $"Internal Error Code: {discoverAccountsResult.Error.Tag.ToString(CultureInfo.InvariantCulture)}");
