@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Core;
 using System.Net;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -28,7 +29,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             _requestContext = requestContext;
         }
 
-        public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(AppTokenProviderParameters parameters, CancellationToken cancellationToken)
+        public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(AcquireTokenForManagedIdentityParameters parameters, CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -37,7 +38,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             // Convert the scopes to a resource string.
-            string resource = ScopeHelper.ScopesToResource(parameters.Scopes.ToArray());
+            string resource = parameters.Resource;
 
             ManagedIdentityRequest request = CreateRequest(resource);
 
@@ -50,7 +51,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
             }
-            catch(TaskCanceledException)
+            catch (TaskCanceledException)
             {
                 _requestContext.Logger.Error(TimeoutError);
                 throw;
@@ -58,7 +59,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         protected virtual Task<ManagedIdentityResponse> HandleResponseAsync(
-            AppTokenProviderParameters parameters,
+            AcquireTokenForManagedIdentityParameters parameters,
             HttpResponse response,
             CancellationToken cancellationToken)
         {

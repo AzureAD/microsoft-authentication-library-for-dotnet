@@ -88,8 +88,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                .WithAuthority(TestConstants.AuthorityTenant);
 
 #if !NET6_WIN
-            // this ensures that legacy broker is called
-            DesktopExtensions.WithWindowsDesktopFeatures(pcaBuilder);
+            pcaBuilder = pcaBuilder.WithWindowsBroker();
 #endif
 
             Assert.IsTrue(pcaBuilder.IsBrokerAvailable());

@@ -20,6 +20,7 @@ namespace Microsoft.Identity.Client
 
         #region High-Level cache operations
         Task RemoveAccountAsync(IAccount account, AuthenticationRequestParameters requestParameters);
+        Task<bool> StopLongRunningOboProcessAsync(string longRunningOboCacheKey, AuthenticationRequestParameters requestParameters);
         Task<IEnumerable<IAccount>> GetAccountsAsync(AuthenticationRequestParameters requestParameters);
 
         Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> SaveTokenResponseAsync(

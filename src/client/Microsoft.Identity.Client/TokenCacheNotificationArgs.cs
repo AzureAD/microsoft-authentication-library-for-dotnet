@@ -236,8 +236,9 @@ namespace Microsoft.Identity.Client
         /// Is true when at least one non-expired access token exists in the cache. 
         /// </summary>
         /// <remarks>  
-        /// If this flag is false in the OnAfterAccessAsync notification, the *application* token cache - used by client_credentials flow / AcquireTokenForClient -  can be deleted.        
-        /// MSAL takes into consideration access tokens expiration when computing this flag, but not refresh token expiration, which is not known to MSAL.
+        /// If this flag is false in the OnAfterAccessAsync notification - the node can be deleted from the underlying storage (e.g. IDistributedCache).
+        /// MSAL takes into consideration access tokens expiration when computing this flag. Use in conjunction with SuggestedCacheExpiry.
+        /// If a refresh token exists in the cache, this proprety will always be true. 
         /// </remarks>
         public bool HasTokens { get; }
 
@@ -248,7 +249,7 @@ namespace Microsoft.Identity.Client
         public CancellationToken CancellationToken { get; }
 
         /// <summary>
-        /// The correlation id associated with the request. See <see cref="AbstractAcquireTokenParameterBuilder{T}.WithCorrelationId(Guid)"/>
+        /// The correlation id associated with the request. See <see cref="BaseAbstractAcquireTokenParameterBuilder{T}.WithCorrelationId(Guid)"/>
         /// </summary>
         public Guid CorrelationId { get; }
 
@@ -271,9 +272,8 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Suggested value of the expiry, to help determining the cache eviction time. 
         /// This value is <b>only</b> set on the <code>OnAfterAccess</code> delegate, on a cache write
-        /// operation (that is when <code>args.HasStateChanged</code> is <code>true</code>) and when the cache write 
-        /// is triggered from the <code>AcquireTokenForClient</code> method. In all other cases it's <code>null</code>, as there is a refresh token, and therefore the
-        /// access tokens are refreshable.
+        /// operation (that is when <code>args.HasStateChanged</code> is <code>true</code>) and when the cache node contains only access tokens.        
+        /// In all other cases it's <code>null</code>. 
         /// </summary> 
         public DateTimeOffset? SuggestedCacheExpiry { get; }
 
