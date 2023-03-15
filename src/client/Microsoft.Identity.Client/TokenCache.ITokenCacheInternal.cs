@@ -88,6 +88,11 @@ namespace Microsoft.Identity.Client
                     requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForClient,
                     "client_credentials flow should not receive a refresh token");
 
+                Debug.Assert(
+                    (requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity || 
+                    requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity),
+                    "Managed identity flow should not receive a refresh token");
+
                 msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(
                                     instanceDiscoveryMetadata.PreferredCache,
                                     requestParams.AppConfig.ClientId,
@@ -109,6 +114,11 @@ namespace Microsoft.Identity.Client
                 Debug.Assert(
                     requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForClient,
                     "client_credentials flow should not receive an ID token");
+
+                Debug.Assert(
+                    (requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity ||
+                    requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity),
+                    "Managed identity flow should not receive an ID token");
 
                 msalIdTokenCacheItem = new MsalIdTokenCacheItem(
                     instanceDiscoveryMetadata.PreferredCache,
@@ -564,6 +574,8 @@ namespace Microsoft.Identity.Client
 
             // Only AcquireTokenSilent has an IAccount in the request that can be used for filtering
             if (requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForClient &&
+                requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity && 
+                requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity &&
                 requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
             {
                 tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(

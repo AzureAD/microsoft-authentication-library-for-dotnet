@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
         string TenantId { get; }
 
         /// <summary>
-        /// Callback used for logging. It was set with <see cref="AbstractApplicationBuilder{T}.WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
+        /// Callback used for logging. It was set with <see cref="BaseAbstractApplicationBuilder{T}.WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
         /// See https://aka.ms/msal-net-logging
         /// </summary>
         LogCallback LoggingCallback { get; }

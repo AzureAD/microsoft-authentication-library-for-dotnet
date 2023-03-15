@@ -25,57 +25,10 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class AbstractApplicationBuilder<T>
-        where T : AbstractApplicationBuilder<T>
+    public abstract class AbstractApplicationBuilder<T> : BaseAbstractApplicationBuilder<T>
+        where T : BaseAbstractApplicationBuilder<T>
     {
-        internal AbstractApplicationBuilder(ApplicationConfiguration configuration)
-        {
-            Config = configuration;
-        }
-
-        internal ApplicationConfiguration Config { get; }
-
-        /// <summary>
-        /// Uses a specific <see cref="IMsalHttpClientFactory"/> to communicate
-        /// with the IdP. This enables advanced scenarios such as setting a proxy,
-        /// or setting the Agent.
-        /// </summary>
-        /// <param name="httpClientFactory">HTTP client factory</param>
-        /// <remarks>MSAL does not guarantee that it will not modify the HttpClient, for example by adding new headers.
-        /// Prior to the changes needed in order to make MSAL's httpClients thread safe (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2046/files),
-        /// the httpClient had the possibility of throwing an exception stating "Properties can only be modified before sending the first request".
-        /// MSAL's httpClient will no longer throw this exception after 4.19.0 (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases/tag/4.19.0)
-        /// see (https://aka.ms/msal-httpclient-info) for more information.
-        /// </remarks>
-        /// <returns>The builder to chain the .With methods</returns>
-        public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory)
-        {
-            Config.HttpClientFactory = httpClientFactory;
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Uses a specific <see cref="IMsalHttpClientFactory"/> to communicate
-        /// with the IdP. This enables advanced scenarios such as setting a proxy,
-        /// or setting the Agent.
-        /// </summary>
-        /// <param name="httpClientFactory">HTTP client factory</param>
-        /// <param name="retryOnceOn5xx">Configures MSAL to retry on 5xx server errors. When enabled (on by default), MSAL will wait 1 second after recieving
-        /// a 5xx error and then retry the http request again.</param>
-        /// <remarks>MSAL does not guarantee that it will not modify the HttpClient, for example by adding new headers.
-        /// Prior to the changes needed in order to make MSAL's httpClients thread safe (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2046/files),
-        /// the httpClient had the possibility of throwing an exception stating "Properties can only be modified before sending the first request".
-        /// MSAL's httpClient will no longer throw this exception after 4.19.0 (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases/tag/4.19.0)
-        /// see (https://aka.ms/msal-httpclient-info) for more information.
-        /// If you only want to configure the retryOnceOn5xx parameter, set httpClientFactory to null and MSAL will use the default http client.
-        /// </remarks>
-        /// <returns>The builder to chain the .With methods</returns>
-        public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory, bool retryOnceOn5xx)
-        {
-            Config.HttpClientFactory = httpClientFactory;
-            Config.RetryOnServerErrors = retryOnceOn5xx;
-            return (T)this;
-        }
+        internal AbstractApplicationBuilder(ApplicationConfiguration configuration) : base(configuration) { }
 
         /// <summary>
         /// Allows developers to configure their own valid authorities. A json string similar to https://aka.ms/aad-instance-discovery should be provided.
@@ -105,7 +58,7 @@ namespace Microsoft.Identity.Client
             {
                 InstanceDiscoveryResponse instanceDiscovery = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(instanceDiscoveryJson);
                 Config.CustomInstanceDiscoveryMetadata = instanceDiscovery;
-                return (T)this;
+                return this as T;
             }
             catch (JsonException ex)
             {
@@ -142,7 +95,7 @@ namespace Microsoft.Identity.Client
             {
                 InstanceDiscoveryResponse instanceDiscovery = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(instanceDiscoveryJson);
                 Config.CustomInstanceDiscoveryMetadata = instanceDiscovery;
-                return (T)this;
+                return this as T;
             }
             catch (JsonException ex)
             {
@@ -175,7 +128,7 @@ namespace Microsoft.Identity.Client
             Config.CustomInstanceDiscoveryMetadataUri = instanceDiscoveryUri ??
                 throw new ArgumentNullException(nameof(instanceDiscoveryUri));
 
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -198,55 +151,19 @@ namespace Microsoft.Identity.Client
             Config.CustomInstanceDiscoveryMetadataUri = instanceDiscoveryUri ??
                 throw new ArgumentNullException(nameof(instanceDiscoveryUri));
 
-            return (T)this;
-        }
-
-        internal T WithHttpManager(IHttpManager httpManager)
-        {
-            Config.HttpManager = httpManager;
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Options for MSAL token caches. 
-        /// 
-        /// MSAL maintains a token cache internally in memory. By default, this cache object is part of each instance of <see cref="PublicClientApplication"/> or <see cref="ConfidentialClientApplication"/>.
-        /// This method allows customization of the in-memory token cache of MSAL. 
-        /// 
-        /// MSAL's memory cache is different than token cache serialization. Cache serialization pulls the tokens from a cache (e.g. Redis, Cosmos, or a file on disk), 
-        /// where they are stored in JSON format, into MSAL's internal memory cache. Memory cache operations do not involve JSON operations. 
-        /// 
-        /// External cache serialization remains the recommended way to handle desktop apps, web site and web APIs, as it provides persistence. These options
-        /// do not currently control external cache serialization.
-        /// 
-        /// Detailed guidance for each application type and platform:
-        /// https://aka.ms/msal-net-token-cache-serialization
-        /// </summary>
-        /// <param name="options">Options for the internal MSAL token caches. </param>
-#if !SUPPORTS_CUSTOM_CACHE || WINDOWS_APP
-    [EditorBrowsable(EditorBrowsableState.Never)]
-#endif
-        public T WithCacheOptions(CacheOptions options)
-        {
-#if !SUPPORTS_CUSTOM_CACHE || WINDOWS_APP
-            throw new PlatformNotSupportedException("WithCacheOptions is supported only on platforms where MSAL stores tokens in memory and not on mobile platforms or UWP.");
-#else
-
-            Config.AccessorOptions = options;
-            return (T)this;
-#endif
+            return this as T;
         }
 
         internal T WithPlatformProxy(IPlatformProxy platformProxy)
         {
             Config.PlatformProxy = platformProxy;
-            return (T)this;
+            return this as T;
         }
 
         internal T WithUserTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)
         {
             Config.UserTokenCacheInternalForTest = tokenCacheInternal;
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -264,98 +181,7 @@ namespace Microsoft.Identity.Client
         public T WithLegacyCacheCompatibility(bool enableLegacyCacheCompatibility = true)
         {
             Config.LegacyCacheCompatibilityEnabled = enableLegacyCacheCompatibility;
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Sets the logging callback. For details see https://aka.ms/msal-net-logging
-        /// </summary>
-        /// <param name="loggingCallback"></param>
-        /// <param name="logLevel">Desired level of logging.  The default is LogLevel.Info</param>
-        /// <param name="enablePiiLogging">Boolean used to enable/disable logging of
-        /// Personally Identifiable Information (PII).
-        /// PII logs are never written to default outputs like Console, Logcat or NSLog
-        /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
-        /// You can set it to <c>true</c> for advanced debugging requiring PII
-        /// If both WithLogging apis are set, the other one will overide the this one
-        /// </param>
-        /// <param name="enableDefaultPlatformLogging">Flag to enable/disable logging to platform defaults.
-        /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
-        /// In android, Logcat is used. The default value is <c>false</c>
-        /// </param>
-        /// <returns>The builder to chain the .With methods</returns>
-        /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
-        /// was already set on the application builder        
-        public T WithLogging(
-            LogCallback loggingCallback,
-            LogLevel? logLevel = null,
-            bool? enablePiiLogging = null,
-            bool? enableDefaultPlatformLogging = null)
-        {
-            if (Config.LoggingCallback != null)
-            {
-                throw new InvalidOperationException(MsalErrorMessage.LoggingCallbackAlreadySet);
-            }
-
-            Config.LoggingCallback = loggingCallback;
-            Config.LogLevel = logLevel ?? Config.LogLevel;
-            Config.EnablePiiLogging = enablePiiLogging ?? Config.EnablePiiLogging;
-            Config.IsDefaultPlatformLoggingEnabled = enableDefaultPlatformLogging ?? Config.IsDefaultPlatformLoggingEnabled;
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Sets the Identity Logger. For details see https://aka.ms/msal-net-logging
-        /// </summary>
-        /// <param name="identityLogger">IdentityLogger</param>
-        /// <param name="enablePiiLogging">Boolean used to enable/disable logging of
-        /// Personally Identifiable Information (PII).
-        /// PII logs are never written to default outputs like Console, Logcat or NSLog
-        /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
-        /// You can set it to <c>true</c> for advanced debugging requiring PII
-        /// If both WithLogging apis are set, this one will override the other
-        /// </param>
-        /// <returns>The builder to chain the .With methods</returns>
-        /// <remarks>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</remarks>
-        public T WithLogging(
-            IIdentityLogger identityLogger,
-            bool enablePiiLogging = false)
-        {
-            Config.IdentityLogger = identityLogger;
-            Config.EnablePiiLogging = enablePiiLogging;
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Sets the Debug logging callback to a default debug method which displays
-        /// the level of the message and the message itself. For details see https://aka.ms/msal-net-logging
-        /// </summary>
-        /// <param name="logLevel">Desired level of logging.  The default is LogLevel.Info</param>
-        /// <param name="enablePiiLogging">Boolean used to enable/disable logging of
-        /// Personally Identifiable Information (PII).
-        /// PII logs are never written to default outputs like Console, Logcat or NSLog
-        /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
-        /// You can set it to <c>true</c> for advanced debugging requiring PII
-        /// </param>
-        /// <param name="withDefaultPlatformLoggingEnabled">Flag to enable/disable logging to platform defaults.
-        /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
-        /// In android, logcat is used. The default value is <c>false</c>
-        /// </param>
-        /// <returns>The builder to chain the .With methods</returns>
-        /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
-        /// was already set on the application builder by calling <see cref="WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
-        /// <seealso cref="WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
-        public T WithDebugLoggingCallback(
-            LogLevel logLevel = LogLevel.Info,
-            bool enablePiiLogging = false,
-            bool withDefaultPlatformLoggingEnabled = false)
-        {
-            WithLogging(
-                (level, message, pii) => { Debug.WriteLine($"{level}: {message}"); },
-                logLevel,
-                enablePiiLogging,
-                withDefaultPlatformLoggingEnabled);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -370,7 +196,7 @@ namespace Microsoft.Identity.Client
         [EditorBrowsable(EditorBrowsableState.Never)]
         internal T WithTelemetry(TelemetryCallback telemetryCallback)
         {
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -382,7 +208,7 @@ namespace Microsoft.Identity.Client
         public T WithClientId(string clientId)
         {
             Config.ClientId = clientId;
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -397,7 +223,7 @@ namespace Microsoft.Identity.Client
         public T WithRedirectUri(string redirectUri)
         {
             Config.RedirectUri = GetValueIfNotEmpty(Config.RedirectUri, redirectUri);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -413,7 +239,7 @@ namespace Microsoft.Identity.Client
         public T WithTenantId(string tenantId)
         {
             Config.TenantId = GetValueIfNotEmpty(Config.TenantId, tenantId);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -424,7 +250,7 @@ namespace Microsoft.Identity.Client
         public T WithClientName(string clientName)
         {
             Config.ClientName = GetValueIfNotEmpty(Config.ClientName, clientName);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -435,7 +261,7 @@ namespace Microsoft.Identity.Client
         public T WithClientVersion(string clientVersion)
         {
             Config.ClientVersion = GetValueIfNotEmpty(Config.ClientVersion, clientVersion);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -464,7 +290,7 @@ namespace Microsoft.Identity.Client
             Config.AadAuthorityAudience = applicationOptions.AadAuthorityAudience;
             Config.AzureCloudInstance = applicationOptions.AzureCloudInstance;
 
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -477,7 +303,7 @@ namespace Microsoft.Identity.Client
         public T WithExtraQueryParameters(IDictionary<string, string> extraQueryParameters)
         {
             Config.ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -493,21 +319,7 @@ namespace Microsoft.Identity.Client
             {
                 return WithExtraQueryParameters(CoreHelpers.ParseKeyValueList(extraQueryParameters, '&', true, null));
             }
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Allows usage of experimental features and APIs. If this flag is not set, experimental features 
-        /// will throw an exception. For details see https://aka.ms/msal-net-experimental-features
-        /// </summary>
-        /// <remarks>
-        /// Changes in the public API of experimental features will not result in an increment of the major version of this library.
-        /// For these reason we advise against using these features in production.
-        /// </remarks>
-        public T WithExperimentalFeatures(bool enableExperimentalFeatures = true)
-        {
-            Config.ExperimentalFeaturesEnabled = enableExperimentalFeatures;
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -526,7 +338,7 @@ namespace Microsoft.Identity.Client
                 Config.ClientCapabilities = clientCapabilities;
             }
 
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -543,7 +355,7 @@ namespace Microsoft.Identity.Client
         {
             Config.IsInstanceDiscoveryEnabled = enableInstanceDiscovery;
 
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -555,7 +367,7 @@ namespace Microsoft.Identity.Client
         [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithTelemetry(ITelemetryConfig telemetryConfig)
         {
-            return (T)this;
+            return this as T;
         }
 
         internal virtual void Validate()
@@ -579,105 +391,15 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal ApplicationConfiguration BuildConfiguration()
+        internal override ApplicationConfiguration BuildConfiguration()
         {
             ResolveAuthority();
             Validate();
             return Config;
         }
 
-        internal void ValidateUseOfExperimentalFeature([System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
-        {
-            if (!Config.ExperimentalFeaturesEnabled)
-            {
-                throw new MsalClientException(
-                    MsalError.ExperimentalFeature,
-                    MsalErrorMessage.ExperimentalFeature(memberName));
-            }
-        }
-
         #region Authority
-        private void ResolveAuthority()
-        {
-            if (Config.Authority?.AuthorityInfo != null)
-            {
-                var isB2C = Config.Authority is B2CAuthority;
-
-                AadAuthority aadAuthority = Config.Authority as AadAuthority;
-                if (!string.IsNullOrEmpty(Config.TenantId)
-                    && !isB2C
-                    && aadAuthority != null)
-                {
-                    if (!aadAuthority.IsCommonOrganizationsOrConsumersTenant() &&
-                        !string.Equals(aadAuthority.TenantId, Config.TenantId))
-                    {
-                        throw new MsalClientException(
-                            MsalError.AuthorityTenantSpecifiedTwice,
-                            "You specified a different tenant - once in WithAuthority() and once using WithTenant().");
-                    }
-
-                    Config.Authority = Authority.CreateAuthorityWithTenant(Config.Authority.AuthorityInfo, Config.TenantId);
-                }
-            }
-            else
-            {
-                string authorityInstance = GetAuthorityInstance();
-                string authorityAudience = GetAuthorityAudience();
-
-                var authorityInfo = new AuthorityInfo(
-                        AuthorityType.Aad,
-                        new Uri($"{authorityInstance}/{authorityAudience}").ToString(),
-                        Config.ValidateAuthority);
-
-                Config.Authority = new AadAuthority(authorityInfo);
-            }
-        }
-
-        private string GetAuthorityAudience()
-        {
-            if (!string.IsNullOrWhiteSpace(Config.TenantId) &&
-                Config.AadAuthorityAudience != AadAuthorityAudience.None &&
-                Config.AadAuthorityAudience != AadAuthorityAudience.AzureAdMyOrg)
-            {
-                // Conflict, user has specified a string tenantId and the enum audience value for AAD, which is also the tenant.
-                throw new InvalidOperationException(MsalErrorMessage.TenantIdAndAadAuthorityInstanceAreMutuallyExclusive);
-            }
-
-            if (Config.AadAuthorityAudience != AadAuthorityAudience.None)
-            {
-                return AuthorityInfo.GetAadAuthorityAudienceValue(Config.AadAuthorityAudience, Config.TenantId);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Config.TenantId))
-            {
-                return Config.TenantId;
-            }
-
-            return AuthorityInfo.GetAadAuthorityAudienceValue(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, string.Empty);
-        }
-
-        private string GetAuthorityInstance()
-        {
-            // Check if there's enough information in the existing config to build up a default authority.
-            if (!string.IsNullOrWhiteSpace(Config.Instance) && Config.AzureCloudInstance != AzureCloudInstance.None)
-            {
-                // Conflict, user has specified a string instance and the enum instance value.
-                throw new InvalidOperationException(MsalErrorMessage.InstanceAndAzureCloudInstanceAreMutuallyExclusive);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Config.Instance))
-            {
-                Config.Instance = Config.Instance.TrimEnd(' ', '/');
-                return Config.Instance;
-            }
-
-            if (Config.AzureCloudInstance != AzureCloudInstance.None)
-            {
-                return AuthorityInfo.GetCloudUrl(Config.AzureCloudInstance);
-            }
-
-            return AuthorityInfo.GetCloudUrl(AzureCloudInstance.AzurePublic);
-        }
+        
 
         /// <summary>
         /// Adds a known authority to the application from its Uri. See https://aka.ms/msal-net-application-configuration.
@@ -723,7 +445,7 @@ namespace Microsoft.Identity.Client
 
             Config.Authority = Authority.CreateAuthority(authorityUri, validateAuthority);
 
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -740,7 +462,7 @@ namespace Microsoft.Identity.Client
             bool validateAuthority = true)
         {
             WithAuthority(cloudInstanceUri, tenantId.ToString("D", CultureInfo.InvariantCulture), validateAuthority);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -778,7 +500,7 @@ namespace Microsoft.Identity.Client
                 validateAuthority);
             Config.Authority = new AadAuthority(authorityInfo);
 
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -797,7 +519,7 @@ namespace Microsoft.Identity.Client
             bool validateAuthority = true)
         {
             WithAuthority(azureCloudInstance, tenantId.ToString("D", CultureInfo.InvariantCulture), validateAuthority);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -825,7 +547,7 @@ namespace Microsoft.Identity.Client
             Config.TenantId = tenant;
             Config.ValidateAuthority = validateAuthority;
 
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -845,7 +567,7 @@ namespace Microsoft.Identity.Client
             Config.AadAuthorityAudience = authorityAudience;
             Config.ValidateAuthority = validateAuthority;
 
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -861,7 +583,7 @@ namespace Microsoft.Identity.Client
         {
             Config.AadAuthorityAudience = authorityAudience;
             Config.ValidateAuthority = validateAuthority;
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -876,7 +598,7 @@ namespace Microsoft.Identity.Client
 
             var authorityInfo = AuthorityInfo.FromAdfsAuthority(authorityUri, validateAuthority);
             Config.Authority = AdfsAuthority.CreateAuthority(authorityInfo);
-            return (T)this;
+            return this as T;
         }
 
         /// <summary>
@@ -891,7 +613,7 @@ namespace Microsoft.Identity.Client
             var authorityInfo = AuthorityInfo.FromB2CAuthority(authorityUri);
             Config.Authority = B2CAuthority.CreateAuthority(authorityInfo);
 
-            return (T)this;
+            return this as T;
         }
 
         #endregion

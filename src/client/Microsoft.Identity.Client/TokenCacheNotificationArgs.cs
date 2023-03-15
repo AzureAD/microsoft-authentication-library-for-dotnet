@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Client
         public CancellationToken CancellationToken { get; }
 
         /// <summary>
-        /// The correlation id associated with the request. See <see cref="AbstractAcquireTokenParameterBuilder{T}.WithCorrelationId(Guid)"/>
+        /// The correlation id associated with the request. See <see cref="BaseAbstractAcquireTokenParameterBuilder{T}.WithCorrelationId(Guid)"/>
         /// </summary>
         public Guid CorrelationId { get; }
 

@@ -63,12 +63,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
        
             requestParams.SendX5C = clientParameters.SendX5C ?? false;
 
-            if (ServiceBundle.Config.UseManagedIdentity)
-            {
-                ManagedIdentityClient managedIdentityClient = new ManagedIdentityClient(requestContext);
-                ServiceBundle.Config.AppTokenProvider = managedIdentityClient.AppTokenProviderImplAsync;
-            }
-
             var handler = new ClientCredentialRequest(
                 ServiceBundle,
                 requestParams,

@@ -30,6 +30,21 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             return executor;
         }
 
+#if !SUPPORTS_CONFIDENTIAL_CLIENT
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
+#endif
+        public static IManagedIdentityApplicationExecutor CreateManagedIdentityExecutor(
+            ManagedIdentityApplication managedIdentityApplication)
+        {
+            ClientApplicationBase.GuardMobileFrameworks();
+
+            IManagedIdentityApplicationExecutor executor = new ManagedIdentityExecutor(
+                managedIdentityApplication.ServiceBundle,
+                managedIdentityApplication);
+
+            return executor;
+        }
+
         public static IClientApplicationBaseExecutor CreateClientApplicationBaseExecutor(
             ClientApplicationBase clientApplicationBase)
         {
