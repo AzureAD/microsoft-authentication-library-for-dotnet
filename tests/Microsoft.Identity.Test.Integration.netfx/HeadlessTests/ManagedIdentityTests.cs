@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -16,9 +17,8 @@ using Microsoft.Identity.Json;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute.Exceptions;
+using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -27,7 +27,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private static readonly string s_msi_scopes = "https://management.azure.com";
         private static readonly string s_wrong_msi_scopes = "https://managements.azure.com";
-        private static readonly string s_clientId = "client_id";
 
         //http proxy base URL 
         private static readonly string s_baseURL = "https://service.msidlab.com/";
@@ -55,16 +54,26 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Arrange
             string result = string.Empty;
 
-            IManagedIdentityApplication mia = CreateMIAWithProxy(s_baseURL);
-
-            MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
+            //Arrange
+            using (new EnvVariableContext())
             {
-                await mia
-                .AcquireTokenForManagedIdentity(s_msi_scopes)
-                .ExecuteAsync().ConfigureAwait(false);
-            }).ConfigureAwait(false);
+                IManagedIdentityApplication mia = CreateMIAWithProxy(s_baseURL);
 
-            Assert.IsNotNull(ex);
+                //Get the Environment Variables
+                Dictionary<string, string> envVariables = new Dictionary<string, string>();
+
+                //Set the Environment Variables
+                SetEnvironmentVariables(envVariables);
+
+                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
+                {
+                    await mia
+                    .AcquireTokenForManagedIdentity(s_msi_scopes)
+                    .ExecuteAsync().ConfigureAwait(false);
+                }).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+            }
         }
 
         [DataTestMethod]
@@ -98,17 +107,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 AuthenticationResult result = null;
                 //Act
-                try
-                {
-                    result = await mia
+                result = await mia
                             .AcquireTokenForManagedIdentity(s_msi_scopes)
                             .ExecuteAsync().ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                { 
-                
-                }
-            
+
                 //Assert
                 //1. Access token
                 Assert.IsNotNull(result.AccessToken);
@@ -131,7 +133,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.IsTrue(result.Scopes.All(s_msi_scopes.Contains));
 
                 //5. Validate the second call to token endpoint gets returned from the cache
-                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(TokenSource.Cache, 
+                    result.AuthenticationResultMetadata.TokenSource);
             }
         }
 
@@ -290,7 +293,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private IManagedIdentityApplication CreateMIAWithProxy(string url, string userAssignedId = "")
         {
             //Proxy the MSI token request 
-            ProxyHttpManager proxyHttpManager = new ProxyHttpManager(url);
+            MsiProxyHttpManager proxyHttpManager = new MsiProxyHttpManager(url);
 
             var builder = ManagedIdentityApplicationBuilder
                .Create()

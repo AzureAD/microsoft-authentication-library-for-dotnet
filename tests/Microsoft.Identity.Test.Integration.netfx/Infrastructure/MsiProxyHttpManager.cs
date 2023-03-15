@@ -26,12 +26,12 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
     /// In particular, do not change any properties on HttpClient such as BaseAddress, buffer sizes and Timeout. You should
     /// also not access DefaultRequestHeaders because the getters are not thread safe (use HttpRequestMessage.Headers instead).
     /// </remarks>
-    internal class ProxyHttpManager : IHttpManager
+    internal class MsiProxyHttpManager : IHttpManager
     {
         private readonly string _testWebServiceEndpoint;
         private static HttpClient s_httpClient = new HttpClient();
 
-        public ProxyHttpManager(string testWebServiceEndpoint)
+        public MsiProxyHttpManager(string testWebServiceEndpoint)
         {
             _testWebServiceEndpoint = testWebServiceEndpoint;
         }

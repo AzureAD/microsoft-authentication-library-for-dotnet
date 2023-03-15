@@ -25,6 +25,17 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             ServiceFabric
         }
 
+        //MSI Azure resources
+        public enum MsiAzureResource
+        {
+            WebApp,
+            Function,
+            VM,
+            AzureArc,
+            CloudShell,
+            ServiceFabric
+        }
+
         public static void SetEnvironmentVariables(ManagedIdentitySourceType managedIdentitySource, string endpoint, string secret = "secret")
         {
             switch (managedIdentitySource)
