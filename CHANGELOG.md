@@ -1,3 +1,15 @@
+4.51.0
+==========
+### New Features
+- Simplified managed identity API. Use `ManagedIdentityApplicationBuilder` to create a `IManagedIdentityApplication` and call `AcquireTokenManagedIdentity`. See [3970](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3970) and [wiki](https://aka.ms/msal-net-managed-identity).  
+- Added `StopLongRunningProcessInWebApiAsync` which allows to remove cached tokens based on a long-running OBO key. See [3346](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3346) and [wiki](https://aka.ms/msal-net-long-running-obo).  
+
+### Bug Fixes
+- `InitiateLongRunningProcessInWebApi` will now always acquire new tokens from AAD without checking the token cache first. See [3825](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3825).  
+- When using preview Windows broker, MSAL will correctly handle the transitive reference to Microsoft.Identity.Client.NativeInterop. Any explicit references to Microsoft.Identity.Client.NativeInterop in projects also referencing MSAL should be removed. See [3964](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3964).  
+- Fixed preview Windows broker throwing a signed out exception when calling `AcquireTokenSilent`. See [3916](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3916) and See [3961](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3961).  
+
+
 4.50.0
 ==========
 ### New Features
