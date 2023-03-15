@@ -13,6 +13,10 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+#if !NET6_WIN
+using Microsoft.Identity.Client.Broker;
+#endif
+
 #if NET6_WIN || NETCOREAPP3_1
 using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
 #endif
@@ -159,11 +163,10 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 
                 var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithHttpManager(httpManager);
-#if NET6_WIN
-                pcaBuilder = pcaBuilder.WithBroker(true);
-#else
-                pcaBuilder = pcaBuilder.WithBroker();
-#endif
+
+                pcaBuilder = pcaBuilder.WithBroker(
+                    new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+
                 PublicClientApplication app = pcaBuilder.BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));

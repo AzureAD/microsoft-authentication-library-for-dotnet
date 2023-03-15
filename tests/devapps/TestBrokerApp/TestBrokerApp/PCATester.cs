@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.ApiConfig;
 
 #if NET48 || NETCOREAPP3_1 // This for classic net and net core
 using Microsoft.Identity.Client.Desktop;

@@ -3,9 +3,10 @@
 
 using System;
 using System.ComponentModel;
+
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// The class specifies the options for broker across OperatingSystems
@@ -43,7 +44,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         private BrokerOptions()
         {
 
-        }       
+        }
 
         /// <summary>
         /// Creates BrokerOptions from WindowsBrokerOptions

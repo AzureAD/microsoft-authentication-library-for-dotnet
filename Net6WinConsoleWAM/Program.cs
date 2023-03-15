@@ -23,7 +23,7 @@ namespace Net6WinConsoleWAM
                     //.WithBroker(true)
                     .WithBroker()
                     //.WithWindowsBrokerOptions(new WindowsBrokerOptions() { HeaderText = "old" }) //This API will give warning. Replace as below.
-                    .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows) {  Title = "new"})
+                    //.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows) {  Title = "new"})
                     .WithLogging((x, y, z) => Console.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                     .WithRedirectUri("http://localhost")
                     .WithParentActivityOrWindow(() => GetConsoleWindow())

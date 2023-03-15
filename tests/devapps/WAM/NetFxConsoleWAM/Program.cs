@@ -8,7 +8,6 @@ using System.Text;
 using Microsoft.Identity.Client;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
-using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Desktop;
 
 namespace NetFxConsoleWAM
