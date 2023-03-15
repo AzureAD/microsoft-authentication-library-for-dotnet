@@ -29,15 +29,13 @@ namespace Microsoft.Identity.Client.Desktop
         [Obsolete("This method has been deprecated. Use WithWindowsDesktopFeatures. For Windows Broker support only, use WithWindowsBroker API from Microsoft.Identity.Client.Broker package.", false)]
         public static PublicClientApplicationBuilder WithDesktopFeatures(this PublicClientApplicationBuilder builder)
         {
-            builder.WithBroker();
-            AddSupportForWebView2(builder);
-
+            builder.WithWindowsDesktopFeatures(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
             return builder;
         }
 
         /// <summary>
         /// Adds enhanced support for desktop applications, e.g. CLI, WinForms, WPF apps.
-        /// - Windows Authentication Manager (WAM) broker, the recommended authentication mechanism on Windows 10 - https://aka.ms/msal-net-wam
+        /// - Windows Authentication Manager (WAM) broker, the recommended authentication mechanism on Windows 10+ - https://aka.ms/msal-net-wam
         /// - Embedded web view. AAD applications use the older WebBrowser control. B2C applications use WebView2, an embedded browser based on Microsoft Edge - https://aka.ms/msal-net-webview2
         /// </summary>
         /// <remarks>These extensions live in a separate package to avoid adding dependencies to MSAL</remarks>
@@ -47,6 +45,8 @@ namespace Microsoft.Identity.Client.Desktop
             builder.Config.IsBrokerEnabled = brokerOptions.IsBrokerEnabledOnCurrentOs();
 
             AddRuntimeSupportForWam(builder);
+            AddSupportForWebView2(builder);
+
             return builder;
         }
 
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Desktop
             builder.Config.WebUiFactoryCreator = () => new WebView2WebUiFactory();
         }
 
-        private static void AddRuntimeSupportForWam(PublicClientApplicationBuilder builder)
+        internal static void AddRuntimeSupportForWam(PublicClientApplicationBuilder builder)
         {
             if (DesktopOsHelper.IsWin10OrServerEquivalent())
             {

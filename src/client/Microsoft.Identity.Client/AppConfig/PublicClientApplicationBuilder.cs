@@ -153,8 +153,8 @@ namespace Microsoft.Identity.Client
         /// <param name="enableBroker">Determines whether or not to use broker with the default set to true.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
-        /// <remarks>If your app uses .NET classic or .NET Core 3.x, and you wish to use the Windows broker, 
-        /// please install the NuGet package Microsoft.Identity.Client.Desktop and call .WithDesktopFeatures()</remarks>
+        /// <remarks>If your app uses .NET classic or .NET, and you wish to use the Windows broker, 
+        /// please install the NuGet package Microsoft.Identity.Client.Broker and call .WithBroker(BrokerOptions)</remarks>
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
 #pragma warning disable CS0162 // Unreachable code detected
@@ -175,12 +175,12 @@ namespace Microsoft.Identity.Client
             }
 #endif
 
-#if NET_CORE
+#if NET_CORE && !NET6_WIN
             if (Config.BrokerCreatorFunc == null)
             {
                 throw new PlatformNotSupportedException(
                     "The desktop broker is not directly available in the MSAL package. "+
-                    "\n\rInstall the NuGet package Microsoft.Identity.Client.Broker and call the extension method .WithBroker(BrokerOptions). " +
+                    "\n\rInstall the NuGet package Microsoft.Identity.Client.Desktop and call the extension method .WithBroker(BrokerOptions). " +
                     "\n\rFor details, see https://aka.ms/msal-net-wam");
             }
 #endif
@@ -200,10 +200,6 @@ namespace Microsoft.Identity.Client
         public PublicClientApplicationBuilder WithWindowsBrokerOptions(WindowsBrokerOptions options)
         {
             WindowsBrokerOptions.ValidatePlatformAvailability();
-            if (Config.BrokerOptions != null)
-            {
-                throw new NotSupportedException("Broker options are already set. Use WithBroker(BrokerOptions) API instead.");
-            }
             var newOptions = BrokerOptions.CreateFromWindowsOptions(options);
             Config.BrokerOptions = newOptions; 
             return this;
