@@ -48,11 +48,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //non existent Resource ID of the User Assigned Identity 
         private const string Non_Existent_UamiResourceId = "/subscriptions/userAssignedIdentities/NO_ID";
 
-        [TestMethod]
-        public async Task ManagedIdentity_WithoutEnvironmentVariables_ThrowsAsync()
+        [DataTestMethod]
+        [DataRow(MsiAzureResource.VM, "", DisplayName = "System Identity Virtual Machine")]
+        public async Task ManagedIdentity_WithoutEnvironmentVariables_ThrowsAsync(MsiAzureResource azureResource)
         {
             //Arrange
             string result = string.Empty;
+
+            //form the http proxy URI 
+            string uri = s_baseURL + $"MSIToken?" +
+                $"azureresource={azureResource}&uri=";
 
             //Arrange
             using (new EnvVariableContext())
@@ -72,7 +77,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     .ExecuteAsync().ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
-                Assert.IsNotNull(ex);
+                Assert.IsNotNull(ex.ErrorCode);
             }
         }
 
