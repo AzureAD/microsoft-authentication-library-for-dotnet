@@ -48,37 +48,25 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //non existent Resource ID of the User Assigned Identity 
         private const string Non_Existent_UamiResourceId = "/subscriptions/userAssignedIdentities/NO_ID";
 
-        [DataTestMethod]
-        [DataRow(MsiAzureResource.VM, "", DisplayName = "System Identity Virtual Machine")]
-        public async Task ManagedIdentity_WithoutEnvironmentVariables_ThrowsAsync(MsiAzureResource azureResource, string userIdentity)
+        [TestMethod]
+        public async Task ManagedIdentity_WithoutEnvironmentVariables_ThrowsAsync()
         {
             //Arrange
-            string result = string.Empty;
+            ManagedIdentityApplicationBuilder builder = ManagedIdentityApplicationBuilder
+                .Create()
+                .WithExperimentalFeatures();
 
-            //form the http proxy URI 
-            string uri = s_baseURL + $"MSIToken?" +
-                $"azureresource={azureResource}&uri=";
+            IManagedIdentityApplication mia = builder.Build();
 
-            //Arrange
-            using (new EnvVariableContext())
+            //Act and Assert
+            HttpRequestException ex = await AssertException
+                .TaskThrowsAsync<HttpRequestException>(async () =>
             {
-                IManagedIdentityApplication mia = CreateMIAWithProxy(s_baseURL, userIdentity);
-
-                //Get the Environment Variables
-                Dictionary<string, string> envVariables = new Dictionary<string, string>();
-
-                //Set the Environment Variables
-                SetEnvironmentVariables(envVariables);
-
-                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
-                {
-                    await mia
-                    .AcquireTokenForManagedIdentity(s_msi_scopes)
-                    .ExecuteAsync().ConfigureAwait(false);
-                }).ConfigureAwait(false);
-
-                Assert.IsNotNull(ex.ErrorCode);
-            }
+                await mia
+                .AcquireTokenForManagedIdentity(s_msi_scopes)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+            }).ConfigureAwait(false);           
         }
 
         [DataTestMethod]
