@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Arrange
             using (new EnvVariableContext())
             {
-                //Get the Environment Variables
+                // Fetch the env variables from the resource and set them locally
                 Dictionary<string, string> envVariables = 
                     await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
 
