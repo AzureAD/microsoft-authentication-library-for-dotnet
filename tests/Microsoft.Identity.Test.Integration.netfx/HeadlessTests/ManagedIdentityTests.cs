@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [DataTestMethod]
         [DataRow(MsiAzureResource.VM, "", DisplayName = "System Identity Virtual Machine")]
-        public async Task ManagedIdentity_WithoutEnvironmentVariables_ThrowsAsync(MsiAzureResource azureResource)
+        public async Task ManagedIdentity_WithoutEnvironmentVariables_ThrowsAsync(MsiAzureResource azureResource, string userIdentity)
         {
             //Arrange
             string result = string.Empty;
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Arrange
             using (new EnvVariableContext())
             {
-                IManagedIdentityApplication mia = CreateMIAWithProxy(s_baseURL);
+                IManagedIdentityApplication mia = CreateMIAWithProxy(s_baseURL, userIdentity);
 
                 //Get the Environment Variables
                 Dictionary<string, string> envVariables = new Dictionary<string, string>();
