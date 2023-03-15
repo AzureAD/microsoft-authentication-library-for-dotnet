@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (telemetryDatapoints.CacheTypeUsed != null)
                 {
-                    telemetryEventDetails.SetProperty(TelemetryConstants.CacheUsed, telemetryDatapoints.CacheTypeUsed.ToString());
+                    telemetryEventDetails.SetProperty(TelemetryConstants.CacheUsed, (int)telemetryDatapoints.CacheTypeUsed);
                 }
             }
         }

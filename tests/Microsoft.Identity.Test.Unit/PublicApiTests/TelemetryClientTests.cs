@@ -9,6 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Extensibility;
@@ -17,6 +18,7 @@ using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.Identity.Test.Unit.TelemetryTests;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -28,12 +30,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     {
         private MockHttpAndServiceBundle _harness;
         private ConfidentialClientApplication _cca;
-        private TelemetryClient _telemetryClient;
+        private TestTelemetryClient _telemetryClient;
 
         [TestInitialize]
         public override void TestInitialize()
         {
-            _telemetryClient = new TelemetryClient(TestConstants.ClientId);
+            _telemetryClient = new TestTelemetryClient(TestConstants.ClientId);
             base.TestInitialize();
         }
 
@@ -144,7 +146,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [DataRow(3)]
         [DataRow(4)]
         [DataRow(5)]
-        public async Task AcquireTokenCertificateTelemetryTestAsync(int assertionType)
+        public async Task AcquireTokenAssertionTypeTelemetryTestAsync(int assertionType)
         {
             using (_harness = CreateTestHarness())
             {
@@ -170,6 +172,74 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     CacheRefreshReason.NoCachedAccessToken,
                     (AssertionType)assertionType,
                     TestConstants.AuthorityUtidTenant);
+            }
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenCacheTelemetryTestAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                //Create app
+                CacheTypeUsed cacheTypeUsed = CacheTypeUsed.L1Cache;
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                CreateApplication();
+
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                //Configure cache
+                _cca.AppTokenCache.SetBeforeAccess((args) =>
+                {
+                    args.TelemetryDatapoints.CacheTypeUsed = cacheTypeUsed;
+                });
+
+                _cca.AppTokenCache.SetAfterAccess((args) =>
+                {
+                    args.TelemetryDatapoints.CacheTypeUsed = cacheTypeUsed;
+                });
+
+                //Acquire Token
+                var result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+
+                MsalTelemetryEventDetails eventDetails = _telemetryClient.TestTelemetryEventDetails;
+
+                //Validate telemetry
+                AssertLoggedTelemetry(
+                    result,
+                    eventDetails,
+                    TokenSource.IdentityProvider,
+                    CacheRefreshReason.NoCachedAccessToken,
+                    AssertionType.Secret,
+                    TestConstants.AuthorityUtidTenant,
+                    TokenType.Bearer,
+                    cacheTypeUsed);
+
+                //Update cache type
+                cacheTypeUsed = CacheTypeUsed.L2Cache;
+
+                //Acquire Token
+                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+
+                eventDetails = _telemetryClient.TestTelemetryEventDetails;
+
+                //Validate telemetry
+                AssertLoggedTelemetry(
+                    result,
+                    eventDetails,
+                    TokenSource.Cache,
+                    CacheRefreshReason.NotApplicable,
+                    AssertionType.Secret,
+                    TestConstants.AuthorityUtidTenant,
+                    TokenType.Bearer,
+                    cacheTypeUsed);
             }
         }
 
@@ -262,7 +332,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             if (eventDetails.Properties.ContainsKey(TelemetryConstants.CacheUsed))
             {
-                Assert.AreEqual(cacheTypeUsed, eventDetails.Properties[TelemetryConstants.CacheUsed]);
+                Assert.AreEqual(Convert.ToInt64(cacheTypeUsed), eventDetails.Properties[TelemetryConstants.CacheUsed]);
             }
         }
 
@@ -322,43 +392,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
 
             TokenCacheHelper.PopulateCache(_cca.UserTokenCacheInternal.Accessor);
-        }
-    }
-
-    internal class TelemetryClient : ITelemetryClient
-    {
-        public MsalTelemetryEventDetails TestTelemetryEventDetails { get; set; }
-        
-        public TelemetryClient(string clientId)
-        {
-            ClientId = clientId;
-        }
-
-        public string ClientId { get; set; }
-
-        public void Initialize()
-        {
-
-        }
-
-        public bool IsEnabled()
-        {
-            return true;
-        }
-
-        public bool IsEnabled(string eventName)
-        {
-            return TelemetryConstants.AcquireTokenEventName.Equals(eventName);
-        }
-
-        public void TrackEvent(TelemetryEventDetails eventDetails)
-        {
-            TestTelemetryEventDetails = (MsalTelemetryEventDetails) eventDetails;
-        }
-
-        public void TrackEvent(string eventName, IDictionary<string, string> stringProperties = null, IDictionary<string, long> longProperties = null, IDictionary<string, bool> boolProperties = null, IDictionary<string, DateTime> dateTimeProperties = null, IDictionary<string, double> doubleProperties = null, IDictionary<string, Guid> guidProperties = null)
-        {
-            throw new NotImplementedException();
         }
     }
 }
