@@ -18,10 +18,9 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         private readonly IDictionary<string, string> _claimsToSign;
         private readonly bool _appendDefaultClaims;
         private readonly string _base64EncodedThumbprint; // x5t
-        private bool _sendX5c;
         public X509Certificate2 Certificate { get; }
 
-        public AssertionType AssertionType => _sendX5c ? AssertionType.CertificateWithSNI : AssertionType.Certificate;
+        public AssertionType TelemetryDetails => AssertionType.CertificateWithoutSNI;
 
         public CertificateAndClaimsClientCredential(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool appendDefaultClaims)
         {
@@ -46,8 +45,6 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 tokenEndpoint,
                 _claimsToSign,
                 _appendDefaultClaims);
-
-            _sendX5c = sendX5C;
 
             string assertion = jwtToken.Sign(Certificate, _base64EncodedThumbprint, sendX5C);
 

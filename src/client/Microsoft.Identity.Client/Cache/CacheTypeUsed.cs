@@ -17,10 +17,10 @@ namespace Microsoft.Identity.Client.Cache
         /// <summary>
         /// Specifies if the L1 cache is used
         /// </summary>
-        L1Cache,
+        L1Cache = 0,
         /// <summary>
         /// Specifies if the L2 cache is used
         /// </summary>
-        L2Cache
+        L2Cache = 1
     }
 }

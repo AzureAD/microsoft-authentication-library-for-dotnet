@@ -139,20 +139,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 telemetryEventDetails.SetProperty(TelemetryConstants.DurationInCache, authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs);
                 telemetryEventDetails.SetProperty(TelemetryConstants.DurationInHttp, authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs);
                 telemetryEventDetails.SetProperty(TelemetryConstants.Succeeded, true);
-                telemetryEventDetails.SetProperty(TelemetryConstants.TokenType, nameof(AuthenticationRequestParameters.RequestContext.ApiEvent.TokenType));
+                telemetryEventDetails.SetProperty(TelemetryConstants.TokenType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.TokenType);
                 telemetryEventDetails.SetProperty(TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds);
                 telemetryEventDetails.SetProperty(TelemetryConstants.ActivityId, authenticationResult.CorrelationId);
                 telemetryEventDetails.SetProperty(TelemetryConstants.RefreshOn, 
                     authenticationResult.AuthenticationResultMetadata.RefreshOn.HasValue ?
                     DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value)
                     : 0);
-                telemetryEventDetails.SetProperty(TelemetryConstants.AssertionType, nameof(AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType));
+                telemetryEventDetails.SetProperty(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
                 telemetryEventDetails.SetProperty(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
+
                 if (telemetryDatapoints.CacheTypeUsed != null)
                 {
-                    telemetryEventDetails.SetProperty(TelemetryConstants.CacheUsed, nameof(telemetryDatapoints.CacheTypeUsed));
+                    telemetryEventDetails.SetProperty(TelemetryConstants.CacheUsed, telemetryDatapoints.CacheTypeUsed.ToString());
                 }
-                
             }
         }
 
@@ -214,17 +214,27 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private AssertionType GetAssertionType()
         {
-            if (ServiceBundle.Config.UseManagedIdentity)
+            if (ServiceBundle.Config.UseManagedIdentity || ServiceBundle.Config.AppTokenProvider != null)
             {
                 return AssertionType.MSI;
             }
 
-            if (AuthenticationRequestParameters.OnBeforeTokenRequestHandler != null)
+            if (ServiceBundle.Config.ClientCredential != null)
             {
-                return AssertionType.TokenRequestHandler;
+                if (ServiceBundle.Config.ClientCredential.TelemetryDetails == AssertionType.CertificateWithoutSNI)
+                {
+                    if (ServiceBundle.Config.SendX5C)
+                    {
+                        return AssertionType.CertificateWithSNI;
+                    }
+
+                    return AssertionType.CertificateWithoutSNI;
+                }
+
+                return ServiceBundle.Config.ClientCredential.TelemetryDetails;
             }
 
-            return (AssertionType)ServiceBundle.Config.ClientCredential.AssertionType;
+            return AssertionType.None;
         }
 
         protected async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse msalTokenResponse)
