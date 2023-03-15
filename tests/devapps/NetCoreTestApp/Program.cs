@@ -11,7 +11,7 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Desktop;
+using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using NetCoreTestApp.Experimental;
@@ -81,9 +81,8 @@ namespace NetCoreTestApp
             {
                 IntPtr consoleWindowHandle = GetConsoleWindow();
                 Func<IntPtr> consoleWindowHandleProvider = () => consoleWindowHandle;
-                pcaBuilder.WithWindowsBroker()
-                          .WithParentActivityOrWindow(consoleWindowHandleProvider)
-                          .WithBroker();
+                pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows) { Title = "Only Windows" })
+                          .WithParentActivityOrWindow(consoleWindowHandleProvider);
             }
 
             Console.WriteLine($"IsBrokerAvailable: {pcaBuilder.IsBrokerAvailable()}");

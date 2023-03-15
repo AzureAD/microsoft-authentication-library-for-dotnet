@@ -140,7 +140,7 @@ namespace NetFx
                 builder = builder
                     .WithParentActivityOrWindow(consoleWindowHandleProvider)
 #if NET48
-                    .WithWindowsBroker();
+                    .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
 #else
                     .WithBroker();
 #endif

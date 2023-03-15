@@ -17,7 +17,7 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Broker;
 #endif
 
-#if NET6_WIN || NETCOREAPP3_1
+#if NET6_WIN
 using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
 #endif
 using Microsoft.Identity.Client.Internal;

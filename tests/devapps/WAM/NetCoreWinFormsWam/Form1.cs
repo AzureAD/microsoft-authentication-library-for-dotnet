@@ -15,10 +15,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Broker;
+using Microsoft.Identity.Client.ApiConfig;
 
-#if NETCOREAPP3_1
-using Microsoft.Identity.Client.Desktop;
-#endif
 
 namespace NetDesktopWinForms
 {
@@ -117,7 +115,7 @@ namespace NetDesktopWinForms
             switch (authMethod)
             {
                 case AuthMethod.WAM:
-                    builder = ToggleOldBroker(builder, true);
+                case AuthMethod.WAMRuntime:
                     builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
                     {
                         ListOperatingSystemAccounts = cbxListOsAccounts.Checked,
@@ -125,22 +123,12 @@ namespace NetDesktopWinForms
                         Title = "MSAL Dev App .NET FX"
                     });
                     break;
-                case AuthMethod.WAMRuntime:
-                    {
-                        BrokerOptions options = new BrokerOptions(BrokerOptions.OperatingSystems.Windows);
-                        options.Title = "new Runtime broker";
-                        options.ListOperatingSystemAccounts = cbxListOsAccounts.Checked;
-                        options.MsaPassthrough= cbxMsaPt.Checked;
-
-                        builder.WithBroker(options);
-                    }
-                    break;
                 case AuthMethod.SystemBrowser:
-                    builder.WithBroker(false);
+                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
                     builder = ToggleOldBroker(builder, false);
                     break;
                 case AuthMethod.EmbeddedBrowser:
-                    builder.WithBroker(false);
+                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
                     builder = ToggleOldBroker(builder, false);
 
                     break;
@@ -159,11 +147,7 @@ namespace NetDesktopWinForms
 
         private static PublicClientApplicationBuilder ToggleOldBroker(PublicClientApplicationBuilder builder, bool enable)
         {
-#if NETCOREAPP3_1
-            builder = WamExtension.WithWindowsBroker(builder, enable);
-#else
             builder = builder.WithBroker(enable);
-#endif
             return builder;
         }
 
@@ -367,15 +351,23 @@ namespace NetDesktopWinForms
             var scopes = GetScopes();
             var guid = Guid.NewGuid();
             var builder = pca.AcquireTokenInteractive(scopes)
-                .WithUseEmbeddedWebView(true)
+                             .WithParentActivityOrWindow(this.Handle);
+
+            if (GetAuthMethod() == AuthMethod.SystemBrowser)
+            {
+                builder.WithSystemWebViewOptions(new SystemWebViewOptions() { HtmlMessageSuccess = "Successful login! You can close the tab." });
+            }
+            else
+            {
+                builder.WithUseEmbeddedWebView(true)
                 //.WithExtraQueryParameters("domain_hint=live.com") -- will force AAD login with browser
                 //.WithExtraQueryParameters("msafed=0")             -- will force MSA login with browser
                 .WithEmbeddedWebViewOptions(
                 new EmbeddedWebViewOptions()
                 {
                     Title = "Hello world",
-                })
-                .WithParentActivityOrWindow(this.Handle);
+                });
+            }
 
             if (cbxPOP.Checked)
             {

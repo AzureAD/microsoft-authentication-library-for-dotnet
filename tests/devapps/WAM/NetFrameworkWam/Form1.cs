@@ -15,7 +15,6 @@ using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Broker;
-using Microsoft.Identity.Client.Desktop;
 
 namespace NetDesktopWinForms
 {
@@ -102,31 +101,25 @@ namespace NetDesktopWinForms
             switch (authMethod)
             {
                 case AuthMethod.WAM:
-                    builder = WamExtension.WithWindowsBroker(builder);
-                    break;
                 case AuthMethod.WAMRuntime:
-                    builder.WithBroker();
+                    builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
+                    {
+                        ListOperatingSystemAccounts = cbxListOsAccounts.Checked,
+                        MsaPassthrough = cbxMsaPt.Checked,
+                        Title = "MSAL Dev App .NET FX"
+                    });
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder.WithBroker(false);
-                    builder = WamExtension.WithWindowsBroker(builder, false);
+                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
                     builder = builder.WithRedirectUri("http://localhost");
                     break;
                 case AuthMethod.EmbeddedBrowser:
                     builder = builder.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}");
-                    builder.WithBroker(false);
-                    builder = WamExtension.WithWindowsBroker(builder, false);
+                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
                     break;
                 default:
                     throw new NotImplementedException();
             }
-
-            builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
-            {
-                ListOperatingSystemAccounts = cbxListOsAccounts.Checked,
-                MsaPassthrough = cbxMsaPt.Checked,
-                Title = "MSAL Dev App .NET FX"
-            });
 
             if (chxEnableRuntimeLogs.Checked)
             {
@@ -316,15 +309,23 @@ namespace NetDesktopWinForms
             var scopes = GetScopes();
 
             var builder = pca.AcquireTokenInteractive(scopes)
-                .WithUseEmbeddedWebView(true)
+                             .WithParentActivityOrWindow(this.Handle);
+
+            if (GetAuthMethod() == AuthMethod.SystemBrowser)
+            {
+                builder.WithSystemWebViewOptions(new SystemWebViewOptions() { HtmlMessageSuccess = "Successful login! You can close the tab." });
+            }
+            else
+            {
+                builder.WithUseEmbeddedWebView(true)
                 //.WithExtraQueryParameters("domain_hint=live.com") -- will force AAD login with browser
                 //.WithExtraQueryParameters("msafed=0")             -- will force MSA login with browser
                 .WithEmbeddedWebViewOptions(
                 new EmbeddedWebViewOptions()
                 {
                     Title = "Hello world",
-                })
-                .WithParentActivityOrWindow(this.Handle);
+                });
+            }
 
             Prompt? prompt = GetPrompt();
             if (prompt.HasValue)
