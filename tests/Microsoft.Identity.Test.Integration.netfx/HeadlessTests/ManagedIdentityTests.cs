@@ -12,6 +12,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Castle.Core.Internal;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Json;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -105,8 +106,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                             .ExecuteAsync().ConfigureAwait(false);
 
                 //Assert
-                //1. Access token
-                Assert.IsNotNull(result.AccessToken);
+                //1. Token Type
+                Assert.AreEqual("Bearer", result.TokenType);
 
                 //2. First token response is from the MSI Endpoint
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
