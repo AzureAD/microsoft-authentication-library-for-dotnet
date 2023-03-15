@@ -55,7 +55,7 @@ namespace TestBrokerApp
             // this is for net-win (Note: Not setting options)
             // for other platforms i.e. UWP and MAUI. There are seperate projects.
             pcaBuilder.WithWindowsBrokerOptions(new WindowsBrokerOptions() { HeaderText = "Only Windows" });
-            pcaBuilder.WithBroker();
+            pcaBuilder.WithBroker(); // Only WithBroker with no options settings.
 #endif
 
             return pcaBuilder;
