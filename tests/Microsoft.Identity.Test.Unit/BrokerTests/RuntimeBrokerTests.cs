@@ -32,6 +32,9 @@ using Microsoft.IdentityModel.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Account = Microsoft.Identity.Client.Account;
+#if !NET6_WIN
+using Microsoft.Identity.Client.Desktop;
+#endif
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -55,6 +58,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             _coreUIParent = new CoreUIParent() { SynchronizationContext = _synchronizationContext };
             ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(isConfidentialClient: false);
+            applicationConfiguration.BrokerOptions = new BrokerOptions(BrokerOptions.OperatingSystems.Windows);
             _logger = Substitute.For<ILoggerAdapter>();
             _logger.PiiLoggingEnabled.Returns(true);
 
@@ -74,11 +78,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAuthority(TestConstants.AuthorityTenant);
 
-#if NET6_WIN
-            pcaBuilder = pcaBuilder.WithBroker(true);
-#else
-            pcaBuilder = pcaBuilder.WithBroker();
-#endif
+            pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+
 
             Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
 
@@ -91,14 +92,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAdfsAuthority(TestConstants.ADFSAuthority);
 
-#if NET6_WIN
-            pcaBuilder = pcaBuilder.WithBroker(true);
-#else
-            pcaBuilder = pcaBuilder.WithBroker(true);
-#endif
+            pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
 
             Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
-
         }
 
         [TestMethod]
@@ -107,11 +103,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             var pcaBuilder = PublicClientApplicationBuilder
                .Create(TestConstants.ClientId);
 
-#if NET6_WIN
-            pcaBuilder = pcaBuilder.WithBroker(true);
-#else
-            pcaBuilder = pcaBuilder.WithBroker();
-#endif
+            pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+
             var pca = pcaBuilder.Build();
 
             // no window handle - throw
@@ -138,7 +131,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             var acquireTokenCommonParameters = new AcquireTokenCommonParameters
             {
                 ApiId = ApiEvent.ApiIds.AcquireTokenSilent,
-                AuthorityOverride = tenantAuthority
+                AuthorityOverride = tenantAuthority                
             };
 
             var authRequestParams = new AuthenticationRequestParameters(

@@ -297,11 +297,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     .WithTestBroker(mockBroker)
                     .WithHttpManager(harness.HttpManager);
 
-#if NET6_WIN
-                pcaBuilder = pcaBuilder.WithBroker(true);
-#else
-                pcaBuilder = pcaBuilder.WithBroker();
-#endif
+                pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+
                 PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
 
@@ -334,11 +331,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
             var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithTestBroker(mockBroker);
 
-#if NET6_WIN
-            pcaBuilder = pcaBuilder.WithBroker(true);
-#else
-            pcaBuilder = pcaBuilder.WithBroker();
-#endif
+            pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+
             PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
             pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
@@ -371,11 +365,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     .WithTestBroker(mockBroker)
                     .WithHttpManager(harness.HttpManager);
 
-#if NET6_WIN
-                pcaBuilder = pcaBuilder.WithBroker(true);
-#else
-                pcaBuilder = pcaBuilder.WithBroker();
-#endif
+                pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+
                 PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(accessor: pca.UserTokenCacheInternal.Accessor,
@@ -416,11 +407,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     .WithTestBroker(mockBroker)
                     .WithHttpManager(harness.HttpManager);
 
-#if NET6_WIN
-                pcaBuilder = pcaBuilder.WithBroker(true);
-#else
-                pcaBuilder = pcaBuilder.WithBroker();
-#endif
+                pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+
                 PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
@@ -456,13 +444,9 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalPopTokenResponse(brokerAccessToken));
 
             var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                            .WithTestBroker(mockBroker);
+                            .WithTestBroker(mockBroker)
+                            .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
 
-#if NET6_WIN
-            pcaBuilder = pcaBuilder.WithBroker(true);
-#else
-            pcaBuilder = pcaBuilder.WithBroker();
-#endif
             PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
             //Populate local cache with token
@@ -529,11 +513,9 @@ namespace Microsoft.Identity.Test.Unit.Pop
             //Broker enabled
             var pcaBuilder = PublicClientApplicationBuilder
                                             .Create(TestConstants.ClientId);
-#if NET6_WIN
-            pcaBuilder = pcaBuilder.WithBroker(true);
-#else
-            pcaBuilder = pcaBuilder.WithBroker(true);
-#endif
+
+            pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+
             IPublicClientApplication app = pcaBuilder.Build();
 
             Assert.IsTrue(app.IsProofOfPossessionSupportedByClient());
@@ -543,10 +525,11 @@ namespace Microsoft.Identity.Test.Unit.Pop
                                 .Create(TestConstants.ClientId);
 
 #if NET6_WIN
-            pcaBuilder = pcaBuilder.WithBroker(true);
+            pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
 #else
-            pcaBuilder = pcaBuilder.WithBroker(false);
+            pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
 #endif
+
             app = pcaBuilder.Build();
 
             Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
