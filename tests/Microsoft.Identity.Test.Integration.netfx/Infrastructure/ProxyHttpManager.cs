@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
         /// <summary>
         /// Performs the POST request just like <see cref="SendPostAsync(Uri, IDictionary{string, string}, IDictionary{String, String}, ILoggerAdapter, CancellationToken)"/>
-        /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="HttpResponse"/> associated
+        /// but does not throw a ServiceUnavailable exception. Instead, it returns the <see cref="HttpResponse"/> associated
         /// with the request.
         /// </summary>
         public Task<HttpResponse> SendPostForceResponseAsync(
