@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.Desktop
         /// Enables Windows broker flows on older platforms, such as .NET framework, where these are not available in the box with Microsoft.Identity.Client
         /// For details about Windows broker, see https://aka.ms/msal-net-wam
         /// </summary>
-        [Obsolete("To use the broker add ")]
+        [Obsolete("This API has been replaced with WithBroker(BrokerOptions)")]
         public static PublicClientApplicationBuilder WithWindowsBroker(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
             builder.Config.IdentityLogger?.Log(new IdentityModel.Abstractions.LogEntry() { EventLogLevel = IdentityModel.Abstractions.EventLogLevel.Informational, Message = "Desktop WAM Broker extension calling RuntimeBroker extension" });
@@ -26,8 +26,8 @@ namespace Microsoft.Identity.Client.Desktop
         }
 
         /// <summary>
-        /// Brokers enable Single-Sign-On, device identification,and application identification verification, 
-        /// while increasing the security of applications. Use this API to enable brokers on desktop platforms.
+        /// Brokers enable Single-Sign-On, device identification, and enhanced security.
+        /// Use this API to enable brokers on desktop platforms.
         /// 
         /// See https://aka.ms/msal-net-wam for more information on platform specific settings required to enable the broker such as redirect URIs.
         /// 

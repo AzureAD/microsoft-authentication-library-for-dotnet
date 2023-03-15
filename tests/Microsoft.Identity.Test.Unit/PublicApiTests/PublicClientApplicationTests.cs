@@ -27,6 +27,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Client.ApiConfig;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -1043,10 +1044,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             if (enableBroker)
             {
-#if NET5_0_OR_GREATER
-                pcaBuilder.WithBroker();
+#if NET6_WIN
+                pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
 #else
-                WamExtension.WithWindowsBroker(pcaBuilder);
+                WamExtension.WithBroker(pcaBuilder, new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
 #endif
             }
 
