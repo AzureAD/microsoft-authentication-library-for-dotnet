@@ -49,25 +49,40 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //non existent Resource ID of the User Assigned Identity 
         private const string Non_Existent_UamiResourceId = "/subscriptions/userAssignedIdentities/NO_ID";
 
-        [TestMethod]
-        public async Task ManagedIdentity_WithoutEnvironmentVariables_ThrowsAsync()
+        [DataTestMethod]
+        [DataRow(MsiAzureResource.VM, "", DisplayName = "System Identity Virtual Machine")]
+        public async Task ManagedIdentity_WithoutEnvironmentVariables_ThrowsAsync(MsiAzureResource azureResource, string userIdentity)
         {
             //Arrange
-            ManagedIdentityApplicationBuilder builder = ManagedIdentityApplicationBuilder
+            using (new EnvVariableContext())
+            {
+                // Fetch the env variables from the resource and set them locally
+                Dictionary<string, string> envVariables =
+                    new Dictionary<string, string>() 
+                    {
+                        { ManagedIdentitySourceType.IMDS.ToString(), "http://169.254.169.250" }
+                    };
+
+                //Set the Environment Variables
+                SetEnvironmentVariables(envVariables);
+
+                //Arrange
+                ManagedIdentityApplicationBuilder builder = ManagedIdentityApplicationBuilder
                 .Create()
                 .WithExperimentalFeatures();
 
-            IManagedIdentityApplication mia = builder.Build();
+                IManagedIdentityApplication mia = builder.Build();
 
-            //Act and Assert
-            HttpRequestException ex = await AssertException
-                .TaskThrowsAsync<HttpRequestException>(async () =>
-            {
-                await mia
-                .AcquireTokenForManagedIdentity(s_msi_scopes)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-            }).ConfigureAwait(false);           
+                //Act and Assert
+                HttpRequestException ex = await AssertException
+                    .TaskThrowsAsync<HttpRequestException>(async () =>
+                {
+                    await mia
+                    .AcquireTokenForManagedIdentity(s_msi_scopes)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                }).ConfigureAwait(false);
+            }
         }
 
         [DataTestMethod]
