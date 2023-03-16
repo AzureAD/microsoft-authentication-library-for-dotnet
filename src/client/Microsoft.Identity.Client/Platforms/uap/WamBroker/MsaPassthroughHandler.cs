@@ -16,9 +16,6 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
     /// This class only deals with MSA-PT transfer token protocol. MSA-PT is 
     /// a legacy configuration available to First Party apps only.
     /// </summary>
-#if NET6_WIN
-    [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
-#endif
     internal class MsaPassthroughHandler : IMsaPassthroughHandler
     {
         public const string TransferTokenScopes =

@@ -27,9 +27,6 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
     /// Important: all the WAM code has Win10 specific types and MUST be guarded against
     /// usage on older Windows, Mac and Linux, otherwise TypeLoadExceptions occur
     /// </summary>
-#if NET6_WIN
-    [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
-#endif
     internal class WamBroker : IBroker
     {
         private readonly IWamPlugin _aadPlugin;
@@ -100,7 +97,6 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-#if WINDOWS_APP
             if (_synchronizationContext == null)
             {
                 throw new MsalClientException(
@@ -108,7 +104,6 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
                     "AcquireTokenInteractive with broker must be called from the UI thread when using WAM." +
                      ErrorMessageSuffix);
             }
-#endif
 
             if (authenticationRequestParameters.Account != null ||
                 !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint))
@@ -448,35 +443,8 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 
         private IntPtr GetParentWindow(CoreUIParent uiParent)
         {
-#if WINDOWS_APP
             // On UWP there is no need for a window handle
             return IntPtr.Zero;
-#endif
-
-#if DESKTOP || NET6_WIN // net core doesn't reference WinForms
-
-            if (uiParent?.OwnerWindow is IWin32Window window)
-            {
-                _logger.Info("[WAM Broker] Owner window specified as IWin32Window.");
-                return window.Handle;
-            }
-#endif
-
-#if DESKTOP || NET6_WIN || NET_CORE
-
-            if (uiParent?.OwnerWindow is IntPtr ptr)
-            {
-                _logger.Info("[WAM Broker] Owner window specified as IntPtr.");
-                return ptr;
-            }
-
-            // other MSALs prefer to default to GetForegroundWindow() but this causes issues
-            // for example if the user quickly switches windows.
-            // GetDesktopWindow will make the default more consistent with the embedded browser
-            _logger.Info("[WAM Broker] Using desktop as a parent window.");
-            IntPtr desktopWindow = WindowsNativeMethods.GetDesktopWindow();
-            return desktopWindow;
-#endif
         }
 
         public async Task<MsalTokenResponse> AcquireTokenSilentAsync(
@@ -833,13 +801,6 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 
         public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
         {
-#if NET_CORE
-            if (!DesktopOsHelper.IsWindows())
-            {
-                _logger.Info("[WAM Broker] Not a Windows operating system. WAM broker is not available. ");
-                return false;
-            }
-#endif
             // WAM does not work on pure ADFS environments
             if (authorityType == AuthorityType.Adfs)
             {

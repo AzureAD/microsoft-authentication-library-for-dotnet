@@ -15,9 +15,6 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
     /// Wrapper class to enable testing, since WebTokenRequestResult object doesn't have any ctor
     /// and interface is not accessible.
     /// </summary>
-#if NET6_WIN
-    [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
-#endif
     internal class WebTokenRequestResultWrapper : IWebTokenRequestResultWrapper
     {
 

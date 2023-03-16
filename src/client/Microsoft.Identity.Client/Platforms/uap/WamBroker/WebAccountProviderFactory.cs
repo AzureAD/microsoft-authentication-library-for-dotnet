@@ -8,9 +8,6 @@ using Windows.Security.Credentials;
 
 namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 {
-#if NET6_WIN
-    [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
-#endif
     internal class WebAccountProviderFactory : IWebAccountProviderFactory
     {
         public async Task<WebAccountProvider> GetAccountProviderAsync(string authorityOrTenant)

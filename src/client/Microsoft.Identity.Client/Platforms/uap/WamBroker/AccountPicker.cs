@@ -10,22 +10,8 @@ using Windows.Security.Authentication.Web.Core;
 using Windows.Security.Credentials;
 using Windows.UI.ApplicationSettings;
 
-#if !UAP10_0_17763
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
-#endif
-
-#if NET6_WIN
-using Microsoft.Identity.Client.Platforms.net6win;
-using AccountsSettingsPaneInterop = Microsoft.Identity.Client.Platforms.net6win.AccountsSettingsPaneInterop;
-#elif DESKTOP || NET_CORE
-using Microsoft.Identity.Client.Platforms;
-#endif
-
 namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 {
-#if NET6_WIN
-    [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
-#endif
     internal class AccountPicker : IAccountPicker
     {
         private readonly IntPtr _parentHandle;
@@ -55,160 +41,9 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 
         public async Task<WebAccountProvider> DetermineAccountInteractivelyAsync()
         {
-#if WINDOWS_APP
             await ShowPicker_UWPAsync().ConfigureAwait(true);
-#else
-            await ShowPicker_Win32Async().ConfigureAwait(false);
-#endif
             return _provider;
         }
-
-#if !WINDOWS_APP
-        private async Task ShowPicker_Win32Async()
-        {
-            // if there is a sync context, move to it (go to UI thread)
-            if (_synchronizationContext != null)
-            {
-                await _synchronizationContext;
-            }
-
-            if (UseSplashScreen())
-            {
-                await ShowPickerWithSplashScreenAsync().ConfigureAwait(false);
-            }
-            else
-            {
-                if (_synchronizationContext == null)
-                {
-                    throw new MsalClientException(
-                       MsalError.WamUiThread,
-                       "AcquireTokenInteractive with broker must be called from the UI thread when using the Windows broker." +
-                        WamBroker.ErrorMessageSuffix);
-                }
-
-                await ShowPickerForWin32WindowAsync(_parentHandle).ConfigureAwait(false);
-
-            }
-        }
-
-        /// <summary>
-        /// Account Picker APIs do not work well with console apps because the console
-        /// window belongs to a different process, which causes a security exception. 
-        /// In general, if the parent window handle does not belong to the current process, 
-        /// we need to take control over the window handle by injecting a splash screen.
-        /// </summary>
-        private bool UseSplashScreen()
-        {
-            if (_synchronizationContext == null)
-            {
-                return true;
-            }
-
-            WindowsNativeMethods.GetWindowThreadProcessId(_parentHandle, out uint windowProcessId);
-            uint appProcessId = WindowsNativeMethods.GetCurrentProcessId();
-
-            return appProcessId != windowProcessId;
-        }
-
-        /// <summary>
-        /// The account picker API has bug that prevent correct usage from console apps. 
-        /// To workaround, show a splash screen and attach to it.
-        /// </summary>
-        /// <returns></returns>
-        private Task<bool> ShowPickerWithSplashScreenAsync()
-        {
-
-            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
-            {
-                TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
-
-                Thread thread = new Thread(() =>
-                {
-                    try
-                    {
-                        ShowPickerWithSplashScreenImpl();
-                        tcs.SetResult(true);
-                    }
-                    catch (Exception e)
-                    {
-                        tcs.SetException(e);
-                    }
-                });
-                thread.SetApartmentState(ApartmentState.STA);
-                thread.Start();
-                return tcs.Task;
-            }
-            else
-            {
-                ShowPickerWithSplashScreenImpl();
-                return Task.FromResult(true);
-            }
-        }
-
-        private void ShowPickerWithSplashScreenImpl()
-        {
-            var win32Window = new SplashScreen.Win32Window(_parentHandle);
-
-            using (var splash = new win32.Splash(win32Window))
-            {
-                splash.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-                splash.DialogResult = System.Windows.Forms.DialogResult.OK;
-                splash.TopMost = true;
-
-#pragma warning disable VSTHRD101 // Avoid unsupported async delegates - Windows API mandates this
-                splash.Shown += async (s, e) =>
-                {
-                    var windowHandle = splash.Handle;
-                    await ShowPickerForWin32WindowAsync(windowHandle).ConfigureAwait(true);
-                    splash.Close();
-                };
-#pragma warning restore VSTHRD101 // Avoid unsupported async delegates
-
-                try
-                {
-                    splash.ShowDialog(win32Window);
-                }
-                catch (InvalidOperationException ex)
-                {
-                    if (_synchronizationContext == null)
-                    {
-                        throw new MsalClientException(
-                           MsalError.WamUiThread,
-                           "AcquireTokenInteractive with broker must be called from the UI thread when using the Windows broker." +
-                            WamBroker.ErrorMessageSuffix, ex);
-                    }
-                    throw;
-                }
-            }
-        }
-
-        private async Task ShowPickerForWin32WindowAsync(IntPtr windowHandle)
-        {
-            AccountsSettingsPane retaccountPane = null;
-            try
-            {
-                retaccountPane = AccountsSettingsPaneInterop.GetForWindow(windowHandle);
-                retaccountPane.AccountCommandsRequested += Authenticator_AccountCommandsRequested;
-                await AccountsSettingsPaneInterop.ShowAddAccountForWindowAsync(windowHandle);
-            }
-            catch (Exception ex)
-            {
-                _logger.ErrorPii(ex);
-                throw;
-            }
-            finally
-            {
-                if (retaccountPane != null)
-                {
-                    retaccountPane.AccountCommandsRequested -= Authenticator_AccountCommandsRequested;                    
-                    retaccountPane = null;
-                }
-            }
-        }
-
-#endif
-
-#if WINDOWS_APP
 
         private async Task<WebAccountProvider> ShowPicker_UWPAsync()
         {
@@ -236,8 +71,6 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
                 }
             }
         }
-#endif
-
 #pragma warning disable VSTHRD100 // Avoid async void methods
         private async void Authenticator_AccountCommandsRequested(
 #pragma warning restore VSTHRD100 // Avoid async void methods

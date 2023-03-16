@@ -12,9 +12,6 @@ using Windows.Security.Authentication.Web.Core;
 
 namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 {
-#if NET6_WIN
-    [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
-#endif
     internal class WamAdapters
     {
         private const string WamErrorPrefix = "WAM Error ";
@@ -109,13 +106,8 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 
         private static string GetExpectedRedirectUri(string clientId)
         {
-#if WINDOWS_APP
             string sid = Windows.Security.Authentication.Web.WebAuthenticationBroker.GetCurrentApplicationCallbackUri().Host.ToUpper();            
             return $"ms-appx-web://microsoft.aad.brokerplugin/{sid}";
-#else
-
-            return $"ms-appx-web://microsoft.aad.brokerplugin/{clientId}";
-#endif
         }
 
         private static void AddAuthorityParamToRequest(string authority, bool validate, WebTokenRequest webTokenRequest)
