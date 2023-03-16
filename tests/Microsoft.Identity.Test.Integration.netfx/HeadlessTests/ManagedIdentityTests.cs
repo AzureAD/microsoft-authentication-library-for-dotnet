@@ -39,7 +39,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string NonExistentUserAssignedClientID = "72f988bf-86f1-41af-91ab-2d7cd011db47";
 
         //Error Messages
-        private const string UserAssignedIdDoesNotExist = "[Managed Identity] Error Message: No User Assigned or Delegated Managed Identity found for specified ClientId/ResourceId/PrincipalId.";
+        private const string UserAssignedIdDoesNotExist = "[Managed Identity] Error Message: " +
+            "No User Assigned or Delegated Managed Identity found for specified ClientId/ResourceId/PrincipalId.";
 
         //Resource ID of the User Assigned Identity 
         private const string UamiResourceId = "/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/" +
@@ -49,40 +50,25 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //non existent Resource ID of the User Assigned Identity 
         private const string Non_Existent_UamiResourceId = "/subscriptions/userAssignedIdentities/NO_ID";
 
-        [DataTestMethod]
-        [DataRow(MsiAzureResource.VM, "", DisplayName = "System Identity Virtual Machine")]
-        public async Task ManagedIdentity_WithoutEnvironmentVariables_ThrowsAsync(MsiAzureResource azureResource, string userIdentity)
+        [TestMethod]
+        public async Task ManagedIdentity_WithoutEnvironmentVariables_ThrowsAsync()
         {
             //Arrange
-            using (new EnvVariableContext())
+            ManagedIdentityApplicationBuilder builder = ManagedIdentityApplicationBuilder
+            .Create()
+            .WithExperimentalFeatures();
+
+            IManagedIdentityApplication mia = builder.Build();
+
+            //Act and Assert
+            MsalServiceException ex = await AssertException
+                .TaskThrowsAsync<MsalServiceException>(async () =>
             {
-                // Fetch the env variables from the resource and set them locally
-                Dictionary<string, string> envVariables =
-                    new Dictionary<string, string>() 
-                    {
-                        { ManagedIdentitySourceType.IMDS.ToString(), "http://169.254.169.250" }
-                    };
-
-                //Set the Environment Variables
-                SetEnvironmentVariables(envVariables);
-
-                //Arrange
-                ManagedIdentityApplicationBuilder builder = ManagedIdentityApplicationBuilder
-                .Create()
-                .WithExperimentalFeatures();
-
-                IManagedIdentityApplication mia = builder.Build();
-
-                //Act and Assert
-                HttpRequestException ex = await AssertException
-                    .TaskThrowsAsync<HttpRequestException>(async () =>
-                {
-                    await mia
-                    .AcquireTokenForManagedIdentity(s_msi_scopes)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-                }).ConfigureAwait(false);
-            }
+                await mia
+                .AcquireTokenForManagedIdentity(s_msi_scopes)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+            }).ConfigureAwait(false);
         }
 
         [DataTestMethod]
