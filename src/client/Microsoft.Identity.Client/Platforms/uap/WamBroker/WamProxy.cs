@@ -12,9 +12,6 @@ using Windows.Security.Credentials;
 
 namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
 {
-#if NET6_WIN
-    [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
-#endif
     internal class WamProxy : IWamProxy
     {
         private readonly ILoggerAdapter _logger;
@@ -81,19 +78,13 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
                 _logger.VerbosePii(() => webTokenRequest.ToLogString(true), () => webTokenRequest.ToLogString(false));
                 _logger.VerbosePii(() => wamAccount.ToLogString(true), () => wamAccount.ToLogString(false));
 
-#if WINDOWS_APP
-
                 // UWP requires being on the UI thread
                 await _synchronizationContext;
 
                 WebTokenRequestResult wamResult = await WebAuthenticationCoreManager.RequestTokenAsync(
                     webTokenRequest,
                     wamAccount);
-#else
 
-                var wamResult = await WebAuthenticationCoreManagerInterop.RequestTokenWithWebAccountForWindowAsync(
-                _parentHandle, webTokenRequest, wamAccount);
-#endif
                 return new WebTokenRequestResultWrapper(wamResult);
             }
         }
