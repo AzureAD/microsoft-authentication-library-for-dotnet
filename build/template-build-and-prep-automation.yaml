@@ -131,9 +131,8 @@ steps:
                          'NetCoreWinFormsWam\bin\Release\net6.0-windows10.0.17763.0\', 
                          'NetDesktopWpf\bin\Release\', 
                          'NetFrameworkWam\bin\Release\',
-                         'NetCoreConsoleWAM\bin\Release\net6.0-windows\',
-                         'NetFXConsoleWAM\bin\Release\');
                          'TestBrokerApp\bin\Release\net6.0\',
+                         'TestBrokerApp\bin\Release\net6.0-windows10.0.17763.0\'
                          'TestBrokerApp\bin\Release\net48\');
 
         #Check if runtime files for each arch exist in the Dev Apps
