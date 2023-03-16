@@ -234,7 +234,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPF", "tests\devapps\WAM\MS
 EndProject
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "WPF.Package", "tests\devapps\WAM\MSIX\WPF.Package\WPF.Package.wapproj", "{34E323E8-E706-4DF4-B916-D614FC8CFCEB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBrokerApp", "tests\devapps\TestBrokerApp\TestBrokerApp\TestBrokerApp.csproj", "{09E236C9-E431-407C-912D-B3DE64A924F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBrokerApp", "tests\devapps\WAM\TestBrokerApp\TestBrokerApp.csproj", "{09E236C9-E431-407C-912D-B3DE64A924F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
