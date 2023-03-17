@@ -7,7 +7,12 @@
     <DelaySign>false</DelaySign>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <IsPackable>false</IsPackable>    
+    <IsPackable>false</IsPackable>
+    <!-- Version of the Microsoft.Identity.Client.NativeInterop package. -->
+    <MSALRuntimeNativeInteropVersion>0.13.6</MSALRuntimeNativeInteropVersion>
+    
+    <!-- Version of MSAL if not defined by the CI-->
+    <MsalInternalVersion>4.51.0</MsalInternalVersion>
   </PropertyGroup>
 
   <ItemGroup Label="For ContinuousIntegrationBuild support">

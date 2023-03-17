@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme;
-using Microsoft.Identity.Client.Broker;
+using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -112,12 +112,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Arg.Any<AuthenticationRequestParameters>(), 
                     Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
 
-                var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures(true)
-                    .WithBrokerPreview()
+                var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithTestBroker(mockBroker)
-                    .WithHttpManager(harness.HttpManager)
-                    .BuildConcrete();
+                    .WithHttpManager(harness.HttpManager);
+
+#if NET6_WIN
+                pcaBuilder = pcaBuilder.WithBroker(true);
+#else
+                pcaBuilder = pcaBuilder.WithBroker();
+#endif
+                var pca = pcaBuilder.BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
                 TokenCacheHelper.ExpireAllAccessTokens(pca.UserTokenCacheInternal);

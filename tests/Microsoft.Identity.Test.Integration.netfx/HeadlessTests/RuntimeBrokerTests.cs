@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
@@ -46,7 +47,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
                .WithAuthority("https://login.microsoftonline.com/organizations");
 
-            IPublicClientApplication pca = pcaBuilder.WithBrokerPreview().Build();
+            IPublicClientApplication pca = pcaBuilder.WithBroker().Build();
 
             // Act
             try
@@ -77,7 +78,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
                .WithAuthority("https://login.microsoftonline.com/organizations");
 
-            IPublicClientApplication pca = pcaBuilder.WithBrokerPreview().Build();
+            IPublicClientApplication pca = pcaBuilder.WithBroker().Build();
 
             // Act
             try
@@ -93,6 +94,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordRequestAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -110,7 +112,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithLogging(testLogger)
-               .WithBrokerPreview().Build();
+               .WithBroker().Build();
 
             // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
@@ -127,30 +129,25 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.IsTrue(testLogger.HasLogged);
             Assert.IsFalse(testLogger.HasPiiLogged);
 
-            try
-            {
-                // Acquire token silently
-                result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
+            // Acquire token silently
+            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
-                MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
 
-                // Remove Account
-                await pca.RemoveAsync(account).ConfigureAwait(false);
+            // Remove Account
+            await pca.RemoveAsync(account).ConfigureAwait(false);
 
-                // Assert the account is removed
-                accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            // Assert the account is removed
+            accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 
-                Assert.IsNotNull(accounts);
-                Assert.AreEqual(0, accounts.Count());
-            }
-            catch (MsalUiRequiredException)
-            {
-                //TODO: See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3916
-                //this failure is occuring outside of MSAL and is being investigated.
-            }
+            Assert.IsNotNull(accounts);
+
+            // this should throw MsalUiRequiredException
+            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -168,7 +165,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithLogging(testLogger, enablePiiLogging: true)
-               .WithBrokerPreview().Build();
+               .WithBroker().Build();
 
             // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
@@ -184,24 +181,19 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             Assert.IsTrue(testLogger.HasLogged);
             Assert.IsTrue(testLogger.HasPiiLogged);
-            try
-            {
-                // Acquire token silently
-                result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
-                MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            // Acquire token silently
+            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
-                await pca.RemoveAsync(account).ConfigureAwait(false);
-                // Assert the account is removed
-                accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-                Assert.IsNotNull(accounts);
-                Assert.AreEqual(0, accounts.Count());
-            }
-            catch (MsalUiRequiredException)
-            {
-                //TODO: See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3916
-                //this failure is occuring outside of MSAL and is being investigated.
-            }
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+
+            await pca.RemoveAsync(account).ConfigureAwait(false);
+            // Assert the account is removed
+            accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            Assert.IsNotNull(accounts);
+
+            // this should throw MsalUiRequiredException
+            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
@@ -219,13 +211,12 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithBrokerPreview()
-               .WithWindowsBrokerOptions(
-                new WindowsBrokerOptions() 
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
                 {
-                    ListWindowsWorkAndSchoolAccounts = true
+                    ListOperatingSystemAccounts = true,
                 })
                .Build();
+
 
             // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
@@ -255,7 +246,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create("43dfbb29-3683-4673-a66f-baba91798bd2")
                .WithAuthority("https://login.microsoftonline.com/organizations")
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithBrokerPreview()
+               .WithBroker()
                .Build();
 
             // Act

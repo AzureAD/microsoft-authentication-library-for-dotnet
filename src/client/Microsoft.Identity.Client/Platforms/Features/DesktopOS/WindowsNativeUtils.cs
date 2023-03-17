@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Identity.Client.Utils.Windows
@@ -9,6 +10,8 @@ namespace Microsoft.Identity.Client.Utils.Windows
     /// <summary>
     /// Public Windows native methods
     /// </summary>
+    [Obsolete("This workaround for previous WAM broker implementation is not necessary with the improved broker.", true)]
+    [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this feature is not in use        
     public static class WindowsNativeUtils
     {
         /// <summary>

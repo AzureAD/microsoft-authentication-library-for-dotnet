@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFrameworks>net6.0-windows10.0.17763.0;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net6.0-windows10.0.17763.0</TargetFrameworks>
     <UseWindowsForms>true</UseWindowsForms>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
@@ -11,9 +11,4 @@
     <ProjectReference Include="..\..\..\..\src\client\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
     <ProjectReference Include="..\..\..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
-
-  <ItemGroup Condition="$(TargetFramework) == 'netcoreapp3.1' ">
-    <ProjectReference Include="..\..\..\..\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj" />
-  </ItemGroup>
-
 </Project>
