@@ -8,8 +8,8 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsPackable>false</IsPackable>
-    <!-- Version of the native interop package. -->
-    <NativeInteropVersion>0.13.6</NativeInteropVersion>
+    <!-- Version of the Microsoft.Identity.Client.NativeInterop package. -->
+    <MSALRuntimeNativeInteropVersion>0.13.6</MSALRuntimeNativeInteropVersion>
     
     <!-- Version of MSAL if not defined by the CI-->
     <MsalInternalVersion>4.51.0</MsalInternalVersion>

@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 
-#if NET48 // This for classic net and net core
+#if NET48 // This for classic net
 using Microsoft.Identity.Client.Desktop;
 #elif !NET6_WIN && NET6_0 // this is for pure net6.0 and not net6.0-windows10.0.17763.0
 using Microsoft.Identity.Client.Broker;
@@ -46,7 +46,7 @@ namespace TestBrokerApp
             options.MsaPassthrough = HasMsaPasThrough;
 
             // here is the framework specific code for broker
-#if NET48 // This for classic net and net core
+#if NET48 // This for classic net
             pcaBuilder.WithWindowsDesktopFeatures(options);
 #elif !NET6_WIN && NET6_0 // this is for pure net6.0 and not net6.0-windows10.0.17763.0
             pcaBuilder.WithBroker(options);

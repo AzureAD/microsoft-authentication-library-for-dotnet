@@ -5,7 +5,6 @@
     <TargetFrameworkNet48>net48</TargetFrameworkNet48>
     <TargetFrameworkNet6>net6.0</TargetFrameworkNet6>
     <TargetFrameworkNet6Win>net6.0-windows10.0.17763.0</TargetFrameworkNet6Win>
-    <!--<TargetFrameworkUap>uap10.0.17763</TargetFrameworkUap>-->
     <TargetFrameworks>net48;net6.0;net6.0-windows10.0.17763.0</TargetFrameworks>
   </PropertyGroup>
 
