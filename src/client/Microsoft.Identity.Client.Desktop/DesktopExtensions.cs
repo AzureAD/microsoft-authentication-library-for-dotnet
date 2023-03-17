@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Desktop
         /// - WebView2 embedded web view, based on Microsoft Edge - https://aka.ms/msal-net-webview2
         /// </summary>
         /// <remarks>These extensions live in a separate package to avoid adding dependencies to MSAL</remarks>
-        [Obsolete("Use WithWindowsDesktopFeatures instead. For Windows broker support only, use WithWindowsBroker from Microsoft.Identity.Client.Broker package.", false)]
+        [Obsolete("Use WithWindowsDesktopFeatures instead. For broker support only, use  WithBroker(BrokerOptions) from Microsoft.Identity.Client.Broker package.", false)]
         public static PublicClientApplicationBuilder WithDesktopFeatures(this PublicClientApplicationBuilder builder)
         {
             builder.WithWindowsDesktopFeatures(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));

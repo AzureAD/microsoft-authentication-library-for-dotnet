@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.Utils.Windows
     /// <summary>
     /// Public Windows native methods
     /// </summary>
-    [Obsolete("This class has been deprecated", true)]
+    [Obsolete("This workaround for previous WAM broker implementation is not necessary with the improved broker.", true)]
     [EditorBrowsable(EditorBrowsableState.Never)] // deprecated, this feature is not in use        
     public static class WindowsNativeUtils
     {

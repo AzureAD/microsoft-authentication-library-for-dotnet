@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Broker
         /// Make sure browser auth is enabled (e.g. if using system browser, register the "http://localhost" redirect URI, etc.)
         /// </remarks>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use WithBroker(BrokerOptions) instead. This API can be found in Microsoft.Identity.Client.Broker package. See https://aka.ms/msal-net-wam for details.", false)]
+        [Obsolete("This broker implementation is generally available. Use WithBroker(BrokerOptions) in Microsoft.Identity.Client.Broker package instead. See https://aka.ms/msal-net-wam for details.", false)]
         public static PublicClientApplicationBuilder WithBrokerPreview(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
             WithBroker(builder, new BrokerOptions(BrokerOptions.OperatingSystems.Windows));

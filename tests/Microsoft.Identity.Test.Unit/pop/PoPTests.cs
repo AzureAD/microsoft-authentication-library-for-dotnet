@@ -160,14 +160,11 @@ namespace Microsoft.Identity.Test.Unit.Pop
         {
             using (var httpManager = new MockHttpManager())
             {
-                
-                var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                              .WithHttpManager(httpManager);
 
-                pcaBuilder = pcaBuilder.WithBroker(
-                    new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
-
-                PublicClientApplication app = pcaBuilder.BuildConcrete();
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithHttpManager(httpManager)
+                                                              .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+                                                              .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
                 var popConfig = new PoPAuthenticationConfiguration(request);

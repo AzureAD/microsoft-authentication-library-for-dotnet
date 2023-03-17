@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// On which operating systems the broker is enabled. 
+        /// Operating systems on which broker is enabled.
         /// </summary>
         public OperatingSystems EnabledOn { get; }
 
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client
         public string Title { get; set; }
 
         /// <summary>
-        /// A legacy option available only to Microsoft applications. Should be avoided where possible.
+        /// A legacy option available only to Microsoft First-Party applications. Should be avoided where possible.
         /// Support is experimental.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)] // 1p feature only, hide it from public API.
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Currently only supported on Windows
-        /// Allow the Windows broker to list Work and School accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>
+        /// Allows the Windows broker to list Work and School accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>
         /// </summary>        
         public bool ListOperatingSystemAccounts { get; set; }
 

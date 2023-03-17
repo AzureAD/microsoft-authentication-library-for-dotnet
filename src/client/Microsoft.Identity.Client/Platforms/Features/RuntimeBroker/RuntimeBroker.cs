@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
 
-            _logger?.Verbose(() => "[WamBroker] Using Windows account picker.");
+            _logger?.Verbose(() => "[RuntimeBroker] Using Windows account picker.");
 
             if (authenticationRequestParameters?.Account?.HomeAccountId?.ObjectId != null)
             {
@@ -176,11 +176,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         else
                         {
                             _logger?.WarningPii(
-                                $"[WamBroker] Could not find a WAM account for the selected user {authenticationRequestParameters.Account.Username}, error: {readAccountResult.Error}",
-                                $"[WamBroker] Could not find a WAM account for the selected user. Error: {readAccountResult.Error}");
+                                $"[RuntimeBroker] Could not find a WAM account for the selected user {authenticationRequestParameters.Account.Username}, error: {readAccountResult.Error}",
+                                $"[RuntimeBroker] Could not find a WAM account for the selected user. Error: {readAccountResult.Error}");
 
                             _logger?.Info(
-                                $"[WamBroker] Calling SignInInteractivelyAsync this will show the account picker.");
+                                $"[RuntimeBroker] Calling SignInInteractivelyAsync this will show the account picker.");
 
                             msalTokenResponse = await SignInInteractivelyAsync(
                                 authenticationRequestParameters, acquireTokenInteractiveParameters)
@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             {
                 //Login Hint
                 string loginHint = authenticationRequestParameters.LoginHint ?? authenticationRequestParameters?.Account?.Username;
-                _logger?.Verbose(() => "[WamBroker] AcquireTokenInteractive - login hint provided? " + !string.IsNullOrEmpty(loginHint));
+                _logger?.Verbose(() => "[RuntimeBroker] AcquireTokenInteractive - login hint provided? " + !string.IsNullOrEmpty(loginHint));
 
                 using (var result = await s_lazyCore.Value.SignInInteractivelyAsync(
                     _parentHandle,
@@ -242,7 +242,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             MsalTokenResponse msalTokenResponse = null;
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
 
-            _logger?.Verbose(() => "[WamBroker] Signing in with the default user account.");
+            _logger?.Verbose(() => "[RuntimeBroker] Signing in with the default user account.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters,
@@ -283,7 +283,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
 
-            _logger?.Verbose(() => "[WamBroker] Acquiring token silently.");
+            _logger?.Verbose(() => "[RuntimeBroker] Acquiring token silently.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters,
@@ -298,8 +298,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     if (!readAccountResult.IsSuccess)
                     {
                         _logger?.WarningPii(
-                            $"[WamBroker] Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}. Error: {readAccountResult.Error}",
-                            $"[WamBroker] Could not find a WAM account for the selected user. Error: {readAccountResult.Error}");
+                            $"[RuntimeBroker] Could not find a WAM account for the selected user {acquireTokenSilentParameters.Account.Username}. Error: {readAccountResult.Error}",
+                            $"[RuntimeBroker] Could not find a WAM account for the selected user. Error: {readAccountResult.Error}");
 
                         throw new MsalUiRequiredException(
                             "wam_no_account_for_id",
@@ -331,7 +331,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
 
-            _logger?.Verbose(() => "[WamBroker] Acquiring token silently for default account.");
+            _logger?.Verbose(() => "[RuntimeBroker] Acquiring token silently for default account.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters,
@@ -361,7 +361,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
 
-            _logger?.Verbose(() => "[WamBroker] Acquiring token with Username Password flow.");
+            _logger?.Verbose(() => "[RuntimeBroker] Acquiring token with Username Password flow.");
 
             using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters,
@@ -391,7 +391,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             if (account == null)
             {
-                _logger?.Verbose(() => "[WamBroker] No valid account was passed to RemoveAccountAsync. ");
+                _logger?.Verbose(() => "[RuntimeBroker] No valid account was passed to RemoveAccountAsync. ");
                 throw new MsalClientException("wam_remove_account_failed", "No valid account was passed.");
             }
 
@@ -400,7 +400,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             //if OperatingSystemAccount is passed then we use the user signed -in on the machine
             if (PublicClientApplication.IsOperatingSystemAccount(account))
             {
-                _logger?.Verbose(() => "[WamBroker] Default Operating System Account cannot be removed. ");
+                _logger?.Verbose(() => "[RuntimeBroker] Default Operating System Account cannot be removed. ");
                 throw new MsalClientException("wam_remove_account_failed", "Default Operating System account cannot be removed.");
             }
 
@@ -414,14 +414,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 {
                     if (readAccountResult.IsSuccess)
                     {
-                        _logger?.Verbose(() => "[WamBroker] WAM Account exists and can be removed.");
+                        _logger?.Verbose(() => "[RuntimeBroker] WAM Account exists and can be removed.");
 
                     }
                     else
                     {
                         _logger?.WarningPii(
-                            $"[WamBroker] Could not find a WAM account for the selected user {account.Username} - error: {readAccountResult.Error}",
-                            $"[WamBroker] Could not find a WAM account for the selected user, error: {readAccountResult.Error}");
+                            $"[RuntimeBroker] Could not find a WAM account for the selected user {account.Username} - error: {readAccountResult.Error}",
+                            $"[RuntimeBroker] Could not find a WAM account for the selected user, error: {readAccountResult.Error}");
                     }
 
                     using (NativeInterop.SignOutResult result = await s_lazyCore.Value.SignOutSilentlyAsync(
@@ -431,13 +431,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     {
                         if (result.IsSuccess)
                         {
-                            _logger?.Verbose(() => "[WamBroker] Account signed out successfully. ");
+                            _logger?.Verbose(() => "[RuntimeBroker] Account signed out successfully. ");
                         }
                         else
                         {
                             _logger?.WarningPii(
-                            $"[WamBroker] Could not sign out user {account.Username} - error: {result.Error}",
-                            $"[WamBroker] Could not sign out user, error: {result.Error}");
+                            $"[RuntimeBroker] Could not sign out user {account.Username} - error: {result.Error}",
+                            $"[RuntimeBroker] Could not sign out user, error: {result.Error}");
                         }
                     }
                 }
@@ -453,7 +453,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
         {
             if (!_wamOptions.ListOperatingSystemAccounts)
             {
-                _logger.Info("[WamBroker] ListWindowsWorkAndSchoolAccounts option was not enabled.");
+                _logger.Info("[RuntimeBroker] ListWindowsWorkAndSchoolAccounts option was not enabled.");
                 return Array.Empty<IAccount>();
             }
             using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
@@ -470,7 +470,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 {
                     List<NativeInterop.Account> wamAccounts = discoverAccountsResult.Accounts;
 
-                    _logger.Info(() => $"[WamBroker] Broker returned {wamAccounts.Count} account(s).");
+                    _logger.Info(() => $"[RuntimeBroker] Broker returned {wamAccounts.Count} account(s).");
 
                     if (wamAccounts.Count == 0)
                     {
@@ -487,11 +487,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                                 environmentList,
                                 requestContext).ConfigureAwait(false);
 
-                        _logger.Verbose(() => $"[WamBroker] Filtering WAM accounts based on Environment.");
+                        _logger.Verbose(() => $"[RuntimeBroker] Filtering WAM accounts based on Environment.");
 
                         wamAccounts.RemoveAll(acc => !instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
 
-                        _logger.Verbose(() => $"[WamBroker] {wamAccounts.Count} account(s) returned after filtering.");
+                        _logger.Verbose(() => $"[RuntimeBroker] {wamAccounts.Count} account(s) returned after filtering.");
                     }
 
                     List<IAccount> msalAccounts = new List<IAccount>();
@@ -504,21 +504,21 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         }
                     }
 
-                    _logger.Verbose(() => $"[WamBroker] Converted {msalAccounts.Count} WAM account(s) to MSAL Account(s).");
+                    _logger.Verbose(() => $"[RuntimeBroker] Converted {msalAccounts.Count} WAM account(s) to MSAL Account(s).");
 
                     return msalAccounts;
                 }
                 else
                 {
                     string errorMessagePii =
-                        $" [WamBroker] \n" +
+                        $" [RuntimeBroker] \n" +
                         $" Error Code: {discoverAccountsResult.Error.ErrorCode} \n" +
                         $" Error Message: {discoverAccountsResult.Error.Context} \n" +
                         $" Internal Error Code: {discoverAccountsResult.Error.Tag.ToString(CultureInfo.InvariantCulture)} \n" +
                         $" Telemetry Data: {discoverAccountsResult.TelemetryData} \n";
 
-                    _logger.ErrorPii($"[WamBroker] {errorMessagePii}",
-                        $"[WamBroker] DiscoverAccounts Error. " +
+                    _logger.ErrorPii($"[RuntimeBroker] {errorMessagePii}",
+                        $"[RuntimeBroker] DiscoverAccounts Error. " +
                         $"Error Code : {discoverAccountsResult.Error.ErrorCode}. " +
                         $"Internal Error Code: {discoverAccountsResult.Error.Tag.ToString(CultureInfo.InvariantCulture)}");
 
