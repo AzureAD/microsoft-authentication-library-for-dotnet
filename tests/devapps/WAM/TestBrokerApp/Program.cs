@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
@@ -10,8 +13,6 @@ namespace TestBrokerApp
 {
     internal class Program
     {
-
-
         static async Task Main(string[] args)
         {
             Console.WriteLine("Hello, World!");
@@ -113,7 +114,6 @@ namespace TestBrokerApp
                             await pcaTester.ExecuteAndDisplay(atiBulider).ConfigureAwait(false);
                         }
                         break;
-
 
                     case 5: // Acquire Token Interactive with Default OS Account MSA
                         {
@@ -346,7 +346,6 @@ namespace TestBrokerApp
                             throw new NotImplementedException();
                         }
 
-
                     case 0:
                         return;
 
@@ -356,7 +355,5 @@ namespace TestBrokerApp
                 Console.ReadKey();
             }
         }
-
-
     }
 }

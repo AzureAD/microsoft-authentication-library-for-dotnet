@@ -129,7 +129,6 @@ namespace TestBrokerApp
             return null;
         }
 
-
         private static void Log(LogLevel level, string message, bool containsPii)
         {
             if (!containsPii)
