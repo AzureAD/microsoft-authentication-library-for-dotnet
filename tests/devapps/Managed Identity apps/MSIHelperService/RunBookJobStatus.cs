@@ -100,6 +100,9 @@ namespace MSIHelperService
         public string? RunOn { get; set; }
     }
 
+    /// <summary>
+    /// Parameters
+    /// </summary>
     public class Parameters
     {
         /// <summary>
