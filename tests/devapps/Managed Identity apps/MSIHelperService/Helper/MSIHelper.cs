@@ -225,6 +225,7 @@ namespace MSIHelperService.Helper
         /// </summary>
         /// <param name="identityHeader"></param>
         /// <param name="uri"></param>
+        /// <param name="httpClient"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
         public static async Task<ActionResult?> GetVirtualMachineMSIToken(
@@ -302,6 +303,7 @@ namespace MSIHelperService.Helper
         /// Get Azure Runbook Job Status
         /// </summary>
         /// <param name="jobId"></param>
+        /// <param name="httpClient"></param>
         /// <param name="logger"></param>
         /// <returns>Azure runbook job Status</returns>
         private static async Task<bool> AzureRunbookJobStatusIsCompleted(
@@ -349,6 +351,7 @@ namespace MSIHelperService.Helper
         /// <summary>
         /// Starts the Runbook and gets Azure Runbook Job Id 
         /// </summary>
+        /// <param name="httpClient"></param>
         /// <param name="logger"></param>
         /// <returns>Azure runbook job ID</returns>
         private static async Task<string?> StartAzureRunbookandGetJobId(HttpClient httpClient, ILogger logger)
@@ -387,9 +390,10 @@ namespace MSIHelperService.Helper
         /// <summary>
         /// Sets the additional headers on the http client
         /// </summary>
-        /// <param name="token"></param>
-        /// <param name="token"></param>
-        /// <param name="logger"></param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <param name="httpClient"></param>
+        /// <param name="logger"></param> 
         /// <returns></returns>
         private static void SetAdditionalHeader(
             string key,
@@ -408,8 +412,8 @@ namespace MSIHelperService.Helper
         /// <summary>
         /// Get the Client Token 
         /// </summary>
-        /// <param name="appID"></param>
-        /// <param name="appSecret"></param>
+        /// <param name="clientID"></param>
+        /// <param name="secret"></param>
         /// <param name="scopes"></param>
         /// <param name="logger"></param>
         /// <returns></returns>

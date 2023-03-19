@@ -22,6 +22,12 @@ namespace MSIHelperService.AzureFunction
     {
         private static Dictionary<string, string> _envVariables => new Dictionary<string, string>();
 
+        /// <summary>
+        /// Gets the environment variables
+        /// </summary>
+        /// <param name="req"></param>
+        /// <param name="log"></param>
+        /// <returns></returns>
         public static async Task<IActionResult> Run(HttpRequest req, ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");

@@ -23,6 +23,7 @@ namespace MSIHelperService.Controllers
         /// Inject Logger and IHttpClientFactory instance 
         /// </summary>
         /// <param name="logger"></param>
+        /// <param name="httpClientFactory"></param>
         public EnvironmentVariablesController(
             ILogger<EnvironmentVariablesController> logger, 
             IHttpClientFactory httpClientFactory)
