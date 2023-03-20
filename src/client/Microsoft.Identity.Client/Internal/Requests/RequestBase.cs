@@ -235,7 +235,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 msalTokenResponse.TokenSource,
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
                 account,
-                msalTokenResponse.SpaAuthCode);
+                msalTokenResponse.SpaAuthCode, 
+                msalTokenResponse.SpaAccountId);
         }
 
         private void ValidateAccountIdentifiers(ClientInfo fromServer)
@@ -449,7 +450,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.CorrelationId,
                     TokenSource.Cache,
                     AuthenticationRequestParameters.RequestContext.ApiEvent,
-                    account);
+                    account, 
+                    spaAuthCode: null, 
+                    spaAccountId: null);
             }
 
             logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");

@@ -1420,7 +1420,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                 .WithRedirectUri(TestConstants.RedirectUri)
                 .WithClientSecret(TestConstants.ClientSecret)
                 .WithHttpManager(httpManager)
@@ -1437,6 +1436,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .ConfigureAwait(false);
 
                 Assert.AreEqual(expectedSpaCode, result.SpaAuthCode);
+                Assert.IsNull(result.SpaAccountId);
                 Assert.AreEqual("1", handler.ActualRequestPostData["return_spa_code"]);
 
                 handler = httpManager.AddSuccessTokenResponseMockHandlerForPost(
@@ -1460,6 +1460,31 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsTrue(string.IsNullOrEmpty(result.SpaAuthCode));
 
+            }
+        }
+
+        [TestMethod]
+        public async Task BridgedHybridSpa_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                var handler = httpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    responseMessage: MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetBridgedHybridSpaTokenResponse("wam_account_id_1234")));
+
+                var result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                    .WithSpaAuthorizationCode(true)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual("wam_account_id_1234", result.SpaAccountId);
+                Assert.IsNull(result.SpaAuthCode);
+                Assert.AreEqual("1", handler.ActualRequestPostData["return_spa_code"]);
             }
         }
 

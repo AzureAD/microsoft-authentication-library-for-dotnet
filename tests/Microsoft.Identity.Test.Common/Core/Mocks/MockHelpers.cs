@@ -87,6 +87,18 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ",\"id_token_expires_in\":\"3600\"}";
         }
 
+        public static string GetBridgedHybridSpaTokenResponse(string spaAccountId)
+        {
+            return
+            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
+            "\"r1/scope1 r1/scope2\",\"access_token\":\"" + TestConstants.ATSecret + "\"" +
+            ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
+            ":\"" + CreateClientInfo() + "\",\"id_token\"" +
+            ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
+            "\",\"spa_accountId\":\"" + spaAccountId + "\"" +
+            ",\"id_token_expires_in\":\"3600\"}";
+        }
+
         public static string GetMsiSuccessfulResponse()
         {
             string expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(1));

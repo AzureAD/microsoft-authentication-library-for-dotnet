@@ -39,13 +39,17 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string Authority = "authority";
         public const string FamilyId = "foci";
         public const string RefreshIn = "refresh_in";
-        public const string SpaCode = "spa_code";
         public const string ErrorSubcode = "error_subcode";
         public const string ErrorSubcodeCancel = "cancel";
 
         public const string TenantId = "tenant_id";
         public const string Upn = "username";
         public const string LocalAccountId = "local_account_id";
+
+        // Hybrid SPA - see https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3994
+        public const string SpaCode = "spa_code";
+        public const string SpaAccountId = "spa_accountId";
+
     }
 
     [JsonObject]
@@ -103,6 +107,9 @@ namespace Microsoft.Identity.Client.OAuth2
 
         [JsonProperty(TokenResponseClaim.SpaCode)]
         public string SpaAuthCode { get; set; }
+
+        [JsonProperty(TokenResponseClaim.SpaAccountId)]
+        public string SpaAccountId { get; set; }
 
         [JsonProperty(TokenResponseClaim.Authority)]
         public string AuthorityUrl { get; set; }

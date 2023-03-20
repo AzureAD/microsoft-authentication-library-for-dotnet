@@ -39,7 +39,8 @@ namespace Microsoft.Identity.Client
         /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
         /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
         /// <param name="claimsPrincipal">Claims from the ID token</param>
-        /// <param name="spaAuthCode">Auth Code returned by the Microsoft identity platform when you use AcquireTokenByAuthorizeCode.WithSpaAuthorizationCode(). This auth code is meant to be redeemed by the frontend code.</param>
+        /// <param name="spaAuthCode">Auth Code returned by the Microsoft identity platform when you use AcquireTokenByAuthorizeCode.WithSpaAuthorizationCode(). This auth code is meant to be redeemed by the frontend code. See https://aka.ms/msal-net/spa-auth-code</param>
+        /// <param name="spaAccountId">Accound ID returned by the Microsoft identity platform instead of spaAuthCode, under certain conditions. See https://aka.ms/msal-net/spa-auth-code for details.</param>
         public AuthenticationResult( // for backwards compat with 4.16-
             string accessToken,
             bool isExtendedLifeTimeToken,
@@ -54,7 +55,8 @@ namespace Microsoft.Identity.Client
             string tokenType = "Bearer",
             AuthenticationResultMetadata authenticationResultMetadata = null, 
             ClaimsPrincipal claimsPrincipal = null,
-            string spaAuthCode = null)
+            string spaAuthCode = null, 
+            string spaAccountId = null)
         {
             AccessToken = accessToken;
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -72,6 +74,7 @@ namespace Microsoft.Identity.Client
             AuthenticationResultMetadata = authenticationResultMetadata;
             ClaimsPrincipal = claimsPrincipal;
             SpaAuthCode = spaAuthCode;
+            SpaAccountId = spaAccountId;
         }
 
         /// <summary>
@@ -130,7 +133,8 @@ namespace Microsoft.Identity.Client
             TokenSource tokenSource, 
             ApiEvent apiEvent,
             Account account,
-            string spaAuthCode = null)
+            string spaAuthCode, 
+            string spaAccountId)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
             
@@ -158,6 +162,7 @@ namespace Microsoft.Identity.Client
             TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
             IdToken = msalIdTokenCacheItem?.Secret;
             SpaAuthCode = spaAuthCode;
+            SpaAccountId = spaAccountId;
 
             CorrelationId = correlationID;
             ApiEvent = apiEvent;
@@ -267,6 +272,17 @@ namespace Microsoft.Identity.Client
         /// AcquireTokenByAuthorizationCode builder. See https://aka.ms/msal-net/spa-auth-code for details.
         /// </summary>
         public string SpaAuthCode { get; }
+
+        /// <summary>
+        /// Get the Accound ID of a user, instead of <see cref="SpaAuthCode"/>, if the user's account
+        /// is connected to Windows. 
+        /// 
+        /// See https://aka.ms/msal-net/spa-auth-code#advanced-scenario---bridged-spa-auth-code-protocol for details.
+        /// </summary>
+        /// <remarks>
+        /// To opt-in this feature, add `nativebroker=1` to the authorization url. 
+        /// </remarks>
+        public string SpaAccountId { get; }
 
         /// <summary>
         /// All the claims present in the ID token.
