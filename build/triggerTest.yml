@@ -21,6 +21,11 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
-- task: Delay@1
+- task: PowerShell@2
   inputs:
-    delayForMinutes: '3'
+    targetType: 'inline'
+    script: |
+      # Write your PowerShell commands here.
+      
+      Write-Host "Waiting"
+      Start-Sleep -Seconds 180
