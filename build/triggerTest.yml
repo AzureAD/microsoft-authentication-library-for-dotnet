@@ -6,7 +6,7 @@
 resources:
   pipelines:
   - pipeline: PR # Name of the pipeline resource.
-    source: pipeline-pullrequest.yaml # The name of the pipeline referenced by this pipeline resource.
+    source: build/pipeline-pullrequest.yaml # The name of the pipeline referenced by this pipeline resource.
     trigger: true # Run app-ci pipeline when any run of security-lib-ci completes 
 
 trigger:
