@@ -232,7 +232,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBrokerApp", "tests\deva
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSIHelperService", "tests\devapps\Managed Identity apps\MSIHelperService\MSIHelperService.csproj", "{2EABD781-C0E4-42AA-9E4A-7B415764EDBE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedIdentityWebApi", "ManagedIdentityWebApi\ManagedIdentityWebApi.csproj", "{6BA6689B-2915-4EEF-9ACC-C3E968C40033}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedIdentityWebApi", "tests\devapps\Managed Identity apps\ManagedIdentityWebApi\ManagedIdentityWebApi.csproj", "{6BA6689B-2915-4EEF-9ACC-C3E968C40033}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
