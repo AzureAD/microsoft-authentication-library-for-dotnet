@@ -15,6 +15,7 @@ using Microsoft.Identity.Client;
 [assembly: InternalsVisibleTo("Microsoft.Identity.Test.Integration.NetFx" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("Microsoft.Identity.Test.Integration.NetStandard" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("Microsoft.Identity.Test.Performance" + KeyTokens.MSAL)]
+[assembly: InternalsVisibleTo("Microsoft.Identity.Test.E2E.NetStandard" + KeyTokens.MSAL)]
 
 [assembly: InternalsVisibleTo("CommonCache.Test.Common" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("CommonCache.Test.Unit" + KeyTokens.MSAL)]
