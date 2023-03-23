@@ -630,8 +630,8 @@ namespace Microsoft.Identity.Client
 
             var authorityInfo = AuthorityInfo.FromGenericAuthority(authorityUri);
             Config.Authority = Authority.CreateAuthority(authorityInfo);
-            
-            return (T)this;
+
+            return this as T;
         }
         
         #endregion
