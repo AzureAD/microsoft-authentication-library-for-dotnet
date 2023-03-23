@@ -1,0 +1,26 @@
+# .NET Desktop
+# Build and run tests for .NET Desktop or Windows classic desktop solutions.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
+
+resources:
+  pipelines:
+  - pipeline: pipeline-pullrequest # Name of the pipeline resource.
+    source: pipeline-pullrequest.yaml # The name of the pipeline referenced by this pipeline resource.
+    trigger: true # Run app-ci pipeline when any run of security-lib-ci completes
+
+trigger:
+  batch: true
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+- task: ManualIntervention@8
+  inputs:
+    instructions: 'Approve'
