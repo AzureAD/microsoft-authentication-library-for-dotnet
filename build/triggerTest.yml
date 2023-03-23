@@ -21,6 +21,6 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
-- task: ManualIntervention@8
+- task: Delay@1
   inputs:
-    instructions: 'Approve'
+    delayForMinutes: '3'
