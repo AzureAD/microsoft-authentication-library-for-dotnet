@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
         /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
         /// <param name="claimsPrincipal">Claims from the ID token</param>
         /// <param name="spaAuthCode">Auth Code returned by the Microsoft identity platform when you use AcquireTokenByAuthorizeCode.WithSpaAuthorizationCode(). This auth code is meant to be redeemed by the frontend code. See https://aka.ms/msal-net/spa-auth-code</param>
-        /// <param name="spaAccountId">Accound ID returned by the Microsoft identity platform instead of spaAuthCode, under certain conditions. See https://aka.ms/msal-net/spa-auth-code for details.</param>
+        /// <param name="additionalResponseParameters">Other properties from the token response.</param>
         public AuthenticationResult( // for backwards compat with 4.16-
             string accessToken,
             bool isExtendedLifeTimeToken,
@@ -55,8 +55,8 @@ namespace Microsoft.Identity.Client
             string tokenType = "Bearer",
             AuthenticationResultMetadata authenticationResultMetadata = null, 
             ClaimsPrincipal claimsPrincipal = null,
-            string spaAuthCode = null, 
-            string spaAccountId = null)
+            string spaAuthCode = null,
+            IReadOnlyDictionary<string, string> additionalResponseParameters=null)
         {
             AccessToken = accessToken;
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client
             AuthenticationResultMetadata = authenticationResultMetadata;
             ClaimsPrincipal = claimsPrincipal;
             SpaAuthCode = spaAuthCode;
-            SpaAccountId = spaAccountId;
+            AdditionalResponseParameters = additionalResponseParameters;
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client
             ApiEvent apiEvent,
             Account account,
             string spaAuthCode, 
-            string spaAccountId)
+            IReadOnlyDictionary<string, string> additionalResponseParameters)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
             
@@ -162,12 +162,11 @@ namespace Microsoft.Identity.Client
             TenantId = msalIdTokenCacheItem?.IdToken?.TenantId;
             IdToken = msalIdTokenCacheItem?.Secret;
             SpaAuthCode = spaAuthCode;
-            SpaAccountId = spaAccountId;
 
             CorrelationId = correlationID;
             ApiEvent = apiEvent;
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
-
+            AdditionalResponseParameters = additionalResponseParameters;
             if (msalAccessTokenCacheItem != null)
             {
                 AccessToken = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
@@ -274,15 +273,13 @@ namespace Microsoft.Identity.Client
         public string SpaAuthCode { get; }
 
         /// <summary>
-        /// Get the Accound ID of a user, instead of <see cref="SpaAuthCode"/>, if the user's account
-        /// is connected to Windows. 
-        /// 
-        /// See https://aka.ms/msal-net/spa-auth-code#advanced-scenario---bridged-spa-auth-code-protocol for details.
+        /// Exposes additional response parameters returned by the token issuer (AAD).
         /// </summary>
         /// <remarks>
-        /// To opt-in this feature, add `nativebroker=1` to the authorization url. 
+        /// Not all parameters are added here. 
+        /// Numbers are set as strings and complex objects are not added.
         /// </remarks>
-        public string SpaAccountId { get; }
+        public IReadOnlyDictionary<string, string> AdditionalResponseParameters { get; }
 
         /// <summary>
         /// All the claims present in the ID token.

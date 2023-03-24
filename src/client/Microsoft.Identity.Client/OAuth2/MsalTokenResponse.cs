@@ -63,6 +63,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
         private const string iOSBrokerErrorMetadata = "error_metadata";
         private const string iOSBrokerHomeAccountId = "home_account_id";
+
         [JsonProperty(TokenResponseClaim.TokenType)]
         public string TokenType { get; set; }
 
