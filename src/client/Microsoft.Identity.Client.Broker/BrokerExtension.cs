@@ -1,8 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+using System.ComponentModel;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.Broker
@@ -23,10 +26,30 @@ namespace Microsoft.Identity.Client.Broker
         /// If a broker does not exist or cannot be used, MSAL will fallback to a browser.
         /// Make sure browser auth is enabled (e.g. if using system browser, register the "http://localhost" redirect URI, etc.)
         /// </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("This broker implementation is generally available. Use WithBroker(BrokerOptions) in Microsoft.Identity.Client.Broker package instead. See https://aka.ms/msal-net-wam for details.", false)]
         public static PublicClientApplicationBuilder WithBrokerPreview(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
-            builder.Config.IsBrokerEnabled = enableBroker;
+            WithBroker(builder, new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+            return builder;
+        }
+
+        /// <summary>
+        /// Brokers enable Single-Sign-On, device identification,and application identification verification, 
+        /// while increasing the security of applications. Use this API to enable brokers on desktop platforms.
+        /// 
+        /// See https://aka.ms/msal-net-wam for more information on platform specific settings required to enable the broker such as redirect URIs.
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="brokerOptions">This provides cross platform options for broker.</param>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
+        public static PublicClientApplicationBuilder WithBroker(this PublicClientApplicationBuilder builder, BrokerOptions brokerOptions)
+        {
             AddRuntimeSupportForWam(builder);
+            builder.Config.BrokerOptions = brokerOptions;
+            builder.Config.IsBrokerEnabled = brokerOptions.IsBrokerEnabledOnCurrentOs();
             return builder;
         }
 
@@ -37,7 +60,7 @@ namespace Microsoft.Identity.Client.Broker
                 builder.Config.BrokerCreatorFunc =
                      (uiParent, appConfig, logger) =>
                      {
-                         logger.Info("[WamBroker] WAM supported OS.");
+                         logger.Info("[RuntimeBroker] WAM supported OS.");
                          return new RuntimeBroker(uiParent, appConfig, logger);
                      };
             }
@@ -46,7 +69,7 @@ namespace Microsoft.Identity.Client.Broker
                 builder.Config.BrokerCreatorFunc =
                    (uiParent, appConfig, logger) =>
                    {
-                       logger.Info("[WamBroker] Not a Windows 10 or Server equivalent machine. WAM is not available.");
+                       logger.Info("[RuntimeBroker] Not a Windows 10 or Server equivalent machine. WAM is not available.");
                        return new NullBroker(logger);
                    };
             }

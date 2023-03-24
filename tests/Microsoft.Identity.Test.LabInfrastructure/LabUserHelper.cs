@@ -51,6 +51,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return s_labService.CreateLabResponseFromResultStringAsync(result).Result;
         }
 
+        public static async Task<string> GetMSIEnvironmentVariablesAsync(string uri)
+        {
+            string result = await s_labService.GetLabResponseAsync(uri).ConfigureAwait(false);
+            return result;
+        }
+
         public static Task<LabResponse> GetDefaultUserAsync()
         {
             return GetLabUserDataAsync(UserQuery.PublicAadUserQuery);

@@ -11,7 +11,9 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Unit;
+using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
@@ -360,6 +362,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpManager.AddMockHandler(httpMessageHandler);
         }
 
+            
         private static MockHttpMessageHandler BuildMockHandlerForManagedIdentitySource(ManagedIdentitySourceType managedIdentitySourceType, string resource)
         {
             MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
@@ -368,7 +371,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             switch (managedIdentitySourceType)
             {
-            
                 case ManagedIdentitySourceType.AppService:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Get;
                     expectedQueryParams.Add("api-version", "2019-08-01");
@@ -392,6 +394,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     expectedRequestHeaders.Add("Metadata", "true");
                     expectedRequestHeaders.Add("ContentType", "application/x-www-form-urlencoded");
                     httpMessageHandler.ExpectedPostData = new Dictionary<string, string> { { "resource", resource } };
+                    break;
+                case ManagedIdentitySourceType.ServiceFabric:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Get;
+                    expectedRequestHeaders.Add("secret", "secret");
+                    expectedQueryParams.Add("api-version", "2019-07-01-preview");
+                    expectedQueryParams.Add("resource", resource);
                     break;
             }
 
@@ -456,21 +464,5 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// Normal server exception
         /// </summary>
         InvalidClient
-    }
-
-    public enum UserAssignedIdentityId
-    {
-        None,
-        ClientId,
-        ResourceId
-    }
-
-    public enum ManagedIdentitySourceType
-    {
-        IMDS,
-        AppService,
-        AzureArc,
-        CloudShell,
-        ServiceFabric
     }
  }

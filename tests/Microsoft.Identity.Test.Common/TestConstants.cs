@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -60,6 +60,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string ATSecret = "some-access-token";
         public const string RTSecret2 = "someRT2";
         public const string ATSecret2 = "some-access-token2";
+        public const string RTSecret3 = "someRT3";
+        public const string ATSecret3 = "some-access-token3";
 
         public const string HomeAccountId = Uid + "." + Utid;
 
@@ -90,7 +92,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthoritySovereignCNTenant = "https://" + SovereignNetworkEnvironmentCN + "/" + TenantId + "/";
         public const string AuthoritySovereignDECommon = "https://" + SovereignNetworkEnvironmentDE + "/" + Common + "/";
         public const string AuthoritySovereignCNCommon = "https://" + SovereignNetworkEnvironmentCN + "/" + Common + "/";
-        
+
         public const string PrefCacheAuthorityCommonTenant = "https://" + ProductionPrefCacheEnvironment + "/" + Common + "/";
         public const string AuthorityOrganizationsTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Organizations + "/";
         public const string AuthorityConsumersTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Consumers + "/";
@@ -115,7 +117,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string B2CEditProfile = "b2c_1_editprofile";
         public const string B2CEnvironment = SomeTenantId + ".b2clogin.com";
         public const string B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/" + B2CSignUpSignIn + "/";
-        public const string B2CLoginAuthority = "https://" + B2CEnvironment + "/tfp/" +  SomeTenantId + "/" + B2CSignUpSignIn + "/";
+        public const string B2CLoginAuthority = "https://" + B2CEnvironment + "/tfp/" + SomeTenantId + "/" + B2CSignUpSignIn + "/";
         public const string B2CLoginAuthorityWrongHost = "https://anothertenantid.b2clogin.com/tfp/" + SomeTenantId + "/" + B2CSignUpSignIn + "/";
         public const string B2CCustomDomain = "https://" + B2CLoginCustomDomain + "/tfp/" + CatsAreAwesome + "/" + B2CSignUpSignIn + "/";
         public const string B2CLoginAuthorityUsGov = "https://" + SomeTenantId + B2CLoginUSGov + "/tfp/" + SomeTenantId + "/" + B2CSignUpSignIn + "/";
@@ -134,6 +136,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string UniqueId = "unique_id";
         public const string IdentityProvider = "my-idp";
         public const string Name = "First Last";
+        public const string MiResourceId = "/subscriptions/ffa4aaa2-4444-4444-5555-e3ccedd3d046/resourcegroups/UAMI_group/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UAMI";
 
         public const string Claims = @"{""userinfo"":{""given_name"":{""essential"":true},""nickname"":null,""email"":{""essential"":true},""email_verified"":{""essential"":true},""picture"":null,""http://example.info/claims/groups"":null},""id_token"":{""auth_time"":{""essential"":true},""acr"":{""values"":[""urn:mace:incommon:iap:silver""]}}}";
         public static readonly string[] ClientCapabilities = new[] { "cp1", "cp2" };

@@ -43,7 +43,7 @@ namespace NetDesktopWpf
         {
             var pca = PublicClientApplicationBuilder.Create(s_clientID)
                 .WithAuthority(s_authority)
-                .WithWindowsBroker(true)
+                .WithBroker()
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 
@@ -56,7 +56,7 @@ namespace NetDesktopWpf
         {
             var pca = PublicClientApplicationBuilder.Create(s_clientID)
                 .WithAuthority(s_authority)
-                .WithBrokerPreview(true)
+                .WithBroker()
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 

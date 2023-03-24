@@ -92,5 +92,15 @@ namespace Microsoft.Identity.Client.Utils
 
             return scopes[0].Remove(scopes[0].LastIndexOf(DefaultSuffix, StringComparison.Ordinal));
         }
+
+        public static string RemoveDefaultSuffixIfPresent(string resource)
+        {
+            if (!resource.EndsWith(DefaultSuffix, StringComparison.Ordinal))
+            {
+                return resource;
+            }
+
+            return resource.Remove(resource.LastIndexOf(DefaultSuffix, StringComparison.Ordinal));
+        }
     }
 }

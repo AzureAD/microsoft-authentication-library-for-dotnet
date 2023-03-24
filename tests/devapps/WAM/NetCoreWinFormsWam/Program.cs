@@ -16,10 +16,6 @@ namespace NetDesktopWinForms
         [STAThread]
         static void Main()
         {
-            if (WindowsNativeUtils.IsElevatedUser())
-            {
-                WindowsNativeUtils.InitializeProcessSecurity();
-            }
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

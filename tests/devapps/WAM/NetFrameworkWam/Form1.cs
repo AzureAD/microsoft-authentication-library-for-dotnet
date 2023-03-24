@@ -13,8 +13,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Broker;
-using Microsoft.Identity.Client.Desktop;
 
 namespace NetDesktopWinForms
 {
@@ -101,39 +101,33 @@ namespace NetDesktopWinForms
             switch (authMethod)
             {
                 case AuthMethod.WAM:
-                    builder = builder.WithWindowsBroker();
-                    break;
                 case AuthMethod.WAMRuntime:
-                    builder = builder.WithBrokerPreview();
+                    builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
+                    {
+                        ListOperatingSystemAccounts = cbxListOsAccounts.Checked,
+                        MsaPassthrough = cbxMsaPt.Checked,
+                        Title = "MSAL Dev App .NET FX"
+                    });
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder = builder.WithBrokerPreview(false);
-                    builder = builder.WithWindowsBroker(false);
+                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
                     builder = builder.WithRedirectUri("http://localhost");
                     break;
                 case AuthMethod.EmbeddedBrowser:
                     builder = builder.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}");
-                    builder = builder.WithBrokerPreview(false);
-                    builder = builder.WithWindowsBroker(false);
+                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
                     break;
                 default:
                     throw new NotImplementedException();
             }
 
-            builder = builder.WithWindowsBrokerOptions(new WindowsBrokerOptions()
-            {
-                ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
-                MsaPassthrough = cbxMsaPt.Checked,
-                HeaderText = "MSAL Dev App .NET FX"
-            });
-
             if (chxEnableRuntimeLogs.Checked)
-            { 
+            {
                 builder = builder.WithLogging((logLevel, message, _) =>
-                 {
-                     Debug.WriteLine($"{logLevel} {message}");
-                     Log("***MSAL Log*** " + message);
-                 }, LogLevel.Verbose, true);
+                {
+                    Debug.WriteLine($"{logLevel} {message}");
+                    Log("***MSAL Log*** " + message);
+                }, LogLevel.Verbose, true);
             }
 
             var pca = builder.Build();
@@ -201,7 +195,7 @@ namespace NetDesktopWinForms
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
 
                 var builder = pca.AcquireTokenSilent(GetScopes(), acc);
-                if (IsMsaPassthroughConfigured() )
+                if (IsMsaPassthroughConfigured())
                 {
                     // this is the same in all clouds
                     const string PersonalTenantIdV2AAD = "9188040d-6c67-4c5b-b112-36a304b66dad";
@@ -315,15 +309,23 @@ namespace NetDesktopWinForms
             var scopes = GetScopes();
 
             var builder = pca.AcquireTokenInteractive(scopes)
-                .WithUseEmbeddedWebView(true)
+                             .WithParentActivityOrWindow(this.Handle);
+
+            if (GetAuthMethod() == AuthMethod.SystemBrowser)
+            {
+                builder.WithSystemWebViewOptions(new SystemWebViewOptions() { HtmlMessageSuccess = "Successful login! You can close the tab." });
+            }
+            else
+            {
+                builder.WithUseEmbeddedWebView(true)
                 //.WithExtraQueryParameters("domain_hint=live.com") -- will force AAD login with browser
                 //.WithExtraQueryParameters("msafed=0")             -- will force MSA login with browser
                 .WithEmbeddedWebViewOptions(
                 new EmbeddedWebViewOptions()
                 {
                     Title = "Hello world",
-                })
-                .WithParentActivityOrWindow(this.Handle);
+                });
+            }
 
             Prompt? prompt = GetPrompt();
             if (prompt.HasValue)
@@ -433,11 +435,12 @@ namespace NetDesktopWinForms
                     s_accounts.Add(new AccountModel(acc));
                 }
 
+                string[] strEmptyList = new string[0];
                 string msg = "Accounts " + Environment.NewLine +
                     string.Join(
                          Environment.NewLine,
-                        accounts.Select(acc => 
-                        $"{acc.Username} {acc.Environment} {acc.HomeAccountId.TenantId} - {acc.GetTenantProfiles()?.Count() ?? 0} tenant profiles: {string.Join(" ", acc.GetTenantProfiles().Select(tp=>tp.TenantId))}"));
+                        accounts.Select(acc =>
+                        $"{acc.Username} {acc.Environment} {acc.HomeAccountId.TenantId} - {acc.GetTenantProfiles()?.Count() ?? 0} tenant profiles: {string.Join(" ", acc.GetTenantProfiles()?.Select(tp => tp.TenantId) ?? strEmptyList)}"));
                 Log(msg);
             }
             catch (Exception ex)

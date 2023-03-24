@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client
     /// Abstract class containing common API methods and properties. Both <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/>
     /// extend this class. For details see https://aka.ms/msal-net-client-applications.
     /// </summary>
-    public partial interface IClientApplicationBase
+    public partial interface IClientApplicationBase : IApplicationBase
     {
         /// <summary>
         /// Details on the configuration of the ClientApplication for debugging purposes.
@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// User token cache. This case holds id tokens, access tokens and refresh tokens for accounts. It's used
-        /// and updated silently if needed when calling <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
+        /// and updated silently if needed when calling <see cref="ClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
         /// It is updated by each AcquireTokenXXX method, with the exception of <c>AcquireTokenForClient</c> which only uses the application
         /// cache (see <c>IConfidentialClientApplication</c>).
         /// </summary>
