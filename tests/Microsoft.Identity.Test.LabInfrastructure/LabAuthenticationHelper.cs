@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.Unit;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
@@ -16,7 +17,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     {
         private const string LabAccessConfidentialClientId = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
         private const string LabAccessPublicClientId = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
-        private const string LabAccessCertName = "AzureADIdentityDivisionTestAgentCert";
         private static LabAccessAuthenticationType s_defaultAuthType = LabAccessAuthenticationType.ClientCertificate;
         private static string s_secret;
         private const string DataFileName = "data.txt";
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 case LabAccessAuthenticationType.ClientCertificate:
                     var clientIdForCertAuth = String.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
 
-                    cert = CertificateHelper.FindCertificateByName(LabAccessCertName);
+                    cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
                     if (cert == null)
                     {
                         throw new InvalidOperationException(
