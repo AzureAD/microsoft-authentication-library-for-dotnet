@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     {
         [DataTestMethod]
         [DataRow(true)]
-        //[DataRow(false)]
+        [DataRow(false)]
         /// AAD doesn't returns the "scope" in the response
         /// Duende does return the "scope" in the response
         public async Task GenericClientCredentialSuccessfulTestAsync(bool includeScopeInResonse)
