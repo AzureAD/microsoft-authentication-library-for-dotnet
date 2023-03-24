@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithBrokerPreview().Build();
+               .WithBroker().Build();
 
             Assert.IsTrue(pca.IsProofOfPossessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");
 

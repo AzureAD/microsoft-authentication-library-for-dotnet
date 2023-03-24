@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             AuthenticationResult authResult = null;
 
-            if (!ServiceBundle.Config.UseManagedIdentity && AuthenticationRequestParameters.Authority is AadAuthority aadAuthority &&
+            if (AuthenticationRequestParameters.Authority is AadAuthority aadAuthority &&
                 aadAuthority.IsCommonOrOrganizationsTenant())
             {
                 logger.Error(MsalErrorMessage.ClientCredentialWrongAuthority);

@@ -15,10 +15,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Broker;
+using Microsoft.Identity.Client.ApiConfig;
 
-#if NETCOREAPP3_1
-using Microsoft.Identity.Client.Desktop;
-#endif
 
 namespace NetDesktopWinForms
 {
@@ -117,17 +115,20 @@ namespace NetDesktopWinForms
             switch (authMethod)
             {
                 case AuthMethod.WAM:
-                    builder = ToggleOldBroker(builder, true);
-                    break;
                 case AuthMethod.WAMRuntime:
-                    builder = builder.WithBrokerPreview().WithExperimentalFeatures();
+                    builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
+                    {
+                        ListOperatingSystemAccounts = cbxListOsAccounts.Checked,
+                        MsaPassthrough = cbxMsaPt.Checked,
+                        Title = "MSAL Dev App .NET FX"
+                    });
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder = builder.WithExperimentalFeatures().WithBrokerPreview(false);
+                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
                     builder = ToggleOldBroker(builder, false);
                     break;
                 case AuthMethod.EmbeddedBrowser:
-                    builder = builder.WithExperimentalFeatures().WithBrokerPreview(false);
+                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
                     builder = ToggleOldBroker(builder, false);
 
                     break;
@@ -135,13 +136,8 @@ namespace NetDesktopWinForms
                     throw new NotImplementedException();
             }
 
-            builder = builder.WithWindowsBrokerOptions(new WindowsBrokerOptions()
-            {
-                ListWindowsWorkAndSchoolAccounts = cbxListOsAccounts.Checked,
-                MsaPassthrough = cbxMsaPt.Checked,
-                HeaderText = "MSAL Dev App .NET FX"
-            })
-            .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true, true);
+
+            builder.WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true, true);
 
             var pca = builder.Build();
 
@@ -151,11 +147,7 @@ namespace NetDesktopWinForms
 
         private static PublicClientApplicationBuilder ToggleOldBroker(PublicClientApplicationBuilder builder, bool enable)
         {
-#if NETCOREAPP3_1
-            builder = builder.WithWindowsBroker(enable);
-#else
             builder = builder.WithBroker(enable);
-#endif
             return builder;
         }
 
@@ -359,15 +351,23 @@ namespace NetDesktopWinForms
             var scopes = GetScopes();
             var guid = Guid.NewGuid();
             var builder = pca.AcquireTokenInteractive(scopes)
-                .WithUseEmbeddedWebView(true)
+                             .WithParentActivityOrWindow(this.Handle);
+
+            if (GetAuthMethod() == AuthMethod.SystemBrowser)
+            {
+                builder.WithSystemWebViewOptions(new SystemWebViewOptions() { HtmlMessageSuccess = "Successful login! You can close the tab." });
+            }
+            else
+            {
+                builder.WithUseEmbeddedWebView(true)
                 //.WithExtraQueryParameters("domain_hint=live.com") -- will force AAD login with browser
                 //.WithExtraQueryParameters("msafed=0")             -- will force MSA login with browser
                 .WithEmbeddedWebViewOptions(
                 new EmbeddedWebViewOptions()
                 {
                     Title = "Hello world",
-                })
-                .WithParentActivityOrWindow(this.Handle);
+                });
+            }
 
             if (cbxPOP.Checked)
             {

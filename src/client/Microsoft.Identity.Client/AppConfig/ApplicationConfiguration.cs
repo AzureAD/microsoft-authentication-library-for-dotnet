@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
@@ -13,7 +12,6 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Kerberos;
@@ -58,7 +56,10 @@ namespace Microsoft.Identity.Client
 
         public bool IsBrokerEnabled { get; internal set; }
 
-        public WindowsBrokerOptions WindowsBrokerOptions { get; set; }
+        // Legacy options for UWP. .NET broker options are in BrokerOptions
+        public WindowsBrokerOptions UwpBrokerOptions { get; set; } 
+
+        public BrokerOptions BrokerOptions { get; set; }
 
         public Func<CoreUIParent, ApplicationConfiguration, ILoggerAdapter, IBroker> BrokerCreatorFunc { get; set; }
         public Func<IWebUIFactory> WebUiFactoryCreator { get; set; }
@@ -107,9 +108,9 @@ namespace Microsoft.Identity.Client
 
         public bool RetryOnServerErrors { get; set; } = true;
 
-        public bool UseManagedIdentity { get; internal set; }
-
-        public string ManagedIdentityUserAssignedId {  get; internal set; }
+        public bool IsUserAssignedManagedIdentity { get; internal set; } = false;
+        public string ManagedIdentityUserAssignedClientId {  get; internal set; }
+        public string ManagedIdentityUserAssignedResourceId { get; internal set; }
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 

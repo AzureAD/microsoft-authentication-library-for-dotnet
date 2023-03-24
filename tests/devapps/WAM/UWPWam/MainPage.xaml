@@ -11,10 +11,11 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Button Content="ATI" Margin="615,105,0,0" VerticalAlignment="Top" Click="ATI_ClickAsync"/>
         <Button Content="ATS" Margin="661,105,0,0" VerticalAlignment="Top" Click="ATS_ClickAsync"/>
+        <Button Content="WIA" Margin="711,105,0,0" VerticalAlignment="Top" Click="AcquireTokenIWA_ClickAsync"/>
+        <Button Content="ATI Broker" Margin="800,105,0,0" VerticalAlignment="Top" Click="ATIDesktop_ClickAsync"/>
 
         <Button Content="Clear Cache" Margin="619,324,0,0" VerticalAlignment="Top" Click="ClearCacheAsync" Width="99"/>
 
-        <Button Content="WIA" Margin="711,105,0,0" VerticalAlignment="Top" Click="AcquireTokenIWA_ClickAsync"/>
         <TextBlock HorizontalAlignment="Left" Margin="354,381,0,0" Height="512" Width="800" TextWrapping="Wrap" Text="" VerticalAlignment="Top" TextAlignment="Center" Name="Log"/>
         <CheckBox Content="Use Broker (WAM)" Margin="615,250,0,0" VerticalAlignment="Top" IsChecked="True" x:Name="chkUseBroker"/>
         <Button Content="GetAccounts" Margin="619,287,0,0" VerticalAlignment="Top" Click="GetAccountsAsync"/>

@@ -32,12 +32,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     [TestClass]
     public class SilentRequestTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
-
         [TestMethod]
         public void ConstructorTests()
         {

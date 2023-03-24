@@ -1065,7 +1065,7 @@ namespace Microsoft.Identity.Client
         public const string InitializeProcessSecurityError = "initialize_process_security_error";
 
         /// <summary>
-        /// <para>What happens?</para>You configured MSAL cache serialization at the same time with a static internal cache via <see cref="AbstractApplicationBuilder{T}.WithCacheOptions(CacheOptions)"/>
+        /// <para>What happens?</para>You configured MSAL cache serialization at the same time with a static internal cache via <see cref="BaseAbstractApplicationBuilder{T}.WithCacheOptions(CacheOptions)"/>
         /// These are mutually exclusive.
         /// <para>Mitigation</para> Use only one option. Web site and web API scenarios should rely on external cache serialization, as internal cache serialization cannot scale. See https://aka.ms/msal-net-cca-token-cache-serialization
         /// </summary>
@@ -1131,6 +1131,11 @@ namespace Microsoft.Identity.Client
         /// User assigned managed identity is not supported for this source.
         /// </summary>
         public const string UserAssignedManagedIdentityNotSupported = "user_assigned_managed_identity_not_supported";
+
+        /// <summary>
+        /// User assigned managed identity is not configurable at runtime for service fabric.
+        /// </summary>
+        public const string UserAssignedManagedIdentityNotConfigurableAtRuntime = "user_assigned_managed_identity_not_configurable_at_runtime";
 
         /// <summary>
         /// Using combined flat storage, like a file, to store both app and user tokens is not supported. Use a partitioned token cache (for ex. distributed cache like Redis) or separate files for app and user token caches. See https://aka.ms/msal-net-token-cache-serialization .
