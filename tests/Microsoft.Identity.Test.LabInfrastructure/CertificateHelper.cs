@@ -9,10 +9,10 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     public static class CertificateHelper
     {
         /// <summary>
-        /// Try and locate a certificate matching the given <paramref subjectName="subjectName"/> by searching in
+        /// Try and locate a certificate matching the given <paramref name="subjectName"/> by searching in
         /// the <see cref="StoreName.My"/> store subjectName for all available <see cref="StoreLocation"/>s.
         /// </summary>
-        /// <param subjectName="subjectName">Thumbprint of certificate to locate</param>
+        /// <param name="subjectName">Thumbprint of certificate to locate</param>
         /// <returns><see cref="X509Certificate2"/> with <paramref subjectName="subjectName"/>, or null if no matching certificate was found</returns>
         public static X509Certificate2 FindCertificateByName(string subjectName)
         {
@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return null;
         }
         /// <summary>
-        /// Try and locate a certificate matching the given <paramref subjectName="certName"/> by searching in
+        /// Try and locate a certificate matching the given <paramref name="certName"/> by searching in
         /// the in the given <see cref="StoreName"/> and <see cref="StoreLocation"/>.
         /// </summary>
         /// <param subjectName="certName">Thumbprint of certificate to locate</param>
