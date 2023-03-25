@@ -152,6 +152,7 @@ namespace MSIHelperService.Helper
 
             Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
             keyValuePairs.Add("IDENTITY_ENDPOINT", "http://localhost:40342/metadata/identity/oauth2/token");
+            keyValuePairs.Add("IMDS_ENDPOINT", "http://localhost:40342/metadata/identity/oauth2/token");
             keyValuePairs.Add("API_VERSION", "2020-06-01");
 
             logger.LogInformation("GetVirtualMachineEnvironmentVariables Function called.");
