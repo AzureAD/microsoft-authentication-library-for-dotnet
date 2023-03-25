@@ -461,10 +461,10 @@ namespace MSIHelperService.Helper
             logger.LogInformation("StartAzureRunbookandGetJobId Function called.");
 
             string payload = "";
-            string? webHookLocation = "";
 
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
 
+            string? webHookLocation;
             if (azureResource == AzureResource.VM)
             {
                 webHookLocation = s_vmWebhookLocation;
