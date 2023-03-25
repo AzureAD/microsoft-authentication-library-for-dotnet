@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore | TargetFrameworks.NetStandard )]
         [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
         [DataRow(Cloud.PPE, TargetFrameworks.NetFx)]        
-        [DataRow(Cloud.Public, new object[] { TargetFrameworks.NetCore, true })]
+        [DataRow(Cloud.Public, new TargetFrameworks[] { TargetFrameworks.NetCore }, true)]
         //[DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithCertificate_TestAsync(Cloud cloud, TargetFrameworks runOn, bool useAppIdUri = false)
         {
