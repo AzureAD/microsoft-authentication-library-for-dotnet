@@ -19,6 +19,7 @@ using JObject = System.Text.Json.Nodes.JsonObject;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
 using Microsoft.Identity.Json;
+using Microsoft.Identity.Json.Linq;
 #endif
 
 namespace Microsoft.Identity.Client.OAuth2
@@ -48,7 +49,6 @@ namespace Microsoft.Identity.Client.OAuth2
 
         // Hybrid SPA - see https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3994
         public const string SpaCode = "spa_code";
-        public const string SpaAccountId = "spa_accountId";
 
     }
 
@@ -63,6 +63,58 @@ namespace Microsoft.Identity.Client.OAuth2
 
         private const string iOSBrokerErrorMetadata = "error_metadata";
         private const string iOSBrokerHomeAccountId = "home_account_id";
+
+        // All properties not explicitly defined are added to this dictionary
+        // See JSON overflow https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/handle-overflow?pivots=dotnet-7-0
+#if SUPPORTS_SYSTEM_TEXT_JSON
+        [JsonExtensionData]
+        public Dictionary<string, JsonElement> ExtensionData { get; set; }
+#else
+        [JsonExtensionData]
+        public Dictionary<string, JToken> ExtensionData { get; set; }
+#endif
+
+        // Exposes only scalar proerties from ExtensionData
+        public Dictionary<string, string> CreateExtensionDataStringMap()
+        {
+            if (ExtensionData == null || ExtensionData.Count == 0)
+            {
+                return null;
+            }
+
+            Dictionary<string, string> stringExtensionData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+#if SUPPORTS_SYSTEM_TEXT_JSON
+            foreach (KeyValuePair<string, JsonElement> item in ExtensionData)
+            {
+                if (item.Value.ValueKind == JsonValueKind.String ||
+                   item.Value.ValueKind == JsonValueKind.Number ||
+                   item.Value.ValueKind == JsonValueKind.True ||
+                   item.Value.ValueKind == JsonValueKind.False ||
+                   item.Value.ValueKind == JsonValueKind.Null)
+                {
+                    stringExtensionData.Add(item.Key, item.Value.ToString());
+                }
+            }
+#else
+            foreach (KeyValuePair<string, JToken> item in ExtensionData)
+            {
+                if (item.Value.Type == JTokenType.String ||
+                   item.Value.Type == JTokenType.Uri ||
+                   item.Value.Type == JTokenType.Boolean ||
+                   item.Value.Type == JTokenType.Date ||
+                   item.Value.Type == JTokenType.Float ||
+                   item.Value.Type == JTokenType.Guid ||
+                   item.Value.Type == JTokenType.Integer ||
+                   item.Value.Type == JTokenType.TimeSpan ||
+                   item.Value.Type == JTokenType.Null)
+                {
+                    stringExtensionData.Add(item.Key, item.Value.ToString());
+                }
+            }
+#endif
+            return stringExtensionData;
+        }
 
         [JsonProperty(TokenResponseClaim.TokenType)]
         public string TokenType { get; set; }
@@ -108,9 +160,6 @@ namespace Microsoft.Identity.Client.OAuth2
 
         [JsonProperty(TokenResponseClaim.SpaCode)]
         public string SpaAuthCode { get; set; }
-
-        [JsonProperty(TokenResponseClaim.SpaAccountId)]
-        public string SpaAccountId { get; set; }
 
         [JsonProperty(TokenResponseClaim.Authority)]
         public string AuthorityUrl { get; set; }

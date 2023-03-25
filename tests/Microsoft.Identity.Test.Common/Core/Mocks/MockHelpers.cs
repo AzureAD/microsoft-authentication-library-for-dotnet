@@ -7,6 +7,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Xml;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
 
@@ -60,8 +61,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             "\"r1/scope1 r1/scope2\",\"access_token\":\"" + accessToken + "\"" +
             ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
             ":\"" + CreateClientInfo() + "\",\"id_token\"" +
-            ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
-            "\",\"id_token_expires_in\":\"3600\"}";
+            ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) + "\"}";
         }
 
         public static string GetPopTokenResponse()
@@ -323,17 +323,30 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string accessToken = "some-access-token",
             string refreshToken = "OAAsomethingencrypedQwgAA")
         {
-            string idToken = CreateIdToken(uniqueId, displayableId, TestConstants.Utid);
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
+            string stringContent = CreateSuccessTokenResponseString(uniqueId, displayableId, scope, foci, utid, accessToken, refreshToken);
+            HttpContent content = new StringContent(stringContent);
+            responseMessage.Content = content;
+            return responseMessage;
+        }
+
+        public static string CreateSuccessTokenResponseString(string uniqueId,
+            string displayableId,
+            string[] scope,
+            bool foci = false,
+            string utid = TestConstants.Utid,
+            string accessToken = "some-access-token",
+            string refreshToken = "OAAsomethingencrypedQwgAA")
+        {
+            string idToken = CreateIdToken(uniqueId, displayableId, TestConstants.Utid);
             string stringContent = "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":\"" +
                                   scope.AsSingleString() +
                                   "\",\"access_token\":\"" + accessToken + "\",\"refresh_token\":\"" + refreshToken + "\",\"id_token\":\"" +
                                   idToken +
                                   (foci ? "\",\"foci\":\"1" : "") +
                                   "\",\"id_token_expires_in\":\"3600\",\"client_info\":\"" + CreateClientInfo(uniqueId, utid) + "\"}";
-            HttpContent content = new StringContent(stringContent);
-            responseMessage.Content = content;
-            return responseMessage;
+            
+            return stringContent;
         }
 
         public static string CreateIdToken(string uniqueId, string displayableId)

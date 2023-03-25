@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                             AuthenticationRequestParameters.RequestContext.ApiEvent,
                                                             account: null,
                                                             spaAuthCode: null,
-                                                            spaAccountId: null);
+                                                            additionalResponseParameters: null);
                 }
                 else
                 {

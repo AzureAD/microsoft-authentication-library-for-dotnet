@@ -1436,7 +1436,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .ConfigureAwait(false);
 
                 Assert.AreEqual(expectedSpaCode, result.SpaAuthCode);
-                Assert.IsNull(result.SpaAccountId);
+                Assert.IsFalse(result.AdditionalResponseParameters.ContainsKey("spa_accountid"));
                 Assert.AreEqual("1", handler.ActualRequestPostData["return_spa_code"]);
 
                 handler = httpManager.AddSuccessTokenResponseMockHandlerForPost(
@@ -1482,7 +1482,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                Assert.AreEqual("wam_account_id_1234", result.SpaAccountId);
+                Assert.AreEqual("wam_account_id_1234", result.AdditionalResponseParameters["spa_Accountid"]);
+
                 Assert.IsNull(result.SpaAuthCode);
                 Assert.AreEqual("1", handler.ActualRequestPostData["return_spa_code"]);
             }

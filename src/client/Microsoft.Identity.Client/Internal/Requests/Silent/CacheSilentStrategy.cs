@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
                 account, 
                 spaAuthCode: null,
-                spaAccountId: null);
+                additionalResponseParameters: null);
         }       
 
         private async Task<MsalTokenResponse> TryGetTokenUsingFociAsync(CancellationToken cancellationToken)

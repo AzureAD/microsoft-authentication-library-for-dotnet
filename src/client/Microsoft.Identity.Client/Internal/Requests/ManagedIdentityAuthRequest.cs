@@ -57,8 +57,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                             TokenSource.Cache,
                                                             AuthenticationRequestParameters.RequestContext.ApiEvent,
                                                             account: null, 
-                                                            spaAuthCode: null, 
-                                                            spaAccountId: null);
+                                                            spaAuthCode: null,
+                                                            additionalResponseParameters: null);
                 }
                 else
                 {

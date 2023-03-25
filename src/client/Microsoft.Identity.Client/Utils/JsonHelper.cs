@@ -40,7 +40,10 @@ namespace Microsoft.Identity.Client.Utils
 #if SUPPORTS_SYSTEM_TEXT_JSON
             return (T)JsonSerializer.Deserialize(json, typeof(T), MsalJsonSerializerContext.Custom);
 #else
-            return JsonConvert.DeserializeObject<T>(json);
+            
+            return JsonConvert.DeserializeObject<T>(json, new JsonSerializerSettings() { 
+                DateParseHandling = DateParseHandling.None, // Newtonsoft tries to be smart about dates, but System.Text.Json does not                
+            });
 #endif
         }
 

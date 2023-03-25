@@ -276,8 +276,7 @@ namespace Microsoft.Identity.Client
         /// Exposes additional response parameters returned by the token issuer (AAD).
         /// </summary>
         /// <remarks>
-        /// Not all parameters are added here. 
-        /// Numbers are set as strings and complex objects are not added.
+        /// Not all parameters are added here, only the ones that MSAL doesn't interpret itself and only scalars.
         /// </remarks>
         public IReadOnlyDictionary<string, string> AdditionalResponseParameters { get; }
 
