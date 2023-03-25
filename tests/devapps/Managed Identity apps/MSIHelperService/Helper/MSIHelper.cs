@@ -155,7 +155,7 @@ namespace MSIHelperService.Helper
             keyValuePairs.Add("IMDS_ENDPOINT", "http://localhost:40342/metadata/identity/oauth2/token");
             keyValuePairs.Add("API_VERSION", "2020-06-01");
 
-            logger.LogInformation("GetVirtualMachineEnvironmentVariables Function called.");
+            logger.LogInformation("GetAzureArcEnvironmentVariables Function called.");
 
             return await Task.FromResult(keyValuePairs).ConfigureAwait(false);
         }
@@ -322,7 +322,7 @@ namespace MSIHelperService.Helper
         }
 
         /// <summary>
-        /// Gets the MSI Token from the Azure Virtual Machine
+        /// Gets the MSI Token from the Azure Arc Machine
         /// </summary>
         /// <param name="identityHeader"></param>
         /// <param name="uri"></param>
@@ -394,7 +394,7 @@ namespace MSIHelperService.Helper
                 //Catch the Azure Runbook exception
                 var errorResponse = ex.Message;
 
-                logger.LogError("GetVirtualMachineMSIToken call failed.");
+                logger.LogError("GetAzureArcMSIToken call failed.");
 
                 return GetContentResult(errorResponse, "application/json", (int)responseMessage.StatusCode);
             }
