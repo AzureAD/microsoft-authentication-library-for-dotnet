@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.E2E.NetStandard
             //Arrange
             using (new EnvVariableContext())
             {
-                // Fetch the env variables from the resource and set them locally
+                // Fetch the environment variables from the resource and set them locally
                 Dictionary<string, string> envVariables =
                     await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
 
