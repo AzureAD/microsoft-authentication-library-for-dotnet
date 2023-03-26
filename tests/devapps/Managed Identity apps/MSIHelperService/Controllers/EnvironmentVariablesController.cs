@@ -23,6 +23,7 @@ namespace MSIHelperService.Controllers
         /// Inject Logger and IHttpClientFactory instance 
         /// </summary>
         /// <param name="logger"></param>
+        /// <param name="httpClientFactory"></param>
         public EnvironmentVariablesController(
             ILogger<EnvironmentVariablesController> logger, 
             IHttpClientFactory httpClientFactory)
@@ -63,7 +64,8 @@ namespace MSIHelperService.Controllers
                 MSIHelper.AzureResource.VM => await MSIHelper.GetVirtualMachineEnvironmentVariables(
                     _logger).ConfigureAwait(false),
 
-                MSIHelper.AzureResource.AzureArc => throw new NotImplementedException(),
+                MSIHelper.AzureResource.AzureArc => await MSIHelper.GetAzureArcEnvironmentVariables(
+                    _logger).ConfigureAwait(false),
 
                 MSIHelper.AzureResource.ServiceFabric => throw new NotImplementedException(),
 

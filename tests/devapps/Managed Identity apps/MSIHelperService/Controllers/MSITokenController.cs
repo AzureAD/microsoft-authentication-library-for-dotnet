@@ -23,6 +23,7 @@ namespace MSIHelperService.Controllers
         /// Inject Logger and IHttpClientFactory instance 
         /// </summary>
         /// <param name="logger"></param>
+        /// <param name="httpClientFactory"></param>
         public MSITokenController(
             ILogger<MSITokenController> logger, 
             IHttpClientFactory httpClientFactory)
@@ -77,7 +78,11 @@ namespace MSIHelperService.Controllers
                     httpClient,
                     _logger).ConfigureAwait(false),
 
-                MSIHelper.AzureResource.AzureArc => throw new NotImplementedException(),
+                MSIHelper.AzureResource.AzureArc => await MSIHelper.GetAzureArcMSIToken(
+                    identityHeader,
+                    uri,
+                    httpClient,
+                    _logger).ConfigureAwait(false),
 
                 MSIHelper.AzureResource.ServiceFabric => throw new NotImplementedException(),
 
