@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 try
                 {
-                    var tokenEndpoint = await AuthenticationRequestParameters.GetTokenEndpointAsync(AuthenticationRequestParameters.RequestContext)
+                    var tokenEndpoint = await AuthenticationRequestParameters.Authority.GetTokenEndpointAsync(AuthenticationRequestParameters.RequestContext)
                         .ConfigureAwait(false);
 
                     var tokenResponse = await SendTokenRequestAsync(

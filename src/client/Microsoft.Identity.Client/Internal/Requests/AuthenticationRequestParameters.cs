@@ -88,17 +88,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public AuthorityInfo AuthorityInfo => AuthorityManager.Authority.AuthorityInfo;
 
-        public AuthorityInfo AuthorityOverride => _commonParameters.AuthorityOverride;
-
-        /// <summary>
-        /// Gets the token endpoint of the "current" authority, as tracked by the AuthorityManager
-        /// </summary>
-        /// <returns></returns>
-        public Task<string> GetTokenEndpointAsync(RequestContext requestContext)
-        {
-            return AuthorityManager.Authority.GetTokenEndpointAsync(
-                requestContext);
-        }
+        public AuthorityInfo AuthorityOverride => _commonParameters.AuthorityOverride;        
 
         #endregion
 

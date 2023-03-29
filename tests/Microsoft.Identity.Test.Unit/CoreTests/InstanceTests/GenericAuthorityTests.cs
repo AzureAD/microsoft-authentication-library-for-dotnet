@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance.Oidc;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -38,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .Build();
 
                 httpManager.AddMockHandler(
-                    CreateOidcHttpHandler(authority + @"/" + OidcRetrieverWithCache.OpenIdConfigurationEndpointSuffix));
+                    CreateOidcHttpHandler(authority + @"/" + Constants.WellKnownOpenIdConfigurationPath));
 
                 httpManager.AddMockHandler(
                     CreateTokenResponseHttpHandler(authority + "/connect/token", "api", includeScopeInResonse ? "api" : null));
@@ -83,7 +84,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build();
 
-                string oidcEndpoint = authority + @"/" + OidcRetrieverWithCache.OpenIdConfigurationEndpointSuffix;
+                string oidcEndpoint = authority + @"/" + Constants.WellKnownOpenIdConfigurationPath;
 
                 HttpResponseMessage responseMessage = null;
                 switch (badOidcResponseType)

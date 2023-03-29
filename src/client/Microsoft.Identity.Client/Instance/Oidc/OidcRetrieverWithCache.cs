@@ -16,8 +16,6 @@ namespace Microsoft.Identity.Client.Instance.Oidc
         private static readonly ConcurrentDictionary<string, OidcMetadata> s_cache = new();
         private static readonly SemaphoreSlim s_lockOidcRetrieval = new SemaphoreSlim(1);
 
-        internal const string OpenIdConfigurationEndpointSuffix = ".well-known/openid-configuration";
-
         public static async Task<OidcMetadata> GetOidcAsync(
             string authority,
             RequestContext requestContext)
@@ -36,7 +34,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
                 if (s_cache.TryGetValue(authority, out configuration))
                     return configuration;
 
-                Uri oidcMetadataEndpoint = new Uri(authority + OpenIdConfigurationEndpointSuffix);
+                Uri oidcMetadataEndpoint = new Uri(authority + Constants.WellKnownOpenIdConfigurationPath);
 
                 var client = new OAuth2Client(requestContext.Logger, requestContext.ServiceBundle.HttpManager);
                 configuration = await client.DiscoverOidcMetadataAsync(oidcMetadataEndpoint, requestContext).ConfigureAwait(false);
@@ -47,7 +45,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             catch (Exception ex)
             {
                 requestContext.Logger.Error(
-                    $"Failed to retrieve OpenId configuration from the OpenId endpoint {authority + OpenIdConfigurationEndpointSuffix} " +
+                    $"Failed to retrieve OpenId configuration from the OpenId endpoint {authority + Constants.WellKnownOpenIdConfigurationPath} " +
                     $"due to {ex}");
                 
                 if (ex is MsalServiceException)
@@ -55,7 +53,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
 
                 throw new MsalServiceException(
                     "oidc_failure",
-                    $"Failed to retrieve OIDC configuration from {authority + OpenIdConfigurationEndpointSuffix}. See inner exception. ",
+                    $"Failed to retrieve OIDC configuration from {authority + Constants.WellKnownOpenIdConfigurationPath}. See inner exception. ",
                     ex);
             }
             finally

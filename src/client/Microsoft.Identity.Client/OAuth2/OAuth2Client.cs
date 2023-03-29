@@ -70,15 +70,15 @@ namespace Microsoft.Identity.Client.OAuth2
             return new ReadOnlyDictionary<string, string>(_bodyParameters);
         }
 
-        public async Task<InstanceDiscoveryResponse> DiscoverAadInstanceAsync(Uri endPoint, RequestContext requestContext)
+        public async Task<InstanceDiscoveryResponse> DiscoverAadInstanceAsync(Uri endpoint, RequestContext requestContext)
         {
-            return await ExecuteRequestAsync<InstanceDiscoveryResponse>(endPoint, HttpMethod.Get, requestContext)
+            return await ExecuteRequestAsync<InstanceDiscoveryResponse>(endpoint, HttpMethod.Get, requestContext)
                        .ConfigureAwait(false);
         }
 
-        public async Task<OidcMetadata> DiscoverOidcMetadataAsync(Uri endPoint, RequestContext requestContext)
+        public async Task<OidcMetadata> DiscoverOidcMetadataAsync(Uri endpoint, RequestContext requestContext)
         {
-            return await ExecuteRequestAsync<OidcMetadata>(endPoint, HttpMethod.Get, requestContext).ConfigureAwait(false);
+            return await ExecuteRequestAsync<OidcMetadata>(endpoint, HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
 
         internal async Task<MsalTokenResponse> GetTokenAsync(

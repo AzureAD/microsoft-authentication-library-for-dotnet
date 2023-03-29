@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         /// <inheritdoc />
 
-        public override HttpClient GetHttpClient()
+        protected override HttpClient GetHttpClient()
         {
             HttpMessageHandler messageHandler;
 

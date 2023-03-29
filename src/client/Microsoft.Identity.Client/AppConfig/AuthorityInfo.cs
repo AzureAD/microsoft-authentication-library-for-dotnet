@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
                     break;
                     
                 case AuthorityType.B2C:
-                    string[] pathSegments = AuthorityInfo.GetPathSegments(authorityUri.AbsolutePath);
+                    string[] pathSegments = GetPathSegments(authorityUri.AbsolutePath);
 
                     if (pathSegments.Length < 3)
                     {
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Client
 
             var authorityType = GetAuthorityType(canonicalUri);
 
-            // If the authority type is B2C, validateAuthority must be false.
+            // Authority validation is only supported for AAD 
             if (authorityType == AuthorityType.B2C || authorityType == AuthorityType.Generic)
             {
                 validateAuthority = false;
@@ -511,6 +511,9 @@ namespace Microsoft.Identity.Client
                     case AuthorityType.B2C:
                         return new B2CAuthority(nonNullAuthInfo);
 
+                    case AuthorityType.Generic:
+                        return new GenericAuthority(nonNullAuthInfo);
+
                     case AuthorityType.Aad:
 
                         bool updateEnvironment = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null && !PublicClientApplication.IsOperatingSystemAccount(account);
@@ -540,9 +543,6 @@ namespace Microsoft.Identity.Client
                         return updateEnvironment ?
                                 CreateAuthorityWithTenant(CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment).AuthorityInfo, account?.HomeAccountId?.TenantId) :
                                 CreateAuthorityWithTenant(configAuthorityInfo, account?.HomeAccountId?.TenantId);
-
-                    case AuthorityType.Generic:
-                        return new GenericAuthority(nonNullAuthInfo);
                     
                     default:
                         throw new MsalClientException(

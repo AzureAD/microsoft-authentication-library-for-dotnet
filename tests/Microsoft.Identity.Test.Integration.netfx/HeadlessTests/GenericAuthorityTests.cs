@@ -71,6 +71,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var applicationConfiguration = new ApplicationConfiguration(true);
             ConfidentialClientApplicationBuilder builder = new(applicationConfiguration);
+
+            string authority = DemoDuendeSoftwareDotCom + "/";
             var app = builder
                 .WithExperimentalFeatures(true)
                 .WithGenericAuthority(DemoDuendeSoftwareDotCom)
