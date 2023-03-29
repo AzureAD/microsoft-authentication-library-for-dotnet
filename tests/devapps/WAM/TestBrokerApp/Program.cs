@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
@@ -195,14 +196,64 @@ namespace TestBrokerApp
                         }
                         break;
 
-                    case 10:
-                    case 11:
-                    case 12:
+                    case 10: // Silent with no account
                         {
-                            throw new NotImplementedException();
-                        }
+                            PCATester pcaTester = new PCATester();
+                            PublicClientApplicationBuilder pcaBuilder = pcaTester.CreatePcaBuilder();
 
-                   case 13: // Oranizations as authority
+                            var pca = pcaBuilder.Build();
+                            AcquireTokenSilentParameterBuilder atsBuilder = pca.AcquireTokenSilent(PCATester.Scopes, (IAccount)null);
+                            try
+                            {
+                                await atsBuilder.ExecuteAsync().ConfigureAwait(false);
+                            }
+                            catch (MsalUiRequiredException )
+                            {
+                                Console.WriteLine("\r\n");
+                                Console.WriteLine("\r\n");
+                                Console.ForegroundColor = ConsoleColor.Green;
+                                Console.WriteLine("+++😁😁😁 Success - threw the desired exception 😁😁😁+++");
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.WriteLine("---😿😿😿 Fail 😿😿😿---");
+                                Console.WriteLine(ex.ToString());
+                            }
+                        }
+                        break;
+
+                    case 11: // Silent with account
+                        {
+                            PCATester pcaTester = new PCATester();
+                            PublicClientApplicationBuilder pcaBuilder = pcaTester.CreatePcaBuilder();
+
+                            var pca = pcaBuilder.Build();
+                            AcquireTokenSilentParameterBuilder atsBuilder = pca.AcquireTokenSilent(PCATester.Scopes, PublicClientApplication.OperatingSystemAccount);
+                            await pcaTester.ExecuteAndDisplay(atsBuilder).ConfigureAwait(false);
+                        }
+                        break;
+
+                    case 12: // Silent with login hint
+                        {
+                            PCATester pcaTester = new PCATester();
+                            PublicClientApplicationBuilder pcaBuilder = pcaTester.CreatePcaBuilder();
+
+                            var pca = pcaBuilder.Build();
+                            Console.Write("Please enter email of your current OS account e.g. <username>@microsoft.com: ");
+                            string email = Console.ReadLine();
+
+                            // get the token in the cache
+                            AcquireTokenSilentParameterBuilder atsBuilder = pca.AcquireTokenSilent(PCATester.Scopes, PublicClientApplication.OperatingSystemAccount);
+                            await atsBuilder.ExecuteAsync().ConfigureAwait(false);
+
+                            // now go with the login hint
+                            atsBuilder = pca.AcquireTokenSilent(PCATester.Scopes, email);
+                            await pcaTester.ExecuteAndDisplay(atsBuilder).ConfigureAwait(false);
+                        }
+                        break;
+
+                    case 13: // Oranizations as authority
                         {
                             PCATester pcaTester = new PCATester();
                             pcaTester.Authority = PCATester.AuthorityOrganizations;
@@ -340,11 +391,65 @@ namespace TestBrokerApp
                         }
                         break;
 
-                    case 20:
-                    case 21:
+                    case 20: // signout
                         {
-                            throw new NotImplementedException();
+                            try
+                            {
+                                PCATester pcaTester = new PCATester();
+                                PublicClientApplicationBuilder pcaBuilder = pcaTester.CreatePcaBuilder();
+                                var pca = pcaBuilder.Build();
+                                AcquireTokenInteractiveParameterBuilder atiBulider = pca.AcquireTokenInteractive(PCATester.Scopes);
+                                atiBulider.WithAccount(PublicClientApplication.OperatingSystemAccount);
+                                var result = await atiBulider.ExecuteAsync().ConfigureAwait(false);
+
+                                IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(true);
+                                var acc = accounts.FirstOrDefault();
+                                await pca.RemoveAsync(acc).ConfigureAwait(false);
+
+                                try
+                                {
+                                    // this should throw an exception
+                                    await pca.AcquireTokenSilent(PCATester.Scopes, acc).ExecuteAsync().ConfigureAwait(false);
+                                    Console.ForegroundColor = ConsoleColor.Red;
+                                    Console.WriteLine("--- Fail ---");
+                                    Console.WriteLine("Did not signout");
+                                }
+                                catch (Exception )
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Green;
+                                    Console.WriteLine("+++ Success +++");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.WriteLine("--- Fail ---");
+                                Console.WriteLine(ex.Message);
+                            }
                         }
+                        break;
+                    case 21: // Switch Account
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Your OS Account will be passed as login hint.");
+                            Console.WriteLine("Please switch to different account and login.");
+                            Console.WriteLine("Check the account that is returned.");
+                            Console.WriteLine("Press any key to continue...");
+                            Console.ReadKey();
+
+                            PCATester pcaTester = new PCATester();
+                            PublicClientApplicationBuilder pcaBuilder = pcaTester.CreatePcaBuilder();
+                            var pca = pcaBuilder.Build();
+                            AcquireTokenInteractiveParameterBuilder atiBulider = pca.AcquireTokenInteractive(PCATester.Scopes);
+                            atiBulider.WithAccount(PublicClientApplication.OperatingSystemAccount);
+                            var result = await atiBulider.ExecuteAsync().ConfigureAwait(false);
+
+                            Console.WriteLine("\r\n");
+                            Console.WriteLine("\r\n");
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine($"The access token was returned for {result.Account.Username}");
+                        }
+                        break;
 
 
                     case 0:
