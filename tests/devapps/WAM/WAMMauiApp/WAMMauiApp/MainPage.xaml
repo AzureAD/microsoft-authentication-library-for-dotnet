@@ -16,7 +16,7 @@
                 HorizontalOptions="Center" />
 
             <Label
-                Text="Hello, World!"
+                Text="Howdy, Partner!. How bout we invoke some WAM!!!"
                 SemanticProperties.HeadingLevel="Level1"
                 FontSize="32"
                 HorizontalOptions="Center" />
@@ -28,10 +28,18 @@
                 FontSize="18"
                 HorizontalOptions="Center" />
 
+            <Label
+                x:Name="Result"
+                Text=""
+                SemanticProperties.HeadingLevel="Level2"
+                SemanticProperties.Description="Result from WAM Broker"
+                FontSize="18"
+                HorizontalOptions="Center" />
+
             <Button
                 x:Name="CounterBtn"
-                Text="Click me"
-                SemanticProperties.Hint="Counts the number of times you click"
+                Text="Invoke WAM Broker"
+                SemanticProperties.Hint="Broker"
                 Clicked="OnCounterClicked"
                 HorizontalOptions="Center" />
 
