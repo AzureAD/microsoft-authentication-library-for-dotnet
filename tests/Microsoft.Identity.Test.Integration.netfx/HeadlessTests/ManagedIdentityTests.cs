@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static readonly string s_wrong_msi_scopes = "https://managements.azure.com";
 
         //http proxy base URL 
-        private static readonly string s_baseURL = "https://msihelperservice-staging.azurewebsites.net/";
+        private static readonly string s_baseURL = "https://service.msidlab.com/";
 
         //Shared User Assigned Client ID
         private const string UserAssignedClientID = "3b57c42c-3201-4295-ae27-d6baec5b7027";
