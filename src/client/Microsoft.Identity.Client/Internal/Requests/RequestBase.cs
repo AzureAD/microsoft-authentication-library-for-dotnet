@@ -148,11 +148,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     : 0);
                 telemetryEventDetails.SetProperty(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
                 telemetryEventDetails.SetProperty(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
-
-                if (telemetryDatapoints.CacheTypeUsed != null)
-                {
-                    telemetryEventDetails.SetProperty(TelemetryConstants.CacheUsed, (int)telemetryDatapoints.CacheTypeUsed);
-                }
+                telemetryEventDetails.SetProperty(TelemetryConstants.CacheUsed, (int)telemetryDatapoints.CacheTypeUsed);
             }
         }
 
@@ -214,14 +210,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private AssertionType GetAssertionType()
         {
-            if (ServiceBundle.Config.UseManagedIdentity || ServiceBundle.Config.AppTokenProvider != null)
+            if (!string.IsNullOrWhiteSpace(ServiceBundle.Config.ManagedIdentityUserAssignedClientId) ||
+                !string.IsNullOrWhiteSpace(ServiceBundle.Config.ManagedIdentityUserAssignedResourceId) ||
+                ServiceBundle.Config.AppTokenProvider != null)
             {
                 return AssertionType.MSI;
             }
 
             if (ServiceBundle.Config.ClientCredential != null)
             {
-                if (ServiceBundle.Config.ClientCredential.TelemetryDetails == AssertionType.CertificateWithoutSNI)
+                if (ServiceBundle.Config.ClientCredential.TelemetryAssertionType == AssertionType.CertificateWithoutSNI)
                 {
                     if (ServiceBundle.Config.SendX5C)
                     {
@@ -231,7 +229,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     return AssertionType.CertificateWithoutSNI;
                 }
 
-                return ServiceBundle.Config.ClientCredential.TelemetryDetails;
+                return ServiceBundle.Config.ClientCredential.TelemetryAssertionType;
             }
 
             return AssertionType.None;

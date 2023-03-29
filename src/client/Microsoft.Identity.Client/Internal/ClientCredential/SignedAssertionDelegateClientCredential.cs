@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     {
         internal Func<CancellationToken, Task<string>> _signedAssertionDelegate { get; }
         internal Func<AssertionRequestOptions, Task<string>> _signedAssertionWithInfoDelegate { get; }
-        public AssertionType TelemetryDetails => AssertionType.ClientAssertion;
+        public AssertionType TelemetryAssertionType => AssertionType.ClientAssertion;
 
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public SignedAssertionDelegateClientCredential(Func<CancellationToken, Task<string>> signedAssertionDelegate)

@@ -22,6 +22,7 @@ using Microsoft.Identity.Test.Unit.TelemetryTests;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -252,13 +253,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 string endpoint = "http://localhost:40342/metadata/identity/oauth2/token";
                 string resource = "https://management.azure.com";
 
-                var scope = "https://management.azure.com";
                 Environment.SetEnvironmentVariable("MSI_ENDPOINT", endpoint);
 
-                IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
+                var mia = ManagedIdentityApplicationBuilder
                     .Create("clientId")
                     .WithHttpManager(_harness.HttpManager)
-                    .WithExperimentalFeatures()
                     .WithTelemetryClient(_telemetryClient)
                     .Build();
 
@@ -268,8 +267,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     MockHelpers.GetMsiSuccessfulResponse(),
                     ManagedIdentitySourceType.CloudShell);
 
-                var result = await cca.AcquireTokenForClient(new string[] { scope })
-                    .WithManagedIdentity()
+                var result = await mia.AcquireTokenForManagedIdentity(resource)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -317,7 +315,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         AssertionType assertionType,
                         string endpoint,
                         TokenType? tokenType = TokenType.Bearer,
-                        CacheTypeUsed? cacheTypeUsed = null)
+                        CacheTypeUsed cacheTypeUsed = CacheTypeUsed.None)
         {
             Assert.IsNotNull(eventDetails);
             Assert.AreEqual(Convert.ToInt64(cacheRefreshReason), eventDetails.Properties[TelemetryConstants.CacheInfoTelemetry]);
@@ -329,11 +327,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(Convert.ToInt64(assertionType), eventDetails.Properties[TelemetryConstants.AssertionType]);
             Assert.AreEqual(Convert.ToInt64(tokenType), eventDetails.Properties[TelemetryConstants.TokenType]);
             Assert.AreEqual(endpoint, eventDetails.Properties[TelemetryConstants.Endpoint]);
-
-            if (eventDetails.Properties.ContainsKey(TelemetryConstants.CacheUsed))
-            {
-                Assert.AreEqual(Convert.ToInt64(cacheTypeUsed), eventDetails.Properties[TelemetryConstants.CacheUsed]);
-            }
+            Assert.AreEqual(Convert.ToInt64(cacheTypeUsed), eventDetails.Properties[TelemetryConstants.CacheUsed]);
         }
 
         private void CreateApplication(AssertionType assertionType = AssertionType.Secret)

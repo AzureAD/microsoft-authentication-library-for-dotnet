@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     {
         internal string Secret { get; }
 
-        public AssertionType TelemetryDetails => AssertionType.Secret;
+        public AssertionType TelemetryAssertionType => AssertionType.Secret;
 
         public SecretStringClientCredential(string secret)
         {

@@ -15,12 +15,16 @@ namespace Microsoft.Identity.Client.Cache
     public enum CacheTypeUsed
     {
         /// <summary>
+        /// Specifies that no cache type is used
+        /// </summary>
+        None = 0,
+        /// <summary>
         /// Specifies if the L1 cache is used
         /// </summary>
-        L1Cache = 0,
+        L1Cache = 1,
         /// <summary>
         /// Specifies if the L2 cache is used
         /// </summary>
-        L2Cache = 1
+        L2Cache = 2
     }
 }

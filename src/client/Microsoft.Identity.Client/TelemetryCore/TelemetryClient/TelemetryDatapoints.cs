@@ -7,13 +7,13 @@ using Microsoft.IdentityModel.Abstractions;
 namespace Microsoft.Identity.Client.TelemetryCore.TelemetryClient
 {
     /// <summary>
-    /// Stores the cache details to log to <see cref="ITelemetryClient"/>.
+    /// Stores details to log to the <see cref="ITelemetryClient"/>.
     /// </summary>
     public class TelemetryDatapoints
     {
         /// <summary>
-        /// Total latency of L1 cache access. This data is captured in MSAL when accessing the internal cache or Microsoft.Identity.Web when accessing the memory cache.
+        /// Type of cache used. This data is captured from MSAL or Microsoft.Identity.Web to log to telemetry.
         /// </summary>
-        public CacheTypeUsed? CacheTypeUsed { get; set; }
+        public CacheTypeUsed CacheTypeUsed { get; set; } = CacheTypeUsed.None;
     }
 }

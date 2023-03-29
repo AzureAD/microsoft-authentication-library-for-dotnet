@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
 {
     internal interface IClientCredential
     {
-        AssertionType TelemetryDetails { get; }
+        AssertionType TelemetryAssertionType { get; }
 
         Task AddConfidentialClientParametersAsync(
               OAuth2Client oAuth2Client,
