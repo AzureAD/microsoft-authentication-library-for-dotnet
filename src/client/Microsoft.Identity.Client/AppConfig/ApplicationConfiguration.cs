@@ -56,7 +56,10 @@ namespace Microsoft.Identity.Client
 
         public bool IsBrokerEnabled { get; internal set; }
 
-        public WindowsBrokerOptions WindowsBrokerOptions { get; set; }
+        // Legacy options for UWP. .NET broker options are in BrokerOptions
+        public WindowsBrokerOptions UwpBrokerOptions { get; set; } 
+
+        public BrokerOptions BrokerOptions { get; set; }
 
         public Func<CoreUIParent, ApplicationConfiguration, ILoggerAdapter, IBroker> BrokerCreatorFunc { get; set; }
         public Func<IWebUIFactory> WebUiFactoryCreator { get; set; }

@@ -34,7 +34,8 @@ namespace MSIHelperService.Helper
         internal static readonly string? s_functionAppUri = Environment.GetEnvironmentVariable("functionAppUri");
         internal static readonly string? s_functionAppEnvCode = Environment.GetEnvironmentVariable("functionAppEnvCode");
         internal static readonly string? s_functionAppMSICode = Environment.GetEnvironmentVariable("functionAppMSICode");
-        internal static readonly string? s_webhookLocation = Environment.GetEnvironmentVariable("webhookLocation");
+        internal static readonly string? s_vmWebhookLocation = Environment.GetEnvironmentVariable("webhookLocation");
+        internal static readonly string? s_azureArcWebhookLocation = Environment.GetEnvironmentVariable("AzureArcWebHookLocation");
         internal static readonly string? s_oMSAdminClientID = Environment.GetEnvironmentVariable("OMSAdminClientID");
         internal static readonly string? s_oMSAdminClientSecret = Environment.GetEnvironmentVariable("OMSAdminClientSecret");
 
@@ -139,6 +140,27 @@ namespace MSIHelperService.Helper
         }
 
         /// <summary>
+        /// Gets the Environment Variables for Azure ARC
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <returns>Returns the environment variable</returns>
+        public static async Task<Dictionary<string, string>> GetAzureArcEnvironmentVariables(
+            ILogger logger)
+        {
+            //IMDS endpoint has only one environment variable and the VMs do not have this
+            //MSAL .Net has this value hardcoded for now. So sending a set value
+
+            Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
+            keyValuePairs.Add("IDENTITY_ENDPOINT", "http://localhost:40342/metadata/identity/oauth2/token");
+            keyValuePairs.Add("IMDS_ENDPOINT", "http://localhost:40342/metadata/identity/oauth2/token");
+            keyValuePairs.Add("API_VERSION", "2020-06-01");
+
+            logger.LogInformation("GetAzureArcEnvironmentVariables Function called.");
+
+            return await Task.FromResult(keyValuePairs).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Gets the MSI Token from the Azure Web App
         /// </summary>
         /// <param name="identityHeader"></param>
@@ -225,6 +247,7 @@ namespace MSIHelperService.Helper
         /// </summary>
         /// <param name="identityHeader"></param>
         /// <param name="uri"></param>
+        /// <param name="httpClient"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
         public static async Task<ActionResult?> GetVirtualMachineMSIToken(
@@ -299,9 +322,89 @@ namespace MSIHelperService.Helper
         }
 
         /// <summary>
+        /// Gets the MSI Token from the Azure Arc Machine
+        /// </summary>
+        /// <param name="identityHeader"></param>
+        /// <param name="uri"></param>
+        /// <param name="httpClient"></param>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        public static async Task<ActionResult?> GetAzureArcMSIToken(
+            string? identityHeader,
+            string uri,
+            HttpClient httpClient,
+            ILogger logger)
+        {
+            logger.LogInformation("GetAzureArcMSIToken Function called.");
+            string response;
+            HttpResponseMessage? responseMessage = new HttpResponseMessage();
+
+            try
+            {
+                //Scopes
+                string[] scopes = new string[] { "https://management.core.windows.net/.default" };
+
+                //get the msal token for the client
+                string? token = await GetMSALToken(
+                    s_oMSAdminClientID,
+                    s_oMSAdminClientSecret,
+                    scopes,
+                    logger).ConfigureAwait(false);
+
+                //clear the default request header for each call
+                ClearDefaultRequestHeaders(logger, httpClient);
+
+                //Set the Authorization header
+                SetAuthorizationHeader(token, httpClient, logger);
+
+                //Set additional headers
+                SetAdditionalHeader("MSI_Identity_Header", identityHeader, httpClient, logger);
+                SetAdditionalHeader("MSI_URI", uri.ToString(), httpClient, logger);
+
+                //get the job id
+                string? jobId = await StartAzureRunbookandGetJobId(httpClient, logger, AzureResource.AzureArc)
+                    .ConfigureAwait(false);
+
+                if (await AzureRunbookJobStatusIsCompleted(jobId, httpClient, logger).ConfigureAwait(false))
+                {
+                    responseMessage = await httpClient.
+                        GetAsync(
+                        AzureRunbook +
+                        jobId +
+                        "/output?api-version=" +
+                        RunbookAPIVersion).ConfigureAwait(false);
+
+                    //send back the response
+                    response = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                    logger.LogInformation("GetAzureArcMSIToken call was successful.");
+                }
+                else
+                {
+                    logger.LogError("Runbook failed to get MSI Token.");
+
+                    //Runbook failed
+                    response = "Azure Runbook failed to execute.";
+                }
+
+                return GetContentResult(response, "application/json", (int)responseMessage.StatusCode);
+            }
+            catch (Exception ex)
+            {
+                //Catch the Azure Runbook exception
+                var errorResponse = ex.Message;
+
+                logger.LogError("GetAzureArcMSIToken call failed.");
+
+                return GetContentResult(errorResponse, "application/json", (int)responseMessage.StatusCode);
+            }
+        }
+
+        /// <summary>
         /// Get Azure Runbook Job Status
         /// </summary>
         /// <param name="jobId"></param>
+        /// <param name="httpClient"></param>
         /// <param name="logger"></param>
         /// <returns>Azure runbook job Status</returns>
         private static async Task<bool> AzureRunbookJobStatusIsCompleted(
@@ -349,9 +452,11 @@ namespace MSIHelperService.Helper
         /// <summary>
         /// Starts the Runbook and gets Azure Runbook Job Id 
         /// </summary>
+        /// <param name="httpClient"></param>
         /// <param name="logger"></param>
+        /// <param name="azureResource"></param>
         /// <returns>Azure runbook job ID</returns>
-        private static async Task<string?> StartAzureRunbookandGetJobId(HttpClient httpClient, ILogger logger)
+        private static async Task<string?> StartAzureRunbookandGetJobId(HttpClient httpClient, ILogger logger, AzureResource azureResource = AzureResource.VM)
         {
             logger.LogInformation("StartAzureRunbookandGetJobId Function called.");
 
@@ -359,9 +464,19 @@ namespace MSIHelperService.Helper
 
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
 
+            string? webHookLocation;
+            if (azureResource == AzureResource.VM)
+            {
+                webHookLocation = s_vmWebhookLocation;
+            }
+            else
+            {
+                webHookLocation = s_azureArcWebhookLocation;
+            }
+
             //invoke the azure runbook from the webhook
             HttpResponseMessage? invokeWebHook = await httpClient
-                .PostAsJsonAsync(s_webhookLocation,content)
+                .PostAsJsonAsync(webHookLocation, content)
                 .ConfigureAwait(false);
 
             //Get the Job ID
@@ -387,9 +502,10 @@ namespace MSIHelperService.Helper
         /// <summary>
         /// Sets the additional headers on the http client
         /// </summary>
-        /// <param name="token"></param>
-        /// <param name="token"></param>
-        /// <param name="logger"></param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <param name="httpClient"></param>
+        /// <param name="logger"></param> 
         /// <returns></returns>
         private static void SetAdditionalHeader(
             string key,
@@ -408,8 +524,8 @@ namespace MSIHelperService.Helper
         /// <summary>
         /// Get the Client Token 
         /// </summary>
-        /// <param name="appID"></param>
-        /// <param name="appSecret"></param>
+        /// <param name="clientID"></param>
+        /// <param name="secret"></param>
         /// <param name="scopes"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
