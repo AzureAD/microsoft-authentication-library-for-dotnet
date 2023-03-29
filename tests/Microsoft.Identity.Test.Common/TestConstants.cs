@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Test.Unit
         public static readonly string[] s_graphScopes = new[] { "user.read" };
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
         public const string ClientCredentialAudience = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0";
-        public const string AutomationTestThumbprint = "444B697D869032F29F9A162D711AF3E2791AD748";
+        public const string AutomationTestCertName = "AzureADIdentityDivisionTestAgentCert";
 
         public static readonly SortedSet<string> s_scopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" }, StringComparer.OrdinalIgnoreCase);
         public static readonly SortedSet<string> s_cacheMissScope = new SortedSet<string>(new[] { "r3/scope1", "r3/scope2" }, StringComparer.OrdinalIgnoreCase);
