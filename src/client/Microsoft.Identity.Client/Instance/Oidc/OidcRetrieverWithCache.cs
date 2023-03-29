@@ -20,11 +20,13 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             string authority,
             RequestContext requestContext)
         {
-            OidcMetadata configuration = null;
+            OidcMetadata configuration;
 
-            // Conccurent dictionary get or add
             if (s_cache.TryGetValue(authority, out configuration))
+            {
+                requestContext.Logger.Verbose(() => $"[OIDC Discovery] OIDC discovery found a cached entry for {authority}");
                 return configuration;
+            }
 
             await s_lockOidcRetrieval.WaitAsync().ConfigureAwait(false);
 
@@ -32,7 +34,10 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             {
                 // try again in critical section
                 if (s_cache.TryGetValue(authority, out configuration))
+                {
+                    requestContext.Logger.Verbose(() => $"[OIDC Discovery] OIDC discovery found a cached entry for {authority}");
                     return configuration;
+                }
 
                 Uri oidcMetadataEndpoint = new Uri(authority + Constants.WellKnownOpenIdConfigurationPath);
 
@@ -40,14 +45,15 @@ namespace Microsoft.Identity.Client.Instance.Oidc
                 configuration = await client.DiscoverOidcMetadataAsync(oidcMetadataEndpoint, requestContext).ConfigureAwait(false);
 
                 s_cache[authority] = configuration;
+
+                requestContext.Logger.Verbose(() => $"[OIDC Discovery] OIDC discovery retrieved metadata from the network for {authority}");
+
                 return configuration;
             }
             catch (Exception ex)
             {
-                requestContext.Logger.Error(
-                    $"Failed to retrieve OpenId configuration from the OpenId endpoint {authority + Constants.WellKnownOpenIdConfigurationPath} " +
-                    $"due to {ex}");
-                
+                requestContext.Logger.Error($"[OIDC Discovery] Failed to retrieve OpenID configuration from the OpenID endpoint {authority + Constants.WellKnownOpenIdConfigurationPath} due to {ex}");
+
                 if (ex is MsalServiceException)
                     throw;
 

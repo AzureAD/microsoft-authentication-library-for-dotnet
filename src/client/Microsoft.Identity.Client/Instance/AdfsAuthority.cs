@@ -1,12 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Globalization;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Http;
 using System.Threading.Tasks;
-using System.Threading;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance

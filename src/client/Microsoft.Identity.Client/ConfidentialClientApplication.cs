@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">scopes requested to access a protected API. 
         /// For this flow (client credentials), the scopes of Microsoft APIs protected with AAD tokens are of the form "{ResourceIdUri/.default}". For example <c>https://management.azure.net/.default</c> or, for Microsoft
         /// Graph, <c>https://graph.microsoft.com/.default</c>. 
-        /// The requested scopes are defined statically with the application registration in the portal, and cannot be overridden in the application.</param>        /// 
+        /// The requested scopes are defined statically with the application registration in the portal, and cannot be overridden in the application.</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>You can also chain the following optional parameters:
         /// <see cref="AcquireTokenForClientParameterBuilder.WithForceRefresh(bool)"/>
