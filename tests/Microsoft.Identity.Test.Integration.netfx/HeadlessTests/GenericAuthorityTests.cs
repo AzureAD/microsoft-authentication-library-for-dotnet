@@ -56,13 +56,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithClientSecret("bad_secret")
                 .Build();
 
-            var response = await app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync().ConfigureAwait(false);
-
             var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
                 app.AcquireTokenForClient(new[] { "api" }).ExecuteAsync()).ConfigureAwait(false);
 
             Assert.AreEqual(ex.ErrorCode, "invalid_client");
-            Assert.AreEqual(ex.StatusCode, HttpStatusCode.BadRequest);
+            Assert.AreEqual(ex.StatusCode, (int)HttpStatusCode.BadRequest);
         }
 
         /// Based on the publicly available https://demo.duendesoftware.com/
@@ -72,10 +70,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var applicationConfiguration = new ApplicationConfiguration(true);
             ConfidentialClientApplicationBuilder builder = new(applicationConfiguration);
 
-            string authority = DemoDuendeSoftwareDotCom + "/";
+            string authority = DemoDuendeSoftwareDotCom + "/"; // for when the app developer adds / at the end.
             var app = builder
                 .WithExperimentalFeatures(true)
-                .WithGenericAuthority(DemoDuendeSoftwareDotCom)
+                .WithGenericAuthority(authority)
                 .WithClientId("m2m.jwt")
                 .WithClientAssertion(options => GetPrivateKeyJwtClientAssertionAsync(options.ClientID, options.TokenEndpoint, options.CancellationToken))
                 .Build();
