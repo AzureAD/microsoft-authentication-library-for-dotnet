@@ -15,32 +15,17 @@
   <ItemGroup>
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
-  
-  
+ 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.52.0-bug-bash" />
-  </ItemGroup>
-  
- <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
-    <PackageReference Include="Microsoft.Identity.Client.Desktop" Version="4.52.0-bug-bash" />
-    <Reference Include="System.Windows.Forms" />
-  </ItemGroup>
-  
-  <ItemGroup Condition="$(TargetFramework) == 'net6.0' ">
-    <PackageReference Include="Microsoft.Identity.Client.Broker" Version="4.52.0-bug-bash" />
-  </ItemGroup>
-
-  <!-- This is kept commented for future reference
-    <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
   
- <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
     <ProjectReference Include="..\..\..\..\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj" />
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   
   <ItemGroup Condition="$(TargetFramework) == 'net6.0' ">
     <ProjectReference Include="..\..\..\..\src\client\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
-  </ItemGroup> -->
+  </ItemGroup>
 </Project>
