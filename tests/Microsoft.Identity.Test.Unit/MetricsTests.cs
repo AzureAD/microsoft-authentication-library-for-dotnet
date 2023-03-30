@@ -124,8 +124,8 @@ namespace Microsoft.Identity.Test.Unit
                 #endregion
 
                 #region ObBehalfOf
-                harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-                harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows);
+                harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_UserFlows);
 
                 // Act - AcquireTokenForClient returns result from IDP. Refresh reason is no access tokens.
                 result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope.ToArray(), new UserAssertion(TestConstants.UserAssertion))

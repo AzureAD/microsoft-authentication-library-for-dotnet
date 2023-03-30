@@ -311,7 +311,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string tokenType = "Bearer")
         {
             return CreateSuccessResponseMessage(
-                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"client_info\":\"" + CreateClientInfo() + "\",\"access_token\":\"" + token + "\"}");
+                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\"}");
         }
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(

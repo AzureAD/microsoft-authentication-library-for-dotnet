@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance
@@ -89,34 +90,33 @@ namespace Microsoft.Identity.Client.Instance
             return AuthorityInfo.CanonicalAuthority.AbsoluteUri;
         }
 
-        internal override string GetTokenEndpoint()
+        internal override Task<string> GetTokenEndpointAsync(RequestContext requestContext)
         {
             string tokenEndpoint = string.Format(
                     CultureInfo.InvariantCulture,
                     TokenEndpointTemplate,
                     AuthorityInfo.CanonicalAuthority);
 
-            return tokenEndpoint;
+            return Task.FromResult(tokenEndpoint);
         }
 
-        internal override string GetAuthorizationEndpoint()
+        internal override Task<string> GetAuthorizationEndpointAsync(RequestContext requestContext)
         {
             string authorizationEndpoint = string.Format(CultureInfo.InvariantCulture,
                   AuthorizationEndpointTemplate,
                   AuthorityInfo.CanonicalAuthority);
 
-            return authorizationEndpoint;
+            return Task.FromResult(authorizationEndpoint);
         }
 
-        internal override string GetDeviceCodeEndpoint()
+        internal override Task<string> GetDeviceCodeEndpointAsync(RequestContext requestContext)
         {
-
             string deviceEndpoint = string.Format(
                 CultureInfo.InvariantCulture,
                 DeviceCodeEndpointTemplate,
                 AuthorityInfo.CanonicalAuthority);
 
-            return deviceEndpoint;
+            return Task.FromResult(deviceEndpoint);
         }
     }
 }
