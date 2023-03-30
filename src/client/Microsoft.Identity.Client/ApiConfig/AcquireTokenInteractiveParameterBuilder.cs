@@ -336,22 +336,22 @@ namespace Microsoft.Identity.Client
         #endregion
 
         /// <summary>
-        ///  Modifies the token acquisition request so that the acquired token is a Proof of Possession token (PoP), rather than a Bearer token. 
+        ///  Modifies the token acquisition request so that the acquired token is a Proof-of-Possession token (PoP), rather than a Bearer token. 
         ///  PoP tokens are similar to Bearer tokens, but are bound to the HTTP request and to a cryptographic key, which MSAL can manage on Windows.
         ///  Note that only the host and path parts of the request URI will be bound.
         ///  See https://aka.ms/msal-net-pop
         /// </summary>
-        /// <param name="httpMethod">The HTTP method ("GET", "POST" etc.) method that will be bound to the token. Leave null and the POP token will not be bound to the method.
+        /// <param name="nonce">Nonce of the protected resource which will be published as part of the WWW-Authenticate header associated with a 401 HTTP response
+        /// or as part of the AuthorityInfo header associated with 200 response. Set it here to make it part of the Signed HTTP Request part of the PoP token.</param>
+        /// <param name="httpMethod">The HTTP method ("GET", "POST" etc.) method that will be bound to the token. If set to null, the PoP token will not be bound to the method.
         /// Corresponds to the "m" part of the a signed HTTP request.</param>
         /// <param name="requestUri">The URI to bind the signed HTTP request to.</param>
-        /// <param name="nonce">Nonce of the protected resource (RP) which will be published as part of the WWWAuthenticate header associated with a 401 HTTP response
-        /// or as part of the AuthorityInfo header associated with 200 response. Set it here to make it part of the Signed HTTP Request part of the POP token.</param>
         /// <returns>The builder.</returns>
         /// <remarks>
         /// <list type="bullet">
-        /// <item><description>An Authentication header is automatically added to the request</description></item>
+        /// <item><description>An Authentication header is automatically added to the request.</description></item>
         /// <item><description>The PoP token is bound to the HTTP request, more specifically to the HTTP method (GET, POST, etc.) and to the Uri (path and query, but not query parameters).</description></item>
-        /// <item><description>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</description></item>
+        /// <item><description>Broker is required to use Proof-of-Possession on public clients.</description></item>
         /// </list>
         /// </remarks>
 #if iOS || ANDROID || WINDOWS_UWP

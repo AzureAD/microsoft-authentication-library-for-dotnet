@@ -39,7 +39,8 @@ namespace Microsoft.Identity.Client
         /// <param name="tokenType">The token type, defaults to Bearer. Note: this property is experimental and may change in future versions of the library.</param>
         /// <param name="authenticationResultMetadata">Contains metadata related to the Authentication Result.</param>
         /// <param name="claimsPrincipal">Claims from the ID token</param>
-        /// <param name="spaAuthCode">Auth Code returned by the Microsoft identity platform when you use AcquireTokenByAuthorizeCode.WithSpaAuthorizationCode(). This auth code is meant to be redeemed by the frontend code.</param>
+        /// <param name="spaAuthCode">Auth Code returned by the Microsoft identity platform when you use AcquireTokenByAuthorizationCode.WithSpaAuthorizationCode(). This auth code is meant to be redeemed by the frontend code. See https://aka.ms/msal-net/spa-auth-code</param>
+        /// <param name="additionalResponseParameters">Other properties from the token response.</param>
         public AuthenticationResult( // for backwards compat with 4.16-
             string accessToken,
             bool isExtendedLifeTimeToken,
@@ -54,7 +55,8 @@ namespace Microsoft.Identity.Client
             string tokenType = "Bearer",
             AuthenticationResultMetadata authenticationResultMetadata = null, 
             ClaimsPrincipal claimsPrincipal = null,
-            string spaAuthCode = null)
+            string spaAuthCode = null,
+            IReadOnlyDictionary<string, string> additionalResponseParameters = null)
         {
             AccessToken = accessToken;
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -72,6 +74,7 @@ namespace Microsoft.Identity.Client
             AuthenticationResultMetadata = authenticationResultMetadata;
             ClaimsPrincipal = claimsPrincipal;
             SpaAuthCode = spaAuthCode;
+            AdditionalResponseParameters = additionalResponseParameters;
         }
 
         /// <summary>
@@ -130,7 +133,8 @@ namespace Microsoft.Identity.Client
             TokenSource tokenSource, 
             ApiEvent apiEvent,
             Account account,
-            string spaAuthCode = null)
+            string spaAuthCode, 
+            IReadOnlyDictionary<string, string> additionalResponseParameters)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
             
@@ -162,7 +166,7 @@ namespace Microsoft.Identity.Client
             CorrelationId = correlationID;
             ApiEvent = apiEvent;
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
-
+            AdditionalResponseParameters = additionalResponseParameters;
             if (msalAccessTokenCacheItem != null)
             {
                 AccessToken = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
@@ -267,6 +271,14 @@ namespace Microsoft.Identity.Client
         /// AcquireTokenByAuthorizationCode builder. See https://aka.ms/msal-net/spa-auth-code for details.
         /// </summary>
         public string SpaAuthCode { get; }
+
+        /// <summary>
+        /// Exposes additional response parameters returned by the token issuer (AAD).
+        /// </summary>
+        /// <remarks>
+        /// Not all parameters are added here, only the ones that MSAL doesn't interpret itself and only scalars.
+        /// </remarks>
+        public IReadOnlyDictionary<string, string> AdditionalResponseParameters { get; }
 
         /// <summary>
         /// All the claims present in the ID token.
