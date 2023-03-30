@@ -5,7 +5,7 @@
     <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
     <TargetFrameworkNet6Win>net6.0-windows</TargetFrameworkNet6Win>
 
-    <TargetFrameworks>$(TargetFrameworkNetDesktop461);$(TargetFrameworkNet6Win)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetCore);$(TargetFrameworkNet6Win)</TargetFrameworks>
     <IsPackable>false</IsPackable>
 
     <LangVersion>latest</LangVersion>
