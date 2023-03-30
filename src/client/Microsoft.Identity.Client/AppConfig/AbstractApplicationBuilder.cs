@@ -13,7 +13,6 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
-using Microsoft.Identity.Client.Internal;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -611,11 +610,11 @@ namespace Microsoft.Identity.Client
         public T WithB2CAuthority(string authorityUri)
         {
             var authorityInfo = AuthorityInfo.FromB2CAuthority(authorityUri);
-            Config.Authority = B2CAuthority.CreateAuthority(authorityInfo);
+            Config.Authority = Authority.CreateAuthority(authorityInfo);
 
             return this as T;
-        }
-
+        }        
+        
         #endregion
 
         private static string GetValueIfNotEmpty(string original, string value)

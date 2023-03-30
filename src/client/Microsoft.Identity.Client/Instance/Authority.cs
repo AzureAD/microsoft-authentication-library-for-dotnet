@@ -4,7 +4,11 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Instance
@@ -83,6 +87,11 @@ namespace Microsoft.Identity.Client.Instance
 
         internal static Authority CreateAuthorityWithEnvironment(AuthorityInfo authorityInfo, string environment)
         {
+            if (authorityInfo.AuthorityType == AuthorityType.Generic)
+            {
+                return CreateAuthority(authorityInfo);
+            }
+
             var uriBuilder = new UriBuilder(authorityInfo.CanonicalAuthority)
             {
                 Host = environment
@@ -102,11 +111,11 @@ namespace Microsoft.Identity.Client.Instance
         /// </summary>
         internal abstract string GetTenantedAuthority(string tenantId, bool forceTenantless = false);
 
-        internal abstract string GetTokenEndpoint();
+        internal abstract Task<string> GetTokenEndpointAsync(RequestContext requestContext);
 
-        internal abstract string GetAuthorizationEndpoint();
+        internal abstract Task<string> GetAuthorizationEndpointAsync(RequestContext requestContext);
 
-        internal abstract string GetDeviceCodeEndpoint();
+        internal abstract Task<string> GetDeviceCodeEndpointAsync(RequestContext requestContext);
         #endregion
 
         internal static string GetEnvironment(string authority)

@@ -305,5 +305,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             throw new NotImplementedException();
         }
+
     }
 }
