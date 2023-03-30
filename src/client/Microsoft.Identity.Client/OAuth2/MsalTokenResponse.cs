@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.OAuth2
         public Dictionary<string, JToken> ExtensionData { get; set; }
 #endif
 
-        // Exposes only scalar proerties from ExtensionData
+        // Exposes only scalar properties from ExtensionData
         public Dictionary<string, string> CreateExtensionDataStringMap()
         {
             if (ExtensionData == null || ExtensionData.Count == 0)

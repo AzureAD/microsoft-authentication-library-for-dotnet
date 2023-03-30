@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
             AuthenticationResultMetadata authenticationResultMetadata = null, 
             ClaimsPrincipal claimsPrincipal = null,
             string spaAuthCode = null,
-            IReadOnlyDictionary<string, string> additionalResponseParameters=null)
+            IReadOnlyDictionary<string, string> additionalResponseParameters = null)
         {
             AccessToken = accessToken;
 #pragma warning disable CS0618 // Type or member is obsolete

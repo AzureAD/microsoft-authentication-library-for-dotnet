@@ -1466,6 +1466,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task BridgedHybridSpa_Async()
         {
+            var wamAccountId = "wam_account_id_1234";
+
             using (var httpManager = new MockHttpManager())
             {
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -1475,14 +1477,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 var handler = httpManager.AddSuccessTokenResponseMockHandlerForPost(
-                    responseMessage: MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetBridgedHybridSpaTokenResponse("wam_account_id_1234")));
+                    responseMessage: MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetBridgedHybridSpaTokenResponse(wamAccountId)));
 
                 var result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
                     .WithSpaAuthorizationCode(true)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                Assert.AreEqual("wam_account_id_1234", result.AdditionalResponseParameters["spa_Accountid"]);
+                Assert.AreEqual(wamAccountId, result.AdditionalResponseParameters["spa_Accountid"]);
 
                 Assert.IsNull(result.SpaAuthCode);
                 Assert.AreEqual("1", handler.ActualRequestPostData["return_spa_code"]);
