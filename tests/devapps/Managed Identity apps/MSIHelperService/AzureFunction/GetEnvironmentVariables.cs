@@ -10,10 +10,8 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 
-/// <summary>
-/// Name space is not required while updating this code in the function app
-/// </summary>
-namespace MSIHelperService.AzureFunction
+
+namespace MSIHelperService.AzureFunction // Name space is not required while updating this code in the function app
 {
     /// <summary>
     /// Gets the environment variables from the function app 
