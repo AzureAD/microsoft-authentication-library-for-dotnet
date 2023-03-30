@@ -890,14 +890,14 @@ namespace Microsoft.Identity.Client
         public const string CryptoNet45 = "crypto_net45";
 
         /// <summary>
-        /// <para>What happens?</para>The request has broker enabled and proof of possession configured but the broker does not support proof of possession
-        /// <para>Mitigation</para>only configure proof of possession for public clients on windows.
+        /// <para>What happens?</para>The request has broker enabled and Proof-of-Possession configured but the broker does not support Proof-of-Possession
+        /// <para>Mitigation</para>only configure Proof-of-Possession for public clients on windows.
         /// </summary>
         public const string BrokerDoesNotSupportPop = "broker_does_not_support_pop";
 
         /// <summary>
-        /// <para>What happens?</para>The request has proof of possession configured but does not have broker enabled. Broker is required for proof of possession on public clients
-        /// <para>Mitigation</para>Enable the broker when proof of possession is configured.
+        /// <para>What happens?</para>The request has Proof-of-Possession configured but does not have broker enabled. Broker is required to use Proof-of-Possession on public clients
+        /// <para>Mitigation</para>Enable the broker when Proof-of-Possession is configured.
         /// </summary>
         public const string BrokerRequiredForPop = "broker_required_for_pop";
 
@@ -908,8 +908,8 @@ namespace Microsoft.Identity.Client
         public const string AdfsNotSupportedWithBroker = "adfs_not_supported_with_broker";
 
         /// <summary>
-        /// <para>What happens?</para>The request has proof of possession configured but does not have a nonce configured. A nonce is required for proof of possession on public clients
-        /// <para>Mitigation</para>Provide a nonce when proof of possession is configured for public clients.
+        /// <para>What happens?</para>The request has Proof-of-Possession configured but does not have a nonce configured. A nonce is required for Proof-of-Possession on public clients
+        /// <para>Mitigation</para>Provide a nonce when Proof-of-Possession is configured for public clients.
         /// </summary>
         public const string NonceRequiredForPopOnPCA = "nonce_required_for_pop_on_pca";
 #if iOS
