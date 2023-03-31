@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Validation;
 using Microsoft.Identity.Client.Internal;
@@ -78,6 +79,10 @@ namespace Microsoft.Identity.Client
                             pathSegments[0]),
                         authorityUri.Port);
                     break;
+                case AuthorityType.Ciam:
+                    CiamAuthorityHelper ciamAuthorityAdapter = new CiamAuthorityHelper(authorityUri);
+                    authorityUri = ciamAuthorityAdapter.TransformedAuthority;
+                    goto default;
                 default:
                     CanonicalAuthority = new Uri(
                         UriBuilderExtensions.GetHttpsUriWithOptionalPort(
@@ -94,7 +99,6 @@ namespace Microsoft.Identity.Client
                             "https://{0}/common/userrealm/",
                             Host),
                         authorityUri.Port);
-
                     break;
             }
         }
@@ -130,7 +134,7 @@ namespace Microsoft.Identity.Client
         public string UserRealmUriPrefix { get; }
         public bool ValidateAuthority { get; }
 
-        internal bool IsInstanceDiscoverySupported => AuthorityType == AuthorityType.Aad;
+        internal bool IsInstanceDiscoverySupported => AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Ciam;
 
         internal bool IsUserAssertionSupported => AuthorityType != AuthorityType.Adfs && AuthorityType != AuthorityType.B2C;
 
@@ -305,6 +309,9 @@ namespace Microsoft.Identity.Client
                 case AuthorityType.Dsts:
                     return new DstsAuthority(this);
 
+                case AuthorityType.Ciam: 
+                    return new CiamAuthority(this);
+
                 default:
                     throw new MsalClientException(
                         MsalError.InvalidAuthorityType,
@@ -409,7 +416,18 @@ namespace Microsoft.Identity.Client
                 return AuthorityType.B2C;
             }
 
+            if (isCiamAuthority(authority))
+            {
+                return AuthorityType.Ciam;
+            }
+
             return AuthorityType.Aad;
+        }
+
+        private static bool isCiamAuthority(string authority)
+        {
+            var uri = new Uri(authority);
+            return uri.Host.Contains("ciamlogin.com");
         }
 
         private static string[] GetPathSegments(string absolutePath)
@@ -439,6 +457,7 @@ namespace Microsoft.Identity.Client
                         return new AadAuthorityValidator(requestContext);
                     case AuthorityType.B2C:
                     case AuthorityType.Dsts:
+                    case AuthorityType.Ciam:
                         return new NullAuthorityValidator();
                     default:
                         throw new InvalidOperationException("Invalid AuthorityType");
@@ -493,6 +512,14 @@ namespace Microsoft.Identity.Client
 
                     case AuthorityType.B2C:
                         return new B2CAuthority(nonNullAuthInfo);
+
+                    case AuthorityType.Ciam:
+
+                        bool updateEnvironmentCiam = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null && !PublicClientApplication.IsOperatingSystemAccount(account);
+                        return updateEnvironmentCiam ?
+                            CreateAuthorityWithTenant(CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment).AuthorityInfo, account?.HomeAccountId?.TenantId) :
+                            CreateAuthorityWithTenant(configAuthorityInfo, account?.HomeAccountId?.TenantId);
+                    //return new CiamAuthority(nonNullAuthInfo);
 
                     case AuthorityType.Aad:
 

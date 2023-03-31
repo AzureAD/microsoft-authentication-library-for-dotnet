@@ -61,6 +61,25 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         #region Happy Path Tests
+        //[TestMethod]
+        //public async Task ROPC_Ciam_Async()
+        //{
+        //    //var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+        //    //await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+
+        //    var msalPublicClient = PublicClientApplicationBuilder
+        //        .Create()
+        //        .WithAuthority()
+        //        .Build();
+
+        //    var result = await msalPublicClient
+        //        .AcquireTokenInteractive(s_scopes)
+        //        .ExecuteAsync()
+        //        .ConfigureAwait(false);
+
+        //    Assert.IsNotNull(result);
+        //}
+
         [TestMethod]
         public async Task ROPC_AAD_Async()
         {
