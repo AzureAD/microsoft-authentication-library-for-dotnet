@@ -1,11 +1,11 @@
 4.52.0
 ==========
 ### New Features
-- The improved experience using Windows broker (WAM) is now out of preview and is enabled by default on all desktop platforms, except UWP. See [3375](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3375), [3447](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3447).  
-- Acquiring Proof-of-Possession tokens on public desktop clients using broker is now also generally available. See [3992](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3992).  
+- The improved experience using Windows broker (WAM) is now generally available for all desktop platforms, except UWP. See [3375](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3375), [3447](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3447).  
+- Acquiring Proof-of-Possession tokens on public desktop clients using WAM broker is now generally available. See [3992](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3992).  
 - The requirement for a specific Windows SDK version on .NET 6 platform has been removed, which should improve the package usage on .NET 6 platforms. MSAL.NET now targets a more general `net6.0-windows` instead of `net6.0-windows10.0.17763.0`. See [3986](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3986).  
 - Added support for non-Azure AD IdP's in client credential flows. Use `WithGenericAuthority(authority)`. This is still an experimental API and may change in the future. See [4047](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4047), [1538](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1538).  
-- Added `AuthenticationResult.AdditionalResponseParameters` property bag with any extra parameters from the AAD response. This collection will also have `spa_accountId` parameter which can be used in brokered hybrid single page application scenarios. See [3994](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3994).  
+- Added `AuthenticationResult.AdditionalResponseParameters` property bag with any extra parameters from the AAD response. This collection will also have `spa_accountId` parameter which can be used in brokered hybrid single-page application (SPA) scenarios. See [3994](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3994).  
 
 4.51.0
 ==========
