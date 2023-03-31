@@ -123,11 +123,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             if (authorizationRequestUrlParameters.CodeVerifier != null)
             {
-                return handler.GetAuthorizationUriWithPkce(authorizationRequestUrlParameters.CodeVerifier);
+                return await handler.GetAuthorizationUriWithPkceAsync(authorizationRequestUrlParameters.CodeVerifier, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                return handler.GetAuthorizationUriWithoutPkce();
+                return await handler.GetAuthorizationUriWithoutPkceAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }

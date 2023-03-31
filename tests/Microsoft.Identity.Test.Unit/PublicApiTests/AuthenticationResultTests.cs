@@ -2,22 +2,21 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
-    public class AuthenticationResultTests
+    public class AuthenticationResultTests : TestBase
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
 
         [TestMethod]
         public void PublicTestConstructorCoversAllProperties()
@@ -130,6 +129,70 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TokenSource.Broker, ar3.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual("Bearer", ar1.TokenType);
 
+        }
+
+        [TestMethod]
+        public async Task MsalTokenResponseParseTestAsync()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                  .WithRedirectUri(TestConstants.RedirectUri)
+                  .WithClientSecret(TestConstants.ClientSecret)
+                  .WithHttpManager(harness.HttpManager)
+                  .BuildConcrete();
+
+                string jsonContent = MockHelpers.CreateSuccessTokenResponseString(
+                        TestConstants.Uid,
+                       TestConstants.DisplayableId, 
+                       TestConstants.s_scope.ToArray());
+
+                jsonContent = jsonContent.TrimEnd('}');
+                jsonContent += ",";
+
+                jsonContent += "\"number_extension\":1209599,";
+                jsonContent += "\"true_extension\":true,";
+                jsonContent += "\"false_extension\":false,";
+                jsonContent += "\"date_extension\":\"2019-08-01T00:00:00-07:00\",";
+                jsonContent += "\"null_extension\":null,";
+                jsonContent += "\"null_string_extension\":\"null\",";
+                jsonContent += "\"array_extension\":[\"a\",\"b\",\"c\"],";
+                jsonContent += "\"object_extension\":{\"a\":\"b\"}";
+                jsonContent += "}";
+
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var handler = harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    responseMessage: MockHelpers.CreateSuccessResponseMessage(jsonContent));
+
+                AuthenticationResult result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                    .WithSpaAuthorizationCode(true)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                IReadOnlyDictionary<string, string> extMap = result.AdditionalResponseParameters;
+
+                // Strongly typed properties should not be exposed (we don't want to expose refresh token)
+                Assert.IsFalse(extMap.ContainsKey("scope"));
+                Assert.IsFalse(extMap.ContainsKey("expires_in"));
+                Assert.IsFalse(extMap.ContainsKey("ext_expires_in"));
+                Assert.IsFalse(extMap.ContainsKey("access_token"));
+                Assert.IsFalse(extMap.ContainsKey("refresh_token"));
+                Assert.IsFalse(extMap.ContainsKey("id_token"));
+                Assert.IsFalse(extMap.ContainsKey("client_info"));
+
+                // only scalar properties should be in the map
+                Assert.IsFalse(extMap.ContainsKey("object_extension"));
+                Assert.IsFalse(extMap.ContainsKey("array_extension"));
+
+                // all other properties should be in the map
+                Assert.AreEqual("1209599", extMap["number_extension"]);
+                Assert.AreEqual("True", extMap["true_extension"]);
+                Assert.AreEqual("False", extMap["false_extension"]);
+                Assert.AreEqual("2019-08-01T00:00:00-07:00", extMap["date_extension"]);
+                Assert.AreEqual("null", extMap["null_string_extension"]);
+                Assert.AreEqual("", extMap["null_extension"]);
+
+            }
         }
     }
 }

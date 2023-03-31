@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Kerberos;
@@ -37,6 +38,7 @@ namespace Microsoft.Identity.Test.Common
             new InstanceDiscoveryManager(
                 Substitute.For<IHttpManager>(),
                 true, null, null);
+            OidcRetrieverWithCache.ResetCacheForTest();
             AuthorityManager.ClearValidationCache();
             SingletonThrottlingManager.GetInstance().ResetCache();
         }

@@ -97,7 +97,7 @@ namespace TestBrokerApp
             return null;
         }
 
-        internal async Task<AuthenticationResult> ExecuteAndDisplay(AcquireTokenInteractiveParameterBuilder atiParamBuilder)
+        internal async Task<AuthenticationResult> ExecuteAndDisplay<T>(T atiParamBuilder) where T : BaseAbstractAcquireTokenParameterBuilder<T>
         {
             try
             {
