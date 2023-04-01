@@ -297,7 +297,10 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Build();
 
             // Acquire token using username password
-            var result = await pca.AcquireTokenByUsernamePassword(scopes, popUser, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, popUser, labResponse.User.GetOrFetchPassword())
+                .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
         }
