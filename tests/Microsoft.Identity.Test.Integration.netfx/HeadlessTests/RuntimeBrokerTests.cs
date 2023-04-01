@@ -265,6 +265,43 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
         }
+
+        [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        [ExpectedException(typeof(MsalUiRequiredException))]
+        public async Task WamUsernamePasswordPopTokenAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            
+            string popUser = "popUser@msidlab4.onmicrosoft.com";
+
+            string[] scopes = { "https://msidlab4.sharepoint.com/user.read" };
+
+            string[] expectedScopes = { 
+                "https://msidlab4.sharepoint.com/Calendars.Read", 
+                "https://msidlab4.sharepoint.com/Sites.Read.All ", 
+                "https://msidlab4.sharepoint.com/UserTimelineActivity.Write.CreatedByApp"
+            };
+
+            IntPtr intPtr = GetForegroundWindow();
+
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            WamLoggerValidator testLogger = new WamLoggerValidator();
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithParentActivityOrWindow(windowHandleProvider)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithLogging(testLogger)
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .Build();
+
+            // Acquire token using username password
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, popUser, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+        }
+
     }
 }
 #endif
