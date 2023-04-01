@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Kerberos;
@@ -55,7 +56,11 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                string tokenEndpoint = tokenEndpointOverride ?? _requestParams.Authority.GetTokenEndpoint();
+                string tokenEndpoint = tokenEndpointOverride;
+                if (tokenEndpoint == null)
+                {
+                    tokenEndpoint = await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
+                }
                 Debug.Assert(_requestParams.RequestContext.ApiEvent != null, "The Token Client must only be called by requests.");
                 _requestParams.RequestContext.ApiEvent.TokenEndpoint = tokenEndpoint;
 
@@ -133,12 +138,13 @@ namespace Microsoft.Identity.Client.OAuth2
                 _requestParams.RequestContext.Logger.Verbose(
                     () => "[TokenClient] Before adding the client assertion / secret");
 
+                var tokenEndpoint = await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
                 await _serviceBundle.Config.ClientCredential.AddConfidentialClientParametersAsync(
                     _oAuth2Client,
                     _requestParams.RequestContext.Logger,
                     _serviceBundle.PlatformProxy.CryptographyManager,
                     _requestParams.AppConfig.ClientId,
-                    _requestParams.Authority.GetTokenEndpoint(),
+                    tokenEndpoint,
                     _requestParams.SendX5C,
                     cancellationToken).ConfigureAwait(false);
 
