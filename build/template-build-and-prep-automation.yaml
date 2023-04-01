@@ -132,10 +132,12 @@ steps:
                          'NetDesktopWpf\bin\Release\', 
                          'NetFrameworkWam\bin\Release\',
                          'TestBrokerApp\bin\Release\net6.0\',
-                         'TestBrokerApp\bin\Release\net6.0-windows10.0.17763.0\'
-                         'TestBrokerApp\bin\Release\net48\');
+                         'TestBrokerApp\bin\Release\net6.0-windows10.0.17763.0\',
+                         'TestBrokerApp\bin\Release\net48\',
+                         'WAMClassLibrary\bin\Release\',
+                         'WAMCallsIntoClassLibrary\bin\Release\');
 
-        #Check if runtime files for each arch exist in the Dev Apps
+        #Check if runtime files for each arch exist in the Dev Apps for any CPU 
         $errors = '';
 
         foreach ($runtime in $runtimes) 
@@ -151,6 +153,14 @@ steps:
                       $errors += "Failed to find runtime files in : " + $SearchInFolder + $app + "`n";
                  }
             }
+        }
+
+        #Check if runtime files for  exist in the MAUI app for win10-x64 runtime identifier
+        $mauiAppRuntimeFilePath = Join-Path $searchInFolder "WAMMauiApp\WAMMauiApp\bin\Release\net6.0-windows10.0.19041.0\win10-x64\msalruntime.dll"
+
+        if (-not(Test-Path -Path $mauiAppRuntimeFilePath -PathType Leaf))
+        {
+            $errors += "Failed to find runtime files in MAUI test App ";
         }
 
         #exit if there are errors
