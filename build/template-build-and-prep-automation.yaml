@@ -158,6 +158,8 @@ steps:
         #Check if runtime files for  exist in the MAUI app for win10-x64 runtime identifier
         $mauiAppRuntimeFilePath = Join-Path $searchInFolder "WAMMauiApp\WAMMauiApp\bin\Release\net6.0-windows10.0.19041.0\win10-x64\msalruntime.dll"
 
+        Write-Host $mauiAppRuntimeFilePath
+
         if (-not(Test-Path -Path $mauiAppRuntimeFilePath -PathType Leaf))
         {
             $errors += "Failed to find runtime files in MAUI test App ";
