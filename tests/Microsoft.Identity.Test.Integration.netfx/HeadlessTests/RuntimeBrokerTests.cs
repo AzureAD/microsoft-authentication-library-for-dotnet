@@ -267,7 +267,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
-        [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordPopTokenAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -303,14 +302,29 @@ namespace Microsoft.Identity.Test.Integration.Broker
                     .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
                     .ExecuteAsync()
                     .ConfigureAwait(false);
+
+                MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
             }
             catch (MsalUiRequiredException ex)
             {
                 Assert.AreEqual(ex.Message,"checking the message");
                 Assert.AreEqual(ex.InnerException, "checking the message");
             }
-            
-            //MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            catch (MsalServiceException ex)
+            {
+                Assert.AreEqual(ex.Message, "checking the message");
+                Assert.AreEqual(ex.InnerException, "checking the message");
+            }
+            catch (MsalException ex)
+            {
+                Assert.AreEqual(ex.Message, "checking the message");
+                Assert.AreEqual(ex.InnerException, "checking the message");
+            }
+            catch (Exception ex)
+            {
+                Assert.AreEqual(ex.Message, "checking the message");
+                Assert.AreEqual(ex.InnerException, "checking the message");
+            }
         }
 
     }
