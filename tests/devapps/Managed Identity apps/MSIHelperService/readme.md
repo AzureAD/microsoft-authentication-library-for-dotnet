@@ -229,7 +229,7 @@ OMS contain four main services:
 Identity Labs has an extensive OMS solution. The MSI Helper Service takes advantage of this existing setup from the Labs to execute code inside of Virtual machines. 
 
 <br>
-<img src="images/oms_admin.PNG" alt="func_endpoints" width="800"/>
+<img src="images/OMS_Admin.PNG" alt="OMSADMIN" width="800"/>
 <br>
 
 The OMS Admin Account executes pre-created Azure Runbooks. You can learn more about Runbooks [here](https://learn.microsoft.com/en-us/azure/automation/manage-runbooks)
