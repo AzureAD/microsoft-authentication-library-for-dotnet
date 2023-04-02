@@ -304,9 +304,10 @@ namespace Microsoft.Identity.Test.Integration.Broker
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }
-            catch (Exception ex)
+            catch (MsalUiRequiredException ex)
             {
                 Assert.AreEqual(ex.Message,"checking the message");
+                Assert.AreEqual(ex.InnerException, "checking the message");
             }
             
             //MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
