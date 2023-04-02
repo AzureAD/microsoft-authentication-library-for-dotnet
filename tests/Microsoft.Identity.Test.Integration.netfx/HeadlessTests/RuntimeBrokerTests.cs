@@ -300,7 +300,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
         [ExpectedException(typeof(MsalUiRequiredException))]
-        public async Task WamUsernamePasswordPopTokenEnforcedWithCaInOnValidResourceAsync()
+        public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
         {
             //Arrange
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
