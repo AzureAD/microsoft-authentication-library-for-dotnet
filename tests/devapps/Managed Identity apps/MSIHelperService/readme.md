@@ -195,7 +195,7 @@ Build the current project (The MSI Helper Service - MSIHelperService.csproj) and
 
 ## How to build and deploy the Function App 
 
-Function app deployment is easy but can also be risky. There is no failover mechanism here since we do not have a staging slot for the Azure functions. But there shouldn't be a need ever to deploy to the function app or to any other Azure resources (VM / Azure ARC / Service Fabric) after MSAL MSI has gone live. The function app code can be found `AzureFunction` folders 
+Function app deployment is easy but can also be risky. There is no failover mechanism here since we do not have a staging slot for the Azure functions. But there shouldn't be a need ever to deploy to the function app or to any other Azure resources (VM / Azure ARC / Service Fabric) after MSAL MSI has gone live. The function app code can be found in the `AzureFunction` folders 
 <br>
 <img src="images/function.PNG" alt="function" width="800"/>
 <br>
@@ -238,7 +238,7 @@ Identity Labs has an extensive OMS solution. The MSI Helper Service takes advant
 
 The OMS Admin Account executes pre-created Azure Runbooks. You can learn more about Runbooks [here](https://learn.microsoft.com/en-us/azure/automation/manage-runbooks)
 
-There are two runbooks created to be used with the Hekper Service. One to execute code in a Virtual Machine and the other for Azure ARC. 
+There are two runbooks created to be used with the Helper Service. One to execute code in a Virtual Machine and the other for Azure ARC. 
 
 ## Azure Virtual Machine Setup 
 
