@@ -267,7 +267,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
-        public async Task WamUsernamePasswordPopTokenAsync()
+        public async Task WamUsernamePasswordPopTokenWithValidResourceAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             
@@ -276,9 +276,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             string[] scopes = { "https://msidlab4.sharepoint.com/user.read" };
 
             string[] expectedScopes = { 
-                "https://msidlab4.sharepoint.com/Calendars.Read", 
-                "https://msidlab4.sharepoint.com/Sites.Read.All ", 
-                "https://msidlab4.sharepoint.com/UserTimelineActivity.Write.CreatedByApp"
+                "https://msidlab4.sharepoint.com/Calendars.Read"
             };
 
             IntPtr intPtr = GetForegroundWindow();
@@ -295,23 +293,45 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
                .Build();
 
-            try
-            {
-                // Acquire token using username password
-                var result = await pca.AcquireTokenByUsernamePassword(scopes, popUser, labResponse.User.GetOrFetchPassword())
-                    .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
+            // Acquire token using username password
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, popUser, labResponse.User.GetOrFetchPassword())
+                .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
-                Assert.IsNotNull(result.Account);
-                Assert.IsNotNull(result.Account.Username);
-            }
-            catch (MsalException ex)
-            {
-                Assert.IsNull(ex.Message);
-            }
+            Assert.AreEqual(popUser, result.Account.Username);
         }
 
+        [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        [ExpectedException(typeof(MsalUiRequiredException))]
+        public async Task WamUsernamePasswordPopTokenWithInValidResourceAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+
+            string popUser = "popUser@msidlab4.onmicrosoft.com";
+
+            string[] scopes = { "user.read" };
+
+            IntPtr intPtr = GetForegroundWindow();
+
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            WamLoggerValidator testLogger = new WamLoggerValidator();
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithParentActivityOrWindow(windowHandleProvider)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithLogging(testLogger)
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .Build();
+
+            // Acquire token using username password
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, popUser, labResponse.User.GetOrFetchPassword())
+                .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+        }
     }
 }
 #endif
