@@ -10,7 +10,17 @@ manager: bogavril
 
 # Testing managed identities on Azure resources for MSAL .Net and other Auth SDKs
 
-Managed service identities (MSI) allow applications hosted on certain Azure resources to authenticate to any service that supports Azure AD authentication. This creates a challenge when testing these apps to deploy them onto created and properly set up Azure resources, so that the application under test is able to retrieve tokens via managed identity. While this may be feasible for a manual end-to-end testing scenario, it could be difficult to run integration tests on CI pipelines or on a local dev box; or when an app must run on multiple different Azure services.
+## Overview
+
+Managed service identities (MSI) allow applications hosted on certain Azure resources to authenticate to any service that supports Azure AD authentication. Managed identities provide an automatically managed identity in Azure Active Directory (Azure AD) for applications to use when connecting to resources that support Azure AD authentication. Applications can use managed identities to obtain Azure AD tokens without having to manage any credentials.
+
+
+## Challenges in Testing Managed Identities
+
+To test managed identities, code needs to be deployed in MI supporfted Azure Resource so the Managded Identity endpoint can be reached from within an Azure Resource. This creates a challenge when testing these apps to deploy them onto created and properly set up Azure resources, so that the application under test is able to retrieve tokens via managed identity. While this may be feasible for a manual end-to-end testing scenario, it could be difficult to run integration tests on CI pipelines or on a local dev box; or when an app must run on multiple different Azure services.
+
+
+## Solution
 
 To eliminate this problem, MSAL.NET team has built a MSI helper service that acts as a proxy for several managed identity sources and allows to retrieve the managed identity token responses via a web API. This API accepts the same query params as a request to a managed identity endpoint which allows your test(s) to call the API just like how you would make a HTTP request to the managed identity endpoint while your code runs inside of a managed identity source.   
 
@@ -64,11 +74,8 @@ MSAL .Net team has deployed a Managed Identity helper service called the MSIHelp
 1. Web App (version : 2019-08-01)
 2. Function App (version : 2019-08-01)
 3. Virtual Machine (IMDS)
-4. Service Fabric (wil be available soon)
+4. Service Fabric 
 5. Azure ARC (wil be available soon)
-
-
-# Troubleshooting the test service
 
 
 ## Where is this service deployed?
@@ -85,7 +92,7 @@ MSI Helper Service exposes two endpoints :
 - GetEnvironmentVariables, and 
 - GetMSIToken
 
-A sample request to the `GetEnvironmentVariables` 
+A sample request to the `EnvironmentVariables` 
 
 ```http
 curl -X 'GET' \
@@ -105,8 +112,8 @@ And here is a successful response from the service.
 
 > **_NOTE:_**  
 
-- The `GetEnvironmentVariables` api, accepts an MSI supported Azure resource as a query parameter and returns all the environment variables needed for you to form a http request.  
-- Once you have formed the URI you can use the `GetMSIToken` endpoint and send the request to the Helper Service, this will inturn call the MSI endpoint and return a MSI token response.  
+- The `EnvironmentVariables` api, accepts an MSI supported Azure resource as a query parameter and returns all the environment variables needed for you to form a http request.  
+- Once you have formed the URI you can use the `MSIToken` endpoint and send the request to the Helper Service, this will inturn call the MSI endpoint and return a MSI token response.  
 - `IDENTITY_API_VERSION` environment variable is not a MSI resource based environment variable. MSAL SDKs hardcode this value or fetch it from the MSI version endpoint. This is returned by the API for ease of use while testing.  
 
 ```http
@@ -122,7 +129,7 @@ You should also be able to test for exceptions that the MSI endpoint throws
 
 ## How to get a token from the MSI Helper service
 
-From the earlier example, you saw how to send an environment variable request for an Azure resource using the `GetEnvironmentVariables` endpoint. Once you get the environment variables, you will need to form the URI as how you would send the request to the actual MSI endpoint. Let's take a look at the below example to understand this better. We have used the environment variables we received from the earlier request to form the URI below and send the request to the `GetMSIToken` endpoint
+From the earlier example, you saw how to send an environment variable request for an Azure resource using the `EnvironmentVariables` endpoint. Once you get the environment variables, you will need to form the URI as how you would send the request to the actual MSI endpoint. Let's take a look at the below example to understand this better. We have used the environment variables we received from the earlier request to form the URI below and send the request to the `MSIToken` endpoint
 
 ```http
 curl -X 'GET' \
@@ -149,7 +156,7 @@ And here is a successful response from the service.
 The service is deployed to an Azure Web App and it exposes the Azure Web Apps MSI endpoint for testing. i.e. it exposes it's own MSI endpoint so the Web App resource can be tested. In addition to that it also calls into other Azure resources like Azure Function, ServiceFabric, AzureARC and IMDS and exposes their MSI endpoints as well. 
 
 
-### How to build and deploy the helper service (exposes Web App MSI)
+## How to build and deploy the helper service (exposes Web App MSI)
 
 Build the current project (The MSI Helper Service - MSIHelperService.csproj) and deploy to the Azure Web App. 
 
@@ -185,7 +192,7 @@ Build the current project (The MSI Helper Service - MSIHelperService.csproj) and
 
 > **_NOTE:_**  Once you have swapped the slot make sure to point the base url to the production slot again in your code and test it again with the production endpoint fron the MSAL integration testing
 
-### How to build and deploy the Function App 
+## How to build and deploy the Function App 
 
 Function app deployment is easy but can also be risky. There is no failover mechanism here since we do not have a staging slot for the Azure functions. But there shouldn't be a need ever to deploy to the function app or to any other Azure resources (VM / Azure ARC / Service Fabric) after MSAL MSI has gone live. The function app code can be found `AzureFunction` folders 
 <br>
@@ -202,9 +209,115 @@ Function app deployment is easy but can also be risky. There is no failover mech
 
 > **_NOTE:_**  Any changes made to this function app will affect both the production and the staging slot of the MSI Helper Service. There are several ID4S teams that are dependent on these services, so before making any change please ensure that you have tested the code in a sample azure function app. 
 
+## How does the VM and AzureArC work in the Helper Service 
+
+It's a little tricky when it comes to executing code within a VM, especially from a Web API like the MSI Helper Service.
+
+To overcome this unique situation, we have used OMS (Operations Manangement Suite)
+
+Operations Management Suite (also known as OMS) is a collection of cloud-based services for managing your on-premises and cloud environments from one single place. Rather than deploying and managing on-premises resources, OMS components are entirely hosted in Azure. In simple words, what basically happens is that OMS goes and talks to different servers, applications in your environment, collects information about how they're doing, consolidates this information in the form of nice colorful graphics and searchable records, after that presents it to you in one single, convenient place, and it doesn't matter where your servers or applications are running, Azure, AWS, on-premises or which operating system they're running on, Windows or Linux, it just works. Configuration is minimal, and you can be up and running literally in a matter of minutes. OMS help administrator manage their hybrid IT environments more efficiently by giving them a greater visibility into their operational infrastructure. This tool aims to fill the current gap of not having a single point of management for your hybrid, multi-cloud and on premises environments. The most important data out of that is visualized and the other part of it can be searched by writing search queries in a highly scalable log search engine. 
+
+OMS contain four main services:
+
+- Log Analytics
+- Azure Automation
+- Azure Backup
+- Azure Site Recovery
+
+***Pre-Req :*** We used an OMS Automation Account in the Azure portal. This Automation Account will also need jobs which have been created and which have run. Automation Account is a Run As Account. Run As accounts in Azure Automation provide authentication for managing resources on the Azure Resource Manager or Azure Classic deployment model using Automation runbooks and other Automation features. 
+
+Identity Labs has an extensive OMS solution. The MSI Helper Service takes advantage of this existing setup from the Labs to execute code inside of Virtual machines. 
+
+<br>
+<img src="images/oms_admin.PNG" alt="func_endpoints" width="800"/>
+<br>
+
+The OMS Admin Account executes pre-created Azure Runbooks. You can learn more about Runbooks [here](https://learn.microsoft.com/en-us/azure/automation/manage-runbooks)
+
+There are two runbooks created to be used with the Hekper Service. One to execute code in a Virtual Machine and the other for Azure ARC. 
+
+## Azure Virtual Machine Setup 
+
+The Azure Virtual Machine runbook simply executes the following lines of code in a Lab Owned Virtual Machine (VM Name: IDANLENG1). This VM has been setup to acquire a Managed Identity token for both System Assigned and User Assigned Identities. 
+
+```powershell
+        try 
+    		{
+        		#Form the URI 
+        		$uri = $RunbookHeaders.MSI_URI;
+        		$MSIResponse = Invoke-WebRequest -UseBasicParsing -Uri $uri -Method GET -Headers @{Metadata="TRUE"}
+        		#$MSIResponse
+        		$MSIContent = $MSIResponse.Content;
+        		$MSIContent;
+    		}
+    		catch [System.Net.WebException] {
+        		$ErrorMessage = $_.ErrorDetails
+        		$ErrorMessage
+
+    		}
+```
+
+And here is the [code](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/tests/devapps/Managed%20Identity%20apps/MSIHelperService/Helper/MSIHelper.cs#L253) in the MSI Helper Service that executes the [Runbook](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/OperationsManagementSuite/providers/Microsoft.Automation/automationAccounts/OMSAdmin/runbooks/GetMSITokenFromVM/overview) code using the Automation Account. 
+
+When the runbook code is executed it runs within the Virtual machine to send a http request to the Managed Identity endpoint and retrives the Managed Identity Response. Below is a sample successful response from the VM. 
+
+<br>
+<img src="images/vm_runbook.PNG" alt="func_endpoints" width="800"/>
+<br>
+
+This result is read by the MSI Helper Service and given back to the app that is calling it. 
+
+## Azure Virtual Machine Setup 
+
+Azure ARC setup uses the same logic as described above for the Virtual Machine. For, Azure ARC we need an on-premise machine. Currently there is a physical machine in Studio A that is corp connected. 
+
+The Azure ARC Machine runbook simply executes the following lines of code in a the physically CORP connected machine (VM Name: Gladwin-Backup). This Machine has been setup with the [Azure ARC Agent](https://learn.microsoft.com/en-us/azure/azure-arc/servers/agent-overview) which will help in getting a System Assigned Managed Identity Token on the On-Premise server. Learn more about Azure Arc [here](https://learn.microsoft.com/en-us/azure/azure-arc/servers/managed-identity-authentication)
+
+```powershell
+        try 
+    		{
+        		Invoke-WebRequest -Method GET -Uri $endpoint -Headers @{Metadata='TRUE'} -UseBasicParsing
+    		}
+    		catch {
+
+        		$wwwAuthHeader = $_.Exception.Response.Headers["WWW-Authenticate"]
+
+                if ($wwwAuthHeader -match "Basic realm=.+")
+                {
+                    $secretFile = ($wwwAuthHeader -split "Basic realm=")[1]
+                }
+
+                $secret = cat -Raw $secretFile
+
+                try
+                {
+                    $response = Invoke-WebRequest -Method GET -Uri $endpoint -Headers @{Metadata='True'; Authorization="Basic $secret"} -UseBasicParsing
+                    
+                    #$MSIResponse
+                    $MSIContent = $response.Content;
+                    $MSIContent;
+                }
+                catch [System.Net.WebException] {
+                    $ErrorMessage = $_.ErrorDetails
+                    $ErrorMessage
+                }
+    		}
+```
+
+And here is the [code](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/tests/devapps/Managed%20Identity%20apps/MSIHelperService/Helper/MSIHelper.cs#L332) in the MSI Helper Service that executes the [Runbook](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/OperationsManagementSuite/providers/Microsoft.Automation/automationAccounts/OMSAdmin/runbooks/GetMSITokenFromAzureArc/overview) code using the Automation Account. 
+
+When the runbook code is executed it runs within the Virtual machine to send a http request to the Managed Identity endpoint and retrives the Managed Identity Response. Below is a sample successful response from the VM. 
+
+<br>
+<img src="images/arc_runbook.PNG" alt="func_endpoints" width="800"/>
+<br>
+
+This result is read by the MSI Helper Service and given back to the app that is calling it. 
+
 ## User Assigned Identity
 
 This helper service also exposed the [User Identity](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSAL_MSI_USERID/overview) for testing. 
+
 
 <br>
 <img src="images/uid.PNG" alt="uid" width="800"/>
@@ -223,6 +336,9 @@ Following are some useful information to test the User Identity.
 | Principal Id   | 3b57c42c-3201-4295-ae27-d6baec5b7027        |
 | Client Id      | 3b57c42c-3201-4295-ae27-d6baec5b7027       |
 
+# Troubleshooting the test service
+
+This section will cover the troubleshooting steps involved with the Helper Service
 
 ## Troubleshooting with logs
 
