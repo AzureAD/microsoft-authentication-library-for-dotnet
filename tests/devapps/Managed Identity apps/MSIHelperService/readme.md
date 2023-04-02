@@ -262,7 +262,7 @@ And here is the [code](https://github.com/AzureAD/microsoft-authentication-libra
 When the runbook code is executed it runs within the Virtual machine to send a http request to the Managed Identity endpoint and retrives the Managed Identity Response. Below is a sample successful response from the VM. 
 
 <br>
-<img src="images/vm_runbook.PNG" alt="func_endpoints" width="800"/>
+<img src="images/VM_Runbook.PNG" alt="VM" width="800"/>
 <br>
 
 This result is read by the MSI Helper Service and given back to the app that is calling it. 
@@ -309,7 +309,7 @@ And here is the [code](https://github.com/AzureAD/microsoft-authentication-libra
 When the runbook code is executed it runs within the Virtual machine to send a http request to the Managed Identity endpoint and retrives the Managed Identity Response. Below is a sample successful response from the VM. 
 
 <br>
-<img src="images/arc_runbook.PNG" alt="func_endpoints" width="800"/>
+<img src="images/arc_runbook.PNG" alt="arc" width="800"/>
 <br>
 
 This result is read by the MSI Helper Service and given back to the app that is calling it. 
