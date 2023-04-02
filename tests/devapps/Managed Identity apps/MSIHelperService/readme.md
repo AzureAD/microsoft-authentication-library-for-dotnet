@@ -74,8 +74,8 @@ MSAL .Net team has deployed a Managed Identity helper service called the MSIHelp
 1. Web App (version : 2019-08-01)
 2. Function App (version : 2019-08-01)
 3. Virtual Machine (IMDS)
-4. Service Fabric 
-5. Azure ARC (wil be available soon)
+4. Service Fabric (wil be available soon)
+5. Azure ARC 
 
 
 ## Where is this service deployed?
@@ -192,6 +192,7 @@ Build the current project (The MSI Helper Service - MSIHelperService.csproj) and
 
 > **_NOTE:_**  Once you have swapped the slot make sure to point the base url to the production slot again in your code and test it again with the production endpoint fron the MSAL integration testing
 
+
 ## How to build and deploy the Function App 
 
 Function app deployment is easy but can also be risky. There is no failover mechanism here since we do not have a staging slot for the Azure functions. But there shouldn't be a need ever to deploy to the function app or to any other Azure resources (VM / Azure ARC / Service Fabric) after MSAL MSI has gone live. The function app code can be found `AzureFunction` folders 
@@ -208,6 +209,7 @@ Function app deployment is easy but can also be risky. There is no failover mech
 <br>
 
 > **_NOTE:_**  Any changes made to this function app will affect both the production and the staging slot of the MSI Helper Service. There are several ID4S teams that are dependent on these services, so before making any change please ensure that you have tested the code in a sample azure function app. 
+
 
 ## How does the VM and AzureArC work in the Helper Service 
 
@@ -227,6 +229,8 @@ OMS contain four main services:
 ***Pre-Req :*** We used an OMS Automation Account in the Azure portal. This Automation Account will also need jobs which have been created and which have run. Automation Account is a Run As Account. Run As accounts in Azure Automation provide authentication for managing resources on the Azure Resource Manager or Azure Classic deployment model using Automation runbooks and other Automation features. 
 
 Identity Labs has an extensive OMS solution. The MSI Helper Service takes advantage of this existing setup from the Labs to execute code inside of Virtual machines. 
+
+***Access to Azure Runbooks and Logs :*** You need to be an admin in the Lab to access these resources. Please file a ticket with lab if there are any issues.
 
 <br>
 <img src="images/OMS_Admin.PNG" alt="OMSADMIN" width="800"/>
