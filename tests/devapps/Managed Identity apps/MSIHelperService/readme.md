@@ -17,12 +17,12 @@ Managed service identities (MSI) allow applications hosted on certain Azure reso
 
 ## Challenges in Testing Managed Identities
 
-To test managed identities, code needs to be deployed in MI supporfted Azure Resource so the Managded Identity endpoint can be reached from within an Azure Resource. This creates a challenge when testing these apps to deploy them onto created and properly set up Azure resources, so that the application under test is able to retrieve tokens via managed identity. While this may be feasible for a manual end-to-end testing scenario, it could be difficult to run integration tests on CI pipelines or on a local dev box; or when an app must run on multiple different Azure services.
+To test managed identities, code needs to be deployed in MI supported Azure Resource so the Managded Identity endpoint can be reached from within an Azure Resource. This creates a challenge when testing these apps, because the code needs to run from within an Azure resources, so that the application under test is able to retrieve tokens via managed identity endpoints. While this may be feasible for a manual end-to-end testing scenario, it could be difficult to run integration tests on CI pipelines or on a local dev box; or when an app must run on different Azure services that support Managed Identity.
 
 
 ## Solution
 
-To eliminate this problem, MSAL.NET team has built a MSI helper service that acts as a proxy for several managed identity sources and allows to retrieve the managed identity token responses via a web API. This API accepts the same query params as a request to a managed identity endpoint which allows your test(s) to call the API just like how you would make a HTTP request to the managed identity endpoint while your code runs inside of a managed identity source.   
+To eliminate this problem, MSAL.NET team has built a MSI helper service ([https://service.msidlab.com/swagger](https://service.msidlab.com/swagger)) that acts as a proxy for several managed identity sources and allows to retrieve the managed identity token responses via a web API. This API accepts the same query params on a request to a managed identity endpoint which allows your test(s) to call the API just like how you would make a HTTP request to the managed identity endpoint while your code runs inside of a managed identity source.   
 
 This protected web service is able to send http requests to Managed Identity endpoints (for e.g. Azure Web App, Function App or a Virtual machine) and transfer the managed identity response back to you. Since Identity Labs manages all the azure resources there will be zero cost and zero maintenance for you and your service. 
 
@@ -35,6 +35,7 @@ To gain access to the MSI Helper service you will need access to [Identity Labs]
 
 Your code running from any dev box or CI pipeline will get service credentials from the lab vault and connect to the protected helper service, and then proxy all environment variable reads and http requests to this web service hosted on an Azure Web App. Depending upon what resource is being testing the Helper service will make calls to the Azure Resources under test and get the Managed Identity token response back to MSAL.
 
+**Need Client Credentials info to connect to the helper service?** [Visit the lab docs for more details](https://docs.msidlab.com/accounts/apiaccess.html)  
 
 ## Managed identity types support
 
@@ -50,6 +51,7 @@ There are two types of managed identities, and both are supported by this servic
     - User-assigned identities can be used by multiple resources.
     - MSI Helper service uses a single user identity shared across all azure resources
 
+Identity Labs has setup a [single shared User Assigned Identity](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/tests/Microsoft.Identity.Test.Integration.netfx/HeadlessTests/ManagedIdentityTests.cs#L36) and assigned to all the supported Managed Identity Sources. 
 
 ## What Azure services support the feature?<a name="which-azure-services-support-managed-identity"></a>
 
@@ -69,7 +71,7 @@ MSAL .Net supports the following Managed Identity sources:
 
 ## How can I test these different sources?
 
-MSAL .Net team has deployed a Managed Identity helper service called the MSIHelper service, using which you should be able to test the following sources. 
+MSAL .Net team has deployed a Managed Identity helper service called the [MSIHelper service](https://service.msidlab.com/swagger/index.html), using which you should be able to test the following sources. 
 
 1. Web App (version : 2019-08-01)
 2. Function App (version : 2019-08-01)
@@ -83,7 +85,7 @@ MSAL .Net team has deployed a Managed Identity helper service called the MSIHelp
 The protected test service can be accessed by going to [https://service.msidlab.com/](https://service.msidlab.com/). You can also use the [MSI Helper Swagger](https://service.msidlab.com/swagger/index.html) to test this service. 
 
 
-## What are the different endpoints the MSI Helper service exposes?
+## What are the different endpoints, the MSI Helper service exposes?
 
 MSI Helper Service exposes two endpoints : 
 
@@ -96,7 +98,7 @@ A sample request to the `EnvironmentVariables`
 
 ```http
 curl -X 'GET' \
-  'https://service.msidlab.com/EnvironmentVariables?resource=webapp' \
+  'https://service.msidlab.com/EnvironmentVariables?resource=WebApp' \
   -H 'accept: text/plain'
 ```
 
@@ -104,15 +106,15 @@ And here is a successful response from the service.
 
 ```http
 {
-  "IDENTITY_HEADER": "69C62B109AAF4EB7B01061197C14F550",
-  "IDENTITY_ENDPOINT": "http://127.0.0.1:41292/msi/token/",
-  "IDENTITY_API_VERSION": "2019-08-01"
+    "IDENTITY_HEADER":"DFD8834E6E754712A405D48C23160297",
+    "IDENTITY_ENDPOINT":"http://127.0.0.1:41872/msi/token/",
+    "IDENTITY_API_VERSION":"2019-08-01"
 }
 ```
 
 > **_NOTE:_**  
 
-- The `EnvironmentVariables` api, accepts an MSI supported Azure resource as a query parameter and returns all the environment variables needed for you to form a http request.  
+- The `EnvironmentVariables` api, accepts a MSI supported Azure resource as a query parameter and returns all the environment variables needed for you to form a http request.  
 - Once you have formed the URI you can use the `MSIToken` endpoint and send the request to the Helper Service, this will inturn call the MSI endpoint and return a MSI token response.  
 - `IDENTITY_API_VERSION` environment variable is not a MSI resource based environment variable. MSAL SDKs hardcode this value or fetch it from the MSI version endpoint. This is returned by the API for ease of use while testing.  
 
@@ -133,9 +135,9 @@ From the earlier example, you saw how to send an environment variable request fo
 
 ```http
 curl -X 'GET' \
-  'https://service.msidlab.com/MSIToken?uri=http%3A%2F%2F127.0.0.1%3A41292%2Fmsi%2Ftoken%2F%3Fresource%3Dhttps%3A%2F%2Fvault.azure.net%26api-version%3D2019-08-01&azureResource=webapp' \
+  'https://service.msidlab.com/MSIToken?uri=http%3A%2F%2F127.0.0.1%3A41872%2Fmsi%2Ftoken%2F%3Fapi-version%3D2019-08-01%26resource%3Dhttps%3A%2F%2Fmanagement.azure.com&azureResource=WebApp' \
   -H 'accept: text/plain' \
-  -H 'X-IDENTITY-HEADER: 69C62B109AAF4EB7B01061197C14F550'
+  -H 'X-IDENTITY-HEADER: DFD8834E6E754712A405D48C23160297'
 ```
 
 And here is a successful response from the service. 
@@ -192,15 +194,18 @@ Build the current project (The MSI Helper Service - MSIHelperService.csproj) and
 
 > **_NOTE:_**  Once you have swapped the slot make sure to point the base url to the production slot again in your code and test it again with the production endpoint fron the MSAL integration testing
 
+> **_NOTE:_**  The service uses [Azure Web App's Environment variables](https://learn.microsoft.com/en-us/azure/app-service/reference-app-settings?tabs=kudu%2Cdotnet) to store Application ID's and Secrets needed to connect to other Azure Resources and the Operations Management suite to execute runbooks. You will see more about runbooks and how they are used under the Virtual Machine and Azure ARC sections 
 
 ## How to build and deploy the Function App 
 
 Function app deployment is easy but can also be risky. There is no failover mechanism here since we do not have a staging slot for the Azure functions. But there shouldn't be a need ever to deploy to the function app or to any other Azure resources (VM / Azure ARC / Service Fabric) after MSAL MSI has gone live. The function app code can be found in the `AzureFunction` folders 
+
 <br>
 <img src="images/function.PNG" alt="function" width="800"/>
 <br>
 
 - The [function app](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/MSAL_MSI/providers/Microsoft.Web/sites/msalmsifunction/appServices) also exposes two protected endpoints. These endpoints are called internally by the MSI Helper service. 
+
 <br>
 <img src="images/func_endpoints.PNG" alt="func_endpoints" width="800"/>
 <br>
@@ -246,19 +251,19 @@ The Azure Virtual Machine runbook simply executes the following lines of code in
 
 ```powershell
         try 
-    		{
-        		#Form the URI 
-        		$uri = $RunbookHeaders.MSI_URI;
-        		$MSIResponse = Invoke-WebRequest -UseBasicParsing -Uri $uri -Method GET -Headers @{Metadata="TRUE"}
-        		#$MSIResponse
-        		$MSIContent = $MSIResponse.Content;
-        		$MSIContent;
-    		}
-    		catch [System.Net.WebException] {
-        		$ErrorMessage = $_.ErrorDetails
-        		$ErrorMessage
+        {
+            #Form the URI 
+            $uri = $RunbookHeaders.MSI_URI;
+            $MSIResponse = Invoke-WebRequest -UseBasicParsing -Uri $uri -Method GET -Headers @{Metadata="TRUE"}
+            #$MSIResponse
+            $MSIContent = $MSIResponse.Content;
+            $MSIContent;
+        }
+        catch [System.Net.WebException] {
+            $ErrorMessage = $_.ErrorDetails
+            $ErrorMessage
 
-    		}
+        }
 ```
 
 And here is the [code](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/tests/devapps/Managed%20Identity%20apps/MSIHelperService/Helper/MSIHelper.cs#L253) in the MSI Helper Service that executes the [Runbook](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/OperationsManagementSuite/providers/Microsoft.Automation/automationAccounts/OMSAdmin/runbooks/GetMSITokenFromVM/overview) code using the Automation Account. 
@@ -279,33 +284,33 @@ The Azure ARC Machine runbook simply executes the following lines of code in a t
 
 ```powershell
         try 
-    		{
-        		Invoke-WebRequest -Method GET -Uri $endpoint -Headers @{Metadata='TRUE'} -UseBasicParsing
-    		}
-    		catch {
+        {
+            Invoke-WebRequest -Method GET -Uri $endpoint -Headers @{Metadata='TRUE'} -UseBasicParsing
+        }
+        catch {
 
-        		$wwwAuthHeader = $_.Exception.Response.Headers["WWW-Authenticate"]
+            $wwwAuthHeader = $_.Exception.Response.Headers["WWW-Authenticate"]
 
-                if ($wwwAuthHeader -match "Basic realm=.+")
-                {
-                    $secretFile = ($wwwAuthHeader -split "Basic realm=")[1]
-                }
+            if ($wwwAuthHeader -match "Basic realm=.+")
+            {
+                $secretFile = ($wwwAuthHeader -split "Basic realm=")[1]
+            }
 
-                $secret = cat -Raw $secretFile
+            $secret = cat -Raw $secretFile
 
-                try
-                {
-                    $response = Invoke-WebRequest -Method GET -Uri $endpoint -Headers @{Metadata='True'; Authorization="Basic $secret"} -UseBasicParsing
-                    
-                    #$MSIResponse
-                    $MSIContent = $response.Content;
-                    $MSIContent;
-                }
-                catch [System.Net.WebException] {
-                    $ErrorMessage = $_.ErrorDetails
-                    $ErrorMessage
-                }
-    		}
+            try
+            {
+                $response = Invoke-WebRequest -Method GET -Uri $endpoint -Headers @{Metadata='True'; Authorization="Basic $secret"} -UseBasicParsing
+
+                #$MSIResponse
+                $MSIContent = $response.Content;
+                $MSIContent;
+            }
+            catch [System.Net.WebException] {
+                $ErrorMessage = $_.ErrorDetails
+                $ErrorMessage
+            }
+        }
 ```
 
 And here is the [code](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/tests/devapps/Managed%20Identity%20apps/MSIHelperService/Helper/MSIHelper.cs#L332) in the MSI Helper Service that executes the [Runbook](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/resourceGroups/OperationsManagementSuite/providers/Microsoft.Automation/automationAccounts/OMSAdmin/runbooks/GetMSITokenFromAzureArc/overview) code using the Automation Account. 
@@ -357,6 +362,8 @@ For, the Function App. Go to Azure Portal and select [Monitor](https://ms.portal
 
 <img src="images/invocation.PNG" alt="invocation" width="800"/>
 <br>
+
+For Azure ARC and Virtual Machine there are no logs in the Application Insights. If there you see any issues during test then please contact the Identity Lab team. Azure Arc and Azure VM scripts are invoked using [Webhooks](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/tests/devapps/Managed%20Identity%20apps/MSIHelperService/Helper/MSIHelper.cs#L37) and authentication to the Webhooks are done using the [Lab Owned OMS Client](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/tests/devapps/Managed%20Identity%20apps/MSIHelperService/Helper/MSIHelper.cs#L39). When you file a service ticket with the lab, adding these additional information will help speed up the troubleshooting process.
 
 ## Need Help? 
 
