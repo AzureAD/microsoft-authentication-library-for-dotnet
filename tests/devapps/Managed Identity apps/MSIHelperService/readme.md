@@ -89,8 +89,8 @@ MSI Helper Service exposes two endpoints :
 
 <img src="images/endpoints.PNG" alt="endpoints" width="400"/>
 
-- GetEnvironmentVariables, and 
-- GetMSIToken
+- EnvironmentVariables, and 
+- MSIToken
 
 A sample request to the `EnvironmentVariables` 
 
