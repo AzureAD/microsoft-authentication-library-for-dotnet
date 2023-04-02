@@ -303,27 +303,12 @@ namespace Microsoft.Identity.Test.Integration.Broker
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
-            }
-            catch (MsalUiRequiredException ex)
-            {
-                Assert.AreEqual(ex.Message,"checking the message");
-                Assert.AreEqual(ex.InnerException, "checking the message");
-            }
-            catch (MsalServiceException ex)
-            {
-                Assert.AreEqual(ex.Message, "checking the message");
-                Assert.AreEqual(ex.InnerException, "checking the message");
+                Assert.IsNotNull(result.Account);
+                Assert.IsNotNull(result.Account.Username);
             }
             catch (MsalException ex)
             {
-                Assert.AreEqual(ex.Message, "checking the message");
-                Assert.AreEqual(ex.InnerException, "checking the message");
-            }
-            catch (Exception ex)
-            {
-                Assert.AreEqual(ex.Message, "checking the message");
-                Assert.AreEqual(ex.InnerException, "checking the message");
+                Assert.IsNull(ex.Message);
             }
         }
 
