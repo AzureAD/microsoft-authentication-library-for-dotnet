@@ -43,11 +43,19 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             using (var store = new X509Store(name, location))
             {
                 store.Open(OpenFlags.ReadOnly);
-                var collection = store.Certificates.Find(X509FindType.FindBySubjectName, certName, validateCerts);
+                X509Certificate2Collection collection = store.Certificates.Find(X509FindType.FindBySubjectName, certName, validateCerts);
 
-                return collection.Count == 0
-                    ? null
-                    : collection[0];
+                X509Certificate2 certToUse = null;
+                // select the "freshest" certificate
+                foreach (X509Certificate2 cert in collection)
+                {
+                    if (certToUse == null || cert.NotBefore > certToUse.NotBefore)
+                    {
+                        certToUse = cert;
+                    }
+                }
+
+                return certToUse;
 
             }
         }
