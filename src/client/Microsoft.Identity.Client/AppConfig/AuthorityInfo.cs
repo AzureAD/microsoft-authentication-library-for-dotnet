@@ -444,7 +444,7 @@ namespace Microsoft.Identity.Client
         private static bool isCiamAuthority(string authority)
         {
             var uri = new Uri(authority);
-            return uri.Host.Contains("ciamlogin.com");
+            return uri.Host.EndsWith("ciamlogin.com");
         }
 
         private static string[] GetPathSegments(string absolutePath)
