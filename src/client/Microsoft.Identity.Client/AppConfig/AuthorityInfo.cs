@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client
         public string UserRealmUriPrefix { get; }
         public bool ValidateAuthority { get; }
 
-        internal bool IsInstanceDiscoverySupported => AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Ciam;
+        internal bool IsInstanceDiscoverySupported => AuthorityType == AuthorityType.Aad;
 
         internal bool IsUserAssertionSupported => AuthorityType != AuthorityType.Adfs && AuthorityType != AuthorityType.B2C;
 
@@ -150,6 +150,7 @@ namespace Microsoft.Identity.Client
         internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)
         {
             string canonicalUri = CanonicalizeAuthorityUri(authorityUri);
+
             ValidateAuthorityUri(canonicalUri);
 
             var authorityType = GetAuthorityType(canonicalUri);
@@ -353,7 +354,7 @@ namespace Microsoft.Identity.Client
             }
 
             string path = authorityUri.AbsolutePath.Substring(1);
-            if (string.IsNullOrWhiteSpace(path))
+            if (string.IsNullOrWhiteSpace(path) && !isCiamAuthority(authority))
             {
                 throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, nameof(authority));
             }
@@ -415,6 +416,11 @@ namespace Microsoft.Identity.Client
 
         private static AuthorityType GetAuthorityType(string authority)
         {
+            if (isCiamAuthority(authority))
+            {
+                return AuthorityType.Ciam;
+            }
+
             string firstPathSegment = GetFirstPathSegment(authority);
 
             if (string.Equals(firstPathSegment, "adfs", StringComparison.OrdinalIgnoreCase))
@@ -430,11 +436,6 @@ namespace Microsoft.Identity.Client
             if (string.Equals(firstPathSegment, B2CAuthority.Prefix, StringComparison.OrdinalIgnoreCase))
             {
                 return AuthorityType.B2C;
-            }
-
-            if (isCiamAuthority(authority))
-            {
-                return AuthorityType.Ciam;
             }
 
             return AuthorityType.Aad;

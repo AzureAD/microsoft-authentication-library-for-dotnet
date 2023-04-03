@@ -11,7 +11,6 @@ namespace Microsoft.Identity.Client.AppConfig
 {
     internal class CiamAuthorityHelper
     {
-        public static readonly string CiamMetadata = "{\"api-version\": \"1.1\",\"metadata\": [{\"preferred_network\": \"login.windows.net\",\"preferred_cache\": \"login.windows.net\",\"aliases\": [\"login.windows.net\",\"login.ciamlogin.com\"]}]}";
         public CiamAuthorityHelper(Uri authority)
         {
             TransformAuthority(authority);

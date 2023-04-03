@@ -68,12 +68,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //    //await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
 
         //    var msalPublicClient = PublicClientApplicationBuilder
-        //        .Create()
-        //        .WithAuthority()
+        //        .Create("")
+        //        .WithAuthority("", false)
+        //        .WithRedirectUri("http://localhost")
         //        .Build();
 
         //    var result = await msalPublicClient
-        //        .AcquireTokenInteractive(s_scopes)
+        //        .AcquireTokenInteractive(new[] { "openid" })
+        //        .WithExtraQueryParameters("")
         //        .ExecuteAsync()
         //        .ConfigureAwait(false);
 

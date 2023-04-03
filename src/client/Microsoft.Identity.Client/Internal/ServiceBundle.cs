@@ -36,12 +36,10 @@ namespace Microsoft.Identity.Client.Internal
 
             HttpTelemetryManager = new HttpTelemetryManager();
 
-            var ciamMetadata = GetCiamMetadata(config.Authority);
-
             InstanceDiscoveryManager = new InstanceDiscoveryManager(
                 HttpManager,
                 shouldClearCaches,
-                ciamMetadata != null ? ciamMetadata : config.CustomInstanceDiscoveryMetadata,
+                config.CustomInstanceDiscoveryMetadata,
                 config.CustomInstanceDiscoveryMetadataUri);
 
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
@@ -53,16 +51,6 @@ namespace Microsoft.Identity.Client.Internal
                 AuthorityManager.ClearValidationCache();
                 PoPProviderFactory.Reset();
             }
-        }
-
-        InstanceDiscoveryResponse GetCiamMetadata(Authority authority)
-        {
-            if (authority.AuthorityInfo.AuthorityType == AuthorityType.Ciam)
-            {
-                return JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(CiamAuthorityHelper.CiamMetadata);
-            }
-
-            return null;
         }
 
         /// <summary>
