@@ -46,6 +46,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 X509Certificate2Collection collection = store.Certificates.Find(X509FindType.FindBySubjectName, certName, validateCerts);
 
                 X509Certificate2 certToUse = null;
+                
                 // select the "freshest" certificate
                 foreach (X509Certificate2 cert in collection)
                 {
