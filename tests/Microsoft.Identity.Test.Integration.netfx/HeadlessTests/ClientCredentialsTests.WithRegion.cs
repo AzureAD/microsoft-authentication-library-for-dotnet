@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
@@ -202,6 +203,101 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var cert = ConfidentialAppSettings.GetSettings(Cloud.Public).GetCertificate();
             
             return jwtToken.Sign(cert, Base64UrlHelpers.Encode(cert.GetCertHash()), true);
+        }
+
+        private class HttpFactoryRegionRetry : IMsalHttpClientFactory
+        {
+            // Note: ensure this factory isn't re-created too many times. Once per region is fine, 
+            // but once per request is problematic, as a new HttpClient will be created each time, 
+            // and this leads to port exhaustion.
+            // E.g. use a static dictionary region -> HttpClient if needed
+            private readonly HttpClient _httpClient;
+
+            public HttpFactoryRegionRetry(string region)
+            {
+                var retryHandler = new RegionHostRetryHandler(new HttpClientHandler(), region);
+                _httpClient = new HttpClient(retryHandler);
+            }
+
+            public HttpClient GetHttpClient()
+            {
+                return _httpClient;
+            }
+        }
+
+        /// <summary>
+        /// Retries from region.microsoft.com to region.r.login.microsoftonline.com
+        /// </summary>
+        private class RegionHostRetryHandler : DelegatingHandler
+        {
+            private readonly string _region;
+
+            public RegionHostRetryHandler(HttpMessageHandler innerHandler, string region)
+                : base(innerHandler)
+            {
+                _region = region;
+            }
+
+            protected override async Task<HttpResponseMessage> SendAsync(
+                HttpRequestMessage request,
+                CancellationToken cancellationToken)
+            {
+                HttpResponseMessage response = null;
+                response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+                // TODO: enhance the error detection with the errors you're getting when the endpoint is blocked
+                if (response.IsSuccessStatusCode)
+                {
+                    return response;
+                }
+
+                // In case of failure, see if this is the regionalized token endpoint request 
+                if (request.RequestUri.Host.StartsWith($"{_region}.login.microsoft.com"))
+                {
+                    // Re-attempt the request by falling back to region.r.login.microsoftonline.com
+                    UriBuilder uriBuilder = new UriBuilder(request.RequestUri);
+                    uriBuilder.Host = $"{_region}.r.login.microsoftonline.com";
+
+                    request.RequestUri = uriBuilder.Uri;
+
+                    response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                }
+
+                return response;
+            }
+        }
+
+        [TestMethod]
+        public async Task HttpAsync()
+        {
+            string region = TestConstants.Region;
+
+            // TODO - do not re-create it on every request!
+            HttpFactoryRegionRetry factory = new HttpFactoryRegionRetry(region);
+
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+
+            var confidentialClientApplication =
+                ConfidentialClientApplicationBuilder.Create(settings.ClientId)
+                .WithAuthority($@"https://{settings.Environment}/{settings.TenantId}")
+                .WithTestLogging()
+                .WithHttpClientFactory(factory)
+                .WithCertificate(settings.GetCertificate())
+                .WithAzureRegion(region)
+                .Build();
+
+
+            var result = await confidentialClientApplication.AcquireTokenForClient(settings.AppScopes)
+                           .WithExtraQueryParameters(_dict)
+                           .ExecuteAsync()
+                           .ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+            var result2 = await confidentialClientApplication.AcquireTokenForClient(settings.AppScopes)
+                           .WithExtraQueryParameters(_dict)
+                           .ExecuteAsync()
+                           .ConfigureAwait(false);
+            Assert.AreEqual(TokenSource.Cache, result2.AuthenticationResultMetadata.TokenSource);
         }
     }
 }
