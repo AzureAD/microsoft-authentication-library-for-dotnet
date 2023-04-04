@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public X509Certificate2 GetCertificate()
             {
-                return GetCertificateLazy(TestConstants.AutomationTestThumbprint).Value;
+                return GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
             }
 
             public string GetSecret()
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public X509Certificate2 GetCertificate()
             {
-                return GetCertificateLazy(TestConstants.AutomationTestThumbprint).Value;
+                return GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
             }
 
             public string GetSecret()
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             public X509Certificate2 GetCertificate()
             {
-                return GetCertificateLazy(TestConstants.AutomationTestThumbprint).Value;
+                return GetCertificateLazy(TestConstants.AutomationTestCertName).Value;
             }
 
             public string GetSecret()
@@ -190,9 +190,9 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             return secret;
         });
 
-        public static Lazy<X509Certificate2> GetCertificateLazy(string thumbprint) => new Lazy<X509Certificate2>(() =>
+        public static Lazy<X509Certificate2> GetCertificateLazy(string certName) => new Lazy<X509Certificate2>(() =>
         {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(thumbprint);
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(certName);
             if (cert == null)
             {
                 throw new InvalidOperationException(
