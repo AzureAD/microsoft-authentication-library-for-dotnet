@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.AppConfig
             if (string.Equals(ciamAuthority.AbsolutePath, "/"))
             {
                 string ciamTenant = host.Substring(0, host.IndexOf(".ciamlogin.com", StringComparison.OrdinalIgnoreCase));
-                TransformedInstance = "https://login.ciamlogin.com/";
+                TransformedInstance = $"https://{ciamTenant}.ciamlogin.com/";
                 TransformedTenant = ciamTenant + ".onmicrosoft.com";
                 TransformedAuthority = new Uri (TransformedInstance + TransformedTenant);
             }
