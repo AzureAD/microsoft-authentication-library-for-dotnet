@@ -54,9 +54,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             // Arrange
             string ciamAuthority = "https://idgciamdemo.ciamlogin.com/";
-            string ciamTransformedInstance = "https://login.ciamlogin.com/";
+            string ciamTransformedInstance = "https://idgciamdemo.ciamlogin.com/";
             string ciamTenant = "idgciamdemo.onmicrosoft.com";
-            string ciamTransformedAuthority = "https://login.ciamlogin.com/" + ciamTenant;
+            string ciamTransformedAuthority = "https://idgciamdemo.ciamlogin.com/" + ciamTenant;
 
             // Act
             CiamAuthorityHelper ciamAuthorityHelper = new CiamAuthorityHelper(new Uri(ciamAuthority));
@@ -89,9 +89,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             // Arrange
             string ciamInstance = "https://idgciamdemo.ciamlogin.com/";
-            string ciamTransformedInstance = "https://login.ciamlogin.com/";
+            string ciamTransformedInstance = "https://idgciamdemo.ciamlogin.com/";
             string ciamTenant = "idgciamdemo.onmicrosoft.com";
-            string ciamTransformedAuthority = "https://login.ciamlogin.com/" + ciamTenant;
+            string ciamTransformedAuthority = "https://idgciamdemo.ciamlogin.com/" + ciamTenant;
 
             // Act
             CiamAuthorityHelper ciamAuthorityHelper = new CiamAuthorityHelper(ciamInstance, null);
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [DataRow("https://msidlabciam1.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d", "https://msidlabciam1.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d/")]
         [DataRow("https://msidlabciam1.ciamlogin.com/msidlabciam1.onmicrosoft.com", "https://msidlabciam1.ciamlogin.com/msidlabciam1.onmicrosoft.com/")]
         [DataRow("https://msidlabciam1.ciamlogin.com/aDomain", "https://msidlabciam1.ciamlogin.com/adomain/")]
-        public void WithAuthorityTransformationTest(string authority, string expectedAuthority)
+        public void CiamWithAuthorityTransformationTest(string authority, string expectedAuthority)
         {
             string effectiveAuthority =
             PublicClientApplicationBuilder.Create(Guid.NewGuid().ToString())
