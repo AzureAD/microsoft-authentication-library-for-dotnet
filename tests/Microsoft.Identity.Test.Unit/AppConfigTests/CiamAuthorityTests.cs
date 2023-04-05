@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
 {
     [TestClass]
-    public class CiamAuthorityHelperTests
+    public class CiamAuthorityTests
     {
         private readonly string _ciamInstance = "https://idgciamdemo.ciamlogin.com";
         private readonly string _ciamTenantGuid = "5e156ef5-9bd2-480c-9de0-d8658f21d3f7";
@@ -103,10 +103,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        [DataRow("https://msidlabciam1.ciamlogin.com/", "https://msidlabciam1.ciamlogin.com/msidlabciam1.onmicrosoft.com/")]
-        [DataRow("https://msidlabciam1.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d", "https://msidlabciam1.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d/")]
-        [DataRow("https://msidlabciam1.ciamlogin.com/msidlabciam1.onmicrosoft.com", "https://msidlabciam1.ciamlogin.com/msidlabciam1.onmicrosoft.com/")]
-        [DataRow("https://msidlabciam1.ciamlogin.com/aDomain", "https://msidlabciam1.ciamlogin.com/adomain/")]
+        [DataRow("https://idgciamdemo.ciamlogin.com/", "https://idgciamdemo.ciamlogin.com/idgciamdemo.onmicrosoft.com/")]
+        [DataRow("https://idgciamdemo.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d", "https://idgciamdemo.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d/")]
+        [DataRow("https://idgciamdemo.ciamlogin.com/idgciamdemo.onmicrosoft.com", "https://idgciamdemo.ciamlogin.com/idgciamdemo.onmicrosoft.com/")]
+        [DataRow("https://idgciamdemo.ciamlogin.com/aDomain", "https://idgciamdemo.ciamlogin.com/adomain/")]
         public void CiamWithAuthorityTransformationTest(string authority, string expectedAuthority)
         {
             string effectiveAuthority =
@@ -117,6 +117,50 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                     .Authority;
 
             Assert.AreEqual(expectedAuthority, effectiveAuthority);
+        }
+
+        [TestMethod]
+        public void CiamWithAuthorityRequestTest()
+        {
+            var app = 
+            PublicClientApplicationBuilder.Create(Guid.NewGuid().ToString())
+                                                    .WithAuthority("https://idgciamdemo.ciamlogin.com/")
+                                                    .WithDefaultRedirectUri()
+                                                    .Build();
+
+            //Ensure that CIAM authorities cannot be set when building a request
+            var exception = Assert.ThrowsExceptionAsync<MsalClientException>(async () => 
+            {
+                await app.AcquireTokenInteractive(new[] { "someScope" })
+                         .WithAuthority("https://idgciamdemo.ciamlogin.com/")
+                         .ExecuteAsync()
+                         .ConfigureAwait(false);
+            }).Result;
+
+            Assert.AreEqual(MsalError.SetCiamAuthorityAtRequestLevelNotSupported, exception.ErrorCode);
+            Assert.AreEqual(MsalErrorMessage.SetCiamAuthorityAtRequestLevelNotSupported, exception.Message);
+
+            exception = Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+            {
+                await app.AcquireTokenInteractive(new[] { "someScope" })
+                         .WithAuthority("https://idgciamdemo.ciamlogin.com/", "idgciamdemo.onmicrosoft.com", false)
+                         .ExecuteAsync()
+                         .ConfigureAwait(false);
+            }).Result;
+
+            Assert.AreEqual(MsalError.SetCiamAuthorityAtRequestLevelNotSupported, exception.ErrorCode);
+            Assert.AreEqual(MsalErrorMessage.SetCiamAuthorityAtRequestLevelNotSupported, exception.Message);
+
+            exception = Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+            {
+                await app.AcquireTokenInteractive(new[] { "someScope" })
+                         .WithAuthority("https://idgciamdemo.ciamlogin.com/", Guid.NewGuid(), false)
+                         .ExecuteAsync()
+                         .ConfigureAwait(false);
+            }).Result;
+
+            Assert.AreEqual(MsalError.SetCiamAuthorityAtRequestLevelNotSupported, exception.ErrorCode);
+            Assert.AreEqual(MsalErrorMessage.SetCiamAuthorityAtRequestLevelNotSupported, exception.Message);
         }
     }
 }
