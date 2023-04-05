@@ -54,6 +54,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
                     break;
             }
 
+            //Acquire tokens
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
                 .WithAuthority(authority, false)
@@ -70,6 +71,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
             Assert.AreEqual(result.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
             Assert.AreEqual($"{labResponse.User.LabName}.ciamlogin.com".ToLower(), result.Account.Environment);
 
+            //Refresh tokens
             var accounts = await msalPublicClient.GetAccountsAsync().ConfigureAwait(false);
 
             result = await msalPublicClient
