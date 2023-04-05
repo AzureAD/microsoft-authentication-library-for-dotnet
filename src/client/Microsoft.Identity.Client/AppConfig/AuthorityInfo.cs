@@ -532,12 +532,8 @@ namespace Microsoft.Identity.Client
                         return new B2CAuthority(nonNullAuthInfo);
 
                     case AuthorityType.Ciam:
+                        return new CiamAuthority(nonNullAuthInfo);
 
-                        bool updateEnvironmentCiam = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null && !PublicClientApplication.IsOperatingSystemAccount(account);
-                        return updateEnvironmentCiam ?
-                            CreateAuthorityWithTenant(CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment).AuthorityInfo, account?.HomeAccountId?.TenantId) :
-                            CreateAuthorityWithTenant(configAuthorityInfo, account?.HomeAccountId?.TenantId);
-                    
                     case AuthorityType.Generic:
                         return new GenericAuthority(nonNullAuthInfo);
 
