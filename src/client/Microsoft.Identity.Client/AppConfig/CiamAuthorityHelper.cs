@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client.AppConfig
 {
     /// <summary>
-    /// Translates CIAM authorities into a usable form. This is needed only until ESTS is updated to support the north start format
-    /// north start format: https://idgciamdemo.ciamlogin.com
+    /// Translates CIAM authorities into a usable form. This is needed only until ESTS is updated to support the north star format
+    /// North star format: https://idgciamdemo.ciamlogin.com
     /// Transformed format: https://idgciamdemo.ciamlogin.com/idgciamdemo.onmicrosoft.com
     /// </summary>
     internal class CiamAuthorityHelper
