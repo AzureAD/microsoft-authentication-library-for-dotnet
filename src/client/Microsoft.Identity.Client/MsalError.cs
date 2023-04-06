@@ -1143,7 +1143,7 @@ namespace Microsoft.Identity.Client
         public const string CombinedUserAppCacheNotSupported = "combined_user_app_cache_not_supported";
 
         /// <summary>
-        /// Setting the CIAM authority (ex. "{tenantName}.ciamlogin.com") at the request level is not supported. CIAM authoritys must be set during application creation.
+        /// Setting the CIAM authority (ex. "{tenantName}.ciamlogin.com") at the request level is not supported. The CIAM authority must be set during application creation.
         /// </summary>
         public const string SetCiamAuthorityAtRequestLevelNotSupported = "set_ciam_authority_at_request_level_not_supported";
     }

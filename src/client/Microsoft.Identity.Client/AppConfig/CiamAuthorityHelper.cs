@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -47,8 +48,8 @@ namespace Microsoft.Identity.Client.AppConfig
             string host = ciamAuthority.Host + ciamAuthority.AbsolutePath;
             if (string.Equals(ciamAuthority.AbsolutePath, "/"))
             {
-                string ciamTenant = host.Substring(0, host.IndexOf(".ciamlogin.com", StringComparison.OrdinalIgnoreCase));
-                TransformedInstance = $"https://{ciamTenant}.ciamlogin.com/";
+                string ciamTenant = host.Substring(0, host.IndexOf(Constants.CiamAuthorityHostSuffix, StringComparison.OrdinalIgnoreCase));
+                TransformedInstance = $"https://{ciamTenant}{Constants.CiamAuthorityHostSuffix}/";
                 TransformedTenant = ciamTenant + ".onmicrosoft.com";
                 TransformedAuthority = new Uri (TransformedInstance + TransformedTenant);
             }

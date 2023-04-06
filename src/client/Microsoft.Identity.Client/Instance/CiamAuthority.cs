@@ -13,8 +13,6 @@ namespace Microsoft.Identity.Client.Instance
     {
         internal CiamAuthority(AuthorityInfo authorityInfo) : 
             base(authorityInfo)
-        {
-
-        }
+        { }
     }
 }

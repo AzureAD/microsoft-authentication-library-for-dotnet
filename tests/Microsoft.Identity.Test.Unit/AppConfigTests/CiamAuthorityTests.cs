@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
@@ -11,7 +12,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
     [TestClass]
     public class CiamAuthorityTests
     {
-        private readonly string _ciamInstance = "https://idgciamdemo.ciamlogin.com";
+        private readonly string _ciamInstance = $"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}";
         private readonly string _ciamTenantGuid = "5e156ef5-9bd2-480c-9de0-d8658f21d3f7";
         private readonly string _ciamTenant = "idgciamdemo.onmicrosoft.com";
 
@@ -53,10 +54,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void CiamAuthorityAdapater_WithCiamLoginTest()
         {
             // Arrange
-            string ciamAuthority = "https://idgciamdemo.ciamlogin.com/";
-            string ciamTransformedInstance = "https://idgciamdemo.ciamlogin.com/";
+            string ciamAuthority = _ciamInstance + "/";
+            string ciamTransformedInstance = _ciamInstance + "/";
             string ciamTenant = "idgciamdemo.onmicrosoft.com";
-            string ciamTransformedAuthority = "https://idgciamdemo.ciamlogin.com/" + ciamTenant;
+            string ciamTransformedAuthority = _ciamInstance + "/" + ciamTenant;
 
             // Act
             CiamAuthorityHelper ciamAuthorityHelper = new CiamAuthorityHelper(new Uri(ciamAuthority));
@@ -71,7 +72,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void CiamAuthorityAdapater_WithInstanceAndTenantTest()
         {
             // Arrange
-            string ciamInstance = "https://idgciamdemo.ciamlogin.com";
+            string ciamInstance = _ciamInstance;
             string ciamTenant = "idgciamdemo.onmicrosoft.com";
             string ciamAuthority = ciamInstance + '/' + ciamTenant;
 
@@ -88,10 +89,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void CiamAuthorityAdapater_WithInstanceAndNullTenantTest()
         {
             // Arrange
-            string ciamInstance = "https://idgciamdemo.ciamlogin.com/";
-            string ciamTransformedInstance = "https://idgciamdemo.ciamlogin.com/";
+            string ciamInstance = _ciamInstance + "/";
+            string ciamTransformedInstance = _ciamInstance + "/";
             string ciamTenant = "idgciamdemo.onmicrosoft.com";
-            string ciamTransformedAuthority = "https://idgciamdemo.ciamlogin.com/" + ciamTenant;
+            string ciamTransformedAuthority = _ciamInstance + "/" + ciamTenant;
 
             // Act
             CiamAuthorityHelper ciamAuthorityHelper = new CiamAuthorityHelper(ciamInstance, null);
@@ -103,10 +104,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        [DataRow("https://idgciamdemo.ciamlogin.com/", "https://idgciamdemo.ciamlogin.com/idgciamdemo.onmicrosoft.com/")]
-        [DataRow("https://idgciamdemo.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d", "https://idgciamdemo.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d/")]
-        [DataRow("https://idgciamdemo.ciamlogin.com/idgciamdemo.onmicrosoft.com", "https://idgciamdemo.ciamlogin.com/idgciamdemo.onmicrosoft.com/")]
-        [DataRow("https://idgciamdemo.ciamlogin.com/aDomain", "https://idgciamdemo.ciamlogin.com/adomain/")]
+        [DataRow($"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}/", $"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}/idgciamdemo.onmicrosoft.com/")]
+        [DataRow($"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}/d57fb3d4-4b5a-4144-9328-9c1f7d58179d", $"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}/d57fb3d4-4b5a-4144-9328-9c1f7d58179d/")]
+        [DataRow($"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}/idgciamdemo.onmicrosoft.com", $"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}/idgciamdemo.onmicrosoft.com/")]
+        [DataRow($"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}/aDomain", $"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}/adomain/")]
         public void CiamWithAuthorityTransformationTest(string authority, string expectedAuthority)
         {
             string effectiveAuthority =
@@ -124,7 +125,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             var app = 
             PublicClientApplicationBuilder.Create(Guid.NewGuid().ToString())
-                                                    .WithAuthority("https://idgciamdemo.ciamlogin.com/")
+                                                    .WithAuthority(_ciamInstance)
                                                     .WithDefaultRedirectUri()
                                                     .Build();
 
@@ -132,7 +133,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var exception = Assert.ThrowsExceptionAsync<MsalClientException>(async () => 
             {
                 await app.AcquireTokenInteractive(new[] { "someScope" })
-                         .WithAuthority("https://idgciamdemo.ciamlogin.com/")
+                         .WithAuthority(_ciamInstance)
                          .ExecuteAsync()
                          .ConfigureAwait(false);
             }).Result;
@@ -143,7 +144,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             exception = Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
             {
                 await app.AcquireTokenInteractive(new[] { "someScope" })
-                         .WithAuthority("https://idgciamdemo.ciamlogin.com/", "idgciamdemo.onmicrosoft.com", false)
+                         .WithAuthority(_ciamInstance, "idgciamdemo.onmicrosoft.com", false)
                          .ExecuteAsync()
                          .ConfigureAwait(false);
             }).Result;
@@ -154,7 +155,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             exception = Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
             {
                 await app.AcquireTokenInteractive(new[] { "someScope" })
-                         .WithAuthority("https://idgciamdemo.ciamlogin.com/", Guid.NewGuid(), false)
+                         .WithAuthority(_ciamInstance, Guid.NewGuid(), false)
                          .ExecuteAsync()
                          .ConfigureAwait(false);
             }).Result;

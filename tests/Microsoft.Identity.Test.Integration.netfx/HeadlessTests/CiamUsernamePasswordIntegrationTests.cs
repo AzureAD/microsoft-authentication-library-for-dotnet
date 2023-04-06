@@ -7,6 +7,7 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
@@ -23,9 +24,9 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
         private const string _ciamRedirectUri = "http://localhost";
 
         [TestMethod]
-        [DataRow("https://{0}.ciamlogin.com/", 0)]
-        [DataRow("https://{0}.ciamlogin.com/{1}.onmicrosoft.com", 1)]
-        [DataRow("https://{0}.ciamlogin.com/{1}", 2)]
+        [DataRow("https://{0}" + Constants.CiamAuthorityHostSuffix + "/", 0)]
+        [DataRow("https://{0}" + Constants.CiamAuthorityHostSuffix + "/{1}.onmicrosoft.com", 1)]
+        [DataRow("https://{0}" + Constants.CiamAuthorityHostSuffix + "/{1}", 2)]
         public async Task ROPC_Ciam_Async(string authorityFormat, int authorityVersion)
         {
             //Get lab details
@@ -69,7 +70,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
 
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(result.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
-            Assert.AreEqual($"{labResponse.User.LabName}.ciamlogin.com".ToLower(), result.Account.Environment);
+            Assert.AreEqual($"{labResponse.User.LabName}{Constants.CiamAuthorityHostSuffix}".ToLower(), result.Account.Environment);
 
             //Refresh tokens
             var accounts = await msalPublicClient.GetAccountsAsync().ConfigureAwait(false);
@@ -81,7 +82,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
 
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(result.AuthenticationResultMetadata.TokenSource, TokenSource.Cache);
-            Assert.AreEqual($"{labResponse.User.LabName}.ciamlogin.com".ToLower(), result.Account.Environment);
+            Assert.AreEqual($"{labResponse.User.LabName}{Constants.CiamAuthorityHostSuffix}".ToLower(), result.Account.Environment);
         }
     }
 }
