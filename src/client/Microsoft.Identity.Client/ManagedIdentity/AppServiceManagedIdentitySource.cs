@@ -31,7 +31,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 : null;
         }
 
-        private AppServiceManagedIdentitySource(RequestContext requestContext, Uri endpoint, string secret) : base(requestContext)
+        private AppServiceManagedIdentitySource(RequestContext requestContext, Uri endpoint, string secret) 
+            : base(requestContext, ManagedIdentitySourceType.AppService)
         {
             _endpoint = endpoint;
             _secret = secret;
@@ -54,8 +55,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
             catch (FormatException ex)
             {
-                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(
-                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", msiEndpoint, "App Service"), ex);
+                throw new MsalManagedIdentityException(MsalError.InvalidManagedIdentityEndpoint, string.Format(
+                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", msiEndpoint, "App Service"), 
+                    ex, ManagedIdentitySourceType.AppService);
             }
 
             logger.Info($"[Managed Identity] Environment variables validation passed for app service managed identity. Endpoint URI: {endpointUri}. Creating App Service managed identity.");

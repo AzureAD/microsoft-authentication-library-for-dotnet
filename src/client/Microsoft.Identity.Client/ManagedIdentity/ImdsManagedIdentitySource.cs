@@ -32,7 +32,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         private readonly Uri _imdsEndpoint;
 
-        internal ImdsManagedIdentitySource(RequestContext requestContext) : base(requestContext)
+        internal ImdsManagedIdentitySource(RequestContext requestContext) : 
+            base(requestContext, ManagedIdentitySourceType.IMDS)
         {
             if (!string.IsNullOrEmpty(EnvironmentVariables.PodIdentityEndpoint))
 			{
@@ -98,7 +99,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 message = message + Environment.NewLine + errorContentMessage;
 
                 _requestContext.Logger.Error($"Error message: {message} Http status code: {response.StatusCode}");
-                throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message);
+                throw new MsalManagedIdentityException(MsalError.ManagedIdentityRequestFailed, message, 
+                    ManagedIdentitySourceType.IMDS);
             }
 
             // Default behavior to handle successful scenario and general errors.

@@ -14,6 +14,7 @@ using Castle.Core.Internal;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Json;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
@@ -136,7 +137,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity);
 
                 //Act
-                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
+                MsalManagedIdentityException ex = await AssertException.TaskThrowsAsync<MsalManagedIdentityException>(async () =>
                 {
                     await mia
                     .AcquireTokenForManagedIdentity(s_msi_scopes)
@@ -145,6 +146,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //Assert
                 Assert.IsTrue(ex.Message.Contains(UserAssignedIdDoesNotExist));
+                Assert.AreEqual(ManagedIdentitySourceType.AppService, ex.ManagedIdentitySource);
             }
         }
 
@@ -171,7 +173,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity);
 
                 //Act
-                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
+                MsalManagedIdentityException ex = await AssertException.TaskThrowsAsync<MsalManagedIdentityException>(async () =>
                 {
                     await mia
                     .AcquireTokenForManagedIdentity(s_msi_scopes)
@@ -180,6 +182,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //Assert
                 Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
+                Assert.AreEqual(ManagedIdentitySourceType.AppService, ex.ManagedIdentitySource);
             }
         }
 
@@ -207,7 +210,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity);
 
                 //Act
-                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
+                MsalManagedIdentityException ex = await AssertException.TaskThrowsAsync<MsalManagedIdentityException>(async () =>
                 {
                     await mia
                     .AcquireTokenForManagedIdentity(s_wrong_msi_scopes)
@@ -216,6 +219,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //Assert
                 Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
+                Assert.AreEqual(ManagedIdentitySourceType.AppService, ex.ManagedIdentitySource);
             }
         }
 

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
@@ -14,15 +15,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             None,
             ClientId,
             ResourceId
-        }
-
-        public enum ManagedIdentitySourceType
-        {
-            IMDS,
-            AppService,
-            AzureArc,
-            CloudShell,
-            ServiceFabric
         }
 
         //MSI Azure resources

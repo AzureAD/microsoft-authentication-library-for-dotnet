@@ -23,10 +23,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     {
         protected readonly RequestContext _requestContext;
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
+        internal readonly ManagedIdentitySourceType _sourceType;
 
-        protected ManagedIdentitySource(RequestContext requestContext)
+        protected ManagedIdentitySource(RequestContext requestContext, ManagedIdentitySourceType sourceType)
         {
             _requestContext = requestContext;
+            _sourceType = sourceType;
         }
 
         public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(AcquireTokenForManagedIdentityParameters parameters, CancellationToken cancellationToken)
@@ -84,7 +86,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 message = MsalErrorMessage.ManagedIdentityUnexpectedResponse;
             }
 
-            throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message, exception);
+            throw new MsalManagedIdentityException(MsalError.ManagedIdentityRequestFailed, message, exception, _sourceType);
         }
 
         protected abstract ManagedIdentityRequest CreateRequest(string resource);
@@ -96,7 +98,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             if (managedIdentityResponse == null || managedIdentityResponse.AccessToken.IsNullOrEmpty() || managedIdentityResponse.ExpiresOn.IsNullOrEmpty())
             {
                 _requestContext.Logger.Error("[Managed Identity] Response is either null or insufficient for authentication.");
-                throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, MsalErrorMessage.ManagedIdentityInvalidResponse);
+                throw new MsalManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed, 
+                    MsalErrorMessage.ManagedIdentityInvalidResponse, 
+                    _sourceType);
             }
 
             return managedIdentityResponse;
