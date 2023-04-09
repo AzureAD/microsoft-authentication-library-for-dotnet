@@ -26,6 +26,8 @@ jobs: #Build and stage projects
   steps:
   # Bootstrap the build
   - template: template-build-and-prep-automation.yaml
+    parameters:
+      runtimeCheck: '$(WAMRuntimeFileCheck)'
 
 # Disabled because mono is unable to restore/build .NET 6 target in MSAL project
 # BUILD IOS APPCENTER APP PHASE
