@@ -8,6 +8,8 @@ variables:
   BuildConfiguration: 'release'
   #intended for running all ui automation tests as one to reduce time
   ConsolidateAppCenterTests: true
+  #enables WAM Runtime File checker in Release builds only
+  WAMRuntimeFileCheck: 'Yes'
 
 #BUILD PHASE 
 stages:
