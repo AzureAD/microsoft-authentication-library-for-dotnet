@@ -96,7 +96,7 @@ steps:
     Contents: '**/bin/**/*'
     TargetFolder: '$(build.artifactstagingdirectory)/DeviceAuth'
 
-- ${{ if eq(parameters.runtimeCheck, 'Yes') }}:
+- ${{ if eq(parameters.WAMRuntimeFileCheck, 'Yes') }}:
     - task: CopyFiles@2
       displayName: "Copy WAM DevApp Dlls"
       inputs:
