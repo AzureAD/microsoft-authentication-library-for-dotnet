@@ -96,6 +96,12 @@ steps:
     Contents: '**/bin/**/*'
     TargetFolder: '$(build.artifactstagingdirectory)/DeviceAuth'
 
+- task: PublishPipelineArtifact@1
+  displayName: "Publish Artifact: drop"
+  inputs:
+    targetPath: $(Build.artifactstagingdirectory)
+    artifactName: drop
+        
 - ${{ if eq(parameters.WAMRuntimeFileCheck, 'Yes') }}:
     - task: CopyFiles@2
       displayName: "Copy WAM DevApp Dlls"
@@ -103,12 +109,6 @@ steps:
         SourceFolder: tests/devapps/wam
         Contents: "**/bin/**/**"
         TargetFolder: "$(Build.SourcesDirectory)/WAM"
-
-    - task: PublishPipelineArtifact@1
-      displayName: "Publish Artifact: drop"
-      inputs:
-        targetPath: $(Build.artifactstagingdirectory)
-        artifactName: drop
 
     - task: PowerShell@2
       displayName: "Verify Existence of Runtime Dlls"
