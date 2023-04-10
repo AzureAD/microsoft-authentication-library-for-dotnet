@@ -1,11 +1,7 @@
 parameters:
-- name: DataFileDirectory
-  type: string
-  default: 'Release'
-- name: WAMRuntimeFileCheck
-  type: string
-  default: ' '
-  
+  DataFileDirectory: 'Release'
+  WAMRuntimeFileCheck: 'No'
+
 jobs: #Build and stage projects
 
 - job: 'PreBuildCheck'
@@ -32,7 +28,7 @@ jobs: #Build and stage projects
   # Bootstrap the build
   - template: template-build-and-prep-automation.yaml
     parameters:
-      WAMRuntimeFileCheck: '$(WAMRuntimeFileCheck)'
+        WAMRuntimeFileCheck: '$(WAMRuntimeFileCheck)'
 
 # Disabled because mono is unable to restore/build .NET 6 target in MSAL project
 # BUILD IOS APPCENTER APP PHASE
