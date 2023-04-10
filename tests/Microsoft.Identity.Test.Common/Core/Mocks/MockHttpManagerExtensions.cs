@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     {
                         Content = new StringContent("Foo")
                     },
-                    ExceptionToThrow = new InvalidOperationException("Error")
+                    ExceptionToThrow = exceptionToThrow
                 });
         }
 

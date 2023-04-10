@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Core;
 using System.Net;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using System.Net.Sockets;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -52,6 +53,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             await _requestContext.ServiceBundle.HttpManager.SendPostForceResponseAsync(request.ComputeUri(), request.Headers, request.BodyParameters, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
 
                 return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new MsalManagedIdentityException(MsalError.ManagedIdentityUnreachableNetwork, ex.Message, ex.InnerException, _sourceType);
             }
             catch (TaskCanceledException)
             {

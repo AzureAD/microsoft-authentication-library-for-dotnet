@@ -4,6 +4,8 @@
 using System;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -347,6 +349,37 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(managedIdentitySource, ex.ManagedIdentitySource);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidResponse, ex.Message);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint)]
+        [DataRow(ManagedIdentitySourceType.IMDS, ImdsEndpoint)]
+        [DataRow(ManagedIdentitySourceType.AzureArc, AzureArcEndpoint)]
+        [DataRow(ManagedIdentitySourceType.CloudShell, CloudShellEndpoint)]
+        [DataRow(ManagedIdentitySourceType.ServiceFabric, ServiceFabricEndpoint)]
+        public async Task ManagedIdentityUnreachableNetworkAsync(ManagedIdentitySourceType managedIdentitySource, string endpoint)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
+
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager).Build();
+
+                httpManager.AddFailingRequest(new HttpRequestException("A socket operation was attempted to an unreachable network.", 
+                    new SocketException(10051)));
+
+                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(managedIdentitySource, ex.ManagedIdentitySource);
+                Assert.AreEqual(MsalError.ManagedIdentityUnreachableNetwork, ex.ErrorCode);
+                Assert.AreEqual("A socket operation was attempted to an unreachable network.", ex.Message);
             }
         }
 

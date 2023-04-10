@@ -1113,6 +1113,11 @@ namespace Microsoft.Identity.Client
         public const string ManagedIdentityRequestFailed = "managed_identity_request_failed";
 
         /// <summary>
+        /// Managed Identity endpoint is not reachable.
+        /// </summary>
+        public const string ManagedIdentityUnreachableNetwork = "managed_identity_unreachable_network";
+
+        /// <summary>
         /// Unknown error response received.
         /// </summary>
         public const string UnknownManagedIdentityError = "unknown_managed_identity_error";
