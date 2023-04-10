@@ -4,6 +4,7 @@ parameters:
   default: 'Release'
 - name: WAMRuntimeFileCheck
   type: string
+  default: ' '
   
 jobs: #Build and stage projects
 
