@@ -257,13 +257,76 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Build();
 
             // Act
-            // Act
             var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
                  () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
                         .ExecuteAsync())
                         .ConfigureAwait(false);
 
             Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+        }
+
+        [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
+        {
+            //Arrange
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            
+            string popUser = "popUser@msidlab4.onmicrosoft.com";
+
+            string[] scopes = { "https://msidlab4.sharepoint.com/user.read" };
+
+            IntPtr intPtr = GetForegroundWindow();
+
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithParentActivityOrWindow(windowHandleProvider)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .Build();
+
+            // Acquire token using username password with POP on a valid resource
+            // CA policy enforces token issuance to popUser only for SPO
+            // https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/concept-token-protection
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, popUser, labResponse.User.GetOrFetchPassword())
+                .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            //Act
+            Assert.AreEqual(popUser, result.Account.Username);
+        }
+
+        [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        [ExpectedException(typeof(MsalUiRequiredException))]
+        public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
+        {
+            //Arrange
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+
+            string popUser = "popUser@msidlab4.onmicrosoft.com";
+
+            string[] scopes = { "user.read" };
+
+            IntPtr intPtr = GetForegroundWindow();
+
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithParentActivityOrWindow(windowHandleProvider)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .Build();
+
+            // Acquire token using username password with POP on a resource not in the CA policy
+            // CA policy enforces token issuance to popUser only for SPO this call will fail with UI Required Exception
+            // https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/concept-token-protection
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, popUser, labResponse.User.GetOrFetchPassword())
+                .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
+                .ExecuteAsync()
+                .ConfigureAwait(false);
         }
     }
 }
