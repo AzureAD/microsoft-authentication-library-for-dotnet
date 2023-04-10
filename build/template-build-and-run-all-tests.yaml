@@ -1,6 +1,6 @@
 parameters:
   DataFileDirectory: 'Release'
-  WAMRuntimeFileCheck: 'No'
+  WAMRuntimeFileCheck: 'Yes'
 
 jobs: #Build and stage projects
 
