@@ -1,3 +1,7 @@
+parameters:
+- name: WAMRuntimeFileCheck
+  type: string
+  
 steps:
 # Install NuGet
 - task: NuGetToolInstaller@0
