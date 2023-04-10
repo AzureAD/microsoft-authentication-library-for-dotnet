@@ -280,12 +280,22 @@ namespace Microsoft.Identity.Client.OAuth2
                 ExpiresIn = tokenProviderResponse.ExpiresInSeconds,
                 ClientInfo = null,
                 TokenSource = TokenSource.IdentityProvider,
-                TenantId = null //Leaving as null so MSAL can use the original request Tid. This is ok for confidential client scenarios
+                TenantId = null, //Leaving as null so MSAL can use the original request Tid. This is ok for confidential client scenarios
+                RefreshIn  = GetOrInferRefreshIn(tokenProviderResponse)
             };
 
-            response.RefreshIn = tokenProviderResponse.RefreshInSeconds;
-
             return response;
+        }
+
+        private static long? GetOrInferRefreshIn(AppTokenProviderResult tokenProviderResponse)
+        {
+            if (!tokenProviderResponse.RefreshInSeconds.HasValue && 
+                tokenProviderResponse.ExpiresInSeconds > 2 * 3600)
+            {
+                return tokenProviderResponse.ExpiresInSeconds/ 2;
+            }
+
+            return null;
         }
 
         private static void ValidateTokenProviderResult(AppTokenProviderResult TokenProviderResult)
