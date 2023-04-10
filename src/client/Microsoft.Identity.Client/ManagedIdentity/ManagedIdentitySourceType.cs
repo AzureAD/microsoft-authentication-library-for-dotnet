@@ -15,6 +15,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     public enum ManagedIdentitySourceType
     {
         /// <summary>
+        /// Default.
+        /// </summary>
+        None,
+
+        /// <summary>
         /// The source to acquire token for managed identity is IMDS.
         /// </summary>
         IMDS,

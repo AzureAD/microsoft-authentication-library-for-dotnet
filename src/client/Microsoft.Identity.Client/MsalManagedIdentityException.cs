@@ -8,7 +8,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// This exception class is for exceptions generated from Managed Identity sources.
-    /// For more details, see https://aka.ms/msal-net-exceptions
+    /// For more details, see https://aka.ms/msal-net-managed-identity
     /// </summary>
     public class MsalManagedIdentityException : MsalServiceException
     {
@@ -47,6 +47,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Specifies the managed identity source from which the exception initiates.
         /// </summary>
-        public ManagedIdentitySourceType ManagedIdentitySource { get; private set; }
+        public ManagedIdentitySourceType ManagedIdentitySource { get; }
     }
 }
