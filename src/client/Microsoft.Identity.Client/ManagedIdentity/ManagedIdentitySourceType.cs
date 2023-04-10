@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
     /// <summary>
-    /// Managed identity sources supported by MSAL.
+    /// Managed identity sources supported. The library will handle these internally. 
     /// </summary>
     public enum ManagedIdentitySourceType
     {
