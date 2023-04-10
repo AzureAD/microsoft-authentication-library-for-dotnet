@@ -1,6 +1,10 @@
 parameters:
-  DataFileDirectory: 'Release'
-
+- name: DataFileDirectory
+  type: string
+  default: 'Release'
+- name: WAMRuntimeFileCheck
+  type: string
+  
 jobs: #Build and stage projects
 
 - job: 'PreBuildCheck'
