@@ -1,6 +1,7 @@
 parameters:
 - name: WAMRuntimeFileCheck
   type: string
+  default: ' '
   
 steps:
 # Install NuGet
