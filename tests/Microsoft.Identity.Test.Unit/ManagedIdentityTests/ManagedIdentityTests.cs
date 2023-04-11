@@ -492,11 +492,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 switch (hoursToAdd)
                 {
                     case 0:
-                        Assert.IsFalse(result.AuthenticationResultMetadata.RefreshOn.HasValue);
-                        break;
                     case 1:
-                        Assert.IsFalse(result.AuthenticationResultMetadata.RefreshOn.HasValue);
-                        break;
                     case 2:
                         Assert.IsFalse(result.AuthenticationResultMetadata.RefreshOn.HasValue);
                         break;
