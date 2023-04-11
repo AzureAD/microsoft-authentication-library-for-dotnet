@@ -55,10 +55,5 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         [JsonProperty("client_id")]
         public string ClientId { get; set; }
 
-        /// <summary>
-        /// When the token should be refreshed.
-        /// </summary>
-        /// <remarks>If not set, MSAL will set it 50% of the expiry time if that time is >2h.</remarks>
-        public string RefreshIn { get; set; }
     }
 }
