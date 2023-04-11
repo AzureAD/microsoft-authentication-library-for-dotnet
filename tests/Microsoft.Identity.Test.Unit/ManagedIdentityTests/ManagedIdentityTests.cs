@@ -466,21 +466,22 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddManagedIdentityMockHandler(
                     AppServiceEndpoint,
                     Resource,
-                    MockHelpers.GetMsiSuccessfulWithExpiresOnResponse(hoursToAdd),
+                    MockHelpers.GetMsiSuccessfulResponse(hoursToAdd),
                     ManagedIdentitySourceType.AppService);
 
                 AcquireTokenForManagedIdentityParameterBuilder builder = mi.AcquireTokenForManagedIdentity(Resource);
 
-                switch (hoursToAdd)
+                if (hoursToAdd == 0)
                 {
-                    case 0:
-                        MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
-                            () => builder.ExecuteAsync()).ConfigureAwait(false);
-                        Assert.AreEqual(ex.ErrorCode, "invalid_token_provider_response_value");
-                        return;
-                    default:
-                        result = await builder.ExecuteAsync().ConfigureAwait(false);
-                        break;
+                    MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                        () => builder.ExecuteAsync()).ConfigureAwait(false);
+
+                    Assert.AreEqual(ex.ErrorCode, "invalid_token_provider_response_value");
+                    return;
+                }
+                else
+                {
+                    result = await builder.ExecuteAsync().ConfigureAwait(false);
                 }
 
                 Assert.IsNotNull(result);

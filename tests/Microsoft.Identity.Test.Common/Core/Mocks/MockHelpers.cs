@@ -99,9 +99,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ",\"id_token_expires_in\":\"3600\"}";
         }
 
-        public static string GetMsiSuccessfulResponse()
+        public static string GetMsiSuccessfulResponse(int hoursToAdd = 1)
         {
-            string expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(1));
+            string expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(hoursToAdd));
             return
           "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"expires_on\":\"" + expiresOn + "\",\"resource\":\"https://management.azure.com/\",\"token_type\":" +
           "\"Bearer\",\"client_id\":\"client_id\"}";
@@ -114,14 +114,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
           "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"client_id\":\"client-id\"," +
           "\"expires_in\":\"12345\",\"expires_on\":\"" + expiresOn + "\",\"resource\":\"https://management.azure.com/\"," +
           "\"ext_expires_in\":\"12345\",\"token_type\":\"Bearer\"}";
-        }
-
-        public static string GetMsiSuccessfulWithExpiresOnResponse(int hoursToAdd)
-        {
-            string expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(hoursToAdd));
-            return
-          "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"expires_on\":\"" + expiresOn + "\",\"resource\":\"https://management.azure.com/\",\"token_type\":" +
-          "\"Bearer\",\"client_id\":\"client_id\"}";
         }
 
         public static string GetMsiErrorResponse()
