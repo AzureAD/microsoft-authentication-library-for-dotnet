@@ -443,5 +443,68 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 appTokenCacheRecoder.AssertAccessCounts(1, 1);
             }
         }
+
+        [DataTestMethod]
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        [DataRow(3)]
+        public async Task ManagedIdentityExpiresOnTestAsync(int hoursToAdd)
+        {
+            AuthenticationResult result;
+
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySourceType.AppService, AppServiceEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager)
+                    .Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulWithExpiresOnResponse(hoursToAdd),
+                    ManagedIdentitySourceType.AppService);
+
+                AcquireTokenForManagedIdentityParameterBuilder builder = mi.AcquireTokenForManagedIdentity(Resource);
+
+                switch (hoursToAdd)
+                {
+                    case 0:
+                        MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                            () => builder.ExecuteAsync()).ConfigureAwait(false);
+                        Assert.AreEqual(ex.ErrorCode, "invalid_token_provider_response_value");
+                        return;
+                    default:
+                        result = await builder.ExecuteAsync().ConfigureAwait(false);
+                        break;
+                }
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                Assert.AreEqual(ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity, builder.CommonParameters.ApiId);
+
+                switch (hoursToAdd)
+                {
+                    case 0:
+                        Assert.IsFalse(result.AuthenticationResultMetadata.RefreshOn.HasValue);
+                        break;
+                    case 1:
+                        Assert.IsFalse(result.AuthenticationResultMetadata.RefreshOn.HasValue);
+                        break;
+                    case 2:
+                        Assert.IsFalse(result.AuthenticationResultMetadata.RefreshOn.HasValue);
+                        break;
+                    case 3:
+                        Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn.HasValue);
+                        break;
+                }
+            }
+        }
     }
 }

@@ -244,13 +244,26 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             ValidateManagedIdentityResult(managedIdentityResponse);
 
+            long expiresOn = DateTimeHelpers.GetDurationFromNowInSeconds(managedIdentityResponse.ExpiresOn);
+
             return new MsalTokenResponse
             {
                 AccessToken = managedIdentityResponse.AccessToken,
-                ExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(managedIdentityResponse.ExpiresOn),
+                ExpiresIn = expiresOn,
                 TokenType = managedIdentityResponse.TokenType,
-                TokenSource = TokenSource.IdentityProvider
+                TokenSource = TokenSource.IdentityProvider,
+                RefreshIn = InferManagedIdentityRefreshInValue(expiresOn)
             };
+        }
+
+        private static long? InferManagedIdentityRefreshInValue(long expiresOn)
+        {
+            if (expiresOn > 2 * 3600)
+            {
+                return expiresOn / 2;
+            }
+
+            return null;
         }
 
         private static void ValidateManagedIdentityResult(ManagedIdentityResponse response)

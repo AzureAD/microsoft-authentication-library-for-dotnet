@@ -116,6 +116,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
           "\"ext_expires_in\":\"12345\",\"token_type\":\"Bearer\"}";
         }
 
+        public static string GetMsiSuccessfulWithExpiresOnResponse(int hoursToAdd)
+        {
+            string expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(hoursToAdd));
+            return
+          "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"expires_on\":\"" + expiresOn + "\",\"resource\":\"https://management.azure.com/\",\"token_type\":" +
+          "\"Bearer\",\"client_id\":\"client_id\"}";
+        }
+
         public static string GetMsiErrorResponse()
         {
             return "{\"statusCode\":\"500\",\"message\":\"An unexpected error occured while fetching the AAD Token.\",\"correlationId\":\"7d0c9763-ff1d-4842-a3f3-6d49e64f4513\"}";
