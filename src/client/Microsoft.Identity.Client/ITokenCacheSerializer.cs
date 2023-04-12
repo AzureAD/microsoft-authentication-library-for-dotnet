@@ -110,4 +110,23 @@ namespace Microsoft.Identity.Client
         [EditorBrowsable(EditorBrowsableState.Never)]
         void DeserializeMsalV2(byte[] msalV2State);
     }
+
+    /// <summary>
+    /// Similar to <see cref="ITokenCacheSerializer"/> except accepts a cache partition to serialize into.
+    /// </summary>
+    public interface IPartitionedTokenCacheSerializer
+    {
+        /// <summary>
+        /// Similar to <see cref="ITokenCacheSerializer.SerializeMsalV3"/> except serializes only the specified partition.
+        /// </summary>
+        /// <param name="cacheKey"></param>
+        byte[] SerializeMsal(string cacheKey);
+
+        /// <summary>
+        /// Similar to <see cref="ITokenCacheSerializer.DeserializeMsalV3(byte[], bool)"/> except doesn't clear the existing cache data.
+        /// </summary>
+        /// <param name="msalState"></param>
+
+        void DeserializeMsal(byte[] msalState);
+    }
 }

@@ -24,23 +24,28 @@ namespace Microsoft.Identity.Client.Cache
 
         public byte[] Serialize(IDictionary<string, JToken> unknownNodes)
         {
+            return Serialize(null, unknownNodes);
+        }
+
+        public byte[] Serialize(string cacheKey, IDictionary<string, JToken> unknownNodes)
+        {
             var cache = new CacheSerializationContract(unknownNodes);
-            foreach (var token in _accessor.GetAllAccessTokens())
+            foreach (var token in _accessor.GetAllAccessTokens(cacheKey))
             {
                 cache.AccessTokens[token.CacheKey] = token;
             }
 
-            foreach (var token in _accessor.GetAllRefreshTokens())
+            foreach (var token in _accessor.GetAllRefreshTokens(cacheKey))
             {
                 cache.RefreshTokens[token.CacheKey] = token;
             }
 
-            foreach (var token in _accessor.GetAllIdTokens())
+            foreach (var token in _accessor.GetAllIdTokens(cacheKey))
             {
                 cache.IdTokens[token.CacheKey] = token;
             }
 
-            foreach (var accountItem in _accessor.GetAllAccounts())
+            foreach (var accountItem in _accessor.GetAllAccounts(cacheKey))
             {
                 cache.Accounts[accountItem.CacheKey] = accountItem;
             }

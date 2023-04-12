@@ -53,5 +53,19 @@ namespace Microsoft.Identity.Client
             }
             _unknownNodes = new TokenCacheJsonSerializer(Accessor).Deserialize(msalV3State, shouldClearExistingCache);
         }
+
+        byte[] IPartitionedTokenCacheSerializer.SerializeMsal(string cacheKey)
+        {
+            return new TokenCacheJsonSerializer(Accessor).Serialize(cacheKey, _unknownNodes);
+        }
+
+        void IPartitionedTokenCacheSerializer.DeserializeMsal(byte[] msalState)
+        {
+            if (msalState == null || msalState.Length == 0)
+            {
+                return;
+            }
+            _unknownNodes = new TokenCacheJsonSerializer(Accessor).Deserialize(msalState, false);
+        }
     }
 }

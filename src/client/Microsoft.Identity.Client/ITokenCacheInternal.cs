@@ -12,7 +12,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
-    internal interface ITokenCacheInternal : ITokenCache, ITokenCacheSerializer
+    internal interface ITokenCacheInternal : ITokenCache, ITokenCacheSerializer, IPartitionedTokenCacheSerializer
     {
         OptionalSemaphoreSlim Semaphore { get; }
         ILegacyCachePersistence LegacyPersistence { get; }
