@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -27,12 +28,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             string ciamAuthority = _ciamInstance + '/' + _ciamTenant;
 
             // Act
-            CiamAuthorityHelper ciamAuthorityHelper = new CiamAuthorityHelper(new Uri(ciamAuthority));
+            var transformedAuthority = CiamAuthority.TransformAuthority(new Uri(ciamAuthority));
 
             // Assert
-            Assert.AreEqual(ciamAuthority, ciamAuthorityHelper.TransformedAuthority.AbsoluteUri);
-            Assert.AreEqual(_ciamInstance, ciamAuthorityHelper.TransformedInstance);
-            Assert.AreEqual(_ciamTenant, ciamAuthorityHelper.TransformedTenant);
+            Assert.AreEqual(ciamAuthority, transformedAuthority.AbsoluteUri);
         }
 
         [TestMethod]
@@ -42,12 +41,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             string ciamAuthority = _ciamInstance + '/' + _ciamTenantGuid;
 
             // Act
-            CiamAuthorityHelper ciamAuthorityHelper = new CiamAuthorityHelper(new Uri(ciamAuthority));
+            var transformedAuthority = CiamAuthority.TransformAuthority(new Uri(ciamAuthority));
 
             // Assert
-            Assert.AreEqual(ciamAuthority, ciamAuthorityHelper.TransformedAuthority.AbsoluteUri);
-            Assert.AreEqual(_ciamInstance, ciamAuthorityHelper.TransformedInstance);
-            Assert.AreEqual(_ciamTenantGuid, ciamAuthorityHelper.TransformedTenant);
+            Assert.AreEqual(ciamAuthority, transformedAuthority.AbsoluteUri);
         }
 
         [TestMethod]
@@ -60,12 +57,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             string ciamTransformedAuthority = _ciamInstance + "/" + ciamTenant;
 
             // Act
-            CiamAuthorityHelper ciamAuthorityHelper = new CiamAuthorityHelper(new Uri(ciamAuthority));
+            var transformedAuthority = CiamAuthority.TransformAuthority(new Uri(ciamAuthority));
 
             // Assert
-            Assert.AreEqual(ciamTransformedAuthority, ciamAuthorityHelper.TransformedAuthority.AbsoluteUri);
-            Assert.AreEqual(ciamTransformedInstance, ciamAuthorityHelper.TransformedInstance);
-            Assert.AreEqual(ciamTenant, ciamAuthorityHelper.TransformedTenant);
+            Assert.AreEqual(ciamTransformedAuthority, transformedAuthority.AbsoluteUri);
         }
 
         [TestMethod]
@@ -77,12 +72,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             string ciamAuthority = ciamInstance + '/' + ciamTenant;
 
             // Act
-            CiamAuthorityHelper ciamAuthorityHelper = new CiamAuthorityHelper(ciamInstance, ciamTenant);
+            var transformedAuthority = CiamAuthority.TransformAuthority(new Uri(ciamInstance + ciamTenant));
 
             // Assert
-            Assert.AreEqual(ciamAuthority, ciamAuthorityHelper.TransformedAuthority.AbsoluteUri);
-            Assert.AreEqual(ciamInstance, ciamAuthorityHelper.TransformedInstance);
-            Assert.AreEqual(ciamTenant, ciamAuthorityHelper.TransformedTenant);
+            Assert.AreEqual(ciamAuthority, transformedAuthority.AbsoluteUri);
         }
 
         [TestMethod]
@@ -90,24 +83,21 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             // Arrange
             string ciamInstance = _ciamInstance + "/";
-            string ciamTransformedInstance = _ciamInstance + "/";
             string ciamTenant = "idgciamdemo.onmicrosoft.com";
             string ciamTransformedAuthority = _ciamInstance + "/" + ciamTenant;
 
             // Act
-            CiamAuthorityHelper ciamAuthorityHelper = new CiamAuthorityHelper(ciamInstance, null);
+            var transformedAuthority = CiamAuthority.TransformAuthority(new Uri(ciamInstance + ciamTenant));
 
             // Assert
-            Assert.AreEqual(ciamTransformedAuthority, ciamAuthorityHelper.TransformedAuthority.AbsoluteUri);
-            Assert.AreEqual(ciamTransformedInstance, ciamAuthorityHelper.TransformedInstance);
-            Assert.AreEqual(ciamTenant, ciamAuthorityHelper.TransformedTenant);
+            Assert.AreEqual(ciamTransformedAuthority, transformedAuthority.AbsoluteUri);
         }
 
         [TestMethod]
-        [DataRow($"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}/", $"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}/idgciamdemo.onmicrosoft.com/")]
-        [DataRow($"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}/d57fb3d4-4b5a-4144-9328-9c1f7d58179d", $"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}/d57fb3d4-4b5a-4144-9328-9c1f7d58179d/")]
-        [DataRow($"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}/idgciamdemo.onmicrosoft.com", $"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}/idgciamdemo.onmicrosoft.com/")]
-        [DataRow($"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}/aDomain", $"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}/adomain/")]
+        [DataRow("https://idgciamdemo.ciamlogin.com/", "https://idgciamdemo.ciamlogin.com/idgciamdemo.onmicrosoft.com/")]
+        [DataRow("https://idgciamdemo.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d", "https://idgciamdemo.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d/")]
+        [DataRow("https://idgciamdemo.ciamlogin.com/idgciamdemo.onmicrosoft.com", "https://idgciamdemo.ciamlogin.com/idgciamdemo.onmicrosoft.com/")]
+        [DataRow("https://idgciamdemo.ciamlogin.com/aDomain", "https://idgciamdemo.ciamlogin.com/adomain/")]
         public void CiamWithAuthorityTransformationTest(string authority, string expectedAuthority)
         {
             string effectiveAuthority =
