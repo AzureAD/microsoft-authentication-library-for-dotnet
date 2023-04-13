@@ -335,7 +335,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string expectedUrl,
             string resource,
             string response,
-            ManagedIdentitySourceType managedIdentitySourceType,
+            ManagedIdentitySource managedIdentitySourceType,
             string userAssignedClientIdOrResourceId = null,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             HttpStatusCode statusCode = HttpStatusCode.OK
@@ -364,7 +364,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
             
-        private static MockHttpMessageHandler BuildMockHandlerForManagedIdentitySource(ManagedIdentitySourceType managedIdentitySourceType, string resource)
+        private static MockHttpMessageHandler BuildMockHandlerForManagedIdentitySource(ManagedIdentitySource managedIdentitySourceType, string resource)
         {
             MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
@@ -372,31 +372,31 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             switch (managedIdentitySourceType)
             {
-                case ManagedIdentitySourceType.AppService:
+                case ManagedIdentitySource.AppService:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Get;
                     expectedQueryParams.Add("api-version", "2019-08-01");
                     expectedQueryParams.Add("resource", resource);
                     expectedRequestHeaders.Add("X-IDENTITY-HEADER", "secret");
                     break;
-                case ManagedIdentitySourceType.AzureArc:
+                case ManagedIdentitySource.AzureArc:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Get;
                     expectedQueryParams.Add("api-version", "2019-11-01");
                     expectedQueryParams.Add("resource", resource);
                     expectedRequestHeaders.Add("Metadata", "true");
                     break;
-                case ManagedIdentitySourceType.IMDS:
+                case ManagedIdentitySource.IMDS:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Get;
                     expectedQueryParams.Add("api-version", "2018-02-01");
                     expectedQueryParams.Add("resource", resource);
                     expectedRequestHeaders.Add("Metadata", "true");
                     break;
-                case ManagedIdentitySourceType.CloudShell:
+                case ManagedIdentitySource.CloudShell:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Post;
                     expectedRequestHeaders.Add("Metadata", "true");
                     expectedRequestHeaders.Add("ContentType", "application/x-www-form-urlencoded");
                     httpMessageHandler.ExpectedPostData = new Dictionary<string, string> { { "resource", resource } };
                     break;
-                case ManagedIdentitySourceType.ServiceFabric:
+                case ManagedIdentitySource.ServiceFabric:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Get;
                     expectedRequestHeaders.Add("secret", "secret");
                     expectedQueryParams.Add("api-version", "2019-07-01-preview");
@@ -404,7 +404,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     break;
             }
 
-            if (managedIdentitySourceType != ManagedIdentitySourceType.CloudShell)
+            if (managedIdentitySourceType != ManagedIdentitySource.CloudShell)
             {
                 httpMessageHandler.ExpectedQueryParams = expectedQueryParams;
             }

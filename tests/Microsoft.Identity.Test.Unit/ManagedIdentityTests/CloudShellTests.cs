@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySourceType.CloudShell, ManagedIdentityTests.CloudShellEndpoint);
+                SetEnvironmentVariables(ManagedIdentitySource.CloudShell, ManagedIdentityTests.CloudShellEndpoint);
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(userAssignedClientId)
                     .WithExperimentalFeatures()
@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySourceType.CloudShell, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.CloudShell, ex.ManagedIdentitySource);
                 Assert.AreEqual(MsalError.UserAssignedManagedIdentityNotSupported, ex.ErrorCode);
                 Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, CloudShell), ex.Message);
             }
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using(new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySourceType.CloudShell, "localhost/token");
+                SetEnvironmentVariables(ManagedIdentitySource.CloudShell, "localhost/token");
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
                     .WithExperimentalFeatures()
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySourceType.CloudShell, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.CloudShell, ex.ManagedIdentitySource);
                 Assert.AreEqual(MsalError.InvalidManagedIdentityEndpoint, ex.ErrorCode);
             }
         }

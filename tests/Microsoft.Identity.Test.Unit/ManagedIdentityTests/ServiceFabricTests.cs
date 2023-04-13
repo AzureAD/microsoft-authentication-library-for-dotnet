@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using(new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySourceType.ServiceFabric, "localhost/token");
+                SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "localhost/token");
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
                     .WithExperimentalFeatures()
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySourceType.ServiceFabric, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.ServiceFabric, ex.ManagedIdentitySource);
                 Assert.AreEqual(MsalError.InvalidManagedIdentityEndpoint, ex.ErrorCode);
                 Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", "localhost/token", "Service Fabric"), ex.Message);
             }

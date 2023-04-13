@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySourceType.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
+                SetEnvironmentVariables(ManagedIdentitySource.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(userAssignedClientId)
                     .WithExperimentalFeatures()
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySourceType.AzureArc, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.AzureArc, ex.ManagedIdentitySource);
                 Assert.AreEqual(MsalError.UserAssignedManagedIdentityNotSupported, ex.ErrorCode);
                 Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, AzureArc), ex.Message);
             }
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySourceType.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
+                SetEnvironmentVariables(ManagedIdentitySource.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
                     .WithExperimentalFeatures()
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySourceType.AzureArc, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.AzureArc, ex.ManagedIdentitySource);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.ManagedIdentityNoChallengeError, ex.Message);
             }
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySourceType.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
+                SetEnvironmentVariables(ManagedIdentitySource.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
                     .WithExperimentalFeatures()
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySourceType.AzureArc, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.AzureArc, ex.ManagedIdentitySource);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidChallenge, ex.Message);
             }
@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using(new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySourceType.AzureArc, "localhost/token");
+                SetEnvironmentVariables(ManagedIdentitySource.AzureArc, "localhost/token");
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
                     .WithExperimentalFeatures()

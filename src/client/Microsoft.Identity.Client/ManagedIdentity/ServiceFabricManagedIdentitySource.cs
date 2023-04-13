@@ -12,14 +12,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// <summary>
     /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/ServiceFabricManagedIdentitySource.cs
     /// </summary>
-    internal class ServiceFabricManagedIdentitySource : ManagedIdentitySource
+    internal class ServiceFabricManagedIdentitySource : AbstractManagedIdentity
     {
         private const string ServiceFabricMsiApiVersion = "2019-07-01-preview";
 
         private readonly Uri _endpoint;
         private readonly string _identityHeaderValue;
 
-        public static ManagedIdentitySource TryCreate(RequestContext requestContext)
+        public static AbstractManagedIdentity TryCreate(RequestContext requestContext)
         {
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
             string identityHeader = EnvironmentVariables.IdentityHeader;
@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 throw new MsalManagedIdentityException(MsalError.InvalidManagedIdentityEndpoint, 
                     string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, 
                         "IDENTITY_ENDPOINT", identityEndpoint, "Service Fabric"), 
-                    ManagedIdentitySourceType.ServiceFabric);
+                    ManagedIdentitySource.ServiceFabric);
             }
 
             requestContext.Logger.Verbose(() => "[Managed Identity] Creating Service Fabric managed identity. Endpoint URI: " + identityEndpoint);
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         private ServiceFabricManagedIdentitySource(RequestContext requestContext, Uri endpoint, string identityHeaderValue) : 
-            base(requestContext, ManagedIdentitySourceType.ServiceFabric)
+            base(requestContext, ManagedIdentitySource.ServiceFabric)
         {
             _endpoint = endpoint;
             _identityHeaderValue = identityHeaderValue;

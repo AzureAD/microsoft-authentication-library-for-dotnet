@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySourceType.AppService, "127.0.0.1:41564/msi/token");
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, "127.0.0.1:41564/msi/token");
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
                     .WithExperimentalFeatures()
@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.InvalidManagedIdentityEndpoint, ex.ErrorCode);
-                Assert.AreEqual(ManagedIdentitySourceType.AppService, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.AppService, ex.ManagedIdentitySource);
                 Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", "127.0.0.1:41564/msi/token", AppService), ex.Message);
             }
         }

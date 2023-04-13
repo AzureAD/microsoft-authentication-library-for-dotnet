@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //Assert
                 Assert.IsTrue(ex.Message.Contains(UserAssignedIdDoesNotExist));
-                Assert.AreEqual(ManagedIdentitySourceType.AppService, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.AppService, ex.ManagedIdentitySource);
             }
         }
 
@@ -182,7 +182,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //Assert
                 Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
-                Assert.AreEqual(ManagedIdentitySourceType.AppService, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.AppService, ex.ManagedIdentitySource);
             }
         }
 
@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //Assert
                 Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
-                Assert.AreEqual(ManagedIdentitySourceType.AppService, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.AppService, ex.ManagedIdentitySource);
             }
         }
 

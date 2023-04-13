@@ -28,29 +28,29 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             ServiceFabric
         }
 
-        public static void SetEnvironmentVariables(ManagedIdentitySourceType managedIdentitySource, string endpoint, string secret = "secret")
+        public static void SetEnvironmentVariables(ManagedIdentitySource managedIdentitySource, string endpoint, string secret = "secret")
         {
             switch (managedIdentitySource)
             {
-                case ManagedIdentitySourceType.AppService:
+                case ManagedIdentitySource.AppService:
                     Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", endpoint);
                     Environment.SetEnvironmentVariable("IDENTITY_HEADER", secret);
                     break;
 
-                case ManagedIdentitySourceType.IMDS:
+                case ManagedIdentitySource.IMDS:
                     Environment.SetEnvironmentVariable("AZURE_POD_IDENTITY_AUTHORITY_HOST", endpoint);
                     break;
 
-                case ManagedIdentitySourceType.AzureArc:
+                case ManagedIdentitySource.AzureArc:
                     Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", endpoint);
                     Environment.SetEnvironmentVariable("IMDS_ENDPOINT", "http://localhost:40342");
                     break;
 
-                case ManagedIdentitySourceType.CloudShell:
+                case ManagedIdentitySource.CloudShell:
                     Environment.SetEnvironmentVariable("MSI_ENDPOINT", endpoint);
                     break;
 
-                case ManagedIdentitySourceType.ServiceFabric:
+                case ManagedIdentitySource.ServiceFabric:
                     Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", endpoint);
                     Environment.SetEnvironmentVariable("IDENTITY_HEADER", secret);
                     Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", "thumbprint");

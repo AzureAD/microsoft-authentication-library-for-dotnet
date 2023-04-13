@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
         /// <param name="source">Specifies the managed identity source from which the exception initiates.</param>
-        public MsalManagedIdentityException(string errorCode, string errorMessage, ManagedIdentitySourceType source) :
+        public MsalManagedIdentityException(string errorCode, string errorMessage, ManagedIdentitySource source) :
             this(errorCode, errorMessage, null, source)
         {
         }
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
         /// <param name="innerException">Represents the root cause of the exception.</param>
         /// <param name="source">Specifies the managed identity source from which the exception initiates.</param>
-        public MsalManagedIdentityException(string errorCode, string errorMessage, Exception innerException, ManagedIdentitySourceType source) :
+        public MsalManagedIdentityException(string errorCode, string errorMessage, Exception innerException, ManagedIdentitySource source) :
             base(errorCode, errorMessage, innerException)
         {
             ManagedIdentitySource = source;
@@ -47,6 +47,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Specifies the managed identity source from which the exception initiates.
         /// </summary>
-        public ManagedIdentitySourceType ManagedIdentitySource { get; }
+        public ManagedIdentitySource ManagedIdentitySource { get; }
     }
 }
