@@ -35,24 +35,27 @@ namespace Microsoft.Identity.Client.Desktop
         /// <summary>
         /// Adds enhanced support for desktop applications, e.g. CLI, WinForms, WPF apps.
         /// - Windows Authentication Manager (WAM) broker, the recommended authentication mechanism on Windows 10+ - https://aka.ms/msal-net-wam
-        /// - Embedded web view. AAD applications use the older WebBrowser control. B2C applications use WebView2, an embedded browser based on Microsoft Edge - https://aka.ms/msal-net-webview2
+        /// - Embedded web view. AAD applications use the older WebBrowser control. Other applications (B2C, ADFS etc.) use WebView2, an embedded browser based on Microsoft Edge - https://aka.ms/msal-net-webview2
         /// </summary>
-        /// <remarks>These extensions live in a separate package to avoid adding dependencies to MSAL</remarks>
+        /// <remarks>This is not required for MAUI / WinUI applications</remarks>
         public static PublicClientApplicationBuilder WithWindowsDesktopFeatures(this PublicClientApplicationBuilder builder, BrokerOptions brokerOptions)
         {
             builder.Config.BrokerOptions = brokerOptions;
             builder.Config.IsBrokerEnabled = brokerOptions.IsBrokerEnabledOnCurrentOs();
 
             AddRuntimeSupportForWam(builder);
-            AddSupportForWebView2(builder);
+            AddEmbeddedBrowserSupport(builder);
 
             return builder;
         }
 
         /// <summary>
-        /// Enables Windows broker flows on older platforms, such as .NET framework, where these are not available in the box with Microsoft.Identity.Client
+        /// Adds better embedded browser support to MSAL.
+        /// AAD applications may only use the older WebBrowser control. 
+        /// Other applications (B2C, ADFS etc.), an embedded browser based on Microsoft Edge - https://aka.ms/msal-net-webview2
         /// </summary>
-        private static void AddSupportForWebView2(PublicClientApplicationBuilder builder)
+        /// <remarks>This is not required for MAUI / WinUI applications</remarks>
+        public static void AddEmbeddedBrowserSupport(PublicClientApplicationBuilder builder)
         {
             builder.Config.WebUiFactoryCreator = () => new WebView2WebUiFactory();
         }

@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                     _requestContextAdfs);
 
             // Assert
-            Assert.IsTrue(webUi is InteractiveWebUI);
+            Assert.IsTrue(webUi is WebView2WebUi);
 
         }
 
