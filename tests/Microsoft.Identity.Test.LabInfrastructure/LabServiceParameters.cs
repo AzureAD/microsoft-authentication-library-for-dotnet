@@ -14,7 +14,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         Shibboleth,
         ADFSv2019,
         B2C,
-        Ping
+        Ping,
+        CIAM
     }
 
     public enum B2CIdentityProvider

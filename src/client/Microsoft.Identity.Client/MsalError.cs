@@ -1146,5 +1146,10 @@ namespace Microsoft.Identity.Client
         /// Using combined flat storage, like a file, to store both app and user tokens is not supported. Use a partitioned token cache (for ex. distributed cache like Redis) or separate files for app and user token caches. See https://aka.ms/msal-net-token-cache-serialization .
         /// </summary>
         public const string CombinedUserAppCacheNotSupported = "combined_user_app_cache_not_supported";
+
+        /// <summary>
+        /// Setting the CIAM authority (ex. "{tenantName}.ciamlogin.com") at the request level is not supported. The CIAM authority must be set during application creation.
+        /// </summary>
+        public const string SetCiamAuthorityAtRequestLevelNotSupported = "set_ciam_authority_at_request_level_not_supported";
     }
 }

@@ -6,12 +6,15 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 
 namespace DesktopTestApp
 {
     class PublicClientHandler
     {
-        private readonly string _clientName = "DesktopTestApp";
+        private const string _clientName = "DesktopTestApp";
+        private const string _ciamExtraQParams = "dc=ESTS-PUB-EUS-AZ1-FD000-TEST1";
+        private const string _ciamRedirectUri = "http://localhost";
 
         public PublicClientHandler(string clientId, LogCallback logCallback)
         {
@@ -146,6 +149,12 @@ namespace DesktopTestApp
             {
                 // Use the override authority provided
                 builder = builder.WithAuthority(new Uri(interactiveAuthority), true);
+
+                if (interactiveAuthority.Contains(Constants.CiamAuthorityHostSuffix))
+                {
+                    builder = builder.WithExtraQueryParameters(_ciamExtraQParams)
+                                     .WithRedirectUri(_ciamRedirectUri);
+                }
             }
 
             PublicClientApplication = builder.BuildConcrete();
