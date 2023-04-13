@@ -346,6 +346,51 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
+        [DataTestMethod]
+        [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint, HttpStatusCode.NotFound)]
+        [DataRow(ManagedIdentitySourceType.IMDS, ImdsEndpoint, HttpStatusCode.NotFound)]
+        [DataRow(ManagedIdentitySourceType.AzureArc, AzureArcEndpoint, HttpStatusCode.NotFound)]
+        [DataRow(ManagedIdentitySourceType.CloudShell, CloudShellEndpoint, HttpStatusCode.NotFound)]
+        [DataRow(ManagedIdentitySourceType.ServiceFabric, ServiceFabricEndpoint, HttpStatusCode.NotFound)]
+        [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint, HttpStatusCode.RequestTimeout)]
+        [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint, HttpStatusCode.TooManyRequests)]
+        [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint, HttpStatusCode.InternalServerError)]
+        [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint, HttpStatusCode.ServiceUnavailable)]
+        [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint, HttpStatusCode.GatewayTimeout)]
+        public async Task ManagedIdentityTestRetryAsync(ManagedIdentitySourceType managedIdentitySource, string endpoint, HttpStatusCode statusCode)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
+
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager).Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    endpoint,
+                    Resource,
+                    "",
+                    managedIdentitySource,
+                    statusCode: statusCode); //404
+
+                httpManager.AddManagedIdentityMockHandler(
+                    endpoint,
+                    Resource,
+                    "",
+                    managedIdentitySource,
+                    statusCode: statusCode); //404
+
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+            }
+        }
+
         [TestMethod] 
         public async Task SystemAssignedManagedIdentityApiIdTestAsync()
         {

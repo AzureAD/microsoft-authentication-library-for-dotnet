@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client
         {
             ApplicationBase.GuardMobileFrameworks();
 
-            var config = new ApplicationConfiguration(isConfidentialClient: false);
+            var config = new ApplicationConfiguration(isConfidentialClient: false, isManagedIdentity: true);
             var builder = new ManagedIdentityApplicationBuilder(config).WithOptions(options);
 
             if (!string.IsNullOrWhiteSpace(options.UserAssignedClientId))
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client
         {
             ApplicationBase.GuardMobileFrameworks();
 
-            var config = new ApplicationConfiguration(isConfidentialClient: false);
+            var config = new ApplicationConfiguration(isConfidentialClient: false, isManagedIdentity: true);
             return new ManagedIdentityApplicationBuilder(config)
                 .WithCacheSynchronization(false);
         }
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(userAssignedId));
             }
 
-            var config = new ApplicationConfiguration(isConfidentialClient: false);
+            var config = new ApplicationConfiguration(isConfidentialClient: false, isManagedIdentity: true);
             return new ManagedIdentityApplicationBuilder(config)
                 .WithUserAssignedManagedIdentity(userAssignedId)
                 .WithCacheSynchronization(false);

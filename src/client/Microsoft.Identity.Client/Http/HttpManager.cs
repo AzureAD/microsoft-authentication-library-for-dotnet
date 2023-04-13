@@ -24,9 +24,9 @@ namespace Microsoft.Identity.Client.Http
     /// </remarks>
     internal class HttpManager : IHttpManager
     {
-        private readonly IMsalHttpClientFactory _httpClientFactory;
+        protected readonly IMsalHttpClientFactory _httpClientFactory;
         //Determines whether or not to retry on 5xx errors. Configurable on application creation. default is true;
-        private readonly bool _retryConfig;
+        protected readonly bool _retryConfig;
         public long LastRequestDurationInMs { get; private set; }
 
         public HttpManager(IMsalHttpClientFactory httpClientFactory, bool retry = true)
@@ -316,7 +316,7 @@ namespace Microsoft.Identity.Client.Http
         /// In HttpManager, the retry policy is based on this simple condition.
         /// Avoid changing this, as it's breaking change.
         /// </summary>
-        private static bool IsRetryableStatusCode(int statusCode)
+        protected virtual bool IsRetryableStatusCode(int statusCode)
         {
             return statusCode >= 500 && statusCode < 600;                
         }

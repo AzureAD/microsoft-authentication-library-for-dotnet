@@ -29,9 +29,20 @@ namespace Microsoft.Identity.Client.Internal
             ApplicationLogger = LoggerHelper.CreateLogger(Guid.Empty, config);
 
             PlatformProxy = config.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(ApplicationLogger);
-            HttpManager = config.HttpManager ?? new HttpManager(
-                config.HttpClientFactory ??
-                PlatformProxy.CreateDefaultHttpClientFactory(), config.RetryOnServerErrors);
+
+            if (config.HttpManager == null && config.HttpClientFactory == null)
+            {
+                
+                HttpManager = config.IsManagedIdentity ?
+                    new HttpManagerManagedIdentity(PlatformProxy.CreateDefaultHttpClientFactory(), config.RetryOnServerErrors) :
+                    new HttpManager(PlatformProxy.CreateDefaultHttpClientFactory(), config.RetryOnServerErrors);
+                
+            }
+            else
+            {
+                HttpManager = config.HttpManager ?? 
+                    new HttpManager(config.HttpClientFactory);
+            }
 
             HttpTelemetryManager = new HttpTelemetryManager();
 

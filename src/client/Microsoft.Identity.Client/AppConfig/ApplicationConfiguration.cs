@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client
 {
     internal sealed class ApplicationConfiguration : IAppConfig
     {
-        public ApplicationConfiguration(bool isConfidentialClient) 
+        public ApplicationConfiguration(bool isConfidentialClient, bool isManagedIdentity = false) 
         {
             IsConfidentialClient = isConfidentialClient;
         }
@@ -111,6 +111,7 @@ namespace Microsoft.Identity.Client
         public bool IsUserAssignedManagedIdentity { get; internal set; } = false;
         public string ManagedIdentityUserAssignedClientId {  get; internal set; }
         public string ManagedIdentityUserAssignedResourceId { get; internal set; }
+        public bool IsManagedIdentity { get; }
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
