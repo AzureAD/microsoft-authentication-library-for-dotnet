@@ -18,12 +18,7 @@ namespace Microsoft.Identity.Test.Unit
         /// </remarks>
         public static string GetTestResourceRelativePath(string resourceName)
         {
-
-#if DESKTOP
             return resourceName;
-#else
-            return "Resources\\" + resourceName;
-#endif
         }
     }
 
