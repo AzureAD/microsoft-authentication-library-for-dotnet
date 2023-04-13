@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
-        public void WebViewTypeNotConfigured_ADFS_WebView1()
+        public void WebViewTypeNotConfigured_ADFS_WebView2()
         {
             // Arrange
             var webUIFactory = new WebView2WebUiFactory(() => true);
@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
-        public void WebViewTypeEmbedded_ADFS_WebView1()
+        public void WebViewTypeEmbedded_ADFS_WebView2()
         {
             // Arrange
             var webUIFactory = new WebView2WebUiFactory(() => true);
