@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Desktop
             builder.Config.IsBrokerEnabled = brokerOptions.IsBrokerEnabledOnCurrentOs();
 
             AddRuntimeSupportForWam(builder);
-            AddEmbeddedBrowserSupport(builder);
+            WithWindowsEmbeddedBrowserSupport(builder);
 
             return builder;
         }
@@ -54,10 +54,14 @@ namespace Microsoft.Identity.Client.Desktop
         /// AAD applications may only use the older WebBrowser control. 
         /// Other applications (B2C, ADFS etc.), an embedded browser based on Microsoft Edge - https://aka.ms/msal-net-webview2
         /// </summary>
-        /// <remarks>This is not required for MAUI / WinUI applications</remarks>
-        public static void AddEmbeddedBrowserSupport(PublicClientApplicationBuilder builder)
+        /// <remarks>This is not required for MAUI / WinUI applications. This is ignored on Mac and Linux.</remarks>    
+        /// 
+        public static void WithWindowsEmbeddedBrowserSupport(PublicClientApplicationBuilder builder)
         {
-            builder.Config.WebUiFactoryCreator = () => new WebView2WebUiFactory();
+            if (DesktopOsHelper.IsWindows())
+            {
+                builder.Config.WebUiFactoryCreator = () => new WebView2WebUiFactory();
+            }
         }
 
         internal static void AddRuntimeSupportForWam(PublicClientApplicationBuilder builder)
