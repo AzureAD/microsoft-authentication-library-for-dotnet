@@ -58,12 +58,14 @@ namespace Microsoft.Identity.Client.Desktop
         /// </summary>
         /// <remarks>This is not required for MAUI / WinUI applications. This is ignored on Mac and Linux.</remarks>    
         /// 
-        public static void WithWindowsEmbeddedBrowserSupport(this PublicClientApplicationBuilder builder)
+        public static PublicClientApplicationBuilder WithWindowsEmbeddedBrowserSupport(this PublicClientApplicationBuilder builder)
         {
             if (DesktopOsHelper.IsWindows())
             {
                 builder.Config.WebUiFactoryCreator = () => new WebView2WebUiFactory();
             }
+
+            return builder;
         }
 
         internal static void AddRuntimeSupportForWam(PublicClientApplicationBuilder builder)
