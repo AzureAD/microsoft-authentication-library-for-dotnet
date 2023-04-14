@@ -53,8 +53,8 @@ namespace Microsoft.Identity.Client.Desktop
 
         /// <summary>
         /// Adds better embedded browser support to MSAL.
-        /// AAD applications may only use the older WebBrowser control. 
-        /// Other applications (B2C, ADFS etc.), an embedded browser based on Microsoft Edge - https://aka.ms/msal-net-webview2
+        /// AAD applications will use the older WebBrowser control.
+        /// Other applications (B2C, ADFS etc.) will use an embedded browser based on Microsoft Edge - https://aka.ms/msal-net-webview2
         /// </summary>
         /// <remarks>This is not required for MAUI / WinUI applications. This is ignored on Mac and Linux.</remarks>    
         /// 
