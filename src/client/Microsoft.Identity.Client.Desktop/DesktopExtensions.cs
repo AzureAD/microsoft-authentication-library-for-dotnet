@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ComponentModel;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -26,6 +27,7 @@ namespace Microsoft.Identity.Client.Desktop
         /// </summary>
         /// <remarks>These extensions live in a separate package to avoid adding dependencies to MSAL</remarks>
         [Obsolete("Use WithWindowsDesktopFeatures instead. For broker support only, use  WithBroker(BrokerOptions) from Microsoft.Identity.Client.Broker package.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public static PublicClientApplicationBuilder WithDesktopFeatures(this PublicClientApplicationBuilder builder)
         {
             builder.WithWindowsDesktopFeatures(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
@@ -56,7 +58,7 @@ namespace Microsoft.Identity.Client.Desktop
         /// </summary>
         /// <remarks>This is not required for MAUI / WinUI applications. This is ignored on Mac and Linux.</remarks>    
         /// 
-        public static void WithWindowsEmbeddedBrowserSupport(PublicClientApplicationBuilder builder)
+        public static void WithWindowsEmbeddedBrowserSupport(this PublicClientApplicationBuilder builder)
         {
             if (DesktopOsHelper.IsWindows())
             {
