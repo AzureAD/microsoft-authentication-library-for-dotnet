@@ -1,3 +1,11 @@
+4.53.0
+==========
+### New Features
+- Added support for CIAM authorities. See [3990](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3990)
+
+### Bug Fixes
+- Fixed issue where WAM is invoked for B2C authorities. MSAL will now fall back to the browser for this scenario. See [4072](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4072)
+
 4.52.0
 ==========
 ### New Features
