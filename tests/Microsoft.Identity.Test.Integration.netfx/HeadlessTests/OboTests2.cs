@@ -214,19 +214,18 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNull(
                 userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheExpiry,
                 "The cache expiry is not set because there is an RT in the cache");
-            Assert.AreEqual(2, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
-            Assert.AreEqual(2, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
             Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count);
             Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccounts().Count);
 
-            Trace.WriteLine("5. Subsequent acquire token calls should return cached token. Throws error for now.");
-            var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
-                await middletierServiceApp
-                   .AcquireTokenInLongRunningProcess(downstreamApiScopes, cacheKey)
-                   .ExecuteAsync()
-                   .ConfigureAwait(false)
-                ).ConfigureAwait(false);
-            Assert.AreEqual(MsalError.MultipleTokensMatchedError, ex.ErrorCode);
+            Trace.WriteLine("5. Subsequent acquire token calls should return cached token.");
+            authenticationResult = await middletierServiceApp
+                .AcquireTokenInLongRunningProcess(downstreamApiScopes, cacheKey)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, authenticationResult.AuthenticationResultMetadata.TokenSource);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
