@@ -45,9 +45,16 @@ namespace Microsoft.Identity.Client
         /// <param name="cancellationToken">Cancellation token. See <see cref="CancellationToken"/> </param>
         /// <returns>Authentication result containing a token for the requested scopes and parameters
         /// set in the builder.</returns>
-        /// <remarks>Cancellation is not guaranteed, it is best effort. If the operation reaches a point of no return, e.g.
+        /// <remarks>
+        /// <para>
+        /// Cancellation is not guaranteed, it is best effort. If the operation reaches a point of no return, e.g.
         /// tokens are acquired and written to the cache, the task will complete even if cancellation was requested.
-        /// Do not rely on cancellation tokens for strong consistency.</remarks>
+        /// Do not rely on cancellation tokens for strong consistency.
+        /// </para>
+        /// <para>
+        /// To learn more about potential exceptions thrown by the function, refer to <see href="https://aka.ms/msal-net-exceptions">Exceptions in MSAL.NET</see>.
+        /// </para>
+        /// </remarks>
         public abstract Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken);
 
         internal abstract ApiEvent.ApiIds CalculateApiEventId();
