@@ -33,7 +33,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             _sourceType = sourceType;
         }
 
-        public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(AcquireTokenForManagedIdentityParameters parameters, CancellationToken cancellationToken)
+        public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(
+            AcquireTokenForManagedIdentityParameters parameters, 
+            CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -49,9 +51,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             try
             {
                 HttpResponse response =
-            request.Method == HttpMethod.Get ?
-            await _requestContext.ServiceBundle.HttpManager.SendGetForceResponseAsync(request.ComputeUri(), request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false) :
-            await _requestContext.ServiceBundle.HttpManager.SendPostForceResponseAsync(request.ComputeUri(), request.Headers, request.BodyParameters, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
+                    request.Method == HttpMethod.Get ?
+                    await _requestContext.ServiceBundle.HttpManager
+                        .SendGetForceResponseAsync(
+                            request.ComputeUri(), 
+                            request.Headers, 
+                            _requestContext.Logger, 
+                            cancellationToken: cancellationToken).ConfigureAwait(false) :
+                    await _requestContext.ServiceBundle.HttpManager
+                        .SendPostForceResponseAsync(
+                            request.ComputeUri(), 
+                            request.Headers, 
+                            request.BodyParameters, 
+                            _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
 
                 return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
             }
@@ -85,7 +97,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 message = GetMessageFromErrorResponse(response);
                 _requestContext.Logger.Error($"[Managed Identity] request failed, HttpStatusCode: {response.StatusCode} Error message: {message}");
             }
-            catch (Exception e) when (e is not MsalServiceException)
+            catch (Exception e) when (e is not MsalManagedIdentityException)
             {
                 _requestContext.Logger.Error($"[Managed Identity] Exception: {e.Message} Http status code: {response?.StatusCode}");
                 exception = e;

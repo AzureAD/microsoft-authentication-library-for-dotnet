@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager())
 
             {
-                SetEnvironmentVariables(ManagedIdentitySource.IMDS, "http://169.254.169.254");
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, "http://169.254.169.254");
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
                     .WithExperimentalFeatures()
@@ -31,14 +31,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Build();
 
                 httpManager.AddManagedIdentityMockHandler(ManagedIdentityTests.ImdsEndpoint, ManagedIdentityTests.Resource, MockHelpers.GetMsiImdsErrorResponse(),
-                    ManagedIdentitySource.IMDS, statusCode: HttpStatusCode.BadRequest);
+                    ManagedIdentitySource.Imds, statusCode: HttpStatusCode.BadRequest);
 
                 MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySource.IMDS, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.Imds, ex.ManagedIdentitySource);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.IsTrue(ex.Message.Contains("The requested identity has not been assigned to this resource."));
             }

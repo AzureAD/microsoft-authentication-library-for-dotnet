@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                     Environment.SetEnvironmentVariable("IDENTITY_HEADER", secret);
                     break;
 
-                case ManagedIdentitySource.IMDS:
+                case ManagedIdentitySource.Imds:
                     Environment.SetEnvironmentVariable("AZURE_POD_IDENTITY_AUTHORITY_HOST", endpoint);
                     break;
 
