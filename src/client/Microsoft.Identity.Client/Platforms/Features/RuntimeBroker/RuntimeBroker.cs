@@ -540,10 +540,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 return false;
             }
 
-            // WAM does not work on pure ADFS environments
-            if (authorityType == AuthorityType.Adfs)
+            // WAM only works with AAD
+            if (authorityType != AuthorityType.Aad)
             {
-                _logger?.Warning("[WAM Broker] WAM does not work in pure ADFS environments. Falling back to browser for an ADFS authority unless Proof-of-Possession is configured. ");
+                _logger?.Warning($"[WAM Broker] Authority is {authorityType}. WAM is not available");
                 return false;
             }
 

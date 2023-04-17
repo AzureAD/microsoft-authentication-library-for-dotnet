@@ -34,7 +34,7 @@ steps:
     targetType: 'inline'
     script: |
       dotnet workload install maui --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
-      dotnet workload install android ios maccatalyst tvos macos maui wasm-tools --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
+      dotnet workload install android --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
 
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'

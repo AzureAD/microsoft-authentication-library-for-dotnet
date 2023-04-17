@@ -45,11 +45,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             }
 
             AuthorityType authorityType = requestContext.ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType;
-            bool isAadOrAdfsAuthority =
-                authorityType == AuthorityType.Aad ||
-                authorityType == AuthorityType.Adfs;
 
-            if (isAadOrAdfsAuthority)
+            if (authorityType == AuthorityType.Aad)
             {
                 requestContext.Logger.Info($"Using WebView1 embedded browser because the authority is {authorityType}. WebView2 does not provide SSO.");
                 return new InteractiveWebUI(coreUIParent, requestContext);
