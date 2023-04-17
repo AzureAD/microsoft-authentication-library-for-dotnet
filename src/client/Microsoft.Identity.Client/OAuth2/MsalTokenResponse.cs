@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json.Serialization;
@@ -18,6 +19,7 @@ using JObject = System.Text.Json.Nodes.JsonObject;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
 using Microsoft.Identity.Json;
+using Microsoft.Identity.Json.Linq;
 #endif
 
 namespace Microsoft.Identity.Client.OAuth2
@@ -38,13 +40,16 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string Authority = "authority";
         public const string FamilyId = "foci";
         public const string RefreshIn = "refresh_in";
-        public const string SpaCode = "spa_code";
         public const string ErrorSubcode = "error_subcode";
         public const string ErrorSubcodeCancel = "cancel";
 
         public const string TenantId = "tenant_id";
         public const string Upn = "username";
         public const string LocalAccountId = "local_account_id";
+
+        // Hybrid SPA - see https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3994
+        public const string SpaCode = "spa_code";
+
     }
 
     [JsonObject]
@@ -58,6 +63,59 @@ namespace Microsoft.Identity.Client.OAuth2
 
         private const string iOSBrokerErrorMetadata = "error_metadata";
         private const string iOSBrokerHomeAccountId = "home_account_id";
+
+        // All properties not explicitly defined are added to this dictionary
+        // See JSON overflow https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/handle-overflow?pivots=dotnet-7-0
+#if SUPPORTS_SYSTEM_TEXT_JSON
+        [JsonExtensionData]
+        public Dictionary<string, JsonElement> ExtensionData { get; set; }
+#else
+        [JsonExtensionData]
+        public Dictionary<string, JToken> ExtensionData { get; set; }
+#endif
+
+        // Exposes only scalar properties from ExtensionData
+        public Dictionary<string, string> CreateExtensionDataStringMap()
+        {
+            if (ExtensionData == null || ExtensionData.Count == 0)
+            {
+                return null;
+            }
+
+            Dictionary<string, string> stringExtensionData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+#if SUPPORTS_SYSTEM_TEXT_JSON
+            foreach (KeyValuePair<string, JsonElement> item in ExtensionData)
+            {
+                if (item.Value.ValueKind == JsonValueKind.String ||
+                   item.Value.ValueKind == JsonValueKind.Number ||
+                   item.Value.ValueKind == JsonValueKind.True ||
+                   item.Value.ValueKind == JsonValueKind.False ||
+                   item.Value.ValueKind == JsonValueKind.Null)
+                {
+                    stringExtensionData.Add(item.Key, item.Value.ToString());
+                }
+            }
+#else
+            foreach (KeyValuePair<string, JToken> item in ExtensionData)
+            {
+                if (item.Value.Type == JTokenType.String ||
+                   item.Value.Type == JTokenType.Uri ||
+                   item.Value.Type == JTokenType.Boolean ||
+                   item.Value.Type == JTokenType.Date ||
+                   item.Value.Type == JTokenType.Float ||
+                   item.Value.Type == JTokenType.Guid ||
+                   item.Value.Type == JTokenType.Integer ||
+                   item.Value.Type == JTokenType.TimeSpan ||
+                   item.Value.Type == JTokenType.Null)
+                {
+                    stringExtensionData.Add(item.Key, item.Value.ToString());
+                }
+            }
+#endif
+            return stringExtensionData;
+        }
+
         [JsonProperty(TokenResponseClaim.TokenType)]
         public string TokenType { get; set; }
 
@@ -180,6 +238,33 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 
             return response;
+        }
+
+        internal static MsalTokenResponse CreateFromManagedIdentityResponse(ManagedIdentityResponse managedIdentityResponse)
+        {
+            ValidateManagedIdentityResult(managedIdentityResponse);
+
+            return new MsalTokenResponse
+            {
+                AccessToken = managedIdentityResponse.AccessToken,
+                ExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(managedIdentityResponse.ExpiresOn),
+                TokenType = managedIdentityResponse.TokenType,
+                TokenSource = TokenSource.IdentityProvider
+            };
+        }
+
+        private static void ValidateManagedIdentityResult(ManagedIdentityResponse response)
+        {
+            if (string.IsNullOrEmpty(response.AccessToken))
+            {
+                HandleInvalidExternalValueError(nameof(response.AccessToken));
+            }
+
+            long expiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(response.ExpiresOn);
+            if (expiresIn <= 0)
+            {
+                HandleInvalidExternalValueError(nameof(response.ExpiresOn));
+            }
         }
 
         internal static MsalTokenResponse CreateFromAppProviderResponse(AppTokenProviderResult tokenProviderResponse)

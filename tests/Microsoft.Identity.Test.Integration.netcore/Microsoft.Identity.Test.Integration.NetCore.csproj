@@ -6,6 +6,7 @@
     <IsPackable>false</IsPackable>
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,7 +26,7 @@
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
     <PackageReference Include="Selenium.Support" Version="4.4.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.22.0" />
     <!-- This reference is a workaround for a bug in .net46

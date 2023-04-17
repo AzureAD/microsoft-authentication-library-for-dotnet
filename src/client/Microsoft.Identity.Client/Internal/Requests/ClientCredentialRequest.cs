@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             AuthenticationResult authResult = null;
 
-            if (!ServiceBundle.Config.UseManagedIdentity && AuthenticationRequestParameters.Authority is AadAuthority aadAuthority &&
+            if (AuthenticationRequestParameters.Authority is AadAuthority aadAuthority &&
                 aadAuthority.IsCommonOrOrganizationsTenant())
             {
                 logger.Error(MsalErrorMessage.ClientCredentialWrongAuthority);
@@ -65,7 +65,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                             AuthenticationRequestParameters.RequestContext.CorrelationId,
                                                             TokenSource.Cache,
                                                             AuthenticationRequestParameters.RequestContext.ApiEvent,
-                                                            null);
+                                                            account: null,
+                                                            spaAuthCode: null,
+                                                            additionalResponseParameters: null);
                 }
                 else
                 {

@@ -42,6 +42,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationResult authResult = null;
 
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
+
+            //Check if initiating a long running process
+            if (IsLongOboInitialize())
+            {
+                //Long running process should not use cached tokens
+                logger.Info("[OBO Request] Initiating long running process. Fetching OBO token from ESTS.");
+                return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+            }
+
             if (!_onBehalfOfParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 // look for access token in the cache first.
@@ -73,7 +82,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                             AuthenticationRequestParameters.RequestContext.CorrelationId,
                                                             TokenSource.Cache,
                                                             AuthenticationRequestParameters.RequestContext.ApiEvent,
-                                                            account);
+                                                            account, 
+                                                            spaAuthCode: null,
+                                                            additionalResponseParameters: null);
                 }
                 else
                 {
@@ -122,6 +133,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 return await HandleTokenRefreshErrorAsync(e, cachedAccessToken).ConfigureAwait(false);
             }
+        }
+
+        private bool IsLongOboInitialize()
+        {
+            return AuthenticationRequestParameters.UserAssertion != null && !string.IsNullOrEmpty(AuthenticationRequestParameters.LongRunningOboCacheKey);
         }
 
         private async Task<AuthenticationResult> RefreshRtOrFetchNewAccessTokenAsync(CancellationToken cancellationToken)

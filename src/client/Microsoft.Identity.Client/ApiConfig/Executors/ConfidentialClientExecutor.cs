@@ -63,12 +63,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
        
             requestParams.SendX5C = clientParameters.SendX5C ?? false;
 
-            if (ServiceBundle.Config.UseManagedIdentity)
-            {
-                ManagedIdentityClient managedIdentityClient = new ManagedIdentityClient(requestContext);
-                ServiceBundle.Config.AppTokenProvider = managedIdentityClient.AppTokenProviderImplAsync;
-            }
-
             var handler = new ClientCredentialRequest(
                 ServiceBundle,
                 requestParams,
@@ -129,11 +123,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             if (authorizationRequestUrlParameters.CodeVerifier != null)
             {
-                return handler.GetAuthorizationUriWithPkce(authorizationRequestUrlParameters.CodeVerifier);
+                return await handler.GetAuthorizationUriWithPkceAsync(authorizationRequestUrlParameters.CodeVerifier, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                return handler.GetAuthorizationUriWithoutPkce();
+                return await handler.GetAuthorizationUriWithoutPkceAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }

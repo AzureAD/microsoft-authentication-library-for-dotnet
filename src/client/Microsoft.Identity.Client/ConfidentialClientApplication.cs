@@ -4,12 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Client
 {
@@ -78,10 +81,10 @@ namespace Microsoft.Identity.Client
         /// Acquires a token from the authority configured in the app, for the confidential client itself (in the name of no user)
         /// using the client credentials flow. See https://aka.ms/msal-net-client-credentials.
         /// </summary>
-        /// <param name="scopes">scopes requested to access a protected API. For this flow (client credentials), the scopes
-        /// should be of the form "{ResourceIdUri/.default}" for instance <c>https://management.azure.net/.default</c> or, for Microsoft
-        /// Graph, <c>https://graph.microsoft.com/.default</c> as the requested scopes are defined statically with the application registration
-        /// in the portal, and cannot be overridden in the application.</param>
+        /// <param name="scopes">scopes requested to access a protected API. 
+        /// For this flow (client credentials), the scopes of Microsoft APIs protected with AAD tokens are of the form "{ResourceIdUri/.default}". For example <c>https://management.azure.net/.default</c> or, for Microsoft
+        /// Graph, <c>https://graph.microsoft.com/.default</c>. 
+        /// The requested scopes are defined statically with the application registration in the portal, and cannot be overridden in the application.</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>You can also chain the following optional parameters:
         /// <see cref="AcquireTokenForClientParameterBuilder.WithForceRefresh(bool)"/>
@@ -164,6 +167,45 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreateConfidentialClientExecutor(this),
                 scopes,
                 longRunningProcessSessionKey);
+        }
+
+        /// <summary>
+        /// Stops an in progress long running OBO session by removing the tokens associated with the provided cache key.
+        /// See https://aka.ms/msal-net-long-running-obo.
+        /// </summary>
+        /// <param name="longRunningProcessSessionKey">OBO cache key used to remove the tokens</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Returns true if tokens are removed from the cache. False otherwise.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="longRunningProcessSessionKey"/> is not set.</exception>
+        public async Task<bool> StopLongRunningProcessInWebApiAsync(string longRunningProcessSessionKey, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrEmpty(longRunningProcessSessionKey))
+            {
+                throw new ArgumentNullException(nameof(longRunningProcessSessionKey));
+            }
+
+            Guid correlationId = Guid.NewGuid();
+            RequestContext requestContext = base.CreateRequestContext(correlationId, cancellationToken);
+            requestContext.ApiEvent = new ApiEvent(correlationId);
+            requestContext.ApiEvent.ApiId = ApiIds.RemoveOboTokens;
+
+            var authority = await Instance.Authority.CreateAuthorityForRequestAsync(
+              requestContext,
+              null).ConfigureAwait(false);
+
+            var authParameters = new AuthenticationRequestParameters(
+                   ServiceBundle,
+                   UserTokenCacheInternal,
+                   new AcquireTokenCommonParameters() { ApiId = requestContext.ApiEvent.ApiId },
+                   requestContext,
+                   authority);
+
+            if (UserTokenCacheInternal != null)
+            {
+                return await UserTokenCacheInternal.StopLongRunningOboProcessAsync(longRunningProcessSessionKey, authParameters).ConfigureAwait(false);
+            }
+
+            return false;
         }
 
         /// <summary>

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
@@ -126,7 +127,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
            
             Assert.IsNotNull(authenticationResult.AccessToken);
-            Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsFalse(userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(TokenSource.Cache, authenticationResult.AuthenticationResultMetadata.TokenSource);
@@ -135,6 +136,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 "The cache expiry is not set because the node did not change");
         }
 
+        // Will need to be updated.
+        // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3913
         [RunOn(TargetFrameworks.NetCore)]
         public async Task ServicePrincipal_OBO_LongRunningProcess_PPE_Async()
         {
@@ -158,7 +161,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                     .Create(OBOServicePpeClientID)
                                     .WithAuthority(PPEAuthenticationAuthority)
                                     .WithCertificate(cert)
-                                    .Build();
+                                    .BuildConcrete();
             var userCacheRecorder = middletierServiceApp.UserTokenCache.RecordAccess();
 
             Trace.WriteLine("1. Upstream client gets an app token");            
@@ -170,21 +173,25 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Trace.WriteLine("2. MidTier kicks off the long running process by getting an OBO token");            
             string cacheKey = null;
-            authenticationResult = await (middletierServiceApp as ILongRunningWebApi).
+            authenticationResult = await middletierServiceApp.
                 InitiateLongRunningProcessInWebApi(downstreamApiScopes, clientToken, ref cacheKey)
                 .ExecuteAsync().ConfigureAwait(false);
 
             Assert.IsNotNull(authenticationResult.AccessToken);
-            Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsFalse(userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(cacheKey, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(TokenSource.IdentityProvider, authenticationResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsNull(
                 userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheExpiry,
                 "The cache expiry is not set because there is an RT in the cache");
+            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count);
+            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccounts().Count);
 
             Trace.WriteLine("3. Later, mid-tier needs the token again, and one is in the cache");
-            authenticationResult = await (middletierServiceApp as ILongRunningWebApi)
+            authenticationResult = await middletierServiceApp
                 .AcquireTokenInLongRunningProcess(downstreamApiScopes, cacheKey)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
@@ -194,19 +201,31 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Trace.WriteLine("4. After the original token expires, the mid-tier needs a token again. RT will be used.");
             TokenCacheHelper.ExpireAllAccessTokens(middletierServiceApp.UserTokenCache as ITokenCacheInternal);
 
-            authenticationResult = await (middletierServiceApp as ILongRunningWebApi)
+            authenticationResult = await middletierServiceApp
                .AcquireTokenInLongRunningProcess(downstreamApiScopes, cacheKey)
                .ExecuteAsync()
                .ConfigureAwait(false);
 
             Assert.IsNotNull(authenticationResult.AccessToken);
-            Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsFalse(userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(cacheKey, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(TokenSource.IdentityProvider, authenticationResult.AuthenticationResultMetadata.TokenSource);
             Assert.IsNull(
                 userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheExpiry,
                 "The cache expiry is not set because there is an RT in the cache");
+            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
+            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count);
+            Assert.AreEqual(1, middletierServiceApp.UserTokenCacheInternal.Accessor.GetAllAccounts().Count);
+
+            Trace.WriteLine("5. Subsequent acquire token calls should return cached token.");
+            authenticationResult = await middletierServiceApp
+                .AcquireTokenInLongRunningProcess(downstreamApiScopes, cacheKey)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.Cache, authenticationResult.AuthenticationResultMetadata.TokenSource);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -297,7 +316,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
-            Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsFalse(userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
@@ -313,7 +332,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
-            Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsFalse(userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
@@ -339,7 +358,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
-            Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsFalse(userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
@@ -356,7 +375,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
-            Assert.IsTrue(!userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsFalse(userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
             Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
             Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);

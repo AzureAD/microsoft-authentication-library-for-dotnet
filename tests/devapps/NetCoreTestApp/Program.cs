@@ -6,11 +6,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Desktop;
+using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using NetCoreTestApp.Experimental;
@@ -49,6 +50,9 @@ namespace NetCoreTestApp
 
         private static int s_currentTid = 0;
 
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetConsoleWindow();
+
         public static void Main(string[] args)
         {
             var ccaSettings = ConfidentialAppSettings.GetSettings(Cloud.Public);
@@ -66,14 +70,20 @@ namespace NetCoreTestApp
             return $"https://login.microsoftonline.com/{tenant}";
         }
 
-        private static IPublicClientApplication CreatePca()
+        private static IPublicClientApplication CreatePca(bool withWamBroker = false)
         {
             var pcaBuilder = PublicClientApplicationBuilder
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
-                            .WithLogging(Log, LogLevel.Verbose, true)
-                            .WithExperimentalFeatures()
-                            .WithDesktopFeatures();
+                            .WithLogging(Log, LogLevel.Verbose, true);
+
+            if(withWamBroker)
+            {
+                IntPtr consoleWindowHandle = GetConsoleWindow();
+                Func<IntPtr> consoleWindowHandleProvider = () => consoleWindowHandle;
+                pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows) { Title = "Only Windows" })
+                          .WithParentActivityOrWindow(consoleWindowHandleProvider);
+            }
 
             Console.WriteLine($"IsBrokerAvailable: {pcaBuilder.IsBrokerAvailable()}");
 
@@ -125,6 +135,7 @@ namespace NetCoreTestApp
                         9. Rotate Tenant ID
                        10. Acquire Token Interactive with Chrome
                        11. AcquireTokenForClient with multiple threads
+                       12. Acquire Token Interactive with Broker
                         0. Exit App
                     Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);
@@ -235,7 +246,6 @@ namespace NetCoreTestApp
 
                             var optionsChrome = new SystemWebViewOptions()
                             {
-                                //BrowserRedirectSuccess = new Uri("https://www.bing.com?q=why+is+42+the+meaning+of+life")
                                 OpenBrowserAsync = SystemWebViewOptions.OpenWithChromeEdgeBrowserAsync
                             };
 
@@ -275,6 +285,25 @@ namespace NetCoreTestApp
                             }
 
                             break;
+
+                        case 12: // acquire token interactive with WamBroker
+                            {
+                                var optionsbroker = new SystemWebViewOptions()
+                                {
+                                    OpenBrowserAsync = SystemWebViewOptions.OpenWithEdgeBrowserAsync
+                                };
+
+                                var pcaBroker = CreatePca(true);
+
+                                var ctsBroker = new CancellationTokenSource();
+                                authTask = pcaBroker.AcquireTokenInteractive(s_scopes)
+                                    .WithSystemWebViewOptions(optionsbroker)
+                                    .ExecuteAsync(ctsBroker.Token);
+
+                                await FetchTokenAndCallGraphAsync(pcaBroker, authTask).ConfigureAwait(false);
+                            }
+                            break;
+
                         case 0:
                             return;
 

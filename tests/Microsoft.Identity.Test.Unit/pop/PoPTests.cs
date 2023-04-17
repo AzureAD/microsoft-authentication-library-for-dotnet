@@ -13,7 +13,13 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+#if !NET6_WIN
 using Microsoft.Identity.Client.Broker;
+#endif
+
+#if NET6_WIN
+using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
+#endif
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -154,10 +160,10 @@ namespace Microsoft.Identity.Test.Unit.Pop
         {
             using (var httpManager = new MockHttpManager())
             {
-                PublicClientApplication app =
-                    PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                              .WithBrokerPreview()
+
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithHttpManager(httpManager)
+                                                              .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
                                                               .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
@@ -284,11 +290,14 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(false);
                 mockBroker.IsPopSupported.Returns(true);
 
-                var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithBrokerPreview()
+                var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithTestBroker(mockBroker)
-                    .WithHttpManager(harness.HttpManager)
-                    .BuildConcrete();
+                    .WithHttpManager(harness.HttpManager);
+
+                pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+
+                PublicClientApplication pca = pcaBuilder.BuildConcrete();
+
 
                 pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
 
@@ -316,11 +325,12 @@ namespace Microsoft.Identity.Test.Unit.Pop
             mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
             mockBroker.IsPopSupported.Returns(false);
 
-            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithExperimentalFeatures(true)
-                .WithBrokerPreview()
-                .WithTestBroker(mockBroker)
-                .BuildConcrete();
+            var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithTestBroker(mockBroker);
+
+            pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+
+            PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
             pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
 
@@ -347,13 +357,14 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 mockBroker.IsPopSupported.Returns(true);
                 mockBroker.AcquireTokenSilentAsync(Arg.Any<AuthenticationRequestParameters>(), Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalPopTokenResponse());
 
-                var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures(true)
+                var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithAdfsAuthority(TestConstants.ADFSAuthority, false)
-                    .WithBrokerPreview()
                     .WithTestBroker(mockBroker)
-                    .WithHttpManager(harness.HttpManager)
-                    .BuildConcrete();
+                    .WithHttpManager(harness.HttpManager);
+
+                pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+
+                PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(accessor: pca.UserTokenCacheInternal.Accessor,
                                                environment: "fs.msidlab8.com");
@@ -389,12 +400,13 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     Arg.Any<AuthenticationRequestParameters>(),
                     Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
 
-                var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures(true)
-                    .WithBrokerPreview()
+                var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithTestBroker(mockBroker)
-                    .WithHttpManager(harness.HttpManager)
-                    .BuildConcrete();
+                    .WithHttpManager(harness.HttpManager);
+
+                pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+
+                PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
                 TokenCacheHelper.ExpireAllAccessTokens(pca.UserTokenCacheInternal);
@@ -428,11 +440,11 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Arg.Any<AuthenticationRequestParameters>(),
                 Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalPopTokenResponse(brokerAccessToken));
 
-            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithExperimentalFeatures(true)
-                .WithBrokerPreview()
-                .WithTestBroker(mockBroker)
-                .BuildConcrete();
+            var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                            .WithTestBroker(mockBroker)
+                            .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+
+            PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
             //Populate local cache with token
             TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
@@ -496,18 +508,26 @@ namespace Microsoft.Identity.Test.Unit.Pop
         public void CheckPopRuntimeBrokerSupportTest()
         {
             //Broker enabled
-            IPublicClientApplication app = PublicClientApplicationBuilder
-                                            .Create(TestConstants.ClientId)
-                                            .WithBrokerPreview()
-                                            .Build();
+            var pcaBuilder = PublicClientApplicationBuilder
+                                            .Create(TestConstants.ClientId);
+
+            pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+
+            IPublicClientApplication app = pcaBuilder.Build();
 
             Assert.IsTrue(app.IsProofOfPossessionSupportedByClient());
 
             //Broker disabled
-            app = PublicClientApplicationBuilder
-                                .Create(TestConstants.ClientId)
-                                .WithBrokerPreview(false)
-                                .Build();
+            pcaBuilder = PublicClientApplicationBuilder
+                                .Create(TestConstants.ClientId);
+
+#if NET6_WIN
+            pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+#else
+            pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
+#endif
+
+            app = pcaBuilder.Build();
 
             Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
 
@@ -558,3 +578,4 @@ namespace Microsoft.Identity.Test.Unit.Pop
         }
     }
 }
+

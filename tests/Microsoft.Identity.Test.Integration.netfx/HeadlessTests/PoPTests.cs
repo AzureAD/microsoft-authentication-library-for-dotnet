@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -464,9 +464,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithExperimentalFeatures()
                .WithLogging(wastestLogger)
-               .WithBrokerPreview().Build();
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .Build();
 
             Assert.IsTrue(pca.IsProofOfPossessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");
 
@@ -492,7 +492,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static X509Certificate2 GetCertificate()
         {
-            X509Certificate2 cert = CertificateHelper.FindCertificateByThumbprint(TestConstants.AutomationTestThumbprint);
+            X509Certificate2 cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            
             if (cert == null)
             {
                 throw new InvalidOperationException(

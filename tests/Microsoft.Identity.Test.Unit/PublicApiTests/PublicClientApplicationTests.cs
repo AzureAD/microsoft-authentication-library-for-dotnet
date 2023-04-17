@@ -1043,10 +1043,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             if (enableBroker)
             {
-#if NET5_0_OR_GREATER
-                pcaBuilder.WithBroker();
+#if NET6_WIN
+                pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
 #else
-                pcaBuilder.WithWindowsBroker();
+                WamExtension.WithBroker(pcaBuilder, new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
 #endif
             }
 

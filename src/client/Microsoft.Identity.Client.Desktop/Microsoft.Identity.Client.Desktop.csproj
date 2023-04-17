@@ -13,7 +13,7 @@
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
-    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">4.46.0</MsalClientSemVer>
+    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">$(MsalInternalVersion)</MsalClientSemVer>
     <MsalClientSemVer>$(MsalClientSemVer)</MsalClientSemVer>
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
     <Version>$(MsalClientSemVer)</Version>
@@ -57,8 +57,6 @@
   </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)' or '$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" LinkBase="Features/WAM" />
-    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.17763.1000" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WebView2WebUi\**\*.cs" LinkBase="Features/WebView2WebUi" />
 
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.864.35" />
@@ -73,6 +71,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
 

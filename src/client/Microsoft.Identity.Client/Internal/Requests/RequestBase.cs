@@ -208,11 +208,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ClientInfo fromServer = null;
 
             if (!AuthenticationRequestParameters.IsClientCredentialRequest &&
+                AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity &&
+                AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity &&
                 AuthenticationRequestParameters.ApiId != ApiEvent.ApiIds.AcquireTokenByRefreshToken &&
                 AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AuthorityType.Adfs &&
                 !(msalTokenResponse.ClientInfo is null))
             {
-                //client_info is not returned from client credential flows because there is no user present.
+                //client_info is not returned from client credential and managed identity flows because there is no user present.
                 fromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
             }
 
@@ -233,7 +235,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 msalTokenResponse.TokenSource,
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
                 account,
-                msalTokenResponse.SpaAuthCode);
+                msalTokenResponse.SpaAuthCode, 
+                msalTokenResponse.CreateExtensionDataStringMap());
         }
 
         private void ValidateAccountIdentifiers(ClientInfo fromServer)
@@ -280,14 +283,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return AuthenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync();
         }
 
-        internal Task<MsalTokenResponse> SendTokenRequestAsync(
+        internal async Task<MsalTokenResponse> SendTokenRequestAsync(
             IDictionary<string, string> additionalBodyParameters,
             CancellationToken cancellationToken)
         {
-            var tokenResponse = SendTokenRequestAsync(
-                AuthenticationRequestParameters.Authority.GetTokenEndpoint(),
+            var tokenEndpoint = await AuthenticationRequestParameters.Authority.GetTokenEndpointAsync(AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+
+            var tokenResponse = await SendTokenRequestAsync(
+                tokenEndpoint,
                 additionalBodyParameters,
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
+
             Metrics.IncrementTotalAccessTokensFromIdP();
             return tokenResponse;
         }
@@ -447,7 +453,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.CorrelationId,
                     TokenSource.Cache,
                     AuthenticationRequestParameters.RequestContext.ApiEvent,
-                    account);
+                    account, 
+                    spaAuthCode: null, 
+                    additionalResponseParameters: null);
             }
 
             logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");
