@@ -494,7 +494,7 @@ namespace Microsoft.Identity.Client
             }
 
             var authorityInfo = AuthorityInfo.FromAadAuthority(
-                new Uri(cloudInstanceUri),
+                cloudInstanceUri,
                 tenant,
                 validateAuthority);
             Config.Authority = new AadAuthority(authorityInfo);

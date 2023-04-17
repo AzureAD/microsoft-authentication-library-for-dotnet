@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentNullException(nameof(cloudInstanceUri));
             }
-            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(new Uri(cloudInstanceUri), tenantId, validateAuthority);
+            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenantId, validateAuthority);
             return this as T;
         }
 
@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentNullException(nameof(cloudInstanceUri));
             }
-            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(new Uri(cloudInstanceUri), tenant, validateAuthority);
+            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenant, validateAuthority);
             return this as T;
         }
 

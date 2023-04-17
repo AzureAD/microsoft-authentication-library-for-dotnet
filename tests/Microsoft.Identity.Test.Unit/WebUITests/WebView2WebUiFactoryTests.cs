@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
-        public void WebViewTypeNotConfigured_ADFS_WebView1()
+        public void WebViewTypeNotConfigured_ADFS_WebView2()
         {
             // Arrange
             var webUIFactory = new WebView2WebUiFactory(() => true);
@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                     _requestContextAdfs);
 
             // Assert
-            Assert.IsTrue(webUi is InteractiveWebUI);
+            Assert.IsTrue(webUi is WebView2WebUi);
 
         }
 
@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
-        public void WebViewTypeEmbedded_ADFS_WebView1()
+        public void WebViewTypeEmbedded_ADFS_WebView2()
         {
             // Arrange
             var webUIFactory = new WebView2WebUiFactory(() => true);
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             var webUi = webUIFactory.CreateAuthenticationDialog(_parent, WebViewPreference.Embedded, _requestContextAdfs);
 
             // Assert
-            Assert.IsTrue(webUi is InteractiveWebUI);
+            Assert.IsTrue(webUi is WebView2WebUi);
         }
 
         [TestMethod]

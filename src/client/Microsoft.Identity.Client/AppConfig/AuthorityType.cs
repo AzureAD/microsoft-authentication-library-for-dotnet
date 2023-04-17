@@ -16,6 +16,8 @@ namespace Microsoft.Identity.Client
 
         Dsts,
 
-        Generic
+        Generic,
+
+        Ciam
     }
 }
