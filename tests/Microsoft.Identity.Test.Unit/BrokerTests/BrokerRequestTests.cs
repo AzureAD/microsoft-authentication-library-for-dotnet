@@ -221,9 +221,13 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         _parameters,
                         _acquireTokenSilentParameters,
                         broker);
+                Assert.IsFalse(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Adfs));
+                Assert.IsFalse(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.B2C));
+                Assert.IsFalse(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Generic));
+                Assert.IsFalse(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Dsts));
 
 #if NET6_WIN || NET7_0
-                Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
+                Assert.IsTrue(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #else
                 Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #endif
