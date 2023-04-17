@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <summary>
         /// When the token should be refreshed.
         /// </summary>
-        /// <remarks>If not set, MSAL will set it 50% of the expiry time if that time is >2h.</remarks>
+        /// <remarks>If not set, MSAL will set it to half of the expiry time if that time is longer than 2 hours.</remarks>
         public long? RefreshInSeconds { get; set; }
     }
 }
