@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -104,8 +105,12 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(4, callbackInvoked);
         }
 
-        [TestMethod]
-        public async Task CheckRefreshInAsync()
+        [DataTestMethod]
+        [DataRow(3600, 0, 0)]
+        [DataRow(3600, 500, 500)]
+        [DataRow(7200, 0, 3600)]
+        [DataRow(7200, 500, 500)]
+        public async Task CheckRefreshInAsync(long expiresInResponse, long refreshInResponse, long expectedRefreshIn)
         {
             string differentScopesForAt = string.Empty;
             var app1 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
@@ -114,9 +119,9 @@ namespace Microsoft.Identity.Test.Unit
                                                               AppTokenProviderResult result = new AppTokenProviderResult
                                                               {
                                                                   AccessToken = TestConstants.DefaultAccessToken,
-                                                                  ExpiresInSeconds = 3600,                                                                  
+                                                                  ExpiresInSeconds = expiresInResponse,   
+                                                                  RefreshInSeconds = refreshInResponse == 0 ? null : refreshInResponse,
                                                               };
-
 
                                                               return Task.FromResult(result);
                                                           })
@@ -126,32 +131,18 @@ namespace Microsoft.Identity.Test.Unit
             AuthenticationResult result = await app1.AcquireTokenForClient(TestConstants.s_scope)
                                                     .ExecuteAsync().ConfigureAwait(false);
 
-            Assert.IsNull(result.AuthenticationResultMetadata.RefreshOn, "Expiration <2h, no refresh in");
-            long expiresInSeconds = 9000;
-            var app2 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                              .WithAppTokenProvider((AppTokenProviderParameters parameters) =>
-                                              {
-                                                  AppTokenProviderResult result = new AppTokenProviderResult
-                                                  {
-                                                      AccessToken = TestConstants.DefaultAccessToken,
-                                                      ExpiresInSeconds = expiresInSeconds,
-                                                  };
-
-
-                                                  return Task.FromResult(result);
-                                              })
-                                              .Build();
-
-            // AcquireToken from app provider
-            AuthenticationResult result2 = await app2.AcquireTokenForClient(TestConstants.s_scope)
-                                                    .ExecuteAsync().ConfigureAwait(false);
-
-            Assert.IsTrue(result2.AuthenticationResultMetadata.RefreshOn.HasValue);
-
-            CoreAssert.IsWithinRange(
-                DateTimeOffset.Now + TimeSpan.FromSeconds(expiresInSeconds/2),
-                result2.AuthenticationResultMetadata.RefreshOn.Value,
-                TimeSpan.FromSeconds(3));
+            if (expiresInResponse != 0)
+            {
+                CoreAssert.IsWithinRange(
+                                       DateTimeOffset.Now + TimeSpan.FromSeconds(expectedRefreshIn),
+                                                          result.AuthenticationResultMetadata.RefreshOn.Value,
+                                                                             TimeSpan.FromSeconds(2));
+            }
+            else
+            {
+                Assert.IsFalse(result.AuthenticationResultMetadata.RefreshOn.HasValue);
+            }
+         
 
         }
 
