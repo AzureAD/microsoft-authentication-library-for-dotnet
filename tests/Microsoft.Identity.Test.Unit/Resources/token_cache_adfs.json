@@ -1,0 +1,48 @@
+﻿{
+  "AccessToken": {
+    "unzyjm1nugflhp1l338bxhryyhbtcyowx1p+f2fcsiq=-fs.msidlab8.com-accesstoken-publicclientid--openid": {
+      "home_account_id": "unZYjm1NugFLhP1l338bxhRYyHbtCYOWX1P+F2fCsiQ=",
+      "environment": "fs.msidlab8.com",
+      "client_id": "PublicClientId",
+      "secret": "secret",
+      "credential_type": "AccessToken",
+      "target": "openid",
+      "cached_at": "1613060010",
+      "expires_on": "1613063610",
+      "extended_expires_on": "-62135596800",
+      "ext_expires_on": "-62135596800"
+    }
+  },
+  "RefreshToken": {
+    "unzyjm1nugflhp1l338bxhryyhbtcyowx1p+f2fcsiq=-fs.msidlab8.com-refreshtoken-publicclientid--": {
+      "home_account_id": "unZYjm1NugFLhP1l338bxhRYyHbtCYOWX1P+F2fCsiQ=",
+      "environment": "fs.msidlab8.com",
+      "client_id": "PublicClientId",
+      "secret": "secret",
+      "credential_type": "RefreshToken"
+    }
+  },
+  "IdToken": {
+    "unzyjm1nugflhp1l338bxhryyhbtcyowx1p+f2fcsiq=-fs.msidlab8.com-idtoken-publicclientid--": {
+      "home_account_id": "unZYjm1NugFLhP1l338bxhRYyHbtCYOWX1P+F2fCsiQ=",
+      "environment": "fs.msidlab8.com",
+      "client_id": "PublicClientId",
+      "secret": "s",
+      "credential_type": "IdToken"
+    }
+  },
+  "Account": {
+    "unZYjm1NugFLhP1l338bxhRYyHbtCYOWX1P+F2fCsiQ=-fs.msidlab8.com-": {
+      "home_account_id": "unZYjm1NugFLhP1l338bxhRYyHbtCYOWX1P+F2fCsiQ=",
+      "environment": "fs.msidlab8.com",
+      "username": "fidlab@msidlab8.com",
+      "authority_type": "MSSTS"
+    }
+  },
+  "AppMetadata": {
+    "appmetadata-fs.msidlab8.com-publicclientid": {
+      "environment": "fs.msidlab8.com",
+      "client_id": "PublicClientId"
+    }
+  }
+}
