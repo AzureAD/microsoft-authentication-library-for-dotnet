@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ComponentModel;
 
 namespace Microsoft.Identity.Client.Desktop
 {
@@ -15,6 +16,7 @@ namespace Microsoft.Identity.Client.Desktop
         /// For details about Windows broker, see https://aka.ms/msal-net-wam
         /// </summary>
         [Obsolete("This API has been replaced with WithBroker(BrokerOptions)")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public static PublicClientApplicationBuilder WithWindowsBroker(this PublicClientApplicationBuilder builder, bool enableBroker = true)
         {
             builder.Config.IdentityLogger?.Log(new IdentityModel.Abstractions.LogEntry() { EventLogLevel = IdentityModel.Abstractions.EventLogLevel.Informational, Message = "Desktop WAM Broker extension calling RuntimeBroker extension" });
