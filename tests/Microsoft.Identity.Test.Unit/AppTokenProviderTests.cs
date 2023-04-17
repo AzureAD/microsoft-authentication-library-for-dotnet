@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit
                                                               AppTokenProviderResult result = new AppTokenProviderResult
                                                               {
                                                                   AccessToken = TestConstants.DefaultAccessToken,
-                                                                  ExpiresInSeconds = expiresInResponse,   
+                                                                  ExpiresInSeconds = expiresInResponse,
                                                                   RefreshInSeconds = refreshInResponse == 0 ? null : refreshInResponse,
                                                               };
 
@@ -131,22 +131,24 @@ namespace Microsoft.Identity.Test.Unit
             AuthenticationResult result = await app1.AcquireTokenForClient(TestConstants.s_scope)
                                                     .ExecuteAsync().ConfigureAwait(false);
 
-            if (expiresInResponse != 0)
-            {
-                CoreAssert.IsWithinRange(
-                                       DateTimeOffset.Now + TimeSpan.FromSeconds(expectedRefreshIn),
-                                                          result.AuthenticationResultMetadata.RefreshOn.Value,
-                                                                             TimeSpan.FromSeconds(2));
-            }
-            else
+            if (expectedRefreshIn == 0)
             {
                 Assert.IsFalse(result.AuthenticationResultMetadata.RefreshOn.HasValue);
             }
-         
+            else
+            {
+                DateTimeOffset expectedRefreshOn = DateTimeOffset.UtcNow;
+                if (expectedRefreshIn != 0)
+                    expectedRefreshOn = expectedRefreshOn + TimeSpan.FromSeconds(expectedRefreshIn);
 
+                CoreAssert.IsWithinRange(
+                    expectedRefreshOn,
+                    result.AuthenticationResultMetadata.RefreshOn.Value,
+                    TimeSpan.FromSeconds(2));
+            }
         }
 
-        private AppTokenProviderResult GetAppTokenProviderResult(string differentScopesForAt = "",  long? refreshIn = 1000)
+        private AppTokenProviderResult GetAppTokenProviderResult(string differentScopesForAt = "", long? refreshIn = 1000)
         {
             var token = new AppTokenProviderResult();
             token.AccessToken = TestConstants.DefaultAccessToken + differentScopesForAt; //Used to indicate that there is a new access token for a different set of scopes
