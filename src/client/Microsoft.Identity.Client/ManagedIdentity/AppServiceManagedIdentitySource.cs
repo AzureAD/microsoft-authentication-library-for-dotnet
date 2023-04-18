@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// <summary>
     /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/AppServiceManagedIdentitySource.cs
     /// </summary>
-    internal class AppServiceManagedIdentitySource : ManagedIdentitySource
+    internal class AppServiceManagedIdentitySource : AbstractManagedIdentity
     {
         // MSI Constants. Docs for MSI are available here https://docs.microsoft.com/azure/app-service/overview-managed-identity
         private const string AppServiceMsiApiVersion = "2019-08-01";
@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private readonly Uri _endpoint;
         private readonly string _secret;
 
-        public static ManagedIdentitySource TryCreate(RequestContext requestContext)
+        public static AbstractManagedIdentity TryCreate(RequestContext requestContext)
         {
             var msiSecret = EnvironmentVariables.IdentityHeader;
 
@@ -31,7 +31,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 : null;
         }
 
-        private AppServiceManagedIdentitySource(RequestContext requestContext, Uri endpoint, string secret) : base(requestContext)
+        private AppServiceManagedIdentitySource(RequestContext requestContext, Uri endpoint, string secret) 
+            : base(requestContext, ManagedIdentitySource.AppService)
         {
             _endpoint = endpoint;
             _secret = secret;
@@ -54,8 +55,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
             catch (FormatException ex)
             {
-                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(
-                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", msiEndpoint, "App Service"), ex);
+                throw new MsalManagedIdentityException(MsalError.InvalidManagedIdentityEndpoint, string.Format(
+                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", msiEndpoint, "App Service"), 
+                    ex, ManagedIdentitySource.AppService);
             }
 
             logger.Info($"[Managed Identity] Environment variables validation passed for app service managed identity. Endpoint URI: {endpointUri}. Creating App Service managed identity.");
