@@ -35,7 +35,7 @@ steps:
     script: |
       dotnet nuget locals all --clear 
       dotnet workload install maui --source https://api.nuget.org/v3/index.json
-      dotnet workload install android ios maccatalyst tvos macos maui wasm-tools --source https://api.nuget.org/v3/index.json
+      dotnet workload install android ios macos maui --source https://api.nuget.org/v3/index.json
 
 - task: NuGetCommand@2
   displayName: 'NuGet restore for LibMacOS.sln'
