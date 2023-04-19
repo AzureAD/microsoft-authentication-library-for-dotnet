@@ -64,6 +64,9 @@ namespace Microsoft.Identity.Client.OAuth2
         private const string iOSBrokerErrorMetadata = "error_metadata";
         private const string iOSBrokerHomeAccountId = "home_account_id";
 
+        // Due to AOT + JSON serializer https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4082
+        // disable this functionality (better fix would be to move to System.Text.Json)
+#if !__MOBILE__
         // All properties not explicitly defined are added to this dictionary
         // See JSON overflow https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/handle-overflow?pivots=dotnet-7-0
 #if SUPPORTS_SYSTEM_TEXT_JSON
@@ -73,10 +76,13 @@ namespace Microsoft.Identity.Client.OAuth2
         [JsonExtensionData]
         public Dictionary<string, JToken> ExtensionData { get; set; }
 #endif
-
+#endif
         // Exposes only scalar properties from ExtensionData
         public Dictionary<string, string> CreateExtensionDataStringMap()
         {
+#if __MOBILE__
+            return null;
+#else
             if (ExtensionData == null || ExtensionData.Count == 0)
             {
                 return null;
@@ -114,6 +120,7 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 #endif
             return stringExtensionData;
+#endif
         }
 
         [JsonProperty(TokenResponseClaim.TokenType)]
