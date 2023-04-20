@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
             Assert.IsNotNull(CommonParametersReceived);
 
             Assert.AreEqual(expectedApiId, CommonParametersReceived.ApiId);
-            Assert.AreEqual(expectedAuthorityOverride, CommonParametersReceived.AuthorityOverride);
+            Assert.AreEqual(expectedAuthorityOverride, CommonParametersReceived.AuthorityOverride?.CanonicalAuthority?.AbsoluteUri);
 
             CoreAssert.AreScopesEqual(
                 (expectedScopes ?? TestConstants.s_scope).AsSingleString(),

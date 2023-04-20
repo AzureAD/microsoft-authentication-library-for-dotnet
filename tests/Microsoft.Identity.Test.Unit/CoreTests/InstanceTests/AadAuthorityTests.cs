@@ -246,7 +246,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
               authority.AuthorityInfo,
               TestConstants.Utid);
 
-            Assert.AreEqual(authority.AuthorityInfo.CanonicalAuthority, TestConstants.AuthorityUtidTenant);
+            Assert.AreEqual(authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri, TestConstants.AuthorityUtidTenant);
         }
 
         [TestMethod]
