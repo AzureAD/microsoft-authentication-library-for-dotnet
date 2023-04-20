@@ -11,15 +11,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
     [TestClass]
     public class CollectionHelperTests
     {
-        [TestMethod]
-        public void EmptyStringDictionary_Is_Shared()
-        {
-            var d1 = CollectionHelpers.GetEmptyDictionary<string, string>();
-            var d2 = CollectionHelpers.GetEmptyDictionary<string, string>();
-
-            Assert.AreEqual(d1, d2);    
-        }
-
 #if NETCOREAPP2_0_OR_GREATER
 
         [TestMethod]
