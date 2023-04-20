@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client
         public const string CannotInvokeBrokerForPop = "MSAL cannot invoke the broker and it is required for Proof-of-Possession. WAM (Broker) may not be installed on the user's device or there was an error invoking the broker. Use IPublicCleintApplication.IsProofOfPossessionSupportedByClient to ensure Proof-of-Possession can be performed before using WithProofOfPossession." +
             "Check logs for more details and see https://aka.ms/msal-net-pop. ";
         public const string BrokerDoesNotSupportPop = "The broker does not support Proof-of-Possession on the current platform.";
-        public const string BrokerRequiredForPop = "The request has Proof-of-Possession configured but does not have broker enabled. Broker is required for Proof-of-Possession on public clients. Use IPublicCleintApplication.IsProofOfPossessionSupportedByClient to ensure Proof-of-Possession can be performed before using WithProofOfPossession.";
+        public const string BrokerRequiredForPop = "The request has Proof-of-Possession configured but does not have broker enabled. Broker is required to use Proof-of-Possession on public clients. Use IPublicCleintApplication.IsProofOfPossessionSupportedByClient to ensure Proof-of-Possession can be performed before using WithProofOfPossession.";
         public const string NonceRequiredForPop = "The request has Proof-of-Possession configured for public clients but does not have a nonce provided. A nonce is required for Proof-of-Possession on public clients.";
         public const string AdfsNotSupportedWithBroker = "Broker does not support ADFS environments. If using Proof-of-Possession, use IPublicCleintApplication.IsProofOfPossessionSupportedByClient to ensure Proof-of-Possession can be performed before calling WithProofOfPossession.";
 
@@ -457,5 +457,6 @@ namespace Microsoft.Identity.Client
         public const string ManagedIdentityUserAssignedNotConfigurableAtRuntime = "[Managed Identity] Service Fabric user assigned managed identity ClientId or ResourceId is not configurable at runtime.";
         public const string CombinedUserAppCacheNotSupported = "Using a combined flat storage, like a file, to store both app and user tokens is not supported. Use a partitioned token cache (for ex. distributed cache like Redis) or separate files for app and user token caches. See https://aka.ms/msal-net-token-cache-serialization .";
         public const string JsonParseErrorMessage = "There was an error parsing the response from the token endpoint, see inner exception for details. Verify that your app is configured correctly. If this is a B2C app, one possible cause is acquiring a token for Microsoft Graph, which is not supported. See https://aka.ms/msal-net-up";
+        public const string SetCiamAuthorityAtRequestLevelNotSupported = "Setting the CIAM authority (ex. \"{tenantName}.ciamlogin.com\") at the request level is not supported. The CIAM authority must be set during application creation";
     }
 }

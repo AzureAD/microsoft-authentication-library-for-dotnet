@@ -890,14 +890,14 @@ namespace Microsoft.Identity.Client
         public const string CryptoNet45 = "crypto_net45";
 
         /// <summary>
-        /// <para>What happens?</para>The request has broker enabled and proof of possession configured but the broker does not support proof of possession
-        /// <para>Mitigation</para>only configure proof of possession for public clients on windows.
+        /// <para>What happens?</para>The request has broker enabled and Proof-of-Possession configured but the broker does not support Proof-of-Possession
+        /// <para>Mitigation</para>only configure Proof-of-Possession for public clients on windows.
         /// </summary>
         public const string BrokerDoesNotSupportPop = "broker_does_not_support_pop";
 
         /// <summary>
-        /// <para>What happens?</para>The request has proof of possession configured but does not have broker enabled. Broker is required for proof of possession on public clients
-        /// <para>Mitigation</para>Enable the broker when proof of possession is configured.
+        /// <para>What happens?</para>The request has Proof-of-Possession configured but does not have broker enabled. Broker is required to use Proof-of-Possession on public clients
+        /// <para>Mitigation</para>Enable the broker when Proof-of-Possession is configured.
         /// </summary>
         public const string BrokerRequiredForPop = "broker_required_for_pop";
 
@@ -908,8 +908,8 @@ namespace Microsoft.Identity.Client
         public const string AdfsNotSupportedWithBroker = "adfs_not_supported_with_broker";
 
         /// <summary>
-        /// <para>What happens?</para>The request has proof of possession configured but does not have a nonce configured. A nonce is required for proof of possession on public clients
-        /// <para>Mitigation</para>Provide a nonce when proof of possession is configured for public clients.
+        /// <para>What happens?</para>The request has Proof-of-Possession configured but does not have a nonce configured. A nonce is required for Proof-of-Possession on public clients
+        /// <para>Mitigation</para>Provide a nonce when Proof-of-Possession is configured for public clients.
         /// </summary>
         public const string NonceRequiredForPopOnPCA = "nonce_required_for_pop_on_pca";
 #if iOS
@@ -1113,6 +1113,11 @@ namespace Microsoft.Identity.Client
         public const string ManagedIdentityRequestFailed = "managed_identity_request_failed";
 
         /// <summary>
+        /// Managed Identity endpoint is not reachable.
+        /// </summary>
+        public const string ManagedIdentityUnreachableNetwork = "managed_identity_unreachable_network";
+
+        /// <summary>
         /// Unknown error response received.
         /// </summary>
         public const string UnknownManagedIdentityError = "unknown_managed_identity_error";
@@ -1141,5 +1146,10 @@ namespace Microsoft.Identity.Client
         /// Using combined flat storage, like a file, to store both app and user tokens is not supported. Use a partitioned token cache (for ex. distributed cache like Redis) or separate files for app and user token caches. See https://aka.ms/msal-net-token-cache-serialization .
         /// </summary>
         public const string CombinedUserAppCacheNotSupported = "combined_user_app_cache_not_supported";
+
+        /// <summary>
+        /// Setting the CIAM authority (ex. "{tenantName}.ciamlogin.com") at the request level is not supported. The CIAM authority must be set during application creation.
+        /// </summary>
+        public const string SetCiamAuthorityAtRequestLevelNotSupported = "set_ciam_authority_at_request_level_not_supported";
     }
 }

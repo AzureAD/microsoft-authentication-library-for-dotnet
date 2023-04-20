@@ -21,7 +21,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     [TestClass]
-    public class AuthorityMigrationTests
+    public class InstanceDiscoveryIntegrationTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
 

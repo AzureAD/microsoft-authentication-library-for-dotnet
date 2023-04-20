@@ -270,7 +270,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 msalTokenResponse.TokenSource,
                 AuthenticationRequestParameters.RequestContext.ApiEvent,
                 account,
-                msalTokenResponse.SpaAuthCode);
+                msalTokenResponse.SpaAuthCode, 
+                msalTokenResponse.CreateExtensionDataStringMap());
         }
 
         private void ValidateAccountIdentifiers(ClientInfo fromServer)
@@ -317,14 +318,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return AuthenticationRequestParameters.AuthorityManager.RunInstanceDiscoveryAndValidationAsync();
         }
 
-        internal Task<MsalTokenResponse> SendTokenRequestAsync(
+        internal async Task<MsalTokenResponse> SendTokenRequestAsync(
             IDictionary<string, string> additionalBodyParameters,
             CancellationToken cancellationToken)
         {
-            var tokenResponse = SendTokenRequestAsync(
-                AuthenticationRequestParameters.Authority.GetTokenEndpoint(),
+            var tokenEndpoint = await AuthenticationRequestParameters.Authority.GetTokenEndpointAsync(AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+
+            var tokenResponse = await SendTokenRequestAsync(
+                tokenEndpoint,
                 additionalBodyParameters,
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
+
             Metrics.IncrementTotalAccessTokensFromIdP();
             return tokenResponse;
         }
@@ -484,7 +488,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.CorrelationId,
                     TokenSource.Cache,
                     AuthenticationRequestParameters.RequestContext.ApiEvent,
-                    account);
+                    account, 
+                    spaAuthCode: null, 
+                    additionalResponseParameters: null);
             }
 
             logger.Warning("Either the exception does not indicate a problem with AAD or the token cache does not have an AT that is usable. ");

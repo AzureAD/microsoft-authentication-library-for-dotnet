@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             authority = Authority.CreateAuthorityWithTenant(authority.AuthorityInfo, "other_tenant_id_2");
 
-            Assert.AreEqual(authority.AuthorityInfo.CanonicalAuthority, authorityUri);
+            Assert.AreEqual(authority.AuthorityInfo.CanonicalAuthority.AbsoluteUri, authorityUri);
         }
 
     }

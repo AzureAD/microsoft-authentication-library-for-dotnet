@@ -15,5 +15,9 @@ namespace Microsoft.Identity.Client
         B2C, 
 
         Dsts,
+
+        Generic,
+
+        Ciam
     }
 }

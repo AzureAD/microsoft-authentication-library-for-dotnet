@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// <summary>
     /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/ImdsManagedIdentitySource.cs
     /// </summary>
-    internal class ImdsManagedIdentitySource : ManagedIdentitySource
+    internal class ImdsManagedIdentitySource : AbstractManagedIdentity
     {
         // IMDS constants. Docs for IMDS are available here https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-http
         private static readonly Uri s_imdsEndpoint = new("http://169.254.169.254/metadata/identity/oauth2/token");
@@ -32,7 +32,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         private readonly Uri _imdsEndpoint;
 
-        internal ImdsManagedIdentitySource(RequestContext requestContext) : base(requestContext)
+        internal ImdsManagedIdentitySource(RequestContext requestContext) : 
+            base(requestContext, ManagedIdentitySource.Imds)
         {
             if (!string.IsNullOrEmpty(EnvironmentVariables.PodIdentityEndpoint))
 			{
@@ -98,7 +99,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 message = message + Environment.NewLine + errorContentMessage;
 
                 _requestContext.Logger.Error($"Error message: {message} Http status code: {response.StatusCode}");
-                throw new MsalServiceException(MsalError.ManagedIdentityRequestFailed, message);
+                throw new MsalManagedIdentityException(MsalError.ManagedIdentityRequestFailed, message, 
+                    ManagedIdentitySource.Imds);
             }
 
             // Default behavior to handle successful scenario and general errors.
