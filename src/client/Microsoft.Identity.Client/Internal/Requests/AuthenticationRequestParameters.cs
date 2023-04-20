@@ -158,11 +158,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string LongRunningOboCacheKey { get; set; }
 
         public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
-
-        /// <summary>
-        /// Represents the client info of the account returned from the authorization enpoint.
-        /// </summary>
-        public ClientInfo AuthorizationClientInfo { get; set; }
         #endregion
 
         public void LogParameters()

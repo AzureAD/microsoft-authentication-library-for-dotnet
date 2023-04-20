@@ -139,8 +139,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthorizationResult authResult = result.Item1;
             string authCode = authResult.Code;
             string pkceCodeVerifier = result.Item2;
-            ClientInfo authorizationClientInfo = string.IsNullOrWhiteSpace(authResult.ClientInfo) ? null : ClientInfo.CreateFromJson(authResult.ClientInfo);
-            AuthenticationRequestParameters.AuthorizationClientInfo = authorizationClientInfo;
 
             if (BrokerInteractiveRequestComponent.IsBrokerRequiredAuthCode(authCode, out string brokerInstallUri))
             {
@@ -165,7 +163,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     _interactiveParameters,
                     authCode,
                     pkceCodeVerifier,
-                    authorizationClientInfo);
+                    authResult.ClientInfo);
 
             MsalTokenResponse idpTokenResponse = await authCodeExchangeComponent.FetchTokensAsync(cancellationToken)
                 .ConfigureAwait(false);

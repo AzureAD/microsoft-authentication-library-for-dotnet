@@ -241,18 +241,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void ValidateAccountIdentifiers(ClientInfo fromServer)
         {
-            if (AuthenticationRequestParameters.AuthorizationClientInfo is not null)
-            {
-                ValidateAccountIdentifiersAgainstAuthorizationClientInfo(fromServer);
-            }
-            else
-            {
-                ValidateAccountIdentifiersAgainstRequestClientInfo(fromServer);
-            }
-        }
-
-        private void ValidateAccountIdentifiersAgainstRequestClientInfo(ClientInfo fromServer)
-        {
             if (fromServer == null ||
                 AuthenticationRequestParameters?.Account?.HomeAccountId == null ||
                 PublicClientApplication.IsOperatingSystemAccount(AuthenticationRequestParameters?.Account))
@@ -285,38 +273,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     fromServer.UniqueTenantIdentifier,
                     AuthenticationRequestParameters.Account.HomeAccountId.ObjectId,
                     AuthenticationRequestParameters.Account.HomeAccountId.TenantId),
-                string.Empty);
-
-            throw new MsalClientException(MsalError.UserMismatch, MsalErrorMessage.UserMismatchSaveToken);
-        }
-
-        private void ValidateAccountIdentifiersAgainstAuthorizationClientInfo(ClientInfo fromServer)
-        {
-            if (AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AuthorityType.B2C &&
-                fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.AuthorizationClientInfo.UniqueTenantIdentifier,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
-            if (fromServer.UniqueObjectIdentifier.Equals(AuthenticationRequestParameters.AuthorizationClientInfo.UniqueObjectIdentifier,
-                    StringComparison.OrdinalIgnoreCase) &&
-                fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.AuthorizationClientInfo.UniqueTenantIdentifier,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
-            AuthenticationRequestParameters.RequestContext.Logger.Error("Returned user identifiers do not match the sent user identifier");
-
-            AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "User identifier returned by AAD (uid:{0} utid:{1}) does not match the user identifier sent. (uid:{2} utid:{3})",
-                    fromServer.UniqueObjectIdentifier,
-                    fromServer.UniqueTenantIdentifier,
-                    AuthenticationRequestParameters.AuthorizationClientInfo.UniqueObjectIdentifier,
-                    AuthenticationRequestParameters.AuthorizationClientInfo.UniqueTenantIdentifier),
                 string.Empty);
 
             throw new MsalClientException(MsalError.UserMismatch, MsalErrorMessage.UserMismatchSaveToken);
