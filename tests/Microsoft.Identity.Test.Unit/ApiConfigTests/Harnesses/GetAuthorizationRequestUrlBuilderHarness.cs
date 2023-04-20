@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
             Assert.AreEqual(expectedLoginHint, interactiveParameters.LoginHint);
             Assert.AreEqual(expectedPromptValue, interactiveParameters.Prompt.PromptValue);
             Assert.IsNotNull(interactiveParameters.UiParent);
-            Assert.AreEqual(false, interactiveParameters.UseEmbeddedWebView);
+            Assert.AreEqual(WebViewPreference.Embedded, interactiveParameters.UseEmbeddedWebView);
         }
     }
 }

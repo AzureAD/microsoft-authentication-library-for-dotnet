@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// </summary>
     internal class ManagedIdentityClient
     {
-        private readonly ManagedIdentitySource _identitySource;
+        private readonly AbstractManagedIdentity _identitySource;
 
         public ManagedIdentityClient(RequestContext requestContext)
         {
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
-        private static ManagedIdentitySource SelectManagedIdentitySource(RequestContext requestContext)
+        private static AbstractManagedIdentity SelectManagedIdentitySource(RequestContext requestContext)
         {
             return 
                 ServiceFabricManagedIdentitySource.TryCreate(requestContext) ??

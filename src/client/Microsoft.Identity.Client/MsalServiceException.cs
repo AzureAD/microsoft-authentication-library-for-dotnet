@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Additional claims requested by the service. When this property is not null or empty, this means that the service requires the user to
         /// provide additional claims, such as doing two factor authentication. The are two cases:
-        /// <list type="bullent">
+        /// <list type="bullet">
         /// <item><description>
         /// If your application is a <see cref="IPublicClientApplication"/>, you should just call <see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string})"/>
         /// and add the <see cref="AbstractAcquireTokenParameterBuilder{T}.WithClaims(string)"/> modifier.
