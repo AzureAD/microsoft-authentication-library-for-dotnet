@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Utils
             return new List<T>();
         }
 
-        public static IDictionary<TKey, TValue> GetEmptyDictionary<TKey, TValue>()
+        public static IReadOnlyDictionary<TKey, TValue> GetEmptyDictionary<TKey, TValue>()
         {
 #if NET_CORE
             return System.Collections.Immutable.ImmutableDictionary<TKey, TValue>.Empty;

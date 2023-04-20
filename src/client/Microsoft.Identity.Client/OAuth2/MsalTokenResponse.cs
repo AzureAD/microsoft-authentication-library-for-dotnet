@@ -78,14 +78,14 @@ namespace Microsoft.Identity.Client.OAuth2
 #endif
 #endif
         // Exposes only scalar properties from ExtensionData
-        public Dictionary<string, string> CreateExtensionDataStringMap()
+        public IReadOnlyDictionary<string, string> CreateExtensionDataStringMap()
         {
 #if __MOBILE__
-            return null;
+            return CollectionHelpers.GetEmptyDictionary<string, string>();
 #else
             if (ExtensionData == null || ExtensionData.Count == 0)
             {
-                return null;
+                return CollectionHelpers.GetEmptyDictionary<string, string>();
             }
 
             Dictionary<string, string> stringExtensionData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
