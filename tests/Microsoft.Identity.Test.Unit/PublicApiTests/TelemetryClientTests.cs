@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -265,7 +266,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     endpoint,
                     resource,
                     MockHelpers.GetMsiSuccessfulResponse(),
-                    ManagedIdentitySourceType.CloudShell);
+                    ManagedIdentitySource.CloudShell);
 
                 var result = await mia.AcquireTokenForManagedIdentity(resource)
                     .ExecuteAsync().ConfigureAwait(false);

@@ -128,44 +128,8 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> requestScopes,
             string requestTenantId,
             IIdentityLogger identityLogger,
-            bool piiLoggingEnabled)
-
-        {
-            TokenCache = tokenCache;
-            ClientId = clientId;
-            Account = account;
-            HasStateChanged = hasStateChanged;
-            IsApplicationCache = isApplicationCache;
-            SuggestedCacheKey = suggestedCacheKey;
-            HasTokens = hasTokens;
-            CancellationToken = cancellationToken;
-            CorrelationId = correlationId;
-            RequestScopes = requestScopes;
-            RequestTenantId = requestTenantId;
-            SuggestedCacheExpiry = suggestedCacheExpiry;
-            IdentityLogger = identityLogger;
-            PiiLoggingEnabled = piiLoggingEnabled;
-        }
-
-        /// <summary>
-        /// This constructor is for test purposes only. It allows apps to unit test their MSAL token cache implementation code.
-        /// </summary>
-        public TokenCacheNotificationArgs(    // only use this constructor in product code
-            ITokenCacheSerializer tokenCache,
-            string clientId,
-            IAccount account,
-            bool hasStateChanged,
-            bool isApplicationCache,
-            string suggestedCacheKey,
-            bool hasTokens,
-            DateTimeOffset? suggestedCacheExpiry,
-            CancellationToken cancellationToken,
-            Guid correlationId,
-            IEnumerable<string> requestScopes,
-            string requestTenantId,
-            IIdentityLogger identityLogger,
             bool piiLoggingEnabled,
-            TelemetryDatapoints telemetryDatapoints)
+            TelemetryDatapoints telemetryDatapoints = null)
 
         {
             TokenCache = tokenCache;

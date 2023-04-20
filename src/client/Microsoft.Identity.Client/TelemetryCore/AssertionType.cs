@@ -12,10 +12,10 @@ namespace Microsoft.Identity.Client.TelemetryCore
     internal enum AssertionType
     {
         None = 0,
-        CertificateWithoutSNI = 1,
-        CertificateWithSNI = 2,
+        CertificateWithoutSni = 1,
+        CertificateWithSni = 2,
         Secret = 3,
         ClientAssertion = 4,
-        MSI = 5
+        Msi = 5
     }
 }
