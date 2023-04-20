@@ -19,14 +19,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly string _authorizationCode;
         private readonly string _pkceCodeVerifier;
         private readonly TokenClient _tokenClient;
-        private readonly string _clientInfo;
+        private readonly ClientInfo _clientInfo;
 
         public AuthCodeExchangeComponent(
             AuthenticationRequestParameters requestParams,
             AcquireTokenInteractiveParameters interactiveParameters,
             string authorizationCode,
             string pkceCodeVerifier,
-            string clientInfo)
+            ClientInfo clientInfo)
         {
             _requestParams = requestParams ?? throw new ArgumentNullException(nameof(requestParams));
             _interactiveParameters = interactiveParameters ?? throw new ArgumentNullException(nameof(interactiveParameters));
@@ -60,13 +60,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void AddCcsHeadersToTokenClient()
         {
-            if (!string.IsNullOrEmpty(_clientInfo))
+            if (_clientInfo is not null)
             {
-                var clientInfo = ClientInfo.CreateFromJson(_clientInfo);
+                //var clientInfo = ClientInfo.CreateFromJson(_clientInfo);
 
                 _tokenClient.AddHeaderToClient(Constants.CcsRoutingHintHeader,
-                                               CoreHelpers.GetCcsClientInfoHint(clientInfo.UniqueObjectIdentifier,
-                                                                                  clientInfo.UniqueTenantIdentifier));
+                                               CoreHelpers.GetCcsClientInfoHint(_clientInfo.UniqueObjectIdentifier,
+                                                                                  _clientInfo.UniqueTenantIdentifier));
             }
             else if (!string.IsNullOrEmpty(_interactiveParameters.LoginHint))
             {
