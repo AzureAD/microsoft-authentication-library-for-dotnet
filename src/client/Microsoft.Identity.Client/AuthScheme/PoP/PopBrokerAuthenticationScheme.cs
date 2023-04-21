@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             return msalAccessTokenCacheItem.Secret;
         }
 
-        public IDictionary<string, string> GetTokenRequestParams()
+        public IReadOnlyDictionary<string, string> GetTokenRequestParams()
         {
             return new Dictionary<string, string>();
         }
