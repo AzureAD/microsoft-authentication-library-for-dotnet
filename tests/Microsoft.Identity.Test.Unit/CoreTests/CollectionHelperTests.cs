@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
     [TestClass]
     public class CollectionHelperTests
     {
-#if NETCOREAPP2_0_OR_GREATER
+#if NETCOREAPP
 
         [TestMethod]
         public void EmptyStringDictionaryIsImmutable()
