@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
@@ -108,7 +109,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 CreateApplication();
                 _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
-                // Acquire token interactively
+                // Acquire token interactively with scope
                 var result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
                     .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -122,7 +123,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     TokenSource.IdentityProvider, 
                     CacheRefreshReason.NoCachedAccessToken, 
                     AssertionType.Secret,
-                    TestConstants.AuthorityUtidTenant);
+                    TestConstants.AuthorityUtidTenant,
+                    TokenType.Bearer,
+                    CacheTypeUsed.None,
+                    JsonHelper.SerializeToJson(TestConstants.s_scope));
 
                 // Acquire token silently
                 var account = (await _cca.GetAccountsAsync().ConfigureAwait(false)).Single();
@@ -139,6 +143,28 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     CacheRefreshReason.NotApplicable,
                     AssertionType.Secret,
                     TestConstants.AuthorityUtidTenant);
+
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                // Acquire token interactively with resource
+                result = await _cca.AcquireTokenForClient(new[] { TestConstants.DefaultGraphScope })
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+
+                eventDetails = _telemetryClient.TestTelemetryEventDetails;
+                AssertLoggedTelemetry(
+                    result,
+                    eventDetails,
+                    TokenSource.IdentityProvider,
+                    CacheRefreshReason.NoCachedAccessToken,
+                    AssertionType.Secret,
+                    TestConstants.AuthorityUtidTenant,
+                    TokenType.Bearer,
+                    CacheTypeUsed.None,
+                    null,
+                    TestConstants.DefaultGraphScope);
             }
         }
 
@@ -279,7 +305,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     eventDetails,
                     TokenSource.IdentityProvider,
                     CacheRefreshReason.NoCachedAccessToken,
-                    AssertionType.MSI,
+                    AssertionType.Msi,
                     TestConstants.AuthorityCommonTenant);
             }
         }
@@ -316,7 +342,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         AssertionType assertionType,
                         string endpoint,
                         TokenType? tokenType = TokenType.Bearer,
-                        CacheTypeUsed cacheTypeUsed = CacheTypeUsed.None)
+                        CacheTypeUsed cacheTypeUsed = CacheTypeUsed.None,
+                        string scopes = null,
+                        string resource = null)
         {
             Assert.IsNotNull(eventDetails);
             Assert.AreEqual(Convert.ToInt64(cacheRefreshReason), eventDetails.Properties[TelemetryConstants.CacheInfoTelemetry]);
@@ -329,6 +357,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(Convert.ToInt64(tokenType), eventDetails.Properties[TelemetryConstants.TokenType]);
             Assert.AreEqual(endpoint, eventDetails.Properties[TelemetryConstants.Endpoint]);
             Assert.AreEqual(Convert.ToInt64(cacheTypeUsed), eventDetails.Properties[TelemetryConstants.CacheUsed]);
+
+            if (!string.IsNullOrWhiteSpace(scopes))
+            {
+                Assert.AreEqual(scopes, eventDetails.Properties[TelemetryConstants.Scopes]);
+            }
+
+            if (!string.IsNullOrWhiteSpace(resource))
+            {
+                Assert.AreEqual(resource, eventDetails.Properties[TelemetryConstants.Resource]);
+            }
         }
 
         private void CreateApplication(AssertionType assertionType = AssertionType.Secret)
@@ -347,7 +385,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .WithTelemetryClient(_telemetryClient)
                         .BuildConcrete();
                         break;
-                case AssertionType.CertificateWithoutSNI:
+                case AssertionType.CertificateWithoutSni:
                     _cca = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
                         .WithCertificate(certificate)
@@ -356,7 +394,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .WithTelemetryClient(_telemetryClient)
                         .BuildConcrete();
                     break;
-                case AssertionType.CertificateWithSNI:
+                case AssertionType.CertificateWithSni:
                     _cca = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
                         .WithCertificate(certificate, true)
@@ -374,7 +412,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .WithTelemetryClient(_telemetryClient)
                         .BuildConcrete();
                     break;
-                case AssertionType.MSI:
+                case AssertionType.Msi:
                     _cca = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
                         .WithAppTokenProvider((AppTokenProviderParameters parameters) => { return Task.FromResult(GetAppTokenProviderResult()); })

@@ -149,6 +149,24 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 telemetryEventDetails.SetProperty(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
                 telemetryEventDetails.SetProperty(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
                 telemetryEventDetails.SetProperty(TelemetryConstants.CacheUsed, (int)telemetryDatapoints.CacheTypeUsed);
+                ParseScopesForTelemetry(telemetryEventDetails);
+            }
+        }
+
+        private void ParseScopesForTelemetry(MsalTelemetryEventDetails telemetryEventDetails)
+        {
+            if (AuthenticationRequestParameters.Scope.Count > 0)
+            {
+                var firstScope = AuthenticationRequestParameters.Scope.First().ToString();
+                if (Uri.IsWellFormedUriString(firstScope, UriKind.Absolute))
+                {
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Resource, firstScope);
+                }
+                else
+                {
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, JsonHelper.SerializeToJson(AuthenticationRequestParameters.Scope));
+                }
+                
             }
         }
 
@@ -214,19 +232,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 !string.IsNullOrWhiteSpace(ServiceBundle.Config.ManagedIdentityUserAssignedResourceId) ||
                 ServiceBundle.Config.AppTokenProvider != null)
             {
-                return AssertionType.MSI;
+                return AssertionType.Msi;
             }
 
             if (ServiceBundle.Config.ClientCredential != null)
             {
-                if (ServiceBundle.Config.ClientCredential.TelemetryAssertionType == AssertionType.CertificateWithoutSNI)
+                if (ServiceBundle.Config.ClientCredential.TelemetryAssertionType == AssertionType.CertificateWithoutSni)
                 {
                     if (ServiceBundle.Config.SendX5C)
                     {
-                        return AssertionType.CertificateWithSNI;
+                        return AssertionType.CertificateWithSni;
                     }
 
-                    return AssertionType.CertificateWithoutSNI;
+                    return AssertionType.CertificateWithoutSni;
                 }
 
                 return ServiceBundle.Config.ClientCredential.TelemetryAssertionType;

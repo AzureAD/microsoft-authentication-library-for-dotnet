@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
         private readonly string _base64EncodedThumbprint; // x5t
         public X509Certificate2 Certificate { get; }
 
-        public AssertionType TelemetryAssertionType => AssertionType.CertificateWithoutSNI;
+        public AssertionType TelemetryAssertionType => AssertionType.CertificateWithoutSni;
 
         public CertificateAndClaimsClientCredential(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool appendDefaultClaims)
         {
