@@ -30,7 +30,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             // The API Ids for managed identity will not be found in Http telemetry,
             // as we don't hit eSTS for managed identity calls.
             AcquireTokenForSystemAssignedManagedIdentity = 1015,
-            AcquireTokenForUserAssignedManagedIdentity = 1016
+            AcquireTokenForUserAssignedManagedIdentity = 1016,
+            AcquireTokenInLongRunningObo = 1017,
         }
 
         public ApiEvent(Guid correlationId)
@@ -120,5 +121,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         {
             get => TokenType.HasValue ? TokenType.Value.ToString("D") : null;
         }
+
+        public static bool IsOnBehalfOfRequest(ApiIds apiId) => apiId == ApiIds.AcquireTokenOnBehalfOf || apiId == ApiIds.AcquireTokenInLongRunningObo;
     }
 }
