@@ -15,18 +15,18 @@ using Microsoft.Identity.Client.Core;
 namespace Microsoft.Identity.Client.Http
 {
     /// <remarks>
-    /// Http Manager specific to managed identity to implement the retry for specific 
+    /// Http Manager specific to managed identity to implement the retry for specific http status codes.
     /// </remarks>
-    internal class HttpManagerManagedIdentity : HttpManager
+    internal class HttpManagerManagedIdentity : HttpManagerWithRetry
     {
-        public HttpManagerManagedIdentity(IMsalHttpClientFactory httpClientFactory, bool retry = true) : 
-            base(httpClientFactory, retry) { }
+        public HttpManagerManagedIdentity(IMsalHttpClientFactory httpClientFactory) : 
+            base(httpClientFactory) { }
 
         /// <summary>
         /// Retry policy specific to managed identity flow.
         /// Avoid changing this, as it's breaking change.
         /// </summary>
-        protected override bool IsRetryableStatusCode(int statusCode)
+        protected override bool IsRetriableStatusCode(int statusCode)
         {
             switch (statusCode)
             {

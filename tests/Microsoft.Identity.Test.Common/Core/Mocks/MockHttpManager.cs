@@ -12,27 +12,36 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
-    internal sealed class MockHttpManager : HttpManager,
+    internal sealed class MockHttpManager : IHttpManager,
                                             IDisposable
     {
         private readonly TestContext _testContext;
         public Func<MockHttpMessageHandler> MessageHandlerFunc;
 
-        public MockHttpManager(TestContext testContext = null) :
-            base(new SimpleHttpClientFactory())
+        private readonly IHttpManager _httpManager;
+
+        public MockHttpManager(TestContext testContext = null) 
+            //base(new SimpleHttpClientFactory())
         {
+            _httpManager = new HttpManagerWithRetry(new MockHttpClientFactory(MessageHandlerFunc, 
+                _httpMessageHandlerQueue, testContext));
             _testContext = testContext;
         }
 
-        public MockHttpManager(bool retryOnceOn5xx, TestContext testContext = null) :
-            base(new SimpleHttpClientFactory(), retryOnceOn5xx)
+        public MockHttpManager(bool retryOnceOn5xx, TestContext testContext = null)
         {
+            _httpManager = retryOnceOn5xx ? new HttpManagerWithRetry(new MockHttpClientFactory(MessageHandlerFunc,
+                _httpMessageHandlerQueue, testContext)) : 
+                new HttpManager(new MockHttpClientFactory(MessageHandlerFunc,
+                _httpMessageHandlerQueue, testContext));
+
             _testContext = testContext;
         }
 
@@ -70,9 +79,61 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public int QueueSize => _httpMessageHandlerQueue.Count;
 
-        /// <inheritdoc />
+        public long LastRequestDurationInMs => 3000;
 
-        protected override HttpClient GetHttpClient()
+        
+
+        private string GetExpectedUrlFromHandler(HttpMessageHandler handler)
+        {
+            return (handler as MockHttpMessageHandler)?.ExpectedUrl ?? "";
+        }
+
+        public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ILoggerAdapter logger, CancellationToken cancellationToken = default)
+        {
+            return await _httpManager.SendPostAsync(endpoint, headers, bodyParameters, logger, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, HttpContent body, ILoggerAdapter logger, CancellationToken cancellationToken = default)
+        {
+            return await _httpManager.SendPostAsync(endpoint, headers, body, logger, cancellationToken).ConfigureAwait(false);
+        }
+
+        public Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
+        {
+            return _httpManager.SendGetAsync(endpoint, headers, logger, retry, cancellationToken);
+        }
+
+        public async Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, StringContent body, ILoggerAdapter logger, CancellationToken cancellationToken = default)
+        {
+            return await _httpManager.SendPostForceResponseAsync(uri, headers, body, logger, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ILoggerAdapter logger, CancellationToken cancellationToken = default)
+        {
+            return await _httpManager.SendPostForceResponseAsync(uri, headers, bodyParameters, logger, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task<HttpResponse> SendGetForceResponseAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
+        {
+            return await _httpManager.SendGetForceResponseAsync(endpoint, headers, logger, retry, cancellationToken).ConfigureAwait(false); 
+        }
+    }
+
+    internal class MockHttpClientFactory : IMsalHttpClientFactory
+    {
+        Func<MockHttpMessageHandler> MessageHandlerFunc;
+        ConcurrentQueue<HttpMessageHandler> HttpMessageHandlerQueue;
+        TestContext TestContext;
+
+        public MockHttpClientFactory(Func<MockHttpMessageHandler> messageHandlerFunc,
+            ConcurrentQueue<HttpMessageHandler> httpMessageHandlerQueue, TestContext testContext)
+        {
+            MessageHandlerFunc = messageHandlerFunc;
+            HttpMessageHandlerQueue = httpMessageHandlerQueue;
+            TestContext = testContext;
+        }
+
+        public HttpClient GetHttpClient()
         {
             HttpMessageHandler messageHandler;
 
@@ -82,13 +143,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
             else
             {
-                if (!_httpMessageHandlerQueue.TryDequeue(out messageHandler))
+                if (!HttpMessageHandlerQueue.TryDequeue(out messageHandler))
                 {
                     Assert.Fail("The MockHttpManager's queue is empty. Cannot serve another response");
                 }
             }
 
-            Trace.WriteLine($"Test {_testContext?.TestName ?? ""} dequeued a mock handler for { GetExpectedUrlFromHandler(messageHandler) }");
+            Trace.WriteLine($"Test {TestContext?.TestName ?? ""} dequeued a mock handler for {GetExpectedUrlFromHandler(messageHandler)}");
 
             var httpClient = new HttpClient(messageHandler)
             {
@@ -104,6 +165,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         private string GetExpectedUrlFromHandler(HttpMessageHandler handler)
         {
             return (handler as MockHttpMessageHandler)?.ExpectedUrl ?? "";
-        }      
+        }
     }
 }

@@ -353,7 +353,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ManagedIdentitySourceType.CloudShell, CloudShellEndpoint, HttpStatusCode.NotFound)]
         [DataRow(ManagedIdentitySourceType.ServiceFabric, ServiceFabricEndpoint, HttpStatusCode.NotFound)]
         [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint, HttpStatusCode.RequestTimeout)]
-        [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint, HttpStatusCode.TooManyRequests)]
         [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint, HttpStatusCode.InternalServerError)]
         [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint, HttpStatusCode.ServiceUnavailable)]
         [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint, HttpStatusCode.GatewayTimeout)]

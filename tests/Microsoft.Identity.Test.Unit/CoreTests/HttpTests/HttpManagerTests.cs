@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         [TestMethod]
         public async Task TestSendGetWithRetryFalseHttp500TypeFailureAsync()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var httpManager = new MockHttpManager(retryOnceOn5xx: false))
             {
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Get, HttpStatusCode.GatewayTimeout);
 
@@ -143,8 +143,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     var msalHttpResponse = await httpManager.SendGetAsync(
                                                                 new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 null,
-                                                                Substitute.For<ILoggerAdapter>(),
-                                                                retry: false)
+                                                                Substitute.For<ILoggerAdapter>())
                                                             .ConfigureAwait(false);
                     Assert.Fail("request should have failed");
                 }
