@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync("https://buildautomation.vault.azure.net/secrets/CertName/CertVersion").ConfigureAwait(false);
 
-            Assert.AreEqual("login.windows.net", new Uri(authParams.Authority).Host);
+            Assert.AreEqual("login.microsoftonline.com", new Uri(authParams.Authority).Host);
             Assert.AreEqual("72f988bf-86f1-41af-91ab-2d7cd011db47", authParams.GetTenantId()); // because the Key Vault resource belong to Microsoft Corp tenant
             Assert.AreEqual(2, authParams.RawParameters.Count);
             Assert.IsNull(authParams.Claims);
