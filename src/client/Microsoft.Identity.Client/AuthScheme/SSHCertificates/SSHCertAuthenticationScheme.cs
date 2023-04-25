@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
             return msalAccessTokenCacheItem.Secret;
         }
 
-        public IDictionary<string, string> GetTokenRequestParams()
+        public IReadOnlyDictionary<string, string> GetTokenRequestParams()
         {
             return new Dictionary<string, string>()
             {

@@ -18,11 +18,14 @@ namespace Microsoft.Identity.Client
     /// For details see https://aka.ms/msal-net-client-applications
     /// </summary>
     /// <remarks>
-    /// <list type="bullet">
-    /// <item><description>Contrary to <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, public clients are unable to hold configuration time secrets,
-    /// and as a result have no client secret</description></item>
-    /// <item><description>The redirect URL is proposed by the library. It does not need to be passed in the constructor</description></item>
-    /// </list>
+    /// <para>
+    /// Unlike <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, public clients are unable to hold configuration time secrets,
+    /// and as a result have no client secret.
+    /// </para>
+    /// <para>
+    /// The redirect URI needed for interactive authentication is automatically determined by the library. It does not need to be passed explicitly in the constructor. Depending
+    /// on the authentication strategy (e.g., through the Web Authentication Manager, Authentication app, browser, etc.), different redirect URIs will be used by MSAL. Redirect URIs must always be configured in the Azure Active Directory blade in the Azure Portal.
+    /// </para>
     /// </remarks>
     public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication, IByRefreshToken
     {

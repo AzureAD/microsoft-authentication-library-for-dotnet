@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.AuthScheme
         /// Extra parameters that are added to the request to the /token endpoint. 
         /// </summary>
         /// <returns>Name and values of params</returns>
-        IDictionary<string, string> GetTokenRequestParams();
+        IReadOnlyDictionary<string, string> GetTokenRequestParams();
 
         /// <summary>
         /// Key ID of the public / private key pair used by the encryption algorithm, if any. 
