@@ -44,8 +44,8 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      dotnet workload install maui --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
-      dotnet workload install android --source https://aka.ms/dotnet6/nuget/index.json --source https://api.nuget.org/v3/index.json
+      dotnet workload install maui --source https://api.nuget.org/v3/index.json
+      dotnet workload install android --source https://api.nuget.org/v3/index.json
 
 #Build and restore test packages
 - task: VSBuild@1
