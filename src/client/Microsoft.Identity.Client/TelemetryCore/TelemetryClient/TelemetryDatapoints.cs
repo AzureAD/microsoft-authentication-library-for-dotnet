@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.TelemetryClient
     /// <summary>
     /// Stores details to log to the <see cref="ITelemetryClient"/>.
     /// </summary>
-    public class TelemetryDatapoints
+    public class TelemetryData
     {
         /// <summary>
         /// Type of cache used. This data is captured from MSAL or Microsoft.Identity.Web to log to telemetry.

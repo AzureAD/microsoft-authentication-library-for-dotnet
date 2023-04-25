@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client.Cache
 {
     /// <summary>
-    /// Identifies the type of cache used when accessing the cache.
+    /// Identifies the type of cache used when accessing the cache. Cache implementations must provide this.
     /// </summary>
-    public enum CacheTypeUsed
+    public enum CacheLevel
     {
         /// <summary>
         /// Specifies that no cache type is used

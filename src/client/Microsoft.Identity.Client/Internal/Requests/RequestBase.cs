@@ -142,10 +142,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 telemetryEventDetails.SetProperty(TelemetryConstants.TokenType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.TokenType);
                 telemetryEventDetails.SetProperty(TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds);
                 telemetryEventDetails.SetProperty(TelemetryConstants.ActivityId, authenticationResult.CorrelationId);
-                telemetryEventDetails.SetProperty(TelemetryConstants.RefreshOn, 
-                    authenticationResult.AuthenticationResultMetadata.RefreshOn.HasValue ?
-                    DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value)
-                    : 0);
+                if (authenticationResult.AuthenticationResultMetadata.RefreshOn.HasValue)
+                {
+                telemetryEventDetails.SetProperty(TelemetryConstants.RefreshOn, DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value));
+                }
                 telemetryEventDetails.SetProperty(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
                 telemetryEventDetails.SetProperty(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
                 telemetryEventDetails.SetProperty(TelemetryConstants.CacheUsed, (int)telemetryDatapoints.CacheTypeUsed);
