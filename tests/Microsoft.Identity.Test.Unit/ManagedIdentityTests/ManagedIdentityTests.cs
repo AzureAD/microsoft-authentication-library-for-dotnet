@@ -384,16 +384,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint, HttpStatusCode.NotFound)]
-        [DataRow(ManagedIdentitySourceType.IMDS, ImdsEndpoint, HttpStatusCode.NotFound)]
-        [DataRow(ManagedIdentitySourceType.AzureArc, AzureArcEndpoint, HttpStatusCode.NotFound)]
-        [DataRow(ManagedIdentitySourceType.CloudShell, CloudShellEndpoint, HttpStatusCode.NotFound)]
-        [DataRow(ManagedIdentitySourceType.ServiceFabric, ServiceFabricEndpoint, HttpStatusCode.NotFound)]
-        [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint, HttpStatusCode.RequestTimeout)]
-        [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint, HttpStatusCode.InternalServerError)]
-        [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint, HttpStatusCode.ServiceUnavailable)]
-        [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint, HttpStatusCode.GatewayTimeout)]
-        public async Task ManagedIdentityTestRetryAsync(ManagedIdentitySourceType managedIdentitySource, string endpoint, HttpStatusCode statusCode)
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.NotFound)]
+        [DataRow(ManagedIdentitySource.Imds, ImdsEndpoint, HttpStatusCode.NotFound)]
+        [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint, HttpStatusCode.NotFound)]
+        [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint, HttpStatusCode.NotFound)]
+        [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint, HttpStatusCode.NotFound)]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.RequestTimeout)]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.InternalServerError)]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.ServiceUnavailable)]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint, HttpStatusCode.GatewayTimeout)]
+        public async Task ManagedIdentityTestRetryAsync(ManagedIdentitySource managedIdentitySource, string endpoint, HttpStatusCode statusCode)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
