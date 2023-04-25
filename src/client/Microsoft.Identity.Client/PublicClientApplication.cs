@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client
     /// </para>
     /// <para>
     /// The redirect URI needed for interactive authentication is automatically determined by the library. It does not need to be passed explicitly in the constructor. Depending
-    /// on the authentication strategy (e.g., through the Web Authentication Manager, Authentication app, browser, etc.), different redirect URIs will be used by MSAL. Redirect URIs must always be configured in the Azure Active Directory bldate in the Azure Portal.
+    /// on the authentication strategy (e.g., through the Web Authentication Manager, Authentication app, browser, etc.), different redirect URIs will be used by MSAL. Redirect URIs must always be configured in the Azure Active Directory blade in the Azure Portal.
     /// </para>
     /// </remarks>
     public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication, IByRefreshToken
