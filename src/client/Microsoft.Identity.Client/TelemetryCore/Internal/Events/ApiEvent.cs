@@ -26,12 +26,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             GetAccountById = 1011,
             GetAccountsByUserFlow = 1012,
             RemoveAccount = 1013,
-            RemoveOboTokens = 1014,
-            // The API Ids for managed identity will not be found in Http telemetry,
+            RemoveOboTokens = 1014, //MSAL 4.51.0+
+            // The API Ids for managed identity will not be found in HTTP telemetry,
             // as we don't hit eSTS for managed identity calls.
-            AcquireTokenForSystemAssignedManagedIdentity = 1015,
-            AcquireTokenForUserAssignedManagedIdentity = 1016,
-            AcquireTokenInLongRunningObo = 1017,
+            AcquireTokenForSystemAssignedManagedIdentity = 1015, //MSAL 4.51.0+
+            AcquireTokenForUserAssignedManagedIdentity = 1016, //MSAL 4.51.0+
+            InitiateLongRunningObo = 1017, //MSAL 4.54.0+
+            AcquireTokenInLongRunningObo = 1018, //MSAL 4.54.0+
         }
 
         public ApiEvent(Guid correlationId)
@@ -122,6 +123,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             get => TokenType.HasValue ? TokenType.Value.ToString("D") : null;
         }
 
-        public static bool IsOnBehalfOfRequest(ApiIds apiId) => apiId == ApiIds.AcquireTokenOnBehalfOf || apiId == ApiIds.AcquireTokenInLongRunningObo;
+        public static bool IsLongRunningObo(ApiIds apiId) => apiId == ApiIds.InitiateLongRunningObo || apiId == ApiIds.AcquireTokenInLongRunningObo;
+
+        public static bool IsOnBehalfOfRequest(ApiIds apiId) => apiId == ApiIds.AcquireTokenOnBehalfOf || IsLongRunningObo(apiId);
+
     }
 }

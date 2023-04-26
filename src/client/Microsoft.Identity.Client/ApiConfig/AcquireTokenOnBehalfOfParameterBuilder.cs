@@ -181,7 +181,21 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            return string.IsNullOrEmpty(Parameters.LongRunningOboCacheKey) ? ApiEvent.ApiIds.AcquireTokenOnBehalfOf : ApiEvent.ApiIds.AcquireTokenInLongRunningObo;
+            if (string.IsNullOrEmpty(Parameters.LongRunningOboCacheKey))
+            {
+                return ApiEvent.ApiIds.AcquireTokenOnBehalfOf;
+            }
+            else
+            {
+                if (Parameters.UserAssertion != null)
+                {
+                    return ApiEvent.ApiIds.InitiateLongRunningObo;
+                }
+                else
+                {
+                    return ApiEvent.ApiIds.AcquireTokenInLongRunningObo;
+                }
+            }
         }
     }
 }
