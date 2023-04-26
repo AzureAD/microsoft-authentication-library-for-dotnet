@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -21,16 +22,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         private const string CloudShell = "Cloud Shell";
 
         [DataTestMethod]
-        [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow("resourceId", UserAssignedIdentityId.ResourceId)]
-        public async Task CloudShellUserAssignedManagedIdentityNotSupportedAsync(string userAssignedClientId, UserAssignedIdentityId userAssignedIdentityId)
+        [DataRow(TestConstants.ClientId, UserAssignedIdType.ClientId)]
+        [DataRow("resourceId", UserAssignedIdType.ResourceId)]
+        public async Task CloudShellUserAssignedManagedIdentityNotSupportedAsync(string userAssignedId, UserAssignedIdType userAssignedIdType)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(ManagedIdentitySource.CloudShell, ManagedIdentityTests.CloudShellEndpoint);
 
-                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(userAssignedClientId)
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder
+                    .Create(userAssignedIdType == UserAssignedIdType.ClientId ?
+                    UserAssignedManagedIdentity.FromClientId(userAssignedId) :
+                    UserAssignedManagedIdentity.FromResourceId(userAssignedId))
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
@@ -54,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.CloudShell, "localhost/token");
 
-                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.Identity.Client.AppConfig;
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -10,9 +12,10 @@ namespace Microsoft.Identity.Client
     public class ManagedIdentityApplicationOptions : BaseApplicationOptions
     {
         /// <summary>
-        /// User assigned client id or resource id of the managed identity resource. 
+        /// Managed identity assigned to the resource, for system assigned managed identity <see cref="SystemAssignedManagedIdentity"/>
+        /// and for user assigned managed identity <see cref="UserAssignedManagedIdentity"/>.
         /// </summary>
-        public string UserAssignedClientId { get; set; }
+        public IManagedIdentity ManagedIdentity { get; set; }
 
         /// <summary>
         /// When set to <c>true</c>, MSAL will lock cache access at the <see cref="ManagedIdentityApplication"/> level, i.e.

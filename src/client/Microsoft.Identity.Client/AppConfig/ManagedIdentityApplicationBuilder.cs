@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -46,13 +47,7 @@ namespace Microsoft.Identity.Client
         {
             ApplicationBase.GuardMobileFrameworks();
 
-            var config = new ApplicationConfiguration(isConfidentialClient: false);
-            var builder = new ManagedIdentityApplicationBuilder(config).WithOptions(options);
-
-            if (!string.IsNullOrWhiteSpace(options.UserAssignedClientId))
-            {
-                builder = builder.WithUserAssignedManagedIdentity(options.UserAssignedClientId);
-            }
+            var builder = new ManagedIdentityApplicationBuilder(BuildConfiguration(options.ManagedIdentity)).WithOptions(options);
 
             builder = builder.WithCacheSynchronization(options.EnableCacheSynchronization);
 
@@ -60,62 +55,46 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Creates a ManagedIdentityApplicationBuilder.
-        /// See https://aka.ms/msal-net-application-configuration
-        /// </summary>
-        /// <returns>A <see cref="ManagedIdentityApplicationBuilder"/> from which to set more
-        /// parameters, and to create a managed identity application instance</returns>
-#if !SUPPORTS_CONFIDENTIAL_CLIENT
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
-#endif
-        public static ManagedIdentityApplicationBuilder Create()
-        {
-            ApplicationBase.GuardMobileFrameworks();
-
-            var config = new ApplicationConfiguration(isConfidentialClient: false);
-            return new ManagedIdentityApplicationBuilder(config)
-                .WithCacheSynchronization(false);
-        }
-
-        /// <summary>
         /// Creates a ManagedIdentityApplicationBuilder from a user assigned managed identity clientID / resourceId.
-        /// See https://aka.ms/msal-net-managed-identity
+        /// For example, for a system assigned managed identity use ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
+        /// and for a user assigned managed identity use ManagedIdentityApplicationBuilder.Create(UserAssignedManagedIdentity.FromClientId(clientId)).
+        /// For more details see https://aka.ms/msal-net-managed-identity
         /// </summary>
-        /// <param name="userAssignedId">Client ID / Resource ID of the user assigned managed identity assigned to the resource.</param>
+        /// <param name="managedIdentity">Managed Identity assigned to the resource.</param>
         /// <returns>A <see cref="ManagedIdentityApplicationBuilder"/> from which to set more
         /// parameters, and to create a managed identity application instance</returns>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
-        public static ManagedIdentityApplicationBuilder Create(string userAssignedId)
+        public static ManagedIdentityApplicationBuilder Create(IManagedIdentity managedIdentity)
         {
             ApplicationBase.GuardMobileFrameworks();
 
-            if (string.IsNullOrWhiteSpace(userAssignedId))
-            {
-                throw new ArgumentNullException(nameof(userAssignedId));
-            }
-
-            var config = new ApplicationConfiguration(isConfidentialClient: false);
-            return new ManagedIdentityApplicationBuilder(config)
-                .WithUserAssignedManagedIdentity(userAssignedId)
+            return new ManagedIdentityApplicationBuilder(BuildConfiguration(managedIdentity))
                 .WithCacheSynchronization(false);
         }
 
-        private ManagedIdentityApplicationBuilder WithUserAssignedManagedIdentity(string userAssignedId)
+        private static ApplicationConfiguration BuildConfiguration(IManagedIdentity managedIdentity)
         {
-            Config.IsUserAssignedManagedIdentity = true;
+            var config = new ApplicationConfiguration(isConfidentialClient: false);
 
-            if (Guid.TryParse(userAssignedId, out _))
+            if (managedIdentity is UserAssignedManagedIdentity)
             {
-                Config.ManagedIdentityUserAssignedClientId = userAssignedId;
-            } 
-            else
-            {
-                Config.ManagedIdentityUserAssignedResourceId = userAssignedId;
+                config.IsUserAssignedManagedIdentity = true;
+                var userAssignedManagedIdentity = managedIdentity as UserAssignedManagedIdentity;
+
+                switch (userAssignedManagedIdentity.UserAssignedIdType)
+                {
+                    case UserAssignedIdType.ClientId:
+                        config.ManagedIdentityUserAssignedClientId = userAssignedManagedIdentity.UserAssignedId;
+                        break;
+                    case UserAssignedIdType.ResourceId:
+                        config.ManagedIdentityUserAssignedResourceId = userAssignedManagedIdentity.UserAssignedId;
+                        break;
+                }
             }
 
-            return this;
+            return config;
         }
 
         /// <summary>

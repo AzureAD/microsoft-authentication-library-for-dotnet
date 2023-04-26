@@ -7,6 +7,7 @@ using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Test.Common;
@@ -28,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor()
         {
-            var mi = ManagedIdentityApplicationBuilder.Create()
+            var mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
                 .WithExperimentalFeatures().BuildConcrete();
 
             // Assert defaults
@@ -51,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithCreateUserAssignedId()
         {
-            var mi = ManagedIdentityApplicationBuilder.Create(TestConstants.ClientId)
+            var mi = ManagedIdentityApplicationBuilder.Create(UserAssignedManagedIdentity.FromClientId(TestConstants.ClientId))
                 .WithExperimentalFeatures().BuildConcrete();
 
             //Assert defaults
@@ -80,7 +81,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [DataRow("resourceId/subscription", false)]
         public void TestConstructor_WithUserAssignedManagedIdentity_ResourceId(string userAssignedId, bool isClientId = true)
         {
-            var mi = ManagedIdentityApplicationBuilder.Create(userAssignedId)
+            var mi = ManagedIdentityApplicationBuilder.Create(isClientId ? 
+                    UserAssignedManagedIdentity.FromClientId(userAssignedId) : 
+                    UserAssignedManagedIdentity.FromResourceId(userAssignedId))
                 .WithExperimentalFeatures()
                 .BuildConcrete();
 
@@ -107,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             var options = new ManagedIdentityApplicationOptions
             {
-                UserAssignedClientId = TestConstants.ClientId,
+                ManagedIdentity = UserAssignedManagedIdentity.FromClientId(TestConstants.ClientId),
                 EnableCacheSynchronization = optionFlag
             };
             var mi = ManagedIdentityApplicationBuilder.CreateWithApplicationOptions(options).WithExperimentalFeatures()
@@ -118,7 +121,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithDebugLoggingCallback()
         {
-            var mi = ManagedIdentityApplicationBuilder.Create()
+            var mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
                 .WithExperimentalFeatures()
                 .WithDebugLoggingCallback()
                 .BuildConcrete();
@@ -129,7 +132,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithHttpClientFactory()
         {
             var httpClientFactory = NSubstitute.Substitute.For<IMsalHttpClientFactory>();
-            var mi = ManagedIdentityApplicationBuilder.Create()
+            var mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
                 .WithExperimentalFeatures()
                 .WithHttpClientFactory(httpClientFactory)
                 .BuildConcrete();
@@ -140,7 +143,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithLogging()
         {
             var mi = ManagedIdentityApplicationBuilder
-                .Create()
+                .Create(SystemAssignedManagedIdentity.Default())
                 .WithExperimentalFeatures()
                 .WithLogging((level, message, pii) => { })
                 .BuildConcrete();

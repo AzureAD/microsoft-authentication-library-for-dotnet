@@ -9,6 +9,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -56,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                var mi = ManagedIdentityApplicationBuilder.Create()
+                var mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
@@ -83,24 +84,27 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
-        [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
-        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
+        [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, TestConstants.ClientId, UserAssignedIdType.ClientId)]
+        [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, TestConstants.MiResourceId, UserAssignedIdType.ResourceId)]
+        [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.ClientId, UserAssignedIdType.ClientId)]
+        [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.MiResourceId, UserAssignedIdType.ResourceId)]
+        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.ClientId, UserAssignedIdType.ClientId)]
+        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdType .ResourceId)]
         public async Task ManagedIdentityUserAssignedHappyPathAsync(
             string endpoint,
             ManagedIdentitySource managedIdentitySource,
             string userAssignedId,
-            UserAssignedIdentityId userAssignedIdentityId)
+            UserAssignedIdType userAssignedIdType)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                var mi = ManagedIdentityApplicationBuilder.Create(userAssignedId)
+                var mi = ManagedIdentityApplicationBuilder.Create(
+                    userAssignedIdType == UserAssignedIdType.ClientId ? 
+                        UserAssignedManagedIdentity.FromClientId(userAssignedId) : 
+                        UserAssignedManagedIdentity.FromResourceId(userAssignedId))
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
@@ -111,7 +115,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     MockHelpers.GetMsiSuccessfulResponse(),
                     managedIdentitySource,
                     userAssignedClientIdOrResourceId: userAssignedId,
-                    userAssignedIdentityId: userAssignedIdentityId);
+                    userAssignedIdType: userAssignedIdType);
 
                 var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
 
@@ -145,7 +149,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                var mi = ManagedIdentityApplicationBuilder.Create()
+                var mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
@@ -201,7 +205,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                var mi = ManagedIdentityApplicationBuilder.Create()
+                var mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
@@ -265,7 +269,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager).Build();
 
@@ -297,7 +301,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager).Build();
 
@@ -330,7 +334,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager).Build();
 
@@ -365,7 +369,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager).Build();
 
@@ -391,7 +395,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
-                var mi = ManagedIdentityApplicationBuilder.Create()
+                var mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
@@ -421,7 +425,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
-                var mi = ManagedIdentityApplicationBuilder.Create(TestConstants.ClientId)
+                var mi = ManagedIdentityApplicationBuilder.Create(UserAssignedManagedIdentity.FromClientId(TestConstants.ClientId))
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
@@ -432,7 +436,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     MockHelpers.GetMsiSuccessfulResponse(),
                     ManagedIdentitySource.AppService,
                     userAssignedClientIdOrResourceId: TestConstants.ClientId,
-                    userAssignedIdentityId: UserAssignedIdentityId.ClientId);
+                    userAssignedIdType: UserAssignedIdType.ClientId);
 
                 var builder = mi.AcquireTokenForManagedIdentity(Resource);
                 var result = await builder.ExecuteAsync().ConfigureAwait(false);
@@ -453,7 +457,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
-                var mi = ManagedIdentityApplicationBuilder.Create()
+                var mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
