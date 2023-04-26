@@ -218,6 +218,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 fromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
             }
 
+            
             ValidateAccountIdentifiers(fromServer);
 
             AuthenticationRequestParameters.RequestContext.Logger.Info("Saving token response to cache..");
@@ -239,43 +240,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 msalTokenResponse.CreateExtensionDataStringMap());
         }
 
-        private void ValidateAccountIdentifiers(ClientInfo fromServer)
+        protected virtual void ValidateAccountIdentifiers(ClientInfo fromServer)
         {
-            if (fromServer == null ||
-                AuthenticationRequestParameters?.Account?.HomeAccountId == null ||
-                PublicClientApplication.IsOperatingSystemAccount(AuthenticationRequestParameters?.Account))
-            {
-                return;
-            }
-
-            if (AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AuthorityType.B2C &&
-                fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.Account.HomeAccountId.TenantId,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
-            if (fromServer.UniqueObjectIdentifier.Equals(AuthenticationRequestParameters.Account.HomeAccountId.ObjectId,
-                    StringComparison.OrdinalIgnoreCase) &&
-                fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.Account.HomeAccountId.TenantId,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
-            AuthenticationRequestParameters.RequestContext.Logger.Error("Returned user identifiers do not match the sent user identifier");
-
-            AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "User identifier returned by AAD (uid:{0} utid:{1}) does not match the user identifier sent. (uid:{2} utid:{3})",
-                    fromServer.UniqueObjectIdentifier,
-                    fromServer.UniqueTenantIdentifier,
-                    AuthenticationRequestParameters.Account.HomeAccountId.ObjectId,
-                    AuthenticationRequestParameters.Account.HomeAccountId.TenantId),
-                string.Empty);
-
-            throw new MsalClientException(MsalError.UserMismatch, MsalErrorMessage.UserMismatchSaveToken);
+            //No Op
         }
 
         protected Task ResolveAuthorityAsync()
