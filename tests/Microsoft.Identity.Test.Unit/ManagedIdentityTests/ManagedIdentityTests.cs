@@ -418,12 +418,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     managedIdentitySource,
                     statusCode: statusCode); //404
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+                Assert.IsTrue(ex.IsRetryable);
             }
         }
 
