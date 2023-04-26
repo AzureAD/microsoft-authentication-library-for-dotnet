@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// </summary>
         public string KeyId { get; }
 
-        public IDictionary<string, string> GetTokenRequestParams()
+        public IReadOnlyDictionary<string, string> GetTokenRequestParams()
         {
             return new Dictionary<string, string>() {
                 { OAuth2Parameter.TokenType, Constants.PoPTokenType},
