@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
@@ -46,7 +47,7 @@ namespace Microsoft.Identity.Client
         {
             ClientApplicationBase.GuardMobileFrameworks();
 
-            var config = new ApplicationConfiguration(isConfidentialClient: true);
+            var config = new ApplicationConfiguration(ApplicationType.ConfidentialClient);
             var builder = new ConfidentialClientApplicationBuilder(config).WithOptions(options);
 
             if (!string.IsNullOrWhiteSpace(options.ClientSecret))
@@ -79,7 +80,7 @@ namespace Microsoft.Identity.Client
         {
             ClientApplicationBase.GuardMobileFrameworks();
 
-            var config = new ApplicationConfiguration(isConfidentialClient: true);
+            var config = new ApplicationConfiguration(ApplicationType.ConfidentialClient);
             return new ConfidentialClientApplicationBuilder(config)
                 .WithClientId(clientId)
                 .WithCacheSynchronization(false);

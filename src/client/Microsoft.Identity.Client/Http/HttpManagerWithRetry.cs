@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client.Http
                     MsalErrorMessage.HttpRequestUnsuccessful,
                     (int)response.StatusCode, response.StatusCode));
 
-                isRetriableStatusCode = IsRetriableStatusCode((int)response.StatusCode);
+                isRetriableStatusCode = IsRetryableStatusCode((int)response.StatusCode);
                 isRetriable = isRetriableStatusCode && !HasRetryAfterHeader(response);
             }
             catch (TaskCanceledException exception)

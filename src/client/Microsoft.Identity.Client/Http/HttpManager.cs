@@ -27,8 +27,6 @@ namespace Microsoft.Identity.Client.Http
         protected readonly IMsalHttpClientFactory _httpClientFactory;
         public long LastRequestDurationInMs { get; private set; }
 
-        protected bool _retryConfig = false;
-
         public HttpManager(IMsalHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory ?? 
@@ -189,7 +187,7 @@ namespace Microsoft.Identity.Client.Http
             }
 
             // package 500 errors in a "service not available" exception
-            if (IsRetriableStatusCode((int)response.StatusCode))
+            if (IsRetryableStatusCode((int)response.StatusCode))
             {
                 throw MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.ServiceNotAvailable,
@@ -279,7 +277,7 @@ namespace Microsoft.Identity.Client.Http
         /// In HttpManager, the retry policy is based on this simple condition.
         /// Avoid changing this, as it's breaking change.
         /// </summary>
-        protected virtual bool IsRetriableStatusCode(int statusCode)
+        protected virtual bool IsRetryableStatusCode(int statusCode)
         {
             return statusCode >= 500 && statusCode < 600;                
         }

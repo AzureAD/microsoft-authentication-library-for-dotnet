@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
@@ -23,9 +24,18 @@ namespace Microsoft.Identity.Client
 {
     internal sealed class ApplicationConfiguration : IAppConfig
     {
-        public ApplicationConfiguration(bool isConfidentialClient, bool isManagedIdentity = false) 
+        public ApplicationConfiguration(ApplicationType applicationType) 
         {
-            IsConfidentialClient = isConfidentialClient;
+            switch (applicationType)
+            {
+                case ApplicationType.ConfidentialClient: 
+                    IsConfidentialClient = true;
+                    break;
+
+                case ApplicationType.ManagedIdentity:
+                    IsManagedIdentity = true;
+                    break;
+            }
         }
         
         public const string DefaultClientName = "UnknownClient";

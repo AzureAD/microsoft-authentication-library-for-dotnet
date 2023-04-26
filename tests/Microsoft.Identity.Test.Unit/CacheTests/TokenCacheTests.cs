@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Castle.Core.Internal;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
@@ -662,7 +663,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory(TestCategories.TokenCacheTests)]
         public async Task DoNotSaveRefreshTokenInAdalCacheForMsalB2CAuthorityTestAsync()
         {
-            var appConfig = new ApplicationConfiguration(isConfidentialClient: true)
+            var appConfig = new ApplicationConfiguration(ApplicationType.ConfidentialClient)
             {
                 ClientId = TestConstants.ClientId,
                 RedirectUri = TestConstants.RedirectUri,

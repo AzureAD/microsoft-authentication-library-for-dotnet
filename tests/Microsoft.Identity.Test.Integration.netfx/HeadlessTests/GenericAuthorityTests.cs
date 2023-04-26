@@ -9,6 +9,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
@@ -67,7 +68,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [RunOn(TargetFrameworks.NetCore | TargetFrameworks.NetFx)]
         public async Task ShouldSupportClientCredentialsPrivateKeyJwtWithDuendeDemoInstanceAsync()
         {
-            var applicationConfiguration = new ApplicationConfiguration(true);
+            var applicationConfiguration = new ApplicationConfiguration(ApplicationType.ConfidentialClient);
             ConfidentialClientApplicationBuilder builder = new(applicationConfiguration);
 
             string authority = DemoDuendeSoftwareDotCom + "/"; // for when the app developer adds / at the end.

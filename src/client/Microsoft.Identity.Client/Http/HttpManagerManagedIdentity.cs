@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Http
         /// Retry policy specific to managed identity flow.
         /// Avoid changing this, as it's breaking change.
         /// </summary>
-        protected override bool IsRetriableStatusCode(int statusCode)
+        protected override bool IsRetryableStatusCode(int statusCode)
         {
             switch (statusCode)
             {
