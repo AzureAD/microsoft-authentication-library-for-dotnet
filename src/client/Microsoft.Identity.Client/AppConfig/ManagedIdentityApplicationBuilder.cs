@@ -49,8 +49,6 @@ namespace Microsoft.Identity.Client
 
             var builder = new ManagedIdentityApplicationBuilder(BuildConfiguration(options.ManagedIdentity)).WithOptions(options);
 
-            builder = builder.WithCacheSynchronization(options.EnableCacheSynchronization);
-
             return builder;
         }
 
@@ -70,8 +68,7 @@ namespace Microsoft.Identity.Client
         {
             ApplicationBase.GuardMobileFrameworks();
 
-            return new ManagedIdentityApplicationBuilder(BuildConfiguration(managedIdentity))
-                .WithCacheSynchronization(false);
+            return new ManagedIdentityApplicationBuilder(BuildConfiguration(managedIdentity));
         }
 
         private static ApplicationConfiguration BuildConfiguration(IManagedIdentity managedIdentity)
@@ -94,23 +91,10 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            return config;
-        }
+            config.CacheSynchronizationEnabled = false;
+            config.AccessorOptions = CacheOptions.EnableSharedCacheOptions;
 
-        /// <summary>
-        /// When set to <c>true</c>, MSAL will lock cache access at the <see cref="ManagedIdentityApplication"/> level, i.e.
-        /// the block of code between BeforeAccessAsync and AfterAccessAsync callbacks will be synchronized. 
-        /// Apps can set this flag to <c>false</c> to enable an optimistic cache locking strategy, which may result in better performance, especially 
-        /// when ConfidentialClientApplication or ManagedIdentityApplication objects are reused.
-        /// </summary>
-        /// <remarks>
-        /// False by default.
-        /// Not recommended for apps that call RemoveAsync
-        /// </remarks>
-        public ManagedIdentityApplicationBuilder WithCacheSynchronization(bool enableCacheSynchronization)
-        {
-            Config.CacheSynchronizationEnabled = enableCacheSynchronization;
-            return this;
+            return config;
         }
 
         /// <summary>

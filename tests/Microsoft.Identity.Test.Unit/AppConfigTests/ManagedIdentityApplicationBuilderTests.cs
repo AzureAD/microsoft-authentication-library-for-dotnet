@@ -43,6 +43,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsNull(mi.ServiceBundle.Config.HttpClientFactory);
             Assert.IsNull(mi.ServiceBundle.Config.LoggingCallback);
 
+            // Assert default cache settings
+            Assert.IsNotNull(mi.ServiceBundle.Config.AccessorOptions);
+
             // Validate Defaults
             Assert.AreEqual(LogLevel.Info, mi.ServiceBundle.Config.LogLevel);
             Assert.AreEqual(false, mi.ServiceBundle.Config.EnablePiiLogging);
@@ -99,23 +102,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 Assert.IsNotNull(mi.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId);
                 Assert.AreEqual(userAssignedId, mi.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId);
             }
-        }
-
-        [DataTestMethod]
-        [DataRow(false, false, false)]
-        [DataRow(true, true, true)]
-        [DataRow(true, false, false)]
-        [DataRow(false, true, true)]
-        public void CacheSynchronizationNoDefault(bool optionFlag, bool builderFlag, bool result)
-        {
-            var options = new ManagedIdentityApplicationOptions
-            {
-                ManagedIdentity = UserAssignedManagedIdentity.FromClientId(TestConstants.ClientId),
-                EnableCacheSynchronization = optionFlag
-            };
-            var mi = ManagedIdentityApplicationBuilder.CreateWithApplicationOptions(options).WithExperimentalFeatures()
-                .WithCacheSynchronization(builderFlag).BuildConcrete();
-            Assert.AreEqual(result, mi.ServiceBundle.Config.CacheSynchronizationEnabled);
         }
 
         [TestMethod]

@@ -61,7 +61,6 @@ namespace ManagedIdentityWebApi.Controllers
                 return ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
                     .WithExperimentalFeatures()
                     .WithLogging(new MyIdentityLogger(_logger))
-                    .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                     .Build();
             }
             else
@@ -69,7 +68,6 @@ namespace ManagedIdentityWebApi.Controllers
                 return ManagedIdentityApplicationBuilder.Create(UserAssignedManagedIdentity.FromClientId(userAssignedId))
                     .WithExperimentalFeatures()
                     .WithLogging(new MyIdentityLogger(_logger))
-                    .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                     .Build();
             }
         }

@@ -39,9 +39,6 @@ namespace Microsoft.Identity.Client
             this.ServiceBundle.ApplicationLogger.Verbose(()=>$"ManagedIdentityApplication {configuration.GetHashCode()} created");
         }
 
-        /// <inheritdoc />
-        public ITokenCache AppTokenCache => AppTokenCacheInternal;
-
         // Stores all app tokens
         internal ITokenCacheInternal AppTokenCacheInternal { get; }
 
