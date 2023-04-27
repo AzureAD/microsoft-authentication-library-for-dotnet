@@ -292,6 +292,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 }
             }
 
+            // Disabling shared cache options to avoid cross test pollution.
+            builder.Config.AccessorOptions = null;
 
             IManagedIdentityApplication mia = builder.WithExperimentalFeatures()
                 .WithHttpManager(proxyHttpManager).Build();

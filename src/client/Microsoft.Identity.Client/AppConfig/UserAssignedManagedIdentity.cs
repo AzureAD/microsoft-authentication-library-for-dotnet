@@ -26,8 +26,8 @@ namespace Microsoft.Identity.Client.AppConfig
 
         private UserAssignedManagedIdentity(UserAssignedIdType userAssignedIdType, string userAssignedId)
         {
-            this.UserAssignedIdType = userAssignedIdType;
-            this.UserAssignedId = userAssignedId;
+            UserAssignedIdType = userAssignedIdType;
+            UserAssignedId = userAssignedId;
         }
 
         /// <summary>
