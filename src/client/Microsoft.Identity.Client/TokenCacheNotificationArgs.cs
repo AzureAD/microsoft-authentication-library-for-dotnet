@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client
             string requestTenantId,
             IIdentityLogger identityLogger,
             bool piiLoggingEnabled,
-            TelemetryDatapoints telemetryDatapoints = null)
+            TelemetryData telemetryData = null)
 
         {
             TokenCache = tokenCache;
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client
             SuggestedCacheExpiry = suggestedCacheExpiry;
             IdentityLogger = identityLogger;
             PiiLoggingEnabled = piiLoggingEnabled;
-            TelemetryDatapoints = telemetryDatapoints;
+            TelemetryData = telemetryData;
         }
 
         /// <summary>
@@ -255,6 +255,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Cache Details contains the details of L1/ L2 cache for telemetry logging.
         /// </summary>
-        public TelemetryDatapoints TelemetryDatapoints { get; }
+        public TelemetryData TelemetryData { get; }
     }
 }

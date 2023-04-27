@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public CancellationToken UserCancellationToken { get; }
 
-        public TelemetryDatapoints TelemetryDatapoints { get; } = new TelemetryDatapoints();
+        public TelemetryData TelemetryData { get; } = new TelemetryData();
 
         public RequestContext(IServiceBundle serviceBundle, Guid correlationId, CancellationToken cancellationToken = default)
         {

@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     {
         private readonly string _signedAssertion;
 
-        public AssertionType TelemetryAssertionType => AssertionType.ClientAssertion;
+        public AssertionType AssertionType => AssertionType.ClientAssertion;
 
         public SignedAssertionClientCredential(string signedAssertion)
         {

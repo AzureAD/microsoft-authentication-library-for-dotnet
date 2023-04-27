@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     LogReturnedToken(authenticationResult);
                     UpdateTelemetry(sw, apiEvent, authenticationResult);
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
-                    LogSuccessfulTelemetryToClient(authenticationResult, AuthenticationRequestParameters.RequestContext.TelemetryDatapoints, telemetryEventDetails, telemetryClients);
+                    LogSuccessfulTelemetryToClient(authenticationResult, AuthenticationRequestParameters.RequestContext.TelemetryData, telemetryEventDetails, telemetryClients);
 
                     return authenticationResult;
                 }
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private void LogSuccessfulTelemetryToClient(AuthenticationResult authenticationResult, TelemetryDatapoints telemetryDatapoints, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
+        private void LogSuccessfulTelemetryToClient(AuthenticationResult authenticationResult, TelemetryData telemetryData, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
         {
             if (telemetryClients.HasEnabledClients(TelemetryConstants.AcquireTokenEventName))
             {
@@ -142,13 +142,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 telemetryEventDetails.SetProperty(TelemetryConstants.TokenType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.TokenType);
                 telemetryEventDetails.SetProperty(TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds);
                 telemetryEventDetails.SetProperty(TelemetryConstants.ActivityId, authenticationResult.CorrelationId);
+
                 if (authenticationResult.AuthenticationResultMetadata.RefreshOn.HasValue)
                 {
-                telemetryEventDetails.SetProperty(TelemetryConstants.RefreshOn, DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value));
+                    telemetryEventDetails.SetProperty(TelemetryConstants.RefreshOn, DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value));
                 }
                 telemetryEventDetails.SetProperty(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
                 telemetryEventDetails.SetProperty(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
-                telemetryEventDetails.SetProperty(TelemetryConstants.CacheUsed, (int)telemetryDatapoints.CacheTypeUsed);
+                telemetryEventDetails.SetProperty(TelemetryConstants.CacheUsed, (int)telemetryData.CacheLevel);
                 ParseScopesForTelemetry(telemetryEventDetails);
             }
         }
@@ -157,16 +158,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (AuthenticationRequestParameters.Scope.Count > 0)
             {
-                var firstScope = AuthenticationRequestParameters.Scope.First().ToString();
+                string firstScope = AuthenticationRequestParameters.Scope.First();
+
                 if (Uri.IsWellFormedUriString(firstScope, UriKind.Absolute))
                 {
-                    telemetryEventDetails.SetProperty(TelemetryConstants.Resource, firstScope);
+                    Uri firstScopeAsUri = new Uri(firstScope);
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Resource, $"{firstScopeAsUri.Scheme}://{firstScopeAsUri.Host}");
+
+                    StringBuilder stringBuilder = new StringBuilder();
+
+                    foreach (string scope in AuthenticationRequestParameters.Scope)
+                    {
+                         stringBuilder.Append(scope.Split(new[] { firstScopeAsUri.Host }, StringSplitOptions.None)[1].Replace("/", string.Empty) + " ");
+                    }
+
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, stringBuilder.ToString().TrimEnd(' '));
                 }
                 else
                 {
-                    telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, JsonHelper.SerializeToJson(AuthenticationRequestParameters.Scope));
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, AuthenticationRequestParameters.Scope.AsSingleString());
                 }
-                
             }
         }
 
@@ -237,7 +248,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (ServiceBundle.Config.ClientCredential != null)
             {
-                if (ServiceBundle.Config.ClientCredential.TelemetryAssertionType == AssertionType.CertificateWithoutSni)
+                if (ServiceBundle.Config.ClientCredential.AssertionType == AssertionType.CertificateWithoutSni)
                 {
                     if (ServiceBundle.Config.SendX5C)
                     {
@@ -247,7 +258,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     return AssertionType.CertificateWithoutSni;
                 }
 
-                return ServiceBundle.Config.ClientCredential.TelemetryAssertionType;
+                return ServiceBundle.Config.ClientCredential.AssertionType;
             }
 
             return AssertionType.None;

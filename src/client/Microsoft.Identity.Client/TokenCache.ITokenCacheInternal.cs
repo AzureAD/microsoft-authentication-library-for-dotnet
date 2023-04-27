@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Client
                             requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId,
                             identityLogger: requestParams.RequestContext.Logger.IdentityLogger,
                             piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled,
-                            telemetryDatapoints: requestParams.RequestContext.TelemetryDatapoints);
+                            telemetryData: requestParams.RequestContext.TelemetryData);
 
                         Stopwatch sw = Stopwatch.StartNew();
 
@@ -262,7 +262,7 @@ namespace Microsoft.Identity.Client
                             requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId,
                             identityLogger: requestParams.RequestContext.Logger.IdentityLogger,
                             piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled,
-                            telemetryDatapoints: requestParams.RequestContext.TelemetryDatapoints);
+                            telemetryData: requestParams.RequestContext.TelemetryData);
 
                         Stopwatch sw = Stopwatch.StartNew();
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
@@ -759,7 +759,7 @@ namespace Microsoft.Identity.Client
                             requestTenantId: null,
                             identityLogger: null,
                             piiLoggingEnabled: false,
-                            telemetryDatapoints: new TelemetryCore.TelemetryClient.TelemetryDatapoints());
+                            telemetryData: new TelemetryCore.TelemetryClient.TelemetryData());
 
                 await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
             }
@@ -1270,7 +1270,7 @@ namespace Microsoft.Identity.Client
                             requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId,
                             identityLogger: requestParameters.RequestContext.Logger.IdentityLogger,
                             piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled,
-                            telemetryDatapoints: requestParameters.RequestContext.TelemetryDatapoints);
+                            telemetryData: requestParameters.RequestContext.TelemetryData);
 
                         await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
                         await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
@@ -1307,7 +1307,7 @@ namespace Microsoft.Identity.Client
                            requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId,
                            identityLogger: requestParameters.RequestContext.Logger.IdentityLogger,
                            piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled,
-                           telemetryDatapoints: requestParameters.RequestContext.TelemetryDatapoints);
+                           telemetryData: requestParameters.RequestContext.TelemetryData);
 
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                     }

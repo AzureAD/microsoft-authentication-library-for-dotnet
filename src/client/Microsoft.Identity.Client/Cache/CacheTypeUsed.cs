@@ -15,9 +15,9 @@ namespace Microsoft.Identity.Client.Cache
     public enum CacheLevel
     {
         /// <summary>
-        /// Specifies that no cache type is used
+        /// Specifies that the cache level used is unknown.
         /// </summary>
-        None = 0,
+        Unknown = 0,
         /// <summary>
         /// Specifies if the L1 cache is used
         /// </summary>
@@ -25,6 +25,10 @@ namespace Microsoft.Identity.Client.Cache
         /// <summary>
         /// Specifies if the L2 cache is used
         /// </summary>
-        L2Cache = 2
+        L2Cache = 2,
+        /// <summary>
+        /// Specifies if both the L1 and L2 caches are used
+        /// </summary>
+        L1AndL2Cache = 3
     }
 }
