@@ -5,12 +5,15 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
@@ -35,21 +38,21 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         internal const string ServiceFabricEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
 
         [DataTestMethod]
-        [DataRow("http://127.0.0.1:41564/msi/token/", Resource, ManagedIdentitySourceType.AppService)]
-        [DataRow(AppServiceEndpoint, Resource, ManagedIdentitySourceType.AppService)]
-        [DataRow(AppServiceEndpoint, ResourceDefaultSuffix, ManagedIdentitySourceType.AppService)]
-        [DataRow(ImdsEndpoint, Resource, ManagedIdentitySourceType.IMDS)]
-        [DataRow(null, Resource, ManagedIdentitySourceType.IMDS)]
-        [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySourceType.AzureArc)]
-        [DataRow(AzureArcEndpoint, ResourceDefaultSuffix, ManagedIdentitySourceType.AzureArc)]
-        [DataRow(CloudShellEndpoint, Resource, ManagedIdentitySourceType.CloudShell)]
-        [DataRow(CloudShellEndpoint, ResourceDefaultSuffix, ManagedIdentitySourceType.CloudShell)]
-        [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySourceType.ServiceFabric)]
-        [DataRow(ServiceFabricEndpoint, ResourceDefaultSuffix, ManagedIdentitySourceType.ServiceFabric)]
+        [DataRow("http://127.0.0.1:41564/msi/token/", Resource, ManagedIdentitySource.AppService)]
+        [DataRow(AppServiceEndpoint, Resource, ManagedIdentitySource.AppService)]
+        [DataRow(AppServiceEndpoint, ResourceDefaultSuffix, ManagedIdentitySource.AppService)]
+        [DataRow(ImdsEndpoint, Resource, ManagedIdentitySource.Imds)]
+        [DataRow(null, Resource, ManagedIdentitySource.Imds)]
+        [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
+        [DataRow(AzureArcEndpoint, ResourceDefaultSuffix, ManagedIdentitySource.AzureArc)]
+        [DataRow(CloudShellEndpoint, Resource, ManagedIdentitySource.CloudShell)]
+        [DataRow(CloudShellEndpoint, ResourceDefaultSuffix, ManagedIdentitySource.CloudShell)]
+        [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySource.ServiceFabric)]
+        [DataRow(ServiceFabricEndpoint, ResourceDefaultSuffix, ManagedIdentitySource.ServiceFabric)]
         public async Task ManagedIdentityHappyPathAsync(
             string endpoint,
             string scope,
-            ManagedIdentitySourceType managedIdentitySource)
+            ManagedIdentitySource managedIdentitySource)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -83,15 +86,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow(AppServiceEndpoint, ManagedIdentitySourceType.AppService, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow(AppServiceEndpoint, ManagedIdentitySourceType.AppService, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
-        [DataRow(ImdsEndpoint, ManagedIdentitySourceType.IMDS, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow(ImdsEndpoint, ManagedIdentitySourceType.IMDS, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
-        [DataRow(ServiceFabricEndpoint, ManagedIdentitySourceType.ServiceFabric, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow(ServiceFabricEndpoint, ManagedIdentitySourceType.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
+        [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
+        [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
+        [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
+        [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
+        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
+        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
         public async Task ManagedIdentityUserAssignedHappyPathAsync(
             string endpoint,
-            ManagedIdentitySourceType managedIdentitySource,
+            ManagedIdentitySource managedIdentitySource,
             string userAssignedId,
             UserAssignedIdentityId userAssignedIdentityId)
         {
@@ -129,16 +132,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow(AppServiceEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySourceType.AppService)]
-        [DataRow(ImdsEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySourceType.IMDS)]
-        [DataRow(AzureArcEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySourceType.AzureArc)]
-        [DataRow(CloudShellEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySourceType.CloudShell)]
-        [DataRow(ServiceFabricEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySourceType.ServiceFabric)]
+        [DataRow(AppServiceEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySource.AppService)]
+        [DataRow(ImdsEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySource.Imds)]
+        [DataRow(AzureArcEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySource.AzureArc)]
+        [DataRow(CloudShellEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySource.CloudShell)]
+        [DataRow(ServiceFabricEndpoint, Resource, "https://graph.microsoft.com", ManagedIdentitySource.ServiceFabric)]
         public async Task ManagedIdentityDifferentScopesTestAsync(
             string endpoint,
             string scope,
             string anotherScope,
-            ManagedIdentitySourceType managedIdentitySource)
+            ManagedIdentitySource managedIdentitySource)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -186,15 +189,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow(AppServiceEndpoint, Resource, ManagedIdentitySourceType.AppService)]
-        [DataRow(ImdsEndpoint, Resource, ManagedIdentitySourceType.IMDS)]
-        [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySourceType.AzureArc)]
-        [DataRow(CloudShellEndpoint, Resource, ManagedIdentitySourceType.CloudShell)]
-        [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySourceType.ServiceFabric)]
+        [DataRow(AppServiceEndpoint, Resource, ManagedIdentitySource.AppService)]
+        [DataRow(ImdsEndpoint, Resource, ManagedIdentitySource.Imds)]
+        [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
+        [DataRow(CloudShellEndpoint, Resource, ManagedIdentitySource.CloudShell)]
+        [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySource.ServiceFabric)]
         public async Task ManagedIdentityForceRefreshTestAsync(
             string endpoint,
             string scope,
-            ManagedIdentitySourceType managedIdentitySource)
+            ManagedIdentitySource managedIdentitySource)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -243,22 +246,22 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow("user.read", ManagedIdentitySourceType.AppService, AppServiceEndpoint)]
-        [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySourceType.AppService, AppServiceEndpoint)]
-        [DataRow("s", ManagedIdentitySourceType.AppService, AppServiceEndpoint)]
-        [DataRow("user.read", ManagedIdentitySourceType.IMDS, ImdsEndpoint)]
-        [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySourceType.IMDS, ImdsEndpoint)]
-        [DataRow("s", ManagedIdentitySourceType.IMDS, ImdsEndpoint)]
-        [DataRow("user.read", ManagedIdentitySourceType.AzureArc, AzureArcEndpoint)]
-        [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySourceType.AzureArc, AzureArcEndpoint)]
-        [DataRow("s", ManagedIdentitySourceType.AzureArc, AzureArcEndpoint)]
-        [DataRow("user.read", ManagedIdentitySourceType.CloudShell, CloudShellEndpoint)]
-        [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySourceType.CloudShell, CloudShellEndpoint)]
-        [DataRow("s", ManagedIdentitySourceType.CloudShell, CloudShellEndpoint)]
-        [DataRow("user.read", ManagedIdentitySourceType.ServiceFabric, ServiceFabricEndpoint)]
-        [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySourceType.ServiceFabric, ServiceFabricEndpoint)]
-        [DataRow("s", ManagedIdentitySourceType.ServiceFabric, ServiceFabricEndpoint)]
-        public async Task ManagedIdentityTestWrongScopeAsync(string resource, ManagedIdentitySourceType managedIdentitySource, string endpoint)
+        [DataRow("user.read", ManagedIdentitySource.AppService, AppServiceEndpoint)]
+        [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySource.AppService, AppServiceEndpoint)]
+        [DataRow("s", ManagedIdentitySource.AppService, AppServiceEndpoint)]
+        [DataRow("user.read", ManagedIdentitySource.Imds, ImdsEndpoint)]
+        [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySource.Imds, ImdsEndpoint)]
+        [DataRow("s", ManagedIdentitySource.Imds, ImdsEndpoint)]
+        [DataRow("user.read", ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
+        [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
+        [DataRow("s", ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
+        [DataRow("user.read", ManagedIdentitySource.CloudShell, CloudShellEndpoint)]
+        [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySource.CloudShell, CloudShellEndpoint)]
+        [DataRow("s", ManagedIdentitySource.CloudShell, CloudShellEndpoint)]
+        [DataRow("user.read", ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        [DataRow("s", ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        public async Task ManagedIdentityTestWrongScopeAsync(string resource, ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -274,22 +277,23 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiErrorResponse(),
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
+                Assert.AreEqual(managedIdentitySource, ex.ManagedIdentitySource);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
             }
         }
 
         [DataTestMethod]
-        [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint)]
-        [DataRow(ManagedIdentitySourceType.IMDS, ImdsEndpoint)]
-        [DataRow(ManagedIdentitySourceType.AzureArc, AzureArcEndpoint)]
-        [DataRow(ManagedIdentitySourceType.CloudShell, CloudShellEndpoint)]
-        [DataRow(ManagedIdentitySourceType.ServiceFabric, ServiceFabricEndpoint)]
-        public async Task ManagedIdentityErrorResponseNoPayloadTestAsync(ManagedIdentitySourceType managedIdentitySource, string endpoint)
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint)]
+        [DataRow(ManagedIdentitySource.Imds, ImdsEndpoint)]
+        [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
+        [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint)]
+        [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        public async Task ManagedIdentityErrorResponseNoPayloadTestAsync(ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -305,23 +309,24 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("scope")
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
+                Assert.AreEqual(managedIdentitySource, ex.ManagedIdentitySource);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.ManagedIdentityNoResponseReceived, ex.Message);
             }
         }
 
         [DataTestMethod]
-        [DataRow(ManagedIdentitySourceType.AppService, AppServiceEndpoint)]
-        [DataRow(ManagedIdentitySourceType.IMDS, ImdsEndpoint)]
-        [DataRow(ManagedIdentitySourceType.AzureArc, AzureArcEndpoint)]
-        [DataRow(ManagedIdentitySourceType.CloudShell, CloudShellEndpoint)]
-        [DataRow(ManagedIdentitySourceType.ServiceFabric, ServiceFabricEndpoint)]
-        public async Task AppServiceNullResponseAsync(ManagedIdentitySourceType managedIdentitySource, string endpoint)
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint)]
+        [DataRow(ManagedIdentitySource.Imds, ImdsEndpoint)]
+        [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
+        [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint)]
+        [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        public async Task ManagedIdentityNullResponseAsync(ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -339,13 +344,45 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     managedIdentitySource,
                     statusCode: HttpStatusCode.OK);
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
+                Assert.AreEqual(managedIdentitySource, ex.ManagedIdentitySource);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidResponse, ex.Message);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint)]
+        [DataRow(ManagedIdentitySource.Imds, ImdsEndpoint)]
+        [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint)]
+        [DataRow(ManagedIdentitySource.CloudShell, CloudShellEndpoint)]
+        [DataRow(ManagedIdentitySource.ServiceFabric, ServiceFabricEndpoint)]
+        public async Task ManagedIdentityUnreachableNetworkAsync(ManagedIdentitySource managedIdentitySource, string endpoint)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
+
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager).Build();
+
+                httpManager.AddFailingRequest(new HttpRequestException("A socket operation was attempted to an unreachable network.", 
+                    new SocketException(10051)));
+
+                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(managedIdentitySource, ex.ManagedIdentitySource);
+                Assert.AreEqual(MsalError.ManagedIdentityUnreachableNetwork, ex.ErrorCode);
+                Assert.AreEqual("A socket operation was attempted to an unreachable network.", ex.Message);
             }
         }
 
@@ -355,7 +392,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySourceType.AppService, AppServiceEndpoint);
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
                 var mi = ManagedIdentityApplicationBuilder.Create()
                     .WithExperimentalFeatures()
@@ -366,7 +403,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     AppServiceEndpoint,
                     Resource,
                     MockHelpers.GetMsiSuccessfulResponse(),
-                    ManagedIdentitySourceType.AppService);
+                    ManagedIdentitySource.AppService);
 
                 var builder = mi.AcquireTokenForManagedIdentity(Resource);
                 var result = await builder.ExecuteAsync().ConfigureAwait(false);
@@ -385,7 +422,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySourceType.AppService, AppServiceEndpoint);
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
                 var mi = ManagedIdentityApplicationBuilder.Create(TestConstants.ClientId)
                     .WithExperimentalFeatures()
@@ -396,7 +433,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     AppServiceEndpoint,
                     Resource,
                     MockHelpers.GetMsiSuccessfulResponse(),
-                    ManagedIdentitySourceType.AppService,
+                    ManagedIdentitySource.AppService,
                     userAssignedClientIdOrResourceId: TestConstants.ClientId,
                     userAssignedIdentityId: UserAssignedIdentityId.ClientId);
 
@@ -417,7 +454,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySourceType.AppService, AppServiceEndpoint);
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
                 var mi = ManagedIdentityApplicationBuilder.Create()
                     .WithExperimentalFeatures()
@@ -439,7 +476,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     AppServiceEndpoint,
                     Resource,
                     MockHelpers.GetMsiSuccessfulResponse(),
-                    ManagedIdentitySourceType.AppService);
+                    ManagedIdentitySource.AppService);
 
                 var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync(cancellationToken).ConfigureAwait(false);
 
