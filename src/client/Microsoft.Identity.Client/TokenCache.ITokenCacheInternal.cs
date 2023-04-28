@@ -19,6 +19,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -41,6 +42,7 @@ namespace Microsoft.Identity.Client
             MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = null;
             MsalIdTokenCacheItem msalIdTokenCacheItem = null;
             MsalAccountCacheItem msalAccountCacheItem = null;
+            TelemetryData telemetryData = new TelemetryData();
 
             IdToken idToken = IdToken.Parse(response.IdToken);
             if (idToken == null)
@@ -189,7 +191,7 @@ namespace Microsoft.Identity.Client
                             requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId,
                             identityLogger: requestParams.RequestContext.Logger.IdentityLogger,
                             piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled,
-                            telemetryData: requestParams.RequestContext.TelemetryData);
+                            telemetryData: telemetryData);
 
                         Stopwatch sw = Stopwatch.StartNew();
 
@@ -262,7 +264,7 @@ namespace Microsoft.Identity.Client
                             requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId,
                             identityLogger: requestParams.RequestContext.Logger.IdentityLogger,
                             piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled,
-                            telemetryData: requestParams.RequestContext.TelemetryData);
+                            telemetryData: telemetryData);
 
                         Stopwatch sw = Stopwatch.StartNew();
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
@@ -282,6 +284,7 @@ namespace Microsoft.Identity.Client
             {
                 _semaphoreSlim.Release();
                 logger.Verbose(() => "[SaveTokenResponseAsync] Released token cache semaphore. ");
+                requestParams.RequestContext.ApiEvent.CacheLevel = telemetryData.CacheLevel;
             }
         }
 
@@ -1269,8 +1272,7 @@ namespace Microsoft.Identity.Client
                             requestScopes: requestParameters.Scope,
                             requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId,
                             identityLogger: requestParameters.RequestContext.Logger.IdentityLogger,
-                            piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled,
-                            telemetryData: requestParameters.RequestContext.TelemetryData);
+                            piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
 
                         await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
                         await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
@@ -1306,8 +1308,7 @@ namespace Microsoft.Identity.Client
                            requestScopes: requestParameters.Scope,
                            requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId,
                            identityLogger: requestParameters.RequestContext.Logger.IdentityLogger,
-                           piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled,
-                           telemetryData: requestParameters.RequestContext.TelemetryData);
+                           piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
 
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                     }

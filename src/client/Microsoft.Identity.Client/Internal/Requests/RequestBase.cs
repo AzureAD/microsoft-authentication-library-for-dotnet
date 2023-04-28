@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     LogReturnedToken(authenticationResult);
                     UpdateTelemetry(sw, apiEvent, authenticationResult);
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
-                    LogSuccessfulTelemetryToClient(authenticationResult, AuthenticationRequestParameters.RequestContext.TelemetryData, telemetryEventDetails, telemetryClients);
+                    LogSuccessfulTelemetryToClient(authenticationResult, AuthenticationRequestParameters.RequestContext.ApiEvent.CacheLevel, telemetryEventDetails, telemetryClients);
 
                     return authenticationResult;
                 }
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private void LogSuccessfulTelemetryToClient(AuthenticationResult authenticationResult, TelemetryData telemetryData, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
+        private void LogSuccessfulTelemetryToClient(AuthenticationResult authenticationResult, CacheLevel cacheLevel, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
         {
             if (telemetryClients.HasEnabledClients(TelemetryConstants.AcquireTokenEventName))
             {
@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 telemetryEventDetails.SetProperty(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
                 telemetryEventDetails.SetProperty(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
-                telemetryEventDetails.SetProperty(TelemetryConstants.CacheUsed, (int)telemetryData.CacheLevel);
+                telemetryEventDetails.SetProperty(TelemetryConstants.CacheUsed, (int)cacheLevel);
                 ParseScopesForTelemetry(telemetryEventDetails);
             }
         }
@@ -241,6 +241,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (!string.IsNullOrWhiteSpace(ServiceBundle.Config.ManagedIdentityUserAssignedClientId) ||
                 !string.IsNullOrWhiteSpace(ServiceBundle.Config.ManagedIdentityUserAssignedResourceId) ||
+                (!string.IsNullOrWhiteSpace(ServiceBundle.Config.TenantId) && ServiceBundle.Config.TenantId.Equals(Constants.ManagedIdentityDefaultTenant)) ||
                 ServiceBundle.Config.AppTokenProvider != null)
             {
                 return AssertionType.Msi;

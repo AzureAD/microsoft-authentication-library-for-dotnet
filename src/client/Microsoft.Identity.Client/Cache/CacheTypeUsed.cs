@@ -25,10 +25,6 @@ namespace Microsoft.Identity.Client.Cache
         /// <summary>
         /// Specifies if the L2 cache is used
         /// </summary>
-        L2Cache = 2,
-        /// <summary>
-        /// Specifies if both the L1 and L2 caches are used
-        /// </summary>
-        L1AndL2Cache = 3
+        L2Cache = 2
     }
 }

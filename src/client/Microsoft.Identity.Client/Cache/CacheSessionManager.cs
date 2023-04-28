@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -106,6 +107,7 @@ namespace Microsoft.Identity.Client.Cache
                     await TokenCacheInternal.Semaphore.WaitAsync(_requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
                     _requestParams.RequestContext.Logger.Verbose(()=>"[Cache Session Manager] Entered cache semaphore");
 
+                    TelemetryData telemetryData = new TelemetryData();
                     Stopwatch stopwatch = new Stopwatch();
                     try
                     {
@@ -130,7 +132,7 @@ namespace Microsoft.Identity.Client.Cache
                                   requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId,
                                   identityLogger: _requestParams.RequestContext.Logger.IdentityLogger,
                                   piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled,
-                                  telemetryData: RequestContext.TelemetryData);
+                                  telemetryData: telemetryData);
 
                                 stopwatch.Start();
                                 await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
@@ -157,7 +159,7 @@ namespace Microsoft.Identity.Client.Cache
                                   requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId,
                                   identityLogger: _requestParams.RequestContext.Logger.IdentityLogger,
                                   piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled,
-                                  telemetryData: RequestContext.TelemetryData);
+                                  telemetryData: telemetryData);
 
                                 await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                                 RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;
@@ -172,6 +174,7 @@ namespace Microsoft.Identity.Client.Cache
                     {
                         TokenCacheInternal.Semaphore.Release();
                         _requestParams.RequestContext.Logger.Verbose(()=>"[Cache Session Manager] Released cache semaphore");
+                        RequestContext.ApiEvent.CacheLevel = telemetryData.CacheLevel;
                     }
                 }
             }

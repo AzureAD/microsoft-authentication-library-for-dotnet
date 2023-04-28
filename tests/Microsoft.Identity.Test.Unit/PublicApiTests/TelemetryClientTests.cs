@@ -49,18 +49,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void TelemetryClientExperimental()
-        {
-            var e = AssertException.Throws<MsalClientException>(() => ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithClientSecret("secret")
-                .WithTelemetryClient(_telemetryClient)
-                .Build());
-
-            Assert.AreEqual(MsalError.ExperimentalFeature, e.ErrorCode);
-        }
-
-        [TestMethod]
         public void TelemetryClientListNull()
         {
             var e = AssertException.Throws<ArgumentNullException>(() => ConfidentialClientApplicationBuilder
@@ -169,7 +157,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     TokenType.Bearer,
                     CacheLevel.Unknown,
                     null,
-                    "https://graph.windows.net/");
+                    "https://graph.windows.net");
             }
         }
 
@@ -319,31 +307,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     cacheTypeUsed,
                     TestConstants.s_scope.AsSingleString(),
                     null);
-
-                //Update cache type
-                cacheTypeUsed = CacheLevel.L1AndL2Cache;
-
-                //Acquire Token
-                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
-                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-
-                eventDetails = _telemetryClient.TestTelemetryEventDetails;
-
-                //Validate telemetry
-                AssertLoggedTelemetry(
-                    result,
-                    eventDetails,
-                    TokenSource.Cache,
-                    CacheRefreshReason.NotApplicable,
-                    AssertionType.Secret,
-                    TestConstants.AuthorityUtidTenant,
-                    TokenType.Bearer,
-                    cacheTypeUsed,
-                    TestConstants.s_scope.AsSingleString(),
-                    null);
             }
         }
 
@@ -359,7 +322,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Environment.SetEnvironmentVariable("MSI_ENDPOINT", endpoint);
 
                 var mia = ManagedIdentityApplicationBuilder
-                    .Create("clientId")
+                    .Create()
+                    .WithExperimentalFeatures()
                     .WithHttpManager(_harness.HttpManager)
                     .WithTelemetryClient(_telemetryClient)
                     .Build();
@@ -382,7 +346,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     TokenSource.IdentityProvider,
                     CacheRefreshReason.NoCachedAccessToken,
                     AssertionType.Msi,
-                    TestConstants.AuthorityCommonTenant,
+                    "https://login.microsoftonline.com/managed_identity/",
                     TokenType.Bearer,
                     CacheLevel.Unknown,
                     null,
@@ -452,11 +416,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private void CreateApplication(AssertionType assertionType = AssertionType.Secret)
         {
-            //var certificate = new X509Certificate2(
-            //                        ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
-            //                        TestConstants.DefaultPassword);
-
-            var certificate = new X509Certificate2();
+            var certificate = new X509Certificate2(
+                                    ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
+                                    TestConstants.DefaultPassword);
 
             switch (assertionType)
             {

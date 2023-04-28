@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
@@ -122,5 +123,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         }
 
         public AssertionType AssertionType { get; set; }
+
+        public CacheLevel CacheLevel { get; set; }
     }
 }
