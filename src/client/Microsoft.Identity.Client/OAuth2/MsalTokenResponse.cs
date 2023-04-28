@@ -256,7 +256,9 @@ namespace Microsoft.Identity.Client.OAuth2
             };
         }
 
+        // Compute refresh_in as 1/2 expires_in, but only if expires_in > 2h.
         private static long? InferManagedIdentityRefreshInValue(long expiresIn)
+
         {
             if (expiresIn > 2 * 3600)
             {
