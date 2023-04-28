@@ -496,7 +496,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySourceType.AppService, AppServiceEndpoint);
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
                 var mi = ManagedIdentityApplicationBuilder.Create()
                     .WithExperimentalFeatures()
@@ -507,7 +507,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     AppServiceEndpoint,
                     Resource,
                     MockHelpers.GetMsiSuccessfulResponse(expiresInHours),
-                    ManagedIdentitySourceType.AppService);
+                    ManagedIdentitySource.AppService);
 
                 AcquireTokenForManagedIdentityParameterBuilder builder = mi.AcquireTokenForManagedIdentity(Resource);
 
@@ -550,7 +550,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
-                SetEnvironmentVariables(ManagedIdentitySourceType.AppService, AppServiceEndpoint);
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
                 Trace.WriteLine("1. Setup an app with a token cache with one AT");
 
@@ -563,7 +563,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         AppServiceEndpoint,
                         Resource,
                         MockHelpers.GetMsiSuccessfulResponse(),
-                        ManagedIdentitySourceType.AppService);
+                        ManagedIdentitySource.AppService);
 
                 AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync()
@@ -578,7 +578,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         AppServiceEndpoint,
                         Resource,
                         MockHelpers.GetMsiSuccessfulResponse(),
-                        ManagedIdentitySourceType.AppService);
+                        ManagedIdentitySource.AppService);
 
                 // Act
                 Trace.WriteLine("4. ATM - should perform an RT refresh");
