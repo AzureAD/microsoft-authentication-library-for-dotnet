@@ -99,9 +99,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ",\"id_token_expires_in\":\"3600\"}";
         }
 
-        public static string GetMsiSuccessfulResponse(int hoursToAdd = 1)
+        public static string GetMsiSuccessfulResponse(int expiresInHours = 1)
         {
-            string expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(hoursToAdd));
+            string expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(expiresInHours));
             return
           "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"expires_on\":\"" + expiresOn + "\",\"resource\":\"https://management.azure.com/\",\"token_type\":" +
           "\"Bearer\",\"client_id\":\"client_id\"}";

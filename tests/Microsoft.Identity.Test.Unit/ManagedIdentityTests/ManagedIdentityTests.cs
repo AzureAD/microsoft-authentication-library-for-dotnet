@@ -452,7 +452,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(1)]
         [DataRow(2)]
         [DataRow(3)]
-        public async Task ManagedIdentityExpiresOnTestAsync(int hoursToAdd)
+        public async Task ManagedIdentityExpiresOnTestAsync(int expiresInHours)
         {
             AuthenticationResult result;
 
@@ -469,12 +469,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddManagedIdentityMockHandler(
                     AppServiceEndpoint,
                     Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(hoursToAdd),
+                    MockHelpers.GetMsiSuccessfulResponse(expiresInHours),
                     ManagedIdentitySourceType.AppService);
 
                 AcquireTokenForManagedIdentityParameterBuilder builder = mi.AcquireTokenForManagedIdentity(Resource);
 
-                if (hoursToAdd == 0)
+                if (expiresInHours == 0)
                 {
                     MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
                         () => builder.ExecuteAsync()).ConfigureAwait(false);
@@ -493,7 +493,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.AreEqual(ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity, builder.CommonParameters.ApiId);
 
-                switch (hoursToAdd)
+                switch (expiresInHours)
                 {
                     case 0:
                     case 1:
