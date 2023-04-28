@@ -2,11 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
@@ -502,6 +505,109 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         break;
                 }
             }
+        }
+
+        [TestMethod]
+        public async Task ManagedIdentityRefreshInTestAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySourceType.AppService, AppServiceEndpoint);
+
+                Trace.WriteLine("1. Setup an app with a token cache with one AT");
+
+                var mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                httpManager.AddManagedIdentityMockHandler(
+                        AppServiceEndpoint,
+                        Resource,
+                        MockHelpers.GetMsiSuccessfulResponse(),
+                        ManagedIdentitySourceType.AppService);
+
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
+                var refreshOn = UpdateATWithRefreshOn(mi.AppTokenCacheInternal.Accessor).RefreshOn;
+                TokenCacheAccessRecorder cacheAccess = mi.AppTokenCache.RecordAccess();
+
+                Trace.WriteLine("3. Configure MSI to respond with a valid token");
+                httpManager.AddManagedIdentityMockHandler(
+                        AppServiceEndpoint,
+                        Resource,
+                        MockHelpers.GetMsiSuccessfulResponse(),
+                        ManagedIdentitySourceType.AppService);
+
+                // Act
+                Trace.WriteLine("4. ATM - should perform an RT refresh");
+                result = await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                YieldTillSatisfied(() => httpManager.QueueSize == 0);
+
+                Assert.IsNotNull(result);
+
+                Assert.AreEqual(0, httpManager.QueueSize,
+                    "MSAL should have refreshed the token because the original AT was marked for refresh");
+                
+                cacheAccess.WaitTo_AssertAcessCounts(1, 1);
+
+                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed);
+                
+                Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == refreshOn);
+
+                result = await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                
+                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.NotApplicable);
+            }
+        }
+
+        private bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 30000)
+        {
+            int iCount = maxTimeInMilliSec / 100;
+            while (iCount > 0)
+            {
+                if (func())
+                {
+                    return true;
+                }
+                Thread.Yield();
+                Thread.Sleep(100);
+                iCount--;
+            }
+
+            return false;
+        }
+        private static MsalAccessTokenCacheItem UpdateATWithRefreshOn(
+            ITokenCacheAccessor accessor,
+            DateTimeOffset? refreshOn = null,
+            bool expired = false)
+        {
+            MsalAccessTokenCacheItem atItem = accessor.GetAllAccessTokens().Single();
+
+            refreshOn = refreshOn ?? DateTimeOffset.UtcNow - TimeSpan.FromMinutes(30);
+
+            atItem = atItem.WithRefreshOn(refreshOn);
+
+            Assert.IsTrue(atItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromMinutes(10));
+
+            if (expired)
+            {
+                atItem = atItem.WithExpiresOn(DateTime.UtcNow - TimeSpan.FromMinutes(1));
+            }
+
+            accessor.SaveAccessToken(atItem);
+
+            return atItem;
         }
     }
 }
