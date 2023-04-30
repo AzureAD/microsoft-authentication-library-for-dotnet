@@ -489,7 +489,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(1)]
         [DataRow(2)]
         [DataRow(3)]
-        public async Task ManagedIdentityExpiresOnTestAsync(int expiresInHours)
+        public async Task ManagedIdentityRefreshOnIsCalculatedAsync(int expiresInHours)
         {
             AuthenticationResult result;
 
@@ -545,7 +545,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task ManagedIdentityRefreshInTestAsync()
+        public async Task ManagedIdentityIsProactivelyRefreshedAsync()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
