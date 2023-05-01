@@ -544,7 +544,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task ManagedIdentityRefreshInTestAsync()
+        public async Task ManagedIdentityIsProactivelyRefreshedAsync()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
