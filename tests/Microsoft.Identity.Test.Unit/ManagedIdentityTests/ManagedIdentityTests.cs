@@ -485,14 +485,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow(0)]
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(3)]
-        public async Task ManagedIdentityExpiresOnTestAsync(int expiresInHours)
+        [DataRow(1, false)]
+        [DataRow(2, false)]
+        [DataRow(3, true)]
+        public async Task ManagedIdentityExpiresOnTestAsync(int expiresInHours, bool refreshOnHasValue)
         {
-            AuthenticationResult result;
-
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
             {
@@ -510,37 +507,39 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     ManagedIdentitySource.AppService);
 
                 AcquireTokenForManagedIdentityParameterBuilder builder = mi.AcquireTokenForManagedIdentity(Resource);
-
-                if (expiresInHours == 0)
-                {
-                    MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
-                        () => builder.ExecuteAsync()).ConfigureAwait(false);
-
-                    Assert.AreEqual(ex.ErrorCode, "invalid_token_provider_response_value");
-                    return;
-                }
-                else
-                {
-                    result = await builder.ExecuteAsync().ConfigureAwait(false);
-                }
+                AuthenticationResult result = await builder.ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-
                 Assert.AreEqual(ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity, builder.CommonParameters.ApiId);
+                Assert.AreEqual(refreshOnHasValue, result.AuthenticationResultMetadata.RefreshOn.HasValue);
+            }
+        }
 
-                switch (expiresInHours)
-                {
-                    case 0:
-                    case 1:
-                    case 2:
-                        Assert.IsFalse(result.AuthenticationResultMetadata.RefreshOn.HasValue);
-                        break;
-                    case 3:
-                        Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn.HasValue);
-                        break;
-                }
+        [TestMethod]
+        [ExpectedException(typeof(MsalClientException))]
+        public async Task ManagedIdentityInvalidRefreshOnThrowsAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager)
+                    .Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(0),
+                    ManagedIdentitySource.AppService);
+
+                AcquireTokenForManagedIdentityParameterBuilder builder = mi.AcquireTokenForManagedIdentity(Resource);
+
+                AuthenticationResult result = await builder.ExecuteAsync().ConfigureAwait(false);
             }
         }
 
@@ -570,7 +569,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ConfigureAwait(false);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
-                var refreshOn = UpdateATWithRefreshOn(mi.AppTokenCacheInternal.Accessor).RefreshOn;
+                var refreshOn = TestCommon.UpdateATWithRefreshOn(mi.AppTokenCacheInternal.Accessor).RefreshOn;
                 TokenCacheAccessRecorder cacheAccess = mi.AppTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure MSI to respond with a valid token");
@@ -587,7 +586,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ConfigureAwait(false);
 
                 // Assert
-                YieldTillSatisfied(() => httpManager.QueueSize == 0);
+                TestCommon.YieldTillSatisfied(() => httpManager.QueueSize == 0);
 
                 Assert.IsNotNull(result);
 
@@ -596,55 +595,16 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 
                 cacheAccess.WaitTo_AssertAcessCounts(1, 1);
 
-                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed);
-                
-                Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == refreshOn);
+                Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, result.AuthenticationResultMetadata.CacheRefreshReason);
+
+                Assert.AreEqual(refreshOn, result.AuthenticationResultMetadata.RefreshOn);
 
                 result = await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
                 
-                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.NotApplicable);
+                Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
             }
-        }
-
-        private bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 30000)
-        {
-            int iCount = maxTimeInMilliSec / 100;
-            while (iCount > 0)
-            {
-                if (func())
-                {
-                    return true;
-                }
-                Thread.Yield();
-                Thread.Sleep(100);
-                iCount--;
-            }
-
-            return false;
-        }
-        private static MsalAccessTokenCacheItem UpdateATWithRefreshOn(
-            ITokenCacheAccessor accessor,
-            DateTimeOffset? refreshOn = null,
-            bool expired = false)
-        {
-            MsalAccessTokenCacheItem atItem = accessor.GetAllAccessTokens().Single();
-
-            refreshOn = refreshOn ?? DateTimeOffset.UtcNow - TimeSpan.FromMinutes(30);
-
-            atItem = atItem.WithRefreshOn(refreshOn);
-
-            Assert.IsTrue(atItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromMinutes(10));
-
-            if (expired)
-            {
-                atItem = atItem.WithExpiresOn(DateTime.UtcNow - TimeSpan.FromMinutes(1));
-            }
-
-            accessor.SaveAccessToken(atItem);
-
-            return atItem;
         }
     }
 }

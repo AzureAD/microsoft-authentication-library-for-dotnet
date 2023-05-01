@@ -519,6 +519,5 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 }
             };
         }
-
     }
 }
