@@ -28,7 +28,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string tenantId,
             string homeAccountId,
             string keyId = null,
-            string oboCacheKey = null)
+            string oboCacheKey = null,
+            string userAssertionHash = null)
             : this(
                 scopes: response.Scope, // token providers send pre-sorted (alphabetically) scopes
                 cachedAt: DateTimeOffset.UtcNow,
@@ -45,11 +46,12 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = response.ClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
+            UserAssertionHash = userAssertionHash;
 
             InitCacheKey();
         }
 
-        internal /* for test */ MsalAccessTokenCacheItem(
+        internal MsalAccessTokenCacheItem(
             string preferredCacheEnv,
             string clientId,
             string scopes,
@@ -63,7 +65,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string keyId = null,
             DateTimeOffset? refreshOn = null,
             string tokenType = StorageJsonValues.TokenTypeBearer,
-            string oboCacheKey = null)
+            string oboCacheKey = null,
+            string userAssertionHash = null)
             : this(scopes, cachedAt, expiresOn, extendedExpiresOn, refreshOn, tenantId, keyId, tokenType)
         {
             Environment = preferredCacheEnv;
@@ -72,6 +75,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = rawClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
+            UserAssertionHash = userAssertionHash;
 
             InitCacheKey();
         }
@@ -121,7 +125,8 @@ namespace Microsoft.Identity.Client.Cache.Items
                KeyId,
                RefreshOn,
                TokenType,
-               OboCacheKey);
+               OboCacheKey,
+               UserAssertionHash);
 
             return newAtItem;
         }
@@ -186,9 +191,15 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         /// <summary>
         /// Used to find the token in the cache. 
-        /// Can be a token assertion hash (normal OBO flow) or a user provided key (long-running OBO flow).
+        /// Can be a token assertion hash (normal OBO flow) or a user-provided key (long-running OBO flow).
         /// </summary>
         internal string OboCacheKey { get; set; }
+
+        /// <summary>
+        /// Only used in InitiateLongRunningProcessInWebApi to compare request and cached assertions.
+        /// Always set to the assertion hash.
+        /// </summary>
+        internal string UserAssertionHash { get; set; }
 
         /// <summary>
         /// Used when the token is bound to a public / private key pair which is identified by a key id (kid). 
@@ -242,7 +253,8 @@ namespace Microsoft.Identity.Client.Cache.Items
                 extendedExpiresOnUnixTimestamp = ext_expires_on;
             }
             string tenantId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm);
-            string oboCacheKey = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.UserAssertionHash);
+            string oboCacheKey = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.UserAssertionHashCacheKey);
+            string userAssertionHash = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.UserAssertionHash);
             string keyId = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.KeyId);
             string tokenType = JsonHelper.ExtractExistingOrDefault<string>(j, StorageJsonKeys.TokenType) ?? StorageJsonValues.TokenTypeBearer;
             string scopes = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target);
@@ -258,6 +270,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 tokenType: tokenType);
 
             item.OboCacheKey = oboCacheKey;
+            item.UserAssertionHash = userAssertionHash;
             item.PopulateFieldsFromJObject(j);
 
             item.InitCacheKey();
@@ -272,7 +285,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             var extExpiresUnixTimestamp = DateTimeHelpers.DateTimeToUnixTimestamp(ExtendedExpiresOn);
             SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);
             SetItemIfValueNotNull(json, StorageJsonKeys.Target, ScopeString);
-            SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHash, OboCacheKey);
+            SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHashCacheKey, OboCacheKey);
+            SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHash, UserAssertionHash);
             SetItemIfValueNotNull(json, StorageJsonKeys.CachedAt, DateTimeHelpers.DateTimeToUnixTimestamp(CachedAt));
             SetItemIfValueNotNull(json, StorageJsonKeys.ExpiresOn, DateTimeHelpers.DateTimeToUnixTimestamp(ExpiresOn));
             SetItemIfValueNotNull(json, StorageJsonKeys.ExtendedExpiresOn, extExpiresUnixTimestamp);

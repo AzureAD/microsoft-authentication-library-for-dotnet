@@ -353,7 +353,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref cacheKey)
                     .ExecuteAsync().ConfigureAwait(false);
 
-                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.InitiateLongRunningObo, CacheRefreshReason.NotApplicable);
+                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.InitiateLongRunningObo, CacheRefreshReason.NoCachedAccessToken);
 
                 // AcquireTokenInLongRunningProcess goes to AAD only in a refresh flow
                 requestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();

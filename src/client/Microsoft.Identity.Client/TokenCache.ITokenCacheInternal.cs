@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client
 
             string suggestedWebCacheKey = CacheKeyFactory.GetExternalCacheKeyFromResponse(requestParams, homeAccountId);
 
-            // token could be comming from a different cloud than the one configured
+            // token could be coming from a different cloud than the one configured
             if (requestParams.AppConfig.MultiCloudSupportEnabled && !string.IsNullOrEmpty(response.AuthorityUrl))
             {
                 var url = new Uri(response.AuthorityUrl);
@@ -79,7 +79,8 @@ namespace Microsoft.Identity.Client
                         tenantId,
                         homeAccountId,
                         requestParams.AuthenticationScheme.KeyId,
-                        CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion));
+                        CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
+                        requestParams.UserAssertion?.AssertionHash);
             }
 
             if (!string.IsNullOrEmpty(response.RefreshToken))

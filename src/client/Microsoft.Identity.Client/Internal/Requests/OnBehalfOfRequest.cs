@@ -43,14 +43,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
-            //Check if initiating a long running process
-            if (AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.InitiateLongRunningObo)
-            {
-                //Long running process should not use cached tokens
-                logger.Info("[OBO Request] Initiating long running process. Fetching OBO token from ESTS.");
-                return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
-            }
-
             if (!_onBehalfOfParameters.ForceRefresh && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 // look for access token in the cache first.
@@ -62,6 +54,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 using (logger.LogBlockDuration("[OBO Request] Looking in the cache for an access token"))
                 {
                     cachedAccessToken = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+                }
+
+                if (cachedAccessToken != null && AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.InitiateLongRunningObo &&
+                    !AuthenticationRequestParameters.UserAssertion.AssertionHash.Equals(cachedAccessToken.UserAssertionHash, System.StringComparison.Ordinal))
+                {
+                    logger.Info("[OBO request] InitiateLongRunningProcessInWebApi found cached token with a different assertion; fetching new tokens.");
+                    cachedAccessToken = null;
                 }
 
                 if (cachedAccessToken != null)
@@ -138,10 +137,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task<AuthenticationResult> RefreshRtOrFetchNewAccessTokenAsync(CancellationToken cancellationToken)
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
-            
-            if (ApiEvent.IsLongRunningObo(AuthenticationRequestParameters.ApiId))
+
+            // InitiateLongRunningProcessInWebApi retrieves tokens only with assertion, not by refresh token
+            if (AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenInLongRunningObo)
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Info("[OBO request] Long-running OBO flow, trying to refresh using an refresh token flow.");
+                AuthenticationRequestParameters.RequestContext.Logger.Info("[OBO request] AcquireTokenInLongRunningProcess, trying to refresh using an refresh token flow.");
 
                 // Look for a refresh token
                 MsalRefreshTokenCacheItem cachedRefreshToken = await CacheManager.FindRefreshTokenAsync().ConfigureAwait(false);
@@ -169,17 +169,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
                 }
 
-                if (AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenInLongRunningObo)
-                {
-                    AuthenticationRequestParameters.RequestContext.Logger.Error("[OBO request] AcquireTokenInLongRunningProcess was called and no access or refresh tokens were found in the cache.");
-                    throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
-                }
-
-                AuthenticationRequestParameters.RequestContext.Logger.Info("[OBO request] No Refresh Token was found in the cache. Fetching OBO token from ESTS");
+                AuthenticationRequestParameters.RequestContext.Logger.Error("[OBO request] AcquireTokenInLongRunningProcess was called and no access or refresh tokens were found in the cache.");
+                throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
             }
             else
             {
-                logger.Info("[OBO request] Normal OBO flow, skipping to fetching access token via OBO flow.");
+                logger.Info("[OBO request] Fetching access token via OBO flow.");
             }
 
             return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);

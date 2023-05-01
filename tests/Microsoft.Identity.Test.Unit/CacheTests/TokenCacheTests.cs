@@ -773,7 +773,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     _clientInfo,
                     _homeAccountId,
-                    oboCacheKey: assertion);
+                    oboCacheKey: assertion,
+                    userAssertionHash: assertion);
 
                 cache.Accessor.SaveAccessToken(atItem);
 
@@ -826,7 +827,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     _clientInfo,
                     _homeAccountId,
-                    oboCacheKey: assertionHash);
+                    oboCacheKey: assertionHash,
+                    userAssertionHash: assertionHash);
 
                 cache.Accessor.SaveAccessToken(atItem);
 

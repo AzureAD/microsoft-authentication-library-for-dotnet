@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             var item = new MsalRefreshTokenCacheItem();
             item.FamilyId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyId);
-            item.OboCacheKey = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash);
+            item.OboCacheKey = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHashCacheKey);
 
             item.PopulateFieldsFromJObject(j);
             item.InitCacheKey();
@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             var json = base.ToJObject();
             SetItemIfValueNotNull(json, StorageJsonKeys.FamilyId, FamilyId);
-            SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHash, OboCacheKey);
+            SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHashCacheKey, OboCacheKey);
             return json;
         }
 

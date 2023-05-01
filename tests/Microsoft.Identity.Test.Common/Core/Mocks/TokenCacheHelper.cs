@@ -173,7 +173,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 extendedAccessTokenExpiresOn,
                 clientInfo,
                 homeAccId,
-                oboCacheKey: userAssertionHash);
+                oboCacheKey: userAssertionHash,
+                userAssertionHash: userAssertionHash);
 
             // add access token
             accessor.SaveAccessToken(atItem);
@@ -385,7 +386,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static MsalAccessTokenCacheItem WithRefreshOn(this MsalAccessTokenCacheItem atItem, DateTimeOffset? refreshOn)
         {
-            MsalAccessTokenCacheItem newAtItem = new MsalAccessTokenCacheItem(
+            return new MsalAccessTokenCacheItem(
                atItem.Environment,
                atItem.ClientId,
                atItem.ScopeString,
@@ -399,14 +400,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                atItem.KeyId,
                refreshOn,
                atItem.TokenType,
-               atItem.OboCacheKey);
-
-            return newAtItem;
+               atItem.OboCacheKey,
+               atItem.UserAssertionHash);
         }
 
         public static MsalAccessTokenCacheItem WithUserAssertion(this MsalAccessTokenCacheItem atItem, string assertion)
         {
-            MsalAccessTokenCacheItem newAtItem = new MsalAccessTokenCacheItem(
+            return new MsalAccessTokenCacheItem(
                atItem.Environment,
                atItem.ClientId,
                atItem.ScopeString,
@@ -420,9 +420,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                atItem.KeyId,
                atItem.RefreshOn,
                atItem.TokenType,
+               assertion,
                assertion);
-
-            return newAtItem;
         }
 
         public static void UpdateUserAssertions(ConfidentialClientApplication app)
