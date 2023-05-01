@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
@@ -214,6 +215,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public string CorrelationId { get; set; }
 
+       
         #endregion
 
         /// <remarks>

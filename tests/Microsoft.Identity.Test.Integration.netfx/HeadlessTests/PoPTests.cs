@@ -28,6 +28,7 @@ using Microsoft.Identity.Test.Unit;
 using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -451,8 +452,35 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result2.AuthenticationResultMetadata.TokenSource);
         }
 
-#if NET_CORE
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
+        public async Task WamBadROPCAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+            WamLoggerValidator wastestLogger = new WamLoggerValidator();
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithLogging(wastestLogger, enablePiiLogging: true) // it's important that the PII is turned on, otherwise context is 'pii'
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .Build();
+
+            MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                pca.AcquireTokenByUsernamePassword(
+                    scopes,
+                    "noUser",
+                    "badPassword")                
+                .ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("557973642", ex.AdditionalResponseParameters["RuntimeTag"]);
+            Assert.AreEqual("User name is malformed.", ex.AdditionalResponseParameters["RuntimeContext"]); // message might change. not a big deal
+            Assert.AreEqual("ApiContractViolation", ex.AdditionalResponseParameters["RuntimeStatus"]);
+            Assert.AreEqual("3399811229", ex.AdditionalResponseParameters["RuntimeErrorCode"]);
+        }
+
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WamUsernamePasswordRequestWithPOPAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -488,7 +516,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 HttpMethod.Get,
                 result).ConfigureAwait(false);
         }
-#endif
 
         private static X509Certificate2 GetCertificate()
         {

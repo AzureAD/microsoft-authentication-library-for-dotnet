@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
@@ -112,6 +113,13 @@ namespace Microsoft.Identity.Client
                     value;
             }
         }
+
+        /// <summary>
+        /// A property bag with extra details for this exception.
+        /// </summary>
+        public IReadOnlyDictionary<string, string> AdditionalResponseParameters { get; set; } 
+            = CollectionHelpers.GetEmptyDictionary<string, string>();
+
 
         /// <summary>
         /// Creates and returns a string representation of the current exception.
