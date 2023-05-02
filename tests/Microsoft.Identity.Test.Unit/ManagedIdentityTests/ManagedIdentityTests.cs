@@ -11,6 +11,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -522,6 +524,129 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync(cancellationToken).ConfigureAwait(false);
 
                 appTokenCacheRecoder.AssertAccessCounts(1, 1);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(1, false)]
+        [DataRow(2, false)]
+        [DataRow(3, true)]
+        public async Task ManagedIdentityExpiresOnTestAsync(int expiresInHours, bool refreshOnHasValue)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager)
+                    .Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(expiresInHours),
+                    ManagedIdentitySource.AppService);
+
+                AcquireTokenForManagedIdentityParameterBuilder builder = mi.AcquireTokenForManagedIdentity(Resource);
+                AuthenticationResult result = await builder.ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity, builder.CommonParameters.ApiId);
+                Assert.AreEqual(refreshOnHasValue, result.AuthenticationResultMetadata.RefreshOn.HasValue);
+            }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(MsalClientException))]
+        public async Task ManagedIdentityInvalidRefreshOnThrowsAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
+
+                var mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager)
+                    .Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    AppServiceEndpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(0),
+                    ManagedIdentitySource.AppService);
+
+                AcquireTokenForManagedIdentityParameterBuilder builder = mi.AcquireTokenForManagedIdentity(Resource);
+
+                AuthenticationResult result = await builder.ExecuteAsync().ConfigureAwait(false);
+            }
+        }
+
+        [TestMethod]
+        public async Task ManagedIdentityIsProactivelyRefreshedAsync()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
+
+                Trace.WriteLine("1. Setup an app with a token cache with one AT");
+
+                var mi = ManagedIdentityApplicationBuilder.Create()
+                    .WithExperimentalFeatures()
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                httpManager.AddManagedIdentityMockHandler(
+                        AppServiceEndpoint,
+                        Resource,
+                        MockHelpers.GetMsiSuccessfulResponse(),
+                        ManagedIdentitySource.AppService);
+
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
+                var refreshOn = TestCommon.UpdateATWithRefreshOn(mi.AppTokenCacheInternal.Accessor).RefreshOn;
+                TokenCacheAccessRecorder cacheAccess = mi.AppTokenCache.RecordAccess();
+
+                Trace.WriteLine("3. Configure MSI to respond with a valid token");
+                httpManager.AddManagedIdentityMockHandler(
+                        AppServiceEndpoint,
+                        Resource,
+                        MockHelpers.GetMsiSuccessfulResponse(),
+                        ManagedIdentitySource.AppService);
+
+                // Act
+                Trace.WriteLine("4. ATM - should perform an RT refresh");
+                result = await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                TestCommon.YieldTillSatisfied(() => httpManager.QueueSize == 0);
+
+                Assert.IsNotNull(result);
+
+                Assert.AreEqual(0, httpManager.QueueSize,
+                    "MSAL should have refreshed the token because the original AT was marked for refresh");
+                
+                cacheAccess.WaitTo_AssertAcessCounts(1, 1);
+
+                Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, result.AuthenticationResultMetadata.CacheRefreshReason);
+
+                Assert.AreEqual(refreshOn, result.AuthenticationResultMetadata.RefreshOn);
+
+                result = await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                
+                Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
             }
         }
     }
