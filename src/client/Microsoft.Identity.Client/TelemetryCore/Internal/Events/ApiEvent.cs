@@ -26,13 +26,17 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             GetAccountById = 1011,
             GetAccountsByUserFlow = 1012,
             RemoveAccount = 1013,
-            RemoveOboTokens = 1014, //MSAL 4.51.0+
-            // The API Ids for managed identity will not be found in HTTP telemetry,
+
+            // MSAL 4.51.0+
+            RemoveOboTokens = 1014,
+            // The API IDs for managed identity will not be found in HTTP telemetry,
             // as we don't hit eSTS for managed identity calls.
-            AcquireTokenForSystemAssignedManagedIdentity = 1015, //MSAL 4.51.0+
-            AcquireTokenForUserAssignedManagedIdentity = 1016, //MSAL 4.51.0+
-            InitiateLongRunningObo = 1017, //MSAL 4.54.0+
-            AcquireTokenInLongRunningObo = 1018, //MSAL 4.54.0+
+            AcquireTokenForSystemAssignedManagedIdentity = 1015,
+            AcquireTokenForUserAssignedManagedIdentity = 1016,
+
+            // MSAL 4.54.0+
+            InitiateLongRunningObo = 1017,
+            AcquireTokenInLongRunningObo = 1018,
         }
 
         public ApiEvent(Guid correlationId)
