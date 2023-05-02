@@ -480,27 +480,40 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid + "more"))
                     });
 
-                try
-                {
-                    result = app
-                        .AcquireTokenInteractive(TestConstants.s_scope)
-                        .WithAccount(result.Account)
-                        .WithPrompt(Prompt.SelectAccount)
-                        .ExecuteAsync(CancellationToken.None)
-                        .Result;
+                //Ensure Interactive flow does not fail when different home account id is returned
+                AuthenticationResult result2 = app
+                    .AcquireTokenInteractive(TestConstants.s_scope)
+                    .WithAccount(result.Account)
+                    .WithPrompt(Prompt.SelectAccount)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
 
-                    Assert.Fail("API should have failed here");
-                }
-                catch (AggregateException ex)
-                {
-                    MsalClientException exc = (MsalClientException)ex.InnerException;
-                    Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalError.UserMismatch, exc.ErrorCode);
-                }
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                            TestConstants.s_scope.AsSingleString(),
+                            MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                            MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid + "more"))
+                    });
+
+                //Silent flow should fail when different account is returned.
+                var exception = Assert.ThrowsException<AggregateException>( () =>
+                    result = app
+                    .AcquireTokenSilent(TestConstants.s_scope, result.Account)
+                    .WithForceRefresh(true)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result
+                    , "Silent API should have failed here");
+
+                MsalClientException exc = (MsalClientException)exception.InnerException;
+                Assert.IsNotNull(exc);
+                Assert.AreEqual(MsalError.UserMismatch, exc.ErrorCode);
 
                 var users = app.GetAccountsAsync().Result;
-                Assert.AreEqual(1, users.Count());
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(2, users.Count());
+                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
             }
         }
 
