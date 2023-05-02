@@ -26,10 +26,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, "http://169.254.169.254");
 
-                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
                     .WithExperimentalFeatures()
-                    .WithHttpManager(httpManager)
-                    .Build();
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(ManagedIdentityTests.ImdsEndpoint, ManagedIdentityTests.Resource, MockHelpers.GetMsiImdsErrorResponse(),
                     ManagedIdentitySource.Imds, statusCode: HttpStatusCode.BadRequest);

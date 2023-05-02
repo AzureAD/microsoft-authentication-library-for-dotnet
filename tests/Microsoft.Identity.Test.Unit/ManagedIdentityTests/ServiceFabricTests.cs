@@ -35,10 +35,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "localhost/token");
 
-                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
                     .WithExperimentalFeatures()
-                    .WithHttpManager(httpManager)
-                    .Build();
+                    .WithHttpManager(httpManager);
+
+                // Disabling the shared cache to avoid the test to pass because of the cache
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
 
                 MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)

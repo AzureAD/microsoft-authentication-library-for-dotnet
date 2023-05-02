@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
@@ -11,17 +10,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
@@ -288,9 +283,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
                     .WithExperimentalFeatures()
-                    .WithHttpManager(httpManager).Build();
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiErrorResponse(),
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
@@ -320,9 +320,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
                     .WithExperimentalFeatures()
-                    .WithHttpManager(httpManager).Build();
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
