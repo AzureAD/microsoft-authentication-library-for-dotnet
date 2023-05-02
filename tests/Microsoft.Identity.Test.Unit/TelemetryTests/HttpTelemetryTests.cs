@@ -23,6 +23,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Test.Unit.Throttling;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Test.Common;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
@@ -231,14 +232,14 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Assert.IsNull(result.HttpRequest, "No calls are made to the token endpoint");
 
                 Trace.WriteLine("Step 3. Acquire Token Silent successful - via expired token");
-                UpdateATWithRefreshOn(_app.UserTokenCacheInternal.Accessor, expired: true);
+                TestCommon.UpdateATWithRefreshOn(_app.UserTokenCacheInternal.Accessor, expired: true);
                 TokenCacheAccessRecorder cacheAccess = _app.UserTokenCache.RecordAccess();
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaCacheRefresh).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheRefreshReason.Expired, isCacheSerialized: true);
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 1);
 
                 Trace.WriteLine("Step 4. Acquire Token Silent successful - via refresh on");
-                UpdateATWithRefreshOn(_app.UserTokenCacheInternal.Accessor);
+                TestCommon.UpdateATWithRefreshOn(_app.UserTokenCacheInternal.Accessor);
                 cacheAccess = _app.UserTokenCache.RecordAccess();
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaCacheRefresh).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheRefreshReason.ProactivelyRefreshed, isCacheSerialized: true);
@@ -247,7 +248,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 HttpTelemetryManager httpTelemetryManager = (HttpTelemetryManager)_app.ServiceBundle.HttpTelemetryManager;
                 Type httpTeleMgrType = typeof(HttpTelemetryManager);
                 FieldInfo field = httpTeleMgrType.GetField("_successfullSilentCallCount", BindingFlags.NonPublic | BindingFlags.Instance);
-                Assert.IsTrue(YieldTillSatisfied(() =>
+                Assert.IsTrue(TestCommon.YieldTillSatisfied(() =>
                 {
                     var actual = (int)field.GetValue(httpTelemetryManager);
                     return actual == 0;
@@ -256,7 +257,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Trace.WriteLine("Step 5. Acquire Token Silent with force_refresh = true");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaCacheRefresh, forceRefresh: true).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheRefreshReason.ForceRefreshOrClaims, isCacheSerialized: true);
-                Assert.IsTrue(YieldTillSatisfied(() =>
+                Assert.IsTrue(TestCommon.YieldTillSatisfied(() =>
                 {
                     var actual = (int)field.GetValue(httpTelemetryManager);
                     return actual == 0;
@@ -515,7 +516,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     throw new NotImplementedException();
             }
 
-            YieldTillSatisfied(() => _harness.HttpManager.QueueSize == 0);
+            TestCommon.YieldTillSatisfied(() => _harness.HttpManager.QueueSize == 0);
             Assert.AreEqual(0, _harness.HttpManager.QueueSize);
             return (tokenRequest?.ActualRequestMessage, correlationId);
         }
@@ -585,7 +586,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             expectedErrors = expectedErrors ?? new string[0];
 
             var actualHeader = ParseLastRequestHeader(requestMessage);
-            YieldTillSatisfied(() => actualHeader.SilentCount == expectedSilentCount);
+            TestCommon.YieldTillSatisfied(() => actualHeader.SilentCount == expectedSilentCount);
             Assert.AreEqual(expectedSilentCount, actualHeader.SilentCount);
             CoreAssert.AreEqual(actualHeader.FailedApis.Length, actualHeader.CorrelationIds.Length, actualHeader.Errors.Length);
 
@@ -632,47 +633,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 .ToArray();
 
             return (actualSuccessfullSilentCount, actualFailedApiIds, correlationIds, actualErrors);
-        }
-
-        private static MsalAccessTokenCacheItem UpdateATWithRefreshOn(
-            ITokenCacheAccessor accessor,
-            DateTimeOffset? refreshOn = null,
-            bool expired = false)
-        {
-            MsalAccessTokenCacheItem atItem = accessor.GetAllAccessTokens().Single();
-
-            refreshOn = refreshOn ?? DateTimeOffset.UtcNow - TimeSpan.FromMinutes(30);
-
-            // past date on refresh on
-            atItem = atItem.WithRefreshOn(refreshOn);
-
-            Assert.IsTrue(atItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromMinutes(10));
-
-            if (expired)
-            {
-                atItem = atItem.WithExpiresOn(DateTime.UtcNow - TimeSpan.FromMinutes(1));
-            }
-
-            accessor.SaveAccessToken(atItem);
-
-            return atItem;
-        }
-
-        private static bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 30000)
-        {
-            int iCount = maxTimeInMilliSec / 100;
-            while (iCount > 0)
-            {
-                if (func())
-                {
-                    return true;
-                }
-                Thread.Yield();
-                Thread.Sleep(100);
-                iCount--;
-            }
-
-            return false;
         }
     }
 }
