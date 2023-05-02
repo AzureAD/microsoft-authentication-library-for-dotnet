@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         //Resource ID of the User Assigned Identity 
         private const string UamiResourceId = "/subscriptions/c1686c51-b717-4fe0-9af3-24a20a41fb0c/" +
-            "resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentityConfiguration/userAssignedIdentities/" +
+            "resourcegroups/MSAL_MSI/providers/Microsoft.ManagedIdentity/userAssignedIdentities/" +
             "MSAL_MSI_USERID";
 
         //non existent Resource ID of the User Assigned Identity 
