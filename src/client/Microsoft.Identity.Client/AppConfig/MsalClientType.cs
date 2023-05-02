@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client.AppConfig
 {
     /// <summary>
-    /// Enum to represent the type of application.
+    /// Enum to represent the type of MSAL application.
     /// </summary>
-    internal enum ApplicationType
+    internal enum MsalClientType
     {
         ConfidentialClient,
         PublicClient,
-        ManagedIdentity
+        ManagedIdentityClient
     }
 }

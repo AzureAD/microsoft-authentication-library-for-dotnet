@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             _synchronizationContext = new DedicatedThreadSynchronizationContext();
 
             _coreUIParent = new CoreUIParent() { SynchronizationContext = _synchronizationContext };
-            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(ApplicationType.PublicClient);
+            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(MsalClientType.PublicClient);
             applicationConfiguration.BrokerOptions = new BrokerOptions(BrokerOptions.OperatingSystems.Windows);
             _logger = Substitute.For<ILoggerAdapter>();
             _logger.PiiLoggingEnabled.Returns(true);

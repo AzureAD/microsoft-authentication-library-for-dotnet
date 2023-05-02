@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
         /// parameters, and to create a public client application instance</returns>
         public static PublicClientApplicationBuilder CreateWithApplicationOptions(PublicClientApplicationOptions options)
         {
-            var config = new ApplicationConfiguration(ApplicationType.PublicClient);
+            var config = new ApplicationConfiguration(MsalClientType.PublicClient);
             return new PublicClientApplicationBuilder(config)
                 .WithOptions(options)
                 .WithKerberosTicketClaim(options.KerberosServicePrincipalName, options.TicketContainer);
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
         /// parameters, and to create a public client application instance</returns>
         public static PublicClientApplicationBuilder Create(string clientId)
         {
-            var config = new ApplicationConfiguration(ApplicationType.PublicClient);
+            var config = new ApplicationConfiguration(MsalClientType.PublicClient);
             return new PublicClientApplicationBuilder(config).WithClientId(clientId);
         }
 

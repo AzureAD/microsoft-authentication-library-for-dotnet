@@ -24,15 +24,15 @@ namespace Microsoft.Identity.Client
 {
     internal sealed class ApplicationConfiguration : IAppConfig
     {
-        public ApplicationConfiguration(ApplicationType applicationType) 
+        public ApplicationConfiguration(MsalClientType applicationType) 
         {
             switch (applicationType)
             {
-                case ApplicationType.ConfidentialClient: 
+                case MsalClientType.ConfidentialClient: 
                     IsConfidentialClient = true;
                     break;
 
-                case ApplicationType.ManagedIdentity:
+                case MsalClientType.ManagedIdentityClient:
                     IsManagedIdentity = true;
                     break;
             }

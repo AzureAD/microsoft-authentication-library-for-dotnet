@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client.Http
 {
     /// <summary>
-    /// 
+    /// Factory to return the instance of HttpManager based on retry configuration and type of MSAL application.
     /// </summary>
     internal sealed class HttpManagerFactory
     {
-        public static IHttpManager GetHttpManager(IMsalHttpClientFactory httpClientFactory, bool retryConfig, bool isManagedIdentity)
+        public static IHttpManager GetHttpManager(IMsalHttpClientFactory httpClientFactory, bool withRetry, bool isManagedIdentity)
         {
-            if (!retryConfig)
+            if (!withRetry)
             {
                 return new HttpManager(httpClientFactory);
             }

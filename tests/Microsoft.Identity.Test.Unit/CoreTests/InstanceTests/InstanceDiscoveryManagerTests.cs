@@ -403,7 +403,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Inject authority in service bundle
             var httpManager = new MockHttpManager();
-            var appConfig = new ApplicationConfiguration(ApplicationType.ConfidentialClient)
+            var appConfig = new ApplicationConfiguration(MsalClientType.ConfidentialClient)
             {
                 HttpManager = httpManager,
                 Authority = Authority.CreateAuthority(TestAuthority, false)

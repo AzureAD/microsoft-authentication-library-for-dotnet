@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Common
             bool validateAuthority = true,
             bool isLegacyCacheEnabled = true,
             bool isMultiCloudSupportEnabled = false, 
-            ApplicationType applicationType = ApplicationType.PublicClient,
+            MsalClientType applicationType = MsalClientType.PublicClient,
             bool isInstanceDiscoveryEnabled = true,
             IPlatformProxy platformProxy = null)
         {

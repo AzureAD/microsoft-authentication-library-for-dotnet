@@ -409,7 +409,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     Resource,
                     "",
                     managedIdentitySource,
-                    statusCode: statusCode); //404
+                    statusCode: statusCode);
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
