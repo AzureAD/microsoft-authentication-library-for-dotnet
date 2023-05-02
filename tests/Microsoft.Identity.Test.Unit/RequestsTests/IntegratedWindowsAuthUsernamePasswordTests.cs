@@ -365,6 +365,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientVer,
                     "Client info header should contain " + TestConstants.XClientVer,
                     StringComparison.OrdinalIgnoreCase);
+
                 // Assert telemetry ApiId
                 Assert.AreEqual(ApiEvent.ApiIds.AcquireTokenByIntegratedWindowsAuth.ToString("D"), mockTokenRequestHttpHandler.ActualRequestMessage.Headers.GetValues(TelemetryConstants.XClientCurrentTelemetry).Single().Split('|')[1].Split(',')[0]);
             }

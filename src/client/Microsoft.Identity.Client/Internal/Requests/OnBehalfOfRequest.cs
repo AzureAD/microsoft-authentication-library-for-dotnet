@@ -141,7 +141,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             
             if (ApiEvent.IsLongRunningObo(AuthenticationRequestParameters.ApiId))
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Info("[OBO request] Long-running OBO flow, trying to refresh using an refresh token flow.");
+                AuthenticationRequestParameters.RequestContext.Logger.Info("[OBO request] Long-running OBO flow, trying to refresh using a refresh token flow.");
+
 
                 // Look for a refresh token
                 MsalRefreshTokenCacheItem cachedRefreshToken = await CacheManager.FindRefreshTokenAsync().ConfigureAwait(false);
