@@ -452,7 +452,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result2.AuthenticationResultMetadata.TokenSource);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+#if NET_CORE
         public async Task WamUsernamePasswordRequestWithPOPAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -488,6 +488,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 HttpMethod.Get,
                 result).ConfigureAwait(false);
         }
+#endif
 
         private static X509Certificate2 GetCertificate()
         {
