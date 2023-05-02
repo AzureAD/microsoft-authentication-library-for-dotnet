@@ -15,7 +15,7 @@ using Microsoft.Identity.Client.Core;
 namespace Microsoft.Identity.Client.Http
 {
     /// <remarks>
-    /// Http Manager specific to managed identity to implement the retry for specific http status codes.
+    /// HTTP Manager specific to managed identity to implement the retry for specific HTTP status codes.
     /// </remarks>
     internal class HttpManagerManagedIdentity : HttpManagerWithRetry
     {
