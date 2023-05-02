@@ -538,10 +538,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
-                var mi = ManagedIdentityApplicationBuilder.Create()
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
                     .WithExperimentalFeatures()
-                    .WithHttpManager(httpManager)
-                    .Build();
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
                     AppServiceEndpoint,
@@ -569,7 +573,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
-                var mi = ManagedIdentityApplicationBuilder.Create()
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
@@ -596,7 +600,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Trace.WriteLine("1. Setup an app with a token cache with one AT");
 
-                var mi = ManagedIdentityApplicationBuilder.Create()
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
@@ -613,7 +617,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
                 var refreshOn = TestCommon.UpdateATWithRefreshOn(mi.AppTokenCacheInternal.Accessor).RefreshOn;
-                TokenCacheAccessRecorder cacheAccess = mi.AppTokenCache.RecordAccess();
+                TokenCacheAccessRecorder cacheAccess = mi.AppTokenCacheInternal.RecordAccess();
 
                 Trace.WriteLine("3. Configure MSI to respond with a valid token");
                 httpManager.AddManagedIdentityMockHandler(
