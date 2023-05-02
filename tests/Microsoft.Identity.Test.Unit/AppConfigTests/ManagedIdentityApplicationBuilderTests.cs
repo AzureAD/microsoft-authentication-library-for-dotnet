@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor()
         {
-            var mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
+            var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
                 .WithExperimentalFeatures().BuildConcrete();
 
             // Assert defaults
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithCreateUserAssignedId()
         {
-            var mi = ManagedIdentityApplicationBuilder.Create(UserAssignedManagedIdentity.FromClientId(TestConstants.ClientId))
+            var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.UserAssignedFromClientId(TestConstants.ClientId))
                 .WithExperimentalFeatures().BuildConcrete();
 
             //Assert defaults
@@ -85,8 +85,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithUserAssignedManagedIdentity_ResourceId(string userAssignedId, bool isClientId = true)
         {
             var mi = ManagedIdentityApplicationBuilder.Create(isClientId ? 
-                    UserAssignedManagedIdentity.FromClientId(userAssignedId) : 
-                    UserAssignedManagedIdentity.FromResourceId(userAssignedId))
+                    ManagedIdentityConfiguration.UserAssignedFromClientId(userAssignedId) : 
+                    ManagedIdentityConfiguration.UserAssignedFromResourceId(userAssignedId))
                 .WithExperimentalFeatures()
                 .BuildConcrete();
 
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithDebugLoggingCallback()
         {
-            var mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
+            var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
                 .WithExperimentalFeatures()
                 .WithDebugLoggingCallback()
                 .BuildConcrete();
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithHttpClientFactory()
         {
             var httpClientFactory = NSubstitute.Substitute.For<IMsalHttpClientFactory>();
-            var mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
+            var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
                 .WithExperimentalFeatures()
                 .WithHttpClientFactory(httpClientFactory)
                 .BuildConcrete();
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithLogging()
         {
             var mi = ManagedIdentityApplicationBuilder
-                .Create(SystemAssignedManagedIdentity.Default())
+                .Create(ManagedIdentityConfiguration.SystemAssigned)
                 .WithExperimentalFeatures()
                 .WithLogging((level, message, pii) => { })
                 .BuildConcrete();

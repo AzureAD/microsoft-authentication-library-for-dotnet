@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, "http://169.254.169.254");
 
-                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();

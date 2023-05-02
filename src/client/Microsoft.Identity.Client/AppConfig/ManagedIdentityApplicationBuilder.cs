@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
         {
             ApplicationBase.GuardMobileFrameworks();
 
-            var builder = new ManagedIdentityApplicationBuilder(BuildConfiguration(options.ManagedIdentity)).WithOptions(options);
+            var builder = new ManagedIdentityApplicationBuilder(BuildConfiguration(options.ManagedIdentityConfiguration)).WithOptions(options);
 
             return builder;
         }
@@ -58,37 +58,38 @@ namespace Microsoft.Identity.Client
         /// and for a user assigned managed identity use ManagedIdentityApplicationBuilder.Create(UserAssignedManagedIdentity.FromClientId(clientId)).
         /// For more details see https://aka.ms/msal-net-managed-identity
         /// </summary>
-        /// <param name="managedIdentity">Managed Identity assigned to the resource.</param>
+        /// <param name="managedIdentityConfiguration">Configuration of the Managed Identity assigned to the resource.</param>
         /// <returns>A <see cref="ManagedIdentityApplicationBuilder"/> from which to set more
         /// parameters, and to create a managed identity application instance</returns>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
-        public static ManagedIdentityApplicationBuilder Create(IManagedIdentity managedIdentity)
+        public static ManagedIdentityApplicationBuilder Create(ManagedIdentityConfiguration managedIdentityConfiguration)
         {
             ApplicationBase.GuardMobileFrameworks();
 
-            return new ManagedIdentityApplicationBuilder(BuildConfiguration(managedIdentity));
+            return new ManagedIdentityApplicationBuilder(BuildConfiguration(managedIdentityConfiguration));
         }
 
-        private static ApplicationConfiguration BuildConfiguration(IManagedIdentity managedIdentity)
+        private static ApplicationConfiguration BuildConfiguration(ManagedIdentityConfiguration managedIdentityConfiguration)
         {
             var config = new ApplicationConfiguration(isConfidentialClient: false);
 
-            if (managedIdentity is UserAssignedManagedIdentity)
+            if (managedIdentityConfiguration == null)
             {
-                config.IsUserAssignedManagedIdentity = true;
-                var userAssignedManagedIdentity = managedIdentity as UserAssignedManagedIdentity;
+                throw new ArgumentNullException(nameof(managedIdentityConfiguration));
+            }
 
-                switch (userAssignedManagedIdentity.UserAssignedIdType)
-                {
-                    case UserAssignedIdType.ClientId:
-                        config.ManagedIdentityUserAssignedClientId = userAssignedManagedIdentity.UserAssignedId;
-                        break;
-                    case UserAssignedIdType.ResourceId:
-                        config.ManagedIdentityUserAssignedResourceId = userAssignedManagedIdentity.UserAssignedId;
-                        break;
-                }
+            switch (managedIdentityConfiguration.IdType)
+            {
+                case ManagedIdentityIdType.ClientId:
+                    config.IsUserAssignedManagedIdentity = true;
+                    config.ManagedIdentityUserAssignedClientId = managedIdentityConfiguration.UserAssignedId;
+                    break;
+                case ManagedIdentityIdType.ResourceId:
+                    config.IsUserAssignedManagedIdentity = true;
+                    config.ManagedIdentityUserAssignedResourceId = managedIdentityConfiguration.UserAssignedId;
+                    break;
             }
 
             config.CacheSynchronizationEnabled = false;
@@ -163,7 +164,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         internal ManagedIdentityApplication BuildConcrete()
         {
-            ValidateUseOfExperimentalFeature("ManagedIdentity");
+            ValidateUseOfExperimentalFeature("ManagedIdentityConfiguration");
             DefaultConfiguration();
             return new ManagedIdentityApplication(BuildConfiguration());
         }

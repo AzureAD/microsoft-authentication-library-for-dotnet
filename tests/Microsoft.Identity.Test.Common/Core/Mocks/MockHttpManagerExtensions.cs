@@ -338,7 +338,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string response,
             ManagedIdentitySource managedIdentitySourceType,
             string userAssignedClientIdOrResourceId = null,
-            UserAssignedIdType? userAssignedIdType = null,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             HttpStatusCode statusCode = HttpStatusCode.OK
             )
         {
@@ -348,12 +348,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             MockHttpMessageHandler httpMessageHandler = BuildMockHandlerForManagedIdentitySource(managedIdentitySourceType, resource);
 
-            if (userAssignedIdType != null && userAssignedIdType == UserAssignedIdType.ClientId)
+            if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
             {
                 httpMessageHandler.ExpectedQueryParams.Add("client_id", userAssignedClientIdOrResourceId);
             }
 
-            if (userAssignedIdType != null && userAssignedIdType == UserAssignedIdType.ResourceId)
+            if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
             {
                 httpMessageHandler.ExpectedQueryParams.Add("mi_res_id", userAssignedClientIdOrResourceId);
             }

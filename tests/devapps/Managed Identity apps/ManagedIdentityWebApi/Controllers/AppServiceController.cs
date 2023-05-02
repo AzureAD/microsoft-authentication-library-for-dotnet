@@ -58,14 +58,14 @@ namespace ManagedIdentityWebApi.Controllers
         {
             if (userAssignedId == null) 
             {
-                return ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
+                return ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
                     .WithExperimentalFeatures()
                     .WithLogging(new MyIdentityLogger(_logger))
                     .Build();
             }
             else
             {
-                return ManagedIdentityApplicationBuilder.Create(UserAssignedManagedIdentity.FromClientId(userAssignedId))
+                return ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.UserAssignedFromClientId(userAssignedId))
                     .WithExperimentalFeatures()
                     .WithLogging(new MyIdentityLogger(_logger))
                     .Build();

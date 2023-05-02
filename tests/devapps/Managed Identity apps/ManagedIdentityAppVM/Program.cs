@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Abstractions;
 
 IIdentityLogger identityLogger = new IdentityLogger();
 
-IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
+IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
                 .WithExperimentalFeatures()
                 .WithLogging(identityLogger, true)
                 .Build();

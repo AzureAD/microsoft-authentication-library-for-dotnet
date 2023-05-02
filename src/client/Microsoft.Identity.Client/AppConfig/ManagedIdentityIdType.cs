@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
-    /// <summary>
-    /// Interface for managed identity configuration supported by MSAL.
-    /// </summary>
-    public interface IManagedIdentity
+    internal enum ManagedIdentityIdType
     {
+        SystemAssigned,
+        ClientId,
+        ResourceId
     }
 }

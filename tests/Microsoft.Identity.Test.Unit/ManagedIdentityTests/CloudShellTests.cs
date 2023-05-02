@@ -22,9 +22,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         private const string CloudShell = "Cloud Shell";
 
         [DataTestMethod]
-        [DataRow(TestConstants.ClientId, UserAssignedIdType.ClientId)]
-        [DataRow("resourceId", UserAssignedIdType.ResourceId)]
-        public async Task CloudShellUserAssignedManagedIdentityNotSupportedAsync(string userAssignedId, UserAssignedIdType userAssignedIdType)
+        [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
+        [DataRow("resourceId", UserAssignedIdentityId.ResourceId)]
+        public async Task CloudShellUserAssignedManagedIdentityNotSupportedAsync(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager())
@@ -32,9 +32,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(ManagedIdentitySource.CloudShell, ManagedIdentityTests.CloudShellEndpoint);
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder
-                    .Create(userAssignedIdType == UserAssignedIdType.ClientId ?
-                    UserAssignedManagedIdentity.FromClientId(userAssignedId) :
-                    UserAssignedManagedIdentity.FromResourceId(userAssignedId))
+                    .Create(userAssignedIdentityId == UserAssignedIdentityId.ClientId ?
+                    ManagedIdentityConfiguration.UserAssignedFromClientId(userAssignedId) :
+                    ManagedIdentityConfiguration.UserAssignedFromResourceId(userAssignedId))
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.CloudShell, "localhost/token");
 
-                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
+                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
