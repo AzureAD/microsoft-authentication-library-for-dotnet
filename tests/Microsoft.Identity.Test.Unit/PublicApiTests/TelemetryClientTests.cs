@@ -429,20 +429,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(ex.ErrorCodes.AsSingleString(), eventDetails.Properties[TelemetryConstants.StsErrorCode]);
                 Assert.IsFalse((bool?)eventDetails.Properties[TelemetryConstants.Succeeded]);
 
-                ////Test for MsalClientException
-                //MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
-                //    () => _cca.acquiretoken .AcquireTokenForClient(TestConstants.s_scope)
-                //    .WithAuthority(TestConstants.AuthorityUtidTenant)
-                //    .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+                //Test for MsalClientException
+                _harness.HttpManager.AddTokenResponse(TokenResponseType.InvalidClient);
 
-                //Assert.IsNotNull(ex);
-                //Assert.IsNotNull(ex.ErrorCode);
+                MsalClientException exClient = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => _cca.AcquireTokenForClient(null)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
 
-                //MsalTelemetryEventDetails eventDetails = _telemetryClient.TestTelemetryEventDetails;
-                //Assert.AreEqual(ex.ErrorCode, eventDetails.Properties[TelemetryConstants.ErrorCode]);
-                //Assert.AreEqual(ex.Message, eventDetails.Properties[TelemetryConstants.ErrorMessage]);
-                //Assert.AreEqual(ex.ErrorCodes.AsSingleString(), eventDetails.Properties[TelemetryConstants.StsErrorCode]);
-                //Assert.IsFalse((bool?)eventDetails.Properties[TelemetryConstants.Succeeded]);
+                Assert.IsNotNull(exClient);
+                Assert.IsNotNull(exClient.ErrorCode);
+
+                eventDetails = _telemetryClient.TestTelemetryEventDetails;
+                Assert.AreEqual(exClient.ErrorCode, eventDetails.Properties[TelemetryConstants.ErrorCode]);
+                Assert.AreEqual(exClient.Message, eventDetails.Properties[TelemetryConstants.ErrorMessage]);
+                Assert.IsFalse((bool?)eventDetails.Properties[TelemetryConstants.Succeeded]);
+
+                //Test for generic Exception
             }
         }
 
