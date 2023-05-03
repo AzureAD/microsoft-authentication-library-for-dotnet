@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     AssertionType.Secret,
                     TestConstants.AuthorityUtidTenant,
                     TokenType.Bearer,
-                    CacheLevel.Unknown,
+                    CacheLevel.None,
                     TestConstants.s_scope.AsSingleString(),
                     null);
 
@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     AssertionType.Secret,
                     TestConstants.AuthorityUtidTenant,
                     TokenType.Bearer,
-                    CacheLevel.Unknown,
+                    CacheLevel.None,
                     null,
                     "https://graph.windows.net");
             }
@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     AssertionType.Secret,
                     TestConstants.AuthorityUtidTenant,
                     TokenType.Bearer,
-                    CacheLevel.Unknown,
+                    CacheLevel.None,
                     expectedScope,
                     expectedResource);
             }
@@ -232,7 +232,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     (AssertionType)assertionType,
                     TestConstants.AuthorityUtidTenant,
                     TokenType.Bearer,
-                    CacheLevel.Unknown, 
+                    CacheLevel.None, 
                     TestConstants.s_scope.AsSingleString(), 
                     null);
             }
@@ -398,7 +398,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     AssertionType.Msi,
                     "https://login.microsoftonline.com/managed_identity/",
                     TokenType.Bearer,
-                    CacheLevel.Unknown,
+                    CacheLevel.None,
                     null,
                     resource);
             }
