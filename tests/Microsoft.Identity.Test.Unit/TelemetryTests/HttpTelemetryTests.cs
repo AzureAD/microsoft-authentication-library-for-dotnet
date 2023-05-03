@@ -599,7 +599,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 case AcquireTokenSilentOutcome.SuccessViaRefreshGrant:
                     // let's remove the AT so that they can't be used 
                     _app.UserTokenCacheInternal.Accessor.ClearAccessTokens();
-                    tokenRequest = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityUtidTenant);
+                    tokenRequest = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityUtidTenant,
+                        responseMessage: MockHelpers.CreateSuccessTokenResponseMessage(refreshToken: Guid.NewGuid().ToString()));
                     authResult = await request
                       .ExecuteAsync()
                       .ConfigureAwait(false);
@@ -607,7 +608,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                     break;
                 case AcquireTokenSilentOutcome.SuccessViaCacheRefresh:
-                    tokenRequest = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityUtidTenant);
+                    tokenRequest = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityUtidTenant, 
+                        responseMessage: MockHelpers.CreateSuccessTokenResponseMessage(refreshToken: Guid.NewGuid().ToString()));
                     authResult = await request
                       .ExecuteAsync()
                       .ConfigureAwait(false);
