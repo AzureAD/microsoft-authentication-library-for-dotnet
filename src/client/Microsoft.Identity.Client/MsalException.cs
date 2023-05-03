@@ -26,19 +26,19 @@ namespace Microsoft.Identity.Client
     public class MsalException : Exception
     {
         /// <summary>
-        /// An <see cref="MsalException.AdditionalErrorData"/> property key, currently available when using desktop brokers.
+        /// An <see cref="AdditionalExceptionData"/> property key, available when using desktop brokers.
         /// </summary>
-        public const string BrokerContext = "BrokerContext";
+        public const string BrokerErrorContext = "BrokerErrorContext";
         /// <summary>
-        /// An <see cref="MsalException.AdditionalErrorData"/> property key, currently available when using desktop brokers.
+        /// An <see cref="AdditionalExceptionData"/> property key, available when using desktop brokers.
         /// </summary>
-        public const string BrokerTag = "BrokerTag";
+        public const string BrokerErrorTag = "BrokerErrorTag";
         /// <summary>
-        /// An <see cref="MsalException.AdditionalErrorData"/> property key, currently available when using desktop brokers.
+        /// An <see cref="AdditionalExceptionData"/> property key, available when using desktop brokers.
         /// </summary>
-        public const string BrokerStatus = "BrokerStatus";
+        public const string BrokerErrorStatus = "BrokerErrorStatus";
         /// <summary>
-        /// An <see cref="MsalException.AdditionalErrorData"/> property key, currently available when using desktop brokers.
+        /// An <see cref="AdditionalExceptionData"/> property key, available when using desktop brokers.
         /// </summary>
         public const string BrokerErrorCode = "BrokerErrorCode";
 
@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// A property bag with extra details for this exception.
         /// </summary>
-        public IReadOnlyDictionary<string, string> AdditionalErrorData { get; set; } 
+        public IReadOnlyDictionary<string, string> AdditionalExceptionData { get; set; } 
             = CollectionHelpers.GetEmptyDictionary<string, string>();
 
 

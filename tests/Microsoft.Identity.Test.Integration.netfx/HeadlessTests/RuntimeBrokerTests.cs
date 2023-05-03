@@ -91,10 +91,10 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 .ExecuteAsync())
                 .ConfigureAwait(false);
 
-            Assert.AreEqual("0x2142008A", ex.AdditionalErrorData[MsalException.BrokerTag]);
-            Assert.AreEqual("User name is malformed.", ex.AdditionalErrorData[MsalException.BrokerContext]); // message might change. not a big deal
-            Assert.AreEqual("ApiContractViolation", ex.AdditionalErrorData[MsalException.BrokerStatus]);
-            Assert.AreEqual("3399811229", ex.AdditionalErrorData[MsalException.BrokerErrorCode]);
+            Assert.AreEqual("0x2142008A", ex.AdditionalExceptionData[MsalException.BrokerErrorTag]);
+            Assert.AreEqual("User name is malformed.", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]); // message might change. not a big deal
+            Assert.AreEqual("ApiContractViolation", ex.AdditionalExceptionData[MsalException.BrokerErrorStatus]);
+            Assert.AreEqual("3399811229", ex.AdditionalExceptionData[MsalException.BrokerErrorCode]);
         }
 
         [RunOn(TargetFrameworks.NetCore)]

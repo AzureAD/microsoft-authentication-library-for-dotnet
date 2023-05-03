@@ -202,13 +202,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
         {
             var result = new Dictionary<string, string>()
             {
-                { MsalException.BrokerContext, runtimeError.Context },
-                { MsalException.BrokerTag, $"0x{runtimeError.Tag:X}" },
-                { MsalException.BrokerStatus, runtimeError.Status.ToString() },
+                { MsalException.BrokerErrorContext, runtimeError.Context },
+                { MsalException.BrokerErrorTag, $"0x{runtimeError.Tag:X}" },
+                { MsalException.BrokerErrorStatus, runtimeError.Status.ToString() },
                 { MsalException.BrokerErrorCode, (runtimeError.ErrorCode).ToString() },
             };
 
-            exception.AdditionalErrorData = result;
+            exception.AdditionalExceptionData = result;
 
             return exception;
         }

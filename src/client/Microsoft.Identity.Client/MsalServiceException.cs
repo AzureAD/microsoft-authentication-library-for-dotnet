@@ -214,7 +214,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public string CorrelationId { get; set; }
 
-       
         #endregion
 
         /// <remarks>
