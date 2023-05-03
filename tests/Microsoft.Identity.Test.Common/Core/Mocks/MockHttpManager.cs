@@ -27,20 +27,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         private readonly IHttpManager _httpManager;
 
-        public MockHttpManager(TestContext testContext = null) 
+        public MockHttpManager(TestContext testContext = null, bool isManagedIdentity = false) 
             //base(new SimpleHttpClientFactory())
         {
-            _httpManager = new HttpManagerWithRetry(new MockHttpClientFactory(MessageHandlerFunc, 
-                _httpMessageHandlerQueue, testContext));
-            _testContext = testContext;
+            _httpManager = HttpManagerFactory.GetHttpManager(new MockHttpClientFactory(MessageHandlerFunc,
+                _httpMessageHandlerQueue, testContext), true, isManagedIdentity);
         }
 
-        public MockHttpManager(bool retryOnceOn5xx, TestContext testContext = null)
+        public MockHttpManager(bool retryOnce, TestContext testContext = null, bool isManagedIdentity = false)
         {
-            _httpManager = retryOnceOn5xx ? new HttpManagerWithRetry(new MockHttpClientFactory(MessageHandlerFunc,
-                _httpMessageHandlerQueue, testContext)) : 
-                new HttpManager(new MockHttpClientFactory(MessageHandlerFunc,
-                _httpMessageHandlerQueue, testContext));
+            _httpManager = HttpManagerFactory.GetHttpManager(new MockHttpClientFactory(MessageHandlerFunc,
+                _httpMessageHandlerQueue, testContext), retryOnce, isManagedIdentity);
 
             _testContext = testContext;
         }

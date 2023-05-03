@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         [TestMethod]
         public async Task TestSendGetWithRetryFalseHttp500TypeFailureAsync()
         {
-            using (var httpManager = new MockHttpManager(retryOnceOn5xx: false))
+            using (var httpManager = new MockHttpManager(retryOnce: false))
             {
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Get, HttpStatusCode.GatewayTimeout);
 
