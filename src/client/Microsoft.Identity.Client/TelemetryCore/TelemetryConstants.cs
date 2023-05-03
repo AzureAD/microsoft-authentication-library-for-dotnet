@@ -26,6 +26,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string TokenSource = "TokenSource";
         public const string CacheInfoTelemetry = "CacheInfoTelemetry";
         public const string ErrorCode = "ErrorCode";
+        public const string StsErrorCode = "StsErrorCode";
         public const string ErrorMessage = "ErrorMessage";
         public const string Duration = "Duration";
         public const string Succeeded = "Succeeded";
@@ -34,7 +35,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string ActivityId = "ActivityId";
         public const string Resource = "Resource";
         public const string RefreshOn = "RefreshOn";
-        public const string CacheUsed = "CacheUsed";
+        public const string CacheLevel = "CacheLevel";
         public const string AssertionType = "AssertionType";
         public const string Endpoint = "Endpoint";
         public const string Scopes = "Scopes";

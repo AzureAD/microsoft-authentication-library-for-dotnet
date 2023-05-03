@@ -222,6 +222,11 @@ namespace Microsoft.Identity.Client
         internal string SubError { get; set; }
 
         /// <summary>
+        /// A list of STS-specific error codes that can help in diagnostics.
+        /// </summary>
+        internal string[] ErrorCodes { get; set; }
+
+        /// <summary>
         /// As per discussion with Evo, AAD 
         /// </summary>
         private void UpdateIsRetryable()

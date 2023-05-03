@@ -130,7 +130,6 @@ namespace Microsoft.Identity.Client
             IIdentityLogger identityLogger,
             bool piiLoggingEnabled,
             TelemetryData telemetryData = null)
-
         {
             TokenCache = tokenCache;
             ClientId = clientId;
@@ -146,7 +145,7 @@ namespace Microsoft.Identity.Client
             SuggestedCacheExpiry = suggestedCacheExpiry;
             IdentityLogger = identityLogger;
             PiiLoggingEnabled = piiLoggingEnabled;
-            TelemetryData = telemetryData;
+            TelemetryData = telemetryData?? new TelemetryData();
         }
 
         /// <summary>

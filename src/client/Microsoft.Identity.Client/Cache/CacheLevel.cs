@@ -15,16 +15,21 @@ namespace Microsoft.Identity.Client.Cache
     public enum CacheLevel
     {
         /// <summary>
+        /// Specifies that the cache level used is None.
+        /// Token was retrieved from ESTS
+        /// </summary>
+        None = 0,
+        /// <summary>
         /// Specifies that the cache level used is unknown.
+        /// The custom token cache which doesn't relay the info about which cache was hit back to MSAL.
         /// </summary>
-        Unknown = 0,
+        Unknown = 1,
         /// <summary>
-        /// Specifies if the L1 cache is used
+        /// Specifies if the L1 cache is used.
         /// </summary>
-        L1Cache = 1,
+        L1Cache = 2,
         /// <summary>
-        /// Specifies if the L2 cache is used
-        /// </summary>
-        L2Cache = 2
+        /// Specifies if the L2 cache is used.
+        L2Cache = 3
     }
 }

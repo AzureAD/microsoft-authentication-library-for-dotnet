@@ -244,7 +244,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (_harness = CreateTestHarness())
             {
                 //Create app
-                CacheLevel cacheTypeUsed = CacheLevel.L1Cache;
+                CacheLevel cacheLevel = CacheLevel.L1Cache;
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 CreateApplication();
 
@@ -253,12 +253,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 //Configure cache
                 _cca.AppTokenCache.SetBeforeAccess((args) =>
                 {
-                    args.TelemetryData.CacheLevel = cacheTypeUsed;
+                    args.TelemetryData.CacheLevel = cacheLevel;
                 });
 
                 _cca.AppTokenCache.SetAfterAccess((args) =>
                 {
-                    args.TelemetryData.CacheLevel = cacheTypeUsed;
+                    args.TelemetryData.CacheLevel = cacheLevel;
                 });
 
                 //Acquire Token
@@ -279,12 +279,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     AssertionType.Secret,
                     TestConstants.AuthorityUtidTenant,
                     TokenType.Bearer,
-                    cacheTypeUsed, 
+                    CacheLevel.None, 
                     TestConstants.s_scope.AsSingleString(), 
                     null);
 
                 //Update cache type
-                cacheTypeUsed = CacheLevel.L2Cache;
+                cacheLevel = CacheLevel.L1Cache;
 
                 //Acquire Token
                 result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
@@ -304,7 +304,57 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     AssertionType.Secret,
                     TestConstants.AuthorityUtidTenant,
                     TokenType.Bearer,
-                    cacheTypeUsed,
+                    CacheLevel.L1Cache,
+                    TestConstants.s_scope.AsSingleString(),
+                    null);
+
+                //Update cache type again
+                cacheLevel = CacheLevel.L2Cache;
+
+                //Acquire Token
+                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+
+                eventDetails = _telemetryClient.TestTelemetryEventDetails;
+
+                //Validate telemetry
+                AssertLoggedTelemetry(
+                    result,
+                    eventDetails,
+                    TokenSource.Cache,
+                    CacheRefreshReason.NotApplicable,
+                    AssertionType.Secret,
+                    TestConstants.AuthorityUtidTenant,
+                    TokenType.Bearer,
+                    CacheLevel.L2Cache,
+                    TestConstants.s_scope.AsSingleString(),
+                    null);
+
+                //Simulate the cache not providing a value
+                cacheLevel = CacheLevel.None;
+
+                //Acquire Token
+                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+
+                eventDetails = _telemetryClient.TestTelemetryEventDetails;
+
+                //Validate telemetry
+                AssertLoggedTelemetry(
+                    result,
+                    eventDetails,
+                    TokenSource.Cache,
+                    CacheRefreshReason.NotApplicable,
+                    AssertionType.Secret,
+                    TestConstants.AuthorityUtidTenant,
+                    TokenType.Bearer,
+                    CacheLevel.Unknown,
                     TestConstants.s_scope.AsSingleString(),
                     null);
             }
@@ -364,6 +414,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 CreateApplication();
                 _harness.HttpManager.AddTokenResponse(TokenResponseType.InvalidClient);
 
+                //Test for MsalServiceException
                 MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
                     () => _cca.AcquireTokenForClient(TestConstants.s_scope)
                     .WithAuthority(TestConstants.AuthorityUtidTenant)
@@ -374,7 +425,24 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 MsalTelemetryEventDetails eventDetails = _telemetryClient.TestTelemetryEventDetails;
                 Assert.AreEqual(ex.ErrorCode, eventDetails.Properties[TelemetryConstants.ErrorCode]);
+                Assert.AreEqual(ex.Message, eventDetails.Properties[TelemetryConstants.ErrorMessage]);
+                Assert.AreEqual(ex.ErrorCodes.AsSingleString(), eventDetails.Properties[TelemetryConstants.StsErrorCode]);
                 Assert.IsFalse((bool?)eventDetails.Properties[TelemetryConstants.Succeeded]);
+
+                ////Test for MsalClientException
+                //MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                //    () => _cca.acquiretoken .AcquireTokenForClient(TestConstants.s_scope)
+                //    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                //    .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+                //Assert.IsNotNull(ex);
+                //Assert.IsNotNull(ex.ErrorCode);
+
+                //MsalTelemetryEventDetails eventDetails = _telemetryClient.TestTelemetryEventDetails;
+                //Assert.AreEqual(ex.ErrorCode, eventDetails.Properties[TelemetryConstants.ErrorCode]);
+                //Assert.AreEqual(ex.Message, eventDetails.Properties[TelemetryConstants.ErrorMessage]);
+                //Assert.AreEqual(ex.ErrorCodes.AsSingleString(), eventDetails.Properties[TelemetryConstants.StsErrorCode]);
+                //Assert.IsFalse((bool?)eventDetails.Properties[TelemetryConstants.Succeeded]);
             }
         }
 
@@ -386,7 +454,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         AssertionType assertionType,
                         string endpoint,
                         TokenType? tokenType,
-                        CacheLevel cacheTypeUsed,
+                        CacheLevel cacheLevel,
                         string scopes,
                         string resource)
         {
@@ -400,7 +468,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(Convert.ToInt64(assertionType), eventDetails.Properties[TelemetryConstants.AssertionType]);
             Assert.AreEqual(Convert.ToInt64(tokenType), eventDetails.Properties[TelemetryConstants.TokenType]);
             Assert.AreEqual(endpoint, eventDetails.Properties[TelemetryConstants.Endpoint]);
-            Assert.AreEqual(Convert.ToInt64(cacheTypeUsed), eventDetails.Properties[TelemetryConstants.CacheUsed]);
+            Assert.AreEqual(Convert.ToInt64(cacheLevel), eventDetails.Properties[TelemetryConstants.CacheLevel]);
 
             if (!string.IsNullOrWhiteSpace(scopes))
             {

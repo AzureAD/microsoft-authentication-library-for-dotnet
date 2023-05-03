@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     LogReturnedToken(authenticationResult);
                     UpdateTelemetry(sw, apiEvent, authenticationResult);
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
-                    LogSuccessfulTelemetryToClient(authenticationResult, AuthenticationRequestParameters.RequestContext.ApiEvent.CacheLevel, telemetryEventDetails, telemetryClients);
+                    LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails, telemetryClients);
 
                     return authenticationResult;
                 }
@@ -104,13 +104,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     apiEvent.ApiErrorCode = ex.ErrorCode;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
-                    LogErrorTelemetryToClient(ex.ErrorCode, telemetryEventDetails, telemetryClients);
+                    LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
                     throw;
                 }
                 catch (Exception ex)
                 {
                     apiEvent.ApiErrorCode = ex.GetType().Name;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
+                    LogErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
                     throw;
                 }
                 finally
@@ -120,16 +121,38 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private void LogErrorTelemetryToClient(string errorCode, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
+        private void LogMsalErrorTelemetryToClient(MsalException ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
+        {
+            if (telemetryClients.HasEnabledClients(TelemetryConstants.AcquireTokenEventName))
+            {
+                if (ex is MsalClientException clientException)
+                {
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Succeeded, false);
+                    telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, clientException.ErrorCode);
+                    telemetryEventDetails.SetProperty(TelemetryConstants.ErrorMessage, clientException.Message);
+                }
+
+                if (ex is MsalServiceException serviceException)
+                {
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Succeeded, false);
+                    telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, serviceException.ErrorCode);
+                    telemetryEventDetails.SetProperty(TelemetryConstants.ErrorMessage, serviceException.Message);
+                    telemetryEventDetails.SetProperty(TelemetryConstants.StsErrorCode, serviceException.ErrorCodes.AsSingleString());
+                }
+            }
+        }
+
+        private void LogErrorTelemetryToClient(Exception ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
         {
             if (telemetryClients.HasEnabledClients(TelemetryConstants.AcquireTokenEventName))
             {
                 telemetryEventDetails.SetProperty(TelemetryConstants.Succeeded, false);
-                telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, errorCode);
+                telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, ex.GetType().ToString());
+                telemetryEventDetails.SetProperty(TelemetryConstants.ErrorMessage, ex.Message);
             }
         }
 
-        private void LogSuccessfulTelemetryToClient(AuthenticationResult authenticationResult, CacheLevel cacheLevel, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
+        private void LogSuccessfulTelemetryToClient(AuthenticationResult authenticationResult, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
         {
             if (telemetryClients.HasEnabledClients(TelemetryConstants.AcquireTokenEventName))
             {
@@ -149,7 +172,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 telemetryEventDetails.SetProperty(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
                 telemetryEventDetails.SetProperty(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
-                telemetryEventDetails.SetProperty(TelemetryConstants.CacheUsed, (int)cacheLevel);
+                telemetryEventDetails.SetProperty(TelemetryConstants.CacheLevel, (int)GetCacheLevel(authenticationResult));
                 ParseScopesForTelemetry(telemetryEventDetails);
             }
         }
@@ -179,6 +202,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, AuthenticationRequestParameters.Scope.AsSingleString());
                 }
             }
+        }
+
+        private CacheLevel GetCacheLevel(AuthenticationResult authenticationResult)
+        {
+            if (authenticationResult.AuthenticationResultMetadata.TokenSource == TokenSource.Cache) //Check if token scource is cache
+            {
+                if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheLevel > CacheLevel.Unknown) //Check if cache has indicated which level was used
+                {
+                    return AuthenticationRequestParameters.RequestContext.ApiEvent.CacheLevel;
+                }
+
+                //If no level was used, set to unknown
+                return CacheLevel.Unknown;
+            }
+
+            return CacheLevel.None;
         }
 
         private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ILoggerAdapter logger)

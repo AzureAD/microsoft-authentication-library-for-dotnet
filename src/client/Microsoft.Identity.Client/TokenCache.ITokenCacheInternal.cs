@@ -42,7 +42,6 @@ namespace Microsoft.Identity.Client
             MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = null;
             MsalIdTokenCacheItem msalIdTokenCacheItem = null;
             MsalAccountCacheItem msalAccountCacheItem = null;
-            TelemetryData telemetryData = new TelemetryData();
 
             IdToken idToken = IdToken.Parse(response.IdToken);
             if (idToken == null)
@@ -190,8 +189,7 @@ namespace Microsoft.Identity.Client
                             requestScopes: requestParams.Scope,
                             requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId,
                             identityLogger: requestParams.RequestContext.Logger.IdentityLogger,
-                            piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled,
-                            telemetryData: telemetryData);
+                            piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled);
 
                         Stopwatch sw = Stopwatch.StartNew();
 
@@ -263,16 +261,15 @@ namespace Microsoft.Identity.Client
                             requestScopes: requestParams.Scope,
                             requestTenantId: requestParams.AuthorityManager.OriginalAuthority.TenantId,
                             identityLogger: requestParams.RequestContext.Logger.IdentityLogger,
-                            piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled,
-                            telemetryData: telemetryData);
+                            piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled);
 
                         Stopwatch sw = Stopwatch.StartNew();
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
 
                         DumpCacheToLogs(requestParams);
-
                     }
+
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = false;
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -284,7 +281,6 @@ namespace Microsoft.Identity.Client
             {
                 _semaphoreSlim.Release();
                 logger.Verbose(() => "[SaveTokenResponseAsync] Released token cache semaphore. ");
-                requestParams.RequestContext.ApiEvent.CacheLevel = telemetryData.CacheLevel;
             }
         }
 
@@ -761,8 +757,7 @@ namespace Microsoft.Identity.Client
                             requestScopes: null,
                             requestTenantId: null,
                             identityLogger: null,
-                            piiLoggingEnabled: false,
-                            telemetryData: new TelemetryCore.TelemetryClient.TelemetryData());
+                            piiLoggingEnabled: false);
 
                 await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
             }
@@ -1223,7 +1218,7 @@ namespace Microsoft.Identity.Client
                            requestScopes: requestParameters.Scope,
                            requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId,
                            identityLogger: requestParameters.RequestContext.Logger.IdentityLogger,
-                            piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
+                           piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
 
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                     }
