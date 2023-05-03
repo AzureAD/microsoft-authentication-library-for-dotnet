@@ -19,6 +19,8 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -323,6 +325,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
+        [TestMethod]
         [DeploymentItem(@"Resources\TestMex.xml")]
         [DeploymentItem(@"Resources\WsTrustResponse13.xml")]
         public async Task AcquireTokenByIntegratedWindowsAuthMetadataTestAsync()
@@ -362,6 +365,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessage.Headers.ToString(), TestConstants.XClientVer,
                     "Client info header should contain " + TestConstants.XClientVer,
                     StringComparison.OrdinalIgnoreCase);
+
+                // Assert telemetry ApiId
+                Assert.AreEqual(ApiEvent.ApiIds.AcquireTokenByIntegratedWindowsAuth.ToString("D"), mockTokenRequestHttpHandler.ActualRequestMessage.Headers.GetValues(TelemetryConstants.XClientCurrentTelemetry).Single().Split('|')[1].Split(',')[0]);
             }
         }
 
