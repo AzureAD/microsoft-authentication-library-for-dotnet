@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Http;
@@ -72,12 +73,11 @@ namespace Microsoft.Identity.Test.Common
             bool validateAuthority = true,
             bool isLegacyCacheEnabled = true,
             bool isMultiCloudSupportEnabled = false, 
-            bool isConfidentialClient = false,
+            MsalClientType applicationType = MsalClientType.PublicClient,
             bool isInstanceDiscoveryEnabled = true,
             IPlatformProxy platformProxy = null)
         {
-
-            var appConfig = new ApplicationConfiguration(isConfidentialClient)
+            var appConfig = new ApplicationConfiguration(applicationType)
             {
                 ClientId = clientId,
                 HttpManager = httpManager,
