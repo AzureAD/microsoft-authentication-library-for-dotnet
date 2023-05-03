@@ -73,12 +73,8 @@ namespace Microsoft.Identity.Client
 
         private static ApplicationConfiguration BuildConfiguration(ManagedIdentityConfiguration managedIdentityConfiguration)
         {
+            _ = managedIdentityConfiguration ?? throw new ArgumentNullException(nameof(managedIdentityConfiguration));
             var config = new ApplicationConfiguration(isConfidentialClient: false);
-
-            if (managedIdentityConfiguration == null)
-            {
-                throw new ArgumentNullException(nameof(managedIdentityConfiguration));
-            }
 
             switch (managedIdentityConfiguration.IdType)
             {
@@ -164,7 +160,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         internal ManagedIdentityApplication BuildConcrete()
         {
-            ValidateUseOfExperimentalFeature("ManagedIdentityConfiguration");
+            ValidateUseOfExperimentalFeature("ManagedIdentity");
             DefaultConfiguration();
             return new ManagedIdentityApplication(BuildConfiguration());
         }
