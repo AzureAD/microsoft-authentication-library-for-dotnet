@@ -23,6 +23,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Test.Unit.Throttling;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Test.Common;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
@@ -106,11 +107,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             {
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
-                _app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                            .WithHttpManager(_harness.HttpManager)
-                            .WithDefaultRedirectUri()
-                            .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
-                            .BuildConcrete();
+                _app = CreatePublicClientApp();
 
                 Trace.WriteLine("Step 1. Acquire Token Interactive successful");
                 var result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
@@ -214,11 +211,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             {
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
-                _app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                            .WithHttpManager(_harness.HttpManager)
-                            .WithDefaultRedirectUri()
-                            .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
-                            .BuildConcrete();
+                _app = CreatePublicClientApp();
+
                 TokenCacheHelper.PopulateCache(_app.UserTokenCacheInternal.Accessor, addSecondAt: false);
 
                 Trace.WriteLine("Step 1. Acquire Token Interactive successful");
@@ -231,23 +225,23 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Assert.IsNull(result.HttpRequest, "No calls are made to the token endpoint");
 
                 Trace.WriteLine("Step 3. Acquire Token Silent successful - via expired token");
-                UpdateATWithRefreshOn(_app.UserTokenCacheInternal.Accessor, expired: true);
+                TestCommon.UpdateATWithRefreshOn(_app.UserTokenCacheInternal.Accessor, expired: true);
                 TokenCacheAccessRecorder cacheAccess = _app.UserTokenCache.RecordAccess();
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaCacheRefresh).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheRefreshReason.Expired, isCacheSerialized: true);
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 1);
 
                 Trace.WriteLine("Step 4. Acquire Token Silent successful - via refresh on");
-                UpdateATWithRefreshOn(_app.UserTokenCacheInternal.Accessor);
+                TestCommon.UpdateATWithRefreshOn(_app.UserTokenCacheInternal.Accessor);
                 cacheAccess = _app.UserTokenCache.RecordAccess();
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaCacheRefresh).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheRefreshReason.ProactivelyRefreshed, isCacheSerialized: true);
-                
+
                 // Use reflection to get the value and wait till achieved
                 HttpTelemetryManager httpTelemetryManager = (HttpTelemetryManager)_app.ServiceBundle.HttpTelemetryManager;
                 Type httpTeleMgrType = typeof(HttpTelemetryManager);
                 FieldInfo field = httpTeleMgrType.GetField("_successfullSilentCallCount", BindingFlags.NonPublic | BindingFlags.Instance);
-                Assert.IsTrue(YieldTillSatisfied(() =>
+                Assert.IsTrue(TestCommon.YieldTillSatisfied(() =>
                 {
                     var actual = (int)field.GetValue(httpTelemetryManager);
                     return actual == 0;
@@ -256,7 +250,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Trace.WriteLine("Step 5. Acquire Token Silent with force_refresh = true");
                 result = await RunAcquireTokenSilentAsync(AcquireTokenSilentOutcome.SuccessViaCacheRefresh, forceRefresh: true).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenSilent, CacheRefreshReason.ForceRefreshOrClaims, isCacheSerialized: true);
-                Assert.IsTrue(YieldTillSatisfied(() =>
+                Assert.IsTrue(TestCommon.YieldTillSatisfied(() =>
                 {
                     var actual = (int)field.GetValue(httpTelemetryManager);
                     return actual == 0;
@@ -276,11 +270,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             {
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
-                _app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                            .WithHttpManager(_harness.HttpManager)
-                            .WithDefaultRedirectUri()
-                            .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
-                            .BuildConcrete();
+                _app = CreatePublicClientApp();
 
                 var inMemoryTokenCache = new InMemoryTokenCache();
                 inMemoryTokenCache.Bind(_app.UserTokenCache);
@@ -299,11 +289,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             {
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
-                _app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                            .WithHttpManager(_harness.HttpManager)
-                            .WithDefaultRedirectUri()
-                            .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
-                            .BuildConcrete();
+                _app = CreatePublicClientApp();
 
                 Trace.WriteLine("Acquire token Interactive with OperationCanceledException.");
                 var result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.TaskCanceledException).ConfigureAwait(false);
@@ -313,9 +299,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 Trace.WriteLine("Acquire token interactive successful.");
                 result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheRefreshReason.NotApplicable);
-                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0, 
-                    expectedFailedApiIds: new ApiIds[] { ApiIds.AcquireTokenInteractive }, 
-                    expectedCorrelationIds: new Guid[] { previousCorrelationId }, 
+                AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0,
+                    expectedFailedApiIds: new ApiIds[] { ApiIds.AcquireTokenInteractive },
+                    expectedCorrelationIds: new Guid[] { previousCorrelationId },
                     expectedErrors: new string[] { "TaskCanceledException" });
             }
         }
@@ -329,17 +315,144 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             {
                 _harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
-                _app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                            .WithHttpManager(_harness.HttpManager)
-                            .WithDefaultRedirectUri()
-                            .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
-                            .WithLegacyCacheCompatibility(isLegacyCacheEnabled)
-                            .BuildConcrete();
+                _app = CreatePublicClientApp(isLegacyCacheEnabled);
 
                 var result = await RunAcquireTokenInteractiveAsync(AcquireTokenInteractiveOutcome.Success).ConfigureAwait(false);
                 AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenInteractive, CacheRefreshReason.NotApplicable, isLegacyCacheEnabled: isLegacyCacheEnabled);
                 AssertPreviousTelemetry(result.HttpRequest, expectedSilentCount: 0);
             }
+        }
+
+        [TestMethod]
+        public async Task CorrectApiIdSet_OnBehalfOf_TestAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var cca = CreateConfidentialClientApp();
+
+                await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.DefaultAccessToken))
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenOnBehalfOf, CacheRefreshReason.NoCachedAccessToken);
+            }
+        }
+
+        [TestMethod]
+        public async Task CorrectApiIdSet_LongRunningOnBehalfOf_TestAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var cca = CreateConfidentialClientApp();
+
+                var cacheKey = string.Empty;
+                await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref cacheKey)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.InitiateLongRunningObo, CacheRefreshReason.NotApplicable);
+
+                // AcquireTokenInLongRunningProcess goes to AAD only in a refresh flow
+                requestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                await cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, cacheKey)
+                    .WithForceRefresh(true)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenInLongRunningObo, CacheRefreshReason.ForceRefreshOrClaims);
+            }
+        }
+
+        [TestMethod]
+        public async Task CorrectApiIdSet_ClientCredentials_TestAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var cca = CreateConfidentialClientApp();
+
+                await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenForClient, CacheRefreshReason.NoCachedAccessToken);
+            }
+        }
+
+        [TestMethod]
+        public async Task CorrectApiIdSet_AuthCode_TestAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var cca = CreateConfidentialClientApp();
+
+                await cca.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenByAuthorizationCode, CacheRefreshReason.NotApplicable);
+            }
+        }
+
+        [TestMethod]
+        public async Task CorrectApiIdSet_RefreshToken_TestAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var cca = CreateConfidentialClientApp();
+
+                await ((IByRefreshToken)cca).AcquireTokenByRefreshToken(TestConstants.s_scope, TestConstants.RefreshToken)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenByRefreshToken, CacheRefreshReason.NotApplicable);
+            }
+        }
+
+        [TestMethod]
+        public async Task CorrectApiIdSet_UsernamePassword_TestAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                _harness.HttpManager.AddWsTrustMockHandler();
+                var requestHandler = _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                var pca = CreatePublicClientApp();
+
+                await pca.AcquireTokenByUsernamePassword(TestConstants.s_scope, "username", TestConstants.DefaultPassword)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenByUsernamePassword, CacheRefreshReason.NotApplicable);
+            }
+        }
+
+        private PublicClientApplication CreatePublicClientApp(bool isLegacyCacheEnabled = true)
+        {
+            return PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithHttpManager(_harness.HttpManager)
+                    .WithDefaultRedirectUri()
+                    .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
+                    .WithLegacyCacheCompatibility(isLegacyCacheEnabled)
+                    .BuildConcrete();
+        }
+
+        private ConfidentialClientApplication CreateConfidentialClientApp()
+        {
+            return ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithHttpManager(_harness.HttpManager)
+                .BuildConcrete();
         }
 
         private enum AcquireTokenSilentOutcome
@@ -443,7 +556,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     CancellationTokenSource cts = new CancellationTokenSource();
                     cts.Cancel(true);
                     CancellationToken token = cts.Token;
-                    
+
                     var operationCanceledException = await AssertException.TaskThrowsAsync<TaskCanceledException>(() =>
                         _app
                         .AcquireTokenInteractive(TestConstants.s_scope)
@@ -515,7 +628,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     throw new NotImplementedException();
             }
 
-            YieldTillSatisfied(() => _harness.HttpManager.QueueSize == 0);
+            TestCommon.YieldTillSatisfied(() => _harness.HttpManager.QueueSize == 0);
             Assert.AreEqual(0, _harness.HttpManager.QueueSize);
             return (tokenRequest?.ActualRequestMessage, correlationId);
         }
@@ -543,7 +656,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             return (tokenRequest, correlationId);
         }
 
-        private static void AssertCurrentTelemetry(
+        private void AssertCurrentTelemetry(
             HttpRequestMessage requestMessage,
             ApiIds apiId,
             CacheRefreshReason cacheInfo,
@@ -573,7 +686,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(TokenType.Bearer.ToString("D"), telemetryCategories[2].Split(',')[2]);
         }
 
-        private static void AssertPreviousTelemetry(
+        private void AssertPreviousTelemetry(
            HttpRequestMessage requestMessage,
            int expectedSilentCount,
            ApiIds[] expectedFailedApiIds = null,
@@ -585,7 +698,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             expectedErrors = expectedErrors ?? new string[0];
 
             var actualHeader = ParseLastRequestHeader(requestMessage);
-            YieldTillSatisfied(() => actualHeader.SilentCount == expectedSilentCount);
+            TestCommon.YieldTillSatisfied(() => actualHeader.SilentCount == expectedSilentCount);
             Assert.AreEqual(expectedSilentCount, actualHeader.SilentCount);
             CoreAssert.AreEqual(actualHeader.FailedApis.Length, actualHeader.CorrelationIds.Length, actualHeader.Errors.Length);
 
@@ -602,7 +715,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 actualHeader.Errors);
         }
 
-        private static (int SilentCount, string[] FailedApis, string[] CorrelationIds, string[] Errors) ParseLastRequestHeader(HttpRequestMessage requestMessage)
+        private (int SilentCount, string[] FailedApis, string[] CorrelationIds, string[] Errors) ParseLastRequestHeader(HttpRequestMessage requestMessage)
         {
             // schema_version | silent_succesful_count | failed_requests | errors | platform_fields
             // where a failed_request is "api_id, correlation_id"
@@ -632,47 +745,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 .ToArray();
 
             return (actualSuccessfullSilentCount, actualFailedApiIds, correlationIds, actualErrors);
-        }
-
-        private static MsalAccessTokenCacheItem UpdateATWithRefreshOn(
-            ITokenCacheAccessor accessor,
-            DateTimeOffset? refreshOn = null,
-            bool expired = false)
-        {
-            MsalAccessTokenCacheItem atItem = accessor.GetAllAccessTokens().Single();
-
-            refreshOn = refreshOn ?? DateTimeOffset.UtcNow - TimeSpan.FromMinutes(30);
-
-            // past date on refresh on
-            atItem = atItem.WithRefreshOn(refreshOn);
-
-            Assert.IsTrue(atItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromMinutes(10));
-
-            if (expired)
-            {
-                atItem = atItem.WithExpiresOn(DateTime.UtcNow - TimeSpan.FromMinutes(1));
-            }
-
-            accessor.SaveAccessToken(atItem);
-
-            return atItem;
-        }
-
-        private static bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 30000)
-        {
-            int iCount = maxTimeInMilliSec / 100;
-            while (iCount > 0)
-            {
-                if (func())
-                {
-                    return true;
-                }
-                Thread.Yield();
-                Thread.Sleep(100);
-                iCount--;
-            }
-
-            return false;
         }
     }
 }

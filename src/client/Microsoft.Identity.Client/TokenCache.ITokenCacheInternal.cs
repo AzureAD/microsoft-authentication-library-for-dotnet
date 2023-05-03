@@ -539,7 +539,7 @@ namespace Microsoft.Identity.Client
             string requestTenantId = requestParams.Authority.TenantId;
             bool filterByTenantId = true;
 
-            if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf) // OBO
+            if (ApiEvent.IsOnBehalfOfRequest(requestParams.ApiId))
             {
                 tokenCacheItems.FilterWithLogging(item =>
                         !string.IsNullOrEmpty(item.OboCacheKey) &&
@@ -575,9 +575,9 @@ namespace Microsoft.Identity.Client
 
             // Only AcquireTokenSilent has an IAccount in the request that can be used for filtering
             if (requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForClient &&
-                requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity && 
+                requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity &&
                 requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity &&
-                requestParams.ApiId != ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
+                !ApiEvent.IsOnBehalfOfRequest(requestParams.ApiId))
             {
                 tokenCacheItems.FilterWithLogging(item => item.HomeAccountId.Equals(
                                 requestParams.Account.HomeAccountId?.Identifier, StringComparison.OrdinalIgnoreCase),
@@ -836,7 +836,7 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParams,
             string familyId)
         {
-            if (requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenOnBehalfOf) // OBO
+            if (ApiEvent.IsOnBehalfOfRequest(requestParams.ApiId))
             {
                 cacheItems.FilterWithLogging(item =>
                                 !string.IsNullOrEmpty(item.OboCacheKey) &&
