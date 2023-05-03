@@ -229,7 +229,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// As per discussion with Evo, AAD 
         /// </summary>
-        private void UpdateIsRetryable()
+        protected virtual void UpdateIsRetryable()
         {
             IsRetryable =
                 (StatusCode >= 500 && StatusCode < 600) ||
