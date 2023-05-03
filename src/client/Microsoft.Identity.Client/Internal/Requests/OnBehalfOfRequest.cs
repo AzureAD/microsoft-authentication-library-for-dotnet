@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
 
                 if (cachedAccessToken != null && AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.InitiateLongRunningObo &&
-                    !AuthenticationRequestParameters.UserAssertion.AssertionHash.Equals(cachedAccessToken.UserAssertionHash, System.StringComparison.Ordinal))
+                    !AuthenticationRequestParameters.UserAssertion.AssertionHash.Equals(cachedAccessToken.OboAssertionHash, System.StringComparison.Ordinal))
                 {
                     logger.Info("[OBO request] InitiateLongRunningProcessInWebApi found cached token with a different assertion; fetching new tokens.");
                     cachedAccessToken = null;
@@ -138,7 +138,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
 
-            // InitiateLongRunningProcessInWebApi retrieves tokens only with assertion, not by refresh token
+            // InitiateLongRunningProcessInWebApi retrieves tokens only with assertion, not by refresh token.
+            // The reason why we don't use RT for InitiateLongRunningProcessInWebApi is because of https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3825.
+            // If tokens are revoked in AAD, refreshing with this cached RT will throw an AAD exception.
+            // Since we already have a user assertion, use it to fetch new tokens via OBO grant.
+            // The expectation is that this use assertion is newer than the one that was used to acquire cached RT.
             if (AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenInLongRunningObo)
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info("[OBO request] AcquireTokenInLongRunningProcess, trying to refresh using an refresh token flow.");

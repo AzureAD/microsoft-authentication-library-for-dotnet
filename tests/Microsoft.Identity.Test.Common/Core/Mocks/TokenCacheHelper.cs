@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 clientInfo,
                 homeAccId,
                 oboCacheKey: userAssertionHash,
-                userAssertionHash: userAssertionHash);
+                oboAssertionHash: userAssertionHash);
 
             // add access token
             accessor.SaveAccessToken(atItem);
@@ -401,7 +401,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                refreshOn,
                atItem.TokenType,
                atItem.OboCacheKey,
-               atItem.UserAssertionHash);
+               atItem.OboAssertionHash);
         }
 
         public static MsalAccessTokenCacheItem WithUserAssertion(this MsalAccessTokenCacheItem atItem, string assertion)

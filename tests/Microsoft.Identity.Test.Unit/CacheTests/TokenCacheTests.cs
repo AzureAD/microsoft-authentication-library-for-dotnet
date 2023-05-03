@@ -774,7 +774,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     _clientInfo,
                     _homeAccountId,
                     oboCacheKey: assertion,
-                    userAssertionHash: assertion);
+                    oboAssertionHash: assertion);
 
                 cache.Accessor.SaveAccessToken(atItem);
 
@@ -828,7 +828,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     _clientInfo,
                     _homeAccountId,
                     oboCacheKey: assertionHash,
-                    userAssertionHash: assertionHash);
+                    oboAssertionHash: assertionHash);
 
                 cache.Accessor.SaveAccessToken(atItem);
 

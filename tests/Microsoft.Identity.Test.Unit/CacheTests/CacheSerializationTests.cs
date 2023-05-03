@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 keyId: kid,
                 tokenType: tokenType,
                 oboCacheKey: "assertion_hash",
-                userAssertionHash: TestConstants.UserAssertion);
+                oboAssertionHash: TestConstants.UserAssertion);
 
             return item;
         }
@@ -903,7 +903,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             CollectionAssert.AreEqual(expected.ScopeSet.ToList(), actual.ScopeSet.ToList(), nameof(actual.ScopeSet));
             Assert.AreEqual(expected.TenantId, actual.TenantId, nameof(actual.TenantId));
             Assert.AreEqual(expected.OboCacheKey, actual.OboCacheKey, nameof(actual.OboCacheKey));
-            Assert.AreEqual(expected.UserAssertionHash, actual.UserAssertionHash, nameof(actual.UserAssertionHash));
+            Assert.AreEqual(expected.OboAssertionHash, actual.OboAssertionHash, nameof(actual.OboAssertionHash));
             Assert.AreEqual(expected.RefreshOn, actual.RefreshOn, nameof(actual.RefreshOn));
             Assert.AreEqual(expected.KeyId, actual.KeyId, nameof(actual.KeyId));
             Assert.AreEqual(expected.TokenType, actual.TokenType, nameof(actual.TokenType));
