@@ -14,6 +14,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.TelemetryClient
         /// <summary>
         /// Type of cache used. This data is captured from MSAL or Microsoft.Identity.Web to log to telemetry.
         /// </summary>
-        public CacheLevel CacheLevel { get; set; } = CacheLevel.Unknown;
+        public CacheLevel CacheLevel { get; set; } = CacheLevel.None;
     }
 }
