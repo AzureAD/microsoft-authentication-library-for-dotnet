@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task AzureArcUserAssignedManagedIdentityNotSupportedAsync(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
 
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task AzureArcAuthHeaderMissingAsync()
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
 
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task AzureArcAuthHeaderInvalidAsync()
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
 
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task AzureArcInvalidEndpointAsync()
         {
             using(new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AzureArc, "localhost/token");
 

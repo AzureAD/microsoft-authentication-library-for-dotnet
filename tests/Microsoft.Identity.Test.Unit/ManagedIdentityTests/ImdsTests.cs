@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ImdsBadRequestTestAsync()
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
 
             {
                 SetEnvironmentVariables(ManagedIdentitySource.Imds, "http://169.254.169.254");

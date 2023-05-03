@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client
         private static ApplicationConfiguration BuildConfiguration(ManagedIdentityConfiguration managedIdentityConfiguration)
         {
             _ = managedIdentityConfiguration ?? throw new ArgumentNullException(nameof(managedIdentityConfiguration));
-            var config = new ApplicationConfiguration(isConfidentialClient: false);
+            var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient);
 
             switch (managedIdentityConfiguration.IdType)
             {

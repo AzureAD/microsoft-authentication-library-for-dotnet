@@ -976,7 +976,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
-        private ConfidentialClientApplication BuildCCA(HttpManager httpManager)
+        private ConfidentialClientApplication BuildCCA(IHttpManager httpManager)
         {
             return ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
