@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             {
                 throw new MsalClientException(
                     "window_handle_required",
-                    "The new WAM implementation now needs application developers to provide parent window handle to the broker. See https://aka.ms/msal-net-wam#parent-window-handles");
+                    "A window handle must be configured. See https://aka.ms/msal-net-wam#parent-window-handles");
             }
 
             //if OperatingSystemAccount is passed then we use the user signed-in on the machine
