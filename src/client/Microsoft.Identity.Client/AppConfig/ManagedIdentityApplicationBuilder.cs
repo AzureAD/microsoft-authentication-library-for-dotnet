@@ -33,26 +33,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Constructor of a ManagedIdentityApplicationBuilder from application configuration options.
-        /// See https://aka.ms/msal-net-application-configuration
-        /// </summary>
-        /// <param name="options">Managed identity applications configuration options</param>
-        /// <returns>A <see cref="ManagedIdentityApplicationBuilder"/> from which to set more
-        /// parameters, and to create a managed identity application instance</returns>
-#if !SUPPORTS_CONFIDENTIAL_CLIENT
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
-#endif
-        public static ManagedIdentityApplicationBuilder CreateWithApplicationOptions(
-            ManagedIdentityApplicationOptions options)
-        {
-            ApplicationBase.GuardMobileFrameworks();
-
-            var builder = new ManagedIdentityApplicationBuilder(BuildConfiguration(options.ManagedIdentityConfiguration)).WithOptions(options);
-
-            return builder;
-        }
-
-        /// <summary>
         /// Creates a ManagedIdentityApplicationBuilder from a user assigned managed identity clientID / resourceId.
         /// For example, for a system assigned managed identity use ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
         /// and for a user assigned managed identity use ManagedIdentityApplicationBuilder.Create(UserAssignedManagedIdentity.FromClientId(clientId)).

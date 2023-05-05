@@ -65,7 +65,7 @@ namespace ManagedIdentityWebApi.Controllers
             }
             else
             {
-                return ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.UserAssignedFromClientId(userAssignedId))
+                return ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.WithUserAssignedClientId(userAssignedId))
                     .WithExperimentalFeatures()
                     .WithLogging(new MyIdentityLogger(_logger))
                     .Build();

@@ -105,8 +105,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(
                     userAssignedIdentityId == UserAssignedIdentityId.ClientId ?
-                        ManagedIdentityConfiguration.UserAssignedFromClientId(userAssignedId) :
-                        ManagedIdentityConfiguration.UserAssignedFromResourceId(userAssignedId))
+                        ManagedIdentityConfiguration.WithUserAssignedClientId(userAssignedId) :
+                        ManagedIdentityConfiguration.WithUserAssignedResourceId(userAssignedId))
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
@@ -438,9 +438,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
                     .WithExperimentalFeatures()
-                    .WithHttpManager(httpManager).Build();
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
@@ -508,7 +513,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.UserAssignedFromClientId(TestConstants.ClientId))
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.WithUserAssignedClientId(TestConstants.ClientId))
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 

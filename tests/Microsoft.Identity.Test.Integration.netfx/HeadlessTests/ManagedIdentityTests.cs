@@ -281,11 +281,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             switch (userAssignedIdentityId)
             {
                 case UserAssignedIdentityId.ClientId: 
-                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.UserAssignedFromClientId(userAssignedId));
+                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.WithUserAssignedClientId(userAssignedId));
                     break;
 
                 case UserAssignedIdentityId.ResourceId:
-                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.UserAssignedFromResourceId(userAssignedId));
+                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.WithUserAssignedResourceId(userAssignedId));
                     break;
             }
 

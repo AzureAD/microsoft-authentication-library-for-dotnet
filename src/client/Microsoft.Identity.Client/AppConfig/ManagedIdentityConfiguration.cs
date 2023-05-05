@@ -12,8 +12,8 @@ namespace Microsoft.Identity.Client.AppConfig
     /// <summary>
     /// Class to store configuration for a managed identity enabled on a resource.
     /// For a system assigned managed identity use ManagedIdentityConfiguration.SystemAssigned.
-    /// For user assigned managed identity use ManagedIdentityConfiguration.UserAssignedFromClientId("clientId") or 
-    /// ManagedIdentityConfiguration.UserAssignedFromResourceId("resourceId").
+    /// For user assigned managed identity use ManagedIdentityConfiguration.WithUserAssignedClientId("clientId") or 
+    /// ManagedIdentityConfiguration.WithUserAssignedResourceId("resourceId").
     /// For more details see https://aka.ms/msal-net-managed-identity
     /// </summary>
     public class ManagedIdentityConfiguration
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="clientId">Client id of the user assigned managed identity assigned to azure resource.</param>
         /// <returns>Instance of ManagedIdentityConfiguration.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static ManagedIdentityConfiguration UserAssignedFromClientId(string clientId)
+        public static ManagedIdentityConfiguration WithUserAssignedClientId(string clientId)
         {
             if (string.IsNullOrEmpty(clientId))
             {
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="resourceId">Resource id of the user assigned managed identity assigned to azure resource.</param>
         /// <returns>Instance of ManagedIdentityConfiguration.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static ManagedIdentityConfiguration UserAssignedFromResourceId(string resourceId)
+        public static ManagedIdentityConfiguration WithUserAssignedResourceId(string resourceId)
         {
             if (string.IsNullOrEmpty(resourceId))
             {

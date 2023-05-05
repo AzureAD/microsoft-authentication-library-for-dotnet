@@ -33,8 +33,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder
                     .Create(userAssignedIdentityId == UserAssignedIdentityId.ClientId ?
-                    ManagedIdentityConfiguration.UserAssignedFromClientId(userAssignedId) :
-                    ManagedIdentityConfiguration.UserAssignedFromResourceId(userAssignedId))
+                    ManagedIdentityConfiguration.WithUserAssignedClientId(userAssignedId) :
+                    ManagedIdentityConfiguration.WithUserAssignedResourceId(userAssignedId))
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 

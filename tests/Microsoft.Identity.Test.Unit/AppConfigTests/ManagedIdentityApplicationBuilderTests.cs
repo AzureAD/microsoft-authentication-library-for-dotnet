@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithCreateUserAssignedId()
         {
-            var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.UserAssignedFromClientId(TestConstants.ClientId))
+            var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.WithUserAssignedClientId(TestConstants.ClientId))
                 .WithExperimentalFeatures().BuildConcrete();
 
             //Assert defaults
@@ -85,8 +85,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithUserAssignedManagedIdentity_ResourceId(string userAssignedId, bool isClientId = true)
         {
             var mi = ManagedIdentityApplicationBuilder.Create(isClientId ? 
-                    ManagedIdentityConfiguration.UserAssignedFromClientId(userAssignedId) : 
-                    ManagedIdentityConfiguration.UserAssignedFromResourceId(userAssignedId))
+                    ManagedIdentityConfiguration.WithUserAssignedClientId(userAssignedId) : 
+                    ManagedIdentityConfiguration.WithUserAssignedResourceId(userAssignedId))
                 .WithExperimentalFeatures()
                 .BuildConcrete();
 
