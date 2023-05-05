@@ -313,25 +313,6 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if MAC
-        /// <summary>
-        /// Sets a reference to the current NSWindow. The browser pop-up will be centered on it. If omitted,
-        /// it will be centered on the screen.
-        /// </summary>
-        /// <param name="nsWindow">The current NSWindow</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        [CLSCompliant(false)]
-        public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(NSWindow nsWindow)
-        {
-            if (nsWindow == null)
-            {
-                throw new ArgumentNullException(nameof(nsWindow));
-            }
-
-            return WithParentObject((object)nsWindow);
-        }
-#endif
-
         #endregion
 
         /// <summary>

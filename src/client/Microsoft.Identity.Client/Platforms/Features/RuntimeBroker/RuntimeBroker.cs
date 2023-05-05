@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
+using System.Threading;
 
 namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 {
@@ -138,6 +139,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     "A window handle must be configured. See https://aka.ms/msal-net-wam#parent-window-handles");
             }
 
+           
+
             //if OperatingSystemAccount is passed then we use the user signed-in on the machine
             if (PublicClientApplication.IsOperatingSystemAccount(authenticationRequestParameters.Account))
             {
@@ -155,6 +158,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     _wamOptions,
                     _logger))
                 {
+                    HandleBadStaThread(authParams);
+
                     using (var readAccountResult = await s_lazyCore.Value.ReadAccountByIdAsync(
                     authenticationRequestParameters.Account.HomeAccountId.ObjectId,
                     authenticationRequestParameters.CorrelationId.ToString("D"),
@@ -199,7 +204,28 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             return msalTokenResponse;
         }
 
-        public async Task<MsalTokenResponse> SignInInteractivelyAsync(
+        /// <summary>
+        /// Attempts to detect an STA thread without a message loop, for example when using [STAThread] on a console app.
+        /// If found, sends a hint to msal_runtime to create a UI thread.
+        /// </summary>
+        private void HandleBadStaThread(AuthParameters authParams)
+        {
+            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
+            {
+                System.Reflection.Assembly[] loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+                System.Reflection.Assembly winForms = loadedAssemblies.FirstOrDefault(a => a.ManifestModule.Name == "System.Windows.Forms.dll");
+                object val = winForms?.GetType("System.Windows.Forms.Application")?.GetProperty("MessageLoop")?.GetValue(null, null);
+                if (val != null && val.ToString() == "false")
+                {
+                    _logger.Warning("[RuntimeBroker] No message loop detected. This may cause deadlocks. Sending hint to msal_runtime to create a UI thread.");
+                    authParams.Properties["msal_gui_thread"] = "true";
+                }
+
+                _logger.Verbose(() => "[RuntimeBroker] STA thread detected, no indication that a message loop isn't running");
+            }
+        }
+
+        private async Task<MsalTokenResponse> SignInInteractivelyAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
@@ -232,7 +258,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             return msalTokenResponse;
         }
 
-        public async Task<MsalTokenResponse> AcquireTokenInteractiveDefaultUserAsync(
+        private async Task<MsalTokenResponse> AcquireTokenInteractiveDefaultUserAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
