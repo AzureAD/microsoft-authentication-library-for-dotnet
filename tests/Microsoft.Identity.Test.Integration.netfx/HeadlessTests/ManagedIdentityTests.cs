@@ -56,14 +56,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
         [DataRow(MsiAzureResource.Function, "", DisplayName = "System_Identity_Function_App")]
         [DataRow(MsiAzureResource.VM, "", DisplayName = "System_Identity_Virtual_Machine")]
-        [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, DisplayName = "User_Identity_Web_App")]
-        [DataRow(MsiAzureResource.Function, UserAssignedClientID, DisplayName = "User_Identity_Function_App")]
-        [DataRow(MsiAzureResource.VM, UserAssignedClientID, DisplayName = "User_Identity_Virtual_Machine")]
-        [DataRow(MsiAzureResource.WebApp, UamiResourceId, DisplayName = "ResourceID_Web_App")]
-        [DataRow(MsiAzureResource.Function, UamiResourceId, DisplayName = "ResourceID_Function_App")]
-        [DataRow(MsiAzureResource.VM, UamiResourceId, DisplayName = "ResourceID_Virtual_Machine")]
+        [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "User_Identity_Web_App")]
+        [DataRow(MsiAzureResource.Function, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "User_Identity_Function_App")]
+        [DataRow(MsiAzureResource.VM, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "User_Identity_Virtual_Machine")]
+        [DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
+        [DataRow(MsiAzureResource.Function, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Function_App")]
+        [DataRow(MsiAzureResource.VM, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Virtual_Machine")]
         [DataRow(MsiAzureResource.AzureArc, "", DisplayName = "Azure_ARC")]
-        public async Task AcquireMSITokenAsync(MsiAzureResource azureResource, string userIdentity)
+        public async Task AcquireMSITokenAsync(MsiAzureResource azureResource, string userIdentity, UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
         {
             //Arrange
             using (new EnvVariableContext())
