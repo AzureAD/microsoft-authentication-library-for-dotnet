@@ -198,7 +198,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         null,
                         broker,
                         "install_url");
-#if NET6_WIN || NET7_0
+#if NET6_WIN 
                 Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #else
                 Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));

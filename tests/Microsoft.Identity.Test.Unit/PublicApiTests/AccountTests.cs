@@ -392,7 +392,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private PublicClientApplication InitPcaFromCacheFile(
             AzureCloudInstance cloud,
-            HttpManager httpManager,
+            IHttpManager httpManager,
             string tokenCacheFile)
         {
             return InitPcaFromCacheString(
@@ -404,7 +404,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private PublicClientApplication InitPcaFromCacheString(
             AzureCloudInstance cloud,
-            HttpManager httpManager,
+            IHttpManager httpManager,
             string tokenCacheString)
         {
             PublicClientApplication pca = PublicClientApplicationBuilder

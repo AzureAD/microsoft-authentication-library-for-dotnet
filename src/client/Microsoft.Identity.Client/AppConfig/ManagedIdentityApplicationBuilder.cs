@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -46,7 +47,7 @@ namespace Microsoft.Identity.Client
         {
             ApplicationBase.GuardMobileFrameworks();
 
-            var config = new ApplicationConfiguration(isConfidentialClient: false);
+            var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient);
             var builder = new ManagedIdentityApplicationBuilder(config).WithOptions(options);
 
             if (!string.IsNullOrWhiteSpace(options.UserAssignedClientId))
@@ -72,7 +73,7 @@ namespace Microsoft.Identity.Client
         {
             ApplicationBase.GuardMobileFrameworks();
 
-            var config = new ApplicationConfiguration(isConfidentialClient: false);
+            var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient);
             return new ManagedIdentityApplicationBuilder(config)
                 .WithCacheSynchronization(false);
         }
@@ -96,7 +97,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(userAssignedId));
             }
 
-            var config = new ApplicationConfiguration(isConfidentialClient: false);
+            var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient);
             return new ManagedIdentityApplicationBuilder(config)
                 .WithUserAssignedManagedIdentity(userAssignedId)
                 .WithCacheSynchronization(false);
@@ -200,7 +201,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         internal ManagedIdentityApplication BuildConcrete()
         {
-            ValidateUseOfExperimentalFeature("ManagedIdentity");
+            ValidateUseOfExperimentalFeature("ManagedIdentityClient");
             DefaultConfiguration();
             return new ManagedIdentityApplication(BuildConfiguration());
         }

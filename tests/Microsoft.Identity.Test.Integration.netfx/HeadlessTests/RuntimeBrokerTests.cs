@@ -70,6 +70,34 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [RunOn(TargetFrameworks.NetCore)]
+        public async Task WamInvalidROPC_ThrowsException_TestAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+            WamLoggerValidator wastestLogger = new WamLoggerValidator();
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithLogging(wastestLogger, enablePiiLogging: true) // it's important that the PII is turned on, otherwise context is 'pii'
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .Build();
+
+            MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                pca.AcquireTokenByUsernamePassword(
+                    scopes,
+                    "noUser",
+                    "badPassword")
+                .ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("0x2142008A", ex.AdditionalExceptionData[MsalException.BrokerErrorTag]);
+            Assert.AreEqual("User name is malformed.", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]); // message might change. not a big deal
+            Assert.AreEqual("ApiContractViolation", ex.AdditionalExceptionData[MsalException.BrokerErrorStatus]);
+            Assert.AreEqual("3399811229", ex.AdditionalExceptionData[MsalException.BrokerErrorCode]);
+        }
+
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WamSilentAuthLoginHintNoAccontInCacheAsync()
         {
             string[] scopes = new[]
