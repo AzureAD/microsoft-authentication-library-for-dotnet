@@ -33,8 +33,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var miBuilder = ManagedIdentityApplicationBuilder
                     .Create(userAssignedIdentityId == UserAssignedIdentityId.ClientId ?
-                    ManagedIdentityConfiguration.WithUserAssignedClientId(userAssignedId) :
-                    ManagedIdentityConfiguration.WithUserAssignedResourceId(userAssignedId))
+                    ManagedIdentityId.WithUserAssignedClientId(userAssignedId) :
+                    ManagedIdentityId.WithUserAssignedResourceId(userAssignedId))
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.CloudShell, "localhost/token");
 
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.SystemAssigned)
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 

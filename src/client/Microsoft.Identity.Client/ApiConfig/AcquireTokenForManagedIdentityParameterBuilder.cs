@@ -68,12 +68,12 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            if (ServiceBundle.Config.IsUserAssignedManagedIdentity)
+            if (ServiceBundle.Config.ManagedIdentityId.IdType == AppConfig.ManagedIdentityIdType.SystemAssigned)
             {
-                return ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity;
+                return ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity;
             }
 
-            return ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity;
+            return ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity;
         }
     }
 }

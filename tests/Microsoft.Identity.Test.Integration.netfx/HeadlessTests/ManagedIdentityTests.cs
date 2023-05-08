@@ -276,16 +276,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsiProxyHttpManager proxyHttpManager = new MsiProxyHttpManager(url);
 
             var builder = ManagedIdentityApplicationBuilder
-               .Create(ManagedIdentityConfiguration.SystemAssigned);
+               .Create(ManagedIdentityId.SystemAssigned);
 
             switch (userAssignedIdentityId)
             {
                 case UserAssignedIdentityId.ClientId: 
-                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.WithUserAssignedClientId(userAssignedId));
+                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(userAssignedId));
                     break;
 
                 case UserAssignedIdentityId.ResourceId:
-                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityConfiguration.WithUserAssignedResourceId(userAssignedId));
+                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedResourceId(userAssignedId));
                     break;
             }
 

@@ -34,39 +34,29 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Creates a ManagedIdentityApplicationBuilder from a user assigned managed identity clientID / resourceId.
-        /// For example, for a system assigned managed identity use ManagedIdentityApplicationBuilder.Create(SystemAssignedManagedIdentity.Default())
-        /// and for a user assigned managed identity use ManagedIdentityApplicationBuilder.Create(UserAssignedManagedIdentity.FromClientId(clientId)).
+        /// For example, for a system assigned managed identity use ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+        /// and for a user assigned managed identity use ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(clientId)).
         /// For more details see https://aka.ms/msal-net-managed-identity
         /// </summary>
-        /// <param name="managedIdentityConfiguration">Configuration of the Managed Identity assigned to the resource.</param>
+        /// <param name="managedIdentityId">Configuration of the Managed Identity assigned to the resource.</param>
         /// <returns>A <see cref="ManagedIdentityApplicationBuilder"/> from which to set more
         /// parameters, and to create a managed identity application instance</returns>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
-        public static ManagedIdentityApplicationBuilder Create(ManagedIdentityConfiguration managedIdentityConfiguration)
+        public static ManagedIdentityApplicationBuilder Create(ManagedIdentityId managedIdentityId)
         {
             ApplicationBase.GuardMobileFrameworks();
 
-            return new ManagedIdentityApplicationBuilder(BuildConfiguration(managedIdentityConfiguration));
+            return new ManagedIdentityApplicationBuilder(BuildConfiguration(managedIdentityId));
         }
 
-        private static ApplicationConfiguration BuildConfiguration(ManagedIdentityConfiguration managedIdentityConfiguration)
+        private static ApplicationConfiguration BuildConfiguration(ManagedIdentityId managedIdentityId)
         {
-            _ = managedIdentityConfiguration ?? throw new ArgumentNullException(nameof(managedIdentityConfiguration));
+            _ = managedIdentityId ?? throw new ArgumentNullException(nameof(managedIdentityId));
             var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient);
 
-            switch (managedIdentityConfiguration.IdType)
-            {
-                case ManagedIdentityIdType.ClientId:
-                    config.IsUserAssignedManagedIdentity = true;
-                    config.ManagedIdentityUserAssignedClientId = managedIdentityConfiguration.UserAssignedId;
-                    break;
-                case ManagedIdentityIdType.ResourceId:
-                    config.IsUserAssignedManagedIdentity = true;
-                    config.ManagedIdentityUserAssignedResourceId = managedIdentityConfiguration.UserAssignedId;
-                    break;
-            }
+            config.ManagedIdentityId = managedIdentityId;
 
             config.CacheSynchronizationEnabled = false;
             config.AccessorOptions = CacheOptions.EnableSharedCacheOptions;
@@ -156,17 +146,13 @@ namespace Microsoft.Identity.Client
 
         private void ComputeClientIdForCaching()
         {
-            if (!string.IsNullOrEmpty(Config.ManagedIdentityUserAssignedClientId))
+            if (Config.ManagedIdentityId.IdType == ManagedIdentityIdType.SystemAssigned)
             {
-                Config.ClientId = Config.ManagedIdentityUserAssignedClientId;
-            }
-            else if (!string.IsNullOrEmpty(Config.ManagedIdentityUserAssignedResourceId))
-            {
-                Config.ClientId = Config.ManagedIdentityUserAssignedResourceId;
+                Config.ClientId = Constants.ManagedIdentityDefaultClientId;
             }
             else
             {
-                Config.ClientId = Constants.ManagedIdentityDefaultClientId;
+                Config.ClientId = Config.ManagedIdentityId.UserAssignedId;
             }
         }
     }
