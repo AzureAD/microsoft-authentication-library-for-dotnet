@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.IdentityModel.Abstractions;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -57,18 +58,16 @@ namespace ManagedIdentityWebApi.Controllers
         {
             if (userAssignedId == null) 
             {
-                return ManagedIdentityApplicationBuilder.Create()
+                return ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithExperimentalFeatures()
                     .WithLogging(new MyIdentityLogger(_logger))
-                    .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                     .Build();
             }
             else
             {
-                return ManagedIdentityApplicationBuilder.Create(userAssignedId)
+                return ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(userAssignedId))
                     .WithExperimentalFeatures()
                     .WithLogging(new MyIdentityLogger(_logger))
-                    .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
                     .Build();
             }
         }

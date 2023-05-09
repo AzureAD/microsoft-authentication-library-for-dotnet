@@ -33,106 +33,35 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Constructor of a ManagedIdentityApplicationBuilder from application configuration options.
-        /// See https://aka.ms/msal-net-application-configuration
-        /// </summary>
-        /// <param name="options">Managed identity applications configuration options</param>
-        /// <returns>A <see cref="ManagedIdentityApplicationBuilder"/> from which to set more
-        /// parameters, and to create a managed identity application instance</returns>
-#if !SUPPORTS_CONFIDENTIAL_CLIENT
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
-#endif
-        public static ManagedIdentityApplicationBuilder CreateWithApplicationOptions(
-            ManagedIdentityApplicationOptions options)
-        {
-            ApplicationBase.GuardMobileFrameworks();
-
-            var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient);
-            var builder = new ManagedIdentityApplicationBuilder(config).WithOptions(options);
-
-            if (!string.IsNullOrWhiteSpace(options.UserAssignedClientId))
-            {
-                builder = builder.WithUserAssignedManagedIdentity(options.UserAssignedClientId);
-            }
-
-            builder = builder.WithCacheSynchronization(options.EnableCacheSynchronization);
-
-            return builder;
-        }
-
-        /// <summary>
-        /// Creates a ManagedIdentityApplicationBuilder.
-        /// See https://aka.ms/msal-net-application-configuration
-        /// </summary>
-        /// <returns>A <see cref="ManagedIdentityApplicationBuilder"/> from which to set more
-        /// parameters, and to create a managed identity application instance</returns>
-#if !SUPPORTS_CONFIDENTIAL_CLIENT
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide managed identity flow on mobile
-#endif
-        public static ManagedIdentityApplicationBuilder Create()
-        {
-            ApplicationBase.GuardMobileFrameworks();
-
-            var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient);
-            return new ManagedIdentityApplicationBuilder(config)
-                .WithCacheSynchronization(false);
-        }
-
-        /// <summary>
         /// Creates a ManagedIdentityApplicationBuilder from a user assigned managed identity clientID / resourceId.
-        /// See https://aka.ms/msal-net-managed-identity
+        /// For example, for a system assigned managed identity use ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+        /// and for a user assigned managed identity use ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(clientId)).
+        /// For more details see https://aka.ms/msal-net-managed-identity
         /// </summary>
-        /// <param name="userAssignedId">Client ID / Resource ID of the user assigned managed identity assigned to the resource.</param>
+        /// <param name="managedIdentityId">Configuration of the Managed Identity assigned to the resource.</param>
         /// <returns>A <see cref="ManagedIdentityApplicationBuilder"/> from which to set more
         /// parameters, and to create a managed identity application instance</returns>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
-        public static ManagedIdentityApplicationBuilder Create(string userAssignedId)
+        public static ManagedIdentityApplicationBuilder Create(ManagedIdentityId managedIdentityId)
         {
             ApplicationBase.GuardMobileFrameworks();
 
-            if (string.IsNullOrWhiteSpace(userAssignedId))
-            {
-                throw new ArgumentNullException(nameof(userAssignedId));
-            }
+            return new ManagedIdentityApplicationBuilder(BuildConfiguration(managedIdentityId));
+        }
 
+        private static ApplicationConfiguration BuildConfiguration(ManagedIdentityId managedIdentityId)
+        {
+            _ = managedIdentityId ?? throw new ArgumentNullException(nameof(managedIdentityId));
             var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient);
-            return new ManagedIdentityApplicationBuilder(config)
-                .WithUserAssignedManagedIdentity(userAssignedId)
-                .WithCacheSynchronization(false);
-        }
 
-        private ManagedIdentityApplicationBuilder WithUserAssignedManagedIdentity(string userAssignedId)
-        {
-            Config.IsUserAssignedManagedIdentity = true;
+            config.ManagedIdentityId = managedIdentityId;
 
-            if (Guid.TryParse(userAssignedId, out _))
-            {
-                Config.ManagedIdentityUserAssignedClientId = userAssignedId;
-            } 
-            else
-            {
-                Config.ManagedIdentityUserAssignedResourceId = userAssignedId;
-            }
+            config.CacheSynchronizationEnabled = false;
+            config.AccessorOptions = CacheOptions.EnableSharedCacheOptions;
 
-            return this;
-        }
-
-        /// <summary>
-        /// When set to <c>true</c>, MSAL will lock cache access at the <see cref="ManagedIdentityApplication"/> level, i.e.
-        /// the block of code between BeforeAccessAsync and AfterAccessAsync callbacks will be synchronized. 
-        /// Apps can set this flag to <c>false</c> to enable an optimistic cache locking strategy, which may result in better performance, especially 
-        /// when ConfidentialClientApplication or ManagedIdentityApplication objects are reused.
-        /// </summary>
-        /// <remarks>
-        /// False by default.
-        /// Not recommended for apps that call RemoveAsync
-        /// </remarks>
-        public ManagedIdentityApplicationBuilder WithCacheSynchronization(bool enableCacheSynchronization)
-        {
-            Config.CacheSynchronizationEnabled = enableCacheSynchronization;
-            return this;
+            return config;
         }
 
         /// <summary>
@@ -201,7 +130,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         internal ManagedIdentityApplication BuildConcrete()
         {
-            ValidateUseOfExperimentalFeature("ManagedIdentityClient");
+            ValidateUseOfExperimentalFeature("ManagedIdentity");
             DefaultConfiguration();
             return new ManagedIdentityApplication(BuildConfiguration());
         }
@@ -217,17 +146,13 @@ namespace Microsoft.Identity.Client
 
         private void ComputeClientIdForCaching()
         {
-            if (!string.IsNullOrEmpty(Config.ManagedIdentityUserAssignedClientId))
+            if (Config.ManagedIdentityId.IdType == ManagedIdentityIdType.SystemAssigned)
             {
-                Config.ClientId = Config.ManagedIdentityUserAssignedClientId;
-            }
-            else if (!string.IsNullOrEmpty(Config.ManagedIdentityUserAssignedResourceId))
-            {
-                Config.ClientId = Config.ManagedIdentityUserAssignedResourceId;
+                Config.ClientId = Constants.ManagedIdentityDefaultClientId;
             }
             else
             {
-                Config.ClientId = Constants.ManagedIdentityDefaultClientId;
+                Config.ClientId = Config.ManagedIdentityId.UserAssignedId;
             }
         }
     }
