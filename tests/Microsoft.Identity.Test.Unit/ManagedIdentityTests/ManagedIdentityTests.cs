@@ -56,7 +56,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -107,7 +106,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     userAssignedIdentityId == UserAssignedIdentityId.ClientId ?
                         ManagedIdentityId.WithUserAssignedClientId(userAssignedId) :
                         ManagedIdentityId.WithUserAssignedResourceId(userAssignedId))
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -156,7 +154,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -216,7 +213,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -284,7 +280,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -321,7 +316,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -359,7 +353,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -399,7 +392,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -439,7 +431,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -480,7 +471,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -514,7 +504,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(TestConstants.ClientId))
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -550,7 +539,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -594,7 +582,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -660,7 +647,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Trace.WriteLine("1. Setup an app with a token cache with one AT");
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.

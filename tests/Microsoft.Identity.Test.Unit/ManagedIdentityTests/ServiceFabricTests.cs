@@ -36,7 +36,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "localhost/token");
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling the shared cache to avoid the test to pass because of the cache
