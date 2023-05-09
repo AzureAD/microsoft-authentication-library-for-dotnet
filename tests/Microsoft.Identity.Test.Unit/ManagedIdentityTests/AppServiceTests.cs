@@ -31,7 +31,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(ManagedIdentitySource.AppService, "127.0.0.1:41564/msi/token");
 
                 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager)
                     .Build();
 

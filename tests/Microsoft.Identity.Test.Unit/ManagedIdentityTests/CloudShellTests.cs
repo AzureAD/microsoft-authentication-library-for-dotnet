@@ -35,7 +35,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Create(userAssignedIdentityId == UserAssignedIdentityId.ClientId ?
                     ManagedIdentityId.WithUserAssignedClientId(userAssignedId) :
                     ManagedIdentityId.WithUserAssignedResourceId(userAssignedId))
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -63,7 +62,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(ManagedIdentitySource.CloudShell, "localhost/token");
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.

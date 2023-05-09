@@ -130,7 +130,6 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         internal ManagedIdentityApplication BuildConcrete()
         {
-            ValidateUseOfExperimentalFeature("ManagedIdentity");
             DefaultConfiguration();
             return new ManagedIdentityApplication(BuildConfiguration());
         }

@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor()
         {
             var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                .WithExperimentalFeatures().BuildConcrete();
+                .BuildConcrete();
 
             // Assert defaults
             Assert.AreEqual(Constants.ManagedIdentityDefaultClientId, mi.ServiceBundle.Config.ClientId);
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithCreateUserAssignedId()
         {
             var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(TestConstants.ClientId))
-                .WithExperimentalFeatures().BuildConcrete();
+                .BuildConcrete();
 
             //Assert defaults
             Assert.AreEqual(TestConstants.ClientId, mi.ServiceBundle.Config.ClientId);
@@ -88,7 +88,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var mi = ManagedIdentityApplicationBuilder.Create(isClientId ? 
                     ManagedIdentityId.WithUserAssignedClientId(userAssignedId) : 
                     ManagedIdentityId.WithUserAssignedResourceId(userAssignedId))
-                .WithExperimentalFeatures()
                 .BuildConcrete();
 
             Assert.AreEqual(userAssignedId, mi.ServiceBundle.Config.ClientId);
@@ -110,7 +109,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithDebugLoggingCallback()
         {
             var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                .WithExperimentalFeatures()
                 .WithDebugLoggingCallback()
                 .BuildConcrete();
             Assert.IsNotNull(mi.ServiceBundle.Config.LoggingCallback);
@@ -121,7 +119,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             var httpClientFactory = NSubstitute.Substitute.For<IMsalHttpClientFactory>();
             var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                .WithExperimentalFeatures()
                 .WithHttpClientFactory(httpClientFactory)
                 .BuildConcrete();
             Assert.AreEqual(httpClientFactory, mi.ServiceBundle.Config.HttpClientFactory);
@@ -132,7 +129,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             var mi = ManagedIdentityApplicationBuilder
                 .Create(ManagedIdentityId.SystemAssigned)
-                .WithExperimentalFeatures()
                 .WithLogging((level, message, pii) => { })
                 .BuildConcrete();
 
