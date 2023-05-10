@@ -163,6 +163,19 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Only affects <see cref="ILongRunningWebApi.InitiateLongRunningProcessInWebApi(IEnumerable{string}, string, ref string)"/>.
+        /// When enabled, mimics MSAL 4.50.0 and below behavior - does not check cached tokens based on OBO assertions.
+        /// When disabled (default behavior), cached tokens will only be returned if the OBO assertion in the request matched the assertion of the cached token.
+        /// </summary>
+        /// <param name="ignoreCachedAssertion">Whether to match on cached OBO assertion hash.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public AcquireTokenOnBehalfOfParameterBuilder WithIgnoreCachedAssertion(bool ignoreCachedAssertion = true)
+        {
+            Parameters.IgnoreCachedOboAssertion = ignoreCachedAssertion;
+            return this;
+        }
+
         /// <inheritdoc />
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
