@@ -11,7 +11,7 @@
 - For HTTP telemetry. added a new telemetry ID for long-running on-behalf-of requests. See [4099](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4099).  
 
 ### Bug Fixes
-- Fixed a JSON serialization issue in iOS apps that are built in release Ahead-Of-Time compilation mode. See [4082](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4082).  
+- Fixed a JSON serialization issue in iOS apps that are built in release Ahead-Of-Time (AOT) compilation mode. See [4082](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4082).  
 - MSAL.NET package now references correct Microsoft.iOS version. See [4091](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4091).  
 - Microsoft.Identity.Client.Broker package can now be used in projects which rely on the older package.config. See [4108](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4108).  
 - Fixed a `user_mismatch` error when `WithAccount` is specified when acquiring tokens interactively and selecting a different account in the account picker. See [3991](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3991).  
