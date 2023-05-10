@@ -14,7 +14,6 @@ namespace Microsoft.Identity.Client
     /// (for instance a JSON file, as in an asp.net configuration scenario)
     /// See https://aka.ms/msal-net-application-configuration
     /// See also derived classes <see cref="ApplicationOptions"/>
-    /// and <see cref="ManagedIdentityApplicationOptions"/>
     /// </summary>
     public abstract class BaseApplicationOptions
     {

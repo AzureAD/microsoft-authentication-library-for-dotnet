@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -30,14 +31,17 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ServiceFabricInvalidEndpointAsync()
         {
             using(new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
                 SetEnvironmentVariables(ManagedIdentitySource.ServiceFabric, "localhost/token");
 
-                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
-                    .WithExperimentalFeatures()
-                    .WithHttpManager(httpManager)
-                    .Build();
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                // Disabling the shared cache to avoid the test to pass because of the cache
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
 
                 MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)

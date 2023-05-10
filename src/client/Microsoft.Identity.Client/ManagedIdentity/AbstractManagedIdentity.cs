@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 message = MsalErrorMessage.ManagedIdentityUnexpectedResponse;
             }
 
-            throw new MsalManagedIdentityException(MsalError.ManagedIdentityRequestFailed, message, exception, _sourceType);
+            throw new MsalManagedIdentityException(MsalError.ManagedIdentityRequestFailed, message, exception, _sourceType, (int)response.StatusCode);
         }
 
         protected abstract ManagedIdentityRequest CreateRequest(string resource);
