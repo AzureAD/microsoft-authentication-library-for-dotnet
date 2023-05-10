@@ -127,10 +127,16 @@ namespace Microsoft.Identity.Client.Cache.Items
         public string FamilyId { get; set; }
 
         /// <summary>
-        /// Used to find the token in the cache.
-        /// Can be a token assertion hash (normal OBO flow) or a user provided key (long-running OBO flow).
+        /// Used to find the token in the cache. 
+        /// Can be a token assertion hash (normal OBO flow) or a user-provided key (long-running OBO flow).
         /// </summary>
         internal string OboCacheKey { get; set; }
+
+        /// <summary>
+        /// Only used in InitiateLongRunningProcessInWebApi to compare request and cached assertions.
+        /// Always set to the assertion hash.
+        /// </summary>
+        internal string OboAssertionHash { get; set; }
 
         /// <summary>
         /// Family Refresh Tokens, can be used for all clients part of the family
@@ -157,6 +163,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             var item = new MsalRefreshTokenCacheItem();
             item.FamilyId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyId);
             item.OboCacheKey = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHashCacheKey);
+            item.OboAssertionHash = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.OboAssertionHash);
 
             item.PopulateFieldsFromJObject(j);
             item.InitCacheKey();
@@ -169,6 +176,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             var json = base.ToJObject();
             SetItemIfValueNotNull(json, StorageJsonKeys.FamilyId, FamilyId);
             SetItemIfValueNotNull(json, StorageJsonKeys.UserAssertionHashCacheKey, OboCacheKey);
+            SetItemIfValueNotNull(json, StorageJsonKeys.OboAssertionHash, OboAssertionHash);
             return json;
         }
 

@@ -102,7 +102,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     HomeAccountId = TestConstants.HomeAccountId,
                     Secret = "access_token_secret",
                     RawClientInfo = string.Empty,
-                    OboCacheKey = "assertion_hash"
+                    OboCacheKey = "assertion_hash",
+                    OboAssertionHash = TestConstants.UserAssertion
                 };
             }
 
@@ -609,18 +610,21 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSerializeContainsNoNulls()
         {
+            var prefix = $"_SOMERANDOMPREFIX";
             var accessor = CreateTokenCacheAccessor();
 
             // Create a refresh token with a null family id in it
             var item = CreateRefreshTokenItem();
             item.FamilyId = null;
-            item.Environment += $"_SOMERANDOMPREFIX"; // ensure we get unique cache keys
+            item.OboAssertionHash = null;
+            item.Environment += prefix; // ensure we get unique cache keys
             accessor.SaveRefreshToken(item);
 
             var s1 = new TokenCacheJsonSerializer(accessor);
             byte[] bytes = s1.Serialize(null);
             string json = CoreHelpers.ByteArrayToString(bytes);
-            Console.WriteLine(json);
+
+            Assert.IsTrue(json.Contains(prefix));
             Assert.IsFalse(json.ToLowerInvariant().Contains("null"));
         }
 
@@ -743,7 +747,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 HomeAccountId = "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb",
                 RawClientInfo = string.Empty,
                 ClientId = "b945c513-3946-4ecd-b179-6499803a2167",
-                OboCacheKey = string.Empty
+                OboCacheKey = string.Empty,
+                OboAssertionHash = string.Empty,
             };
             AssertRefreshTokenCacheItemsAreEqual(expectedRefreshTokenItem, accessor.GetAllRefreshTokens().First());
 
@@ -927,15 +932,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 Assert.AreEqual(expected.FamilyId, actual.FamilyId);
             }
-
-            if (string.IsNullOrEmpty(expected.OboCacheKey))
-            {
-                Assert.IsTrue(string.IsNullOrEmpty(actual.OboCacheKey));
-            }
-            else
-            {
-                Assert.AreEqual(expected.OboCacheKey, actual.OboCacheKey);
-            }
+            Assert.AreEqual(expected.OboCacheKey, actual.OboCacheKey);
+            Assert.AreEqual(expected.OboAssertionHash, actual.OboAssertionHash);
         }
 
         private void AssertIdTokenCacheItemsAreEqual(MsalIdTokenCacheItem expected, MsalIdTokenCacheItem actual)

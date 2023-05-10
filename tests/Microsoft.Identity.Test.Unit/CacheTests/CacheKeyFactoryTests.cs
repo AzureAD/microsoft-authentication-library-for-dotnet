@@ -169,6 +169,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             at = at.WithUserAssertion("at_hash");            
             rt.OboCacheKey = "rt_hash";
+            rt.OboAssertionHash = TestConstants.UserAssertion;
             Assert.AreEqual("at_hash", CacheKeyFactory.GetKeyFromCachedItem(at));
             Assert.AreEqual("rt_hash", CacheKeyFactory.GetKeyFromCachedItem(rt));
             Assert.AreEqual(idt.HomeAccountId, CacheKeyFactory.GetKeyFromCachedItem(idt));

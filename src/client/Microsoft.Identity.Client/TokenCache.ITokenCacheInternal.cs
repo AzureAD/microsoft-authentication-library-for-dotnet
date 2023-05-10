@@ -101,6 +101,7 @@ namespace Microsoft.Identity.Client
                                     homeAccountId)
                 {
                     OboCacheKey = CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
+                    OboAssertionHash = requestParams.UserAssertion?.AssertionHash,
                 };
 
                 if (!_featureFlags.IsFociEnabled)

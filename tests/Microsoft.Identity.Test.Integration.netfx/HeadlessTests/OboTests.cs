@@ -323,7 +323,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Expire AT
             TokenCacheHelper.ExpireAllAccessTokens(cca.UserTokenCacheInternal);
 
-            // InitiateLR - AT from IdP via OBO flow (new AT, RT cached)
+            // InitiateLR - AT from IdP via RT flow (new AT, RT cached)
             result = await cca.InitiateLongRunningProcessInWebApi(s_scopes, userAuthResult.AccessToken, ref oboCacheKey)
                                 .ExecuteAsync().ConfigureAwait(false);
 
@@ -499,7 +499,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var cca = BuildCCA(userAuthResult.TenantId);
 
             string oboCacheKey = "obo-cache-key";
-            UserAssertion userAssertion = new UserAssertion(userAuthResult.AccessToken);
 
             var result = await cca.InitiateLongRunningProcessInWebApi(s_scopes, userAuthResult.AccessToken, ref oboCacheKey)
                 .ExecuteAsync().ConfigureAwait(false);

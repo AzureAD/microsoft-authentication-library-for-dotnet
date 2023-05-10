@@ -273,11 +273,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 AddMockHandlerAadSuccess(httpManager,
                     responseMessage: MockHelpers.CreateSuccessTokenResponseMessage(accessToken: TestConstants.ATSecret2, refreshToken: TestConstants.RTSecret2),
-                    expectedPostData: new Dictionary<string, string> { 
-                        { OAuth2Parameter.RequestedTokenUse, OAuth2RequestedTokenUse.OnBehalfOf }, { OAuth2Parameter.GrantType, OAuth2GrantType.JwtBearer } });
+                    expectedPostData: new Dictionary<string, string> { { OAuth2Parameter.GrantType, OAuth2GrantType.RefreshToken } });
 
                 // Initiate another process using the same cache key and assertion
-                // Access token is expired, uses assertion, not a refresh token, to retrieve new tokens from AAD
+                // Access token is expired - uses a refresh token to retrieve new tokens from AAD
                 result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
                     .ExecuteAsync().ConfigureAwait(false);
 
@@ -618,10 +617,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         utid: TestConstants.Utid,
                         accessToken: "access-token-2",
                         refreshToken: "refresh-token-2"),
-                        expectedPostData: new Dictionary<string, string> {
-                            { OAuth2Parameter.RequestedTokenUse, OAuth2RequestedTokenUse.OnBehalfOf }, { OAuth2Parameter.GrantType, OAuth2GrantType.JwtBearer } });
+                        expectedPostData: new Dictionary<string, string> { { OAuth2Parameter.GrantType, OAuth2GrantType.RefreshToken } });
 
-                // InitiateLR - AT from IdP via OBO flow new AT, RT cached
+                // InitiateLR - AT from IdP via RT flow new AT, RT cached
                 result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, userToken, ref oboCacheKey)
                                     .ExecuteAsync().ConfigureAwait(false);
 

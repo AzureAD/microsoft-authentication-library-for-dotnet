@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (cachedAccessToken != null && AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.InitiateLongRunningObo &&
                     !AuthenticationRequestParameters.UserAssertion.AssertionHash.Equals(cachedAccessToken.OboAssertionHash, System.StringComparison.Ordinal))
                 {
-                    logger.Info("[OBO request] InitiateLongRunningProcessInWebApi found cached token with a different assertion; fetching new tokens.");
+                    logger.Info("[OBO request] InitiateLongRunningProcessInWebApi found cached access token with a different assertion; fetching new tokens.");
                     cachedAccessToken = null;
                 }
 
@@ -138,17 +138,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
 
-            // InitiateLongRunningProcessInWebApi retrieves tokens only with assertion, not by refresh token.
-            // The reason why we don't use RT for InitiateLongRunningProcessInWebApi is because of https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3825.
-            // If tokens are revoked in AAD, refreshing with this cached RT will throw an AAD exception.
-            // Since we already have a user assertion, use it to fetch new tokens via OBO grant.
-            // The expectation is that this use assertion is newer than the one that was used to acquire cached RT.
-            if (AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenInLongRunningObo)
+            if (ApiEvent.IsLongRunningObo(AuthenticationRequestParameters.ApiId))
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info("[OBO request] AcquireTokenInLongRunningProcess, trying to refresh using an refresh token flow.");
 
                 // Look for a refresh token
                 MsalRefreshTokenCacheItem cachedRefreshToken = await CacheManager.FindRefreshTokenAsync().ConfigureAwait(false);
+
+                if (cachedRefreshToken != null && AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.InitiateLongRunningObo &&
+                    !AuthenticationRequestParameters.UserAssertion.AssertionHash.Equals(cachedRefreshToken.OboAssertionHash, System.StringComparison.Ordinal))
+                {
+                    logger.Info("[OBO request] InitiateLongRunningProcessInWebApi found cached refresh token with a different assertion; fetching new tokens.");
+                    cachedRefreshToken = null;
+                }
 
                 // If a refresh token is not found, fetch a new access token
                 if (cachedRefreshToken != null)
@@ -173,8 +175,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
                 }
 
-                AuthenticationRequestParameters.RequestContext.Logger.Error("[OBO request] AcquireTokenInLongRunningProcess was called and no access or refresh tokens were found in the cache.");
-                throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
+                if (AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenInLongRunningObo)
+                {
+                    AuthenticationRequestParameters.RequestContext.Logger.Error("[OBO request] AcquireTokenInLongRunningProcess was called and no access or refresh tokens were found in the cache.");
+                    throw new MsalClientException(MsalError.OboCacheKeyNotInCacheError, MsalErrorMessage.OboCacheKeyNotInCache);
+                }
             }
             else
             {

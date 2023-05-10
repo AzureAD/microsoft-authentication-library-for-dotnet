@@ -75,6 +75,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 Environment = TestConstants.ProductionPrefCacheEnvironment,
                 HomeAccountId = homeAccountId,
                 OboCacheKey = oboCacheKey,
+                OboAssertionHash = TestConstants.UserAssertion,
                 Secret = refreshToken,
             };
 
@@ -449,6 +450,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             foreach (var rtItem in rtItems)
             {
                 rtItem.OboCacheKey = assertion;
+                rtItem.OboAssertionHash = assertion;
                 tokenCache.Accessor.SaveRefreshToken(rtItem);
             }
         }

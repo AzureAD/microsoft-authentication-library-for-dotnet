@@ -789,6 +789,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 string rtKey = rtItem.CacheKey;
                 rtItem.Secret = rtKey;
                 rtItem.OboCacheKey = assertion;
+                rtItem.OboAssertionHash = assertion;
                 cache.Accessor.SaveRefreshToken(rtItem);
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
@@ -841,6 +842,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     _homeAccountId);
 
                 rtItem.OboCacheKey = assertionHash;
+                rtItem.OboAssertionHash = assertionHash;
                 cache.Accessor.SaveRefreshToken(rtItem);
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
