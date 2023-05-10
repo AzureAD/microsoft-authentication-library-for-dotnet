@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     cachedAccessToken = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
                 }
 
-                if (cachedAccessToken != null && AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.InitiateLongRunningObo &&
+                if (AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.InitiateLongRunningObo && cachedAccessToken != null &&
                     !AuthenticationRequestParameters.UserAssertion.AssertionHash.Equals(cachedAccessToken.OboAssertionHash, System.StringComparison.Ordinal))
                 {
                     logger.Info("[OBO request] InitiateLongRunningProcessInWebApi found cached access token with a different assertion; fetching new tokens.");
@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // Look for a refresh token
                 MsalRefreshTokenCacheItem cachedRefreshToken = await CacheManager.FindRefreshTokenAsync().ConfigureAwait(false);
 
-                if (cachedRefreshToken != null && AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.InitiateLongRunningObo &&
+                if (AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.InitiateLongRunningObo && cachedRefreshToken != null &&
                     !AuthenticationRequestParameters.UserAssertion.AssertionHash.Equals(cachedRefreshToken.OboAssertionHash, System.StringComparison.Ordinal))
                 {
                     logger.Info("[OBO request] InitiateLongRunningProcessInWebApi found cached refresh token with a different assertion; fetching new tokens.");
