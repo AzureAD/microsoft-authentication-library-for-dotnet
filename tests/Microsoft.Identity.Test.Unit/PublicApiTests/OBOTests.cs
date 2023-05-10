@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                
+
                 AddMockHandlerAadSuccess(httpManager);
 
                 var cca = ConfidentialClientApplicationBuilder
@@ -72,9 +72,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                       .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(
-                    TokenSource.IdentityProvider, 
+                    TokenSource.IdentityProvider,
                     result.AuthenticationResultMetadata.TokenSource);
-                
+
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/common/oauth2/v2.0/token", // no region
                     result.AuthenticationResultMetadata.TokenEndpoint);
@@ -340,7 +340,60 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(CacheRefreshReason.NoCachedAccessToken, result.AuthenticationResultMetadata.CacheRefreshReason);
                 userCacheAccess.AssertAccessCounts(2, 2);
             }
+        }
 
+        [TestMethod]
+        public async Task InitiateLongRunningObo_WithNullCachedAssertionHash_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                AddMockHandlerAadSuccess(httpManager);
+
+                var cca = BuildCCA(httpManager);
+
+                var userCacheAccess = cca.UserTokenCache.RecordAccess();
+
+                string oboCacheKey = null;
+
+                // Token's not in the cache, retrieved from IdP
+                var result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(CacheRefreshReason.NoCachedAccessToken, result.AuthenticationResultMetadata.CacheRefreshReason);
+                userCacheAccess.AssertAccessCounts(1, 1);
+
+                // Clear assertion hash in the cached tokens (mimics MSAL 4.50.0 and below behavior)
+                ClearCachedAssertionHash();
+
+                AddMockHandlerAadSuccess(httpManager,
+                    responseMessage: MockHelpers.CreateSuccessTokenResponseMessage(accessToken: TestConstants.ATSecret2, refreshToken: TestConstants.RTSecret2));
+
+                // Since cached tokens don't have an assertion hash, match fails, call goes to AAD.
+                result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TestConstants.ATSecret2, result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                var cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single();
+                Assert.AreEqual(TestConstants.RTSecret2, cachedRefreshToken.Secret);
+                Assert.AreEqual(CacheRefreshReason.NoCachedAccessToken, result.AuthenticationResultMetadata.CacheRefreshReason);
+                userCacheAccess.AssertAccessCounts(2, 2);
+
+                void ClearCachedAssertionHash()
+                {
+                    var cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+                    cachedAccessToken.OboAssertionHash = string.Empty;
+                    cca.UserTokenCacheInternal.Accessor.SaveAccessToken(cachedAccessToken);
+
+                    var cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single();
+                    cachedRefreshToken.OboAssertionHash = string.Empty;
+                    cca.UserTokenCacheInternal.Accessor.SaveRefreshToken(cachedRefreshToken);
+                }
+            }
         }
 
         [TestMethod]
@@ -911,7 +964,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var cca = BuildCCA(httpManager);
                 var oboCca = cca as ILongRunningWebApi;
 
-                cca.UserTokenCache.SetBeforeAccess((args) => 
+                cca.UserTokenCache.SetBeforeAccess((args) =>
                 {
                     if (validateCacheProperties)
                     {
