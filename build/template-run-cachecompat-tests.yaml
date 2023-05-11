@@ -13,3 +13,4 @@ steps:
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
     runInParallel: true
+    runSettingsFile: '**\build\MSAL.CodeCoverage.runsettings'

@@ -15,6 +15,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Integration.Win8
 {
     [TestClass]
+    [Ignore] // needs to run on Win8 or on Win Server 2012 machine
     public class DeviceAuthenticationTests
     {
         private const string _claims = "{\"access_token\":{\"deviceid\":{\"essential\":true}}}";

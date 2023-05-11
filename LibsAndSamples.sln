@@ -134,7 +134,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\template-restore-build-libsandsamples.yaml = build\template-restore-build-libsandsamples.yaml
 		build\template-run-all-tests.yaml = build\template-run-all-tests.yaml
 		build\template-run-cachecompat-tests.yaml = build\template-run-cachecompat-tests.yaml
-		build\template-run-device-auth-tests.yaml = build\template-run-device-auth-tests.yaml
 		build\template-run-integration-tests.yaml = build\template-run-integration-tests.yaml
 		build\template-run-unit-tests.yaml = build\template-run-unit-tests.yaml
 		build\template-sign-binary.yaml = build\template-sign-binary.yaml
