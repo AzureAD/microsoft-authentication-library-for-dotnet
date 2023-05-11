@@ -17,15 +17,6 @@ namespace Microsoft.Identity.Client
     public interface IManagedIdentityApplication : IApplicationBase
     {
         /// <summary>
-        /// Application token cache. This case holds access tokens for the application. It's maintained
-        /// and updated silently if needed when calling <see cref="AcquireTokenForManagedIdentity(string)"/>
-        /// </summary>
-        /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.
-        /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms.
-        /// </remarks>
-        ITokenCache AppTokenCache { get; }
-
-        /// <summary>
         /// Acquires token for a managed identity configured on Azure resource. See https://aka.ms/msal-net-managed-identity.
         /// </summary>
         /// <param name="resource">resource requested to access the protected API. For this flow (managed identity), the resource

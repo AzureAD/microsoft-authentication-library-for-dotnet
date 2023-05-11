@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             _endpoint = endpoint;
 
-            if (requestContext.ServiceBundle.Config.IsUserAssignedManagedIdentity)
+            if (requestContext.ServiceBundle.Config.ManagedIdentityId._isUserAssigned)
             {
                 throw new MsalManagedIdentityException(MsalError.UserAssignedManagedIdentityNotSupported, 
                     string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, CloudShell), 
