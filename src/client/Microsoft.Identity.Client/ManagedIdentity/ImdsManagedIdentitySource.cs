@@ -61,16 +61,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.QueryParameters["api-version"] = ImdsApiVersion;
             request.QueryParameters["resource"] = resource;
 
-            if (!string.IsNullOrEmpty(_requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId))
+            switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
             {
-                _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
-                request.QueryParameters[Constants.ManagedIdentityClientId] = _requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId;
-            }
-            
-            if (!string.IsNullOrEmpty(_requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId))
-            {
-                _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
-                request.QueryParameters[Constants.ManagedIdentityResourceId] = _requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId;
+                case AppConfig.ManagedIdentityIdType.ClientId:
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
+                    request.QueryParameters[Constants.ManagedIdentityClientId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                    break;
+
+                case AppConfig.ManagedIdentityIdType.ResourceId:
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
+                    request.QueryParameters[Constants.ManagedIdentityResourceId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                    break;
             }
 
             return request;
