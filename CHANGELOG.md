@@ -4,10 +4,10 @@
 - Acquiring tokens with managed identity is now generally available. See [4125](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4125) and [documentation for managed identity in MSAL.NET](https://aka.ms/msal-net-managed-identity).  
 - Updated the managed identity API to specify the identity type when creating an `ManagedIdentityApplication`. See [4114](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4114).  
 - When acquiring tokens with managed identity and using the default HTTP client, MSAL will retry the request for certain exception codes. See [4067](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4067).  
-- `MsalManagedIdentityException` now includes the Azure source used. See [4041](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4041).  
-- MSAL now can proactively refresh tokens acquired with managed identity. See [4062](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4062).  
-- MSAL now can proactively refresh tokens acquired using `AppTokenProvider` API. See [4074](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4074).  
-- `MsalException` and derived exception classes now have a property `AdditionalExceptionData`, which holds any extra error information coming from the authentication broker. See [4106](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4106).  
+- Adds `MsalManagedIdentityException` class that represents any managed identity related exceptions. It includes general exception information including the Azure source from which the exception originates. See [4041](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4041).  
+- MSAL will now proactively refresh tokens acquired with managed identity. See [4062](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4062).  
+- MSAL will now proactively refresh tokens acquired using `AppTokenProvider` API. See [4074](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4074).  
+- `MsalException` and derived exception classes now have a property `AdditionalExceptionData`, which holds any extra error information. Currently it is only populated for exceptions coming from the Windows authentication broker (WAM). See [4106](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4106).  
 - For HTTP telemetry. added a new telemetry ID for long-running on-behalf-of requests. See [4099](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4099).  
 
 ### Bug Fixes
