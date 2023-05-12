@@ -44,9 +44,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
             //Check if initiating a long running process
-            if (AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.InitiateLongRunningObo)
+            if (AuthenticationRequestParameters.ApiId == ApiEvent.ApiIds.InitiateLongRunningObo && !_onBehalfOfParameters.SearchInCacheForLongRunningObo)
             {
-                //Long running process should not use cached tokens
+                //Long running OBO doesn't search in cache by default
                 logger.Info("[OBO Request] Initiating long running process. Fetching OBO token from ESTS.");
                 return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -142,7 +142,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (ApiEvent.IsLongRunningObo(AuthenticationRequestParameters.ApiId))
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info("[OBO request] Long-running OBO flow, trying to refresh using a refresh token flow.");
-
 
                 // Look for a refresh token
                 MsalRefreshTokenCacheItem cachedRefreshToken = await CacheManager.FindRefreshTokenAsync().ConfigureAwait(false);

@@ -348,6 +348,68 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
+        public async Task InitiateLongRunningObo_WithIgnoreCachedAssertion_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                AddMockHandlerAadSuccess(httpManager);
+
+                var cca = BuildCCA(httpManager);
+
+                var userCacheAccess = cca.UserTokenCache.RecordAccess();
+
+                string oboCacheKey = null;
+
+                // Token's not in the cache, searched by user assertion hash, retrieved from IdP, saved with the provided OBO cache key
+                var result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                MsalAccessTokenCacheItem cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+                MsalRefreshTokenCacheItem cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single();
+                Assert.AreEqual(oboCacheKey, cachedAccessToken.OboCacheKey);
+                Assert.AreEqual(oboCacheKey, cachedRefreshToken.OboCacheKey);
+                Assert.AreEqual(CacheRefreshReason.NoCachedAccessToken, result.AuthenticationResultMetadata.CacheRefreshReason);
+                userCacheAccess.AssertAccessCounts(1, 1);
+
+                // Initiate with different user assertion and IgnoreCachedAssertion flag
+                // MSAL will not match on the assertion and return cached token
+                result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, $"{TestConstants.DefaultAccessToken}2", ref oboCacheKey)
+                    .WithSearchInCache()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
+                userCacheAccess.AssertAccessCounts(2, 1);
+
+                AddMockHandlerAadSuccess(httpManager,
+                    responseMessage: MockHelpers.CreateSuccessTokenResponseMessage(accessToken: TestConstants.ATSecret2, refreshToken: TestConstants.RTSecret2),
+                    expectedPostData: new Dictionary<string, string> { { OAuth2Parameter.GrantType, OAuth2GrantType.RefreshToken } });
+                TokenCacheHelper.ExpireAllAccessTokens(cca.UserTokenCacheInternal);
+
+                // Initiate with different user assertion and IgnoreCachedAssertion flag
+                // MSAL will not match on the assertion, find expired cached token, and use cached refresh token
+                result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, $"{TestConstants.DefaultAccessToken}2", ref oboCacheKey)
+                    .WithSearchInCache()
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TestConstants.ATSecret2, result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
+                cachedRefreshToken = cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Single();
+                Assert.AreEqual(oboCacheKey, cachedAccessToken.OboCacheKey);
+                Assert.AreEqual(oboCacheKey, cachedRefreshToken.OboCacheKey);
+                Assert.AreEqual(TestConstants.ATSecret2, cachedAccessToken.Secret);
+                Assert.AreEqual(TestConstants.RTSecret2, cachedRefreshToken.Secret);
+                Assert.AreEqual(CacheRefreshReason.Expired, result.AuthenticationResultMetadata.CacheRefreshReason);
+                userCacheAccess.AssertAccessCounts(3, 2);
+            }
+        }
+
+        [TestMethod]
         public async Task AcquireTokenByObo_AcquireTokenInLongRunningProcess_CacheKeyDoesNotExist_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
