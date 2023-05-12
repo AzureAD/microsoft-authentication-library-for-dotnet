@@ -1598,7 +1598,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                TestConstants.s_scope.ToArray(),
                                TestConstants.DefaultClientAssertion,
                                ref oboCacheKey)
-                .WithSearchInCache();
+                .WithSearchInCacheForLongRunningProcess();
             PublicClientApplicationTests.CheckBuilderCommonMethods(longRunningOboBuilder);
 
             longRunningOboBuilder = ((ILongRunningWebApi)app).AcquireTokenInLongRunningProcess(

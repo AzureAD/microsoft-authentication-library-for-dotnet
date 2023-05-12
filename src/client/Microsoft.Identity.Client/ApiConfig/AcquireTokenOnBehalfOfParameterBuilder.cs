@@ -165,12 +165,13 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Only affects <see cref="ILongRunningWebApi.InitiateLongRunningProcessInWebApi(IEnumerable{string}, string, ref string)"/>.
-        /// When enabled, mimics MSAL 4.50.0 and below behavior - checks in cache for cached tokens.
+        /// When enabled, mimics MSAL 4.50.0 and below behavior - checks in cache for cached tokens first, 
+        /// and if not found, then uses user assertion to request new tokens from AAD.
         /// When disabled (default behavior), doesn't search in cache, but uses the user assertion to retrieve tokens from AAD.
         /// </summary>
         /// <param name="searchInCache">Whether to match on cached OBO assertion hash.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenOnBehalfOfParameterBuilder WithSearchInCache(bool searchInCache = true)
+        public AcquireTokenOnBehalfOfParameterBuilder WithSearchInCacheForLongRunningProcess(bool searchInCache = true)
         {
             Parameters.SearchInCacheForLongRunningObo = searchInCache;
             return this;

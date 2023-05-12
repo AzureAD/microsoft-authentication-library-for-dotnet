@@ -54,12 +54,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                                         "\"trace_id\":\"dd25f4fb-3e8d-458e-90e7-179524ce0000\",\"correlation_id\":" +
                                         "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}";
 
-        public static string GetDefaultTokenResponse(string accessToken = TestConstants.ATSecret)
+        public static string GetDefaultTokenResponse(string accessToken = TestConstants.ATSecret, string refreshToken = TestConstants.RTSecret)
         {
               return
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
             "\"r1/scope1 r1/scope2\",\"access_token\":\"" + accessToken + "\"" +
-            ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
+            ",\"refresh_token\":\"" + refreshToken + "\",\"client_info\"" +
             ":\"" + CreateClientInfo() + "\",\"id_token\"" +
             ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) + "\"}";
         }
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return
           "{\"token_type\":\"pop\",\"expires_in\":\"3599\",\"scope\":" +
           "\"r1/scope1 r1/scope2\",\"access_token\":\"" + TestConstants.ATSecret + "\"" +
-          ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
+          ",\"refresh_token\":\"" + TestConstants.RTSecret + "\",\"client_info\"" +
           ":\"" + CreateClientInfo() + "\",\"id_token\"" +
           ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
           "\",\"id_token_expires_in\":\"3600\"}";
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
             "\"r1/scope1 r1/scope2\",\"access_token\":\"" + TestConstants.ATSecret + "\"" +
-            ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
+            ",\"refresh_token\":\"" + TestConstants.RTSecret + "\",\"client_info\"" +
             ":\"" + CreateClientInfo() + "\",\"id_token\"" +
             ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
             "\",\"spa_code\":\"" + spaCode + "\"" +
@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
             "\"r1/scope1 r1/scope2\",\"access_token\":\"" + TestConstants.ATSecret + "\"" +
-            ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
+            ",\"refresh_token\":\"" + TestConstants.RTSecret + "\",\"client_info\"" +
             ":\"" + CreateClientInfo() + "\",\"id_token\"" +
             ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
             "\",\"spa_accountId\":\"" + spaAccountId + "\"" +
@@ -193,10 +193,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 scopes, idToken, clientInfo));
         }
 
-        public static HttpResponseMessage CreateSuccessTokenResponseMessage(bool foci = false, string accessToken = TestConstants.ATSecret)
+        public static HttpResponseMessage CreateSuccessTokenResponseMessage(bool foci = false, string accessToken = TestConstants.ATSecret, string refreshToken = TestConstants.RTSecret)
         {
             return CreateSuccessResponseMessage(
-                foci ? GetFociTokenResponse() : GetDefaultTokenResponse(accessToken));
+                foci ? GetFociTokenResponse() : GetDefaultTokenResponse(accessToken, refreshToken));
         }
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessageWithUid(
