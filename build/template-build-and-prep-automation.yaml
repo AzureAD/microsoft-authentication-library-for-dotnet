@@ -103,6 +103,13 @@ steps:
     Contents: '**/bin/**/**'
     TargetFolder: '$(Build.SourcesDirectory)/WAM'
 
+- task: CopyFiles@2
+  displayName: 'Copy Test runsettings'
+  inputs:
+    SourceFolder: build
+    Contents: '**/MSAL.CodeCoverage.runsettings'
+    TargetFolder: '$(Build.artifactstagingdirectory)/test'
+
 - task: PublishPipelineArtifact@1
   displayName: 'Publish Artifact: drop'
   inputs:

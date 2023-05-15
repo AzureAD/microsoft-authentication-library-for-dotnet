@@ -17,7 +17,7 @@ steps:
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
     pathtoCustomTestAdapters: 'C:\temp' # Workaround for test failure, as NUnit Test Adapter that gets detected seems to mess something up
-    runSettingsFile: '**\build\MSAL.CodeCoverage.runsettings'
+    runSettingsFile: '**\test\MSAL.CodeCoverage.runsettings'
 
 - task: VSTest@2
   displayName: 'Run integration tests (.NET Core)'
@@ -32,7 +32,7 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
-    runSettingsFile: '**\build\MSAL.CodeCoverage.runsettings'
+    runSettingsFile: '**\test\MSAL.CodeCoverage.runsettings'
 
 - task: VSTest@2
   displayName: 'Run integration tests (.NET Standard)'
@@ -47,4 +47,4 @@ steps:
     codeCoverageEnabled: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
-    runSettingsFile: '**\build\MSAL.CodeCoverage.runsettings'
+    runSettingsFile: '**\test\MSAL.CodeCoverage.runsettings'
