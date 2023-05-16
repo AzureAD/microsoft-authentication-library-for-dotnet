@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [DataRow(new[] { "User.Read", "Mail.Read" }, null, "User.Read Mail.Read")]
         [DataRow(new[] { "https://sharepoint.com/scope" }, "https://sharepoint.com", "scope")]
         [DataRow(new[] { "offline_access", "openid", "profile" }, null, "offline_access openid profile")]
-        public async Task AcquireTokenSuccessfulTelemetryTestForScopesAsync(IEnumerable<string> intput, string expectedResource, string expectedScope)
+        public async Task AcquireTokenSuccessfulTelemetryTestForScopesAsync(IEnumerable<string> input, string expectedResource, string expectedScope)
         {
             using (_harness = CreateTestHarness())
             {

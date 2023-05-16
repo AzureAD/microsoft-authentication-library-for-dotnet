@@ -10,6 +10,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
         CertificateWithSni = 2,
         Secret = 3,
         ClientAssertion = 4,
-        Msi = 5
+        ManagedIdentity = 5
     }
 }

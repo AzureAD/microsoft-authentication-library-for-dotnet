@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                     foreach (string scope in AuthenticationRequestParameters.Scope)
                     {
-                         stringBuilder.Append(scope.Split(new[] { firstScopeAsUri.Host }, StringSplitOptions.None)[1].Replace("/", string.Empty) + " ");
+                         stringBuilder.Append(scope.Split(new[] { firstScopeAsUri.Host }, StringSplitOptions.None)[1].TrimStart('/') + " ");
                     }
 
                     telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, stringBuilder.ToString().TrimEnd(' '));
