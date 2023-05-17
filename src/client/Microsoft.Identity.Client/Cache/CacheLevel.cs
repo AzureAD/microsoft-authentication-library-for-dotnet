@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client.Cache
 {
     /// <summary>
-    /// Identifies the type of cache used when accessing the cache. Cache implementations must provide this.
+    /// Identifies the type of cache that the token was read from. Cache implementations must provide this.
     /// </summary>
     public enum CacheLevel
     {
@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.Cache
         None = 0,
         /// <summary>
         /// Specifies that the cache level used is unknown.
-        /// The custom token cache which doesn't relay the info about which cache was hit back to MSAL.
+        /// Token was retrieved from cache but the token cache implementation didn't specify which cache level was used.
         /// </summary>
         Unknown = 1,
         /// <summary>

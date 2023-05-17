@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     apiEvent.ApiErrorCode = ex.GetType().Name;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
-                    LogErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
+                    LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
                     throw;
                 }
                 finally
@@ -121,34 +121,27 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private void LogMsalErrorTelemetryToClient(MsalException ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
-        {
-            if (telemetryClients.HasEnabledClients(TelemetryConstants.AcquireTokenEventName))
-            {
-                if (ex is MsalClientException clientException)
-                {
-                    telemetryEventDetails.SetProperty(TelemetryConstants.Succeeded, false);
-                    telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, clientException.ErrorCode);
-                    telemetryEventDetails.SetProperty(TelemetryConstants.ErrorMessage, clientException.Message);
-                }
-
-                if (ex is MsalServiceException serviceException)
-                {
-                    telemetryEventDetails.SetProperty(TelemetryConstants.Succeeded, false);
-                    telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, serviceException.ErrorCode);
-                    telemetryEventDetails.SetProperty(TelemetryConstants.ErrorMessage, serviceException.Message);
-                    telemetryEventDetails.SetProperty(TelemetryConstants.StsErrorCode, serviceException.ErrorCodes.AsSingleString());
-                }
-            }
-        }
-
-        private void LogErrorTelemetryToClient(Exception ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
+        private void LogMsalErrorTelemetryToClient(Exception ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
         {
             if (telemetryClients.HasEnabledClients(TelemetryConstants.AcquireTokenEventName))
             {
                 telemetryEventDetails.SetProperty(TelemetryConstants.Succeeded, false);
-                telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, ex.GetType().ToString());
                 telemetryEventDetails.SetProperty(TelemetryConstants.ErrorMessage, ex.Message);
+
+                if (ex is MsalClientException clientException)
+                {
+                    telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, clientException.ErrorCode);
+                    return;
+                }
+
+                if (ex is MsalServiceException serviceException)
+                {
+                    telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, serviceException.ErrorCode);
+                    telemetryEventDetails.SetProperty(TelemetryConstants.StsErrorCode, serviceException.ErrorCodes?.FirstOrDefault());
+                    return;
+                }
+
+                telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, ex.GetType().ToString());
             }
         }
 
@@ -192,7 +185,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                     foreach (string scope in AuthenticationRequestParameters.Scope)
                     {
-                         stringBuilder.Append(scope.Split(new[] { firstScopeAsUri.Host }, StringSplitOptions.None)[1].TrimStart('/') + " ");
+                        var splitString = scope.Split(new[] { firstScopeAsUri.Host }, StringSplitOptions.None);
+                        string scopeToAppend = splitString.Count() > 1 ? splitString[1].TrimStart('/') + " " : splitString.FirstOrDefault();
+                        stringBuilder.Append(scopeToAppend);
                     }
 
                     telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, stringBuilder.ToString().TrimEnd(' '));
@@ -206,7 +201,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private CacheLevel GetCacheLevel(AuthenticationResult authenticationResult)
         {
-            if (authenticationResult.AuthenticationResultMetadata.TokenSource == TokenSource.Cache) //Check if token scource is cache
+            if (authenticationResult.AuthenticationResultMetadata.TokenSource == TokenSource.Cache) //Check if token source is cache
             {
                 if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheLevel > CacheLevel.Unknown) //Check if cache has indicated which level was used
                 {
@@ -278,12 +273,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private AssertionType GetAssertionType()
         {
-            if (!string.IsNullOrWhiteSpace(ServiceBundle.Config.ManagedIdentityUserAssignedClientId) ||
-                !string.IsNullOrWhiteSpace(ServiceBundle.Config.ManagedIdentityUserAssignedResourceId) ||
-                (!string.IsNullOrWhiteSpace(ServiceBundle.Config.TenantId) && ServiceBundle.Config.TenantId.Equals(Constants.ManagedIdentityDefaultTenant)) ||
+            if (ServiceBundle.Config.IsManagedIdentity ||
                 ServiceBundle.Config.AppTokenProvider != null)
             {
-                return AssertionType.Msi;
+                return AssertionType.ManagedIdentity;
             }
 
             if (ServiceBundle.Config.ClientCredential != null)

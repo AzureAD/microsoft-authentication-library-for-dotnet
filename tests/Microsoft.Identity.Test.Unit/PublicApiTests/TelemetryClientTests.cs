@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -168,6 +169,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [DataRow(new[] { "User.Read", "Mail.Read" }, null, "User.Read Mail.Read")]
         [DataRow(new[] { "https://sharepoint.com/scope" }, "https://sharepoint.com", "scope")]
         [DataRow(new[] { "offline_access", "openid", "profile" }, null, "offline_access openid profile")]
+        [DataRow(new[] { "https://graph.microsoft.com/.default", "User.Read" }, "https://graph.microsoft.com", ".default User.Read")]
         public async Task AcquireTokenSuccessfulTelemetryTestForScopesAsync(IEnumerable<string> input, string expectedResource, string expectedScope)
         {
             using (_harness = CreateTestHarness())
@@ -178,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 // Acquire token for client with scope
-                var result = await _cca.AcquireTokenForClient(intput)
+                var result = await _cca.AcquireTokenForClient(input)
                     .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
@@ -395,7 +397,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     eventDetails,
                     TokenSource.IdentityProvider,
                     CacheRefreshReason.NoCachedAccessToken,
-                    AssertionType.Msi,
+                    AssertionType.ManagedIdentity,
                     "https://login.microsoftonline.com/managed_identity/",
                     TokenType.Bearer,
                     CacheLevel.None,
@@ -444,9 +446,35 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(exClient.ErrorCode, eventDetails.Properties[TelemetryConstants.ErrorCode]);
                 Assert.AreEqual(exClient.Message, eventDetails.Properties[TelemetryConstants.ErrorMessage]);
                 Assert.IsFalse((bool?)eventDetails.Properties[TelemetryConstants.Succeeded]);
-
-                //Test for generic Exception
             }
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenGenericErrorTelemetryTestAsync()
+        {
+            IMsalHttpClientFactory factoryThatThrows = Substitute.For<IMsalHttpClientFactory>();
+            factoryThatThrows.When(x => x.GetHttpClient()).Do(x => { throw new SocketException(0); });
+
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithHttpClientFactory(factoryThatThrows)
+                .WithExperimentalFeatures()
+                .WithTelemetryClient(_telemetryClient)
+                .BuildConcrete();
+
+            MsalClientException exClient = await AssertException.TaskThrowsAsync<MsalClientException>(
+                () => cca.AcquireTokenForClient(null)
+                .WithAuthority(TestConstants.AuthorityUtidTenant)
+                .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
+
+            Assert.IsNotNull(exClient);
+            Assert.IsNotNull(exClient.ErrorCode);
+
+            var eventDetails = _telemetryClient.TestTelemetryEventDetails;
+            Assert.AreEqual(exClient.ErrorCode, eventDetails.Properties[TelemetryConstants.ErrorCode]);
+            Assert.AreEqual(exClient.Message, eventDetails.Properties[TelemetryConstants.ErrorMessage]);
+            Assert.IsFalse((bool?)eventDetails.Properties[TelemetryConstants.Succeeded]);
         }
 
         private void AssertLoggedTelemetry(
@@ -487,9 +515,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private void CreateApplication(AssertionType assertionType = AssertionType.Secret)
         {
-            var certificate = new X509Certificate2(
-                                    ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
-                                    TestConstants.DefaultPassword);
+            //var certificate = new X509Certificate2(
+            //                        ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
+            //                        TestConstants.DefaultPassword);
 
             switch (assertionType)
             {
@@ -502,24 +530,24 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .WithTelemetryClient(_telemetryClient)
                         .BuildConcrete();
                         break;
-                case AssertionType.CertificateWithoutSni:
-                    _cca = ConfidentialClientApplicationBuilder
-                        .Create(TestConstants.ClientId)
-                        .WithCertificate(certificate)
-                        .WithHttpManager(_harness.HttpManager)
-                        .WithExperimentalFeatures()
-                        .WithTelemetryClient(_telemetryClient)
-                        .BuildConcrete();
-                    break;
-                case AssertionType.CertificateWithSni:
-                    _cca = ConfidentialClientApplicationBuilder
-                        .Create(TestConstants.ClientId)
-                        .WithCertificate(certificate, true)
-                        .WithHttpManager(_harness.HttpManager)
-                        .WithExperimentalFeatures()
-                        .WithTelemetryClient(_telemetryClient)
-                        .BuildConcrete();
-                    break;
+                //case AssertionType.CertificateWithoutSni:
+                //    _cca = ConfidentialClientApplicationBuilder
+                //        .Create(TestConstants.ClientId)
+                //        .WithCertificate(certificate)
+                //        .WithHttpManager(_harness.HttpManager)
+                //        .WithExperimentalFeatures()
+                //        .WithTelemetryClient(_telemetryClient)
+                //        .BuildConcrete();
+                //    break;
+                //case AssertionType.CertificateWithSni:
+                //    _cca = ConfidentialClientApplicationBuilder
+                //        .Create(TestConstants.ClientId)
+                //        .WithCertificate(certificate, true)
+                //        .WithHttpManager(_harness.HttpManager)
+                //        .WithExperimentalFeatures()
+                //        .WithTelemetryClient(_telemetryClient)
+                //        .BuildConcrete();
+                //    break;
                 case AssertionType.ClientAssertion:
                     _cca = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
@@ -529,7 +557,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .WithTelemetryClient(_telemetryClient)
                         .BuildConcrete();
                     break;
-                case AssertionType.Msi:
+                case AssertionType.ManagedIdentity:
                     _cca = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
                         .WithAppTokenProvider((AppTokenProviderParameters parameters) => { return Task.FromResult(GetAppTokenProviderResult()); })

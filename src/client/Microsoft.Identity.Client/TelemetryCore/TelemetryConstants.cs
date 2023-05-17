@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string ActivityId = "ActivityId";
         public const string Resource = "Resource";
         public const string RefreshOn = "RefreshOn";
-        public const string CacheSourceLevel = "CacheSourceLevel";
+        public const string CacheLevel = "CacheLevel";
         public const string AssertionType = "AssertionType";
         public const string Endpoint = "Endpoint";
         public const string Scopes = "Scopes";
