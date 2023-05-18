@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             Init(
                 preferredCacheEnv,
-                idToken?.ObjectId,
+                idToken?.GetUniqueId(),
                 clientInfo,
                 homeAccountId,
                 idToken?.Name,

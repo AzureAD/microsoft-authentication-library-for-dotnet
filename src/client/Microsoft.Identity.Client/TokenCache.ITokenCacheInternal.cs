@@ -358,7 +358,7 @@ namespace Microsoft.Identity.Client
             InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata)
         {
             if (msalRefreshTokenCacheItem?.RawClientInfo != null &&
-                msalIdTokenCacheItem?.IdToken?.ObjectId != null &&
+                msalIdTokenCacheItem?.IdToken?.GetUniqueId() != null &&
                 IsLegacyAdalCacheEnabled(requestParams))
             {
 
@@ -373,7 +373,7 @@ namespace Microsoft.Identity.Client
                     msalRefreshTokenCacheItem,
                     msalIdTokenCacheItem,
                     authorityWithPreferredCache.AuthorityInfo.CanonicalAuthority.ToString(),
-                    msalIdTokenCacheItem.IdToken.ObjectId,
+                    msalIdTokenCacheItem.IdToken.GetUniqueId(),
                     response.Scope);
             }
             else

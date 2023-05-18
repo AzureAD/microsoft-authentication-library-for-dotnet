@@ -211,9 +211,16 @@ namespace Microsoft.Identity.Client
         public bool IsExtendedLifeTimeToken { get; }
 
         /// <summary>
-        /// Gets the Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is its ID, that
-        /// is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.
+        /// Gets the Unique Id of the account in this <see cref="TenantId">
+        /// It is set as the oid (ObjectId) claim, or if that claim is <c>null</c>, as the sub (Subject) claim which is guaranteed not-null.
         /// </summary>
+        /// <remarks>
+        /// The oid claim identifies a user in all apps - Microsoft Identity Providers issue ID tokens with this claim, although it can be null in rare cases.
+        /// The sub claim is "a locally unique and never reassigned identifier within the Issuer for the End-User" as per https://openid.net/specs/openid-connect-core-1_0.html and it is a 
+        /// mandatory claim with OIDC compliant issuers.
+        /// Guest AAD accounts have different oid claim values in each tenant. Use <see cref="Account.HomeAccountId"/> to uniquely identify users across tenants.
+        /// See https://docs.microsoft.com/azure/active-directory/develop/id-tokens#payload-claims
+        /// </remarks>
         public string UniqueId { get; }
 
         /// <summary>
