@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -22,7 +22,6 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
     [TestClass]
     public class CiamIntegrationTests
     {
-        private const string _extraQParams = "dc=ESTS-PUB-EUS-AZ1-FD000-TEST1";
         private readonly string[] _ciamScopes = new[] { "openid" };
         private const string _ciamRedirectUri = "http://localhost";
 
@@ -67,7 +66,6 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
 
             var result = await msalPublicClient
                 .AcquireTokenByUsernamePassword(_ciamScopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
-                .WithExtraQueryParameters(_extraQParams)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -130,7 +128,6 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
 
             var result = await msalConfidentialClient
                 .AcquireTokenForClient(new[] { TestConstants.DefaultGraphScope })
-                .WithExtraQueryParameters(_extraQParams)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
