@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Client
         public bool IsExtendedLifeTimeToken { get; }
 
         /// <summary>
-        /// Gets the Unique Id of the account in this <see cref="TenantId">
+        /// Gets the Unique Id of the account in this <see cref="TenantId" />
         /// It is set as the oid (ObjectId) claim, or if that claim is <c>null</c>, as the sub (Subject) claim which is guaranteed not-null.
         /// </summary>
         /// <remarks>
