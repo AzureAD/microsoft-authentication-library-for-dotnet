@@ -347,6 +347,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
+        // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4124
         [TestMethod]
         public async Task InitiateLongRunningObo_WithIgnoreCachedAssertion_TestAsync()
         {

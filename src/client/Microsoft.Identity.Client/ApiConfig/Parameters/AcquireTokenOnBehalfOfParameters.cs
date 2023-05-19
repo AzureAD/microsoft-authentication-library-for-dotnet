@@ -20,8 +20,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         /// <summary>
         /// Only affects <see cref="ILongRunningWebApi.InitiateLongRunningProcessInWebApi(IEnumerable{string}, string, ref string)"/>.
-        /// When enabled, mimics MSAL 4.50.0 and below behavior - does not check cached tokens based on OBO assertions.
-        /// When disabled (default behavior), cached tokens will only be returned if the OBO assertion in the request matched the assertion of the cached token.
+        /// When enabled, mimics MSAL 4.50.0 and below behavior - checks in cache for cached tokens first, 
+        /// and if not found, then uses user assertion to request new tokens from AAD.
+        /// When disabled (default behavior), doesn't search in cache, but uses the user assertion to retrieve tokens from AAD.
         /// </summary>
         public bool SearchInCacheForLongRunningObo { get; set; }
 
