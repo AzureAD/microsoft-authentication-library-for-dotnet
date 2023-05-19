@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client
     public sealed class AcquireTokenOnBehalfOfParameterBuilder :
         AbstractConfidentialClientAcquireTokenParameterBuilder<AcquireTokenOnBehalfOfParameterBuilder>
     {
-        private AcquireTokenOnBehalfOfParameters Parameters { get; } = new AcquireTokenOnBehalfOfParameters();
+        internal AcquireTokenOnBehalfOfParameters Parameters { get; } = new AcquireTokenOnBehalfOfParameters();
 
         /// <inheritdoc />
         internal AcquireTokenOnBehalfOfParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
@@ -160,20 +160,6 @@ namespace Microsoft.Identity.Client
             };
 
             this.WithExtraHttpHeaders(ccsRoutingHeader);
-            return this;
-        }
-
-        /// <summary>
-        /// Only affects <see cref="ILongRunningWebApi.InitiateLongRunningProcessInWebApi(IEnumerable{string}, string, ref string)"/>.
-        /// When enabled, mimics MSAL 4.50.0 and below behavior - checks in cache for cached tokens first, 
-        /// and if not found, then uses user assertion to request new tokens from AAD.
-        /// When disabled (default behavior), doesn't search in cache, but uses the user assertion to retrieve tokens from AAD.
-        /// </summary>
-        /// <param name="searchInCache">Whether to match on cached OBO assertion hash.</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenOnBehalfOfParameterBuilder WithSearchInCacheForLongRunningProcess(bool searchInCache = true)
-        {
-            Parameters.SearchInCacheForLongRunningObo = searchInCache;
             return this;
         }
 
