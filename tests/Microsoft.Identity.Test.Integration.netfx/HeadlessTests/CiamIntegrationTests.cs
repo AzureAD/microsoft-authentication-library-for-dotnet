@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
     public class CiamIntegrationTests
     {
         private readonly string[] _ciamScopes = new[] { "https://graph.microsoft.com/.default" };
+        private readonly string _ciamCcResource = "https://graph.microsoft.com/.default";
         private const string _ciamRedirectUri = "http://localhost";
 
         [TestMethod]
@@ -32,8 +33,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
         public async Task ROPC_Ciam_Async(string authorityFormat, int authorityVersion)
         {
             //Get lab details
-            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery() 
-            { 
+            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
+            {
                 FederationProvider = FederationProvider.CIAM,
                 SignInAudience = SignInAudience.AzureAdMyOrg,
                 PublicClient = PublicClient.no
@@ -127,7 +128,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
                 .Build();
 
             var result = await msalConfidentialClient
-                .AcquireTokenForClient(new[] { TestConstants.DefaultGraphScope })
+                .AcquireTokenForClient(new[] { _ciamCcResource })
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
