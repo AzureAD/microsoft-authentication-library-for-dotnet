@@ -26,6 +26,7 @@ namespace Microsoft.Identity.Client
         /// This ID uniquely identifies the user across applications - two different applications signing in the same user will receive the same value in the oid claim. 
         /// The user will have a different object ID in each tenant - they're considered different accounts, even though the user logs into each account with the same credentials. 
         /// </summary>
+        /// <remarks>This claim is issued by Microsoft Identity Providers and can be null. Fallback to the sub claim, which is scoped to a user and an app.</remarks>
         public string Oid => _msalIdTokenCacheItem?.IdToken.ObjectId;
 
         /// <summary>

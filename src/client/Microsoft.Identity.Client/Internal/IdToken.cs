@@ -41,8 +41,21 @@ namespace Microsoft.Identity.Client.Internal
     {
         private const string DefaultIssuser = "LOCAL AUTHORITY";
 
+        /// <summary>
+        /// The OID claim is a unique identifier (GUID) for the user object in Azure AD.
+        /// Guest Users have different OID.
+        /// This is a stable ID across all apps.
+        /// 
+        /// IMPORTANT: There are rare cases where this is missing! 
+        /// </summary>
+        /// <remarks>
+        /// Avoid using as it is not guaranteed non-null. Use <see cref="GetUniqueId"/> instead.
+        /// </remarks>
         public string ObjectId { get; private set; }
 
+        /// <summary>
+        /// The sub claim is a unique identifier for user + app. 
+        /// </summary>
         public string Subject { get; private set; }
 
         public string TenantId { get; private set; }
