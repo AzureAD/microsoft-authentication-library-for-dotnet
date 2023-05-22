@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             return new MockHttpMessageHandler()
             {
-                ExpectedUrl = $"{authority}/oauth2/v2.0/token",
+                ExpectedUrl = $"{authority}oauth2/v2.0/token",
                 ExpectedMethod = HttpMethod.Post,
                 ExpectedPostData = expectedRequestBody,
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid))
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build();
 
-                Assert.AreEqual(authority + "/", app.Authority);
+                Assert.AreEqual(authority, app.Authority);
                 var confidentailClientApp = (ConfidentialClientApplication)app;
                 Assert.AreEqual(AuthorityType.Dsts, confidentailClientApp.AuthorityInfo.AuthorityType);
 
@@ -135,9 +135,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 _harness.ServiceBundle,
                 Guid.NewGuid());
 
-            Assert.AreEqual($"{authority}/oauth2/v2.0/token", instance.GetTokenEndpointAsync(_testRequestContext).Result);
-            Assert.AreEqual($"{authority}/oauth2/v2.0/authorize", instance.GetAuthorizationEndpointAsync(_testRequestContext).Result);
-            Assert.AreEqual($"{authority}/oauth2/v2.0/devicecode", instance.GetDeviceCodeEndpointAsync(_testRequestContext).Result);
+            Assert.AreEqual($"{authority}oauth2/v2.0/token", instance.GetTokenEndpointAsync(_testRequestContext).Result);
+            Assert.AreEqual($"{authority}oauth2/v2.0/authorize", instance.GetAuthorizationEndpointAsync(_testRequestContext).Result);
+            Assert.AreEqual($"{authority}oauth2/v2.0/devicecode", instance.GetDeviceCodeEndpointAsync(_testRequestContext).Result);
             Assert.AreEqual($"https://some.url.dsts.core.azure-test.net/dstsv2/common/userrealm/", instance.AuthorityInfo.UserRealmUriPrefix);
         }
 
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             Assert.AreEqual(
                 TestConstants.DstsAuthorityTenanted,
-                updatedAuthority.TrimEnd('/'),
+                updatedAuthority,
                 "Not changed, original authority already has tenant id");
 
             string updatedAuthority2 = authority.GetTenantedAuthority("tenant2", true);
