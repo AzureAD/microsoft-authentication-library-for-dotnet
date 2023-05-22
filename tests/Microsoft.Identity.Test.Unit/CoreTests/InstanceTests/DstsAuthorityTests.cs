@@ -118,10 +118,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
         [TestMethod]
         public void CreateAuthorityFromTenantedWithTenantTest()
-        {
-            
+        {            
             Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(TestConstants.DstsAuthorityTenanted);
-            Assert.AreEqual("tenantid", authority.TenantId);
+            Assert.AreEqual(TestConstants.TenantId, authority.TenantId);
             
             string updatedAuthority = authority.GetTenantedAuthority("tenant2");            
 

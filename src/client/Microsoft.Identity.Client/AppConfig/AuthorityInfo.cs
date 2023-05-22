@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client
 
         internal bool IsUserAssertionSupported => AuthorityType != AuthorityType.Adfs && AuthorityType != AuthorityType.B2C;
 
-        internal bool IsTenantOverrideSupported => AuthorityType == AuthorityType.Aad;
+        internal bool IsTenantOverrideSupported => AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Dsts;
         internal bool IsMultiTenantSupported => AuthorityType != AuthorityType.Adfs;
         internal bool IsClientInfoSupported => AuthorityType == AuthorityType.Aad || AuthorityType == AuthorityType.Dsts || AuthorityType == AuthorityType.B2C;
 
@@ -236,6 +236,11 @@ namespace Microsoft.Identity.Client
         internal static AuthorityInfo FromAdfsAuthority(string authorityUri, bool validateAuthority)
         {
             return new AuthorityInfo(AuthorityType.Adfs, authorityUri, validateAuthority);
+        }
+
+        internal static AuthorityInfo FromDstsAuthority(string authorityUri, bool validateAuthority)
+        {
+            return new AuthorityInfo(AuthorityType.Dsts, authorityUri, validateAuthority);
         }
 
         internal static AuthorityInfo FromB2CAuthority(string authorityUri)
