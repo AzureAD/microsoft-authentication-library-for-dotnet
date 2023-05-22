@@ -11,7 +11,6 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute.ReceivedExtensions;
 
 namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 {
@@ -77,6 +76,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             Assert.AreEqual(ex1.ErrorCode, MsalError.TenantOverrideNonAad);
             Assert.AreEqual(ex2.ErrorCode, MsalError.TenantOverrideNonAad);
         }
+       
 
         [DataTestMethod]
         [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]

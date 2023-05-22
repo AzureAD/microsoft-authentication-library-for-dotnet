@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [DataRow(TestConstants.B2CLoginAuthorityMoonCake, TestConstants.SomeTenantId, DisplayName = "B2C MoonCake Tenant Id")]
         [DataRow(TestConstants.AuthoritySovereignCNTenant, TestConstants.TenantId, DisplayName = "Sovereign Tenant Id")]
         [DataRow(TestConstants.AuthoritySovereignDETenant, TestConstants.TenantId, DisplayName = "Sovereign Tenant Id")]
-        [DataRow(TestConstants.DstsAuthorityTenanted, "tenantid", DisplayName = "DSTS Tenant Id")]
+        [DataRow(TestConstants.DstsAuthorityTenanted, TestConstants.TenantId, DisplayName = "DSTS Tenant Id")]
         [DataRow(TestConstants.DstsAuthorityCommon, TestConstants.Common, DisplayName = "DSTS Common Tenant Id")]
         public void ParseTest_Success(string authorityUrl, string expectedTenantId)
         {
