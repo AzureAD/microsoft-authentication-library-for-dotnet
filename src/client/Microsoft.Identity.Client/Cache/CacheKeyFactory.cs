@@ -1,11 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -26,13 +25,13 @@ namespace Microsoft.Identity.Client.Cache
                 return key;
             }
 
-            if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenSilent ||
-                requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.RemoveAccount)
+            if (requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenSilent ||
+                requestParameters.ApiId == ApiEvent.ApiIds.RemoveAccount)
             {
                 return requestParameters.Account?.HomeAccountId?.Identifier;
             }
 
-            if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.GetAccountById)
+            if (requestParameters.ApiId == ApiEvent.ApiIds.GetAccountById)
             {
                 return requestParameters.HomeAccountId;
             }
@@ -50,7 +49,7 @@ namespace Microsoft.Identity.Client.Cache
             }
 
             if (requestParameters.AppConfig.IsConfidentialClient ||
-                requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenSilent)
+                requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenSilent)
             {
                 return homeAccountIdFromResponse;
             }
@@ -68,15 +67,15 @@ namespace Microsoft.Identity.Client.Cache
 
         private static bool GetOboOrAppKey(AuthenticationRequestParameters requestParameters, out string key)
         {
-            if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenOnBehalfOf)
+            if (ApiEvent.IsOnBehalfOfRequest(requestParameters.ApiId))
             {
                 key = GetOboKey(requestParameters.LongRunningOboCacheKey, requestParameters.UserAssertion);
                 return true;
             }
 
-            if (requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient || 
-                requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity ||
-                requestParameters.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity)
+            if (requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenForClient || 
+                requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity ||
+                requestParameters.ApiId == ApiEvent.ApiIds.AcquireTokenForUserAssignedManagedIdentity)
             {
                 string tenantId = requestParameters.Authority.TenantId ?? "";
                 key = GetClientCredentialKey(requestParameters.AppConfig.ClientId, tenantId, requestParameters.AuthenticationScheme?.KeyId);

@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             {
                 throw new MsalClientException(
                     "window_handle_required",
-                    "The new WAM implementation now needs application developers to provide parent window handle to the broker. See https://aka.ms/msal-net-wam#parent-window-handles");
+                    "A window handle must be configured. See https://aka.ms/msal-net-wam#parent-window-handles");
             }
 
             //if OperatingSystemAccount is passed then we use the user signed-in on the machine
@@ -540,10 +540,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 return false;
             }
 
-            // WAM does not work on pure ADFS environments
-            if (authorityType == AuthorityType.Adfs)
+            // WAM only works with AAD
+            if (authorityType != AuthorityType.Aad)
             {
-                _logger?.Warning("[WAM Broker] WAM does not work in pure ADFS environments. Falling back to browser for an ADFS authority unless Proof-of-Possession is configured. ");
+                _logger?.Warning($"[WAM Broker] Authority is {authorityType}. WAM is not available");
                 return false;
             }
 

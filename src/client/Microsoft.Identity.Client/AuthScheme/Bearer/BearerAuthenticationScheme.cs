@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.AuthScheme.Bearer
             return msalAccessTokenCacheItem.Secret;
         }
 
-        public IDictionary<string, string> GetTokenRequestParams()
+        public IReadOnlyDictionary<string, string> GetTokenRequestParams()
         {
             // ESTS issues Bearer tokens by default, no need for any extra params
             return new Dictionary<string, string>();

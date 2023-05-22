@@ -13,7 +13,6 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
-using Microsoft.Identity.Client.Internal;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -158,6 +157,36 @@ namespace Microsoft.Identity.Client
         {
             Config.PlatformProxy = platformProxy;
             return this as T;
+        }
+
+        /// <summary>
+        /// Options for MSAL token caches. 
+        /// 
+        /// MSAL maintains a token cache internally in memory. By default, this cache object is part of each instance of <see cref="PublicClientApplication"/> or <see cref="ConfidentialClientApplication"/>.
+        /// This method allows customization of the in-memory token cache of MSAL. 
+        /// 
+        /// MSAL's memory cache is different than token cache serialization. Cache serialization pulls the tokens from a cache (e.g. Redis, Cosmos, or a file on disk), 
+        /// where they are stored in JSON format, into MSAL's internal memory cache. Memory cache operations do not involve JSON operations. 
+        /// 
+        /// External cache serialization remains the recommended way to handle desktop apps, web site and web APIs, as it provides persistence. These options
+        /// do not currently control external cache serialization.
+        /// 
+        /// Detailed guidance for each application type and platform:
+        /// https://aka.ms/msal-net-token-cache-serialization
+        /// </summary>
+        /// <param name="options">Options for the internal MSAL token caches. </param>
+#if !SUPPORTS_CUSTOM_CACHE || WINDOWS_APP
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#endif
+        public T WithCacheOptions(CacheOptions options)
+        {
+#if !SUPPORTS_CUSTOM_CACHE || WINDOWS_APP
+            throw new PlatformNotSupportedException("WithCacheOptions is supported only on platforms where MSAL stores tokens in memory and not on mobile platforms or UWP.");
+#else
+
+            Config.AccessorOptions = options;
+            return this as T;
+#endif
         }
 
         internal T WithUserTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)
@@ -495,7 +524,7 @@ namespace Microsoft.Identity.Client
             }
 
             var authorityInfo = AuthorityInfo.FromAadAuthority(
-                new Uri(cloudInstanceUri),
+                cloudInstanceUri,
                 tenant,
                 validateAuthority);
             Config.Authority = new AadAuthority(authorityInfo);
@@ -611,11 +640,11 @@ namespace Microsoft.Identity.Client
         public T WithB2CAuthority(string authorityUri)
         {
             var authorityInfo = AuthorityInfo.FromB2CAuthority(authorityUri);
-            Config.Authority = B2CAuthority.CreateAuthority(authorityInfo);
+            Config.Authority = Authority.CreateAuthority(authorityInfo);
 
             return this as T;
-        }
-
+        }        
+        
         #endregion
 
         private static string GetValueIfNotEmpty(string original, string value)

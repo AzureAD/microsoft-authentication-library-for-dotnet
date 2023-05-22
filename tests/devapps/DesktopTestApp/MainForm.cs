@@ -27,6 +27,9 @@ namespace DesktopTestApp
         private const string PublicClientId = "6afec070-b576-4a2f-8d95-41f317b28e06";
         private string _b2CClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
         public const string B2CCustomDomainClientId = "64a88201-6bbd-49f5-ab46-9153798493fd ";
+        private const string _ciamAuthority = "https://msidlabciam1.ciamlogin.com";
+        private const string _ciamClientId = "b8e9d222-c4ee-414c-ac29-b0eff1f32400";
+        private const string _defaultAuthority = "https://login.microsoftonline.com/common";
 
         private PublicClientHandler _publicClientHandler;
         private CancellationTokenSource _cancellationTokenSource;
@@ -39,6 +42,8 @@ namespace DesktopTestApp
         public const string B2CROPCAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ROPC_Auth";
 
         private bool IsForceRefreshEnabled => forceRefreshCheckBox.Checked;
+
+        public string CurrentClientId { get { return ciamCheckBox.Checked? _ciamClientId : PublicClientId; } }
 
         public MainForm()
         {
@@ -135,7 +140,7 @@ namespace DesktopTestApp
             using (new UIProgressScope(this))
             {
                 ClearResultPageInfo();
-                _publicClientHandler.ApplicationId = PublicClientId;
+                _publicClientHandler.ApplicationId = CurrentClientId;
                 _publicClientHandler.LoginHint = loginHintTextBox.Text;
                 _publicClientHandler.AuthorityOverride = overriddenAuthority.Text;
                 _publicClientHandler.InteractiveAuthority = authority.Text;
@@ -197,7 +202,7 @@ namespace DesktopTestApp
             try
             {
                 _publicClientHandler.PublicClientApplication = PublicClientApplicationBuilder
-                    .Create(PublicClientId)
+                    .Create(CurrentClientId)
                     .WithAuthority("https://login.microsoftonline.com/organizations")
                     .BuildConcrete();
 
@@ -241,7 +246,7 @@ namespace DesktopTestApp
             {
                 ClearResultPageInfo();
 
-                _publicClientHandler.ApplicationId = PublicClientId;
+                _publicClientHandler.ApplicationId = CurrentClientId;
                 _publicClientHandler.AuthorityOverride = overriddenAuthority.Text;
                 if (IgnoreUserCbx.Checked)
                 {
@@ -466,7 +471,7 @@ namespace DesktopTestApp
 
         private void authority_FocusLeave(object sender, EventArgs e)
         {
-            _publicClientHandler.CreateOrUpdatePublicClientApp(this.authority.Text, PublicClientId);
+            _publicClientHandler.CreateOrUpdatePublicClientApp(this.authority.Text, CurrentClientId);
         }
 
         private async void acquireTokenDeviceCode_Click(object sender, EventArgs e)
@@ -718,6 +723,11 @@ namespace DesktopTestApp
             }
             LabResponse labResponse = await LabUserHelper.GetB2CLocalAccountAsync().ConfigureAwait(false);
             _b2CClientId = labResponse.App.AppId;
+        }
+
+        private void ciamCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            authority.Text = ciamCheckBox.Checked ? _ciamAuthority : _defaultAuthority;
         }
     }
 }

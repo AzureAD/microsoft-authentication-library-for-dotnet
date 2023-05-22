@@ -7,7 +7,9 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -45,7 +47,7 @@ namespace Microsoft.Identity.Client
         {
             ClientApplicationBase.GuardMobileFrameworks();
 
-            var config = new ApplicationConfiguration(isConfidentialClient: true);
+            var config = new ApplicationConfiguration(MsalClientType.ConfidentialClient);
             var builder = new ConfidentialClientApplicationBuilder(config).WithOptions(options);
 
             if (!string.IsNullOrWhiteSpace(options.ClientSecret))
@@ -78,7 +80,7 @@ namespace Microsoft.Identity.Client
         {
             ClientApplicationBase.GuardMobileFrameworks();
 
-            var config = new ApplicationConfiguration(isConfidentialClient: true);
+            var config = new ApplicationConfiguration(MsalClientType.ConfidentialClient);
             return new ConfidentialClientApplicationBuilder(config)
                 .WithClientId(clientId)
                 .WithCacheSynchronization(false);
@@ -310,6 +312,25 @@ namespace Microsoft.Identity.Client
         public ConfidentialClientApplicationBuilder WithCacheSynchronization(bool enableCacheSynchronization)
         {
             Config.CacheSynchronizationEnabled = enableCacheSynchronization;
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a known authority corresponding to a generic OpenIdConnect Identity Provider. 
+        /// MSAL will append ".well-known/openid-configuration" to the authority and retrieve the OIDC 
+        /// metadata from there, to figure out the endpoints.
+        /// See https://openid.net/specs/openid-connect-core-1_0.html#Terminology
+        /// </summary>
+        /// <param name="authorityUri">OpenIdConnect authority</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        /// <remarks>This is an experimental API and only AcquireTokenForClient (client_credentials flow) has been implemented</remarks>        
+        public ConfidentialClientApplicationBuilder WithGenericAuthority(string authorityUri)
+        {
+            ValidateUseOfExperimentalFeature("WithGenericAuthority");
+
+            var authorityInfo = AuthorityInfo.FromGenericAuthority(authorityUri);
+            Config.Authority = Authority.CreateAuthority(authorityInfo);
+
             return this;
         }
 

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
@@ -24,6 +25,23 @@ namespace Microsoft.Identity.Client
     /// </remarks>
     public class MsalException : Exception
     {
+        /// <summary>
+        /// An <see cref="AdditionalExceptionData"/> property key, available when using desktop brokers.
+        /// </summary>
+        public const string BrokerErrorContext = "BrokerErrorContext";
+        /// <summary>
+        /// An <see cref="AdditionalExceptionData"/> property key, available when using desktop brokers.
+        /// </summary>
+        public const string BrokerErrorTag = "BrokerErrorTag";
+        /// <summary>
+        /// An <see cref="AdditionalExceptionData"/> property key, available when using desktop brokers.
+        /// </summary>
+        public const string BrokerErrorStatus = "BrokerErrorStatus";
+        /// <summary>
+        /// An <see cref="AdditionalExceptionData"/> property key, available when using desktop brokers.
+        /// </summary>
+        public const string BrokerErrorCode = "BrokerErrorCode";
+
         private string _errorCode;
 
         /// <summary>
@@ -112,6 +130,13 @@ namespace Microsoft.Identity.Client
                     value;
             }
         }
+
+        /// <summary>
+        /// A property bag with extra details for this exception.
+        /// </summary>
+        public IReadOnlyDictionary<string, string> AdditionalExceptionData { get; set; } 
+            = CollectionHelpers.GetEmptyDictionary<string, string>();
+
 
         /// <summary>
         /// Creates and returns a string representation of the current exception.

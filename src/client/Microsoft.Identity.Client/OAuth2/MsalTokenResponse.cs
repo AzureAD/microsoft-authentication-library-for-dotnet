@@ -19,6 +19,7 @@ using JObject = System.Text.Json.Nodes.JsonObject;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 #else
 using Microsoft.Identity.Json;
+using Microsoft.Identity.Json.Linq;
 #endif
 
 namespace Microsoft.Identity.Client.OAuth2
@@ -39,13 +40,16 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string Authority = "authority";
         public const string FamilyId = "foci";
         public const string RefreshIn = "refresh_in";
-        public const string SpaCode = "spa_code";
         public const string ErrorSubcode = "error_subcode";
         public const string ErrorSubcodeCancel = "cancel";
 
         public const string TenantId = "tenant_id";
         public const string Upn = "username";
         public const string LocalAccountId = "local_account_id";
+
+        // Hybrid SPA - see https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3994
+        public const string SpaCode = "spa_code";
+
     }
 
     [JsonObject]
@@ -59,6 +63,66 @@ namespace Microsoft.Identity.Client.OAuth2
 
         private const string iOSBrokerErrorMetadata = "error_metadata";
         private const string iOSBrokerHomeAccountId = "home_account_id";
+
+        // Due to AOT + JSON serializer https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4082
+        // disable this functionality (better fix would be to move to System.Text.Json)
+#if !__MOBILE__
+        // All properties not explicitly defined are added to this dictionary
+        // See JSON overflow https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/handle-overflow?pivots=dotnet-7-0
+#if SUPPORTS_SYSTEM_TEXT_JSON
+        [JsonExtensionData]
+        public Dictionary<string, JsonElement> ExtensionData { get; set; }
+#else
+        [JsonExtensionData]
+        public Dictionary<string, JToken> ExtensionData { get; set; }
+#endif
+#endif
+        // Exposes only scalar properties from ExtensionData
+        public IReadOnlyDictionary<string, string> CreateExtensionDataStringMap()
+        {
+#if __MOBILE__
+            return CollectionHelpers.GetEmptyDictionary<string, string>();
+#else
+            if (ExtensionData == null || ExtensionData.Count == 0)
+            {
+                return CollectionHelpers.GetEmptyDictionary<string, string>();
+            }
+
+            Dictionary<string, string> stringExtensionData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+#if SUPPORTS_SYSTEM_TEXT_JSON
+            foreach (KeyValuePair<string, JsonElement> item in ExtensionData)
+            {
+                if (item.Value.ValueKind == JsonValueKind.String ||
+                   item.Value.ValueKind == JsonValueKind.Number ||
+                   item.Value.ValueKind == JsonValueKind.True ||
+                   item.Value.ValueKind == JsonValueKind.False ||
+                   item.Value.ValueKind == JsonValueKind.Null)
+                {
+                    stringExtensionData.Add(item.Key, item.Value.ToString());
+                }
+            }
+#else
+            foreach (KeyValuePair<string, JToken> item in ExtensionData)
+            {
+                if (item.Value.Type == JTokenType.String ||
+                   item.Value.Type == JTokenType.Uri ||
+                   item.Value.Type == JTokenType.Boolean ||
+                   item.Value.Type == JTokenType.Date ||
+                   item.Value.Type == JTokenType.Float ||
+                   item.Value.Type == JTokenType.Guid ||
+                   item.Value.Type == JTokenType.Integer ||
+                   item.Value.Type == JTokenType.TimeSpan ||
+                   item.Value.Type == JTokenType.Null)
+                {
+                    stringExtensionData.Add(item.Key, item.Value.ToString());
+                }
+            }
+#endif
+            return stringExtensionData;
+#endif
+        }
+
         [JsonProperty(TokenResponseClaim.TokenType)]
         public string TokenType { get; set; }
 
@@ -187,13 +251,28 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             ValidateManagedIdentityResult(managedIdentityResponse);
 
+            long expiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(managedIdentityResponse.ExpiresOn);
+
             return new MsalTokenResponse
             {
                 AccessToken = managedIdentityResponse.AccessToken,
-                ExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(managedIdentityResponse.ExpiresOn),
+                ExpiresIn = expiresIn,
                 TokenType = managedIdentityResponse.TokenType,
-                TokenSource = TokenSource.IdentityProvider
+                TokenSource = TokenSource.IdentityProvider,
+                RefreshIn = InferManagedIdentityRefreshInValue(expiresIn)
             };
+        }
+
+        // Compute refresh_in as 1/2 expires_in, but only if expires_in > 2h.
+        private static long? InferManagedIdentityRefreshInValue(long expiresIn)
+
+        {
+            if (expiresIn > 2 * 3600)
+            {
+                return expiresIn / 2;
+            }
+
+            return null;
         }
 
         private static void ValidateManagedIdentityResult(ManagedIdentityResponse response)
@@ -223,12 +302,21 @@ namespace Microsoft.Identity.Client.OAuth2
                 ExpiresIn = tokenProviderResponse.ExpiresInSeconds,
                 ClientInfo = null,
                 TokenSource = TokenSource.IdentityProvider,
-                TenantId = null //Leaving as null so MSAL can use the original request Tid. This is ok for confidential client scenarios
+                TenantId = null, // Leave as null so MSAL can use the original request Tid. This is ok for confidential client scenarios
+                RefreshIn = tokenProviderResponse.RefreshInSeconds ?? EstimateRefreshIn(tokenProviderResponse.ExpiresInSeconds)
             };
 
-            response.RefreshIn = tokenProviderResponse.RefreshInSeconds;
-
             return response;
+        }
+
+        private static long? EstimateRefreshIn(long expiresInSeconds)
+        {
+            if (expiresInSeconds >= 2 * 3600)
+            {
+                return expiresInSeconds / 2;
+            }
+
+            return null;
         }
 
         private static void ValidateTokenProviderResult(AppTokenProviderResult TokenProviderResult)

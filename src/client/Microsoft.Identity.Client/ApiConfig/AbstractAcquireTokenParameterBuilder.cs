@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentNullException(nameof(cloudInstanceUri));
             }
-            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(new Uri(cloudInstanceUri), tenantId, validateAuthority);
+            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenantId, validateAuthority);
             return this as T;
         }
 
@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Client
             {
                 throw new ArgumentNullException(nameof(cloudInstanceUri));
             }
-            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(new Uri(cloudInstanceUri), tenant, validateAuthority);
+            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenant, validateAuthority);
             return this as T;
         }
 
@@ -274,11 +274,13 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.TenantOverrideNonAad);
             }
 
-            AadAuthority aadAuthority = (AadAuthority)ServiceBundle.Config.Authority;
-            string tenantedAuthority = aadAuthority.GetTenantedAuthority(tenantId, true);
-            var newAuthorityInfo = AuthorityInfo.FromAadAuthority(
+            Authority originalAuthority = ServiceBundle.Config.Authority;
+            string tenantedAuthority = originalAuthority.GetTenantedAuthority(tenantId, true);
+
+            var newAuthorityInfo = new AuthorityInfo(
+                originalAuthority.AuthorityInfo.AuthorityType,
                 tenantedAuthority,
-                ServiceBundle.Config.Authority.AuthorityInfo.ValidateAuthority);
+                originalAuthority.AuthorityInfo.ValidateAuthority);
 
             CommonParameters.AuthorityOverride = newAuthorityInfo;
 

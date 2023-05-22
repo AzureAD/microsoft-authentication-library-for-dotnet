@@ -217,7 +217,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var tenantAuthority = AuthorityInfo.FromAadAuthority(AzureCloudInstance.AzurePublic, tenant: TestConstants.AadTenantId, validateAuthority: false);
             var acquireTokenCommonParameters = new AcquireTokenCommonParameters
             {
-                ApiId = ApiEvent.ApiIds.AcquireTokenOnBehalfOf,
+                ApiId = ApiEvent.ApiIds.InitiateLongRunningObo,
                 AuthorityOverride = tenantAuthority
             };
 

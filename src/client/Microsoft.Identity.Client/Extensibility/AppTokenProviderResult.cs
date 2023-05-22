@@ -8,7 +8,7 @@ namespace Microsoft.Identity.Client.Extensibility
     /// </summary>
     /// <remarks>
     /// This is part of an extensibility mechanism designed to be used by Azure SDK in order to 
-    /// enchance managed identity support.
+    /// enhance managed identity support.
     /// </remarks>
     public class AppTokenProviderResult
     {
@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <summary>
         /// When the token should be refreshed.
         /// </summary>
-        /// <remarks>Optional</remarks>
+        /// <remarks>If not set, MSAL will set it to half of the expiry time if that time is longer than 2 hours.</remarks>
         public long? RefreshInSeconds { get; set; }
     }
 }

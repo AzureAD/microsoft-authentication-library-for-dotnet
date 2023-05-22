@@ -5,6 +5,8 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -19,24 +21,28 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ImdsBadRequestTestAsync()
         {
             using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
 
             {
-                SetEnvironmentVariables(ManagedIdentitySourceType.IMDS, "http://169.254.169.254");
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, "http://169.254.169.254");
 
-                IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create()
-                    .WithExperimentalFeatures()
-                    .WithHttpManager(httpManager)
-                    .Build();
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(ManagedIdentityTests.ImdsEndpoint, ManagedIdentityTests.Resource, MockHelpers.GetMsiImdsErrorResponse(),
-                    ManagedIdentitySourceType.IMDS, statusCode: HttpStatusCode.BadRequest);
+                    ManagedIdentitySource.Imds, statusCode: HttpStatusCode.BadRequest);
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
+                Assert.AreEqual(ManagedIdentitySource.Imds, ex.ManagedIdentitySource);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.IsTrue(ex.Message.Contains("The requested identity has not been assigned to this resource."));
             }

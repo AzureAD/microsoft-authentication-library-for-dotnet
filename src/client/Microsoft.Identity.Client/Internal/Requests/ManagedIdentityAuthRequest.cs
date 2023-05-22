@@ -37,26 +37,30 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     MsalErrorMessage.ScopesRequired);
             }
 
+            AuthenticationResult authResult = null;
+            MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
             if (!_managedIdentityParameters.ForceRefresh)
             {
-                MsalAccessTokenCacheItem cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+                cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
                 if (cachedAccessTokenItem != null)
                 {
                     AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
 
                     Metrics.IncrementTotalAccessTokensFromCache();
-                    return new AuthenticationResult(
+                    authResult = new AuthenticationResult(
                                                             cachedAccessTokenItem,
                                                             null,
                                                             AuthenticationRequestParameters.AuthenticationScheme,
                                                             AuthenticationRequestParameters.RequestContext.CorrelationId,
                                                             TokenSource.Cache,
                                                             AuthenticationRequestParameters.RequestContext.ApiEvent,
-                                                            null);
+                                                            account: null, 
+                                                            spaAuthCode: null,
+                                                            additionalResponseParameters: null);
                 }
                 else
                 {
@@ -77,9 +81,35 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = cacheInfoTelemetry;
             }
 
-            // No AT in the cache
-            return await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
-               
+            // No AT in the cache or AT needs to be refreshed
+            try
+            {
+                if (cachedAccessTokenItem == null)
+                {
+                    authResult = await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    var shouldRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
+
+                    // may fire a request to get a new token in the background
+                    if (shouldRefresh)
+                    {
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ProactivelyRefreshed;
+
+                        SilentRequestHelper.ProcessFetchInBackground(
+                        cachedAccessTokenItem,
+                        () => FetchNewAccessTokenAsync(cancellationToken), logger);
+                    }
+                }
+
+                return authResult;
+            }
+            catch (MsalServiceException e)
+            {
+                return await HandleTokenRefreshErrorAsync(e, cachedAccessTokenItem).ConfigureAwait(false);
+            }
+
         }
 
         private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)

@@ -8,12 +8,17 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Kerberos;
@@ -23,7 +28,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using NSubstitute;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
@@ -37,6 +42,7 @@ namespace Microsoft.Identity.Test.Common
             new InstanceDiscoveryManager(
                 Substitute.For<IHttpManager>(),
                 true, null, null);
+            OidcRetrieverWithCache.ResetCacheForTest();
             AuthorityManager.ClearValidationCache();
             SingletonThrottlingManager.GetInstance().ResetCache();
         }
@@ -67,12 +73,11 @@ namespace Microsoft.Identity.Test.Common
             bool validateAuthority = true,
             bool isLegacyCacheEnabled = true,
             bool isMultiCloudSupportEnabled = false, 
-            bool isConfidentialClient = false,
+            MsalClientType applicationType = MsalClientType.PublicClient,
             bool isInstanceDiscoveryEnabled = true,
             IPlatformProxy platformProxy = null)
         {
-
-            var appConfig = new ApplicationConfiguration(isConfidentialClient)
+            var appConfig = new ApplicationConfiguration(applicationType)
             {
                 ClientId = clientId,
                 HttpManager = httpManager,
@@ -268,5 +273,45 @@ namespace Microsoft.Identity.Test.Common
 
         //    Assert.AreEqual(response.StatusCode, System.Net.HttpStatusCode.OK);
         //}
+
+        public static bool YieldTillSatisfied(Func<bool> func, int maxTimeInMilliSec = 30000)
+        {
+            int iCount = maxTimeInMilliSec / 100;
+            while (iCount > 0)
+            {
+                if (func())
+                {
+                    return true;
+                }
+                Thread.Yield();
+                Thread.Sleep(100);
+                iCount--;
+            }
+
+            return false;
+        }
+
+        public static MsalAccessTokenCacheItem UpdateATWithRefreshOn(
+            ITokenCacheAccessor accessor,
+            DateTimeOffset? refreshOn = null,
+            bool expired = false)
+        {
+            MsalAccessTokenCacheItem atItem = accessor.GetAllAccessTokens().Single();
+
+            refreshOn = refreshOn ?? DateTimeOffset.UtcNow - TimeSpan.FromMinutes(30);
+
+            atItem = atItem.WithRefreshOn(refreshOn);
+
+            Assert.IsTrue(atItem.ExpiresOn > DateTime.UtcNow + TimeSpan.FromMinutes(10));
+
+            if (expired)
+            {
+                atItem = atItem.WithExpiresOn(DateTime.UtcNow - TimeSpan.FromMinutes(1));
+            }
+
+            accessor.SaveAccessToken(atItem);
+
+            return atItem;
+        }
     }
 }

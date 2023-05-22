@@ -12,8 +12,10 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Castle.Core.Internal;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Json;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
@@ -51,16 +53,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string Non_Existent_UamiResourceId = "/subscriptions/userAssignedIdentities/NO_ID";
 
         [DataTestMethod]
-        [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System Identity Web App")]
-        [DataRow(MsiAzureResource.Function, "", DisplayName = "System Identity Function App")]
-        [DataRow(MsiAzureResource.VM, "", DisplayName = "System Identity Virtual Machine")]
-        [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, DisplayName = "User Identity Web App")]
-        [DataRow(MsiAzureResource.Function, UserAssignedClientID, DisplayName = "User Identity Function App")]
-        [DataRow(MsiAzureResource.VM, UserAssignedClientID, DisplayName = "User Identity Virtual Machine")]
-        [DataRow(MsiAzureResource.WebApp, UamiResourceId, DisplayName = "ResourceID Web App")]
-        [DataRow(MsiAzureResource.Function, UamiResourceId, DisplayName = "ResourceID Function App")]
-        [DataRow(MsiAzureResource.VM, UamiResourceId, DisplayName = "ResourceID Virtual Machine")]
-        public async Task AcquireMSITokenAsync(MsiAzureResource azureResource, string userIdentity)
+        [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
+        [DataRow(MsiAzureResource.Function, "", DisplayName = "System_Identity_Function_App")]
+        [DataRow(MsiAzureResource.VM, "", DisplayName = "System_Identity_Virtual_Machine")]
+        [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "User_Identity_Web_App")]
+        [DataRow(MsiAzureResource.Function, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "User_Identity_Function_App")]
+        [DataRow(MsiAzureResource.VM, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "User_Identity_Virtual_Machine")]
+        [DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
+        [DataRow(MsiAzureResource.Function, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Function_App")]
+        [DataRow(MsiAzureResource.VM, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Virtual_Machine")]
+        [DataRow(MsiAzureResource.AzureArc, "", DisplayName = "Azure_ARC")]
+        public async Task AcquireMSITokenAsync(MsiAzureResource azureResource, string userIdentity, UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
         {
             //Arrange
             using (new EnvVariableContext())
@@ -77,7 +80,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     $"azureresource={azureResource}&uri=";
 
                 //Create CCA with Proxy
-                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity);
+                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
 
                 AuthenticationResult result = null;
                 //Act
@@ -113,9 +116,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [DataTestMethod]
-        [DataRow(MsiAzureResource.WebApp, NonExistentUserAssignedClientID, DisplayName = "User Identity Web App")]
-        [DataRow(MsiAzureResource.WebApp, Non_Existent_UamiResourceId, DisplayName = "ResourceID Web App")]
-        public async Task MSIWrongClientIDAsync(MsiAzureResource azureResource, string userIdentity)
+        [DataRow(MsiAzureResource.WebApp, NonExistentUserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "User_Identity_Web_App")]
+        [DataRow(MsiAzureResource.WebApp, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
+        public async Task MSIWrongClientIDAsync(MsiAzureResource azureResource, string userIdentity, UserAssignedIdentityId userAssignedIdentityId)
         {
             //Arrange
             using (new EnvVariableContext())
@@ -132,10 +135,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     $"azureresource={azureResource}&uri=";
 
                 //Create CCA with Proxy
-                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity);
+                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
 
                 //Act
-                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
+                MsalManagedIdentityException ex = await AssertException.TaskThrowsAsync<MsalManagedIdentityException>(async () =>
                 {
                     await mia
                     .AcquireTokenForManagedIdentity(s_msi_scopes)
@@ -144,13 +147,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //Assert
                 Assert.IsTrue(ex.Message.Contains(UserAssignedIdDoesNotExist));
+                Assert.AreEqual(ManagedIdentitySource.AppService, ex.ManagedIdentitySource);
             }
         }
 
         [DataTestMethod]
-        [DataRow(MsiAzureResource.Function, NonExistentUserAssignedClientID, DisplayName = "User Identity Function App")]
-        [DataRow(MsiAzureResource.Function, Non_Existent_UamiResourceId, DisplayName = "ResourceID Function App")]
-        public async Task FunctionAppErrorNotInExpectedFormatAsync(MsiAzureResource azureResource, string userIdentity)
+        [DataRow(MsiAzureResource.Function, NonExistentUserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "User_Identity_Function_App")]
+        [DataRow(MsiAzureResource.Function, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Function_App")]
+        public async Task FunctionAppErrorNotInExpectedFormatAsync(MsiAzureResource azureResource, string userIdentity, UserAssignedIdentityId userAssignedIdentityId)
         {
             //Arrange
             using (new EnvVariableContext())
@@ -166,11 +170,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 string uri = s_baseURL + $"MSIToken?" +
                     $"azureresource={azureResource}&uri=";
 
-                //Create CCA with Proxy
-                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity);
+                //Create ManagedIdentityApplication with Proxy
+                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
 
                 //Act
-                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
+                MsalManagedIdentityException ex = await AssertException.TaskThrowsAsync<MsalManagedIdentityException>(async () =>
                 {
                     await mia
                     .AcquireTokenForManagedIdentity(s_msi_scopes)
@@ -179,14 +183,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //Assert
                 Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
+                Assert.AreEqual(ManagedIdentitySource.AppService, ex.ManagedIdentitySource);
             }
         }
 
         [DataTestMethod]
-        [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System Identity Web App")]
-        [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, DisplayName = "User Identity Web App")]
-        [DataRow(MsiAzureResource.WebApp, UamiResourceId, DisplayName = "ResourceID Web App")]
-        public async Task MSIWrongScopesAsync(MsiAzureResource azureResource, string userIdentity)
+        [DataRow(MsiAzureResource.WebApp, "", UserAssignedIdentityId.None, DisplayName = "System_Identity_Web_App")]
+        [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "User_Identity_Web_App")]
+        [DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
+        public async Task MSIWrongScopesAsync(MsiAzureResource azureResource, string userIdentity, UserAssignedIdentityId userAssignedIdentityId)
         {
             //Arrange
             using (new EnvVariableContext())
@@ -203,10 +208,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     $"azureresource={azureResource}&uri=";
 
                 //Create CCA with Proxy
-                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity);
+                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
 
                 //Act
-                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
+                MsalManagedIdentityException ex = await AssertException.TaskThrowsAsync<MsalManagedIdentityException>(async () =>
                 {
                     await mia
                     .AcquireTokenForManagedIdentity(s_wrong_msi_scopes)
@@ -215,6 +220,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //Assert
                 Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
+                Assert.AreEqual(ManagedIdentitySource.AppService, ex.ManagedIdentitySource);
             }
         }
 
@@ -264,25 +270,30 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// <param name="url"></param>
         /// <param name="userAssignedId"></param>
         /// <returns></returns>
-        private IManagedIdentityApplication CreateMIAWithProxy(string url, string userAssignedId = "")
+        private IManagedIdentityApplication CreateMIAWithProxy(string url, string userAssignedId = "", UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
         {
             //Proxy the MSI token request 
             MsiProxyHttpManager proxyHttpManager = new MsiProxyHttpManager(url);
 
             var builder = ManagedIdentityApplicationBuilder
-               .Create()
-               .WithExperimentalFeatures()
-               .WithHttpManager(proxyHttpManager);
+               .Create(ManagedIdentityId.SystemAssigned);
 
-            if (!string.IsNullOrEmpty(userAssignedId))
+            switch (userAssignedIdentityId)
             {
-                builder = ManagedIdentityApplicationBuilder
-               .Create(userAssignedId)
-               .WithExperimentalFeatures()
-               .WithHttpManager(proxyHttpManager);
+                case UserAssignedIdentityId.ClientId: 
+                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(userAssignedId));
+                    break;
+
+                case UserAssignedIdentityId.ResourceId:
+                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedResourceId(userAssignedId));
+                    break;
             }
 
-            IManagedIdentityApplication mia = builder.Build();
+            // Disabling shared cache options to avoid cross test pollution.
+            builder.Config.AccessorOptions = null;
+
+            IManagedIdentityApplication mia = builder
+                .WithHttpManager(proxyHttpManager).Build();
 
             return mia;
         }

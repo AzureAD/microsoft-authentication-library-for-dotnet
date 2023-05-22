@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Extensibility
             return msalAccessTokenCacheItem.Secret;
         }
 
-        public IDictionary<string, string> GetTokenRequestParams()
+        public IReadOnlyDictionary<string, string> GetTokenRequestParams()
         {
             return CollectionHelpers.GetEmptyDictionary<string, string>();
         }

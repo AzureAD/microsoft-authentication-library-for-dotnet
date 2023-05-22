@@ -12,14 +12,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// <summary>
     /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/ServiceFabricManagedIdentitySource.cs
     /// </summary>
-    internal class ServiceFabricManagedIdentitySource : ManagedIdentitySource
+    internal class ServiceFabricManagedIdentitySource : AbstractManagedIdentity
     {
         private const string ServiceFabricMsiApiVersion = "2019-07-01-preview";
 
         private readonly Uri _endpoint;
         private readonly string _identityHeaderValue;
 
-        public static ManagedIdentitySource TryCreate(RequestContext requestContext)
+        public static AbstractManagedIdentity TryCreate(RequestContext requestContext)
         {
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
             string identityHeader = EnvironmentVariables.IdentityHeader;
@@ -33,19 +33,23 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (!Uri.TryCreate(identityEndpoint, UriKind.Absolute, out Uri endpointUri))
             {
-                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "IDENTITY_ENDPOINT", identityEndpoint, "Service Fabric"));
+                throw new MsalManagedIdentityException(MsalError.InvalidManagedIdentityEndpoint, 
+                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, 
+                        "IDENTITY_ENDPOINT", identityEndpoint, "Service Fabric"), 
+                    ManagedIdentitySource.ServiceFabric);
             }
 
             requestContext.Logger.Verbose(() => "[Managed Identity] Creating Service Fabric managed identity. Endpoint URI: " + identityEndpoint);
             return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, identityHeader);
         }
 
-        private ServiceFabricManagedIdentitySource(RequestContext requestContext, Uri endpoint, string identityHeaderValue) : base(requestContext)
+        private ServiceFabricManagedIdentitySource(RequestContext requestContext, Uri endpoint, string identityHeaderValue) : 
+            base(requestContext, ManagedIdentitySource.ServiceFabric)
         {
             _endpoint = endpoint;
             _identityHeaderValue = identityHeaderValue;
 
-            if (requestContext.ServiceBundle.Config.IsUserAssignedManagedIdentity)
+            if (requestContext.ServiceBundle.Config.ManagedIdentityId._isUserAssigned)
             {
                 requestContext.Logger.Warning(MsalErrorMessage.ManagedIdentityUserAssignedNotConfigurableAtRuntime);
             }
@@ -60,18 +64,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.QueryParameters["api-version"] = ServiceFabricMsiApiVersion;
             request.QueryParameters["resource"] = resource;
 
-
-
-            if (!string.IsNullOrEmpty(_requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId))
+            switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
             {
-                _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
-                request.QueryParameters[Constants.ManagedIdentityClientId] = _requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedClientId;
-            }
+                case AppConfig.ManagedIdentityIdType.ClientId:
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
+                    request.QueryParameters[Constants.ManagedIdentityClientId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                    break;
 
-            if (!string.IsNullOrEmpty(_requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId))
-            {
-                _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
-                request.QueryParameters[Constants.ManagedIdentityResourceId] = _requestContext.ServiceBundle.Config.ManagedIdentityUserAssignedResourceId;
+                case AppConfig.ManagedIdentityIdType.ResourceId:
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
+                    request.QueryParameters[Constants.ManagedIdentityResourceId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                    break;
             }
 
             return request;

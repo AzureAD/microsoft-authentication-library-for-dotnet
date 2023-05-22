@@ -32,6 +32,7 @@ using Microsoft.IdentityModel.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Account = Microsoft.Identity.Client.Account;
+using Microsoft.Identity.Client.AppConfig;
 #if !NET6_WIN
 using Microsoft.Identity.Client.Desktop;
 #endif
@@ -57,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             _synchronizationContext = new DedicatedThreadSynchronizationContext();
 
             _coreUIParent = new CoreUIParent() { SynchronizationContext = _synchronizationContext };
-            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(isConfidentialClient: false);
+            ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration(MsalClientType.PublicClient);
             applicationConfiguration.BrokerOptions = new BrokerOptions(BrokerOptions.OperatingSystems.Windows);
             _logger = Substitute.For<ILoggerAdapter>();
             _logger.PiiLoggingEnabled.Returns(true);

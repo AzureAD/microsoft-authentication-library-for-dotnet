@@ -35,6 +35,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [DllImport("user32.dll")]
         static extern IntPtr GetForegroundWindow();
 
+        // This test should fail locally but succeed in a CI build.
         [RunOn(TargetFrameworks.NetCore)]
         public async Task WamSilentAuthUserInteractionRequiredAsync()
         {
@@ -47,7 +48,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
                .WithAuthority("https://login.microsoftonline.com/organizations");
 
-            IPublicClientApplication pca = pcaBuilder.WithBroker().Build();
+            IPublicClientApplication pca = pcaBuilder
+                .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+                .Build();
 
             // Act
             try
@@ -67,6 +70,34 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [RunOn(TargetFrameworks.NetCore)]
+        public async Task WamInvalidROPC_ThrowsException_TestAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+            WamLoggerValidator wastestLogger = new WamLoggerValidator();
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithLogging(wastestLogger, enablePiiLogging: true) // it's important that the PII is turned on, otherwise context is 'pii'
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .Build();
+
+            MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
+                pca.AcquireTokenByUsernamePassword(
+                    scopes,
+                    "noUser",
+                    "badPassword")
+                .ExecuteAsync())
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("0x2142008A", ex.AdditionalExceptionData[MsalException.BrokerErrorTag]);
+            Assert.AreEqual("User name is malformed.", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]); // message might change. not a big deal
+            Assert.AreEqual("ApiContractViolation", ex.AdditionalExceptionData[MsalException.BrokerErrorStatus]);
+            Assert.AreEqual("3399811229", ex.AdditionalExceptionData[MsalException.BrokerErrorCode]);
+        }
+
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WamSilentAuthLoginHintNoAccontInCacheAsync()
         {
             string[] scopes = new[]
@@ -78,7 +109,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
                .WithAuthority("https://login.microsoftonline.com/organizations");
 
-            IPublicClientApplication pca = pcaBuilder.WithBroker().Build();
+            IPublicClientApplication pca = pcaBuilder
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .Build();
 
             // Act
             try
@@ -112,7 +145,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithLogging(testLogger)
-               .WithBroker().Build();
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .Build();
 
             // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
@@ -165,7 +199,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithLogging(testLogger, enablePiiLogging: true)
-               .WithBroker().Build();
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .Build();
 
             // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
@@ -212,9 +247,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
-                {
-                    ListOperatingSystemAccounts = true,
-                })
+               {
+                   ListOperatingSystemAccounts = true,
+               })
                .Build();
 
 
@@ -246,10 +281,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
                .Create("43dfbb29-3683-4673-a66f-baba91798bd2")
                .WithAuthority("https://login.microsoftonline.com/organizations")
                .WithParentActivityOrWindow(windowHandleProvider)
-               .WithBroker()
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
                .Build();
 
-            // Act
             // Act
             var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
                  () => pca.AcquireTokenSilent(new string[] { scopes }, PublicClientApplication.OperatingSystemAccount)
@@ -257,6 +291,70 @@ namespace Microsoft.Identity.Test.Integration.Broker
                         .ConfigureAwait(false);
 
             Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
+        }
+
+        [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
+        {
+            //Arrange
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            
+            string popUser = "popUser@msidlab4.onmicrosoft.com";
+
+            string[] scopes = { "https://msidlab4.sharepoint.com/user.read" };
+
+            IntPtr intPtr = GetForegroundWindow();
+
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithParentActivityOrWindow(windowHandleProvider)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .Build();
+
+            // Acquire token using username password with POP on a valid resource
+            // CA policy enforces token issuance to popUser only for SPO
+            // https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/concept-token-protection
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, popUser, labResponse.User.GetOrFetchPassword())
+                .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            //Act
+            Assert.AreEqual(popUser, result.Account.Username);
+        }
+
+        [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        [ExpectedException(typeof(MsalUiRequiredException))]
+        public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
+        {
+            //Arrange
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+
+            string popUser = "popUser@msidlab4.onmicrosoft.com";
+
+            string[] scopes = { "user.read" };
+
+            IntPtr intPtr = GetForegroundWindow();
+
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithParentActivityOrWindow(windowHandleProvider)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .Build();
+
+            // Acquire token using username password with POP on a resource not in the CA policy
+            // CA policy enforces token issuance to popUser only for SPO this call will fail with UI Required Exception
+            // https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/concept-token-protection
+            var result = await pca.AcquireTokenByUsernamePassword(scopes, popUser, labResponse.User.GetOrFetchPassword())
+                .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
+                .ExecuteAsync()
+                .ConfigureAwait(false);
         }
     }
 }

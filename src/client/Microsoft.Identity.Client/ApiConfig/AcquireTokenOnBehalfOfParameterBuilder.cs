@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client
     public sealed class AcquireTokenOnBehalfOfParameterBuilder :
         AbstractConfidentialClientAcquireTokenParameterBuilder<AcquireTokenOnBehalfOfParameterBuilder>
     {
-        private AcquireTokenOnBehalfOfParameters Parameters { get; } = new AcquireTokenOnBehalfOfParameters();
+        internal AcquireTokenOnBehalfOfParameters Parameters { get; } = new AcquireTokenOnBehalfOfParameters();
 
         /// <inheritdoc />
         internal AcquireTokenOnBehalfOfParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
@@ -181,7 +181,21 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            return ApiEvent.ApiIds.AcquireTokenOnBehalfOf;
+            if (string.IsNullOrEmpty(Parameters.LongRunningOboCacheKey))
+            {
+                return ApiEvent.ApiIds.AcquireTokenOnBehalfOf;
+            }
+            else
+            {
+                if (Parameters.UserAssertion != null)
+                {
+                    return ApiEvent.ApiIds.InitiateLongRunningObo;
+                }
+                else
+                {
+                    return ApiEvent.ApiIds.AcquireTokenInLongRunningObo;
+                }
+            }
         }
     }
 }

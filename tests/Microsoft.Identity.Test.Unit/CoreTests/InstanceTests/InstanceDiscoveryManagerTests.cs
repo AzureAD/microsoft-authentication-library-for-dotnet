@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
@@ -402,7 +403,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             // Inject authority in service bundle
             var httpManager = new MockHttpManager();
-            var appConfig = new ApplicationConfiguration(isConfidentialClient: true)
+            var appConfig = new ApplicationConfiguration(MsalClientType.ConfidentialClient)
             {
                 HttpManager = httpManager,
                 Authority = Authority.CreateAuthority(TestAuthority, false)

@@ -12,12 +12,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// <summary>
     /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/CloudShellManagedIdentitySource.cs
     /// </summary>
-    internal class CloudShellManagedIdentitySource : ManagedIdentitySource
+    internal class CloudShellManagedIdentitySource : AbstractManagedIdentity
     {
         private readonly Uri _endpoint;
         private const string CloudShell = "Cloud Shell";
 
-        public static ManagedIdentitySource TryCreate(RequestContext requestContext)
+        public static AbstractManagedIdentity TryCreate(RequestContext requestContext)
         {
             string msiEndpoint = EnvironmentVariables.MsiEndpoint;
 
@@ -36,22 +36,25 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             catch (FormatException ex)
             {
                 requestContext.Logger.Error("[Managed Identity] Invalid endpoint found for the environment variable MSI_ENDPOINT: " + msiEndpoint);
-                throw new MsalClientException(MsalError.InvalidManagedIdentityEndpoint, string.Format(
-                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "MSI_ENDPOINT", msiEndpoint, CloudShell), ex);
+                throw new MsalManagedIdentityException(MsalError.InvalidManagedIdentityEndpoint, string.Format(
+                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "MSI_ENDPOINT", msiEndpoint, CloudShell), 
+                    ex, ManagedIdentitySource.CloudShell);
             }
 
             requestContext.Logger.Verbose(()=>"[Managed Identity] Creating cloud shell managed identity. Endpoint URI: " + msiEndpoint);
             return new CloudShellManagedIdentitySource(endpointUri, requestContext);
         }
 
-        private CloudShellManagedIdentitySource(Uri endpoint, RequestContext requestContext) : base(requestContext)
+        private CloudShellManagedIdentitySource(Uri endpoint, RequestContext requestContext) : 
+            base(requestContext, ManagedIdentitySource.CloudShell)
         {
             _endpoint = endpoint;
 
-            if (requestContext.ServiceBundle.Config.IsUserAssignedManagedIdentity)
+            if (requestContext.ServiceBundle.Config.ManagedIdentityId._isUserAssigned)
             {
-                throw new MsalClientException(MsalError.UserAssignedManagedIdentityNotSupported, 
-                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, CloudShell));
+                throw new MsalManagedIdentityException(MsalError.UserAssignedManagedIdentityNotSupported, 
+                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, CloudShell), 
+                    ManagedIdentitySource.CloudShell);
             }
         }
 

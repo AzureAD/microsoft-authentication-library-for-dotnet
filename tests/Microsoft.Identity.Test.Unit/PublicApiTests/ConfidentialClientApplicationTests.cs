@@ -1037,6 +1037,53 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        [TestMethod]
+        // regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4140
+        public async Task IdTokenHasNoOid_ADALSerialization_Async()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler("https://login.windows-ppe.net/98ecb0ef-bb8d-4216-b45a-70df950dc6e3/");
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority("https://login.windows-ppe.net/98ecb0ef-bb8d-4216-b45a-70df950dc6e3/")
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .Build();
+
+                byte[] tokenCacheInAdalFormat = null;
+                app.UserTokenCache.SetAfterAccess(
+                    (args) =>
+                    {
+                        if (args.HasStateChanged)
+                        {
+                            tokenCacheInAdalFormat = args.TokenCache.SerializeAdalV3();
+                        };
+                    });
+
+                var handler = httpManager.AddMockHandler(
+                       new MockHttpMessageHandler()
+                       {
+                           ExpectedMethod = HttpMethod.Post,
+                           ResponseMessage = MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetTokenResponseWithNoOidClaim())
+                       });
+                
+
+                // Act
+                var result = await app.AcquireTokenByAuthorizationCode(new[] { "https://management.core.windows.net//.default" }, "code")                    
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(tokenCacheInAdalFormat);
+
+                Assert.AreEqual("AujLDQp5yRMRcGpPcDBft9Nb5uFSKYxDZq65-ebfHls", result.UniqueId);
+                Assert.AreEqual("AujLDQp5yRMRcGpPcDBft9Nb5uFSKYxDZq65-ebfHls", result.ClaimsPrincipal.FindFirst("sub").Value);
+                Assert.IsNull(result.ClaimsPrincipal.FindFirst("oid"));
+            }
+        }
+
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
@@ -1420,7 +1467,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                 .WithRedirectUri(TestConstants.RedirectUri)
                 .WithClientSecret(TestConstants.ClientSecret)
                 .WithHttpManager(httpManager)
@@ -1437,6 +1483,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .ConfigureAwait(false);
 
                 Assert.AreEqual(expectedSpaCode, result.SpaAuthCode);
+                Assert.IsFalse(result.AdditionalResponseParameters.ContainsKey("spa_accountid"));
                 Assert.AreEqual("1", handler.ActualRequestPostData["return_spa_code"]);
 
                 handler = httpManager.AddSuccessTokenResponseMockHandlerForPost(
@@ -1460,6 +1507,34 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsTrue(string.IsNullOrEmpty(result.SpaAuthCode));
 
+            }
+        }
+
+        [TestMethod]
+        public async Task BridgedHybridSpa_Async()
+        {
+            var wamAccountId = "wam_account_id_1234";
+
+            using (var httpManager = new MockHttpManager())
+            {
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                var handler = httpManager.AddSuccessTokenResponseMockHandlerForPost(
+                    responseMessage: MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetBridgedHybridSpaTokenResponse(wamAccountId)));
+
+                var result = await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                    .WithSpaAuthorizationCode(true)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(wamAccountId, result.AdditionalResponseParameters["spa_Accountid"]);
+
+                Assert.IsNull(result.SpaAuthCode);
+                Assert.AreEqual("1", handler.ActualRequestPostData["return_spa_code"]);
             }
         }
 
@@ -1569,7 +1644,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var longRunningOboBuilder = ((ILongRunningWebApi)app).InitiateLongRunningProcessInWebApi(
                                TestConstants.s_scope.ToArray(),
                                TestConstants.DefaultClientAssertion,
-                               ref oboCacheKey);
+                               ref oboCacheKey)
+                .WithSearchInCacheForLongRunningProcess();
             PublicClientApplicationTests.CheckBuilderCommonMethods(longRunningOboBuilder);
 
             longRunningOboBuilder = ((ILongRunningWebApi)app).AcquireTokenInLongRunningProcess(
@@ -1777,7 +1853,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                           .BuildConcrete();
 
             // AcquireToken from app provider
-            AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)                                                    
+            AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
                                                     .ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
 
             Assert.IsNotNull(result.AccessToken);
@@ -1837,7 +1913,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(4, callbackInvoked);
         }
 
-       
+
 
         private AppTokenProviderResult GetAppTokenProviderResult(string differentScopesForAt = "", long? refreshIn = 1000)
         {

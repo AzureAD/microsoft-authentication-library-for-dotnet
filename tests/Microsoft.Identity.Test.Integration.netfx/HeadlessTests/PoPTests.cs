@@ -28,6 +28,7 @@ using Microsoft.Identity.Test.Unit;
 using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -452,7 +453,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
 #if NET_CORE
-        [TestMethod]
         public async Task WamUsernamePasswordRequestWithPOPAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -465,7 +465,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .Create(labResponse.App.AppId)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
                .WithLogging(wastestLogger)
-               .WithBroker()
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
                .Build();
 
             Assert.IsTrue(pca.IsProofOfPossessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");

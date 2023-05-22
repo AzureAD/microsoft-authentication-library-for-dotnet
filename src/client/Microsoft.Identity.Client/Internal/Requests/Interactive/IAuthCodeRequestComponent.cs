@@ -12,6 +12,6 @@ namespace Microsoft.Identity.Client.Internal
     {
         Task<Tuple<AuthorizationResult, string>> FetchAuthCodeAndPkceVerifierAsync(CancellationToken cancellationToken);
 
-        Uri GetAuthorizationUriWithoutPkce();
+        Task<Uri> GetAuthorizationUriWithoutPkceAsync(CancellationToken cancellationToken);
     }
 }

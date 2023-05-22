@@ -20,6 +20,18 @@ steps:
     pathtoCustomTestAdapters: 'C:\temp' # Workaround for test failure, as NUnit Test Adapter that gets detected seems to mess something up
 
 - task: VSTest@2
+  displayName: 'Run unit tests (.NET CORE 3.1)'
+  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\netcoreapp3.1\Microsoft.Identity.Test.Unit.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    runInParallel: true
+    codeCoverageEnabled: true
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: '1'
+
+- task: VSTest@2
   displayName: 'Run unit tests (NET6-WIN)'
   condition: and(succeeded(), eq(variables['RunTests'], 'true'))
   inputs:
