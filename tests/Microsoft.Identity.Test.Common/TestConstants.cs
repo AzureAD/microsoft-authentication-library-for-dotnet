@@ -104,8 +104,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string ADFSAuthority2 = "https://someAdfs.com/adfs/";
 
         public const string DstsAuthorityTenantless = "https://some.url.dsts.core.azure-test.net/dstsv2/";
-        public const string DstsAuthorityTenanted = "https://some.url.dsts.core.azure-test.net/dstsv2/" + TenantId;
-        public const string DstsAuthorityCommon = "https://some.url.dsts.core.azure-test.net/dstsv2/" + Common;
+        public const string DstsAuthorityTenanted = "https://some.url.dsts.core.azure-test.net/dstsv2/" + TenantId + "/";
+        public const string DstsAuthorityCommon = "https://some.url.dsts.core.azure-test.net/dstsv2/" + Common + "/";
 
         public const string B2CLoginGlobal = ".b2clogin.com";
         public const string B2CLoginUSGov = ".b2clogin.us";

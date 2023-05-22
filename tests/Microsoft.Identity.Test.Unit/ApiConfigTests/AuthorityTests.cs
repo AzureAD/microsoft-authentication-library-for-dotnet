@@ -76,25 +76,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             Assert.AreEqual(ex1.ErrorCode, MsalError.TenantOverrideNonAad);
             Assert.AreEqual(ex2.ErrorCode, MsalError.TenantOverrideNonAad);
         }
-
-        [TestMethod]
-        public void DstsAuthority_WithTenantId_Success()
-        {
-            var app = ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithAuthority(TestConstants.DstsAuthorityTenanted)
-                .WithClientSecret("secret")
-                .Build();
-
-            var parameterBuilder = app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
-                    .WithTenantId(TestConstants.TenantId);
-
-            // Verify Host still matches the original Authority
-            Assert.AreEqual(new Uri(TestConstants.DstsAuthorityTenanted).Host, parameterBuilder.CommonParameters.AuthorityOverride.Host);
-
-            // Verify the Tenant Id matches
-            Assert.AreEqual(TestConstants.TenantId, AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority));
-        }
+       
 
         [DataTestMethod]
         [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]

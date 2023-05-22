@@ -274,23 +274,13 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.TenantOverrideNonAad);
             }
 
-            AuthorityInfo newAuthorityInfo;
-            if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.Dsts)
-            {
-                DstsAuthority dSTSAuthority = (DstsAuthority)ServiceBundle.Config.Authority;
-                string tenantedAuthority = dSTSAuthority.GetTenantedAuthority(tenantId, true);
-                newAuthorityInfo = AuthorityInfo.FromDstsAuthority(
-                    tenantedAuthority,
-                    ServiceBundle.Config.Authority.AuthorityInfo.ValidateAuthority);
-            }
-            else
-            {
-                AadAuthority aadAuthority = (AadAuthority)ServiceBundle.Config.Authority;
-                string tenantedAuthority = aadAuthority.GetTenantedAuthority(tenantId, true);
-                newAuthorityInfo = AuthorityInfo.FromAadAuthority(
-                    tenantedAuthority,
-                    ServiceBundle.Config.Authority.AuthorityInfo.ValidateAuthority);
-            }
+            Authority originalAuthority = ServiceBundle.Config.Authority;
+            string tenantedAuthority = originalAuthority.GetTenantedAuthority(tenantId, true);
+
+            var newAuthorityInfo = new AuthorityInfo(
+                originalAuthority.AuthorityInfo.AuthorityType,
+                tenantedAuthority,
+                originalAuthority.AuthorityInfo.ValidateAuthority);
 
             CommonParameters.AuthorityOverride = newAuthorityInfo;
 
