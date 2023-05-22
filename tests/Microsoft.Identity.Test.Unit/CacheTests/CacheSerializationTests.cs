@@ -608,18 +608,20 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void TestSerializeContainsNoNulls()
         {
+            var prefix = $"_SOMERANDOMPREFIX";
             var accessor = CreateTokenCacheAccessor();
 
             // Create a refresh token with a null family id in it
             var item = CreateRefreshTokenItem();
             item.FamilyId = null;
-            item.Environment += $"_SOMERANDOMPREFIX"; // ensure we get unique cache keys
+            item.Environment += prefix; // ensure we get unique cache keys
             accessor.SaveRefreshToken(item);
 
             var s1 = new TokenCacheJsonSerializer(accessor);
             byte[] bytes = s1.Serialize(null);
             string json = CoreHelpers.ByteArrayToString(bytes);
-            Console.WriteLine(json);
+
+            Assert.IsTrue(json.Contains(prefix));
             Assert.IsFalse(json.ToLowerInvariant().Contains("null"));
         }
 
