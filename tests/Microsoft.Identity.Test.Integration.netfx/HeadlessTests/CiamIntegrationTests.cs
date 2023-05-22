@@ -22,18 +22,18 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
     [TestClass]
     public class CiamIntegrationTests
     {
-        private readonly string[] _ciamScopes = new[] { "openid" };
+        private readonly string[] _ciamScopes = new[] { TestConstants.DefaultGraphScope };
         private const string _ciamRedirectUri = "http://localhost";
 
-        //[TestMethod]
-        //[DataRow("https://{0}.ciamlogin.com/", 0)] //https://tenantName.ciamlogin.com/
-        //[DataRow("https://{0}.ciamlogin.com/{1}.onmicrosoft.com", 1)] //https://tenantName.ciamlogin.com/tenantName.onmicrosoft.com
-        //[DataRow("https://{0}.ciamlogin.com/{1}", 2)] //https://tenantName.ciamlogin.com/tenantId
+        [TestMethod]
+        [DataRow("https://{0}.ciamlogin.com/", 0)] //https://tenantName.ciamlogin.com/
+        [DataRow("https://{0}.ciamlogin.com/{1}.onmicrosoft.com", 1)] //https://tenantName.ciamlogin.com/tenantName.onmicrosoft.com
+        [DataRow("https://{0}.ciamlogin.com/{1}", 2)] //https://tenantName.ciamlogin.com/tenantId
         public async Task ROPC_Ciam_Async(string authorityFormat, int authorityVersion)
         {
             //Get lab details
-            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery() 
-            { 
+            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
+            {
                 FederationProvider = FederationProvider.CIAM,
                 SignInAudience = SignInAudience.AzureAdMyOrg,
                 PublicClient = PublicClient.no
@@ -86,10 +86,10 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
             Assert.AreEqual($"{labResponse.User.LabName}{Constants.CiamAuthorityHostSuffix}".ToLower(), result.Account.Environment);
         }
 
-        //[TestMethod]
-        //[DataRow("https://{0}.ciamlogin.com/", 0)] //https://tenantName.ciamlogin.com/
-        //[DataRow("https://{0}.ciamlogin.com/{1}.onmicrosoft.com", 1)] //https://tenantName.ciamlogin.com/tenantName.onmicrosoft.com
-        //[DataRow("https://{0}.ciamlogin.com/{1}", 2)] //https://tenantName.ciamlogin.com/tenantId
+        [TestMethod]
+        [DataRow("https://{0}.ciamlogin.com/", 0)] //https://tenantName.ciamlogin.com/
+        [DataRow("https://{0}.ciamlogin.com/{1}.onmicrosoft.com", 1)] //https://tenantName.ciamlogin.com/tenantName.onmicrosoft.com
+        [DataRow("https://{0}.ciamlogin.com/{1}", 2)] //https://tenantName.ciamlogin.com/tenantId
         public async Task ClientCredentialWithClientSecret_Ciam_Async(string authorityFormat, int authorityVersion)
         {
             //Get lab details
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
         private string GetCiamSecret()
         {
             KeyVaultSecretsProvider provider = new KeyVaultSecretsProvider();
-            return provider.GetSecretByName("MSIDLABCIAM1-cc").Value;
+            return provider.GetSecretByName("msidlabciam2-cc").Value;
         }
     }
 }
