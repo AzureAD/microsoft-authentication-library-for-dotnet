@@ -2,581 +2,152 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text.RegularExpressions;
+using System.Linq;
+using System.Net;
+using System.Security;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.net45.Infrastructure;
+using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.Unit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Unit
+namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
 {
-    internal static class TestConstants
+    [TestClass]
+    public class CiamIntegrationTests
     {
-        public static HashSet<string> s_scope
+        private readonly string[] _ciamScopes = new[] { "https://graph.microsoft.com/.default" };
+        private const string _ciamRedirectUri = "http://localhost";
+
+        [TestMethod]
+        [DataRow("https://{0}.ciamlogin.com/", 0)] //https://tenantName.ciamlogin.com/
+        [DataRow("https://{0}.ciamlogin.com/{1}.onmicrosoft.com", 1)] //https://tenantName.ciamlogin.com/tenantName.onmicrosoft.com
+        [DataRow("https://{0}.ciamlogin.com/{1}", 2)] //https://tenantName.ciamlogin.com/tenantId
+        public async Task ROPC_Ciam_Async(string authorityFormat, int authorityVersion)
         {
-            get
+            //Get lab details
+            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
             {
-                return new HashSet<string>(new[] { "r1/scope1", "r1/scope2" }, StringComparer.OrdinalIgnoreCase);
+                FederationProvider = FederationProvider.CIAM,
+                SignInAudience = SignInAudience.AzureAdMyOrg,
+                PublicClient = PublicClient.no
+            }).ConfigureAwait(false);
+
+            string authority = string.Empty;
+
+            //Compute authority from format and lab response
+            switch (authorityVersion)
+            {
+                case 0:
+                    authority = string.Format(authorityFormat, labResponse.User.LabName);
+                    break;
+
+                case 1:
+                    authority = string.Format(authorityFormat, labResponse.User.LabName, labResponse.User.LabName);
+                    break;
+
+                case 2:
+                    authority = string.Format(authorityFormat, labResponse.User.LabName, labResponse.Lab.TenantId);
+                    break;
             }
+
+            //Acquire tokens
+            var msalPublicClient = PublicClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithAuthority(authority, false)
+                .WithRedirectUri(_ciamRedirectUri)
+                .Build();
+
+            var result = await msalPublicClient
+                .AcquireTokenByUsernamePassword(_ciamScopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual($"{labResponse.User.LabName}{Constants.CiamAuthorityHostSuffix}".ToLower(), result.Account.Environment);
+
+            //Fetch cached tokens
+            var accounts = await msalPublicClient.GetAccountsAsync().ConfigureAwait(false);
+
+            result = await msalPublicClient
+                .AcquireTokenSilent(_ciamScopes, accounts.FirstOrDefault())
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result.AccessToken);
+            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual($"{labResponse.User.LabName}{Constants.CiamAuthorityHostSuffix}".ToLower(), result.Account.Environment);
         }
 
-        public static readonly Dictionary<string, string> ExtraHttpHeader = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { { "SomeExtraHeadderKey", "SomeExtraHeadderValue" } };
-
-        public const string ScopeStr = "r1/scope1 r1/scope2";
-        public const string ScopeStrFormat = "r{0}/scope1 r{0}/scope2";
-        public const string MsiResource = "scope";
-        public static readonly string[] s_graphScopes = new[] { "user.read" };
-        public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
-        public const string ClientCredentialAudience = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0";
-        public const string AutomationTestCertName = "AzureADIdentityDivisionTestAgentCert";
-
-        public static readonly SortedSet<string> s_scopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" }, StringComparer.OrdinalIgnoreCase);
-        public static readonly SortedSet<string> s_cacheMissScope = new SortedSet<string>(new[] { "r3/scope1", "r3/scope2" }, StringComparer.OrdinalIgnoreCase);
-        public const string ScopeForAnotherResourceStr = "r2/scope1 r2/scope2";
-        public const string Uid = "my-uid";
-        public const string Utid = "my-utid";
-        public const string Utid2 = "my-utid2";
-
-        public const string Common = "common";
-        public const string Organizations = "organizations";
-        public const string Consumers = "consumers";
-        public const string Guest = "guest";
-        public const string Home = "home";
-        public const string TenantId = "751a212b-4003-416e-b600-e1f48e40db9f";
-        public const string TenantId2 = "aaaaaaab-aaaa-aaaa-bbbb-aaaaaaaaaaaa";
-        public const string AadTenantId = "751a212b-4003-416e-b600-e1f48e40db9f";
-        public const string MsaTenantId = "9188040d-6c67-4c5b-b112-36a304b66dad";
-        public const string SomeTenantId = "sometenantid";
-        public const string CatsAreAwesome = "catsareawesome";
-        public const string TenantIdNumber1 = "12345679";
-        public const string TenantIdNumber2 = "987654321";
-        public const string TenantIdString = "tenantid";
-        public const string AadAuthorityWithTestTenantId = "https://login.microsoftonline.com/" + AadTenantId + "/";
-        public static readonly IDictionary<string, string> s_clientAssertionClaims = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { { "client_ip", "some_ip" }, { "aud", "some_audience" } };
-        public const string RTSecret = "someRT";
-        public const string ATSecret = "some-access-token";
-        public const string RTSecret2 = "someRT2";
-        public const string ATSecret2 = "some-access-token2";
-        public const string RTSecret3 = "someRT3";
-        public const string ATSecret3 = "some-access-token3";
-
-        public const string HomeAccountId = Uid + "." + Utid;
-
-        public const string ProductionPrefNetworkEnvironment = "login.microsoftonline.com";
-        public const string ProductionPrefCacheEnvironment = "login.windows.net";
-        public const string ProductionPrefRegionalEnvironment = "centralus.login.microsoft.com";
-        public const string ProductionPrefInvalidRegionEnvironment = "invalidregion.login.microsoft.com";
-        public const string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
-        public const string SovereignNetworkEnvironmentDE = "login.microsoftonline.de";
-        public const string SovereignNetworkEnvironmentCN = "login.partner.microsoftonline.cn";
-        public const string PpeEnvironment = "login.windows-ppe.net";
-        public const string PpeOrgEnvironment = "login.windows-ppe.org"; //This environment is not known to MSAL or AAD
-
-        public const string AuthorityNotKnownCommon = "https://sts.access.edu/" + Common + "/";
-        public const string AuthorityNotKnownTenanted = "https://sts.access.edu/" + Utid + "/";
-
-        public const string AuthorityHomeTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Home + "/";
-        public const string AuthorityUtidTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
-        public const string AuthorityUtid2Tenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid2 + "/";
-        public const string AuthorityGuestTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Guest + "/";
-        public const string AuthorityCommonTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Common + "/";
-        public const string AuthorityRegional = "https://" + ProductionPrefRegionalEnvironment + "/" + TenantId + "/";
-        public const string AuthorityRegionalInvalidRegion = "https://" + ProductionPrefInvalidRegionEnvironment + "/" + TenantId + "/";
-        public const string AuthorityTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + TenantId + "/";
-        public const string AuthorityCommonTenantNotPrefAlias = "https://" + ProductionNotPrefEnvironmentAlias + "/" + Common + "/";
-        public const string AuthorityCommonPpeAuthority = "https://" + PpeEnvironment + "/" + Common + "/";
-        public const string AuthoritySovereignDETenant = "https://" + SovereignNetworkEnvironmentDE + "/" + TenantId + "/";
-        public const string AuthoritySovereignCNTenant = "https://" + SovereignNetworkEnvironmentCN + "/" + TenantId + "/";
-        public const string AuthoritySovereignDECommon = "https://" + SovereignNetworkEnvironmentDE + "/" + Common + "/";
-        public const string AuthoritySovereignCNCommon = "https://" + SovereignNetworkEnvironmentCN + "/" + Common + "/";
-
-        public const string PrefCacheAuthorityCommonTenant = "https://" + ProductionPrefCacheEnvironment + "/" + Common + "/";
-        public const string AuthorityOrganizationsTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Organizations + "/";
-        public const string AuthorityConsumersTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Consumers + "/";
-        public const string AuthorityConsumerTidTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + MsaTenantId + "/";
-        public const string AuthorityGuidTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + TenantIdNumber1 + "/";
-        public const string AuthorityGuidTenant2 = "https://" + ProductionPrefNetworkEnvironment + "/" + TenantIdNumber2 + "/";
-        public const string AuthorityWindowsNet = "https://" + ProductionPrefCacheEnvironment + "/" + Utid + "/";
-        public const string ADFSAuthority = "https://fs.msidlab8.com/adfs/";
-        public const string ADFSAuthority2 = "https://someAdfs.com/adfs/";
-
-        public const string DstsAuthorityTenantless = "https://some.url.dsts.core.azure-test.net/dstsv2/";
-        public const string DstsAuthorityTenanted = "https://some.url.dsts.core.azure-test.net/dstsv2/" + TenantIdString;
-        public const string DstsAuthorityCommon = "https://some.url.dsts.core.azure-test.net/dstsv2/" + Common;
-
-        public const string B2CLoginGlobal = ".b2clogin.com";
-        public const string B2CLoginUSGov = ".b2clogin.us";
-        public const string B2CLoginMoonCake = ".b2clogin.cn";
-        public const string B2CLoginBlackforest = ".b2clogin.de";
-        public const string B2CLoginCustomDomain = CatsAreAwesome + ".com";
-        public const string B2CSignUpSignIn = "b2c_1_susi";
-        public const string B2CProfileWithDot = "b2c.someprofile";
-        public const string B2CEditProfile = "b2c_1_editprofile";
-        public const string B2CEnvironment = SomeTenantId + ".b2clogin.com";
-        public const string B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/" + B2CSignUpSignIn + "/";
-        public const string B2CLoginAuthority = "https://" + B2CEnvironment + "/tfp/" + SomeTenantId + "/" + B2CSignUpSignIn + "/";
-        public const string B2CLoginAuthorityWrongHost = "https://anothertenantid.b2clogin.com/tfp/" + SomeTenantId + "/" + B2CSignUpSignIn + "/";
-        public const string B2CCustomDomain = "https://" + B2CLoginCustomDomain + "/tfp/" + CatsAreAwesome + "/" + B2CSignUpSignIn + "/";
-        public const string B2CLoginAuthorityUsGov = "https://" + SomeTenantId + B2CLoginUSGov + "/tfp/" + SomeTenantId + "/" + B2CSignUpSignIn + "/";
-        public const string B2CLoginAuthorityMoonCake = "https://" + SomeTenantId + B2CLoginMoonCake + "/tfp/" + SomeTenantId + "/" + B2CSignUpSignIn + "/";
-        public const string B2CLoginAuthorityBlackforest = "https://" + SomeTenantId + B2CLoginBlackforest + "/tfp/" + SomeTenantId + "/" + B2CSignUpSignIn + "/";
-        public const string B2CSuSiHomeAccountIdentifer = Uid + "-" + B2CSignUpSignIn + "." + Utid;
-        public const string B2CSuSiHomeAccountObjectId = Uid + "-" + B2CSignUpSignIn;
-        public const string B2CProfileWithDotHomeAccountIdentifer = Uid + "-" + B2CProfileWithDot + "." + Utid;
-        public const string B2CProfileWithDotHomeAccountObjectId = Uid + "-" + B2CProfileWithDot;
-        public const string B2CEditProfileHomeAccountIdentifer = Uid + "-" + B2CEditProfile + "." + Utid;
-        public const string B2CEditProfileHomeAccountObjectId = Uid + "-" + B2CEditProfile;
-
-        public const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
-        public const string ClientId2 = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
-        public const string FamilyId = "1";
-        public const string UniqueId = "unique_id";
-        public const string IdentityProvider = "my-idp";
-        public const string Name = "First Last";
-        public const string MiResourceId = "/subscriptions/ffa4aaa2-4444-4444-5555-e3ccedd3d046/resourcegroups/UAMI_group/providers/Microsoft.ManagedIdentityClient/userAssignedIdentities/UAMI";
-
-        public const string Claims = @"{""userinfo"":{""given_name"":{""essential"":true},""nickname"":null,""email"":{""essential"":true},""email_verified"":{""essential"":true},""picture"":null,""http://example.info/claims/groups"":null},""id_token"":{""auth_time"":{""essential"":true},""acr"":{""values"":[""urn:mace:incommon:iap:silver""]}}}";
-        public static readonly string[] ClientCapabilities = new[] { "cp1", "cp2" };
-        public const string ClientCapabilitiesJson = @"{""access_token"":{""xms_cc"":{""values"":[""cp1"",""cp2""]}}}";
-        // this a JSON merge from Claims and ClientCapabilitiesJson
-        public const string ClientCapabilitiesAndClaimsJson = @"{""access_token"":{""xms_cc"":{""values"":[""cp1"",""cp2""]}},""userinfo"":{""given_name"":{""essential"":true},""nickname"":null,""email"":{""essential"":true},""email_verified"":{""essential"":true},""picture"":null,""http://example.info/claims/groups"":null},""id_token"":{""auth_time"":{""essential"":true},""acr"":{""values"":[""urn:mace:incommon:iap:silver""]}}}";
-
-        public const string DisplayableId = "displayable@id.com";
-        public const string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
-        public const string MobileDefaultRedirectUri = "msal4a1aa1d5-c567-49d0-ad0b-cd957a47f842://auth"; // in msidentity-samples-testing tenant -> PublicClientSample
-        public const string ClientSecret = "client_secret";
-        public const string DefaultPassword = "password";
-        public const string TestCertPassword = "passw0rd!";
-        public const string AuthorityTestTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
-        public const string DiscoveryEndPoint = "discovery/instance";
-        public const string DefaultAuthorizationCode = "DefaultAuthorizationCode";
-        public const string DefaultAccessToken = "DefaultAccessToken";
-        public const string DefaultClientAssertion = "DefaultClientAssertion";
-        public const string RawClientId = "eyJ1aWQiOiJteS11aWQiLCJ1dGlkIjoibXktdXRpZCJ9";
-        public const string XClientSku = "x-client-SKU";
-        public const string XClientVer = "x-client-Ver";
-        public const TokenSubjectType TokenSubjectTypeUser = 0;
-        public const string TestMessage = "test message";
-        public const string LoginHint = "loginHint";
-        public const string LoginHintParam = "login_hint";
-        public const string PromptParam = "prompt";
-
-        public const string LocalAccountId = "test_local_account_id";
-        public const string GivenName = "Joe";
-        public const string FamilyName = "Doe";
-        public const string Username = "joe@localhost.com";
-        public const string PKeyAuthResponse = "PKeyAuth Context=\"context\",Version=\"1.0\"";
-
-        public const string RegionName = "REGION_NAME";
-        public const string Region = "centralus";
-        public const string InvalidRegion = "invalidregion";
-        public const int TimeoutInMs = 2000;
-        public const string ImdsUrl = "http://169.254.169.254/metadata/instance/compute/location";
-
-        public const string UserAssertion = "fake_access_token";
-        public const string CodeVerifier = "someCodeVerifier";
-
-        public const string Nonce = "someNonce";
-        public const string Realm = "someRealm";
-
-        public const string TestErrCode = "TestErrCode";
-        public const string iOSBrokerSuberrCode = "TestSuberrCode";
-        public const string iOSBrokerErrDescr = "Test Error Description";
-        public const string iOSBrokerErrorMetadata = "error_metadata";
-        public const string iOSBrokerErrorMetadataValue = @"{""home_account_id"":""test_home"", ""username"" : """ + Username + @""" }";
-        public const string DefaultGraphScope = "https://graph.microsoft.com/.default";
-
-        //This value is only for testing purposes. It is for a certificate that is not used for anything other than running tests
-        public const string _defaultx5cValue = @"MIIDHzCCAgegAwIBAgIQM6NFYNBJ9rdOiK+C91ZzFDANBgkqhkiG9w0BAQsFADAgMR4wHAYDVQQDExVBQ1MyQ2xpZW50Q2VydGlmaWNhdGUwHhcNMTIwNTIyMj
-IxMTIyWhcNMzAwNTIyMDcwMDAwWjAgMR4wHAYDVQQDExVBQ1MyQ2xpZW50Q2VydGlmaWNhdGUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCh7HjK
-YyVMDZDT64OgtcGKWxHmK2wqzi2LJb65KxGdNfObWGxh5HQtjzrgHDkACPsgyYseqxhGxHh8I/TR6wBKx/AAKuPHE8jB4hJ1W6FczPfb7FaMV9xP0qNQrbNGZU
-YbCdy7U5zIw4XrGq22l6yTqpCAh59DLufd4d7x8fCgUDV3l1ZwrncF0QrBRzns/O9Ex9pXsi2DzMa1S1PKR81D9q5QSW7LZkCgSSqI6W0b5iodx/a3RBvW3l7d
-noW2fPqkZ4iMcntGNqgsSGtbXPvUR3fFdjmg+xq9FfqWyNxShlZg4U+wE1v4+kzTJxd9sgD1V0PKgW57zyzdOmTyFPJFAgMBAAGjVTBTMFEGA1UdAQRKMEiAEM
-9qihCt+12P5FrjVMAEYjShIjAgMR4wHAYDVQQDExVBQ1MyQ2xpZW50Q2VydGlmaWNhdGWCEDOjRWDQSfa3ToivgvdWcxQwDQYJKoZIhvcNAQELBQADggEBAIm6
-gBOkSdYjXgOvcJGgE4FJkKAMQzAhkdYq5+stfUotG6vZNL3nVOOA6aELMq/ENhrJLC3rTwLOIgj4Cy+B7BxUS9GxTPphneuZCBzjvqhzP5DmLBs8l8qu10XAsh
-y1NFZmB24rMoq8C+HPOpuVLzkwBr+qcCq7ry2326auogvVMGaxhHlwSLR4Q1OhRjKs8JctCk2+5Qs1NHfawa7jWHxdAK6cLm7Rv/c0ig2Jow7wRaI5ciAcEjX7
-m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgFnDzVtItOnhuFTa0=";
-
-        public static string Defaultx5cValue
+        [TestMethod]
+        [DataRow("https://{0}.ciamlogin.com/", 0)] //https://tenantName.ciamlogin.com/
+        [DataRow("https://{0}.ciamlogin.com/{1}.onmicrosoft.com", 1)] //https://tenantName.ciamlogin.com/tenantName.onmicrosoft.com
+        [DataRow("https://{0}.ciamlogin.com/{1}", 2)] //https://tenantName.ciamlogin.com/tenantId
+        public async Task ClientCredentialWithClientSecret_Ciam_Async(string authorityFormat, int authorityVersion)
         {
-            get
+            //Get lab details
+            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
             {
-                return Regex.Replace(_defaultx5cValue, @"\r\n?|\n", string.Empty);
+                FederationProvider = FederationProvider.CIAM,
+                SignInAudience = SignInAudience.AzureAdMyOrg,
+                PublicClient = PublicClient.no
+            }).ConfigureAwait(false);
+
+            string authority = string.Empty;
+
+            //Compute authority from format and lab response
+            switch (authorityVersion)
+            {
+                case 0:
+                    authority = string.Format(authorityFormat, labResponse.User.LabName);
+                    break;
+
+                case 1:
+                    authority = string.Format(authorityFormat, labResponse.User.LabName, labResponse.User.LabName);
+                    break;
+
+                case 2:
+                    authority = string.Format(authorityFormat, labResponse.User.LabName, labResponse.Lab.TenantId);
+                    break;
             }
+
+            //Acquire tokens
+            var msalConfidentialClient = ConfidentialClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithClientSecret(GetCiamSecret())
+                .WithAuthority(authority, false)
+                .WithRedirectUri(_ciamRedirectUri)
+                .Build();
+
+            var result = await msalConfidentialClient
+                .AcquireTokenForClient(new[] { TestConstants.DefaultGraphScope })
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+            //Fetch cached tokens
+            result = await msalConfidentialClient
+                .AcquireTokenForClient(_ciamScopes)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result.AccessToken);
+            Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
         }
 
-        public const string Bearer = "Bearer";
-        public const string Pop = "PoP";
-
-        public static IDictionary<string, string> ExtraQueryParameters
+        private string GetCiamSecret()
         {
-            get
-            {
-                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "extra", "qp" },
-                    { "key1", "value1%20with%20encoded%20space" },
-                    { "key2", "value2" }
-                };
-            }
+            KeyVaultSecretsProvider provider = new KeyVaultSecretsProvider();
+            return provider.GetSecretByName("msidlabciam2-cc").Value;
         }
-
-        public const string MsalCCAKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/";
-        public const string MsalCCAKeyVaultSecretName = "AzureADIdentityDivisionTestAgentSecret";
-        public const string MsalOBOKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/";
-        public const string MsalOBOKeyVaultSecretName = "IdentityDivisionDotNetOBOServiceSecret";
-        public const string MsalArlingtonOBOKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
-        public const string MsalArlingtonOBOKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret";
-        public const string FociApp1 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app1/";
-        public const string FociApp1KeyVaultSecretName = "automation-foci-app1";
-        public const string FociApp2 = "https://buildautomation.vault.azure.net/secrets/automation-foci-app2/";
-        public const string FociApp2KeyVaultSecretName = "automation-foci-app2";
-        public const string MsalArlingtonCCAKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
-        public const string MsalArlingtonCCAKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret";
-
-        public enum AuthorityType { B2C };
-        public static string[] s_prodEnvAliases = new[] {
-                                "login.microsoftonline.com",
-                                "login.windows.net",
-                                "login.microsoft.com",
-                                "sts.windows.net"};
-
-        public static readonly string s_userIdentifier = CreateUserIdentifier();
-
-        public static string CreateUserIdentifier()
-        {
-            // return CreateUserIdentifier(Uid, Utid);
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Uid, Utid);
-        }
-
-        public static string CreateUserIdentifier(string uid, string utid)
-        {
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", uid, utid);
-        }
-
-        public static MsalTokenResponse CreateMsalTokenResponse(string tenantId = null)
-        {
-            return new MsalTokenResponse
-            {
-                IdToken = MockHelpers.CreateIdToken(UniqueId, DisplayableId, tenantId),
-                AccessToken = "access-token",
-                ClientInfo = MockHelpers.CreateClientInfo(),
-                ExpiresIn = 3599,
-                CorrelationId = "correlation-id",
-                RefreshToken = "refresh-token",
-                Scope = s_scope.AsSingleString(),
-                TokenType = "Bearer"
-            };
-        }
-
-        public static MsalTokenResponse CreateMsalTokenResponseWithTokenSource()
-        {
-            return new MsalTokenResponse
-            {
-                IdToken = MockHelpers.CreateIdToken(UniqueId, DisplayableId),
-                AccessToken = "access-token",
-                ClientInfo = MockHelpers.CreateClientInfo(),
-                ExpiresIn = 3599,
-                CorrelationId = "correlation-id",
-                RefreshToken = "refresh-token",
-                Scope = s_scope.AsSingleString(),
-                TokenType = "Bearer",
-                TokenSource = TokenSource.Broker
-            };
-        }
-
-        public static readonly Account s_user = new Account(s_userIdentifier, DisplayableId, ProductionPrefNetworkEnvironment);
-
-        public const string OnPremiseAuthority = "https://fs.contoso.com/adfs/";
-        public const string OnPremiseClientId = "on_premise_client_id";
-        public const string OnPremiseUniqueId = "on_premise_unique_id";
-        public const string OnPremiseDisplayableId = "displayable@contoso.com";
-        public const string FabrikamDisplayableId = "displayable@fabrikam.com";
-        public const string OnPremiseHomeObjectId = OnPremiseUniqueId;
-        public const string OnPremisePolicy = "on_premise_policy";
-        public const string OnPremiseRedirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
-        public const string OnPremiseClientSecret = "on_premise_client_secret";
-        public const string OnPremiseUid = "my-OnPremise-UID";
-        public const string OnPremiseUtid = "my-OnPremise-UTID";
-
-        public static readonly Account s_onPremiseUser = new Account(
-            string.Format(CultureInfo.InvariantCulture, "{0}.{1}", OnPremiseUid, OnPremiseUtid), OnPremiseDisplayableId, null);
-
-        public const string BrokerExtraQueryParameters = "extra=qp&key1=value1%20with%20encoded%20space&key2=value2";
-        public const string BrokerOIDCScopes = "openid offline_access profile";
-        public const string BrokerClaims = "testClaims";
-
-        public const string DiscoveryJsonResponse = @"{
-                        ""tenant_discovery_endpoint"":""https://login.microsoftonline.com/tenant/.well-known/openid-configuration"",
-                        ""api-version"":""1.1"",
-                        ""metadata"":[
-                            {
-                            ""preferred_network"":""login.microsoftonline.com"",
-                            ""preferred_cache"":""login.windows.net"",
-                            ""aliases"":[
-                                ""login.microsoftonline.com"",
-                                ""login.windows.net"",
-                                ""login.microsoft.com"",
-                                ""sts.windows.net""]},
-                            {
-                            ""preferred_network"":""login.partner.microsoftonline.cn"",
-                            ""preferred_cache"":""login.partner.microsoftonline.cn"",
-                            ""aliases"":[
-                                ""login.partner.microsoftonline.cn"",
-                                ""login.chinacloudapi.cn""]},
-                            {
-                            ""preferred_network"":""login.microsoftonline.de"",
-                            ""preferred_cache"":""login.microsoftonline.de"",
-                            ""aliases"":[
-                                    ""login.microsoftonline.de""]},
-                            {
-                            ""preferred_network"":""login.microsoftonline.us"",
-                            ""preferred_cache"":""login.microsoftonline.us"",
-                            ""aliases"":[
-                                ""login.microsoftonline.us"",
-                                ""login.usgovcloudapi.net""]},
-                            {
-                            ""preferred_network"":""login-us.microsoftonline.com"",
-                            ""preferred_cache"":""login-us.microsoftonline.com"",
-                            ""aliases"":[
-                                ""login-us.microsoftonline.com""]}
-                        ]
-                }";
-
-        public const string DiscoveryFailedResponse =
-            @"{""error"":""invalid_instance"",
-               ""error_description"":""AADSTS50049: Unknown or invalid instance.\r\nTrace ID: 82e709b9-f0b3-431d-99cd-f3c2ca3d4b00\r\nCorrelation ID: e7619cf4-53ea-443c-b76a-194c032e9840\r\nTimestamp: 2021-04-14 11:27:26Z"",
-               ""error_codes"":[50049],
-               ""timestamp"":""2021-04-14 11:27:26Z"",
-               ""trace_id"":""82e709b9-f0b3-431d-99cd-f3c2ca3d4b00"",
-               ""correlation_id"":""e7619cf4-53ea-443c-b76a-194c032e9840"",
-               ""error_uri"":""https://login.microsoftonline.com/error?code=50049""}";
-
-        public const string TokenResponseJson = @"{
-                                                   ""token_type"": ""Bearer"",
-                                                   ""scope"": ""user_impersonation"",
-                                                   ""expires_in"": ""3600"",
-                                                   ""ext_expires_in"": ""3600"",
-                                                   ""expires_on"": ""1566165638"",
-                                                   ""not_before"": ""1566161738"",
-                                                   ""resource"": ""user.read"",
-                                                   ""access_token"": ""at_secret"",
-                                                   ""refresh_token"": ""rt_secret"",
-                                                   ""id_token"": ""idtoken."",
-                                                   ""client_info"": ""eyJ1aWQiOiI2ZWVkYTNhMS1jM2I5LTRlOTItYTk0ZC05NjVhNTBjMDZkZTciLCJ1dGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3In0""
-                                                }";
-
-        public const string AndroidBrokerResponse = @"
-{
-      ""access_token"":""secretAt"",
-      ""authority"":""https://login.microsoftonline.com/common"",
-      ""cached_at"":1591193165,
-      ""client_id"":""4a1aa1d5-c567-49d0-ad0b-cd957a47f842"",
-      ""client_info"":""clientInfo"",
-      ""environment"":""login.windows.net"",
-      ""expires_on"":1591196764,
-      ""ext_expires_on"":1591196764,
-      ""home_account_id"":""ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462"",
-      ""http_response_code"":0,
-      ""id_token"":""idT"",
-      ""local_account_id"":""ae821e4d-f408-451a-af82-882691148603"",
-      ""scopes"":""User.Read openid offline_access profile"",
-      ""success"":true,
-      ""tenant_id"":""49f548d0-12b7-4169-a390-bb5304d24462"",
-      ""token_type"":""Bearer"",
-      ""username"":""some_user@contoso.com""
-   }";
-
-        // constants for Azure AD Kerberos Features
-        public const string KerberosTestApplicationId = "682992e9-c9c6-49c9-a819-3fbca2dd5111";
-        public const string KerberosServicePrincipalName = "HTTP/msal-kerberos-test.msidlab4.com";
-        public const string KerberosServicePrincipalNameEscaped = "HTTP**msal-kerberos-test.msidlab4.com";
-        public const string AzureADKerberosRealmName = "KERBEROS.MICROSOFTONLINE.COM";
-        public const int KerberosMinMessageBufferLength = 256;
-
-        // do not change these constants!
-        public const string AadRawClientInfo = "eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0";
-        public const string MsaRawClientInfo = "eyJ2ZXIiOiIxLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwibmFtZSI6Ik9sZ2EgRGFsdG9tIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20iLCJvaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtNDBjMC0zYmFjMTg4ZDAxZDEiLCJ0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQiLCJob21lX29pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInVpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInV0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQifQ";
-        public const string B2CRawClientInfo = "eyJ1aWQiOiJhZDAyMGY4ZS1iMWJhLTQ0YjItYmQ2OS1jMjJiZTg2NzM3ZjUtYjJjXzFfc2lnbmluIiwidXRpZCI6ImJhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOCJ9";
-
-        //Region Discovery Failures
-        public const string RegionAutoDetectOkFailureMessage = "Call to local IMDS failed with status code OK or an empty response.";
-        public const string RegionAutoDetectNotFoundFailureMessage = "Call to local IMDS failed with status code NotFound or an empty response.";
-        public const string RegionDiscoveryNotSupportedErrorMessage = "Region discovery can only be made if the service resides in Azure function or Azure VM";
-        public const string RegionDiscoveryIMDSCallFailedMessage = "IMDS call failed";
-
-        public const string PiiSerializeLogMessage = "MsalExternalLogMessage: Serializing Cache Pii";
-        public const string PiiDeserializeLogMessage = "MsalExternalLogMessage: Deserializing Cache Pii";
-        public const string SerializeLogMessage = "MsalExternalLogMessage: Serializing Cache without Pii";
-        public const string DeserializeLogMessage = "MsalExternalLogMessage: Deserializing Cache without Pii";
-
-        public const string GenericOidcJwkResponse = @"{""keys"":[{""kty"":""RSA"",""use"":""sig"",""kid"":""66682C848A3140685FC883FD7EA993CC"",""e"":""AQAB"",""n"":""pY-a5km28zOE-KS1UgYlWS9AT-4eYdxAlTVeGaSq21dhbB4L6tmlUiiV8s-Zv_L5Ng6rC1asmjEVtrKmFkYMoW4RbJC6HAzQbS7crGglyTJ39uDGJBpeQZCWYUljlIzp2VAJnPxG1-iyIDjZSOuGgvTxiphV4j2naU46RcT3IfC7CPkUZUtmqpbYNOHRli_oVirxGUMjHbq623qOCQUkUfMBLhKr0EjrZtcispSDzHqWktUO7K8Iy8D6VyttPIuzVkYx1GYiB0jCF1jgIDyEnH1E3r6S5ytao9KvoO6DGZTzFTJL2-i_uPco1DXfXFlVO9jKb5MHomO3NNrSDNRSnQ"",""alg"":""RS256""}]}";
-        public const string GenericOidcResponse = @"{
-   ""issuer"":""https://demo.duendesoftware.com"",
-   ""jwks_uri"":""https://demo.duendesoftware.com/.well-known/openid-configuration/jwks"",
-   ""authorization_endpoint"":""https://demo.duendesoftware.com/connect/authorize"",
-   ""token_endpoint"":""https://demo.duendesoftware.com/connect/token"",
-   ""userinfo_endpoint"":""https://demo.duendesoftware.com/connect/userinfo"",
-   ""end_session_endpoint"":""https://demo.duendesoftware.com/connect/endsession"",
-   ""check_session_iframe"":""https://demo.duendesoftware.com/connect/checksession"",
-   ""revocation_endpoint"":""https://demo.duendesoftware.com/connect/revocation"",
-   ""introspection_endpoint"":""https://demo.duendesoftware.com/connect/introspect"",
-   ""device_authorization_endpoint"":""https://demo.duendesoftware.com/connect/deviceauthorization"",
-   ""backchannel_authentication_endpoint"":""https://demo.duendesoftware.com/connect/ciba"",
-   ""frontchannel_logout_supported"":true,
-   ""frontchannel_logout_session_supported"":true,
-   ""backchannel_logout_supported"":true,
-   ""backchannel_logout_session_supported"":true,
-   ""scopes_supported"":[
-      ""openid"",
-      ""profile"",
-      ""email"",
-      ""api"",
-      ""resource1.scope1"",
-      ""resource1.scope2"",
-      ""resource2.scope1"",
-      ""resource2.scope2"",
-      ""resource3.scope1"",
-      ""resource3.scope2"",
-      ""scope3"",
-      ""scope4"",
-      ""shared.scope"",
-      ""transaction"",
-      ""offline_access""
-   ],
-   ""claims_supported"":[
-      ""sub"",
-      ""name"",
-      ""family_name"",
-      ""given_name"",
-      ""middle_name"",
-      ""nickname"",
-      ""preferred_username"",
-      ""profile"",
-      ""picture"",
-      ""website"",
-      ""gender"",
-      ""birthdate"",
-      ""zoneinfo"",
-      ""locale"",
-      ""updated_at"",
-      ""email"",
-      ""email_verified""
-   ],
-   ""grant_types_supported"":[
-      ""authorization_code"",
-      ""client_credentials"",
-      ""refresh_token"",
-      ""implicit"",
-      ""password"",
-      ""urn:ietf:params:oauth:grant-type:device_code"",
-      ""urn:openid:params:grant-type:ciba""
-   ],
-   ""response_types_supported"":[
-      ""code"",
-      ""token"",
-      ""id_token"",
-      ""id_token token"",
-      ""code id_token"",
-      ""code token"",
-      ""code id_token token""
-   ],
-   ""response_modes_supported"":[
-      ""form_post"",
-      ""query"",
-      ""fragment""
-   ],
-   ""token_endpoint_auth_methods_supported"":[
-      ""client_secret_basic"",
-      ""client_secret_post"",
-      ""private_key_jwt""
-   ],
-   ""id_token_signing_alg_values_supported"":[
-      ""RS256""
-   ],
-   ""subject_types_supported"":[
-      ""public""
-   ],
-   ""code_challenge_methods_supported"":[
-      ""plain"",
-      ""S256""
-   ],
-   ""request_parameter_supported"":true,
-   ""request_object_signing_alg_values_supported"":[
-      ""RS256"",
-      ""RS384"",
-      ""RS512"",
-      ""PS256"",
-      ""PS384"",
-      ""PS512"",
-      ""ES256"",
-      ""ES384"",
-      ""ES512"",
-      ""HS256"",
-      ""HS384"",
-      ""HS512""
-   ],
-   ""authorization_response_iss_parameter_supported"":true,
-   ""backchannel_token_delivery_modes_supported"":[
-      ""poll""
-   ],
-   ""backchannel_user_code_parameter_supported"":true
-}";
-
-        public static MsalTokenResponse CreateAadTestTokenResponse()
-        {
-            const string jsonResponse = "{\"token_type\":\"Bearer\",\"scope\":\"Calendars.Read openid profile Tasks.Read User.Read email\",\"expires_in\":3600,\"ext_expires_in\":262800,\"access_token\":\"<removed_at>\",\"refresh_token\":\"<removed_rt>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJiNmM2OWEzNy1kZjk2LTRkYjAtOTA4OC0yYWI5NmUxZDgyMTUiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhL3YyLjAiLCJpYXQiOjE1Mzg1Mzg0MjIsIm5iZiI6MTUzODUzODQyMiwiZXhwIjoxNTM4NTQyMzIyLCJuYW1lIjoiQ2xvdWQgSURMQUIgQmFzaWMgVXNlciIsIm9pZCI6IjlmNDg4MGQ4LTgwYmEtNGM0MC05N2JjLWY3YTIzYzcwMzA4NCIsInByZWZlcnJlZF91c2VybmFtZSI6ImlkbGFiQG1zaWRsYWI0Lm9ubWljcm9zb2Z0LmNvbSIsInN1YiI6Ilk2WWtCZEhOTkxITm1US2VsOUtoUno4d3Jhc3hkTFJGaVAxNEJSUFdybjQiLCJ0aWQiOiJmNjQ1YWQ5Mi1lMzhkLTRkMWEtYjUxMC1kMWIwOWE3NGE4Y2EiLCJ1dGkiOiI2bmNpWDAyU01raTlrNzMtRjFzWkFBIiwidmVyIjoiMi4wIn0.\",\"client_info\":\"" + AadRawClientInfo + "\"}";
-            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
-            return msalTokenResponse;
-        }
-
-        public static MsalTokenResponse CreateMsaTestTokenResponse()
-        {
-            const string jsonResponse = "{\"token_type\":\"Bearer\",\"scope\":\"Tasks.Read User.Read openid profile\",\"expires_in\":3600,\"ext_expires_in\":262800,\"access_token\":\"<removed_at>\",\"refresh_token\":\"<removed_rt>\",\"id_token\":\"eyJ2ZXIiOiIyLjAiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vOTE4ODA0MGQtNmM2Ny00YzViLWIxMTItMzZhMzA0YjY2ZGFkL3YyLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwiYXVkIjoiYjZjNjlhMzctZGY5Ni00ZGIwLTkwODgtMmFiOTZlMWQ4MjE1IiwiZXhwIjoxNTM4ODg1MjU0LCJpYXQiOjE1Mzg3OTg1NTQsIm5iZiI6MTUzODc5ODU1NCwibmFtZSI6IlRlc3QgVXNlcm5hbWUiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJtc2Fsc2RrdGVzdEBvdXRsb29rLmNvbSIsIm9pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInRpZCI6IjkxODgwNDBkLTZjNjctNGM1Yi1iMTEyLTM2YTMwNGI2NmRhZCIsImFpbyI6IkRXZ0tubCFFc2ZWa1NVOGpGVmJ4TTZQaFphUjJFeVhzTUJ5bVJHU1h2UkV1NGkqRm1CVTFSQmw1aEh2TnZvR1NHbHFkQkpGeG5kQXNBNipaM3FaQnIwYzl2YUlSd1VwZUlDVipTWFpqdzghQiIsImFsZyI6IkhTMjU2In0.\",\"client_info\":\"" + MsaRawClientInfo + "\"}";
-            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
-            return msalTokenResponse;
-        }
-
-        public static MsalTokenResponse CreateB2CTestTokenResponse()
-        {
-            const string jsonResponse = "{\"access_token\":\"<removed_at>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Mzg4MDQ4NjAsIm5iZiI6MTUzODgwMTI2MCwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2JhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOC92Mi4wLyIsInN1YiI6ImFkMDIwZjhlLWIxYmEtNDRiMi1iZDY5LWMyMmJlODY3MzdmNSIsImF1ZCI6IjBhN2Y1MmRkLTI2MGUtNDMyZi05NGRlLWI0NzgyOGMzZjM3MiIsImlhdCI6MTUzODgwMTI2MCwiYXV0aF90aW1lIjoxNTM4ODAxMjYwLCJpZHAiOiJsaXZlLmNvbSIsIm5hbWUiOiJNU0FMIFNESyBUZXN0Iiwib2lkIjoiYWQwMjBmOGUtYjFiYS00NGIyLWJkNjktYzIyYmU4NjczN2Y1IiwiZmFtaWx5X25hbWUiOiJTREsgVGVzdCIsImdpdmVuX25hbWUiOiJNU0FMIiwiZW1haWxzIjpbIm1zYWxzZGt0ZXN0QG91dGxvb2suY29tIl0sInRmcCI6IkIyQ18xX1NpZ25pbiIsImF0X2hhc2giOiJRNE8zSERDbGNhTGw3eTB1VS1iSkFnIn0.\",\"token_type\":\"Bearer\",\"not_before\":1538801260,\"expires_in\":3600,\"ext_expires_in\":262800,\"expires_on\":1538804860,\"resource\":\"14df2240-96cc-4f42-a133-ef0807492869\",\"client_info\":\"" + B2CRawClientInfo + "\",\"scope\":\"https://iosmsalb2c.onmicrosoft.com/webapitest/user.read\",\"refresh_token\":\"<removed_rt>\",\"refresh_token_expires_in\":1209600}";
-            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
-            return msalTokenResponse;
-        }
-
-        public static MsalTokenResponse CreateB2CTestTokenResponseWithTenantId()
-        {
-            const string jsonResponse = "{\"access_token\":\"<removed_at>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Mzg4MDQ4NjAsIm5iZiI6MTUzODgwMTI2MCwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2JhNmMwZDk0LWE4ZGEtNDViMi04M2FlLTMzODcxZjljMmRkOC92Mi4wLyIsInN1YiI6ImFkMDIwZjhlLWIxYmEtNDRiMi1iZDY5LWMyMmJlODY3MzdmNSIsImF1ZCI6IjBhN2Y1MmRkLTI2MGUtNDMyZi05NGRlLWI0NzgyOGMzZjM3MiIsImlhdCI6MTUzODgwMTI2MCwiYXV0aF90aW1lIjoxNTM4ODAxMjYwLCJpZHAiOiJsaXZlLmNvbSIsIm5hbWUiOiJNU0FMIFNESyBUZXN0Iiwib2lkIjoiYWQwMjBmOGUtYjFiYS00NGIyLWJkNjktYzIyYmU4NjczN2Y1IiwiZmFtaWx5X25hbWUiOiJTREsgVGVzdCIsImdpdmVuX25hbWUiOiJNU0FMIiwiZW1haWxzIjpbIm1zYWxzZGt0ZXN0QG91dGxvb2suY29tIl0sInRmcCI6IkIyQ18xX1NpZ25pbiIsImF0X2hhc2giOiJRNE8zSERDbGNhTGw3eTB1VS1iSkFnIiwidGlkIjoiYmE2YzBkOTQtYThkYS00NWIyLTgzYWUtMzM4NzFmOWMyZGQ4IiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20ifQ.\",\"token_type\":\"Bearer\",\"not_before\":1538801260,\"expires_in\":3600,\"ext_expires_in\":262800,\"expires_on\":1538804860,\"resource\":\"14df2240-96cc-4f42-a133-ef0807492869\",\"client_info\":\"" + B2CRawClientInfo + "\",\"scope\":\"https://iosmsalb2c.onmicrosoft.com/webapitest/user.read\",\"refresh_token\":\"<removed_rt>\",\"refresh_token_expires_in\":1209600}";
-            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
-            return msalTokenResponse;
-        }
-
-        public static MsalTokenResponse CreateAadTestTokenResponseWithFoci()
-        {
-            const string jsonResponse = "{\"token_type\":\"Bearer\",\"scope\":\"Calendars.Read openid profile Tasks.Read User.Read email\",\"expires_in\":3600,\"ext_expires_in\":262800,\"access_token\":\"<removed_at>\",\"refresh_token\":\"<removed_rt>\",\"id_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJiNmM2OWEzNy1kZjk2LTRkYjAtOTA4OC0yYWI5NmUxZDgyMTUiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhL3YyLjAiLCJpYXQiOjE1Mzg1Mzg0MjIsIm5iZiI6MTUzODUzODQyMiwiZXhwIjoxNTM4NTQyMzIyLCJuYW1lIjoiQ2xvdWQgSURMQUIgQmFzaWMgVXNlciIsIm9pZCI6IjlmNDg4MGQ4LTgwYmEtNGM0MC05N2JjLWY3YTIzYzcwMzA4NCIsInByZWZlcnJlZF91c2VybmFtZSI6ImlkbGFiQG1zaWRsYWI0Lm9ubWljcm9zb2Z0LmNvbSIsInN1YiI6Ilk2WWtCZEhOTkxITm1US2VsOUtoUno4d3Jhc3hkTFJGaVAxNEJSUFdybjQiLCJ0aWQiOiJmNjQ1YWQ5Mi1lMzhkLTRkMWEtYjUxMC1kMWIwOWE3NGE4Y2EiLCJ1dGkiOiI2bmNpWDAyU01raTlrNzMtRjFzWkFBIiwidmVyIjoiMi4wIn0.\",\"client_info\":\"" + AadRawClientInfo + "\",\"foci\":\"1\"}";
-            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(jsonResponse);
-            return msalTokenResponse;
-        }
-
-        // Fake strings approximately representing tokens of real-world size
-        internal const string AppAccessToken = "a9sVdA2UrU0KbsG19MjSZp4hlrd4B3mhZc1gfWsu1v3Nxuf9y7MMqdmCqyt4OwJ7cZEFAhdy8wf9vRastaS0Dcc6MnAtaI73k9co06QtQgecLPVMR23ht6cWB25Ta7yqdcQ8X7ARdUD4MWY6o01TqADKE4Vo3DMpzZiwpiS6Z81I5bW9jbWiUTT7J44lRM1qR3ZJUdaa6OSOaLZT4temLYy3bXZh6Bvu7fxOF1pStzwESRDiFegYq6LFf1sHVY5scdvNOifQnWuRy4bWw0Fl17IO5lKzhuEUvaOcgyWea0Hg3Rh9U0or2WPogJna7HraHdp0BWtuj3KOdXqmjxDoFKkTfBXiubpnAqlWwfAKHvKYefNuSRT7ewHLFQNpVVbr93P1Na4aMHqL4DWIQ1BEYoRskQkxNDtzeipb5CP5FrfStz8lFB4nCaZsJPqIzi82BpZ4HwXls8VYrRLt2dK0D9ksxufhN2uUknO2w5MBDvpwl5IuPZiCvwxU0IG3eDyqRCqw1uh18KL4qbeAwp0BPQL7Xexc4eCXC5o24uxipyWK6C169R645sYCgHY9Phiik9fUaTcZ6rzPhSKXK5svhtuMUpDHoHnSkOocCmJPRdNEpULup7zAMtGxGtD4ldfRRtAD5MLBcnKB4QN4KsbysV9lj1xDSFawL22pno61hreo5lJmqlRdj3yRVupqg5IRhilWI0wbUSfUPISrBS0EcCb6rSBd6MPIbstJYOsuJ4Bh4wtLDDeD5oxlMIaF2tkf2QHfspXocd0fLbpA7X9AR1s5yYRRJKgh7SJMgS4JJxLHvF9VZJCKKwnYzlR5EaHYsvDCGyvEi9UkWDCBYMcG6OvzYemjVOTiJTbNM2q6DaqLS9bOMZdZzNfG3PlMAqeZlH5CLv8edLzfDaVZmMCdsc6iUTCAgW4ERDzu7Pf2AeQHQlpplPkgYMxiKZ31BxoaHvwlGReopWq3NN8oOS9QG5VCG1osQRmBZAQHDZTA2x30C4l8L4yH8tvs12trqAvRGnFIq79qluVwJHAPGbQZiAEArzpN7laNqDmzJFCA4emv6DdnCnGdLCSaIubVTBJ5dXbBN9xmphJUGw1jCoFDcFxrcOK0MdJnVGnbkEuSrnEVHUGmocUG1tb0QRZ9Jhn9mGO6RxVcZVzs7XJi8vEQ0FeWJOG0uqsNyi0gCmsglyH8QqsOVlYve8UuxqCgzm1CgfCeNDJEB01xk6iTsjRM0iGcCaZGCm9dRdW99Hlq8SsLRZl2IT48KYj4B9ZP4jBrkY9Ef3xpFRu8fiwgBdzrZosZA2aQPRXlvdM1XjeGaK7iUsrpsVOrvDorBoMucV3uypI85c7yQaTu1qrKfri7OZgEVVBdQO08iipyvyRVSBz1U9ZAc0xqgERqPUoPIOFtqMRx1qJD7WWRUa0hnd66SAgiM2ViGBZspIsUvA9KnAF28uU0kVRn3FXb3B3pNLhpHQSqElPz1uFKp6gO1kqRR6B6TwKn";
-        internal const string UserAccessToken = "flMpQIKiCoiPK6qISSjmF9dGhKe47KFGPwe82BDBxBCVfYI4UiKYbBuShsjf8oGTsjN5ODeaO6k0cmZJYuNNbLyOr8JGqoxQRW9bI8j5ETpbTNf6tYpAWde9PIYj2wEBnbughVgtJsh2QxIrahie5leMpsGb1yoFzADD5gyoJq8etNUSgZwe5qkfaE9UBCUKrznKjKbsG5hBJXut5GD0QdQy3wo2PnocewrptlMzd5SsHCzUUBGA4q7ks7IfrLiQH11JyBnjBhypOX3XvuqBz4JKkpftVYfvwPWE3f5Onku6FkZJFFESyGQP9YnJVx5dQCpHH9l6ShTqOLSQduf7wxoyeAgxwPrM9Y8Kvj31IrXqiwP52x4hBsctLCqOXOZ3wMXnozMXyHpNvKMJaNgDgvBgMYhiyORkb3qKYw0gAP4659I8dK1esxJoD8I3EreDftGfNMFCgn7kFfauUQphkqx8ukqzw068R7g5TOUci1pgPcVXCAMxj0P3fTiKe1doVuF6znKYh3m7pjyzyaqb5K9VFIh4A8TXOO0MqjaVkoSWJXARTy4T0kAZBVPbO6U2BWku23yLIt43MhQTc9uf7inuirwaIgh5u7noDxYG4QZLB1CJl04Zq2gbh9GW7dqweAaC9efYTEDwhxDTPHeGTQs44e8cnWerIyZA7mq8sFuzihIiCfgZ6nNBPcx2lXKyarUtQGmjjRyOEAhs66atv3SgMhNBhontPoUhR1QEnTKeYzfaavlnf5qMZA41hijGazHyxy5FgLD5aLEpZTHN5MPQLeaEXzDMX5Wtdvq7nokiItRfLkKZtXkuSiFVltmRPcKqzGbjNRH96OQzuxLE1Mv25FYFR3PAwv6np69yScVOpNFL8CqJdT310dGnRPUKSrEqTPuMsHqVRr36j2ZUaGs6YBtcrxIxKHuPrv23FQg5fC0FgxZvKqve0hf68AocJ1HqKRy01CGQobmYpTwBByftOZYGC4KOfGd13l78kZaKLuk2gxfFuTQyr11A0L4n5tXfjlikJtr3wlTGt0KCGGXmNK1xsSoRC0VcXDOgQUu3FHblhiaYjbSvPRF09xn9tRPnUkznbsT1kPMiJ8v89ZOCtVWpvkoiy9VUVcSUpZNQwRh3wHidZAkp1xyjyVc2pIHPg6XhzJnlt77zHNiBkPxWbYt7hXBQf3QeYoMF4s0Qi1y5N72DdoSNJ3iaTwx3esAz6TeyxSh36PIz35mR5jGyGMssyaNg6lIewLPbjnizgC6xssi6mKOheDqWqBv89nIvSBOXEkKcUYsBlhBBK6BgxOIha1NAeP93RRKfyjrF7LtIoSOk3DJUx75rUJ9oyuuTt4FdSnp7ZdrIciO8vlNslPrfa7UjBdOtVHiaz9Ef91dctdADVFcwXXmcu2ypyKB1YvMbkPP7mc12TF1a8X6t0mU4s4J4IpA3SHmT5JvbQBEzOIs6ex38X3UtXSItxpaS2gKozAhAmvjt6NKMe3Jysm4bafH1kb8eB1vdwTQu3jIOGozqHC3rvqEVAt26NNKOuNYAoYYamQOSb2w8PUCuDDWs1ffLvvfyvRndZztV5C4HGGR1Tg82N291Sb7rSUYmA1rdGyJ4kPtSaiPOwMyPUs9FuZNef5Ib83D3gTcgS1gMxto5UkfSxtCDKLXtGKArOdACrRzHiiMSn3owQfyVtSXZPdeofoCzuPWcZzFLBUJR0iKWBpUkxd0N17vw45uMQpQUNGgGoyvyboKkAFlOGsEIAmrnooC3CJGVA4jHPYJnVG4xTJ37U6QL5sX95qWtjbvuD5KoT2GyWec0o62CNr09tCQsiALLC1QrfCiCGsullefbsgBB5tsOY1Kyiy4uf84qBMu20GbsJ01R8xxpJ5bh6HFRaStEK3WIy7TMJym42YMbxB3AGsGFGhNYljtuqgeUjXn1UuWskkB6QqdepFHCof6CHg0LlV0o4Iz9QKu5cfoi8jk5HKbvIGyDqCgZaC2LdugNgQ0X";
-        internal const string RefreshToken = "mhJDJ8wtjA3KxpRtuPAreZnMcJ2yKC2JUbpOGbRTdOCImLyQ2B4EIhv8AiA2cCEylZZfZsOsZrNsMBZZAAU9TQYYEO72QcdfnIWpAOeKkud5W2L8nMq6i9dx1EVIl09zFXhOJ79BdFbU0Eb5aUHlcqPCQjec62UKBLkZJmtMnoAa8cjvgIuxTdVM8FNdghe5nlCNTEVooKleTTEHNl2BrdyitLaWTKSP0lRqnFxriG0xWcJoSMsdS7Vt6HZd1TkwHIXycNMlCcCdUh5tOgqx1M8y8uoXK4OJ1LQmtkZvcQWcycvOCPACYakKM1pUQqwTxI6Y4HrL38sqQaSNxpF9OcFxOQWpuGodRekCbxXVbWclttIpvSOLaBhZ2ZBpcCBEeEMSmhqqYgajNwwwe9w88u0UsYKe6PBbaI48ENr02u2qBeLsIQ2HUyKlN3iVmX7u7MhgDWA3NNavMtlLmWd63NfuDgXpLI0O4cLhjAx8uoBIK8LntXPHPTxJ28o0yrszvD4gf7RdhuTq5VE15zne6iAJgIGfy7latGFzxuDMcML9OoXURHnNEHBgS9ZQCfNzYZ2O9flF1UjGpcBLEi7hHVHnrQb4y7c98dz9p62cvEMhorGx9kCwSIkOae5LheXPQkFIbsGyomNEwz3HZvR131VGAwdfmUUodvPr6LAAtmjl4sZ72PRqAo8EdQ0IFsWoypXVv51IooR87tO3uiG2DkxhIAwumOQdaJNxw1a0WS9mpQOmwFlvfbZkaIoUKgagHc8fVa1aHZntLGwH0S1iYixJiIrMnPYAeRdSp9mlHllrMX8xUIznobcZ5i8MpUYCKlUXMZ82S3XUJ5dJxARNRPxXlLJ5LPYBhUNkBLQen9Qmq3VZEV1RDJyhbGp6GAo14KsMtVAVYNmYPIgo85pCZgOwVEOBUycszu4AD3p4PT2ella4LVoqmTTMSA5GEWoeWb5JvEo222Z0oKr7UK8dGwpWRSbg8TNeODihJaTUDfErvbgaZnjIRpqfgtM5i1HfQbD7Yyft5PqyygUra7GYy7pjRrEvq95XQD8sAZ32ku9AqCo5qOB584iX881WErOoheQZokt1txqwuIMUyhVuMKNEXy70CeNTsb30ghQMZpZcXIkrLYyQCZ0gNmARhMKagCSdrpUtxudLk44yfmuwSQzBN3ifWfLZiFpU53qdPLZoTw5";
-        internal const string IdToken = "6GwdM7f6hHXfivavPozhaRqrbxvEysfXSMQyEKBwVgivPZTtmowsmYygchhIuxjeFFeq1ZPHjhxKFnulrvoY6TDerZY5xyOlg45bToI9Bu95qFvUrrt5r17UJcXdw4YkvEt10CcDDcLcEYw704RpVefvbpjbF24pOgIuafcAkDnbDA0Qea4ePuSC45Lw7zpJhbo9Gh8IfMX597fayBvMs3fh7frrm9KpWMCeKY3h99YSaCYjZFKp1ppvXXPE9bc4sh4pRDOfnv0Yr9J8u4elZevEE4qGddfgd3hYb18XPGRjPEMlWsh7tnwxwUm6OSZlMTHYuvwBENNMx7SUQmMeg4rCfgnbcNDkWpXCiSDVt1lLLv8F2GjYnM6De3v1Ks5lhBWx3grLggcN9LnXz92eJ1l5lTB2v0y9MgmFZ4gY43oIOW5n8G5HOx3bGOyjTw0TKKbyVa3mDj0A3QqW8eLTUJz42BNiGOf5m9prMSlpAW59CHCMJLatsj3IvGeCITsGAr3sUZEytORWUdxCfuIPwecQgU6bO7pNqNvZc1tJHHNwJlfS23ZkiFuEXqEThHYfxBCFxAzMDlzO0TOdWhvrb8hlNeAOcNhoAKxu7HXsePajKs4fU1rcdSxzNKwtASEla3p6jfJnnDtKf38RJZPaRRYMviqqWEMhjmqIvBm7sMaf8RyNNuYl7otZwmwNVCR1hzzmaTAy4kQce67FJqFba7uizrgwp9zsvK8muCHKKPvNthy7fHsxKmrBIm0bLcoePKK3wAID4kFvNQcxXp6rAOr8bLFF3bLEoYdzmF2QJz1frVZZHHPy90Cmlhw48EQN8NE2OllpdaykKt5k4rPcZQyitayNNhism30qh7eCBhcA7mm5Ja0S8X4VPlkwvgwg0mQuul6gakmja8xpnTrwiOdtao320GDmJaJA6zf3UTpNZTq9tdfBtUrjAD8RS0tNUBT3Ko8N2Lfh9ry8y9ESmRVIhch3rKY7UeefFAnkiwH2WwC57ZEsHtMP0SwKYtYKHZW9HkERCCyqOT1Mw0IavsLGFvchzMAvTnz4RwRBk6IrWgANvqT3F3Vexc2K0poKb71XZ4aMXxjqAzydGQAKpKJEJcqEvX9RD8nL76TF2LZIepiaZ3dbQImkqSjbF7aaY2JFoN9ZWlcSQKe8zdO8TIG16bF8W9R4ldDyzV39L33KcweG";
-    }
-
-    internal static class Adfs2019LabConstants
-    {
-        public const string Authority = "https://fs.msidlab8.com/adfs";
-        public const string AppId = "TestAppIdentifier";
-        public const string PublicClientId = "PublicClientId";
-        public const string ConfidentialClientId = "ConfidentialClientId";
-        public const string ClientRedirectUri = "http://localhost:8080";
-        public static readonly SortedSet<string> s_supportedScopes = new SortedSet<string>(new[] { "openid", "email", "profile" }, StringComparer.OrdinalIgnoreCase);
-        public const string ADFS2019ClientSecretURL = "https://buildautomation.vault.azure.net/secrets/ADFS2019ClientCredSecret/";
-        public const string ADFS2019ClientSecretName = "ADFS2019ClientCredSecret";
     }
 }
