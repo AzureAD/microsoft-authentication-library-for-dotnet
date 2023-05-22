@@ -23,7 +23,6 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
     public class CiamIntegrationTests
     {
         private readonly string[] _ciamScopes = new[] { "https://graph.microsoft.com/.default" };
-        private readonly string _ciamCcResource = "https://graph.microsoft.com/.default";
         private const string _ciamRedirectUri = "http://localhost";
 
         [TestMethod]
@@ -128,7 +127,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
                 .Build();
 
             var result = await msalConfidentialClient
-                .AcquireTokenForClient(new[] { _ciamCcResource })
+                .AcquireTokenForClient(new[] { TestConstants.DefaultGraphScope })
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
