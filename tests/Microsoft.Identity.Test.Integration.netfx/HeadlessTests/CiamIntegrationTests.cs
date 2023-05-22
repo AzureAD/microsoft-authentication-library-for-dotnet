@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
     [TestClass]
     public class CiamIntegrationTests
     {
-        private readonly string[] _ciamScopes = new[] { "https://graph.microsoft.com/.default" };
+        private readonly string[] _ciamScopes = new[] { TestConstants.DefaultGraphScope };
         private const string _ciamRedirectUri = "http://localhost";
 
         [TestMethod]
