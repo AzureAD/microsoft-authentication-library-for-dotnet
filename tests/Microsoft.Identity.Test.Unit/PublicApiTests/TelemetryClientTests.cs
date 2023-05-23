@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     TokenType.Bearer,
                     CacheLevel.None,
                     null,
-                    "https://graph.windows.net");
+                    "https://graph.microsoft.com");
             }
         }
 
