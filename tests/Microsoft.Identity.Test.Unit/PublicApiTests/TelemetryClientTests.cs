@@ -374,7 +374,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Environment.SetEnvironmentVariable("MSI_ENDPOINT", endpoint);
 
                 var mia = ManagedIdentityApplicationBuilder
-                    .Create()
+                    .Create(ManagedIdentityId.SystemAssigned)
                     .WithExperimentalFeatures()
                     .WithHttpManager(_harness.HttpManager)
                     .WithTelemetryClient(_telemetryClient)
