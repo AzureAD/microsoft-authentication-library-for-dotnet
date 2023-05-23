@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Common
             yield return new AuthorityWithExpectedTenantId { Authority = new Uri(TestConstants.AuthorityTestTenant), ExpectedTenantId = TestConstants.Utid }.ToObjectArray();
             yield return new AuthorityWithExpectedTenantId { Authority = new Uri(TestConstants.AadAuthorityWithTestTenantId), ExpectedTenantId = TestConstants.AadTenantId }.ToObjectArray();
             yield return new AuthorityWithExpectedTenantId { Authority = new Uri(TestConstants.AuthorityWindowsNet), ExpectedTenantId = TestConstants.Utid }.ToObjectArray();
-            yield return new AuthorityWithExpectedTenantId { Authority = new Uri(TestConstants.DstsAuthorityTenanted), ExpectedTenantId = TestConstants.TenantIdString }.ToObjectArray();
+            yield return new AuthorityWithExpectedTenantId { Authority = new Uri(TestConstants.DstsAuthorityTenanted), ExpectedTenantId = TestConstants.TenantId }.ToObjectArray();
         }
     }
 }

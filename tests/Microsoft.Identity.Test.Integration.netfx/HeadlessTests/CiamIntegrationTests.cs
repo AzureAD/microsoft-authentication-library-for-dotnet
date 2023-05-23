@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -22,8 +22,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
     [TestClass]
     public class CiamIntegrationTests
     {
-        private const string _extraQParams = "dc=ESTS-PUB-EUS-AZ1-FD000-TEST1";
-        private readonly string[] _ciamScopes = new[] { "openid" };
+        private readonly string[] _ciamScopes = new[] { TestConstants.DefaultGraphScope };
         private const string _ciamRedirectUri = "http://localhost";
 
         [TestMethod]
@@ -33,8 +32,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
         public async Task ROPC_Ciam_Async(string authorityFormat, int authorityVersion)
         {
             //Get lab details
-            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery() 
-            { 
+            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
+            {
                 FederationProvider = FederationProvider.CIAM,
                 SignInAudience = SignInAudience.AzureAdMyOrg,
                 PublicClient = PublicClient.no
@@ -67,7 +66,6 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
 
             var result = await msalPublicClient
                 .AcquireTokenByUsernamePassword(_ciamScopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
-                .WithExtraQueryParameters(_extraQParams)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -130,7 +128,6 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
 
             var result = await msalConfidentialClient
                 .AcquireTokenForClient(new[] { TestConstants.DefaultGraphScope })
-                .WithExtraQueryParameters(_extraQParams)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -150,7 +147,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
         private string GetCiamSecret()
         {
             KeyVaultSecretsProvider provider = new KeyVaultSecretsProvider();
-            return provider.GetSecretByName("MSIDLABCIAM1-cc").Value;
+            return provider.GetSecretByName("msidlabciam2-cc").Value;
         }
     }
 }

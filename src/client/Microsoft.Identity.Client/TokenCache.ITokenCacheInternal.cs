@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -55,7 +54,7 @@ namespace Microsoft.Identity.Client
 
             string suggestedWebCacheKey = CacheKeyFactory.GetExternalCacheKeyFromResponse(requestParams, homeAccountId);
 
-            // token could be comming from a different cloud than the one configured
+            // token could be coming from a different cloud than the one configured
             if (requestParams.AppConfig.MultiCloudSupportEnabled && !string.IsNullOrEmpty(response.AuthorityUrl))
             {
                 var url = new Uri(response.AuthorityUrl);
@@ -359,7 +358,7 @@ namespace Microsoft.Identity.Client
             InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata)
         {
             if (msalRefreshTokenCacheItem?.RawClientInfo != null &&
-                msalIdTokenCacheItem?.IdToken?.ObjectId != null &&
+                msalIdTokenCacheItem?.IdToken?.GetUniqueId() != null &&
                 IsLegacyAdalCacheEnabled(requestParams))
             {
 
@@ -374,7 +373,7 @@ namespace Microsoft.Identity.Client
                     msalRefreshTokenCacheItem,
                     msalIdTokenCacheItem,
                     authorityWithPreferredCache.AuthorityInfo.CanonicalAuthority.ToString(),
-                    msalIdTokenCacheItem.IdToken.ObjectId,
+                    msalIdTokenCacheItem.IdToken.GetUniqueId(),
                     response.Scope);
             }
             else

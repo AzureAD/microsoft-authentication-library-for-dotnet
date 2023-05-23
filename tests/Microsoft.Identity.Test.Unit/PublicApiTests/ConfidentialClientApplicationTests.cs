@@ -1037,6 +1037,53 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        [TestMethod]
+        // regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4140
+        public async Task IdTokenHasNoOid_ADALSerialization_Async()
+        {
+            // Arrange
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler("https://login.windows-ppe.net/98ecb0ef-bb8d-4216-b45a-70df950dc6e3/");
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority("https://login.windows-ppe.net/98ecb0ef-bb8d-4216-b45a-70df950dc6e3/")
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .Build();
+
+                byte[] tokenCacheInAdalFormat = null;
+                app.UserTokenCache.SetAfterAccess(
+                    (args) =>
+                    {
+                        if (args.HasStateChanged)
+                        {
+                            tokenCacheInAdalFormat = args.TokenCache.SerializeAdalV3();
+                        };
+                    });
+
+                var handler = httpManager.AddMockHandler(
+                       new MockHttpMessageHandler()
+                       {
+                           ExpectedMethod = HttpMethod.Post,
+                           ResponseMessage = MockHelpers.CreateSuccessResponseMessage(MockHelpers.GetTokenResponseWithNoOidClaim())
+                       });
+                
+
+                // Act
+                var result = await app.AcquireTokenByAuthorizationCode(new[] { "https://management.core.windows.net//.default" }, "code")                    
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(tokenCacheInAdalFormat);
+
+                Assert.AreEqual("AujLDQp5yRMRcGpPcDBft9Nb5uFSKYxDZq65-ebfHls", result.UniqueId);
+                Assert.AreEqual("AujLDQp5yRMRcGpPcDBft9Nb5uFSKYxDZq65-ebfHls", result.ClaimsPrincipal.FindFirst("sub").Value);
+                Assert.IsNull(result.ClaimsPrincipal.FindFirst("oid"));
+            }
+        }
+
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
@@ -1597,7 +1644,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var longRunningOboBuilder = ((ILongRunningWebApi)app).InitiateLongRunningProcessInWebApi(
                                TestConstants.s_scope.ToArray(),
                                TestConstants.DefaultClientAssertion,
-                               ref oboCacheKey);
+                               ref oboCacheKey)
+                .WithSearchInCacheForLongRunningProcess();
             PublicClientApplicationTests.CheckBuilderCommonMethods(longRunningOboBuilder);
 
             longRunningOboBuilder = ((ILongRunningWebApi)app).AcquireTokenInLongRunningProcess(
@@ -1805,7 +1853,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                           .BuildConcrete();
 
             // AcquireToken from app provider
-            AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)                                                    
+            AuthenticationResult result = await app.AcquireTokenForClient(TestConstants.s_scope)
                                                     .ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
 
             Assert.IsNotNull(result.AccessToken);
@@ -1863,6 +1911,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TestConstants.DefaultAccessToken + differentScopesForAt, result.AccessToken);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(4, callbackInvoked);
+        }
+
+        private AppTokenProviderResult GetAppTokenProviderResult(string differentScopesForAt = "", long? refreshIn = 1000)
+        {
+            var token = new AppTokenProviderResult();
+            token.AccessToken = TestConstants.DefaultAccessToken + differentScopesForAt; //Used to indicate that there is a new access token for a different set of scopes
+            token.ExpiresInSeconds = 3600;
+            token.RefreshInSeconds = refreshIn;
+
+            return token;
         }
     }
 }

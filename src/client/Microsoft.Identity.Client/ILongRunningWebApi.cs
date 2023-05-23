@@ -14,11 +14,14 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Acquires an access token for this web API from the authority configured in the application,
         /// in order to access another downstream protected web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow.
-        /// See https://aka.ms/msal-net-long-running-obo .
+        /// See https://aka.ms/msal-net-long-running-obo.
         /// This confidential client application was itself called with a token which will be provided in the
         /// <paramref name="userToken">userToken</paramref> parameter.
         /// Use <seealso cref="ConfidentialClientApplicationExtensions.StopLongRunningProcessInWebApiAsync"/> to stop the long running process.
         /// </summary>
+        /// <remarks>
+        /// This method should be called once when the long running session is started.
+        /// </remarks>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="userToken">A JSON Web Token which was used to call the web API and contains the credential information
         /// about the user on behalf of whom to get a token.</param>
@@ -34,7 +37,7 @@ namespace Microsoft.Identity.Client
         /// Use <seealso cref="ConfidentialClientApplicationExtensions.StopLongRunningProcessInWebApiAsync"/> to stop the long running process.
         /// </summary>
         /// <remarks>
-        /// This method is intended to be used in the long running processes inside of web APIs.
+        /// This method should be called during the long running session to retrieve the token from the cache
         /// </remarks>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="longRunningProcessSessionKey">Key by which to look up the token in the cache</param>

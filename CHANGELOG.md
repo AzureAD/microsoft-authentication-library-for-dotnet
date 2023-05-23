@@ -1,10 +1,28 @@
+4.54.0
+==========
+### New Features
+- Acquiring tokens with managed identity is now generally available. See [4125](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4125) and [documentation for managed identity in MSAL.NET](https://aka.ms/msal-net-managed-identity).  
+- Updated the managed identity API to specify the identity type when creating an `ManagedIdentityApplication`. See [4114](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4114).  
+- When acquiring tokens with managed identity and using the default HTTP client, MSAL will retry the request for certain exception codes. See [4067](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4067).  
+- Adds `MsalManagedIdentityException` class that represents any managed identity related exceptions. It includes general exception information including the Azure source from which the exception originates. See [4041](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4041).  
+- MSAL will now proactively refresh tokens acquired with managed identity. See [4062](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4062).  
+- MSAL will now proactively refresh tokens acquired using `AppTokenProvider` API. See [4074](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4074).  
+- `MsalException` and derived exception classes now have a property `AdditionalExceptionData`, which holds any extra error information. Currently it is only populated for exceptions coming from the Windows authentication broker (WAM). See [4106](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4106).  
+- For HTTP telemetry. added a new telemetry ID for long-running on-behalf-of requests. See [4099](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4099).  
+
+### Bug Fixes
+- Fixed a JSON serialization issue in iOS apps that are built in release Ahead-Of-Time (AOT) compilation mode. See [4082](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4082).  
+- MSAL.NET package now references correct Microsoft.iOS version. See [4091](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4091).  
+- Microsoft.Identity.Client.Broker package can now be used in projects which rely on the older package.config. See [4108](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4108).  
+- Fixed a `user_mismatch` error when `WithAccount` is specified when acquiring tokens interactively and selecting a different account in the account picker. See [3991](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3991).  
+
 4.53.0
 ==========
 ### New Features
-- Added support for CIAM authorities. See [3990](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3990)
+- Added support for CIAM authorities. See [3990](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3990).  
 
 ### Bug Fixes
-- Fixed issue where WAM is invoked for B2C authorities. MSAL will now fall back to the browser for this scenario. See [4072](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4072)
+- Fixed issue where WAM is invoked for B2C authorities. MSAL will now fall back to the browser for this scenario. See [4072](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4072).  
 
 4.52.0
 ==========

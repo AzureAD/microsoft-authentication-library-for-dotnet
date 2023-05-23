@@ -45,6 +45,18 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             "\",\"id_token_expires_in\":\"3600\"}";
         }
 
+        public static string GetTokenResponseWithNoOidClaim()
+        {
+            return "{\"token_type\": \"Bearer\"," +
+                "\"scope\": \"https://management.core.windows.net//user_impersonation https://management.core.windows.net//.default\"," +
+                "\"expires_in\": 4771," +
+                "\"ext_expires_in\": 4771," +
+                "\"access_token\": \"secret\"," +
+                "\"refresh_token\": \"secret\"," +
+                "\"id_token\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6InVFQnBBVkVBTVBaUVpGS2lJRFVWdjFEdFRkayJ9.eyJhdWQiOiI0OTliODRhYy0xMzIxLTQyN2YtYWExNy0yNjdjYTY5NzU3OTgiLCJpc3MiOiJodHRwczovL2xvZ2luLndpbmRvd3MtcHBlLm5ldC85OGVjYjBlZi1iYjhkLTQyMTYtYjQ1YS03MGRmOTUwZGM2ZTMvdjIuMCIsImlhdCI6MTY4NDMxMzA1NCwibmJmIjoxNjg0MzEzMDU0LCJleHAiOjE2ODQzMTY5NTQsImFhaSI6InRlbmFudDogODExOTg5MGItNGMzZi00NjVkLTk4NDAtNTk5MTMxZDE0ZDk4LCBvYmplY3Q6IDRlNjJhMmI0LTBiZTYtNDI0Yi1hMDg0LWYyZmYwOTIxOGUyMyIsImF1dGhfdGltZSI6MTY4NDMxMzMzOCwiaG9tZV9vaWQiOiI0ZTYyYTJiNC0wYmU2LTQyNGItYTA4NC1mMmZmMDkyMThlMjMiLCJob21lX3B1aWQiOiIxMDAzREZGRDAwOURGODQ3IiwiaG9tZV90aWQiOiI4MTE5ODkwYi00YzNmLTQ2NWQtOTg0MC01OTkxMzFkMTRkOTgiLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLXBwZS5uZXQvODExOTg5MGItNGMzZi00NjVkLTk4NDAtNTk5MTMxZDE0ZDk4LyIsIm5hbWUiOiJ0ZXN0X3Rlc3RfY3NwXzAyMiBUZWNobmljaWFuIiwibm9uY2UiOiIzMGJiYTU0Ny05MjViLTQxZWItOTFiYy05YTM1YTY3M2JmZDkiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ1c2VyXzRlNjJhMmI0MGJlNjQyNGJhMDg0ZjJmZjA5MjE4ZTIzQHN1YmdkYXAuYWxpbmMueHl6IiwicmgiOiIwLkFBRUE3N0RzbUkyN0ZrSzBXbkRmbFEzRzQ2eUVtMGtoRTM5Q3FoY21mS2FYVjVnQkFKUS4iLCJzdWIiOiJBdWpMRFFwNXlSTVJjR3BQY0RCZnQ5TmI1dUZTS1l4RFpxNjUtZWJmSGxzIiwidGlkIjoiOThlY2IwZWYtYmI4ZC00MjE2LWI0NWEtNzBkZjk1MGRjNmUzIiwidXRpIjoiODZyeGRJTlhiMDJMY3RIMDltVW1BQSIsInZlciI6IjIuMCIsIndpZHMiOlsiODhkOGUzZTMtOGY1NS00YTFlLTk1M2EtOWI5ODk4Yjg4NzZiIiwiMDgzNzJiODctN2QwMi00ODJhLTllMDItZmIwM2VhNWZlMTkzIl0sInhtc19tcGNpIjoyNTkyMDAsInhtc19wY2kiOjM2MDAsInhtc193c2l0IjoxODAwfQ.no_signature\"," +
+                "\"client_info\": \"eyJ1aWQiOiI0ZTYyYTJiNC0wYmU2LTQyNGItYTA4NC1mMmZmMDkyMThlMjMiLCJ1dGlkIjoiODExOTg5MGItNGMzZi00NjVkLTk4NDAtNTk5MTMxZDE0ZDk4In0\"}";
+        }
+
         public static readonly string DefaultEmtpyFailureErrorMessage =
             "{\"the-error-is-not-here\":\"erorwithouterrorfield\",\"error_description\":\"AADSTS991: " +
                                         "This is an error message which doesn't contain the error field. " +
@@ -54,12 +66,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                                         "\"trace_id\":\"dd25f4fb-3e8d-458e-90e7-179524ce0000\",\"correlation_id\":" +
                                         "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}";
 
-        public static string GetDefaultTokenResponse(string accessToken = TestConstants.ATSecret)
+        public static string GetDefaultTokenResponse(string accessToken = TestConstants.ATSecret, string refreshToken = TestConstants.RTSecret)
         {
               return
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
             "\"r1/scope1 r1/scope2\",\"access_token\":\"" + accessToken + "\"" +
-            ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
+            ",\"refresh_token\":\"" + refreshToken + "\",\"client_info\"" +
             ":\"" + CreateClientInfo() + "\",\"id_token\"" +
             ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) + "\"}";
         }
@@ -69,7 +81,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return
           "{\"token_type\":\"pop\",\"expires_in\":\"3599\",\"scope\":" +
           "\"r1/scope1 r1/scope2\",\"access_token\":\"" + TestConstants.ATSecret + "\"" +
-          ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
+          ",\"refresh_token\":\"" + TestConstants.RTSecret + "\",\"client_info\"" +
           ":\"" + CreateClientInfo() + "\",\"id_token\"" +
           ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
           "\",\"id_token_expires_in\":\"3600\"}";
@@ -80,7 +92,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
             "\"r1/scope1 r1/scope2\",\"access_token\":\"" + TestConstants.ATSecret + "\"" +
-            ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
+            ",\"refresh_token\":\"" + TestConstants.RTSecret + "\",\"client_info\"" +
             ":\"" + CreateClientInfo() + "\",\"id_token\"" +
             ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
             "\",\"spa_code\":\"" + spaCode + "\"" +
@@ -92,7 +104,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
             "\"r1/scope1 r1/scope2\",\"access_token\":\"" + TestConstants.ATSecret + "\"" +
-            ",\"refresh_token\":\"" + Guid.NewGuid() + "\",\"client_info\"" +
+            ",\"refresh_token\":\"" + TestConstants.RTSecret + "\",\"client_info\"" +
             ":\"" + CreateClientInfo() + "\",\"id_token\"" +
             ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
             "\",\"spa_accountId\":\"" + spaAccountId + "\"" +
@@ -193,10 +205,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 scopes, idToken, clientInfo));
         }
 
-        public static HttpResponseMessage CreateSuccessTokenResponseMessage(bool foci = false, string accessToken = TestConstants.ATSecret)
+        public static HttpResponseMessage CreateSuccessTokenResponseMessage(bool foci = false, string accessToken = TestConstants.ATSecret, string refreshToken = TestConstants.RTSecret)
         {
             return CreateSuccessResponseMessage(
-                foci ? GetFociTokenResponse() : GetDefaultTokenResponse(accessToken));
+                foci ? GetFociTokenResponse() : GetDefaultTokenResponse(accessToken, refreshToken));
         }
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessageWithUid(

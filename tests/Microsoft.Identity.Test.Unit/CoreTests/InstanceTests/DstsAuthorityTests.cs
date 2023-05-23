@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
@@ -36,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             return new MockHttpMessageHandler()
             {
-                ExpectedUrl = $"{authority}/oauth2/v2.0/token",
+                ExpectedUrl = $"{authority}oauth2/v2.0/token",
                 ExpectedMethod = HttpMethod.Post,
                 ExpectedPostData = expectedRequestBody,
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid))
@@ -57,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build();
 
-                Assert.AreEqual(authority + "/", app.Authority);
+                Assert.AreEqual(authority, app.Authority);
                 var confidentailClientApp = (ConfidentialClientApplication)app;
                 Assert.AreEqual(AuthorityType.Dsts, confidentailClientApp.AuthorityInfo.AuthorityType);
 
@@ -83,6 +84,46 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             }
         }
 
+        [TestMethod]
+        public void DstsAuthorityFlags()
+        {
+            var app = ConfidentialClientApplicationBuilder
+               .Create(TestConstants.ClientId)
+               .WithAuthority(TestConstants.DstsAuthorityTenanted)
+               .WithClientSecret("secret")
+               .Build();
+
+            Assert.AreEqual(AuthorityType.Dsts, (app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.AuthorityType);
+
+            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.IsMultiTenantSupported);
+            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.IsClientInfoSupported);
+            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.IsInstanceDiscoverySupported);
+            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.IsTenantOverrideSupported);
+            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.IsUserAssertionSupported);
+        }
+
+        [TestMethod]
+        public void DstsAuthority_WithTenantId_Success()
+        {
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority(TestConstants.DstsAuthorityTenanted)
+                .WithClientSecret("secret")
+                .Build();
+
+            Assert.AreEqual(TestConstants.DstsAuthorityTenanted, app.Authority);
+
+            // change the tenant id
+            var parameterBuilder = app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                    .WithTenantId(TestConstants.TenantId2);
+
+            // Verify Host still matches the original Authority
+            Assert.AreEqual(new Uri(TestConstants.DstsAuthorityTenanted).Host, parameterBuilder.CommonParameters.AuthorityOverride.Host);
+
+            // Verify the Tenant Id matches
+            Assert.AreEqual(TestConstants.TenantId2, AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority));
+        }
+
         [DataTestMethod]
         [DataRow(TestConstants.DstsAuthorityCommon)]
         [DataRow(TestConstants.DstsAuthorityTenanted)]
@@ -94,9 +135,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 _harness.ServiceBundle,
                 Guid.NewGuid());
 
-            Assert.AreEqual($"{authority}/oauth2/v2.0/token", instance.GetTokenEndpointAsync(_testRequestContext).Result);
-            Assert.AreEqual($"{authority}/oauth2/v2.0/authorize", instance.GetAuthorizationEndpointAsync(_testRequestContext).Result);
-            Assert.AreEqual($"{authority}/oauth2/v2.0/devicecode", instance.GetDeviceCodeEndpointAsync(_testRequestContext).Result);
+            Assert.AreEqual($"{authority}oauth2/v2.0/token", instance.GetTokenEndpointAsync(_testRequestContext).Result);
+            Assert.AreEqual($"{authority}oauth2/v2.0/authorize", instance.GetAuthorizationEndpointAsync(_testRequestContext).Result);
+            Assert.AreEqual($"{authority}oauth2/v2.0/devicecode", instance.GetDeviceCodeEndpointAsync(_testRequestContext).Result);
             Assert.AreEqual($"https://some.url.dsts.core.azure-test.net/dstsv2/common/userrealm/", instance.AuthorityInfo.UserRealmUriPrefix);
         }
 
@@ -118,16 +159,15 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
         [TestMethod]
         public void CreateAuthorityFromTenantedWithTenantTest()
-        {
-            
+        {            
             Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(TestConstants.DstsAuthorityTenanted);
-            Assert.AreEqual("tenantid", authority.TenantId);
+            Assert.AreEqual(TestConstants.TenantId, authority.TenantId);
             
             string updatedAuthority = authority.GetTenantedAuthority("tenant2");            
 
             Assert.AreEqual(
                 TestConstants.DstsAuthorityTenanted,
-                updatedAuthority.TrimEnd('/'),
+                updatedAuthority,
                 "Not changed, original authority already has tenant id");
 
             string updatedAuthority2 = authority.GetTenantedAuthority("tenant2", true);

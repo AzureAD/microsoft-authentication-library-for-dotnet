@@ -104,8 +104,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string ADFSAuthority2 = "https://someAdfs.com/adfs/";
 
         public const string DstsAuthorityTenantless = "https://some.url.dsts.core.azure-test.net/dstsv2/";
-        public const string DstsAuthorityTenanted = "https://some.url.dsts.core.azure-test.net/dstsv2/" + TenantIdString;
-        public const string DstsAuthorityCommon = "https://some.url.dsts.core.azure-test.net/dstsv2/" + Common;
+        public const string DstsAuthorityTenanted = "https://some.url.dsts.core.azure-test.net/dstsv2/" + TenantId + "/";
+        public const string DstsAuthorityCommon = "https://some.url.dsts.core.azure-test.net/dstsv2/" + Common + "/";
 
         public const string B2CLoginGlobal = ".b2clogin.com";
         public const string B2CLoginUSGov = ".b2clogin.us";
@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string iOSBrokerErrDescr = "Test Error Description";
         public const string iOSBrokerErrorMetadata = "error_metadata";
         public const string iOSBrokerErrorMetadataValue = @"{""home_account_id"":""test_home"", ""username"" : """ + Username + @""" }";
-        public const string DefaultGraphScope = "https://graph.windows.net/.default";
+        public const string DefaultGraphScope = "https://graph.microsoft.com/.default";
 
         //This value is only for testing purposes. It is for a certificate that is not used for anything other than running tests
         public const string _defaultx5cValue = @"MIIDHzCCAgegAwIBAgIQM6NFYNBJ9rdOiK+C91ZzFDANBgkqhkiG9w0BAQsFADAgMR4wHAYDVQQDExVBQ1MyQ2xpZW50Q2VydGlmaWNhdGUwHhcNMTIwNTIyMj
