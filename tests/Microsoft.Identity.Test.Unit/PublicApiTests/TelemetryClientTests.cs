@@ -515,9 +515,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private void CreateApplication(AssertionType assertionType = AssertionType.Secret)
         {
-            //var certificate = new X509Certificate2(
-            //                        ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
-            //                        TestConstants.DefaultPassword);
+            var certificate = new X509Certificate2(
+                                    ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
+                                    TestConstants.DefaultPassword);
 
             switch (assertionType)
             {
@@ -530,24 +530,24 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .WithTelemetryClient(_telemetryClient)
                         .BuildConcrete();
                         break;
-                //case AssertionType.CertificateWithoutSni:
-                //    _cca = ConfidentialClientApplicationBuilder
-                //        .Create(TestConstants.ClientId)
-                //        .WithCertificate(certificate)
-                //        .WithHttpManager(_harness.HttpManager)
-                //        .WithExperimentalFeatures()
-                //        .WithTelemetryClient(_telemetryClient)
-                //        .BuildConcrete();
-                //    break;
-                //case AssertionType.CertificateWithSni:
-                //    _cca = ConfidentialClientApplicationBuilder
-                //        .Create(TestConstants.ClientId)
-                //        .WithCertificate(certificate, true)
-                //        .WithHttpManager(_harness.HttpManager)
-                //        .WithExperimentalFeatures()
-                //        .WithTelemetryClient(_telemetryClient)
-                //        .BuildConcrete();
-                //    break;
+                case AssertionType.CertificateWithoutSni:
+                    _cca = ConfidentialClientApplicationBuilder
+                        .Create(TestConstants.ClientId)
+                        .WithCertificate(certificate)
+                        .WithHttpManager(_harness.HttpManager)
+                        .WithExperimentalFeatures()
+                        .WithTelemetryClient(_telemetryClient)
+                        .BuildConcrete();
+                    break;
+                case AssertionType.CertificateWithSni:
+                    _cca = ConfidentialClientApplicationBuilder
+                        .Create(TestConstants.ClientId)
+                        .WithCertificate(certificate, true)
+                        .WithHttpManager(_harness.HttpManager)
+                        .WithExperimentalFeatures()
+                        .WithTelemetryClient(_telemetryClient)
+                        .BuildConcrete();
+                    break;
                 case AssertionType.ClientAssertion:
                     _cca = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
