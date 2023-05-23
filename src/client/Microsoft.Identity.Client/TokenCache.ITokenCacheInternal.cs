@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -266,8 +267,8 @@ namespace Microsoft.Identity.Client
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
 
                         DumpCacheToLogs(requestParams);
-
                     }
+
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = false;
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -1216,7 +1217,7 @@ namespace Microsoft.Identity.Client
                            requestScopes: requestParameters.Scope,
                            requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId,
                            identityLogger: requestParameters.RequestContext.Logger.IdentityLogger,
-                            piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
+                           piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
 
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                     }
@@ -1301,7 +1302,7 @@ namespace Microsoft.Identity.Client
                            requestScopes: requestParameters.Scope,
                            requestTenantId: requestParameters.AuthorityManager.OriginalAuthority.TenantId,
                            identityLogger: requestParameters.RequestContext.Logger.IdentityLogger,
-                            piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
+                           piiLoggingEnabled: requestParameters.RequestContext.Logger.PiiLoggingEnabled);
 
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                     }

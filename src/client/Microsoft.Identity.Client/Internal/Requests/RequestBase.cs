@@ -104,13 +104,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     apiEvent.ApiErrorCode = ex.ErrorCode;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
-                    LogErrorTelemetryToClient(ex.ErrorCode, telemetryEventDetails, telemetryClients);
+                    LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
                     throw;
                 }
                 catch (Exception ex)
                 {
                     apiEvent.ApiErrorCode = ex.GetType().Name;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
+                    LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
                     throw;
                 }
                 finally
@@ -120,12 +121,27 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private void LogErrorTelemetryToClient(string errorCode, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
+        private void LogMsalErrorTelemetryToClient(Exception ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
         {
             if (telemetryClients.HasEnabledClients(TelemetryConstants.AcquireTokenEventName))
             {
                 telemetryEventDetails.SetProperty(TelemetryConstants.Succeeded, false);
-                telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, errorCode);
+                telemetryEventDetails.SetProperty(TelemetryConstants.ErrorMessage, ex.Message);
+
+                if (ex is MsalClientException clientException)
+                {
+                    telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, clientException.ErrorCode);
+                    return;
+                }
+
+                if (ex is MsalServiceException serviceException)
+                {
+                    telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, serviceException.ErrorCode);
+                    telemetryEventDetails.SetProperty(TelemetryConstants.StsErrorCode, serviceException.ErrorCodes?.FirstOrDefault());
+                    return;
+                }
+
+                telemetryEventDetails.SetProperty(TelemetryConstants.ErrorCode, ex.GetType().ToString());
             }
         }
 
@@ -139,10 +155,64 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 telemetryEventDetails.SetProperty(TelemetryConstants.DurationInCache, authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs);
                 telemetryEventDetails.SetProperty(TelemetryConstants.DurationInHttp, authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs);
                 telemetryEventDetails.SetProperty(TelemetryConstants.Succeeded, true);
-                telemetryEventDetails.SetProperty(TelemetryConstants.PopToken, authenticationResult.TokenType.Equals(Constants.PoPTokenType));
+                telemetryEventDetails.SetProperty(TelemetryConstants.TokenType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.TokenType);
                 telemetryEventDetails.SetProperty(TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds);
                 telemetryEventDetails.SetProperty(TelemetryConstants.ActivityId, authenticationResult.CorrelationId);
+
+                if (authenticationResult.AuthenticationResultMetadata.RefreshOn.HasValue)
+                {
+                    telemetryEventDetails.SetProperty(TelemetryConstants.RefreshOn, DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value));
+                }
+                telemetryEventDetails.SetProperty(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
+                telemetryEventDetails.SetProperty(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
+                telemetryEventDetails.SetProperty(TelemetryConstants.CacheLevel, (int)GetCacheLevel(authenticationResult));
+                ParseScopesForTelemetry(telemetryEventDetails);
             }
+        }
+
+        private void ParseScopesForTelemetry(MsalTelemetryEventDetails telemetryEventDetails)
+        {
+            if (AuthenticationRequestParameters.Scope.Count > 0)
+            {
+                string firstScope = AuthenticationRequestParameters.Scope.First();
+
+                if (Uri.IsWellFormedUriString(firstScope, UriKind.Absolute))
+                {
+                    Uri firstScopeAsUri = new Uri(firstScope);
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Resource, $"{firstScopeAsUri.Scheme}://{firstScopeAsUri.Host}");
+
+                    StringBuilder stringBuilder = new StringBuilder();
+
+                    foreach (string scope in AuthenticationRequestParameters.Scope)
+                    {
+                        var splitString = scope.Split(new[] { firstScopeAsUri.Host }, StringSplitOptions.None);
+                        string scopeToAppend = splitString.Count() > 1 ? splitString[1].TrimStart('/') + " " : splitString.FirstOrDefault();
+                        stringBuilder.Append(scopeToAppend);
+                    }
+
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, stringBuilder.ToString().TrimEnd(' '));
+                }
+                else
+                {
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, AuthenticationRequestParameters.Scope.AsSingleString());
+                }
+            }
+        }
+
+        private CacheLevel GetCacheLevel(AuthenticationResult authenticationResult)
+        {
+            if (authenticationResult.AuthenticationResultMetadata.TokenSource == TokenSource.Cache) //Check if token source is cache
+            {
+                if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheLevel > CacheLevel.Unknown) //Check if cache has indicated which level was used
+                {
+                    return AuthenticationRequestParameters.RequestContext.ApiEvent.CacheLevel;
+                }
+
+                //If no level was used, set to unknown
+                return CacheLevel.Unknown;
+            }
+
+            return CacheLevel.None;
         }
 
         private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ILoggerAdapter logger)
@@ -193,11 +263,38 @@ namespace Microsoft.Identity.Client.Internal.Requests
             apiEvent.IsLegacyCacheEnabled = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
             apiEvent.CacheInfo = CacheRefreshReason.NotApplicable;
             apiEvent.TokenType = AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
+            apiEvent.AssertionType = GetAssertionType();
 
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
             EnrichTelemetryApiEvent(apiEvent);
 
             return apiEvent;
+        }
+
+        private AssertionType GetAssertionType()
+        {
+            if (ServiceBundle.Config.IsManagedIdentity ||
+                ServiceBundle.Config.AppTokenProvider != null)
+            {
+                return AssertionType.ManagedIdentity;
+            }
+
+            if (ServiceBundle.Config.ClientCredential != null)
+            {
+                if (ServiceBundle.Config.ClientCredential.AssertionType == AssertionType.CertificateWithoutSni)
+                {
+                    if (ServiceBundle.Config.SendX5C)
+                    {
+                        return AssertionType.CertificateWithSni;
+                    }
+
+                    return AssertionType.CertificateWithoutSni;
+                }
+
+                return ServiceBundle.Config.ClientCredential.AssertionType;
+            }
+
+            return AssertionType.None;
         }
 
         protected async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse msalTokenResponse)

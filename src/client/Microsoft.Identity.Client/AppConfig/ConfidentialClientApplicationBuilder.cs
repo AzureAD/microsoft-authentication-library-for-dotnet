@@ -341,8 +341,6 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public ConfidentialClientApplicationBuilder WithTelemetryClient(params ITelemetryClient[] telemetryClients)
         {
-            ValidateUseOfExperimentalFeature("ITelemetryClient");
-
             if (telemetryClients == null)
             {
                 throw new ArgumentNullException(nameof(telemetryClients));

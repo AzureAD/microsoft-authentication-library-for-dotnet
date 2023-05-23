@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
@@ -127,8 +128,8 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> requestScopes,
             string requestTenantId,
             IIdentityLogger identityLogger,
-            bool piiLoggingEnabled)
-
+            bool piiLoggingEnabled,
+            TelemetryData telemetryData = null)
         {
             TokenCache = tokenCache;
             ClientId = clientId;
@@ -144,6 +145,7 @@ namespace Microsoft.Identity.Client
             SuggestedCacheExpiry = suggestedCacheExpiry;
             IdentityLogger = identityLogger;
             PiiLoggingEnabled = piiLoggingEnabled;
+            TelemetryData = telemetryData?? new TelemetryData();
         }
 
         /// <summary>
@@ -248,5 +250,10 @@ namespace Microsoft.Identity.Client
         /// Boolean used to determine if Personally Identifiable Information (PII) logging is enabled.
         /// </summary>
         public bool PiiLoggingEnabled { get; }
+
+        /// <summary>
+        /// Cache Details contains the details of L1/ L2 cache for telemetry logging.
+        /// </summary>
+        public TelemetryData TelemetryData { get; }
     }
 }

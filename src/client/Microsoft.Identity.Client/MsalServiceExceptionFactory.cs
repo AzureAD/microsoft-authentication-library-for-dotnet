@@ -58,6 +58,7 @@ namespace Microsoft.Identity.Client
             ex.Claims = oAuth2Response?.Claims;
             ex.CorrelationId = oAuth2Response?.CorrelationId;
             ex.SubError = oAuth2Response?.SubError;
+            ex.ErrorCodes = oAuth2Response?.ErrorCodes;
 
             return ex;
         }

@@ -29,6 +29,10 @@ using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.IdentityModel.Abstractions;
+using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
+using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -258,11 +262,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task PopTestWithRSAAsync()
         {
+            var telemetryClient = new TestTelemetryClient(TestConstants.ClientId);
             var confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(PublicCloudConfidentialClientID)
                 .WithExperimentalFeatures()
                 .WithAuthority(PublicCloudTestAuthority)
                 .WithClientSecret(s_publicCloudCcaSecret)
+                .WithTelemetryClient(telemetryClient)
                 .Build();
 
             //RSA provider
@@ -281,6 +287,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                  ProtectedUrl,
                  HttpMethod.Get,
                  result).ConfigureAwait(false);
+
+            MsalTelemetryEventDetails eventDetails = telemetryClient.TestTelemetryEventDetails;
+            Assert.IsNotNull(eventDetails);
+            Assert.AreEqual(Convert.ToInt64(TokenType.Pop), eventDetails.Properties[TelemetryConstants.TokenType]);
         }
 
         [TestMethod]
@@ -588,44 +598,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Array.Copy(rsaParameters.Modulus, 0, kidBytes, rsaParameters.Exponent.Length, rsaParameters.Modulus.Length);
             using (var sha2 = SHA256.Create())
                 return Base64UrlEncoder.Encode(sha2.ComputeHash(kidBytes));
-        }
-    }
-
-    public class RSACertificatePopCryptoProvider : IPoPCryptoProvider
-    {
-        private readonly X509Certificate2 _cert;
-
-        public RSACertificatePopCryptoProvider(X509Certificate2 cert)
-        {
-            _cert = cert ?? throw new ArgumentNullException(nameof(cert));
-
-            RSA provider = _cert.GetRSAPublicKey();
-            RSAParameters publicKeyParams = provider.ExportParameters(false);
-            CannonicalPublicKeyJwk = ComputeCannonicalJwk(publicKeyParams);
-        }
-
-        public byte[] Sign(byte[] payload)
-        {
-            using (RSA key = _cert.GetRSAPrivateKey())
-            {
-                return key.SignData(
-                    payload,
-                    HashAlgorithmName.SHA256,
-                    RSASignaturePadding.Pkcs1);
-            }
-        }
-
-        public string CannonicalPublicKeyJwk { get; }
-
-        public string CryptographicAlgorithm { get => "RS256"; }
-
-        /// <summary>
-        /// Creates the canonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
-        /// The number of parameters as well as the lexicographic order is important, as this string will be hashed to get a thumbprint
-        /// </summary>
-        private static string ComputeCannonicalJwk(RSAParameters rsaPublicKey)
-        {
-            return $@"{{""e"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""kty"":""RSA"",""n"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
         }
     }
 }

@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [TestClass]
     [DeploymentItem(@"Resources\valid.crtfile")]
     [DeploymentItem("Resources\\OpenidConfiguration-QueryParams-B2C.json")]
-    public class ConfidentialClientApplicationTests
+    public class ConfidentialClientApplicationTests : TestBase
     {
         private byte[] _serializedCache;
 
@@ -1912,8 +1912,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(4, callbackInvoked);
         }
-
-
 
         private AppTokenProviderResult GetAppTokenProviderResult(string differentScopesForAt = "", long? refreshIn = 1000)
         {

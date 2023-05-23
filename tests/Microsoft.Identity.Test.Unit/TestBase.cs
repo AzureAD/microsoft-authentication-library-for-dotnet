@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common;
@@ -125,6 +126,16 @@ namespace Microsoft.Identity.Test.Unit
             }
 
             throw new NotImplementedException();
+        }
+
+        internal AppTokenProviderResult GetAppTokenProviderResult(string differentScopesForAt = "", long? refreshIn = 1000)
+        {
+            var token = new AppTokenProviderResult();
+            token.AccessToken = TestConstants.DefaultAccessToken + differentScopesForAt; //Used to indicate that there is a new access token for a different set of scopes
+            token.ExpiresInSeconds = 3600;
+            token.RefreshInSeconds = refreshIn;
+
+            return token;
         }
     }
 }

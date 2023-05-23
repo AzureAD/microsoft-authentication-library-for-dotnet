@@ -16,7 +16,6 @@ using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
-
     [TestClass]
     public class AppServiceTests : TestBase
     {

@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Region;
 
 namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
@@ -127,9 +128,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             get => TokenType.HasValue ? TokenType.Value.ToString("D") : null;
         }
 
+        public AssertionType AssertionType { get; set; }
+
+        public CacheLevel CacheLevel { get; set; }
+        
         public static bool IsLongRunningObo(ApiIds apiId) => apiId == ApiIds.InitiateLongRunningObo || apiId == ApiIds.AcquireTokenInLongRunningObo;
 
         public static bool IsOnBehalfOfRequest(ApiIds apiId) => apiId == ApiIds.AcquireTokenOnBehalfOf || IsLongRunningObo(apiId);
-
     }
 }
