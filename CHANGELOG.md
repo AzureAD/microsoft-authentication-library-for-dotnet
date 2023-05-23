@@ -1,3 +1,14 @@
+4.54.1
+==========
+### New Features
+- The client-side telemetry API (`ITelemetryClient`) is now generally available. See [3784](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3784).  
+- Logging additional telemetry data: exception information, access token type, token refresh on value, assertion type, authority, scopes, cache level used. See [3784](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3784).  
+- Added `WithSearchInCacheForLongRunningProcess()` modifier which allows `InitiateLongRunningProcessInWebApi` method to search in cache. This flag is intended only for rare legacy cases; for most cases, rely on the default behavior of `InitiateLongRunningProcessInWebApi` and `AcquireTokenInLongRunningProcess`. See [4124](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4124).  
+
+### Bug Fixes
+- `WithTenantId` can now be used with dSTS authorities to overwrite the tenant. See [4144](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4144), [4145](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4145).  
+- Fixed a bug in token serialization for rare cases when an ID token has no `oid` claim. See [4140](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4140).  
+
 4.54.0
 ==========
 ### New Features
