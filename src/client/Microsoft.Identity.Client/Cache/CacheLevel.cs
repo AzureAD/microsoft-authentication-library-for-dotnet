@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -30,6 +30,7 @@ namespace Microsoft.Identity.Client.Cache
         L1Cache = 2,
         /// <summary>
         /// Specifies if the L2 cache is used.
+        /// </summary>
         L2Cache = 3
     }
 }
