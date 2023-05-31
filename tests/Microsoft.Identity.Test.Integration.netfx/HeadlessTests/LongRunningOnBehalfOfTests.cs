@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// (if the user-provided key is not assertion hash)
         /// </summary>
         [RunOn(TargetFrameworks.NetCore)]
-        public async Task AcquireTokenByObo_LongRunningAndNormalObo_WithDifferentKeys_TestAsync()
+        public async Task LongRunningAndNormalObo_WithDifferentKeys_TestAsync()
         {
             var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// Should be the same partition: by assertion hash.
         /// </summary>
         [RunOn(TargetFrameworks.NetCore)]
-        public async Task AcquireTokenByObo_LongRunningThenNormalObo_WithTheSameKey_TestAsync()
+        public async Task LongRunningThenNormalObo_WithTheSameKey_TestAsync()
         {
             var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// Should be the same partition: by assertion hash.
         /// </summary>
         [RunOn(TargetFrameworks.NetCore)]
-        public async Task AcquireTokenByObo_NormalOboThenLongRunningAcquire_WithTheSameKey_TestAsync()
+        public async Task NormalOboThenLongRunningAcquire_WithTheSameKey_TestAsync()
         {
             var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
@@ -250,7 +250,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// Should be the same partition: by assertion hash.
         /// </summary>
         [RunOn(TargetFrameworks.NetCore)]
-        public async Task AcquireTokenByObo_NormalOboThenLongRunningInitiate_WithTheSameKey_TestAsync()
+        public async Task NormalOboThenLongRunningInitiate_WithTheSameKey_TestAsync()
         {
             var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
@@ -304,7 +304,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
-        public async Task AcquireTokenByObo_LongRunning_WithDifferentScopes_TestAsync()
+        public async Task WithDifferentScopes_TestAsync()
         {
             string[] scopes2 = { "api://eec635da-5760-452d-940a-448220db047c/access_as_user" };
             var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
@@ -340,7 +340,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
-        public async Task AcquireTokenByObo_LongRunning_WithNoTokensFound_TestAsync()
+        public async Task AcquireTokenInLongRunningObo_WithNoTokensFound_TestAsync()
         {
             var cca = BuildCCA(Guid.NewGuid().ToString());
 

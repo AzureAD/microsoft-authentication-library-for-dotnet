@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task WithExistingKeyAndToken_TestAsync()
+        public async Task InitiateLongRunningObo_WithExistingKeyAndToken_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task CacheKeyAlreadyExists_TestAsync()
+        public async Task InitiateLongRunningObo_CacheKeyAlreadyExists_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -202,7 +202,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4124
         [TestMethod]
-        public async Task WithIgnoreCachedAssertion_TestAsync()
+        public async Task InitiateLongRunningObo_WithIgnoreCachedAssertion_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -259,7 +259,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task WithIgnoreCachedAssertionAndWithForceRefresh_TestAsync()
+        public async Task InitiateLongRunningObo_WithIgnoreCachedAssertionAndWithForceRefresh_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -299,7 +299,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task CacheKeyDoesNotExist_TestAsync()
+        public async Task AcquireTokenInLongRunningObo_CacheKeyDoesNotExist_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -357,7 +357,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         /// (if the user-provided key is not assertion hash)
         /// </summary>
         [TestMethod]
-        public async Task WithDifferentKeys_TestAsync()
+        public async Task NormalOboAndLongRunningObo_WithDifferentKeys_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -431,7 +431,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         /// Should be the same partition: by assertion hash.
         /// </summary>
         [TestMethod]
-        public async Task WithTheSameKey_TestAsync()
+        public async Task NormalOboAndLongRunningObo_WithTheSameKey_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -862,10 +862,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
-        [DataTestMethod]
-        [DataRow(true)]
-        [DataRow(false)]
-        public async Task SuggestedCacheExpiry_TestAsync(bool shouldHaveSuggestedCacheExpiry)
+        [TestMethod]
+        public async Task SuggestedCacheExpiry_ShouldNotExist_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -879,23 +877,16 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 (app.UserTokenCache as TokenCache).AfterAccess += (args) =>
                 {
-                    if (args.HasStateChanged == true)
+                    if (args.HasStateChanged)
                     {
-                        Assert.AreEqual(shouldHaveSuggestedCacheExpiry, args.SuggestedCacheExpiry.HasValue);
+                        Assert.IsFalse(args.SuggestedCacheExpiry.HasValue);
                     }
                 };
 
-                if (shouldHaveSuggestedCacheExpiry)
-                {
-                    UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
-                    await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
-                }
-                else
-                {
-                    string oboCacheKey = "obo-cache-key";
-                    await app.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
-                        .ExecuteAsync().ConfigureAwait(false);
-                }
+                string oboCacheKey = "obo-cache-key";
+                await app.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
+                    .ExecuteAsync().ConfigureAwait(false);
+                await app.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
             }
         }
 

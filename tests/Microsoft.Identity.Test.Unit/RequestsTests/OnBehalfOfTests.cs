@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                
+
                 AddMockHandlerAadSuccess(httpManager);
 
                 var cca = ConfidentialClientApplicationBuilder
@@ -71,9 +71,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                       .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(
-                    TokenSource.IdentityProvider, 
+                    TokenSource.IdentityProvider,
                     result.AuthenticationResultMetadata.TokenSource);
-                
+
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/common/oauth2/v2.0/token", // no region
                     result.AuthenticationResultMetadata.TokenEndpoint);
@@ -201,10 +201,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
-        [DataTestMethod]
-        [DataRow(true)]
-        [DataRow(false)]
-        public async Task SuggestedCacheExpiry_TestAsync(bool shouldHaveSuggestedCacheExpiry)
+        [TestMethod]
+        public async Task SuggestedCacheExpiry_ShouldExist_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -218,23 +216,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 (app.UserTokenCache as TokenCache).AfterAccess += (args) =>
                 {
-                    if (args.HasStateChanged == true)
+                    if (args.HasStateChanged)
                     {
-                        Assert.AreEqual(shouldHaveSuggestedCacheExpiry, args.SuggestedCacheExpiry.HasValue);
+                        Assert.IsTrue(args.SuggestedCacheExpiry.HasValue);
                     }
                 };
 
-                if (shouldHaveSuggestedCacheExpiry)
-                {
-                    UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
-                    await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
-                }
-                else
-                {
-                    string oboCacheKey = "obo-cache-key";
-                    await app.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
-                        .ExecuteAsync().ConfigureAwait(false);
-                }
+                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+                await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
             }
         }
 
