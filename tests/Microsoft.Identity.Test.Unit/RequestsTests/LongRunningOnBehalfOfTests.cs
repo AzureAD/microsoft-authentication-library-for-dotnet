@@ -10,7 +10,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -20,7 +19,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
     [TestClass]
-    public class OboRequestTests
+    public class LongRunningOnBehalfOfTests
     {
         [TestInitialize]
         public void TestInitialize()
@@ -28,154 +27,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-        private MockHttpMessageHandler AddMockHandlerAadSuccess(
-            MockHttpManager httpManager,
-            string authority = TestConstants.AuthorityCommonTenant,
-            IList<string> unexpectedHeaders = null,
-            HttpResponseMessage responseMessage = null,
-            IDictionary<string, string> expectedPostData = null)
-        {
-            var handler = new MockHttpMessageHandler
-            {
-                ExpectedUrl = authority + "oauth2/v2.0/token",
-                ExpectedMethod = HttpMethod.Post,
-                ResponseMessage = responseMessage ?? MockHelpers.CreateSuccessTokenResponseMessage(),
-                UnexpectedRequestHeaders = unexpectedHeaders,
-            };
-            if (expectedPostData != null)
-            {
-                handler.ExpectedPostData = expectedPostData;
-            }
-            httpManager.AddMockHandler(handler);
-
-            return handler;
-        }
-
         [TestMethod]
-        public async Task OBO_SkipsRegional_Async()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
-                
-                AddMockHandlerAadSuccess(httpManager);
-
-                var cca = ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithClientSecret(TestConstants.ClientSecret)
-                    .WithAzureRegion("eastus1")
-                    .WithHttpManager(httpManager)
-                    .BuildConcrete();
-
-                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
-                var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
-                                      .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.AreEqual(
-                    TokenSource.IdentityProvider, 
-                    result.AuthenticationResultMetadata.TokenSource);
-                
-                Assert.AreEqual(
-                    "https://login.microsoftonline.com/common/oauth2/v2.0/token", // no region
-                    result.AuthenticationResultMetadata.TokenEndpoint);
-            }
-        }
-
-        [TestMethod]
-        public async Task AcquireTokenByObo_AccessTokenExpiredRefreshTokenNotAvailable_TestAsync()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
-                AddMockHandlerAadSuccess(httpManager);
-
-                var cca = BuildCCA(httpManager);
-
-                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
-                var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
-
-                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-
-                //Expire access tokens
-                TokenCacheHelper.ExpireAllAccessTokens(cca.UserTokenCacheInternal);
-
-                AddMockHandlerAadSuccess(
-                    httpManager,
-                    expectedPostData: new Dictionary<string, string> { { OAuth2Parameter.GrantType, OAuth2GrantType.JwtBearer } });
-
-                result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
-
-                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-            }
-        }
-
-        [TestMethod]
-        public async Task AcquireTokenByObo_MissMatchUserAssertions_TestAsync()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
-                AddMockHandlerAadSuccess(httpManager);
-
-                var cca = BuildCCA(httpManager);
-
-                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
-                var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
-
-                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-
-                //Update user assertions
-                TokenCacheHelper.UpdateUserAssertions(cca);
-
-                AddMockHandlerAadSuccess(httpManager);
-
-                //Access and refresh tokens have a different user assertion so MSAL should perform OBO.
-                result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
-
-                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
-                Assert.AreEqual(result.AuthenticationResultMetadata.TokenSource, TokenSource.IdentityProvider);
-            }
-        }
-
-        [TestMethod]
-        public async Task AcquireTokenByObo_AccessTokenInCache_TestAsync()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
-                AddMockHandlerAadSuccess(httpManager);
-
-                var cca = BuildCCA(httpManager);
-
-                var userCacheAccess = cca.UserTokenCache.RecordAccess();
-
-                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
-                var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
-
-                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                userCacheAccess.AssertAccessCounts(1, 1);
-
-                result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
-
-                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
-                userCacheAccess.AssertAccessCounts(2, 1);
-
-                MsalAccessTokenCacheItem cachedAccessToken = cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Single();
-                Assert.AreEqual(userAssertion.AssertionHash, cachedAccessToken.OboCacheKey);
-                Assert.AreEqual(0, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
-            }
-        }
-
-        [TestMethod]
-        public async Task AcquireTokenByObo_InLongRunningProcess_TestAsync()
+        public async Task LongRunningObo_RunsSuccessfully_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -227,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task InitiateLongRunningProcessWithExistingKeyAndToken_TestAsync()
+        public async Task InitiateLongRunningObo_WithExistingKeyAndToken_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -289,7 +142,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task AcquireTokenByObo_InitiateLongRunningProcessInWebApi_CacheKeyAlreadyExists_TestAsync()
+        public async Task InitiateLongRunningObo_CacheKeyAlreadyExists_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -446,7 +299,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task AcquireTokenByObo_AcquireTokenInLongRunningProcess_CacheKeyDoesNotExist_TestAsync()
+        public async Task AcquireTokenInLongRunningObo_CacheKeyDoesNotExist_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -470,7 +323,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task AcquireTokenByObo_InLongRunningProcess_WithNullCacheKey_TestAsync()
+        public async Task WithNullCacheKey_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -496,34 +349,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
-        [TestMethod]
-        public async Task AcquireTokenByObo_NullCcs_TestAsync()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                httpManager.AddInstanceDiscoveryMockHandler();
-                var extraUnexpectedHeaders = new List<string>() { { Constants.CcsRoutingHintHeader } };
-                AddMockHandlerAadSuccess(httpManager, unexpectedHeaders: extraUnexpectedHeaders);
-
-                var cca = BuildCCA(httpManager);
-
-                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
-                var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
-                                      .WithCcsRoutingHint("")
-                                      .WithCcsRoutingHint("", "")
-                                      .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
-
-                result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
-                      .WithCcsRoutingHint("")
-                      .WithCcsRoutingHint("", "")
-                      .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
-            }
-        }
-
         /// <summary>
         /// Tests the behavior when calling both, long-running and normal OBO methods.
         /// Long-running OBO method return cached long-running tokens.
@@ -532,7 +357,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         /// (if the user-provided key is not assertion hash)
         /// </summary>
         [TestMethod]
-        public async Task AcquireTokenByObo_LongRunningAndNormalObo_WithDifferentKeys_TestAsync()
+        public async Task NormalOboAndLongRunningObo_WithDifferentKeys_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -606,7 +431,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         /// Should be the same partition: by assertion hash.
         /// </summary>
         [TestMethod]
-        public async Task AcquireTokenByObo_LongRunningThenNormalObo_WithTheSameKey_TestAsync()
+        public async Task NormalOboAndLongRunningObo_WithTheSameKey_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -737,7 +562,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         /// Should be the same partition: by assertion hash.
         /// </summary>
         [TestMethod]
-        public async Task AcquireTokenByObo_NormalOboThenLongRunningAcquire_WithTheSameKey_TestAsync()
+        public async Task NormalOboThenLongRunningAcquire_WithTheSameKey_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -846,7 +671,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         /// Should be the same partition: by assertion hash.
         /// </summary>
         [TestMethod]
-        public async Task AcquireTokenByObo_NormalOboThenLongRunningInitiate_WithTheSameKey_TestAsync()
+        public async Task NormalOboThenLongRunningInitiate_WithTheSameKey_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -950,11 +775,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         /// <summary>
-        /// This test performs an initiation of a long running obo process, then validated that the remove long running process api deletes the tokens
-        /// in the cache associated with the provided obo cache key.
+        /// This test performs an initiation of a long running OBO process, then validated that the remove long running process api deletes the tokens
+        /// in the cache associated with the provided OBO cache key.
         /// </summary>
         [TestMethod]
-        public async Task AcquireTokenByObo_LongRunningThenRemoveTokens_TestAsync()
+        public async Task LongRunningThenRemoveTokens_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -966,7 +791,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var cca = BuildCCA(httpManager);
                 var oboCca = cca as ILongRunningWebApi;
 
-                cca.UserTokenCache.SetBeforeAccess((args) => 
+                cca.UserTokenCache.SetBeforeAccess((args) =>
                 {
                     if (validateCacheProperties)
                     {
@@ -1037,10 +862,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
-        [DataTestMethod]
-        [DataRow(true)]
-        [DataRow(false)]
-        public async Task AcquireTokenByObo_SuggestedCacheExpiry_TestAsync(bool shouldHaveSuggestedCacheExpiry)
+        [TestMethod]
+        public async Task SuggestedCacheExpiry_ShouldNotExist_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -1054,24 +877,40 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 (app.UserTokenCache as TokenCache).AfterAccess += (args) =>
                 {
-                    if (args.HasStateChanged == true)
+                    if (args.HasStateChanged)
                     {
-                        Assert.AreEqual(shouldHaveSuggestedCacheExpiry, args.SuggestedCacheExpiry.HasValue);
+                        Assert.IsFalse(args.SuggestedCacheExpiry.HasValue);
                     }
                 };
 
-                if (shouldHaveSuggestedCacheExpiry)
-                {
-                    UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
-                    await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
-                }
-                else
-                {
-                    string oboCacheKey = "obo-cache-key";
-                    await app.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
-                        .ExecuteAsync().ConfigureAwait(false);
-                }
+                string oboCacheKey = "obo-cache-key";
+                await app.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
+                    .ExecuteAsync().ConfigureAwait(false);
+                await app.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
             }
+        }
+
+        private MockHttpMessageHandler AddMockHandlerAadSuccess(
+            MockHttpManager httpManager,
+            string authority = TestConstants.AuthorityCommonTenant,
+            IList<string> unexpectedHeaders = null,
+            HttpResponseMessage responseMessage = null,
+            IDictionary<string, string> expectedPostData = null)
+        {
+            var handler = new MockHttpMessageHandler
+            {
+                ExpectedUrl = authority + "oauth2/v2.0/token",
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = responseMessage ?? MockHelpers.CreateSuccessTokenResponseMessage(),
+                UnexpectedRequestHeaders = unexpectedHeaders,
+            };
+            if (expectedPostData != null)
+            {
+                handler.ExpectedPostData = expectedPostData;
+            }
+            httpManager.AddMockHandler(handler);
+
+            return handler;
         }
 
         private ConfidentialClientApplication BuildCCA(IHttpManager httpManager)
@@ -1082,72 +921,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     .WithAuthority(TestConstants.AuthorityCommonTenant)
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
-        }
-
-        [TestMethod]
-        [DeploymentItem(@"Resources\MultiTenantOBOTokenCache.json")]
-        public async Task MultiTenantOBOAsync()
-        {
-            const string tenant1 = "72f988bf-86f1-41af-91ab-2d7cd011db47";
-            const string tenant2 = "49f548d0-12b7-4169-a390-bb5304d24462";
-
-            using (var httpManager = new MockHttpManager())
-            {
-                // Arrange
-                httpManager.AddInstanceDiscoveryMockHandler();
-
-                var cca = CreatePcaFromFileWithAuthority(httpManager);
-
-                // Act
-                var result1 = await cca.AcquireTokenOnBehalfOf(
-                    new[] { "User.Read" },
-                    new UserAssertion("jwt"))
-                    .WithTenantId(tenant1)
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                var result2 = await cca.AcquireTokenOnBehalfOf(
-                   new[] { "User.Read" },
-                   new UserAssertion("jwt"))
-                   .WithTenantId(tenant2)
-                   .ExecuteAsync().ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(tenant1, result1.TenantId);
-                Assert.AreEqual(tenant2, result2.TenantId);
-
-                Assert.AreEqual(2, result1.Account.GetTenantProfiles().Count());
-                Assert.AreEqual(2, result2.Account.GetTenantProfiles().Count());
-                Assert.AreEqual(result1.Account.HomeAccountId, result2.Account.HomeAccountId);
-                Assert.IsNotNull(result1.Account.GetTenantProfiles().Single(t => t.TenantId == tenant1));
-                Assert.IsNotNull(result1.Account.GetTenantProfiles().Single(t => t.TenantId == tenant2));
-
-                Assert.AreEqual(tenant1, result1.ClaimsPrincipal.FindFirst("tid").Value);
-                Assert.AreEqual(tenant2, result2.ClaimsPrincipal.FindFirst("tid").Value);
-            }
-        }
-
-        private static IConfidentialClientApplication CreatePcaFromFileWithAuthority(
-           MockHttpManager httpManager,
-           string authority = null)
-        {
-            const string clientIdInFile = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
-            const string tokenCacheFile = "MultiTenantOBOTokenCache.json";
-
-            var ccaBuilder = ConfidentialClientApplicationBuilder
-                .Create(clientIdInFile)
-                .WithClientSecret("secret")
-                .WithHttpManager(httpManager);
-
-            if (authority != null)
-            {
-                ccaBuilder = ccaBuilder.WithAuthority(authority);
-            }
-
-            var cca = ccaBuilder.BuildConcrete();
-            cca.InitializeTokenCacheFromFile(ResourceHelper.GetTestResourceRelativePath(tokenCacheFile), true);
-            cca.UserTokenCacheInternal.Accessor.AssertItemCount(2, 2, 3, 3, 1);
-
-            return cca;
         }
     }
 }
