@@ -69,7 +69,7 @@ Platform of choice:
  
 ## Community Help and Support
 
-We use [Stack Overflow](http://stackoverflow.com/questions/tagged/msal) with the community to provide support. We highly recommend you ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
+We use [Stack Overflow](https://stackoverflow.com/questions/tagged/azure-ad-msal) with the community to provide support. We highly recommend you ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
 
 If you find a bug or have a feature request, please raise the issue on [GitHub Issues](../../issues).
 
@@ -80,7 +80,7 @@ We'd like your thoughts on this library. Please complete [this short survey.](ht
 
 ## Contribute
 
-We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now. Read our [Contribution Guide](contributing.md) for more information.
+We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now. Read our [Contribution Guide](CONTRIBUTING.md) for more information.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
