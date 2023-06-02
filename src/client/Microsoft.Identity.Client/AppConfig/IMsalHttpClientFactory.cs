@@ -6,12 +6,13 @@ using System.Net.Http;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Factory responsible for creating HttpClient
-    /// .Net recommends to use a single instance of HttpClient.
+    /// Factory responsible for creating HttpClient. 
+    /// See https://learn.microsoft.com/dotnet/api/system.net.http.httpclient?view=net-7.0#instancing for more details.
     /// </summary>
     /// <remarks>
-    /// Implementations must be thread safe. Consider creating and configuring an HttpClient in the constructor
-    /// of the factory, and returning the same object in <see cref="GetHttpClient"/>
+    /// Implementations must be thread safe. 
+    /// Do not create a new HttpClient for each call to <see cref="GetHttpClient"/> - this leads to socket exhaustion.
+    /// If your app uses Integrated Windows Authentication, ensure <see cref="HttpClientHandler.UseDefaultCredentials"/> is set to true.
     /// </remarks>
     public interface IMsalHttpClientFactory
     {

@@ -11,10 +11,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     /// A simple implementation of the HttpClient factory that uses a managed HttpClientHandler
     /// </summary>
     /// <remarks>
-    /// This implementation is not suitable for high-scale applications / confidential client scenarios
-    /// because a static HttpClient might run into DNS issues (and creating new HttpClients leads to a port exhaustion issue).
-    /// Mobile platforms should use HttpClientHandlers that are platform specific.
-    /// .NET Core should use the IHttpClientFactory, but MSAL cannot take a dependency on it as it has too many dependencies itself.
+    /// .NET should use the IHttpClientFactory, but MSAL cannot take a dependency on it.
+    /// .NET should use SocketHandler, but UseDefaultCredentials doesn't work with it 
     /// </remarks>
     internal class SimpleHttpClientFactory : IMsalHttpClientFactory
     {
