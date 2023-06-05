@@ -62,7 +62,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
         [DataRow(MsiAzureResource.Function, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Function_App")]
         [DataRow(MsiAzureResource.VM, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Virtual_Machine")]
+#if ENABLE_AZURE_ARC_TESTS
         [DataRow(MsiAzureResource.AzureArc, "", DisplayName = "Azure_ARC")]
+#endif
         public async Task AcquireMSITokenAsync(MsiAzureResource azureResource, string userIdentity, UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
         {
             //Arrange
