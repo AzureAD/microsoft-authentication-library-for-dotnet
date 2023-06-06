@@ -34,6 +34,13 @@ namespace Microsoft.Identity.Client
         /// Resource for which to request scopes.
         /// This is the App ID URI of the API that returned the WWW-Authenticate header.
         /// </summary>
+        /// <remarks>
+        /// Clients that perform resource validation (e.g. by comparing the host part of the resource against a list of known good hosts), 
+        /// can still use the indexer to retrieve the raw value of the resource / scope.
+        /// 
+        /// If a resource is used, add "/.default" to it to transform it into a scope, e.g. "https://graph.microsoft.com/.default" is the OAuth2 scope for "https://graph.microsoft.com" resource.
+        /// MSAL only works with scopes.
+        /// </remarks>
         [Obsolete("The client apps should know which App ID URI it requests scopes for.", true)]
         public string Resource { get; set; }
 
@@ -41,6 +48,13 @@ namespace Microsoft.Identity.Client
         /// Scopes to request.
         /// If it's not provided by the web API, it's computed from the Resource.
         /// </summary>
+        /// <remarks>
+        /// Clients that perform resource validation (e.g. by comparing the host part of the resource against a list of known good hosts), 
+        /// can still use the indexer to retrieve the raw value of the resource / scope. 
+        /// 
+        /// If a resource is used, add "/.default" to it to transform it into a scope, e.g. "https://graph.microsoft.com/.default" is the OAuth2 scope for "https://graph.microsoft.com" resource.
+        /// MSAL only works with scopes.
+        /// </remarks>
         [Obsolete("The client apps should know which scopes to request for.", true)]
         public IEnumerable<string> Scopes { get; set; }
 
