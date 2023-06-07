@@ -271,19 +271,20 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Instructs MSAL.NET to use an Azure regional token service. This feature is currently available to 
-        /// first party applications only. 
+        /// Instructs MSAL to use an Azure regional token service. This feature is currently available to 
+        /// first-party applications only. 
         /// </summary>
         /// <param name="azureRegion">Either the string with the region (preferred) or        
-        /// use <see cref="ConfidentialClientApplication.AttemptRegionDiscovery"/> and MSAL.NET will attempt to auto-detect the region.                
+        /// use <see cref="ConfidentialClientApplication.AttemptRegionDiscovery"/> and MSAL will attempt to auto-detect the region.                
         /// </param>
         /// <remarks>
-        /// The region value should be short region name for the region where the service is deployed. 
-        /// For example "centralus" is short name for region Central US.
-        /// Service To Service (client credential flow) tokens can be obtained from the regional service.
+        /// The region value should be a short region name for the region where the service is deployed. 
+        /// For example, "centralus" is short name for region Central US.
+        /// Currently only tokens for the client credential flow can be obtained from the regional service.
         /// Requires configuration at the tenant level.
         /// Auto-detection works on a limited number of Azure artifacts (VMs, Azure functions). 
         /// If auto-detection fails, the non-regional endpoint will be used.
+        /// If a specific region was provided and the token web request failed, verify that the region name is valid.
         /// See https://aka.ms/msal-net-region-discovery for more details.        
         /// </remarks>
         /// <returns>The builder to chain the .With methods</returns>
