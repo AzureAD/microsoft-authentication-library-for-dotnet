@@ -2,10 +2,11 @@
 name: Feature request
 about: Suggest an idea for this project.
 title: "[Feature Request] "
-labels: enhancement, Feature Request
+labels: Feature Request
 assignees: ''
 
 ---
+_Make sure that your question or issue is not already covered in [MSAL docs](https://learn.microsoft.com/en-us/entra/msal/dotnet/) or [samples](https://learn.microsoft.com/en-us/azure/active-directory/develop/sample-v2-code?tabs=apptype)._
 
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
