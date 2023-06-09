@@ -6,6 +6,7 @@ labels: ''
 assignees: ''
 
 ---
+Make sure that your question or issue is not already covered in [MSAL docs](https://learn.microsoft.com/en-us/entra/msal/dotnet/) or [samples](https://learn.microsoft.com/en-us/azure/active-directory/develop/sample-v2-code?tabs=apptype).
 
 **Logs and network traces**
 Without logs or traces, it is unlikely that the team can investigate your issue. Capturing logs and network traces is described in [Logging wiki](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging).
@@ -18,15 +19,16 @@ Without logs or traces, it is unlikely that the team can investigate your issue.
 
 **What authentication flow has the issue?**
 * Desktop / Mobile
-    * [ ] Interactive
+    * [ ] Interactive (broker)
+    * [ ] Interactive (embedded or system browser)
     * [ ] Integrated Windows Authentication
-    * [ ] Username Password
-    * [ ] Device code flow (browserless)
+    * [ ] Username / Password
+    * [ ] Device code (browserless)
 * Web app 
     * [ ] Authorization code
     * [ ] On-Behalf-Of
 * Daemon app 
-    * [ ] Service to Service calls
+    * [ ] Client credentials (service-to-service calls)
 
 Other?
 <!-- Please describe here -->
@@ -44,11 +46,11 @@ c. This is a new app or experiment.
 var your = (code) => here;
 ```
 
-**Expected behavior**
-A clear and concise description of what you expected to happen (or code).
-
 **Actual behavior**
 A clear and concise description of what happens, e.g. exception is thrown, UI freezes.  
+
+**Expected behavior**
+A clear and concise description of what you expected to happen (or code).
 
 **Possible solution**
 <!--- Only if you have suggestions on a fix for the bug -->
