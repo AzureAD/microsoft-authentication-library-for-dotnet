@@ -71,8 +71,8 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// A legacy option available only to Microsoft First-Party applications. Should be avoided where possible.
-        /// Support is experimental.
         /// </summary>
+        /// <remarks>This is a convenience API, the same can be achieved by using WithExtraQueryParameters and passing the extra query parameter "msal_request_type": "consumer_passthrough"</remarks>
         [EditorBrowsable(EditorBrowsableState.Never)] // 1p feature only, hide it from public API.
         public bool MsaPassthrough { get; set; } = false;
 
