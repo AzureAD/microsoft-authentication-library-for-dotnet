@@ -1,5 +1,5 @@
 ﻿$url = "https://go.microsoft.com/fwlink/p/?LinkID=2033908" #Android SDK Tools from https://developer.android.com/studio#downloads
-$fileName = "WindowsSDK"
+$fileName = "WindowsSDK.exe"
 $source = "C:\Downloads\$fileName"
 $destination = "C:\Downloads\WindowsSDK"
 
