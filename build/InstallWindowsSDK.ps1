@@ -1,7 +1,8 @@
 ﻿$url = "https://go.microsoft.com/fwlink/p/?LinkID=2033908" #Android SDK Tools from https://developer.android.com/studio#downloads
 $fileName = "WindowsSDK.exe"
 $source = "C:\Downloads\$fileName"
-$destination = "C:\Downloads\WindowsSDK"
+$destination = "C:\Downloads\WindowsSDK.exe"
+$logPath = "C:\Downloads\sdkInstallLog.txt"
 
 #$ErrorActionPreference = "Stop"
 
@@ -18,6 +19,8 @@ mkdir -Path C:\Downloads\ -Force
 Get-File -Url $url -FileName $fileName
 
 echo "Installing"
-Start-Process -FilePath $source -ArgumentList /quiet
+Start-Process -FilePath $source -ArgumentList "/repair", "/quiet", "/log $logPath"
 
 echo "Done"
+
+gc $logPath 
