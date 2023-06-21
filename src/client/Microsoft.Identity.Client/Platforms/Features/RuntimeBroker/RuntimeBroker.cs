@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             }
             catch (MsalRuntimeException ex) when (ex.Status == ResponseStatus.ApiContractViolation)
             {
-                // failed to initialize msal runtime - can happen on older versions of Windows. Means broker is not available.
+                // failed to initialize MSAL runtime - can happen on older versions of Windows. Means broker is not available.
                 // We will never get here with our current OS version check. Instead in this scenario we will fallback to the browser
                 // but MSALRuntime does it's internal check for OS compatibility and throws an ApiContractViolation MsalRuntimeException.
                 // For any reason, if our OS check fails then this will catch the MsalRuntimeException and 
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             }
             catch (Exception ex)
             {
-                // When MSAL Runtime dlls fails to load then we catch the exception and throw with a meaningful
+                // When MSAL Runtime DLL fails to load then we catch the exception and throw with a meaningful
                 // message with information on how to troubleshoot
                 throw new MsalClientException(
                     "wam_runtime_init_failed", ex.Message + " See https://aka.ms/msal-net-wam#troubleshooting", ex);
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
             using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
-            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
+            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
             MsalTokenResponse msalTokenResponse = null;
 
             //need to provide a handle
@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                             readAccountResult.Account,
                             cancellationToken).ConfigureAwait(false))
                             {
-                                var errorMessage = "Could not login interactively.";
+                                var errorMessage = "Could not acquire token interactively.";
                                 msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                             }
                         }
@@ -178,9 +178,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                             _logger?.WarningPii(
                                 $"[RuntimeBroker] Could not find a WAM account for the selected user {authenticationRequestParameters.Account.Username}, error: {readAccountResult.Error}",
                                 $"[RuntimeBroker] Could not find a WAM account for the selected user. Error: {readAccountResult.Error}");
-
-                            _logger?.Info(
-                                $"[RuntimeBroker] Calling SignInInteractivelyAsync this will show the account picker.");
 
                             msalTokenResponse = await SignInInteractivelyAsync(
                                 authenticationRequestParameters, acquireTokenInteractiveParameters)
@@ -206,7 +203,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             MsalTokenResponse msalTokenResponse = null;
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
-            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
+            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
+
+            _logger?.Info($"[RuntimeBroker] Calling SignInInteractivelyAsync this will show the account picker.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters,
@@ -224,7 +223,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     loginHint,
                     cancellationToken).ConfigureAwait(false))
                 {
-                    var errorMessage = "Could not login interactively.";
+                    var errorMessage = "Could not sign in interactively.";
                     msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                 }
             }
@@ -237,7 +236,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
             using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
-            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
+            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
 
             MsalTokenResponse msalTokenResponse = null;
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
@@ -255,7 +254,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         authenticationRequestParameters.CorrelationId.ToString("D"),
                         cancellationToken).ConfigureAwait(false))
                 {
-                    var errorMessage = "Could not login interactively with the Default OS Account.";
+                    var errorMessage = "Could not sign in interactively with the default OS account.";
                     msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                 }
             }
@@ -278,7 +277,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
             using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
-            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
+            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
@@ -326,7 +325,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
             using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
-            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
+            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
@@ -387,7 +386,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
         public async Task RemoveAccountAsync(ApplicationConfiguration appConfig, IAccount account)
         {
             using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
-            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
+            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
 
             if (account == null)
             {
@@ -457,7 +456,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 return Array.Empty<IAccount>();
             }
             using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
-            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if msal runtime init failed");
+            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
 
             var requestContext = cacheSessionManager.RequestContext;
 
@@ -536,25 +535,25 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
         {
             if (!DesktopOsHelper.IsWin10OrServerEquivalent())
             {
-                _logger?.Warning("[WAM Broker] Not a supported operating system. WAM broker is not available. ");
+                _logger?.Warning("[RuntimeBroker] Not a supported operating system. WAM broker is not available. ");
                 return false;
             }
 
             // WAM only works with AAD
             if (authorityType != AuthorityType.Aad)
             {
-                _logger?.Warning($"[WAM Broker] Authority is {authorityType}. WAM is not available");
+                _logger?.Warning($"[RuntimeBroker] Authority is {authorityType}. WAM is not available");
                 return false;
             }
 
             if (s_lazyCore.Value == null)
             {
-                _logger?.Info(() => "[WAM Broker] MsalRuntime initialization failed. See https://aka.ms/msal-net-wam#wam-limitations");
+                _logger?.Info(() => "[RuntimeBroker] MsalRuntime initialization failed. See https://aka.ms/msal-net-wam#wam-limitations");
                 _logger?.InfoPii(s_initException);
                 return false;
             }
 
-            _logger?.Verbose(() => "[WAM Broker] MsalRuntime initialization successful.");
+            _logger?.Verbose(() => "[RuntimeBroker] MsalRuntime initialization successful.");
             return true;
         }
 
