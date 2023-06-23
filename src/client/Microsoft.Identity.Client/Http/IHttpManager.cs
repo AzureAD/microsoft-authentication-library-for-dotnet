@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Http
@@ -19,14 +20,16 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             IDictionary<string, string> bodyParameters,
             ILoggerAdapter logger,
-            CancellationToken cancellationToken = default);
+            CancellationToken cancellationToken = default,
+            TokenRequestContentType? tokenRequestContentType = null);
 
         Task<HttpResponse> SendPostAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
             HttpContent body,
             ILoggerAdapter logger,
-            CancellationToken cancellationToken = default);
+            CancellationToken cancellationToken = default,
+            TokenRequestContentType? tokenRequestContentType = null);
 
         Task<HttpResponse> SendGetAsync(
             Uri endpoint,

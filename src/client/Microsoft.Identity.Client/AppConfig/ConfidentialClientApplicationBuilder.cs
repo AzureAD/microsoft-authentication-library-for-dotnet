@@ -336,6 +336,27 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Adds a known authority corresponding to a generic OpenIdConnect Identity Provider. 
+        /// MSAL will append ".well-known/openid-configuration" to the authority and retrieve the OIDC 
+        /// metadata from there, to figure out the endpoints.
+        /// See https://openid.net/specs/openid-connect-core-1_0.html#Terminology
+        /// </summary>
+        /// <param name="authorityUri">OpenIdConnect authority</param>
+        /// <param name="tokenRequestContentType">Specifies the media content type for post requests made to the identity provider.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        /// <remarks>This is an experimental API and only AcquireTokenForClient (client_credentials flow) has been implemented</remarks>        
+        public ConfidentialClientApplicationBuilder WithGenericAuthority(string authorityUri, TokenRequestContentType tokenRequestContentType)
+        {
+            ValidateUseOfExperimentalFeature("WithGenericAuthority");
+
+            var authorityInfo = AuthorityInfo.FromGenericAuthority(authorityUri);
+            Config.Authority = Authority.CreateAuthority(authorityInfo);
+            Config.tokenRequestContentType = tokenRequestContentType;
+
+            return this;
+        }
+
+        /// <summary>
         /// Sets telemetry client for the application.
         /// </summary>
         /// <param name="telemetryClients">List of telemetry clients to add telemetry logs.</param>

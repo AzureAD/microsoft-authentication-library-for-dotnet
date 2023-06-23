@@ -8,8 +8,11 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Http
@@ -24,6 +27,7 @@ namespace Microsoft.Identity.Client.Http
     /// </remarks>
     internal class HttpManager : IHttpManager
     {
+        private const string _jsonMediaContent = "application/json";
         protected readonly IMsalHttpClientFactory _httpClientFactory;
         public long LastRequestDurationInMs { get; private set; }
 
@@ -43,9 +47,16 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             IDictionary<string, string> bodyParameters,
             ILoggerAdapter logger,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            TokenRequestContentType? tokenRequestContentType = null)
         {
             HttpContent body = bodyParameters == null ? null : new FormUrlEncodedContent(bodyParameters);
+
+            if (tokenRequestContentType.HasValue)
+            {
+                body.Headers.ContentType = new MediaTypeHeaderValue(tokenRequestContentType.Value.ToString());
+            }
+            
             return await SendPostAsync(endpoint, headers, body, logger, cancellationToken).ConfigureAwait(false);
         }
 
@@ -54,7 +65,8 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             HttpContent body,
             ILoggerAdapter logger,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            TokenRequestContentType? tokenRequestContentType = null)
         {
             return await SendRequestAsync(endpoint, headers, body, HttpMethod.Post, logger, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
