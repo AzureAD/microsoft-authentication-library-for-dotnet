@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             }
             catch (Exception ex)
             {
-                // When MSAL Runtime DLL fails to load then we catch the exception and throw with a meaningful
+                // When the MSAL Runtime DLL fails to load then we catch the exception and throw with a meaningful
                 // message with information on how to troubleshoot
                 throw new MsalClientException(
                     "wam_runtime_init_failed", ex.Message + " See https://aka.ms/msal-net-wam#troubleshooting", ex);
