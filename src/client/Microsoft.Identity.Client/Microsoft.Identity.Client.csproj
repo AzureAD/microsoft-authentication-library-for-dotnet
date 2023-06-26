@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <!-- MAUI -->
-  <PropertyGroup Condition="'$(MAUI_SUPPORT)' != ''">
+  <PropertyGroup Condition="'$(PipelineType)' != 'OneBranch'">
     <TargetFrameworkUap>uap10.0.17763</TargetFrameworkUap>
   </PropertyGroup>
 
@@ -236,7 +236,7 @@
     <Reference Include="System.Xml" />
 
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' And '$(MAUI_SUPPORT)' != ''">
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' And '$(PipelineType)' != 'OneBranch'">
     <Compile Include="$(PathToMsalSources)\Platforms\uap\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" Exclude="$(PathToMsalSources)\Platforms\Features\WamBroker\win32\**\*.cs" />
