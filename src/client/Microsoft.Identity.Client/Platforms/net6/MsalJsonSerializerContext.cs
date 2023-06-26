@@ -17,6 +17,7 @@ using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client.Platforms.net6
 {
+#pragma warning disable CS0534 // OneBranchSuppression for 'MsalJsonSerializerContext' does not implement inherited abstract member 'JsonSerializerContext.GeneratedSerializerOptions.get'
     /// <summary>
     /// This class specifies metadata for System.Text.Json source generation.
     /// See <see href="https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-source-generation-modes?pivots=dotnet-6-0">https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-source-generation-modes?pivots=dotnet-6-0</see>
