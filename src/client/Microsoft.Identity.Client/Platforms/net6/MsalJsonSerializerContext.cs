@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.WsTrust;
 
+#pragma warning disable CS0534 // OneBranchSuppression for 'MsalJsonSerializerContext' does not implement inherited abstract member 'JsonSerializerContext.GeneratedSerializerOptions.get'
 namespace Microsoft.Identity.Client.Platforms.net6
 {
     /// <summary>
