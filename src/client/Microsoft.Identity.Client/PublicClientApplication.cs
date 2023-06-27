@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
         /// case calling `AcquireTokenSilent` will throw an <see cref="MsalUiRequiredException"/>. 
         /// </summary>
         /// <remarks>
-        /// Currently, only the Windows broker is able to login with the current operating system user. For additional details, see <see href="https://aka.ms/msal-net-wam">the documentation on the Windows broker</see>.
+        /// Currently only the Windows broker is able to login with the current operating system user. For additional details, see <see href="https://aka.ms/msal-net-wam">the documentation on the Windows broker</see>.
         /// </remarks>
         public static IAccount OperatingSystemAccount
         {
@@ -146,25 +146,25 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Acquires a security token on a device without a web browser, by letting the user authenticate on
-        /// another device. This is done in two steps:
-        /// <list type="bullet">
-        /// <item><description>The method first acquires a device code from the authority and returns it to the caller via
-        /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
-        /// to direct them to authenticate (to a specific URL, with a code)</description></item>
-        /// <item><description>The method then proceeds to poll for the security
-        /// token which is granted upon successful login by the user based on the device code information</description></item>
-        /// </list>
-        /// See https://aka.ms/msal-device-code-flow.
+        /// another device.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="deviceCodeResultCallback">Callback containing information to show the user about how to authenticate and enter the device code.</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>
-        /// You can also pass optional parameters by calling:
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
-        /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
-        /// of the known authorities added to the application construction.
+        /// The token acquisition is done in two steps:
+        /// <list type="bullet">
+        /// <item><description>The method first acquires a device code from the authority and returns it to the caller via
+        /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
+        /// to direct them to authenticate (i.e., to a specific URL, with a code)</description></item>
+        /// <item><description>The method then proceeds to poll for the security
+        /// token which is granted upon successful login by the user based on the device code information.</description></item>
+        /// </list>
+        /// See <see href="https://aka.ms/msal-device-code-flow">our documentation</see> for additional context.
+        /// You can also pass optional parameters by calling <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>
+        /// and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
+        /// in order to override the default authority. Note that the overriding authority needs to be part
+        /// of the known authorities added to the application constructor.
         /// </remarks>
         public AcquireTokenWithDeviceCodeParameterBuilder AcquireTokenWithDeviceCode(
             IEnumerable<string> scopes,
@@ -188,23 +188,21 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Non-interactive request to acquire a security token for the signed-in user in Windows,
-        /// via Integrated Windows Authentication. See https://aka.ms/msal-net-iwa.
+        /// via Integrated Windows Authentication.
         /// The account used in this overrides is pulled from the operating system as the current user principal name.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>
-        /// You can also pass optional parameters by calling:
-        /// <see cref="AcquireTokenByIntegratedWindowsAuthParameterBuilder.WithUsername(string)"/> to pass the identifier
-        /// of the user account for which to acquire a token with Integrated Windows authentication. This is generally in
-        /// UserPrincipalName (UPN) format, e.g. john.doe@contoso.com. This is normally not needed, but some Windows administrators
-        /// set policies preventing applications from looking-up the signed-in user in Windows, and in that case the username
-        /// needs to be passed.
-        /// You can also chain with
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
-        /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
-        /// of the known authorities added to the application construction.
+        ///  See <see cref="https://aka.ms/msal-net-iwa">our documentation</see> for more details.
+        /// You can pass optional parameters by calling <see cref="AcquireTokenByIntegratedWindowsAuthParameterBuilder.WithUsername(string)"/> to pass the identifier
+        /// of the user account for which to acquire a token with Integrated Windows Authentication. This is generally in
+        /// User Principal Name (UPN) format (e.g. john.doe@contoso.com). This is normally not needed, but some Windows administrators
+        /// set policies preventing applications from looking up the signed-in user and in that case the username needs to be passed.
+        /// You can also chain with <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
+        /// additional query parameters to the authentication service, along with one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
+        /// in order to override the default authority. Note that the overriding authority needs to be part
+        /// of the known authorities added to the application constructor.
         /// </remarks>
         public AcquireTokenByIntegratedWindowsAuthParameterBuilder AcquireTokenByIntegratedWindowsAuth(
             IEnumerable<string> scopes)
