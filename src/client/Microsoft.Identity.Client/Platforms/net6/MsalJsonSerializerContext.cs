@@ -66,19 +66,37 @@ namespace Microsoft.Identity.Client.Platforms.net6
         }
     }
 #else 
-
-    internal partial class MsalJsonSerializerContext
+    internal class MsalJsonSerializerContext : JsonSerializerContext
     {
         private static MsalJsonSerializerContext s_customContext;
+
+        public MsalJsonSerializerContext(JsonSerializerOptions options) : base(options)
+        {
+        }
 
         public static MsalJsonSerializerContext Custom
         {
             get
             {
-                return s_customContext;
+                return s_customContext ??=
+                    new MsalJsonSerializerContext(new JsonSerializerOptions
+                    {
+                        NumberHandling = JsonNumberHandling.AllowReadingFromString,
+                        AllowTrailingCommas = true,
+                        Converters =
+                        {
+                            new JsonStringConverter(),
+                        }
+                    });
             }
         }
 
+        protected override JsonSerializerOptions GeneratedSerializerOptions => throw new NotImplementedException();
+
+        public override JsonTypeInfo GetTypeInfo(Type type)
+        {
+            throw new NotImplementedException();
+        }
     }
 #endif
 
