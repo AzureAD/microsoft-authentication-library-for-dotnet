@@ -18,7 +18,7 @@ steps:
 - task: VSBuild@1
   displayName: 'Rebuild solution for Roslyn workaround'
   inputs:
-    solution: ${{ parameters.Solution }}
+    solution: 'microsoft-authentication-library-for-dotnet/LibsAndSamples.sln'
     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
