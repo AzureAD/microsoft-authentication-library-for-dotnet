@@ -17,7 +17,6 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.WsTrust;
 
-#pragma warning disable CS0534 // OneBranchSuppression for 'MsalJsonSerializerContext' does not implement inherited abstract member 'JsonSerializerContext.GeneratedSerializerOptions.get'
 namespace Microsoft.Identity.Client.Platforms.net6
 {
     /// <summary>
@@ -64,10 +63,21 @@ namespace Microsoft.Identity.Client.Platforms.net6
                     });
             }
         }
-
-#if ONE_BRANCH //Onebranch suppression workaround. 
-        protected override JsonSerializerOptions? GeneratedSerializerOptions { get; }
-        public override JsonTypeInfo? GetTypeInfo(Type type) { return null; }
-#endif
     }
+#if ONE_BRANCH //Onebranch suppression workaround. 
+    internal partial class MsalJsonSerializerContext
+    {
+        private static MsalJsonSerializerContext s_customContext;
+
+        public static MsalJsonSerializerContext Custom
+        {
+            get
+            {
+                return s_customContext;
+            }
+        }
+
+    }
+#endif
+
 }
