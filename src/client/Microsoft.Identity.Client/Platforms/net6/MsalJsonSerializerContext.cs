@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Oidc;
@@ -19,7 +17,6 @@ using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client.Platforms.net6
 {
-#pragma warning disable CS0534 // OneBranchSuppression for 'MsalJsonSerializerContext' does not implement inherited abstract member 'JsonSerializerContext.GeneratedSerializerOptions.get'
     /// <summary>
     /// This class specifies metadata for System.Text.Json source generation.
     /// See <see href="https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-source-generation-modes?pivots=dotnet-6-0">https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-source-generation-modes?pivots=dotnet-6-0</see>
@@ -64,10 +61,5 @@ namespace Microsoft.Identity.Client.Platforms.net6
                     });
             }
         }
-
-#if ONE_BRANCH //Onebranch suppression workaround. 
-        protected override JsonSerializerOptions? GeneratedSerializerOptions { get; }
-        public override JsonTypeInfo? GetTypeInfo(Type type) { return null; }
-#endif
     }
 }
