@@ -7,6 +7,7 @@ steps:
   inputs:
     userProvideBuildInfo: auto
     suppressionFileForCompilerWarnings: 'microsoft-authentication-library-for-dotnet\RoslynSuppressions.txt'
+    msBuildCommandline: 'dotnet build'
   env:
     system_accesstoken: $(System.AccessToken)
   continueOnError: true
