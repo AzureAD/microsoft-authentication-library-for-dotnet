@@ -64,7 +64,8 @@ namespace Microsoft.Identity.Client.Platforms.net6
             }
         }
     }
-#if ONE_BRANCH //Onebranch suppression workaround. 
+#if ONE_BRANCH // OneBranchSuppression for error: 'MsalJsonSerializerContext' does not implement inherited abstract member 'JsonSerializerContext.GeneratedSerializerOptions.get'
+
     internal partial class MsalJsonSerializerContext
     {
         private static MsalJsonSerializerContext s_customContext;
