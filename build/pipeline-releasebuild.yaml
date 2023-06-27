@@ -27,6 +27,8 @@ stages:
       demands:
       - msbuild
       - visualstudio
+    variables:
+        Codeql.SkipTaskAutoInjection: true
 
     steps:
     - template: template-pack-and-sign-packages.yaml
