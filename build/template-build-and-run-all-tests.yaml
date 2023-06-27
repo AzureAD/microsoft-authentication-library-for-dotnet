@@ -11,6 +11,7 @@ jobs: #Build and stage projects
       - visualstudio
   variables:
       runCodesignValidationInjection: false
+      Codeql.SkipTaskAutoInjection: true
 
   steps:
   #Pre build analysis
@@ -22,6 +23,9 @@ jobs: #Build and stage projects
       demands:
       - msbuild
       - visualstudio
+  variables:
+      Codeql.Enabled: true
+      Codeql.Language: csharp
 
   steps:
   # Bootstrap the build
@@ -52,6 +56,7 @@ jobs: #Build and stage projects
       - visualstudio
   variables:
       runCodesignValidationInjection: false
+      Codeql.SkipTaskAutoInjection: true
 
   steps:
   - template: template-build-android-automation.yaml
@@ -67,6 +72,7 @@ jobs: #Build and stage projects
       - visualstudio
   variables:
       runCodesignValidationInjection: false
+      Codeql.SkipTaskAutoInjection: true
 
   steps:
   - template: template-cachecompat-automation.yaml
@@ -88,6 +94,7 @@ jobs: #Build and stage projects
       - visualstudio
   variables:
       runCodesignValidationInjection: false
+      Codeql.SkipTaskAutoInjection: true
 
   steps:
   - template: template-desktop-unit-and-automation.yaml
@@ -100,7 +107,8 @@ jobs: #Build and stage projects
   pool:
     vmImage: 'windows-2022'
   variables:
-    runCodesignValidationInjection: false
+      runCodesignValidationInjection: false
+      Codeql.SkipTaskAutoInjection: true
 
   steps:
   - template: template-android-appcenter-tests.yaml
