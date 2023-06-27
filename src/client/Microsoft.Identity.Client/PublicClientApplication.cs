@@ -58,12 +58,15 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Returns <c>true</c> if MSAL can use the system web browser.
+        /// Tells if the application can use the system web browser, therefore enabling single-sign-on with web applications.
+        /// By default, MSAL will try to use a system browser on the mobile platforms, if it is available.
+        /// See <see href="https://aka.ms/msal-net-uses-web-browser">our documentation</see> for more details.
         /// </summary>
         /// <remarks>
         /// On Windows, macOS, and Linux a system browser can always be used, except in cases where there is no UI (e.g., a SSH session).
         /// On Android, the browser must support tabs.
         /// </remarks>
+        /// <returns>Returns <c>true</c> if MSAL can use the system web browser.</returns>
         public bool IsSystemWebViewAvailable // TODO MSAL5: consolidate these helpers in the interface
         {
             get
