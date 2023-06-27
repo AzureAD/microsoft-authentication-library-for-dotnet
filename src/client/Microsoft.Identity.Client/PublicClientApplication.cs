@@ -56,7 +56,8 @@ namespace Microsoft.Identity.Client
         /// Returns <c>true</c> if MSAL can use an embedded web view (web browser).
         /// </summary>
         /// <remarks>
-        /// Currently, there are no embedded web views on macOS and Linux. On Windows, the WebView2 runtime is required and this property will reflect the availability of the component.
+        /// All .NET Framework applications will use the legacy web view. .NET 6 and .NET Core applications must use the <see href="https://www.nuget.org/packages/Microsoft.Identity.Client.Desktop">Microsoft.Identity.Client.Desktop</see> package with WebView2. .NET 6 for Windows comes with WebView2 by default.
+        /// WebView2 UI is only shown for non-AAD authorities.
         /// Refer to <see href="https://aka.ms/msal-net-webview2">our documentation</see> for additional details.
         /// </remarks>
         public bool IsEmbeddedWebViewAvailable()
@@ -147,21 +148,6 @@ namespace Microsoft.Identity.Client
                 new string(password.PasswordToCharArray()));
         }
 
-        /// <summary>
-        /// Non-interactive request to acquire a security token from the authority, via Username/Password Authentication.
-        /// See https://aka.ms/msal-net-up for details.
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="username">Identifier of the user application requests token on behalf.
-        /// Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
-        /// <param name="password">User password as a string.</param>
-        /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
-        /// <remarks>You can also pass optional parameters by chaining the builder with:
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
-        /// additional query parameters to the Azure AD, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
-        /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
-        /// of the known authorities added to the application construction.
-        /// </remarks>
         public AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
             IEnumerable<string> scopes,
             string username,
