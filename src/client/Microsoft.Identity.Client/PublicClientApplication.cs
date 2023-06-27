@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
         /// case calling `AcquireTokenSilent` will throw an <see cref="MsalUiRequiredException"/>. 
         /// </summary>
         /// <remarks>
-        /// Currently, only the Windows broker is able to login with the current operating system user. For additional details, see <see href="https://aka.ms/msal-net-wam">documentation on the Windows broker</see>.
+        /// Currently, only the Windows broker is able to login with the current operating system user. For additional details, see <see href="https://aka.ms/msal-net-wam">the documentation on the Windows broker</see>.
         /// </remarks>
         public static IAccount OperatingSystemAccount
         {
@@ -116,8 +116,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Interactive request to acquire a token for the specified scopes. The interactive window will be parented to the specified application
-        /// window. The user will be required to select an account.
+        /// Interactive request to acquire a token for the specified scopes. The interactive window will be parented to an application
+        /// window specified through a handle. The user will be required to select an account.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API.</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request.</returns>
