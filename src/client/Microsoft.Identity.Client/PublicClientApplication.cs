@@ -197,7 +197,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>
-        ///  See <see cref="https://aka.ms/msal-net-iwa">our documentation</see> for more details.
+        /// See <see href="https://aka.ms/msal-net-iwa">our documentation</see> for more details.
         /// You can pass optional parameters by calling <see cref="AcquireTokenByIntegratedWindowsAuthParameterBuilder.WithUsername(string)"/> to pass the identifier
         /// of the user account for which to acquire a token with Integrated Windows Authentication. This is generally in
         /// User Principal Name (UPN) format (e.g. john.doe@contoso.com). This is normally not needed, but some Windows administrators
