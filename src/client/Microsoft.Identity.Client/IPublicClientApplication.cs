@@ -11,10 +11,18 @@ using static System.Net.WebRequestMethods;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Interface to be used for creation of public clients for desktop and mobile applications.
-    /// Public client applications are not trusted to safely keep application secrets and therefore they can only access web APIs in the name of the authenticating user.
+    /// Class used to acquire tokens in desktop and mobile applications. Public client applications are not trusted to safely keep application secrets and therefore they can only access web APIs in the name of the authenticating user.
     /// For more details on differences between public and confidential clients, refer to <see href="https://aka.ms/msal-net-client-applications">our documentation</see>.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Unlike <see cref="Microsoft.Identity.Client.IConfidentialClientApplication"/>, public clients are unable to securely store secrets on a client device and as a result do not require the use of a client secret.
+    /// </para>
+    /// <para>
+    /// The redirect URI needed for interactive authentication is automatically determined by the library. It does not need to be passed explicitly in the constructor. Depending
+    /// on the authentication strategy (e.g., through the <see href="https://learn.microsoft.com/entra/msal/dotnet/acquiring-tokens/desktop-mobile/wam?view=msal-dotnet-latest">Web Account Manager</see>, the Authenticator app, web browser, etc.), different redirect URIs will be used by MSAL. Redirect URIs must always be configured for the application in the Azure Portal.
+    /// </para>
+    /// </remarks>
     public partial interface IPublicClientApplication : IClientApplicationBase
     {
         /// <summary>
@@ -22,6 +30,11 @@ namespace Microsoft.Identity.Client
         /// By default, MSAL will try to use a system browser on the mobile platforms, if it is available.
         /// See <see href="https://aka.ms/msal-net-uses-web-browser">our documentation</see> for more details.
         /// </summary>
+        /// <remarks>
+        /// On Windows, macOS, and Linux a system browser can always be used, except in cases where there is no UI (e.g., a SSH session).
+        /// On Android, the browser must support tabs.
+        /// </remarks>
+        /// <returns>Returns <c>true</c> if MSAL can use the system web browser.</returns>
         bool IsSystemWebViewAvailable { get; }
 
         /// <summary>
@@ -93,20 +106,20 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes);
 
         /// <summary>
-        /// Non-interactive request to acquire a security token from the authority, via Username/Password Authentication.
-        /// Available only on .net desktop and .net core. See https://aka.ms/msal-net-up for details.
+        /// Non-interactive request to acquire a token via username and password authentication.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="username">Identifier of the user application requests token on behalf.
         /// Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
         /// <param name="password">User password as a secure string.</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
-        /// <remarks>You can also pass optional parameters by chaining the builder with:
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
-        /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
-        /// of the known authorities added to the application construction.
-        /// .NET no longer recommends using SecureString and MSAL puts the plaintext value of the password on the wire, as required by the OAuth protocol. See <see href="https://docs.microsoft.com/en-us/dotnet/api/system.security.securestring?view=net-6.0#remarks">SecureString documentation</see>.
+        /// <remarks>
+        /// Available only for .NET Framework and .NET Core applications. See <see href="https://aka.ms/msal-net-up">our documentation</see> for details.
+        /// You can also pass optional parameters by chaining the builder with <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>
+        /// and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
+        /// to override the default authority. Note that the overriding authority needs to be part
+        /// of the known authorities added to the application constructor.
+        /// .NET no longer recommends using SecureString and MSAL puts the plaintext value of the password on the wire, as required by the OAuth protocol. See <see href="https://docs.microsoft.com/dotnet/api/system.security.securestring?view=net-6.0#remarks">SecureString documentation</see> for details.
         /// </remarks>
         [Obsolete("Using SecureString is not recommended. Use AcquireTokenByUsernamePassword(IEnumerable<string> scopes, string username, string password) instead.", false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -116,19 +129,19 @@ namespace Microsoft.Identity.Client
             SecureString password);
 
         /// <summary>
-        /// Non-interactive request to acquire a security token from the authority, via Username/Password Authentication.
-        /// Available only on .NET desktop and .NET core. See https://aka.ms/msal-net-up for details.
+        /// Non-interactive request to acquire a token via username and password authentication.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="username">Identifier of the user application requests token on behalf.
         /// Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
         /// <param name="password">User password as a string.</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
-        /// <remarks>You can also pass optional parameters by chaining the builder with:
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
-        /// additional query parameters to the Azure AD, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
-        /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
-        /// of the known authorities added to the application construction.
+        /// <remarks>
+        /// Available only for .NET Framework and .NET Core applications. See <see href="https://aka.ms/msal-net-up">our documentation</see> for details.
+        /// You can also pass optional parameters by chaining the builder with <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>
+        /// and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
+        /// to override the default authority. Note that the overriding authority needs to be part
+        /// of the known authorities added to the application constructor.
         /// </remarks>
         AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
             IEnumerable<string> scopes,
