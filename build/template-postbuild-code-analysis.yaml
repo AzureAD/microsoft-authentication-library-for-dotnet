@@ -6,6 +6,7 @@ steps:
   displayName: 'Run Roslyn Analyzers'
   inputs:
     userProvideBuildInfo: auto
+    suppressionFileForCompilerWarnings: 'RoslynSuppressions.txt'
   env:
     system_accesstoken: $(System.AccessToken)
   continueOnError: true
