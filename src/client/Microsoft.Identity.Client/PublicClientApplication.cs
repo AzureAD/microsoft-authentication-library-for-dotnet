@@ -13,18 +13,16 @@ namespace Microsoft.Identity.Client
 {
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
     /// <summary>
-    /// Class to be used to acquire tokens in desktop or mobile applications (Desktop / UWP / Xamarin.iOS / Xamarin.Android).
-    /// public client applications are not trusted to safely keep application secrets, and therefore they only access web APIs in the name of the user only.
-    /// For details see https://aka.ms/msal-net-client-applications
+    /// Class used to acquire tokens in desktop and mobile applications. Public client applications are not trusted to safely keep application secrets and therefore they can only access web APIs in the name of the authenticating user.
+    /// For more details on differences between public and confidential clients, refer to <see href="https://aka.ms/msal-net-client-applications">our documentation</see>.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Unlike <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, public clients are unable to hold configuration time secrets,
-    /// and as a result have no client secret.
+    /// Unlike <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, public clients are unable to securely store secrets on a client device and as a result do not require the use of a client secret.
     /// </para>
     /// <para>
     /// The redirect URI needed for interactive authentication is automatically determined by the library. It does not need to be passed explicitly in the constructor. Depending
-    /// on the authentication strategy (e.g., through the Web Authentication Manager, Authentication app, browser, etc.), different redirect URIs will be used by MSAL. Redirect URIs must always be configured in the Azure Active Directory blade in the Azure Portal.
+    /// on the authentication strategy (e.g., through the <see href="https://learn.microsoft.com/entra/msal/dotnet/acquiring-tokens/desktop-mobile/wam?view=msal-dotnet-latest">Web Account Manager</see>, the Authenticator app, web browser, etc.), different redirect URIs will be used by MSAL. Redirect URIs must always be configured for the application in the Azure Portal.
     /// </para>
     /// </remarks>
     public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication, IByRefreshToken
@@ -39,12 +37,13 @@ namespace Microsoft.Identity.Client
             new Account(CurrentOSAccountDescriptor, null, null, null);
 
         /// <summary>
-        /// Currently only the Windows broker is able to login with the current user, see https://aka.ms/msal-net-wam for details.
-        /// 
-        /// A special account value that indicates that the current Operating System account should be used 
-        /// to login the user. Not all operating systems and authentication flows support this concept, in which 
+        /// A special account value that indicates that the current operating system account should be used 
+        /// to log the user in. Not all operating systems and authentication flows support this concept, in which 
         /// case calling `AcquireTokenSilent` will throw an <see cref="MsalUiRequiredException"/>. 
         /// </summary>
+        /// <remarks>
+        /// Currently, only the Windows broker is able to login with the current operating system user. For additional details, see <see href="https://aka.ms/msal-net-wam">documentation on the Windows broker</see>.
+        /// </remarks>
         public static IAccount OperatingSystemAccount
         {
             get
@@ -59,10 +58,10 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Returns true if MSAL can use a system browser.
+        /// Returns <c>true</c> if MSAL can use the system web browser.
         /// </summary>
         /// <remarks>
-        /// On Windows, Mac and Linux a system browser can always be used, except in cases where there is no UI, e.g. SSH connection.
+        /// On Windows, macOS, and Linux a system browser can always be used, except in cases where there is no UI (e.g., a SSH session).
         /// On Android, the browser must support tabs.
         /// </remarks>
         public bool IsSystemWebViewAvailable // TODO MSAL5: consolidate these helpers in the interface
@@ -74,11 +73,11 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Returns true if MSAL can use an embedded web view (browser). 
+        /// Returns <c>true</c> if MSAL can use an embedded web view (web browser).
         /// </summary>
         /// <remarks>
-        /// Currently there are no embedded web views on Mac and Linux. On Windows, app developers or users should install 
-        /// the WebView2 runtime and this property will inform if the runtime is available, see https://aka.ms/msal-net-webview2
+        /// Currently, there are no embedded web views on macOS and Linux. On Windows, the WebView2 runtime is required and this property will reflect the availability of the component.
+        /// Refer to <see href="https://aka.ms/msal-net-webview2">our documentation</see> for additional details.
         /// </remarks>
         public bool IsEmbeddedWebViewAvailable()
         {
@@ -86,8 +85,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Returns false when the program runs in headless OS, for example when SSH-ed into a Linux machine.
-        /// Browsers (web views) and brokers cannot be used if there is no UI support. Instead, please use <see cref="PublicClientApplication.AcquireTokenWithDeviceCode(IEnumerable{string}, Func{DeviceCodeResult, Task})"/>
+        /// Returns <c>false</c> when the application runs in headless mode (e.g., when SSH-d into a Linux machine).
+        /// Browsers (web views) and brokers cannot be used if there is no UI support. For those scenarios, use <see cref="PublicClientApplication.AcquireTokenWithDeviceCode(IEnumerable{string}, Func{DeviceCodeResult, Task})"/>.
         /// </summary>
         public bool IsUserInteractive()
         {
@@ -95,8 +94,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Returns <c>true</c> if a broker can be used.
-        /// This method is only needed to be used in mobile scenarios which support Mobile Application Management. In other supported scenarios, use <c>WithBroker</c> by itself, which will fall back to use a browser if broker is unavailable.
+        /// Returns <c>true</c> if an authentication broker can be used.
+        /// This method is only needed for mobile scenarios which support Mobile Application Management (MAM). In other cases, use <c>WithBroker</c>, which will fall back to use a browser if an authentication broker is unavailable.
         /// </summary>
         /// <remarks>
         /// <list type="bullet">
@@ -117,29 +116,23 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Interactive request to acquire a token for the specified scopes. The interactive window will be parented to the specified
+        /// Interactive request to acquire a token for the specified scopes. The interactive window will be parented to the specified application
         /// window. The user will be required to select an account.
         /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
-        /// <remarks>The user will be signed-in interactively if needed,
-        /// and will consent to scopes and do multi-factor authentication if such a policy was enabled in the Azure AD tenant.
+        /// <param name="scopes">Scopes requested to access a protected API.</param>
+        /// <returns>A builder enabling you to add optional parameters before executing the token request.</returns>
+        /// <remarks>The user will be signed-in interactively and will consent to scopes, as well as perform a multi-factor authentication step if such a policy was enabled in the Azure AD tenant.
         ///
         /// You can also pass optional parameters by calling:
-        ///         
-        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithPrompt(Prompt)"/> to specify the user experience
-        /// when signing-in, <see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/> to specify
-        /// if you want to use the embedded web browser or the system default browser,
-        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithSystemWebViewOptions(SystemWebViewOptions)"/> to configure
-        /// the user experience when using the Default browser,
-        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithAccount(IAccount)"/> or <see cref="AcquireTokenInteractiveParameterBuilder.WithLoginHint(string)"/>
-        /// to prevent the select account dialog from appearing in the case you want to sign-in a specific account,
-        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/> if you want to let the
-        /// user pre-consent to additional scopes (which won't be returned in the access token),
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
-        /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
-        /// of the known authorities added to the application construction.
+        /// <list type="bullet">         
+        /// <item><description><see cref="AcquireTokenInteractiveParameterBuilder.WithPrompt(Prompt)"/> to specify the user experience when signing-in.</description></item>
+        /// <item><description><see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/> to specify if you want to use the embedded web browser or the default system browser.</description></item>
+        /// <item><description><see cref="AcquireTokenInteractiveParameterBuilder.WithSystemWebViewOptions(SystemWebViewOptions)"/> to configure the user experience when using the default system browser.</description></item>
+        /// <item><description><see cref="AcquireTokenInteractiveParameterBuilder.WithAccount(IAccount)"/> or <see cref="AcquireTokenInteractiveParameterBuilder.WithLoginHint(string)"/> to prevent the account selection dialog from appearing if you want to sign-in a specific account.</description></item>
+        /// <item><description><see cref="AcquireTokenInteractiveParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/> if you want to let the user pre-consent to additional scopes (which won't be returned in the access token).</description></item>
+        /// <item><description><see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass additional query parameters to the authentication service.</description></item>
+        /// <item><description>One of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> to override the default authority set at the application construction. Note that the overriding authority needs to be part of the known authorities added to the application constructor.</description></item>
+        /// </list>
         /// </remarks>
         [CLSCompliant(false)]
         public AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(
