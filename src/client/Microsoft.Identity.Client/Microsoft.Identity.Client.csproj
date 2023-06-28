@@ -26,10 +26,6 @@
     <TargetFrameworkUap>uap10.0.17763</TargetFrameworkUap>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(PipelineType)' == 'OneBranch'">
-    <DefineConstants>$(DefineConstants);ONE_BRANCH</DefineConstants>
-  </PropertyGroup>
-
   <!-- net6.0 (MAUI) -->
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Ios)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Mac)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">
     <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
