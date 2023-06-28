@@ -184,6 +184,7 @@ namespace Microsoft.Identity.Client
                 {
                     AuthenticationResultMetadata.RefreshOn = msalAccessTokenCacheItem.RefreshOn;
                 }
+                ExtraTokenParams = msalAccessTokenCacheItem.ExtraTokenParams;
             }
         }
 
@@ -322,5 +323,10 @@ namespace Microsoft.Identity.Client
                 _authenticationScheme?.AuthorizationHeaderPrefix ?? TokenType,
                 AccessToken);
         }
+
+        /// <summary>
+        /// Extra token parameters spicified in the token request.
+        /// </summary>
+        public IReadOnlyDictionary<string, string> ExtraTokenParams { get; }
     }
 }

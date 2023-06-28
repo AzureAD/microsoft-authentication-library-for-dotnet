@@ -28,7 +28,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string tenantId,
             string homeAccountId,
             string keyId = null,
-            string oboCacheKey = null)
+            string oboCacheKey = null,
+            Dictionary<string, string> extraTokenParams = null)
             : this(
                 scopes: response.Scope, // token providers send pre-sorted (alphabetically) scopes
                 cachedAt: DateTimeOffset.UtcNow,
@@ -45,6 +46,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = response.ClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
+            ExtraTokenParams = extraTokenParams;
 
             InitCacheKey();
         }

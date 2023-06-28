@@ -21,15 +21,14 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> bodyParameters,
             ILoggerAdapter logger,
             CancellationToken cancellationToken = default,
-            TokenRequestContentType? tokenRequestContentType = null);
+            TokenRequestContentType tokenRequestContentType = null);
 
         Task<HttpResponse> SendPostAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
             HttpContent body,
             ILoggerAdapter logger,
-            CancellationToken cancellationToken = default,
-            TokenRequestContentType? tokenRequestContentType = null);
+            CancellationToken cancellationToken = default);
 
         Task<HttpResponse> SendGetAsync(
             Uri endpoint,

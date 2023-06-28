@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -21,20 +22,29 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     public class GenericAuthorityTests : TestBase
     {
         [DataTestMethod]
-        [DataRow(true)]
-        [DataRow(false)]
+        [DataRow(true, false)]
+        [DataRow(false, false)]
+        [DataRow(true, true)]
         /// AAD doesn't returns the "scope" in the response
         /// Duende does return the "scope" in the response
-        public async Task GenericClientCredentialSuccessfulTestAsync(bool includeScopeInResonse)
+        public async Task GenericClientCredentialSuccessfulTestAsync(bool includeScopeInResonse, bool jsonContentType)
         {
             using (var httpManager = new MockHttpManager())
             {
+                TokenRequestContentType tokenRequestContentType = null;
+
+                if (jsonContentType)
+                {
+                    tokenRequestContentType = TokenRequestContentType.JSON;
+                }
+
                 string authority = "https://demo.duendesoftware.com";
                 IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(httpManager)
                     .WithExperimentalFeatures(true)
-                    .WithGenericAuthority(authority)
+                    .WithGenericAuthority(authority, TokenRequestContentType.JSON)
+                    .WithCacheOptions(new CacheOptions(false, new[] { "topology", "trusted_keys" }))
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build();
 
@@ -42,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     CreateOidcHttpHandler(authority + @"/" + Constants.WellKnownOpenIdConfigurationPath));
 
                 httpManager.AddMockHandler(
-                    CreateTokenResponseHttpHandler(authority + "/connect/token", "api", includeScopeInResonse ? "api" : null));
+                    CreateTokenResponseHttpHandler(authority + "/connect/token", "api", includeScopeInResonse ? "api" : null, tokenRequestContentType));
 
                 Assert.AreEqual(authority + "/", app.Authority);
                 var confidentailClientApp = (ConfidentialClientApplication)app;
@@ -135,7 +145,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         private static MockHttpMessageHandler CreateTokenResponseHttpHandler(
             string tokenEndpoint,
             string scopesInRequest, 
-            string scopesInResponse)
+            string scopesInResponse,
+            TokenRequestContentType tokenRequestContentType = null)
         {
             IDictionary<string, string> expectedRequestBody = new Dictionary<string, string>
             {
@@ -145,8 +156,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 { "client_secret", TestConstants.ClientSecret }
             };
 
-            string responseWithScopes = @"{ ""access_token"":""secret"", ""expires_in"":3600, ""token_type"":""Bearer"", ""scope"":""api"" }";
-            string responseWithoutScopes = @"{ ""access_token"":""secret"", ""expires_in"":3600, ""token_type"":""Bearer"" }";
+            string responseWithScopes = @"{ ""access_token"":""secret"", ""expires_in"":3600, ""token_type"":""Bearer"", ""scope"":""api"", ""topology"":{""Type"":""Machine"",""Value"":""CY4TDS090000B1.CY4TDS090000B1D.extest.microsoft.com""}, ""trusted_keys"":""[aE1ZcuCz-xfufPtDU88i8ynGkk8]"" }";
+            string responseWithoutScopes = @"{ ""access_token"":""secret"", ""expires_in"":3600, ""token_type"":""Bearer"", ""topology"":{""Type"":""Machine"",""Value"":""CY4TDS090000B1.CY4TDS090000B1D.extest.microsoft.com""}, ""trusted_keys"":""[aE1ZcuCz-xfufPtDU88i8ynGkk8]"" }";
 
             string response = scopesInResponse == null ? 
                 responseWithScopes .Replace("api", scopesInResponse)
@@ -154,6 +165,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             return new MockHttpMessageHandler()
             {
+                ExpectedContentType = tokenRequestContentType,
                 ExpectedUrl = tokenEndpoint,
                 ExpectedMethod = HttpMethod.Post,
                 ExpectedPostData = expectedRequestBody,

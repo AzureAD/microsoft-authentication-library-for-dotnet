@@ -71,6 +71,10 @@ namespace Microsoft.Identity.Client
             #region Create Cache Objects
             if (!string.IsNullOrEmpty(response.AccessToken))
             {
+                IEnumerable<string> extraTokenParams = requestParams.AppConfig?.AccessorOptions?.ExtraTokenParamsToCache;
+
+                Dictionary <string, string> extraResponseParameters = GetExtraTokenParametersFromResponse(extraTokenParams, response);
+
                 msalAccessTokenCacheItem =
                     new MsalAccessTokenCacheItem(
                         instanceDiscoveryMetadata.PreferredCache,
@@ -79,7 +83,8 @@ namespace Microsoft.Identity.Client
                         tenantId,
                         homeAccountId,
                         requestParams.AuthenticationScheme.KeyId,
-                        CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion));
+                        CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
+                        extraResponseParameters);
             }
 
             if (!string.IsNullOrEmpty(response.RefreshToken))
@@ -281,6 +286,22 @@ namespace Microsoft.Identity.Client
                 _semaphoreSlim.Release();
                 logger.Verbose(() => "[SaveTokenResponseAsync] Released token cache semaphore. ");
             }
+        }
+
+        private Dictionary<string, string> GetExtraTokenParametersFromResponse(IEnumerable<string> extraTokenParams, MsalTokenResponse response)
+        {
+            Dictionary<string, string> extraTokenParamsDict = new Dictionary<string, string>();
+
+            foreach (string tokenParam in extraTokenParams)
+            {
+                if (response.ExtensionData.Keys.Contains(tokenParam))
+                {
+                    var entry = response.ExtensionData.Where(item => item.Key == tokenParam).FirstOrDefault();
+                    extraTokenParamsDict.Add(entry.Key, entry.Value.ToString());
+                }
+            }
+
+            return extraTokenParamsDict;
         }
 
         private bool ShouldCacheAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem, TokenSource tokenSource)

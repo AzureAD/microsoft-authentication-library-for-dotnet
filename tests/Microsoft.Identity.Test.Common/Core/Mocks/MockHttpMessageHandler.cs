@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -37,6 +38,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public Dictionary<string, string> ActualRequestPostData { get; private set; }
         public HttpRequestHeaders ActualRequestHeaders { get; private set; }
+        public TokenRequestContentType ExpectedContentType { get; set; }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
@@ -79,6 +81,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                             uri.AbsolutePath));
                     Assert.AreEqual(ExpectedQueryParams[key], inputQp[key]);
                 }
+            }
+
+            if (request.Method == HttpMethod.Post && ExpectedContentType != null)
+            {
+                Assert.AreEqual(ExpectedContentType.GetValue(), request.Headers.Accept.FirstOrDefault().ToString());
             }
 
             if (request.Method != HttpMethod.Get && request.Content != null)

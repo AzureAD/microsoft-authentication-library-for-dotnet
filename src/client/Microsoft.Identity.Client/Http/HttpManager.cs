@@ -48,13 +48,13 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> bodyParameters,
             ILoggerAdapter logger,
             CancellationToken cancellationToken = default,
-            TokenRequestContentType? tokenRequestContentType = null)
+            TokenRequestContentType tokenRequestContentType = null)
         {
             HttpContent body = bodyParameters == null ? null : new FormUrlEncodedContent(bodyParameters);
 
-            if (tokenRequestContentType.HasValue)
+            if (tokenRequestContentType != null)
             {
-                body.Headers.ContentType = new MediaTypeHeaderValue(tokenRequestContentType.Value.ToString());
+                body.Headers.ContentType = new MediaTypeHeaderValue(tokenRequestContentType.GetValue());
             }
             
             return await SendPostAsync(endpoint, headers, body, logger, cancellationToken).ConfigureAwait(false);
@@ -65,8 +65,7 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             HttpContent body,
             ILoggerAdapter logger,
-            CancellationToken cancellationToken = default,
-            TokenRequestContentType? tokenRequestContentType = null)
+            CancellationToken cancellationToken = default)
         {
             return await SendRequestAsync(endpoint, headers, body, HttpMethod.Post, logger, cancellationToken: cancellationToken).ConfigureAwait(false);
         }

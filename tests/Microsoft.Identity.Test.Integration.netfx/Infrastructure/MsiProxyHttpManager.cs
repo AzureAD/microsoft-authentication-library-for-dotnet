@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Test.LabInfrastructure;
@@ -43,7 +44,8 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             IDictionary<string, string> headers,
             IDictionary<string, string> bodyParameters,
             ILoggerAdapter logger,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            TokenRequestContentType tokenRequestContentType = null)
         {
             throw new NotSupportedException();
         }

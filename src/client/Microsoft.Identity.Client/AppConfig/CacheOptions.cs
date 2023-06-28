@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
+
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -40,6 +42,17 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="useSharedCache">Set to true to share the cache between all ClientApplication objects. The cache becomes static. <see cref="UseSharedCache"/> for a detailed description. </param>
+        /// <param name="extraTokenParamsToCache">Specifies the extra parameters MSAL should cache</param>
+        public CacheOptions(bool useSharedCache, IEnumerable<string> extraTokenParamsToCache)
+        {
+            UseSharedCache = useSharedCache;
+            ExtraTokenParamsToCache = extraTokenParamsToCache;
+        }
+
+        /// <summary>
         /// Share the cache between all ClientApplication objects. The cache becomes static. Defaults to false.
         /// </summary>
         /// <remarks>
@@ -50,5 +63,9 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public bool UseSharedCache { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public IEnumerable<string> ExtraTokenParamsToCache { get; set; }
     }
 }

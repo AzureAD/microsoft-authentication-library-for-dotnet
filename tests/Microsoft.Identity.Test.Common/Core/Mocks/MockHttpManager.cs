@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -82,9 +83,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return (handler as MockHttpMessageHandler)?.ExpectedUrl ?? "";
         }
 
-        public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ILoggerAdapter logger, CancellationToken cancellationToken = default)
+        public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ILoggerAdapter logger, CancellationToken cancellationToken = default, TokenRequestContentType tokenRequestContentType = null)
         {
-            return await _httpManager.SendPostAsync(endpoint, headers, bodyParameters, logger, cancellationToken).ConfigureAwait(false);
+            return await _httpManager.SendPostAsync(endpoint, headers, bodyParameters, logger, cancellationToken, tokenRequestContentType).ConfigureAwait(false);
         }
 
         public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, HttpContent body, ILoggerAdapter logger, CancellationToken cancellationToken = default)

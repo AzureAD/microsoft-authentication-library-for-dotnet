@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using JObject = System.Text.Json.Nodes.JsonObject;
@@ -15,6 +16,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal string CredentialType { get; set; }
         public string ClientId { get; set; }
         public string Secret { get; set; }
+        public Dictionary<string, string> ExtraTokenParams { get; set; }
 
         internal override void PopulateFieldsFromJObject(JObject j)
         {

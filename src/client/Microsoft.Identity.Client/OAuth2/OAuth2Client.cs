@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.AppConfig;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -125,12 +126,15 @@ namespace Microsoft.Identity.Client.OAuth2
                             await onBeforePostRequestData(requestData).ConfigureAwait(false);
                         }
 
+                        TokenRequestContentType tokenRequestContentType = requestContext.ServiceBundle.Config.tokenRequestContentType;
+
                         response = await _httpManager.SendPostAsync(
                             endpointUri,
                             _headers,
                             _bodyParameters,
                             requestContext.Logger,
-                            cancellationToken: requestContext.UserCancellationToken)
+                            cancellationToken: requestContext.UserCancellationToken,
+                            tokenRequestContentType)
                                  .ConfigureAwait(false);
                     }
                     else
