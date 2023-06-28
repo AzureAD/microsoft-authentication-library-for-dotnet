@@ -35,6 +35,3 @@ steps:
 # Run Post-build code analysis (e.g. Roslyn)
 
 - template: template-pack-and-sign-all-nugets.yaml
-
-# Publish analysis and cleanup
-- template: template-publish-analysis-and-cleanup.yaml

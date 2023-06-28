@@ -6,12 +6,5 @@ steps:
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@3
   displayName: 'Publish Security Analysis Logs'
 
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@2
-  displayName: 'TSA upload to Codebase: Unified .NET Core Stamp: Azure'
-  inputs:
-    GdnPublishTsaOnboard: false
-    GdnPublishTsaConfigFile: '$(Build.SourcesDirectory)/build/tsaConfig.json'
-  continueOnError: true
-
 - task: mspremier.PostBuildCleanup.PostBuildCleanup-task.PostBuildCleanup@3
   displayName: 'Clean Agent Directories'
