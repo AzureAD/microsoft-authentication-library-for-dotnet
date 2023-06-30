@@ -32,6 +32,4 @@ steps:
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
-# Run Post-build code analysis (e.g. Roslyn)
-
 - template: template-pack-and-sign-all-nugets.yaml

@@ -13,16 +13,6 @@ steps:
   env:
     system_accesstoken: $(System.AccessToken)
   continueOnError: true
-  condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
-
-- task: VSBuild@1
-  displayName: 'Rebuild solution for Roslyn workaround'
-  inputs:
-    solution: 'microsoft-authentication-library-for-dotnet/LibsAndSamples.sln'
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
-    platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
-    maximumCpuCount: true
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@2
   displayName: 'Check Roslyn Results '

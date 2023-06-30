@@ -11,8 +11,8 @@
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
-  <!-- Mobile and legacy targets - comment these out or set env variable MSAL_DESKTOP_ONLY_DEV to speedup the build -->
-  <PropertyGroup Condition="'$(MSAL_DESKTOP_ONLY_DEV)' != ''">
+  <!-- Mobile and legacy targets - comment these out or set env variable INCLUDE_MOBILE_AND_LEGACY_TFM to speedup the build -->
+  <PropertyGroup Condition="'$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
     <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
     <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
     <TargetFrameworkAndroid9>MonoAndroid9.0</TargetFrameworkAndroid9>
@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <!-- MAUI -->
-  <PropertyGroup Condition="'$(PipelineType)' != 'OneBranch' and '$(MSAL_DESKTOP_ONLY_DEV)' != ''">
+  <PropertyGroup Condition="'$(PipelineType)' != 'OneBranch' and '$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
     <TargetFrameworkUap>uap10.0.17763</TargetFrameworkUap>
   </PropertyGroup>
 
