@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <!-- MAUI -->
-  <PropertyGroup Condition="'$(PipelineType)' != 'OneBranch' and '$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
+  <PropertyGroup Condition="'$(PipelineType)' != 'OneBranch' and '$(INCLUDE_MOBILE_AND_LEGACY_TFM)' == ''">
     <TargetFrameworkUap>uap10.0.17763</TargetFrameworkUap>
   </PropertyGroup>
 
