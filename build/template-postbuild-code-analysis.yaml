@@ -6,6 +6,10 @@ steps:
   displayName: 'Run Roslyn Analyzers'
   inputs:
     userProvideBuildInfo: auto
+    suppressionFileForCompilerWarnings: 'microsoft-authentication-library-for-dotnet\RoslynSuppressions.txt'
+    msBuildCommandline: 'dotnet build'
+    rulesetName: Recommended
+    rulesetVersion: Latest
   env:
     system_accesstoken: $(System.AccessToken)
   continueOnError: true
