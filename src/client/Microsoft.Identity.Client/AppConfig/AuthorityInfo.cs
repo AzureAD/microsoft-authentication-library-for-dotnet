@@ -140,11 +140,7 @@ namespace Microsoft.Identity.Client
             AuthorityType != AuthorityType.Adfs && 
             AuthorityType != AuthorityType.B2C;
 
-        internal bool IsTenantOverrideSupported => 
-            AuthorityType == AuthorityType.Aad || 
-            AuthorityType == AuthorityType.Dsts;
-
-        internal bool IsMultiTenantSupported => 
+        internal bool IsTenanted => 
             AuthorityType == AuthorityType.Aad  ||
             AuthorityType == AuthorityType.Dsts ||
             AuthorityType == AuthorityType.B2C  ||
