@@ -150,6 +150,7 @@ namespace Microsoft.Identity.Client
             AuthorityType == AuthorityType.B2C  ||
             AuthorityType == AuthorityType.Ciam;
 
+
         internal bool IsClientInfoSupported =>
             AuthorityType == AuthorityType.Aad ||
             AuthorityType == AuthorityType.Dsts ||
@@ -513,7 +514,8 @@ namespace Microsoft.Identity.Client
                 AuthorityInfo requestAuthorityInfo,
                 IAccount account = null)
             {
-                var configAuthorityInfo = requestContext.ServiceBundle.Config.Authority.AuthorityInfo;
+                var configAuthority = requestContext.ServiceBundle.Config.Authority;
+                var configAuthorityInfo = configAuthority.AuthorityInfo;
 
                 if (configAuthorityInfo == null)
                 {
@@ -551,8 +553,14 @@ namespace Microsoft.Identity.Client
                         if (requestAuthorityInfo == null)
                         {
                             return updateEnvironment ?
-                                CreateAuthorityWithTenant(CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment).AuthorityInfo, account?.HomeAccountId?.TenantId) :
-                                CreateAuthorityWithTenant(configAuthorityInfo, account?.HomeAccountId?.TenantId);
+                                CreateAuthorityWithTenant(
+                                    CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment),
+                                    account?.HomeAccountId?.TenantId, 
+                                    forceTenantless: false) :
+                                CreateAuthorityWithTenant(
+                                    configAuthority, 
+                                    account?.HomeAccountId?.TenantId, 
+                                    forceTenantless: false);
                         }
 
                         // In case the authority is defined only at the request level
@@ -571,8 +579,14 @@ namespace Microsoft.Identity.Client
                         }
 
                         return updateEnvironment ?
-                                CreateAuthorityWithTenant(CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment).AuthorityInfo, account?.HomeAccountId?.TenantId) :
-                                CreateAuthorityWithTenant(configAuthorityInfo, account?.HomeAccountId?.TenantId);
+                                CreateAuthorityWithTenant(
+                                    CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment),
+                                    account?.HomeAccountId?.TenantId, 
+                                    forceTenantless: false) :
+                                CreateAuthorityWithTenant(
+                                    configAuthority, 
+                                    account?.HomeAccountId?.TenantId,
+                                    forceTenantless: false);
                     
                     default:
                         throw new MsalClientException(
@@ -581,18 +595,16 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            internal static Authority CreateAuthorityWithTenant(AuthorityInfo authorityInfo, string tenantId)
+            internal static Authority CreateAuthorityWithTenant(Authority authority, string tenantId, bool forceTenantless)
             {
-                Authority initialAuthority = authorityInfo.CreateAuthority();
-
                 if (string.IsNullOrEmpty(tenantId))
                 {
-                    return initialAuthority;
+                    return authority;
                 }
 
-                string tenantedAuthority = initialAuthority.GetTenantedAuthority(tenantId);
+                string tenantedAuthority = authority.GetTenantedAuthority(tenantId, forceTenantless);
 
-                return Authority.CreateAuthority(tenantedAuthority, authorityInfo.ValidateAuthority);
+                return Authority.CreateAuthority(tenantedAuthority, authority.AuthorityInfo.ValidateAuthority);
             }
 
             internal static Authority CreateAuthorityWithEnvironment(AuthorityInfo authorityInfo, string environment)

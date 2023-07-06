@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
@@ -267,22 +268,12 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(tenantId));
             }
 
-            if (!ServiceBundle.Config.Authority.AuthorityInfo.IsTenantOverrideSupported)
-            {
-                throw new MsalClientException(
-                    MsalError.TenantOverrideNonAad,
-                    MsalErrorMessage.TenantOverrideNonAad);
-            }
+            Authority newAuthority = AuthorityInfo.AuthorityInfoHelper.CreateAuthorityWithTenant(
+                ServiceBundle.Config.Authority, 
+                tenantId, 
+                true);
 
-            Authority originalAuthority = ServiceBundle.Config.Authority;
-            string tenantedAuthority = originalAuthority.GetTenantedAuthority(tenantId, true);
-
-            var newAuthorityInfo = new AuthorityInfo(
-                originalAuthority.AuthorityInfo.AuthorityType,
-                tenantedAuthority,
-                originalAuthority.AuthorityInfo.ValidateAuthority);
-
-            CommonParameters.AuthorityOverride = newAuthorityInfo;
+            CommonParameters.AuthorityOverride = newAuthority.AuthorityInfo;
 
             return this as T;
         }
@@ -307,15 +298,8 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(authorityUri));
             }
 
-            if (!ServiceBundle.Config.Authority.AuthorityInfo.IsTenantOverrideSupported)
-            {
-                throw new MsalClientException(
-                    MsalError.TenantOverrideNonAad,
-                    MsalErrorMessage.TenantOverrideNonAad);
-            }
-
             var authorityInfo = AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), false);
-            var authority = authorityInfo.CreateAuthority();
+            var authority = Authority.CreateAuthority(authorityInfo);
             return WithTenantId(authority.TenantId);
         }
 

@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(authorityUri);
             Assert.AreEqual(actualTenant, authority.TenantId);
 
-            string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id");
+            string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id", false);
             Assert.AreEqual(actualTenant, authority.TenantId);
             Assert.AreEqual(updatedAuthority, authorityUri);
 

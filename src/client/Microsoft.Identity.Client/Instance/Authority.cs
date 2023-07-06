@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.Instance
                 return initialAuthority;
             }
 
-            string tenantedAuthority = initialAuthority.GetTenantedAuthority(tenantId);
+            string tenantedAuthority = initialAuthority.GetTenantedAuthority(tenantId, forceTenantless: false);
 
             return CreateAuthority(tenantedAuthority, authorityInfo.ValidateAuthority);
         }
@@ -106,10 +106,17 @@ namespace Microsoft.Identity.Client.Instance
         internal abstract string TenantId { get; }
 
         /// <summary>
-        /// Gets a tenanted authority if the current authority is tenant-less.
-        /// Returns the original authority on B2C and ADFS
+        /// Changes the tenant id of the authority, if the authority supports tenants. If not, throws exception,.
         /// </summary>
-        internal abstract string GetTenantedAuthority(string tenantId, bool forceTenantless = false);
+        /// <param name="tenantId">The new tenant id</param>
+        /// <param name="forceTenantless">Forces the change, even if the current tenant is not "common" or "organizations" or "consumers"</param>
+        internal virtual string GetTenantedAuthority(string tenantId, bool forceTenantless)
+        {
+            throw new MsalClientException(
+                MsalError.TenantOverrideNonAad,
+                MsalErrorMessage.TenantOverrideNonAad);
+        }
+    
 
         internal abstract Task<string> GetTokenEndpointAsync(RequestContext requestContext);
 

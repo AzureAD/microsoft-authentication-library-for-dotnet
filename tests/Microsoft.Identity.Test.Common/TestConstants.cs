@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -106,6 +107,13 @@ namespace Microsoft.Identity.Test.Unit
         public const string DstsAuthorityTenantless = "https://some.url.dsts.core.azure-test.net/dstsv2/";
         public const string DstsAuthorityTenanted = "https://some.url.dsts.core.azure-test.net/dstsv2/" + TenantId + "/";
         public const string DstsAuthorityCommon = "https://some.url.dsts.core.azure-test.net/dstsv2/" + Common + "/";
+
+        public const string GenericAuthority = "https://demo.duendesoftware.com";
+
+        // not actually used by MSAL directly, MSAL will transform it to friendly name format
+        public const string CiamAuthorityMainFormat = "https://tenant.ciamlogin.com/";
+        public const string CiamAuthorityWithFriendlyName = "https://tenant.ciamlogin.com/tenant.onmicrosoft.com";
+        public const string CiamAuthorityWithGuid = "https://tenant.ciamlogin.com/aaaaaaab-aaaa-aaaa-cccc-aaaaaaaaaaaa";
 
         public const string B2CLoginGlobal = ".b2clogin.com";
         public const string B2CLoginUSGov = ".b2clogin.us";

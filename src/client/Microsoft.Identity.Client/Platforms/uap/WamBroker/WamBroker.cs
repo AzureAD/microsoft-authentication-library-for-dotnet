@@ -313,7 +313,7 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
                 if (webAccountProvider != null && _webAccountProviderFactory.IsOrganizationsProvider(webAccountProvider) ||
                     (await IsDefaultAccountAndAadAsync(authenticationRequestParameters.Account).ConfigureAwait(false)))
                 {
-                    differentAuthority = authenticationRequestParameters.Authority.GetTenantedAuthority("common");
+                    differentAuthority = authenticationRequestParameters.Authority.GetTenantedAuthority("common", false);
                 }
             }
 

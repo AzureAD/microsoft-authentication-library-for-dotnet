@@ -1096,7 +1096,7 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParameters,
             string homeAccountId)
         {
-            if (!requestParameters.AuthorityInfo.IsMultiTenantSupported)
+            if (!requestParameters.AuthorityInfo.IsTenantProfileSupported)
             {
                 return null;
             }
