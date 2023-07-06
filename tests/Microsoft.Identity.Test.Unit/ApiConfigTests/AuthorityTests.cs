@@ -48,15 +48,32 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             base.TestCleanup();
         }
 
-        [DataTestMethod]
-        [DataRow(TestConstants.ADFSAuthority)]
-        [DataRow(TestConstants.B2CAuthority)]
-        [DataRow(TestConstants.GenericAuthority)]
-        public void WithTenantId_Exceptions(string inputAuthority)
+        [TestMethod]      
+        public void WithTenantId_Adfs_Exception()
         {
             var app1 = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithAdfsAuthority(inputAuthority)
+                .WithAuthority(TestConstants.ADFSAuthority)
+                .WithClientSecret("secret")
+                .Build();
+
+            var ex1 = AssertException.Throws<MsalClientException>(() =>
+                app1
+                    .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                    .WithTenantId(TestConstants.TenantId));
+
+            Assert.AreEqual(ex1.ErrorCode, MsalError.TenantOverrideNonAad);
+        }
+
+      
+
+        [TestMethod]
+        public void GenericAuthority_WithTenantId_Exceptions()
+        {
+            var app1 = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures(true)
+                .WithGenericAuthority(TestConstants.GenericAuthority)
                 .WithClientSecret("secret")
                 .Build();
 
@@ -96,7 +113,30 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority),
                 "The tenant id should have been changed");
         }
-       
+
+        [TestMethod]
+        public void WithTenantId_B2C()
+        {
+            var app = ConfidentialClientApplicationBuilder
+            .Create(TestConstants.ClientId)
+            .WithAuthority(TestConstants.B2CAuthority)
+            .WithClientSecret("secret")
+            .Build();
+
+            var parameterBuilder = app
+                .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                .WithTenantId(TestConstants.TenantId);
+
+            Assert.AreEqual(
+                new Uri(TestConstants.B2CAuthority).Host,
+                parameterBuilder.CommonParameters.AuthorityOverride.Host,
+                "The host should have stayed the same");
+
+            Assert.AreEqual(
+                "tenant",
+                AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority),
+                "The tenant id should have NOT changed");
+        }
 
         [DataTestMethod]
         [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]
