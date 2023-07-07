@@ -40,6 +40,7 @@ namespace Microsoft.Identity.Client.Internal
         public const string BearerAuthHeaderPrefix = "Bearer";
 
         public const string ManagedIdentityClientId = "client_id";
+        public const string ManagedIdentityObjectId = "object_id";
         public const string ManagedIdentityResourceId = "mi_res_id";
         public const string ManagedIdentityDefaultClientId = "system_assigned_managed_identity";
         public const string ManagedIdentityDefaultTenant = "managed_identity";
