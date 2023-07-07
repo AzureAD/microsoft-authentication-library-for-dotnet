@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,22 @@ namespace Microsoft.Identity.Client.Instance
         internal CiamAuthority(AuthorityInfo authorityInfo) : 
             base(authorityInfo)
         { }
+
+        internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
+        {
+            if (!string.IsNullOrEmpty(tenantId))
+            {
+                var authorityUri = AuthorityInfo.CanonicalAuthority;
+
+                return string.Format(
+                    CultureInfo.InvariantCulture,
+                    AADCanonicalAuthorityTemplate,
+                    authorityUri.Authority,
+                    tenantId);
+            }
+
+            return AuthorityInfo.CanonicalAuthority.AbsoluteUri;
+        }
 
         /// <summary>
         /// Translates CIAM authorities into a usable form. This is needed only until ESTS is updated to support the north star format
@@ -40,4 +57,5 @@ namespace Microsoft.Identity.Client.Instance
             }
         }
     }
+
 }

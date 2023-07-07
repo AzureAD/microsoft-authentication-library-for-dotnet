@@ -72,25 +72,24 @@ namespace Microsoft.Identity.Client
 
         internal void LogParameters(ILoggerAdapter logger)
         {
-            if (logger.IsLoggingEnabled(LogLevel.Info))
+            if (logger.IsLoggingEnabled(LogLevel.Verbose))
             {
                 logger.Info("DefaultBrowserOptions configured");
 
-                logger.InfoPii(
+                logger.VerbosePii(
                     () => "HtmlMessageSuccess " + HtmlMessageSuccess,
                     () => "HtmlMessageSuccess? " + !String.IsNullOrEmpty(HtmlMessageSuccess));
-                logger.InfoPii(
+                logger.VerbosePii(
                     () => "HtmlMessageError " + HtmlMessageError,
                     () => "HtmlMessageError? " + !String.IsNullOrEmpty(HtmlMessageError));
-                logger.InfoPii(
+                logger.VerbosePii(
                     () => "BrowserRedirectSuccess " + BrowserRedirectSuccess,
                     () => "BrowserRedirectSuccess? " + (BrowserRedirectSuccess != null));
-                logger.InfoPii(
+                logger.VerbosePii(
                     () => "BrowserRedirectError " + BrowserRedirectError,
                     () => "BrowserRedirectError? " + (BrowserRedirectError != null));
-
-                logger.Info(() => $"HidePrivacyPrompt {iOSHidePrivacyPrompt}");
             }
+            logger.Info(() => $"HidePrivacyPrompt {iOSHidePrivacyPrompt}");
         }
 
         internal static void ValidatePlatformAvailability()

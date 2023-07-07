@@ -146,7 +146,6 @@ namespace Microsoft.Identity.Client
             AuthorityType == AuthorityType.B2C  ||
             AuthorityType == AuthorityType.Ciam;
 
-
         internal bool IsClientInfoSupported =>
             AuthorityType == AuthorityType.Aad ||
             AuthorityType == AuthorityType.Dsts ||
@@ -175,7 +174,7 @@ namespace Microsoft.Identity.Client
 
         private static Uri TransformIfCiamAuthority(Uri authorityUri)
         {
-            if (isCiamAuthority(authorityUri))
+            if (IsCiamAuthority(authorityUri))
             {
                 return CiamAuthority.TransformAuthority(authorityUri);
             }
@@ -369,7 +368,7 @@ namespace Microsoft.Identity.Client
             }
 
             string path = authorityUri.AbsolutePath.Substring(1);
-            if (string.IsNullOrWhiteSpace(path) && !isCiamAuthority(authorityUri))
+            if (string.IsNullOrWhiteSpace(path) && !IsCiamAuthority(authorityUri))
             {
                 throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, nameof(authority));
             }
@@ -421,7 +420,7 @@ namespace Microsoft.Identity.Client
 
         private static AuthorityType GetAuthorityType(Uri authorityUri)
         {
-            if (isCiamAuthority(authorityUri))
+            if (IsCiamAuthority(authorityUri))
             {
                 return AuthorityType.Ciam;
             }
@@ -446,7 +445,7 @@ namespace Microsoft.Identity.Client
             return AuthorityType.Aad;
         }
 
-        private static bool isCiamAuthority(Uri authorityUri)
+        private static bool IsCiamAuthority(Uri authorityUri)
         {
             return authorityUri.Host.EndsWith(Constants.CiamAuthorityHostSuffix);
         }
