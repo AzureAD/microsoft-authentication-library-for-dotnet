@@ -350,17 +350,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
             {
-                httpMessageHandler.ExpectedQueryParams.Add("client_id", userAssignedId);
+                httpMessageHandler.ExpectedQueryParams.Add(TestConstants.ManagedIdentityClientId, userAssignedId);
             }
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
             {
-                httpMessageHandler.ExpectedQueryParams.Add("mi_res_id", userAssignedId);
+                httpMessageHandler.ExpectedQueryParams.Add(TestConstants.ManagedIdentityResourceId, userAssignedId);
             }
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)
             {
-                httpMessageHandler.ExpectedQueryParams.Add("object_id", userAssignedId);
+                httpMessageHandler.ExpectedQueryParams.Add(TestConstants.ManagedIdentityObjectId, userAssignedId);
             }
 
             httpMessageHandler.ResponseMessage = responseMessage;

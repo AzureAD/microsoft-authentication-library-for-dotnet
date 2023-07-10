@@ -85,26 +85,14 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [DataRow("resourceId", UserAssignedIdentityId.ResourceId)]
         [DataRow("resourceId/subscription", UserAssignedIdentityId.ResourceId)]
         [DataRow(TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)]
-        public void TestConstructor_WithUserAssignedManagedIdentity_ResourceId(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
+        public void TestConstructor_WithUserAssignedManagedIdentity(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
         {
             ManagedIdentityApplication mi = CreateMIABuilder(userAssignedId, userAssignedIdentityId).BuildConcrete();
 
             Assert.AreEqual(userAssignedId, mi.ServiceBundle.Config.ClientId);
             Assert.IsNotNull(mi.ServiceBundle.Config.ManagedIdentityId);
-
-            if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
-            {
-                Assert.AreEqual(ManagedIdentityIdType.ClientId, mi.ServiceBundle.Config.ManagedIdentityId.IdType);
-            }
-            else if(userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
-            {
-                Assert.AreEqual(ManagedIdentityIdType.ResourceId, mi.ServiceBundle.Config.ManagedIdentityId.IdType);
-            }
-            else 
-            {
-                Assert.AreEqual(ManagedIdentityIdType.ObjectId, mi.ServiceBundle.Config.ManagedIdentityId.IdType);
-            }
-
+           
+            Assert.AreEqual(userAssignedIdentityId.ToString(), mi.ServiceBundle.Config.ManagedIdentityId.IdType.ToString());
             Assert.AreEqual(userAssignedId, mi.ServiceBundle.Config.ManagedIdentityId.UserAssignedId);
         }
 
