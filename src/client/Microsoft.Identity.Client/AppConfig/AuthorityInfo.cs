@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client
             AuthorityType != AuthorityType.Adfs && 
             AuthorityType != AuthorityType.B2C;
 
-        internal bool IsTenanted => 
+        internal bool CanBeTenanted => 
             AuthorityType == AuthorityType.Aad  ||
             AuthorityType == AuthorityType.Dsts ||
             AuthorityType == AuthorityType.B2C  ||
@@ -551,11 +551,11 @@ namespace Microsoft.Identity.Client
                                 CreateAuthorityWithTenant(
                                     CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment),
                                     account?.HomeAccountId?.TenantId, 
-                                    forceTenantless: false) :
+                                    forceSpecifiedTenant: false) :
                                 CreateAuthorityWithTenant(
                                     configAuthority, 
                                     account?.HomeAccountId?.TenantId, 
-                                    forceTenantless: false);
+                                    forceSpecifiedTenant: false);
                         }
 
                         // In case the authority is defined only at the request level
@@ -577,11 +577,11 @@ namespace Microsoft.Identity.Client
                                 CreateAuthorityWithTenant(
                                     CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment),
                                     account?.HomeAccountId?.TenantId, 
-                                    forceTenantless: false) :
+                                    forceSpecifiedTenant: false) :
                                 CreateAuthorityWithTenant(
                                     configAuthority, 
                                     account?.HomeAccountId?.TenantId,
-                                    forceTenantless: false);
+                                    forceSpecifiedTenant: false);
                     
                     default:
                         throw new MsalClientException(
@@ -590,14 +590,14 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            internal static Authority CreateAuthorityWithTenant(Authority authority, string tenantId, bool forceTenantless)
+            internal static Authority CreateAuthorityWithTenant(Authority authority, string tenantId, bool forceSpecifiedTenant)
             {
                 if (string.IsNullOrEmpty(tenantId))
                 {
                     return authority;
                 }
 
-                string tenantedAuthority = authority.GetTenantedAuthority(tenantId, forceTenantless);
+                string tenantedAuthority = authority.GetTenantedAuthority(tenantId, forceSpecifiedTenant);
 
                 return Authority.CreateAuthority(tenantedAuthority, authority.AuthorityInfo.ValidateAuthority);
             }

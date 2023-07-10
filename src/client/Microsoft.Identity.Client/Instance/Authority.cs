@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.Instance
                 return initialAuthority;
             }
 
-            string tenantedAuthority = initialAuthority.GetTenantedAuthority(tenantId, forceTenantless: false);
+            string tenantedAuthority = initialAuthority.GetTenantedAuthority(tenantId, forceSpecifiedTenant: false);
 
             return CreateAuthority(tenantedAuthority, authorityInfo.ValidateAuthority);
         }
@@ -109,8 +109,8 @@ namespace Microsoft.Identity.Client.Instance
         /// Changes the tenant id of the authority, if the authority supports tenants. If not, throws exception,.
         /// </summary>
         /// <param name="tenantId">The new tenant id</param>
-        /// <param name="forceTenantless">Forces the change, even if the current tenant is not "common" or "organizations" or "consumers"</param>
-        internal virtual string GetTenantedAuthority(string tenantId, bool forceTenantless)
+        /// <param name="forceSpecifiedTenant">Forces the change, even if the current tenant is not "common" or "organizations" or "consumers"</param>
+        internal virtual string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant)
         {
             throw new MsalClientException(
                 MsalError.TenantOverrideNonAad,

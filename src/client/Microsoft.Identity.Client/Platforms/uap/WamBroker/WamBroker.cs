@@ -513,7 +513,7 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
                     authenticationRequestParameters.Authority is AadAuthority aadAuthority &&
                     aadAuthority.IsConsumers())
                 {
-                    differentAuthority = authenticationRequestParameters.Authority.GetTenantedAuthority("organizations", forceTenantless: true);
+                    differentAuthority = authenticationRequestParameters.Authority.GetTenantedAuthority("organizations", forceSpecifiedTenant: true);
                 }
 
                 WamAdapters.AddMsalParamsToRequest(authenticationRequestParameters, webTokenRequest, _logger, differentAuthority);

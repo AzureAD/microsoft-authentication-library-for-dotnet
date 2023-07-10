@@ -216,12 +216,12 @@ namespace Microsoft.Identity.Client
             if (Config.Authority?.AuthorityInfo != null)
             {
                 // Both WithAuthority and WithTenant were used at app config level
-                if (Config.Authority.AuthorityInfo.IsTenanted &&
+                if (Config.Authority.AuthorityInfo.CanBeTenanted &&
                     !string.IsNullOrEmpty(Config.TenantId))
                 {
                     string tenantedAuthority = Config.Authority.GetTenantedAuthority(
                         Config.TenantId,
-                        forceTenantless: false);
+                        forceSpecifiedTenant: true);
 
                     Config.Authority = Authority.CreateAuthority(
                         tenantedAuthority,

@@ -31,13 +31,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [DeploymentItem("Resources\\OpenidConfiguration-QueryParams-B2C.json")]
     public class ConfidentialClientApplicationTests : TestBase
     {
-        private byte[] _serializedCache;
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetInternalStaticCaches();
-        }
+        private byte[] _serializedCache;        
 
         [TestMethod]
         [Description("Tests the public interfaces can be mocked")]

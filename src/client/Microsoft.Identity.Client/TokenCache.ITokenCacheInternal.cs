@@ -1096,7 +1096,7 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters requestParameters,
             string homeAccountId)
         {
-            if (!requestParameters.AuthorityInfo.IsTenanted)
+            if (!requestParameters.AuthorityInfo.CanBeTenanted)
             {
                 return null;
             }

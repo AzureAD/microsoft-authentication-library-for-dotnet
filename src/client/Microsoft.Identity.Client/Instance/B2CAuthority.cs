@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client.Instance
         // B2C doesn't allow tenant update, but ignores it
         internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
         {
-            return AuthorityInfo.CanonicalAuthority.AbsoluteUri;
+            return AuthorityInfo.ToString();
         }
 
     }

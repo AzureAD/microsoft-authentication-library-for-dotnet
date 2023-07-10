@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 
             var parameterBuilder = app
                 .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
-                .WithTenantId(TestConstants.TenantId);
+                .WithTenantId(TestConstants.TenantId2);
 
             Assert.AreEqual(
                 new Uri(inputAuthority).Host, 
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 "The host should have stayed the same");
             
             Assert.AreEqual(
-                TestConstants.TenantId,
+                TestConstants.TenantId2,
                 AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority),
                 "The tenant id should have been changed");
         }
