@@ -16,7 +16,6 @@ pool:
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'release'
-  MSAL_DESKTOP_ONLY_DEV: 'true' # skips building mobile and legacy targets
 
 jobs:
   - job: 'BuildJob'
@@ -49,7 +48,7 @@ jobs:
         msbuildArchitecture: x64
         platform: '$(BuildPlatform)'
         configuration: '$(BuildConfiguration)'
-        msbuildArguments: '/p:RunCodeAnalysis=false /p:MSAL_DESKTOP_ONLY_DEV=$(MSAL_DESKTOP_ONLY_DEV)'
+        msbuildArguments: '/p:RunCodeAnalysis=false'
         clean: true
 
     # The parameters currently are not used, but can be uploaded into the reporting system in the future.

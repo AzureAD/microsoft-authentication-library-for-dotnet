@@ -1,7 +1,5 @@
 <Project Sdk="MSBuild.Sdk.Extras">
 
-  <!--Add MAUI_SUPPORT variable to environment when you compile MAUI. esp for.\tests\devapps\MauiApps\MauiApps.sln-->
-
   <PropertyGroup Label="Targets required for unit tests to run">
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
     <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
@@ -11,19 +9,19 @@
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
-  <!-- Mobile and legacy targets - comment these out or set env variable MSAL_DESKTOP_ONLY_DEV to speedup the build -->
-  <PropertyGroup Condition="'$(MSAL_DESKTOP_ONLY_DEV)' == ''">
+  <!-- Mobile and legacy targets - comment these out or set env variable INCLUDE_MOBILE_AND_LEGACY_TFM to speedup the build -->
+  <PropertyGroup Condition="'$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
     <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
-    <TargetFrameworkUap>uap10.0.17763</TargetFrameworkUap>
     <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
     <TargetFrameworkAndroid9>MonoAndroid9.0</TargetFrameworkAndroid9>
     <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
-  </PropertyGroup>
-
-  <!-- MAUI -->
-  <PropertyGroup Condition="'$(MAUI_SUPPORT)' != ''">
     <TargetFrameworkNet6Android>net6.0-android</TargetFrameworkNet6Android>
     <TargetFrameworkNet6Ios>net6.0-ios15.4</TargetFrameworkNet6Ios>
+  </PropertyGroup>
+
+  <!-- UAP -->
+  <PropertyGroup Condition="'$(PipelineType)' != 'OneBranch' and '$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
+    <TargetFrameworkUap>uap10.0.17763</TargetFrameworkUap>
   </PropertyGroup>
 
   <!-- net6.0 (MAUI) -->
@@ -236,7 +234,7 @@
     <Reference Include="System.Xml" />
 
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' And '$(PipelineType)' != 'OneBranch'">
     <Compile Include="$(PathToMsalSources)\Platforms\uap\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" Exclude="$(PathToMsalSources)\Platforms\Features\WamBroker\win32\**\*.cs" />
@@ -297,7 +295,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.RulesetToEditorconfigConverter" Version="3.3.3" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet6Android)' And '$(MAUI_SUPPORT)' != ''">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">
     <Compile Include="$(PathToMsalSources)\Platforms\Android\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
