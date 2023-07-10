@@ -48,7 +48,7 @@ namespace UWP_standalone
             var pca = PublicClientApplicationBuilder.Create(s_clientID)
                 .WithAuthority(s_authority)
                 .WithBroker(chkUseBroker.IsChecked.Value)
-                .WithWindowsBrokerOptions(new WindowsBrokerOptions() { HeaderText = "aaa" })
+                //.WithWindowsBrokerOptions(new WindowsBrokerOptions() { HeaderText = "aaa" })
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 
