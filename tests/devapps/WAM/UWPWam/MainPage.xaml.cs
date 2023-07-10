@@ -17,7 +17,6 @@ using System.Text;
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 namespace UWP_standalone
 {
-#pragma warning disable CS0618 // Type or member is obsolete
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
@@ -49,7 +48,7 @@ namespace UWP_standalone
             var pca = PublicClientApplicationBuilder.Create(s_clientID)
                 .WithAuthority(s_authority)
                 .WithBroker(chkUseBroker.IsChecked.Value)
-                .WithWindowsBrokerOptions(new WindowsBrokerOptions() { HeaderText = "aaa" })
+                //.WithWindowsBrokerOptions(new WindowsBrokerOptions() { HeaderText = "aaa" })
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 

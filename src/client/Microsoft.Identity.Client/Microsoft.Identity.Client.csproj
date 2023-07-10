@@ -1,7 +1,5 @@
 <Project Sdk="MSBuild.Sdk.Extras">
 
-  <!--Add MAUI_SUPPORT variable to environment when you compile MAUI. esp for.\tests\devapps\MauiApps\MauiApps.sln-->
-
   <PropertyGroup Label="Targets required for unit tests to run">
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
     <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
@@ -297,7 +295,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.RulesetToEditorconfigConverter" Version="3.3.3" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet6Android)' And '$(MAUI_SUPPORT)' != ''">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">
     <Compile Include="$(PathToMsalSources)\Platforms\Android\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
