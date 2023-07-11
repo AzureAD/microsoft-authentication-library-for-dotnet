@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataTestMethod]
         [DataRow(TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow("resourceId", UserAssignedIdentityId.ResourceId)]
+        [DataRow(TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)]
         public async Task AzureArcUserAssignedManagedIdentityNotSupportedAsync(string userAssignedId, UserAssignedIdentityId userAssignedIdentityId)
         {
             using (new EnvVariableContext())
@@ -32,16 +33,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AzureArc, ManagedIdentityTests.AzureArcEndpoint);
 
-                var miBuilder = ManagedIdentityApplicationBuilder
-                    .Create(userAssignedIdentityId == UserAssignedIdentityId.ClientId ? 
-                        ManagedIdentityId.WithUserAssignedClientId(userAssignedId) : 
-                        ManagedIdentityId.WithUserAssignedResourceId(userAssignedId))
-                    .WithHttpManager(httpManager);
+                ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId);
+                miBuilder.WithHttpManager(httpManager);
 
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
                 MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("scope")

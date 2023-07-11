@@ -4,7 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
@@ -14,7 +17,8 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         {
             None,
             ClientId,
-            ResourceId
+            ResourceId,
+            ObjectId
         }
 
         //MSI Azure resources
@@ -56,6 +60,33 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                     Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", "thumbprint");
                     break;
             }
+        }
+
+        /// <summary>
+        /// Create the MIA with the http proxy
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="userAssignedId"></param>
+        /// <returns></returns>
+        public static ManagedIdentityApplicationBuilder CreateMIABuilder(string userAssignedId = "", UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.ClientId)
+        {
+            var builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(userAssignedId));
+
+            switch (userAssignedIdentityId)
+            {
+                case UserAssignedIdentityId.ResourceId:
+                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedResourceId(userAssignedId));
+                    break;
+
+                case UserAssignedIdentityId.ObjectId:
+                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedObjectId(userAssignedId));
+                    break;
+            }
+
+            // Disabling shared cache options to avoid cross test pollution.
+            builder.Config.AccessorOptions = null;
+
+            return builder;
         }
     }
 }

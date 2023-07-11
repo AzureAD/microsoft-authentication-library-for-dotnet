@@ -33,9 +33,11 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Creates a ManagedIdentityApplicationBuilder from a user assigned managed identity clientID / resourceId.
+        /// Creates a ManagedIdentityApplicationBuilder from a user assigned managed identity clientID / resourceId / objectId.
         /// For example, for a system assigned managed identity use ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-        /// and for a user assigned managed identity use ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(clientId)).
+        /// and for a user assigned managed identity use ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(clientId)) or
+        /// ManagedIdentityId.WithUserAssignedResourceId("resourceId") or 
+        /// ManagedIdentityId.WithUserAssignedObjectId("objectid").
         /// For more details see https://aka.ms/msal-net-managed-identity
         /// </summary>
         /// <param name="managedIdentityId">Configuration of the Managed Identity assigned to the resource.</param>

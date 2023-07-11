@@ -83,6 +83,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
                     request.QueryParameters[Constants.ManagedIdentityResourceId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
                     break;
+
+                case AppConfig.ManagedIdentityIdType.ObjectId:
+                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned object id to the request.");
+                    request.QueryParameters[Constants.ManagedIdentityObjectId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
+                    break;
             }
                 
             return request;
