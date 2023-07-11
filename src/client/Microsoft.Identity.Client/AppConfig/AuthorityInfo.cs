@@ -136,10 +136,18 @@ namespace Microsoft.Identity.Client
 
         internal bool IsInstanceDiscoverySupported => AuthorityType == AuthorityType.Aad;
 
+        /// <summary>
+        /// For IWA
+        /// </summary>
         internal bool IsUserAssertionSupported => 
             AuthorityType != AuthorityType.Adfs && 
             AuthorityType != AuthorityType.B2C;
 
+        /// <summary>
+        /// Authority support multi-tenantcy. ADFS and Generic authorities are not tenanted.
+        /// B2C doesn't allow multi-tenancy scenarios, but the authority itself is tenanted. 
+        /// For CIAM, we allow multi-tenancy scenarios, and expect the STS to fail.
+        /// </summary>
         internal bool CanBeTenanted => 
             AuthorityType == AuthorityType.Aad  ||
             AuthorityType == AuthorityType.Dsts ||
@@ -521,25 +529,25 @@ namespace Microsoft.Identity.Client
 
                 await ValidateSameHostAsync(requestAuthorityInfo, requestContext).ConfigureAwait(false);
 
-                AuthorityInfo nonNullAuthInfo = requestAuthorityInfo ?? configAuthorityInfo;
+                AuthorityInfo requestOrConfig = requestAuthorityInfo ?? configAuthorityInfo;
 
                 switch (configAuthorityInfo.AuthorityType)
                 {
                     // ADFS is tenant-less, no need to consider tenant
                     case AuthorityType.Adfs:
-                        return new AdfsAuthority(nonNullAuthInfo);
+                        return new AdfsAuthority(requestOrConfig);
 
                     case AuthorityType.Dsts:
-                        return new DstsAuthority(nonNullAuthInfo);
+                        return new DstsAuthority(requestOrConfig);
 
                     case AuthorityType.B2C:
-                        return new B2CAuthority(nonNullAuthInfo);
+                        return new B2CAuthority(requestOrConfig);
 
                     case AuthorityType.Ciam:
-                        return new CiamAuthority(nonNullAuthInfo);
+                        return new CiamAuthority(requestOrConfig);
 
                     case AuthorityType.Generic:
-                        return new GenericAuthority(nonNullAuthInfo);
+                        return new GenericAuthority(requestOrConfig);
 
                     case AuthorityType.Aad:
 
@@ -632,6 +640,13 @@ namespace Microsoft.Identity.Client
                     if (requestAuthorityInfo.AuthorityType == AuthorityType.B2C)
                     {
                         throw new MsalClientException(MsalError.B2CAuthorityHostMismatch, MsalErrorMessage.B2CAuthorityHostMisMatch);
+                    }
+
+                    // Do not try to be smart here, let the STS figure it out
+                    if ( requestAuthorityInfo.AuthorityType == AuthorityType.Ciam || 
+                        requestAuthorityInfo.AuthorityType == AuthorityType.Generic)
+                    {
+                        return;
                     }
 
                     // This check should be done when validating the request parameters, however we've allowed
