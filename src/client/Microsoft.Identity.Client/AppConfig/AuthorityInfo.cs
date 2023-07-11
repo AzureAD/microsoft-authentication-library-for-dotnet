@@ -591,12 +591,7 @@ namespace Microsoft.Identity.Client
             }
 
             internal static Authority CreateAuthorityWithTenant(Authority authority, string tenantId, bool forceSpecifiedTenant)
-            {
-                if (string.IsNullOrEmpty(tenantId))
-                {
-                    return authority;
-                }
-
+            {                
                 string tenantedAuthority = authority.GetTenantedAuthority(tenantId, forceSpecifiedTenant);
 
                 return Authority.CreateAuthority(tenantedAuthority, authority.AuthorityInfo.ValidateAuthority);

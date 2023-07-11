@@ -216,9 +216,15 @@ namespace Microsoft.Identity.Client
             if (Config.Authority?.AuthorityInfo != null)
             {
                 // Both WithAuthority and WithTenant were used at app config level
-                if (Config.Authority.AuthorityInfo.CanBeTenanted &&
-                    !string.IsNullOrEmpty(Config.TenantId))
+                if (!string.IsNullOrEmpty(Config.TenantId))
                 {
+                    if (!Config.Authority.AuthorityInfo.CanBeTenanted)
+                    {
+                        throw new MsalClientException(
+                            MsalError.TenantOverrideNonAad,
+                            $"Cannot use WithTenantId() in the application builder, because the authority {Config.Authority.AuthorityInfo.AuthorityType} doesn't support it");
+                    }
+
                     string tenantedAuthority = Config.Authority.GetTenantedAuthority(
                         Config.TenantId,
                         forceSpecifiedTenant: true);

@@ -66,7 +66,6 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             Assert.AreEqual(ex1.ErrorCode, MsalError.TenantOverrideNonAad);
         }
 
-      
 
         [TestMethod]
         public void GenericAuthority_WithTenantId_Exceptions()
@@ -119,8 +118,10 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [DataRow(TestConstants.AuthorityCommonTenant)]
         [DataRow(TestConstants.AuthorityCommonPpeAuthority)]
         [DataRow(TestConstants.AuthorityConsumersTenant)]
-        [DataRow(TestConstants.AuthorityOrganizationsTenant)]        
+        [DataRow(TestConstants.AuthorityOrganizationsTenant)]
+        [DataRow(TestConstants.AuthorityGuidTenant)]
         [DataRow(TestConstants.DstsAuthorityCommon)]
+        [DataRow(TestConstants.DstsAuthorityTenanted)]
         [DataRow(TestConstants.CiamAuthorityMainFormat)]
         [DataRow(TestConstants.CiamAuthorityWithFriendlyName)]
         [DataRow(TestConstants.CiamAuthorityWithGuid)]
@@ -142,42 +143,52 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 AuthorityHelpers.GetTenantId(new Uri(cca.Authority)));
         }
 
-        [DataTestMethod]
-        [DataRow(TestConstants.ADFSAuthority, null)]
-        [DataRow(TestConstants.B2CAuthority, "tenant")]
-        [DataRow(TestConstants.AuthorityGuidTenant, TestConstants.TenantIdNumber1)]
-        [DataRow(TestConstants.DstsAuthorityTenanted, TestConstants.TenantId)]
-        public void AppLevel_AuthorityAndTenant_Noop_Config(string inputAuthority, string expectedTenant)
+        [TestMethod]
+        public void B2CAuthorityWithTenant()
         {
             var cca = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithTenantId(TestConstants.TenantId2)
-                .WithAuthority(inputAuthority)
+                .WithAuthority(TestConstants.B2CAuthority)
             .Build();
 
             Assert.AreEqual(
-                new Uri(inputAuthority).Host,
+                new Uri(TestConstants.B2CAuthority).Host,
                 (cca.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.Host,
                 "The host should have stayed the same");
 
             Assert.AreEqual(
-               expectedTenant,
+               "tenant",
                AuthorityHelpers.GetTenantId(new Uri(cca.Authority)));
         }
 
         [TestMethod]
         public void GenericAuthorityWithTenant()
         {
-            var cca = ConfidentialClientApplicationBuilder
-                .Create(TestConstants.ClientId)
-                .WithTenantId(TestConstants.TenantId2)
-                .WithExperimentalFeatures(true)
-                .WithGenericAuthority(TestConstants.GenericAuthority)
-            .Build();
+            var ex  = AssertException.Throws<MsalClientException>(() =>
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithTenantId(TestConstants.TenantId2)
+                    .WithExperimentalFeatures(true)
+                    .WithGenericAuthority(TestConstants.GenericAuthority)
+                    .Build()
+            );
 
-            Assert.AreEqual(
-                TestConstants.GenericAuthority + "/", 
-                cca.Authority);
+            Assert.AreEqual(ex.ErrorCode, MsalError.TenantOverrideNonAad);
+        }
+
+        [TestMethod]
+        public void AdfsAuthorityWithTenant()
+        {
+            var ex = AssertException.Throws<MsalClientException>(() =>
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithTenantId(TestConstants.TenantId2)
+                    .WithAuthority(TestConstants.ADFSAuthority)
+                    .Build()
+            );
+
+            Assert.AreEqual(ex.ErrorCode, MsalError.TenantOverrideNonAad);
         }
 
         [TestMethod]

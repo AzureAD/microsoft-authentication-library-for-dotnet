@@ -581,13 +581,11 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app2.Authority);
 
-            var ex = AssertException.Throws<MsalClientException>(() => PublicClientApplicationBuilder
+            PublicClientApplicationBuilder
              .CreateWithApplicationOptions(options)
              .WithTenantId(TestConstants.TenantId)
              .WithAuthority($"https://login.microsoftonline.com/{TestConstants.TenantId2}")
-            .Build());
-
-            Assert.AreEqual(MsalError.AuthorityTenantSpecifiedTwice, ex.ErrorCode);
+            .Build();
 
             var options2 = new PublicClientApplicationOptions();
             options2.ClientId = TestConstants.ClientId;

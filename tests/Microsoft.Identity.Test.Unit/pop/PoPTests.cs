@@ -298,7 +298,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
-
                 pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
 
                 pca.ServiceBundle.ConfigureMockWebUI();
