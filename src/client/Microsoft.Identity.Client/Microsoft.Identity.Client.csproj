@@ -235,7 +235,7 @@
     <Reference Include="System.Xml" />
 
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' And '$(PipelineType)' != 'OneBranch'">
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)'">
     <Compile Include="$(PathToMsalSources)\Platforms\uap\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" Exclude="$(PathToMsalSources)\Platforms\Features\WamBroker\win32\**\*.cs" />
