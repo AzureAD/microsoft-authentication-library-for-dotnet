@@ -6,6 +6,7 @@
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
     <TargetFrameworkNet6>net6.0</TargetFrameworkNet6>
     <TargetFrameworkNet6Win>net6.0-windows</TargetFrameworkNet6Win>
+    <TargetFrameworkUap>uap10.0.17763</TargetFrameworkUap>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
@@ -17,7 +18,6 @@
     <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
     <TargetFrameworkNet6Android>net6.0-android</TargetFrameworkNet6Android>
     <TargetFrameworkNet6Ios>net6.0-ios15.4</TargetFrameworkNet6Ios>
-    <TargetFrameworkUap>uap10.0.17763</TargetFrameworkUap>
   </PropertyGroup>
 
   <!-- UAP 
