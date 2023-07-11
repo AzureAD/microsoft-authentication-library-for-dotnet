@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -350,17 +351,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
             {
-                httpMessageHandler.ExpectedQueryParams.Add(TestConstants.ManagedIdentityClientId, userAssignedId);
+                httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityClientId, userAssignedId);
             }
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
             {
-                httpMessageHandler.ExpectedQueryParams.Add(TestConstants.ManagedIdentityResourceId, userAssignedId);
+                httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityResourceId, userAssignedId);
             }
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)
             {
-                httpMessageHandler.ExpectedQueryParams.Add(TestConstants.ManagedIdentityObjectId, userAssignedId);
+                httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityObjectId, userAssignedId);
             }
 
             httpMessageHandler.ResponseMessage = responseMessage;

@@ -238,10 +238,6 @@ m1t9gRT1mNeeluL4cZa6WyVXqXc6U2wfR5DY6GOMUubN5Nr1n8Czew8TPfab4OG37BuEMNmBpqoRrRgF
         public const string MsalArlingtonCCAKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
         public const string MsalArlingtonCCAKeyVaultSecretName = "ARLMSIDLAB1-IDLASBS-App-CC-Secret";
 
-        public const string ManagedIdentityClientId = "client_id";
-        public const string ManagedIdentityObjectId = "object_id";
-        public const string ManagedIdentityResourceId = "mi_res_id";
-
         public enum AuthorityType { B2C };
         public static string[] s_prodEnvAliases = new[] {
                                 "login.microsoftonline.com",
