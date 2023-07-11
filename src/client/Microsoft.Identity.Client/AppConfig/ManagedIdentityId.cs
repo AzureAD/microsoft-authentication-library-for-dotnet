@@ -13,7 +13,8 @@ namespace Microsoft.Identity.Client.AppConfig
     /// Class to store configuration for a managed identity enabled on a resource.
     /// For a system assigned managed identity use ManagedIdentityId.SystemAssigned.
     /// For user assigned managed identity use ManagedIdentityId.WithUserAssignedClientId("clientId") or 
-    /// ManagedIdentityId.WithUserAssignedResourceId("resourceId").
+    /// ManagedIdentityId.WithUserAssignedResourceId("resourceId") or 
+    /// ManagedIdentityId.WithUserAssignedObjectId("objectid").
     /// For more details see https://aka.ms/msal-net-managed-identity
     /// </summary>
     public class ManagedIdentityId
@@ -33,6 +34,7 @@ namespace Microsoft.Identity.Client.AppConfig
                     break;
                 case ManagedIdentityIdType.ClientId:
                 case ManagedIdentityIdType.ResourceId:
+                case ManagedIdentityIdType.ObjectId:
                     _isUserAssigned = true;
                     break;
             }
@@ -47,7 +49,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <summary>
         /// Create an instance of ManagedIdentityId for a user assigned managed identity from a client id.
         /// </summary>
-        /// <param name="clientId">Client id of the user assigned managed identity assigned to azure resource.</param>
+        /// <param name="clientId">Client id of the user assigned managed identity assigned to the azure resource.</param>
         /// <returns>Instance of ManagedIdentityId.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public static ManagedIdentityId WithUserAssignedClientId(string clientId)
@@ -63,7 +65,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <summary>
         /// Create an instance of ManagedIdentityId for a user assigned managed identity from a resource id.
         /// </summary>
-        /// <param name="resourceId">Resource id of the user assigned managed identity assigned to azure resource.</param>
+        /// <param name="resourceId">Resource id of the user assigned managed identity assigned to the azure resource.</param>
         /// <returns>Instance of ManagedIdentityId.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public static ManagedIdentityId WithUserAssignedResourceId(string resourceId)
@@ -74,6 +76,22 @@ namespace Microsoft.Identity.Client.AppConfig
             }
 
             return new ManagedIdentityId(ManagedIdentityIdType.ResourceId) { UserAssignedId = resourceId };
+        }
+
+        /// <summary>
+        /// Create an instance of ManagedIdentityId for a user assigned managed identity from an object id.
+        /// </summary>
+        /// <param name="objectId">Object id of the user assigned managed identity assigned to the azure resource.</param>
+        /// <returns>Instance of ManagedIdentityId.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static ManagedIdentityId WithUserAssignedObjectId(string objectId)
+        {
+            if (string.IsNullOrEmpty(objectId))
+            {
+                throw new ArgumentNullException(objectId);
+            }
+
+            return new ManagedIdentityId(ManagedIdentityIdType.ObjectId) { UserAssignedId = objectId };
         }
     }
 }
