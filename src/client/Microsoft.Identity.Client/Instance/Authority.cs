@@ -116,7 +116,6 @@ namespace Microsoft.Identity.Client.Instance
                 MsalError.TenantOverrideNonAad,
                 MsalErrorMessage.TenantOverrideNonAad);
         }
-    
 
         internal abstract Task<string> GetTokenEndpointAsync(RequestContext requestContext);
 
