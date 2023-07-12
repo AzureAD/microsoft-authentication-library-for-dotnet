@@ -17,10 +17,6 @@
     <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
     <TargetFrameworkNet6Android>net6.0-android</TargetFrameworkNet6Android>
     <TargetFrameworkNet6Ios>net6.0-ios15.4</TargetFrameworkNet6Ios>
-  </PropertyGroup>
-
-  <!-- UAP -->
-  <PropertyGroup Condition="'$(PipelineType)' != 'OneBranch' and '$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
     <TargetFrameworkUap>uap10.0.17763</TargetFrameworkUap>
   </PropertyGroup>
 
@@ -234,7 +230,7 @@
     <Reference Include="System.Xml" />
 
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' And '$(PipelineType)' != 'OneBranch'">
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)'">
     <Compile Include="$(PathToMsalSources)\Platforms\uap\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WamBroker\**\*.cs" Exclude="$(PathToMsalSources)\Platforms\Features\WamBroker\win32\**\*.cs" />
