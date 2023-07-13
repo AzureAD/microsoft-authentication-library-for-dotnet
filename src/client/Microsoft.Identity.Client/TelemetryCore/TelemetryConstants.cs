@@ -39,6 +39,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string AssertionType = "AssertionType";
         public const string Endpoint = "Endpoint";
         public const string Scopes = "Scopes";
+        public const string ClientId = "ClientId";
 
         #endregion
     }

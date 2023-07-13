@@ -22,6 +22,9 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using System.Net.Http;
+#if NET6_0_OR_GREATER
+using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
+#endif
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -98,6 +101,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
                     LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails, telemetryClients);
 
+#if NET6_0_OR_GREATER
+                    // Aggregates the successful requests based on client id, token source and cache refresh reason.
+                    OpenTelemetry.SuccessCounter.Add(1, 
+                        new (TelemetryConstants.ClientId, AuthenticationRequestParameters.AppConfig.ClientId), 
+                        new (TelemetryConstants.TokenSource, authenticationResult.AuthenticationResultMetadata.TokenSource), 
+                        new (TelemetryConstants.CacheInfoTelemetry, authenticationResult.AuthenticationResultMetadata.CacheRefreshReason));
+#endif
+
                     return authenticationResult;
                 }
                 catch (MsalException ex)
@@ -105,6 +116,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     apiEvent.ApiErrorCode = ex.ErrorCode;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
+#if NET6_0_OR_GREATER
+                    // Aggregates the failed requests based on client id and error code.
+                    OpenTelemetry.FailureCounter.Add(1, 
+                        new (TelemetryConstants.ClientId, AuthenticationRequestParameters.AppConfig.ClientId),
+                        new(TelemetryConstants.ErrorCode, ex.ErrorCode));
+#endif
                     throw;
                 }
                 catch (Exception ex)
@@ -112,6 +129,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     apiEvent.ApiErrorCode = ex.GetType().Name;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
+#if NET6_0_OR_GREATER
+                    // Aggregates the failed requests based on client id and error code.
+                    OpenTelemetry.FailureCounter.Add(1,
+                        new(TelemetryConstants.ClientId, AuthenticationRequestParameters.AppConfig.ClientId),
+                        new(TelemetryConstants.ErrorCode, ex.GetType().Name));
+#endif
                     throw;
                 }
                 finally
