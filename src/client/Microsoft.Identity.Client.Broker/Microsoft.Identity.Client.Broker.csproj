@@ -2,7 +2,7 @@
   
   <PropertyGroup>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
-    <TargetFrameworkNetDesktop Condition="$([MSBuild]::IsOsPlatform('Windows')) and '$(MSAL_DESKTOP_ONLY_DEV)' == ''">net461</TargetFrameworkNetDesktop>
+    <TargetFrameworkNetDesktop Condition="$([MSBuild]::IsOsPlatform('Windows'))">net461</TargetFrameworkNetDesktop>
 
     <LangVersion>8.0</LangVersion>
     <PlatformTarget>AnyCPU</PlatformTarget>

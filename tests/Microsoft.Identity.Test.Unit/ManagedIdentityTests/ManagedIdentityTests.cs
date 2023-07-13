@@ -87,10 +87,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataTestMethod]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
+        [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, TestConstants.ObjectId, UserAssignedIdentityId.ObjectId)]
         [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
+        [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.MiResourceId, UserAssignedIdentityId.ObjectId)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId .ResourceId)]
+        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId.ObjectId)]
         public async Task ManagedIdentityUserAssignedHappyPathAsync(
             string endpoint,
             ManagedIdentitySource managedIdentitySource,
@@ -102,23 +105,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(
-                    userAssignedIdentityId == UserAssignedIdentityId.ClientId ?
-                        ManagedIdentityId.WithUserAssignedClientId(userAssignedId) :
-                        ManagedIdentityId.WithUserAssignedResourceId(userAssignedId))
-                    .WithHttpManager(httpManager);
+                ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId);
+                
+                miBuilder.WithHttpManager(httpManager);
 
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
                 httpManager.AddManagedIdentityMockHandler(
                     endpoint,
                     Resource,
                     MockHelpers.GetMsiSuccessfulResponse(),
                     managedIdentitySource,
-                    userAssignedClientIdOrResourceId: userAssignedId,
+                    userAssignedId: userAssignedId,
                     userAssignedIdentityId: userAssignedIdentityId);
 
                 var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
@@ -516,7 +514,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     Resource,
                     MockHelpers.GetMsiSuccessfulResponse(),
                     ManagedIdentitySource.AppService,
-                    userAssignedClientIdOrResourceId: TestConstants.ClientId,
+                    userAssignedId: TestConstants.ClientId,
                     userAssignedIdentityId: UserAssignedIdentityId.ClientId);
 
                 var builder = mi.AcquireTokenForManagedIdentity(Resource);

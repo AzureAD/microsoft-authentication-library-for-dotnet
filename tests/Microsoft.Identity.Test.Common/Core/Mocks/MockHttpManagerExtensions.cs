@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -337,7 +338,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string resource,
             string response,
             ManagedIdentitySource managedIdentitySourceType,
-            string userAssignedClientIdOrResourceId = null,
+            string userAssignedId = null,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
             HttpStatusCode statusCode = HttpStatusCode.OK
             )
@@ -350,12 +351,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
             {
-                httpMessageHandler.ExpectedQueryParams.Add("client_id", userAssignedClientIdOrResourceId);
+                httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityClientId, userAssignedId);
             }
 
             if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
             {
-                httpMessageHandler.ExpectedQueryParams.Add("mi_res_id", userAssignedClientIdOrResourceId);
+                httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityResourceId, userAssignedId);
+            }
+
+            if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)
+            {
+                httpMessageHandler.ExpectedQueryParams.Add(Constants.ManagedIdentityObjectId, userAssignedId);
             }
 
             httpMessageHandler.ResponseMessage = responseMessage;

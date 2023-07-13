@@ -13,6 +13,7 @@ namespace Microsoft.Identity.Client.AppConfig
     {
         SystemAssigned,
         ClientId,
-        ResourceId
+        ResourceId,
+        ObjectId
     }
 }
