@@ -64,6 +64,7 @@ namespace Microsoft.Identity.Test.Performance
         [BenchmarkCategory("No cache")]
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOf_TestAsync()
         {
+            throw new Exception("test");
             return await _cca.AcquireTokenOnBehalfOf(_scope, _userAssertion)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
