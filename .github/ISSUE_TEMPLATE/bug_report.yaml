@@ -65,8 +65,16 @@ body:
       - "Mobile"
       - "Web app"
       - "Daemon app" 
+      - "Other" 
   validations:
     required: true   
+
+- type: textarea
+  attributes:
+    label: Other Application Type?
+    description: "Please specify the application Type if you selected Other."
+  validations: 
+    required: false
 
 - type: dropdown
   attributes:
@@ -85,13 +93,6 @@ body:
       - "Other"
   validations:
     required: true    
-
-- type: textarea
-  attributes:
-    label: Other Application Type?
-    description: "Please specify the application Type if you selected Other."
-  validations: 
-    required: false
 
 - type: dropdown
   attributes:
