@@ -1,0 +1,49 @@
+name: Engineering Task
+description: New Engineering Task (For Internal Microsoft Use Only).
+labels: [internal]
+title : '[Engineering Task] '
+body:     
+- type: markdown
+  attributes:
+    value: |
+      ## Engineering Task **(For Internal Use Only)**
+      
+- type: dropdown
+  attributes:
+    label: Public, Confidential or Managed Identity Client?
+    description: Are you using PublicClientApplication, ConfidentialClientApplication or ManagedIdentityApplication?
+    multiple: true
+    options: 
+      - "Public"
+      - "Confidential"
+      - "Managed Identity"
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Description
+    description: "Please describe briefly what this task is about."
+  validations: 
+    required: true
+
+- type: textarea
+  attributes:
+    label: Solution
+    description: "Describe the solution you'd like."
+  validations: 
+    required: true
+
+- type: textarea
+  attributes:
+    label: Alternatives
+    description: "Describe alternatives you've considered."
+  validations: 
+    required: true
+
+- type: textarea
+  attributes:
+    label: Context
+    description: "Additional context."
+  validations: 
+    required: true    
