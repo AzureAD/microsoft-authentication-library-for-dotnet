@@ -19,6 +19,7 @@ namespace Microsoft.Identity.Test.Performance
 
             try
             {
+                throw new Exception("test2");
                 BenchmarkSwitcher.FromTypes(new[] {
                     typeof(AcquireTokenForClientCacheTests),
                     typeof(AcquireTokenForOboCacheTests),
@@ -31,6 +32,7 @@ namespace Microsoft.Identity.Test.Performance
                     DefaultConfig.Instance
 #endif
                 .WithOptions(ConfigOptions.DisableLogFile)
+                .WithOptions(ConfigOptions.StopOnFirstError)
                 .WithOptions(ConfigOptions.JoinSummary)
                 .WithOrderer(new DefaultOrderer(SummaryOrderPolicy.Method))
                 //.WithOptions(ConfigOptions.DontOverwriteResults) // Uncomment when running manually locally
