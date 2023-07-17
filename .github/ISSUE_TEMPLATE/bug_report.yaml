@@ -28,6 +28,7 @@ body:
 - type: dropdown
   attributes:
     label: .Net Framework
+    description: "Please enter the .NET Framework version your application was developed in."
   validations:
     required: true
 
