@@ -12,7 +12,7 @@ using Microsoft.Identity.Client.Extensions.Msal;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Unit
+namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     /// <summary>
     /// These tests write data to disk / key chain / key ring etc. 
