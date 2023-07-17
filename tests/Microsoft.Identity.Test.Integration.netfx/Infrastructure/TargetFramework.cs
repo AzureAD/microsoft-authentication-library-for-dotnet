@@ -6,6 +6,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
+    /// <summary>
+    /// Important: this class must be in a project that is built on: netfx, netcore and netstandard (i.e. not on Test.Common!)
+    /// </summary>
     public class RunOnAttribute : TestMethodAttribute
     {
         private readonly TargetFrameworks _tfms;
