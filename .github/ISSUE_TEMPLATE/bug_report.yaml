@@ -1,5 +1,5 @@
 name: Bug Report
-description: Broken or unintended behavior with MSAL .NET Authentication Library.
+description: Broken or unintended behavior with one of our libraries.
 title: '[Bug] '
 labels: [bug-unconfirmed, question]
 body:
@@ -12,7 +12,6 @@ body:
       **Logs and network traces**
       Without logs or traces, it is unlikely that the team can investigate your issue. Capturing logs and network traces is described in [Logging wiki](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging).
 
-
 - type: markdown
   attributes:
     value: |
@@ -22,24 +21,13 @@ body:
   attributes:
     label: Library Version used
     description: "Please enter the latest version this issue can be reproduced in."
-    placeholder: "4.54.1"
+    placeholder: "4.54.0"
   validations:
     required: true
     
 - type: dropdown
   attributes:
-    label: Target Framework (e.g. .NET Framework 4.8, .NET 8, .NET 7 windows). If in doubt, look at the TargetFramework property in the csproj file of your project.
-    options:
-      - ".NET 4.5 or greater"
-      - ".NET Core 2.1 or greater"
-      - ".NET Standard 2.0"
-      - "Mono Android 9.0"
-      - "UAP 10.0"
-      - "Xamarin.iOS 10"
-      - "Xamarin.Mac 2.0"
-      - "Net6.0-android"
-      - "Net6.0-ios"
-      - "WINUI3"
+    label: .Net Framework
   validations:
     required: true
 
@@ -63,18 +51,11 @@ body:
     options: 
       - "Desktop"
       - "Mobile"
-      - "Web app"
-      - "Daemon app" 
-      - "Other" 
+      - "Web App"
+      - "Web API"
+      - "Daemon App" 
   validations:
     required: true   
-
-- type: textarea
-  attributes:
-    label: Other Application Type?
-    description: "Please specify the application Type if you selected Other."
-  validations: 
-    required: false
 
 - type: dropdown
   attributes:
@@ -90,6 +71,8 @@ body:
       - "Authorization code"
       - "On-Behalf-Of"
       - "Client credentials (service-to-service calls)"
+      - "Long Running OBO"
+      - "Managed Identity"
       - "Other"
   validations:
     required: true    
@@ -108,8 +91,8 @@ body:
 
 - type: textarea
   attributes:
-    label: Issue Description
-    description: "Briefly explain the issue you are seeing."
+    label: Issue Description and Reproduction Steps
+    description: "Briefly explain the issue you are seeing. Please also provide steps to reproduce or a link to a sample which demonstrates this behavior."
     
 - type: textarea
   attributes:
@@ -127,19 +110,8 @@ body:
     description: "Please provide relevant code snippets that can be used to reproduce this issue."
     render: javascript
   validations:
-    required: true
-    
-- type: textarea
-  attributes:
-    label: Reproduction Steps
-    description: "Please provide steps to reproduce or a link to a sample which demonstrates this behavior."
-    placeholder: |
-      1.
-      2.
-      3.
-  validations:
-    required: true
-    
+    required: false
+       
 - type: textarea
   attributes:
     label: Expected Behavior
@@ -171,17 +143,18 @@ body:
     label: Solution
     description: "Possible solution if you know of any."
   validations:
-    required: true
+    required: false
     
 - type: dropdown
   attributes:
     label: Source
     description: "Are you an internal or external customer?"
     options: 
-      - Internal (Microsoft)
       - External (Customer)
+      - Internal (Microsoft)
+      
   validations: 
-     required: true
+     required: false
     
 - type: markdown
   attributes:
