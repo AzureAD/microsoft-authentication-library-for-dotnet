@@ -28,7 +28,7 @@ body:
     
 - type: dropdown
   attributes:
-    label: .Net Framework
+    label: Target Framework (e.g. .NET Framework 4.8, .NET 8, .NET 7 windows). If in doubt, look at the TargetFramework property in the csproj file of your project.
     options:
       - ".NET 4.5 or greater"
       - ".NET Core 2.1 or greater"
