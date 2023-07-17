@@ -10,7 +10,7 @@ body:
       Please make sure that your question or issue is not already covered in [MSAL docs](https://learn.microsoft.com/entra/msal/dotnet/) or [samples](https://learn.microsoft.com/azure/active-directory/develop/sample-v2-code?tabs=apptype).
 
       **Logs and network traces**
-      Without logs or traces, it is unlikely that the team can investigate your issue. Capturing logs and network traces is described in [Logging wiki](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging).
+      Without logs or traces, it is unlikely that the team can investigate your issue. Capturing logs and network traces is described in our [Docs](https://learn.microsoft.com/azure/active-directory/develop/msal-logging-dotnet).
 
 - type: markdown
   attributes:
