@@ -10,13 +10,22 @@ body:
       
 - type: dropdown
   attributes:
-    label: Public, Confidential or Managed Identity Client?
-    description: Are you using PublicClientApplication, ConfidentialClientApplication or ManagedIdentityApplication?
+    label: Type of task?
+    description: Can you select a category for this task?
     multiple: true
     options: 
-      - "Public"
-      - "Confidential"
-      - "Managed Identity"
+      - "Design"
+      - "Test"
+      - "Evaluation"
+      - "Prototype"
+      - "Builds"
+      - "Development"
+      - "Best Practices"
+      - "Supportability"
+      - "Engineering Excellence"
+      - "Performance"
+      - "Security"
+      - "Other(s)"
   validations:
     required: true
 
