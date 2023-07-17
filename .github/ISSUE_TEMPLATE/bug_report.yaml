@@ -25,7 +25,7 @@ body:
   validations:
     required: true
     
-- type: text
+- type: textarea
   attributes:
     label: .Net Framework
     description: "Please enter the .NET Framework version your application was developed in."
