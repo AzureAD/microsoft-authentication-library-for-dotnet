@@ -6,8 +6,8 @@ body:
 - type: markdown
   attributes:
     value: |
-      ## Before Submitting your Issue
-      Please make sure that your question or issue is not already covered in [MSAL docs](https://learn.microsoft.com/en-us/entra/msal/dotnet/) or [samples](https://learn.microsoft.com/en-us/azure/active-directory/develop/sample-v2-code?tabs=apptype).
+      ## Before submitting your issue
+      Please make sure that your question or issue is not already covered in [MSAL docs](https://learn.microsoft.com/entra/msal/dotnet/) or [samples](https://learn.microsoft.com/azure/active-directory/develop/sample-v2-code?tabs=apptype).
 
       **Logs and network traces**
       Without logs or traces, it is unlikely that the team can investigate your issue. Capturing logs and network traces is described in [Logging wiki](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/logging).
@@ -15,26 +15,26 @@ body:
 - type: markdown
   attributes:
     value: |
-      ## Issue Details   
+      ## Issue details   
     
 - type: input
   attributes:
-    label: Library Version used
-    description: "Please enter the latest version this issue can be reproduced in."
+    label: Library version used
+    description: "Please enter the version of the library where you ran into the issue."
     placeholder: "4.54.0"
   validations:
     required: true
     
 - type: textarea
   attributes:
-    label: .Net Framework
-    description: "Please enter the .NET Framework version your application was developed in."
+    label: .NET version
+    description: "Please enter the .NET platform version your application was developed in."
   validations:
     required: true
 
 - type: dropdown
   attributes:
-    label: Public, Confidential or Managed Identity Client?
+    label: Public, confidential, or Managed Identity client?
     description: "Are you using PublicClientApplication,  ConfidentialClientApplication or ManagedIdentityApplication?"
     multiple: true
     options: 
@@ -46,33 +46,33 @@ body:
 
 - type: dropdown
   attributes:
-    label: Application Type?
+    label: Application type
     description: "Please select your application type"
     multiple: true
     options: 
       - "Desktop"
       - "Mobile"
-      - "Web App"
+      - "Web app"
       - "Web API"
-      - "Daemon App" 
+      - "Daemon app" 
   validations:
     required: true   
 
 - type: dropdown
   attributes:
-    label: Authentication Flow?
-    description: "What authentication flow has the issue?"
+    label: Authentication flow type
+    description: "What authentication flow was used when the issue appeared?"
     multiple: true
     options: 
-      - "Interactive (broker)"
-      - "Interactive (embedded or system browser)"
+      - "Interactive (with an authentication broker)"
+      - "Interactive (with embedded or system browser)"
       - "Integrated Windows Authentication"
-      - "Username / Password"
+      - "Username and password (ROPC)"
       - "Device code (browserless)"
       - "Authorization code"
       - "On-Behalf-Of"
       - "Client credentials (service-to-service calls)"
-      - "Long Running OBO"
+      - "Long-running On Behalf Of (OBO)"
       - "Managed Identity"
       - "Other"
   validations:
@@ -92,43 +92,43 @@ body:
 
 - type: textarea
   attributes:
-    label: Issue Description and Reproduction Steps
-    description: "Briefly explain the issue you are seeing. Please also provide steps to reproduce or a link to a sample which demonstrates this behavior."
+    label: Issue description and reproduction steps
+    description: "Briefly explain the issue you are seeing. Please also provide steps to reproduce or a link to a sample which demonstrates the behavior."
     
 - type: textarea
   attributes:
-    label: Error Message
-    description: "Please provide any error message you are receiving and a stack trace."
+    label: Error message
+    description: "Please provide any error messages you are receiving along with a stack trace, if possible."
 
 - type: textarea
   attributes:
-    label: Msal Logs
-    description: "Please provide verbose level log messages from msal. [Learn more](https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-logging-dotnet)"
+    label: MSAL-specific logs
+    description: "Please provide verbose level log messages from MSAL. [Learn more](https://learn.microsoft.com/azure/active-directory/develop/msal-logging-dotnet)"
        
 - type: textarea
   attributes:
-    label: Relevant Code Snippets
-    description: "Please provide relevant code snippets that can be used to reproduce this issue."
+    label: Relevant code snippets
+    description: "Please provide relevant code snippets that can be used to reproduce the issue."
     render: javascript
   validations:
     required: false
        
 - type: textarea
   attributes:
-    label: Expected Behavior
+    label: Expected behavior
     description: "Please describe what you expect the behavior to be."
   validations:
     required: true
     
 - type: dropdown
   attributes:
-    label: Identity Provider
+    label: Identity provider
     options: 
-      - Azure AD / MSA
+      - Microsoft Entra ID and/or MSA
       - Azure B2C Basic Policy
       - Azure B2C Custom Policy
-      - ADFS
-      - CIAM
+      - Azure Active Directory Federation Services (ADFS)
+      - Microsoft Entra External ID
       - Other
   validations:
     required: true
@@ -136,13 +136,13 @@ body:
 - type: input
   attributes:
     label: Regression
-    description: "If this behavior worked before, please enter the last working version(s)."
-    placeholder: "MSAL version : "
+    description: "If this behavior worked before, please enter the last working version(s) of MSAL."
+    placeholder: "MSAL version: "
 
 - type: textarea
   attributes:
-    label: Solution
-    description: "Possible solution if you know of any."
+    label: Solution and workarounds
+    description: "Possible solution or workarounds, if you know of any."
   validations:
     required: false
     
@@ -151,7 +151,7 @@ body:
     label: Source
     description: "Are you an internal or external customer?"
     options: 
-      - External (Customer)
+      - External (outside Microsoft)
       - Internal (Microsoft)
       
   validations: 
