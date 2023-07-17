@@ -17,7 +17,7 @@ body:
 - type: dropdown
   attributes:
     label: Public, Confidential or Managed Identity Client?
-    description: Are you using PublicClientApplication, ConfidentialClientApplication or ManagedIdentityApplication?
+    description: Are you using PublicClientApplication (desktop and mobile apps), ConfidentialClientApplication (web sites, web apis, S2S) or ManagedIdentityApplication?
     multiple: true
     options: 
       - "Public"
