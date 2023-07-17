@@ -1,23 +1,23 @@
 name: Feature request
-description: Suggest a new feature for MSAL .NET.
+description: Suggest a new feature for MSAL.NET.
 labels: [feature request]
 title : '[Feature Request] '
 body:
 - type: markdown
   attributes:
     value: |
-      ## Before Submitting your Feature Request
-      Please make sure that your question or issue is not already covered in [MSAL docs](https://learn.microsoft.com/en-us/entra/msal/dotnet/) or [samples](https://learn.microsoft.com/en-us/azure/active-directory/develop/sample-v2-code?tabs=apptype).
+      ## Before submitting your feature request
+      Please make sure that your question or issue is not already covered in [MSAL documentation](https://learn.microsoft.com/entra/msal/dotnet/) or [samples](https://learn.microsoft.com/azure/active-directory/develop/sample-v2-code?tabs=apptype).
       
 - type: markdown
   attributes:
     value: |
-      ## Feature Request
+      ## Feature request
       
 - type: dropdown
   attributes:
-    label: Public, Confidential or Managed Identity Client?
-    description: Are you using PublicClientApplication (desktop and mobile apps), ConfidentialClientApplication (web sites, web apis, S2S) or ManagedIdentityApplication?
+    label: Public, confidential, or Managed Identity client?
+    description: Are you using PublicClientApplication (desktop and mobile apps), ConfidentialClientApplication (web sites, web apis, service-to-service) or ManagedIdentityApplication?
     multiple: true
     options: 
       - "Public"
@@ -60,6 +60,6 @@ body:
     description: "Are you an internal or external customer?"
     options: 
       - Internal (Microsoft)
-      - External (Customer)
+      - External (outside Microsoft)
   validations: 
      required: true
