@@ -24,8 +24,7 @@ jobs: #Build and stage projects
       - msbuild
       - visualstudio
   variables:
-      Codeql.Enabled: true
-      Codeql.Language: csharp
+      Codeql.SkipTaskAutoInjection: true
 
   steps:
   # Bootstrap the build
