@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -70,10 +71,10 @@ namespace Microsoft.Identity.Test.Performance
 
         private void SetupApp(bool isAppFlow)
         {
-            _httpManager = new MockHttpManager();
+            Func<MockHttpMessageHandler> messageHandlerFunc;
             if (isAppFlow)
             {
-                _httpManager.MessageHandlerFunc = () => new MockHttpMessageHandler()
+                messageHandlerFunc = () => new MockHttpMessageHandler()
                 {
                     ExpectedMethod = HttpMethod.Post,
                     ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
@@ -81,12 +82,15 @@ namespace Microsoft.Identity.Test.Performance
             }
             else
             {
-                _httpManager.MessageHandlerFunc = () => new MockHttpMessageHandler()
+                messageHandlerFunc = () => new MockHttpMessageHandler()
                 {
                     ExpectedMethod = HttpMethod.Post,
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.Uid, TestConstants.DisplayableId, TestConstants.s_scope.ToArray())
                 };
             }
+
+            _httpManager = new MockHttpManager(messageHandlerFunc: messageHandlerFunc);
+
             _cca = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithAuthority(TestConstants.AuthorityUtidTenant)
