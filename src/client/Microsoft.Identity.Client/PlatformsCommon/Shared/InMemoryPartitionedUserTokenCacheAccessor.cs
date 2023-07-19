@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
@@ -210,12 +211,25 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             logger.Always($"[Internal cache] Total number of cache partitions found while getting access tokens: {AccessTokenCacheDictionary.Count}");
             if (string.IsNullOrEmpty(partitionKey))
             {
-                return AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
+                List<MsalAccessTokenCacheItem> result = AccessTokenCacheDictionary.SelectMany(dict => dict.Value).Select(kv => kv.Value).ToList();
+                if (result.Count > 1)
+                {
+                    Debugger.Launch();
+                    Debugger.Break();
+                }
+
+                return result;
             }
             else
             {
                 AccessTokenCacheDictionary.TryGetValue(partitionKey, out ConcurrentDictionary<string, MsalAccessTokenCacheItem> partition);
-                return partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyList<MsalAccessTokenCacheItem>();
+                var result = partition?.Select(kv => kv.Value)?.ToList() ?? CollectionHelpers.GetEmptyList<MsalAccessTokenCacheItem>();
+                if (result.Count > 1)
+                {
+                    Debugger.Launch();
+                    Debugger.Break();
+                }
+                return result;
             }
         }
 
