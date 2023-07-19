@@ -1,4 +1,3 @@
-4.54.1
 ==========
 ### New Features
 - The client-side telemetry API (`ITelemetryClient`) is now generally available. See [3784](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3784).  
@@ -1173,7 +1172,7 @@ Changes related to improving app Creation and configuration [MSAL issue](https:/
 - New interface `IMsalHttpClientFactory` to pass-in the HttpClient to use by MSAL.NET to communicate with the endpoints of Microsoft identity platform for developers.
 - New classes `PublicClientApplicationBuilder` and `ConfidentialClientApplicationBuilder` propose a fluent API to instantiate respectively classes implementing `IPublicClientApplication` and `IConfidentialClientApplication` including from configuration files, setting the targetted cloud and audience, but also setting per application logging and telemetry, and setting the `HttpClient`.
 - New delegates `TelemetryCallback` and `TokenCacheCallback` can be set at application construction
-- New enumerations `AadAuthorityAudience` and `AzureCloudInstance` help you writing applications for sovereign and national clouds, and help you choose the audience for your application.
+- New enumerations `AadAuthorityAudience` and `AzureCloudInstance` help you writing applications for sovereign clouds, and help you choose the audience for your application.
 
 Changes related to improving token acquisition, addressing issues [810](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/810), [635](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/635), [426](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/426), [799](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/799) :
 
