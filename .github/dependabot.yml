@@ -1,0 +1,316 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /src/client/Microsoft.Identity.Client.Broker
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /src/client/Microsoft.Identity.Client.Desktop
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /src/client/Microsoft.Identity.Client
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/CacheCompat/CommonCache.Test.AdalV3
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/CacheCompat/CommonCache.Test.AdalV4
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/CacheCompat/CommonCache.Test.AdalV5
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/CacheCompat/CommonCache.Test.Common
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/CacheCompat/CommonCache.Test.MsalJava
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/CacheCompat/CommonCache.Test.MsalNode
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /tests/CacheCompat/CommonCache.Test.MsalNode/NodeScript
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/CacheCompat/CommonCache.Test.MsalPython
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/CacheCompat/CommonCache.Test.MsalV2
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/CacheCompat/CommonCache.Test.MsalV3
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/CacheCompat/CommonCache.Test.Unit
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/Microsoft.Identity.Test.Android.UIAutomation
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/Microsoft.Identity.Test.Common
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/Microsoft.Identity.Test.Core.UIAutomation
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/Microsoft.Identity.Test.Integration.Win8
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/Microsoft.Identity.Test.Integration.netcore
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/Microsoft.Identity.Test.Integration.netfx
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/Microsoft.Identity.Test.Integration.netstandard
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/Microsoft.Identity.Test.LabInfrastructure
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/Microsoft.Identity.Test.Performance
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/Microsoft.Identity.Test.Unit
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/Microsoft.Identity.Test.iOS.UIAutomation
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/DesktopTestApp
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/FociTestApp
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/Intune-xamarin-Android
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/Intune-xamarin-ios
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/KerberosConsole
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/Managed Identity apps/MSIHelperService
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/Managed Identity apps/ManagedIdentityAppVM
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/Managed Identity apps/ManagedIdentityWebApi
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/MauiApps/MauiAppB2C
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/MauiApps/MauiAppBasic
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/MauiApps/MauiAppWithBroker
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/MultiCloudTestApp
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/Net5TestApp
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/NetCoreTestApp
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/NetFxConsoleTestApp
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/RegionalTestApp
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/WAM/MSIX/WPF
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/WAM/NetCoreWinFormsWam
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/WAM/NetDesktopWpf
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/WAM/NetFrameworkWam
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/WAM/TestBrokerApp
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/WAM/UWPWam
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/WAM/WAMCallsIntoClassLibrary
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/WAM/WAMClassLibrary
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/WAM/WAMMauiApp/WAMMauiApp
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/WebApi
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/XForms/XForms.Android
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/XForms/XForms.UWP
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/XForms/XForms.iOS
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/XForms/XForms
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/Xamarin Manual/Xamarin Manual/Xamarin Manual.Android
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/Xamarin Manual/Xamarin Manual/Xamarin Manual.iOS
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/Xamarin Manual/Xamarin Manual/Xamarin Manual
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/XamarinDev/XamarinDev.Android
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/XamarinDev/XamarinDev.iOS
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /tests/devapps/XamarinDev/XamarinDev
+    schedule:
+      interval: daily
+
+  - package-ecosystem: maven
+    directory: /tests/CacheCompat/CommonCache.Test.MsalJava
+    schedule:
+      interval: daily
