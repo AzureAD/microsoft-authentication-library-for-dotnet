@@ -12,8 +12,9 @@ steps:
 
 - template: template-OneBranch-CI-libsandsamples.yaml
   parameters:
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-    ProjectRootPath: '$(Build.SourcesDirectory)\$(MsalSourceDir)src\client'
-    AssemblyName: 'Microsoft.Identity.Client.Desktop'
+    Solution: 'microsoft-authentication-library-for-dotnet/LibsAndSamples.sln'
+    MsalClientSemVer: $(MsalClientSemVer) #Default MSAL package version
+    MsalSourceDir: $(MsalSourceDir) #Default MSAL root directory
+    PipelineType: $(PipelineType) #Build type
 
 - template: template-pack-and-sign-all-nugets.yaml
