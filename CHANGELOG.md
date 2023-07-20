@@ -1,3 +1,4 @@
+4.54.1
 ==========
 ### New Features
 - The client-side telemetry API (`ITelemetryClient`) is now generally available. See [3784](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3784).  
