@@ -31,6 +31,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     [DeploymentItem("Resources\\OpenidConfiguration-QueryParams-B2C.json")]
     public class ConfidentialClientApplicationTests : TestBase
     {
+
         private byte[] _serializedCache;        
 
         [TestMethod]
