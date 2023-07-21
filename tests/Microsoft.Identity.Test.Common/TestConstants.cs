@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit
 
         public const string GenericAuthority = "https://demo.duendesoftware.com";
 
-        // not actually used by MSAL directly, MSAL will transform it to friendly name format
+        // not actually used by MSAL directly, MSAL will transform it to tenanted format
         public const string CiamAuthorityMainFormat = "https://tenant.ciamlogin.com/";
         public const string CiamAuthorityWithFriendlyName = "https://tenant.ciamlogin.com/tenant.onmicrosoft.com";
         public const string CiamAuthorityWithGuid = "https://tenant.ciamlogin.com/aaaaaaab-aaaa-aaaa-cccc-aaaaaaaaaaaa";

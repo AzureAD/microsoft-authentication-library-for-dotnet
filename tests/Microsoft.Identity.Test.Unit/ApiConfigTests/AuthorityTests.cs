@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [DataRow(TestConstants.CiamAuthorityMainFormat)]
         [DataRow(TestConstants.CiamAuthorityWithFriendlyName)]
         [DataRow(TestConstants.CiamAuthorityWithGuid)]
-        public void WithTenantId_NonAad(string inputAuthority)
+        public void WithTenantIdAtRequestLevel_NonAad(string inputAuthority)
         {
             var app = ConfidentialClientApplicationBuilder
                .Create(TestConstants.ClientId)
@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         }
 
         [TestMethod]
-        public void B2CAuthorityWithTenant()
+        public void B2CAuthorityWithTenantAppLevel()
         {
             var cca = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
