@@ -215,22 +215,23 @@ namespace Microsoft.Identity.Client
         {
             if (Config.Authority?.AuthorityInfo != null)
             {
-                var isB2C = Config.Authority is B2CAuthority;
-
-                AadAuthority aadAuthority = Config.Authority as AadAuthority;
-                if (!string.IsNullOrEmpty(Config.TenantId)
-                    && !isB2C
-                    && aadAuthority != null)
+                // Both WithAuthority and WithTenant were used at app config level
+                if (!string.IsNullOrEmpty(Config.TenantId))
                 {
-                    if (!aadAuthority.IsCommonOrganizationsOrConsumersTenant() &&
-                        !string.Equals(aadAuthority.TenantId, Config.TenantId))
+                    if (!Config.Authority.AuthorityInfo.CanBeTenanted)
                     {
                         throw new MsalClientException(
-                            MsalError.AuthorityTenantSpecifiedTwice,
-                            "You specified a different tenant - once in WithAuthority() and once using WithTenant().");
+                            MsalError.TenantOverrideNonAad,
+                            $"Cannot use WithTenantId() in the application builder, because the authority {Config.Authority.AuthorityInfo.AuthorityType} doesn't support it");
                     }
 
-                    Config.Authority = Authority.CreateAuthorityWithTenant(Config.Authority.AuthorityInfo, Config.TenantId);
+                    string tenantedAuthority = Config.Authority.GetTenantedAuthority(
+                        Config.TenantId,
+                        forceSpecifiedTenant: true);
+
+                    Config.Authority = Authority.CreateAuthority(
+                        tenantedAuthority,
+                        Config.Authority.AuthorityInfo.ValidateAuthority);
                 }
             }
             else

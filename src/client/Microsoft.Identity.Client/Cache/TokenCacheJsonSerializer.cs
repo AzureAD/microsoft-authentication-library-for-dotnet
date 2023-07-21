@@ -57,14 +57,20 @@ namespace Microsoft.Identity.Client.Cache
         public IDictionary<string, JToken> Deserialize(byte[] bytes, bool clearExistingCacheData)
         {
             CacheSerializationContract cache;
-
+            string cacheAsString = CoreHelpers.ByteArrayToString(bytes);
             try
             {
-                cache = CacheSerializationContract.FromJsonString(CoreHelpers.ByteArrayToString(bytes));
+                cache = CacheSerializationContract.FromJsonString(cacheAsString);
             }
             catch (Exception ex)
             {
-                throw new MsalClientException(MsalError.JsonParseError, MsalErrorMessage.TokenCacheJsonSerializerFailedParse, ex);
+                // see if the string is at least in JSON format. First few characters do not have any personal / secret data.
+                string firstFewCharacters = cacheAsString.Length > 5 ? cacheAsString.Substring(0, 5) : cacheAsString;
+
+                throw new MsalClientException(
+                    MsalError.JsonParseError, 
+                    string.Format(MsalErrorMessage.TokenCacheJsonSerializerFailedParse, firstFewCharacters, ex),
+                    ex);
             }
 
             if (clearExistingCacheData)
