@@ -535,9 +535,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             return VerifyPoPTokenAsync(clientId, requestUri, method, result.AccessToken, result.TokenType);
         }
 
-        private async Task VerifyPoPTokenAsync(string clientId, string requestUri, HttpMethod method, string token, string tokenType)
+        private Task VerifyPoPTokenAsync(string clientId, string requestUri, HttpMethod method, string token, string tokenType)
         {
-            Uri protectedUri = new Uri(ProtectedUrl);
+            Uri protectedUri = new Uri(requestUri);
 
             ClaimsPrincipal popClaims = IdToken.Parse(token).ClaimsPrincipal;
             string assertionWithoutShr = popClaims.FindFirst("at").Value;
@@ -555,7 +555,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string reqCnf = innerTokenClaims.FindFirst("cnf").Value;
             Assert.IsNotNull(reqCnf);
 
-
+            return Task.Delay(0);
             // POP validation endpoint is down
             // uncomment code below https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4264
 
