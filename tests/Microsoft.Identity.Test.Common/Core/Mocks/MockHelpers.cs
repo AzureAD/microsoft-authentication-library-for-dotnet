@@ -7,9 +7,10 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Xml;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
@@ -529,6 +530,22 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 {
                     Content = new StringContent(content)
                 }
+            };
+        }
+
+        public static MsalTokenResponse CreateMsalRunTimeBrokerTokenResponse(string accessToken = null, string tokenType = null)
+        {
+            return new MsalTokenResponse()
+            {
+                AccessToken = accessToken ?? TestConstants.UserAccessToken,
+                IdToken = null,
+                CorrelationId = null,
+                Scope = TestConstants.ScopeStr,
+                ExpiresIn = 3600,
+                ClientInfo = null,
+                TokenType = tokenType ?? "Bearer",
+                WamAccountId = TestConstants.LocalAccountId,
+                TokenSource = TokenSource.Broker
             };
         }
     }
