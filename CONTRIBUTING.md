@@ -14,7 +14,7 @@ To build the mobile targets, install the Maui workload. To build UWP, install Wi
 MSAL .Net supports many target frameworks, by default it does not enable the mobile targets and the legacy targets. Unit tests exist only for the base frameworks.
 To load all targets, edit Microsoft.Identity.Client.csproj or set an env variable named INCLUDE_MOBILE_AND_LEGACY_TFM to value "1" and restart Visual Studio.
 
-Open `LibsAndSamples.sln` for a bigger solution with lots of apps that exercise MSAL. You may have to disable some dev apps. Load `LibsNoSamples.sln` for a small solution that has the library and the tests. 
+Open `LibsAndSamples.sln` for a bigger solution with lots of developer apps that exercise MSAL. You may have to disable some dev apps. Load `LibsNoSamples.sln` for a small solution that has the library and the tests. 
 
 ## Run tests
 
