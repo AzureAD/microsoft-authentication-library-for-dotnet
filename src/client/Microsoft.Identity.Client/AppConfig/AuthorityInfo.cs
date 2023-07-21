@@ -136,15 +136,19 @@ namespace Microsoft.Identity.Client
 
         internal bool IsInstanceDiscoverySupported => AuthorityType == AuthorityType.Aad;
 
+        /// <summary>
+        /// For IWA
+        /// </summary>
         internal bool IsUserAssertionSupported => 
             AuthorityType != AuthorityType.Adfs && 
             AuthorityType != AuthorityType.B2C;
 
-        internal bool IsTenantOverrideSupported => 
-            AuthorityType == AuthorityType.Aad || 
-            AuthorityType == AuthorityType.Dsts;
-
-        internal bool IsMultiTenantSupported => 
+        /// <summary>
+        /// Authority support multi-tenantcy. ADFS and Generic authorities are not tenanted.
+        /// B2C doesn't allow multi-tenancy scenarios, but the authority itself is tenanted. 
+        /// For CIAM, we allow multi-tenancy scenarios, and expect the STS to fail.
+        /// </summary>
+        internal bool CanBeTenanted => 
             AuthorityType == AuthorityType.Aad  ||
             AuthorityType == AuthorityType.Dsts ||
             AuthorityType == AuthorityType.B2C  ||
@@ -178,7 +182,7 @@ namespace Microsoft.Identity.Client
 
         private static Uri TransformIfCiamAuthority(Uri authorityUri)
         {
-            if (isCiamAuthority(authorityUri))
+            if (IsCiamAuthority(authorityUri))
             {
                 return CiamAuthority.TransformAuthority(authorityUri);
             }
@@ -372,7 +376,7 @@ namespace Microsoft.Identity.Client
             }
 
             string path = authorityUri.AbsolutePath.Substring(1);
-            if (string.IsNullOrWhiteSpace(path) && !isCiamAuthority(authorityUri))
+            if (string.IsNullOrWhiteSpace(path) && !IsCiamAuthority(authorityUri))
             {
                 throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, nameof(authority));
             }
@@ -424,7 +428,7 @@ namespace Microsoft.Identity.Client
 
         private static AuthorityType GetAuthorityType(Uri authorityUri)
         {
-            if (isCiamAuthority(authorityUri))
+            if (IsCiamAuthority(authorityUri))
             {
                 return AuthorityType.Ciam;
             }
@@ -449,7 +453,7 @@ namespace Microsoft.Identity.Client
             return AuthorityType.Aad;
         }
 
-        private static bool isCiamAuthority(Uri authorityUri)
+        private static bool IsCiamAuthority(Uri authorityUri)
         {
             return authorityUri.Host.EndsWith(Constants.CiamAuthorityHostSuffix);
         }
@@ -513,7 +517,8 @@ namespace Microsoft.Identity.Client
                 AuthorityInfo requestAuthorityInfo,
                 IAccount account = null)
             {
-                var configAuthorityInfo = requestContext.ServiceBundle.Config.Authority.AuthorityInfo;
+                var configAuthority = requestContext.ServiceBundle.Config.Authority;
+                var configAuthorityInfo = configAuthority.AuthorityInfo;
 
                 if (configAuthorityInfo == null)
                 {
@@ -524,25 +529,25 @@ namespace Microsoft.Identity.Client
 
                 await ValidateSameHostAsync(requestAuthorityInfo, requestContext).ConfigureAwait(false);
 
-                AuthorityInfo nonNullAuthInfo = requestAuthorityInfo ?? configAuthorityInfo;
+                AuthorityInfo requestOrConfig = requestAuthorityInfo ?? configAuthorityInfo;
 
                 switch (configAuthorityInfo.AuthorityType)
                 {
                     // ADFS is tenant-less, no need to consider tenant
                     case AuthorityType.Adfs:
-                        return new AdfsAuthority(nonNullAuthInfo);
+                        return new AdfsAuthority(requestOrConfig);
 
                     case AuthorityType.Dsts:
-                        return new DstsAuthority(nonNullAuthInfo);
+                        return new DstsAuthority(requestOrConfig);
 
                     case AuthorityType.B2C:
-                        return new B2CAuthority(nonNullAuthInfo);
+                        return new B2CAuthority(requestOrConfig);
 
                     case AuthorityType.Ciam:
-                        return new CiamAuthority(nonNullAuthInfo);
+                        return new CiamAuthority(requestOrConfig);
 
                     case AuthorityType.Generic:
-                        return new GenericAuthority(nonNullAuthInfo);
+                        return new GenericAuthority(requestOrConfig);
 
                     case AuthorityType.Aad:
 
@@ -551,8 +556,14 @@ namespace Microsoft.Identity.Client
                         if (requestAuthorityInfo == null)
                         {
                             return updateEnvironment ?
-                                CreateAuthorityWithTenant(CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment).AuthorityInfo, account?.HomeAccountId?.TenantId) :
-                                CreateAuthorityWithTenant(configAuthorityInfo, account?.HomeAccountId?.TenantId);
+                                CreateAuthorityWithTenant(
+                                    CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment),
+                                    account?.HomeAccountId?.TenantId, 
+                                    forceSpecifiedTenant: false) :
+                                CreateAuthorityWithTenant(
+                                    configAuthority, 
+                                    account?.HomeAccountId?.TenantId, 
+                                    forceSpecifiedTenant: false);
                         }
 
                         // In case the authority is defined only at the request level
@@ -571,8 +582,14 @@ namespace Microsoft.Identity.Client
                         }
 
                         return updateEnvironment ?
-                                CreateAuthorityWithTenant(CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment).AuthorityInfo, account?.HomeAccountId?.TenantId) :
-                                CreateAuthorityWithTenant(configAuthorityInfo, account?.HomeAccountId?.TenantId);
+                                CreateAuthorityWithTenant(
+                                    CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment),
+                                    account?.HomeAccountId?.TenantId, 
+                                    forceSpecifiedTenant: false) :
+                                CreateAuthorityWithTenant(
+                                    configAuthority, 
+                                    account?.HomeAccountId?.TenantId,
+                                    forceSpecifiedTenant: false);
                     
                     default:
                         throw new MsalClientException(
@@ -581,18 +598,11 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            internal static Authority CreateAuthorityWithTenant(AuthorityInfo authorityInfo, string tenantId)
-            {
-                Authority initialAuthority = authorityInfo.CreateAuthority();
+            internal static Authority CreateAuthorityWithTenant(Authority authority, string tenantId, bool forceSpecifiedTenant)
+            {                
+                string tenantedAuthority = authority.GetTenantedAuthority(tenantId, forceSpecifiedTenant);
 
-                if (string.IsNullOrEmpty(tenantId))
-                {
-                    return initialAuthority;
-                }
-
-                string tenantedAuthority = initialAuthority.GetTenantedAuthority(tenantId);
-
-                return Authority.CreateAuthority(tenantedAuthority, authorityInfo.ValidateAuthority);
+                return Authority.CreateAuthority(tenantedAuthority, authority.AuthorityInfo.ValidateAuthority);
             }
 
             internal static Authority CreateAuthorityWithEnvironment(AuthorityInfo authorityInfo, string environment)
@@ -630,6 +640,13 @@ namespace Microsoft.Identity.Client
                     if (requestAuthorityInfo.AuthorityType == AuthorityType.B2C)
                     {
                         throw new MsalClientException(MsalError.B2CAuthorityHostMismatch, MsalErrorMessage.B2CAuthorityHostMisMatch);
+                    }
+
+                    // Do not try to be smart here, let the STS figure it out
+                    if ( requestAuthorityInfo.AuthorityType == AuthorityType.Ciam || 
+                        requestAuthorityInfo.AuthorityType == AuthorityType.Generic)
+                    {
+                        return;
                     }
 
                     // This check should be done when validating the request parameters, however we've allowed

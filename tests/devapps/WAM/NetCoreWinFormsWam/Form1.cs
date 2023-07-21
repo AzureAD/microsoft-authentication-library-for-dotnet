@@ -22,7 +22,7 @@ namespace NetDesktopWinForms
 {
     public partial class Form1 : Form
     {
-        private static readonly Uri s_downstreamApi = new Uri("https://www.contoso.com/path1/path2");
+
         private readonly SynchronizationContext _syncContext;
 
         private static List<ClientEntry> s_clients = new List<ClientEntry>()
@@ -104,7 +104,7 @@ namespace NetDesktopWinForms
             bool msaPt = IsMsaPassthroughConfigured();
 
             var builder = PublicClientApplicationBuilder
-                .Create(clientId)                
+                .Create(clientId)
                 .WithRedirectUri("http://localhost")
                 .WithMultiCloudSupport(cbxMultiCloud2.Checked)
                 .WithAuthority(authority);
@@ -206,8 +206,9 @@ namespace NetDesktopWinForms
                 if (cbxPOP.Checked)
                 {
                     builder = builder.WithProofOfPossession(
-                        "some_nonce", 
-                        System.Net.Http.HttpMethod.Get, s_downstreamApi);
+                        Guid.NewGuid().ToString(),
+                        System.Net.Http.HttpMethod.Get,
+                        GetRandomDownstreamUri());
                 }
 
                 return await builder.ExecuteAsync(GetAutocancelToken()).ConfigureAwait(false);
@@ -239,7 +240,10 @@ namespace NetDesktopWinForms
 
                 if (cbxPOP.Checked)
                 {
-                    builder = builder.WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority));
+                    builder = builder.WithProofOfPossession(
+                        Guid.NewGuid().ToString(),
+                    System.Net.Http.HttpMethod.Get,
+                    GetRandomDownstreamUri());
                 }
 
                 Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
@@ -261,7 +265,7 @@ namespace NetDesktopWinForms
 
             cbxScopes.Invoke((MethodInvoker)delegate
             {
-                if(!string.IsNullOrWhiteSpace(cbxScopes.Text))
+                if (!string.IsNullOrWhiteSpace(cbxScopes.Text))
                     result = cbxScopes.Text.Split(' ');
             });
 
@@ -311,7 +315,7 @@ namespace NetDesktopWinForms
 
             Log("Refreshing accounts");
 
-            if(refreshAccounts)
+            if (refreshAccounts)
                 await RefreshAccountsAsync().ConfigureAwait(true);
         }
 
@@ -371,7 +375,10 @@ namespace NetDesktopWinForms
 
             if (cbxPOP.Checked)
             {
-                builder = builder.WithProofOfPossession("nonce", System.Net.Http.HttpMethod.Get, s_downstreamApi);
+                builder = builder.WithProofOfPossession(
+                    Guid.NewGuid().ToString(),
+                    System.Net.Http.HttpMethod.Get,
+                    GetRandomDownstreamUri());
             }
 
             Prompt? prompt = GetPrompt();
@@ -388,7 +395,7 @@ namespace NetDesktopWinForms
             else if (cbxAccount.SelectedIndex > 0)
             {
                 var acc = (cbxAccount.SelectedItem as AccountModel).Account;
-                Log($"ATI WithAccount for account {acc?.Username ?? "null" }");
+                Log($"ATI WithAccount for account {acc?.Username ?? "null"}");
                 builder = builder.WithAccount(acc);
             }
             else
@@ -404,6 +411,13 @@ namespace NetDesktopWinForms
             result = await builder.ExecuteAsync(GetAutocancelToken()).ConfigureAwait(false);
 
             return result;
+        }
+
+        private static Uri GetRandomDownstreamUri()
+        {
+            Uri downstreamApi = new Uri($"https://www.contoso.com/path1/path2/{Guid.NewGuid()}");
+
+            return downstreamApi;
         }
 
         private string GetLoginHint()
@@ -574,12 +588,15 @@ namespace NetDesktopWinForms
 
             AuthenticationResult result = null;
             var scopes = GetScopes();
-            
+
             var builder = pca.AcquireTokenByUsernamePassword(scopes, username, password);
 
             if (cbxPOP.Checked)
             {
-                builder = builder.WithProofOfPossession("nonce", System.Net.Http.HttpMethod.Get, s_downstreamApi);
+                builder = builder.WithProofOfPossession(
+                    Guid.NewGuid().ToString(),
+                    System.Net.Http.HttpMethod.Get,
+                    GetRandomDownstreamUri());
             }
 
             if (cbxBackgroundThread.Checked)

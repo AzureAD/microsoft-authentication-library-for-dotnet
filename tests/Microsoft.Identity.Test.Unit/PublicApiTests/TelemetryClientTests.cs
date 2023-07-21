@@ -571,5 +571,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             TokenCacheHelper.PopulateCache(_cca.UserTokenCacheInternal.Accessor);
         }
+
+
+        private AppTokenProviderResult GetAppTokenProviderResult(string differentScopesForAt = "", long? refreshIn = 1000)
+        {
+            var token = new AppTokenProviderResult();
+            token.AccessToken = TestConstants.DefaultAccessToken + differentScopesForAt; //Used to indicate that there is a new access token for a different set of scopes
+            token.ExpiresInSeconds = 3600;
+            token.RefreshInSeconds = refreshIn;
+
+            return token;
+        }
     }
 }
