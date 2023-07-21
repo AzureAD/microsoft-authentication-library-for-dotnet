@@ -1,4 +1,4 @@
-# Contributor License agreement
+# Contributor License agreements
 
 Please visit [https://cla.microsoft.com/](https://cla.microsoft.com/) and sign the Contributor License Agreement.  You only need to do that once. We cannot look at your code until you've submitted this request.
 
