@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Enables multi cloud support for this instance of public client application.
-        /// It enables applications to use in a global public cloud authority to the library and can still get tokens for resources from national clouds.
+        /// It enables applications to use in a global public cloud authority to the library and can still get tokens for resources from sovereign clouds.
         /// </summary>
         /// <param name="enableMultiCloudSupport">Enable or disable multi cloud support.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
