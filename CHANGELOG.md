@@ -1,3 +1,14 @@
+4.55.0
+==========
+### New Features
+- A user assigned managed identity can now be specified using its object ID. [4215](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/4215).  
+
+### Bug Fixes
+
+- `WithTenantId` now works with CIAM authorities. See [4191](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4191).  
+- Improved the error message when cache serialization fails. See [4206](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4206).  
+- Improved logging when using the Windows broker (WAM). See [4183](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/4183).  
+
 4.54.1
 ==========
 ### New Features
