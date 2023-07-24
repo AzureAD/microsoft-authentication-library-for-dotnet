@@ -24,12 +24,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static readonly string[] s_b2cScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-        }
-
         // If test fails with "user needs to consent to the application, do an interactive request" error,
         // Do the following: 
         // 1) Add in code to pull the user's password, and put a breakpoint there.

@@ -4,6 +4,7 @@
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -11,6 +12,7 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -52,7 +54,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsTrue(result.AuthenticationResultMetadata.DurationInCacheInMs > 0);
                 Assert.IsTrue(result.AuthenticationResultMetadata.DurationTotalInMs > 0);
                 Assert.AreEqual(
-                    "https://login.microsoftonline.com/common/oauth2/v2.0/token", 
+                    "https://login.microsoftonline.com/common/oauth2/v2.0/token",
                     result.AuthenticationResultMetadata.TokenEndpoint);
                 Assert.AreEqual(1, Metrics.TotalAccessTokensFromIdP);
                 Assert.AreEqual(0, Metrics.TotalAccessTokensFromCache);
@@ -161,6 +163,49 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        public void IdWebAccountExtension()
+        {
+            // copied from https://github.com/AzureAD/microsoft-identity-web/blob/master/src/Microsoft.Identity.Web/AccountExtensions.cs#L13
+            static ClaimsPrincipal ToClaimsPrincipal(IAccount account)
+            {
+                ClaimsIdentity identity = new ClaimsIdentity(new[]
+                    {
+                    new Claim(ClaimTypes.Upn, account.Username),
+                });
+
+                if (!string.IsNullOrEmpty(account.HomeAccountId?.ObjectId))
+                {
+                    identity.AddClaim(new Claim("oid", account.HomeAccountId.ObjectId));
+                }
+
+                if (!string.IsNullOrEmpty(account.HomeAccountId?.TenantId))
+                {
+                    identity.AddClaim(new Claim("tid", account.HomeAccountId.TenantId));
+                }
+
+                return new ClaimsPrincipal(identity);
+            }
+
+            var username = "username@test.com";
+            var oid = "objectId";
+            var tid = "tenantId";
+
+            IAccount account = Substitute.For<IAccount>();
+            account.Username.Returns(username);
+            var accId = new AccountId("identifier", oid, tid);
+            account.HomeAccountId.Returns(accId);
+
+            var claimsIdentityResult = ToClaimsPrincipal(account).Identity as ClaimsIdentity;
+
+            Assert.IsNotNull(claimsIdentityResult);
+            Assert.AreEqual(3, claimsIdentityResult.Claims.Count());
+            Assert.AreEqual(username, claimsIdentityResult.FindFirst(ClaimTypes.Upn)?.Value);
+            Assert.AreEqual(oid, claimsIdentityResult.FindFirst("oid")?.Value);
+            Assert.AreEqual(tid, claimsIdentityResult.FindFirst("tid")?.Value);
+
+        }
+
+        [TestMethod]
         public async Task RefreshReasonExpired_AcquireTokenSilent_Async()
         {
             using (var harness = CreateTestHarness())
@@ -255,7 +300,7 @@ namespace Microsoft.Identity.Test.Unit
                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), false)
                             .WithHttpManager(httpManager)
                             .BuildConcrete();
-            
+
             if (populateUserCache)
             {
                 TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
