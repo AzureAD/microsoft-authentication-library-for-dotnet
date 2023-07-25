@@ -107,10 +107,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 mockBroker.IsPopSupported.Returns(true);
                 mockBroker.AcquireTokenInteractiveAsync(
                     Arg.Any<AuthenticationRequestParameters>(),
-                    Arg.Any<AcquireTokenInteractiveParameters>()).Returns(CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
+                    Arg.Any<AcquireTokenInteractiveParameters>()).Returns(
+                    MockHelpers.CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
                 mockBroker.AcquireTokenSilentAsync(
                     Arg.Any<AuthenticationRequestParameters>(), 
-                    Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
+                    Arg.Any<AcquireTokenSilentParameters>()).Returns(
+                    MockHelpers.CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
 
                 var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithTestBroker(mockBroker)

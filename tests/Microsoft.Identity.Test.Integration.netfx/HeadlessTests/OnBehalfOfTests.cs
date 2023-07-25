@@ -35,11 +35,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private readonly KeyVaultSecretsProvider _keyVaultMsidLab = new KeyVaultSecretsProvider(KeyVaultInstance.MSIDLab);
 
         #region Test Hooks
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-        }
 
         [TestInitialize]
         public void TestInitialize()

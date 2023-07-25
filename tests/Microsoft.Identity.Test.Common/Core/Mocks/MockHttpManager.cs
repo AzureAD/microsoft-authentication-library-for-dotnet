@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
@@ -23,17 +22,16 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                                             IDisposable
     {
         private readonly TestContext _testContext;
-        public Func<MockHttpMessageHandler> MessageHandlerFunc;
 
         private readonly IHttpManager _httpManager;
 
-        public MockHttpManager(TestContext testContext = null, bool isManagedIdentity = false) :
-            this(true, testContext, isManagedIdentity)
+        public MockHttpManager(TestContext testContext = null, bool isManagedIdentity = false, Func<MockHttpMessageHandler> messageHandlerFunc = null) :
+            this(true, testContext, isManagedIdentity, messageHandlerFunc)
         { }
 
-        public MockHttpManager(bool retryOnce, TestContext testContext = null, bool isManagedIdentity = false)
+        public MockHttpManager(bool retryOnce, TestContext testContext = null, bool isManagedIdentity = false, Func<MockHttpMessageHandler> messageHandlerFunc = null)
         {
-            _httpManager = HttpManagerFactory.GetHttpManager(new MockHttpClientFactory(MessageHandlerFunc,
+            _httpManager = HttpManagerFactory.GetHttpManager(new MockHttpClientFactory(messageHandlerFunc,
                 _httpMessageHandlerQueue, testContext), retryOnce, isManagedIdentity);
 
             _testContext = testContext;

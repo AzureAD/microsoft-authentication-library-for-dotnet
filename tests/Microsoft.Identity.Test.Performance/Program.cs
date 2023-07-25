@@ -27,16 +27,17 @@ namespace Microsoft.Identity.Test.Performance
             }).RunAll(
 #if DEBUG
                     new DebugInProcessConfig()
+                        .WithOptions(ConfigOptions.DontOverwriteResults) // When running manually locally
 #else
                     DefaultConfig.Instance
 #endif
-                .WithOptions(ConfigOptions.DisableLogFile)
-                .WithOptions(ConfigOptions.JoinSummary)
-                .WithOrderer(new DefaultOrderer(SummaryOrderPolicy.Method))
-                //.WithOptions(ConfigOptions.DontOverwriteResults) // Uncomment when running manually locally
-                .HideColumns(Column.UnrollFactor, Column.Type, Column.InvocationCount, Column.Error, Column.StdDev, Column.Median, Column.Job)
-                .AddDiagnoser(MemoryDiagnoser.Default) // https://benchmarkdotnet.org/articles/configs/diagnosers.html
-                                                       //.AddDiagnoser(new EtwProfiler()) // https://adamsitnik.com/ETW-Profiler/
+                        .WithOptions(ConfigOptions.DisableLogFile)
+                        .WithOptions(ConfigOptions.StopOnFirstError)
+                        .WithOptions(ConfigOptions.JoinSummary)
+                        .WithOrderer(new DefaultOrderer(SummaryOrderPolicy.Method))
+                        .HideColumns(Column.UnrollFactor, Column.Type, Column.InvocationCount, Column.Error, Column.StdDev, Column.Median, Column.Job)
+                        .AddDiagnoser(MemoryDiagnoser.Default) // https://benchmarkdotnet.org/articles/configs/diagnosers.html
+                        //.AddDiagnoser(new EtwProfiler()) // https://adamsitnik.com/ETW-Profiler/
                 .AddJob(
                     Job.Default
                         .WithId("Job-PerfTests")));

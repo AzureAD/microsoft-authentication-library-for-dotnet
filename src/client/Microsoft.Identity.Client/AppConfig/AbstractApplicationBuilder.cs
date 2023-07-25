@@ -433,7 +433,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Adds a known authority to the application from its Uri. See https://aka.ms/msal-net-application-configuration.
         /// This constructor is mainly used for scenarios where the authority is not a standard Azure AD authority,
-        /// nor an ADFS authority, nor an Azure AD B2C authority. For Azure AD, even in national and sovereign clouds, prefer
+        /// nor an ADFS authority, nor an Azure AD B2C authority. For Azure AD, even in sovereign clouds, prefer
         /// using other overrides such as <see cref="WithAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </summary>
         /// <param name="authorityUri">Uri of the authority</param>
