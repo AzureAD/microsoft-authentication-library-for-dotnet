@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 #if !ANDROID && !iOS && !WINDOWS_APP 
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -21,7 +22,6 @@ using static Microsoft.Identity.Client.Internal.JsonWebToken;
 namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
-    [DeploymentItem(@"Resources\valid_cert.pfx")]
     [DeploymentItem(@"Resources\testCert.crtfile")]
     [DeploymentItem(@"Resources\RSATestCertDotNet.pfx")]
     public class ConfidentialClientWithCertTests : TestBase
@@ -41,7 +41,9 @@ namespace Microsoft.Identity.Test.Unit
             };
         }
 
-        private static MockHttpMessageHandler CreateTokenResponseHttpHandlerWithX5CValidation(bool clientCredentialFlow, bool expectX5C = true)
+        private static MockHttpMessageHandler CreateTokenResponseHttpHandlerWithX5CValidation(
+            bool clientCredentialFlow, 
+            string expectedX5C = null)
         {
             return new MockHttpMessageHandler()
             {
@@ -59,10 +61,10 @@ namespace Microsoft.Identity.Test.Unit
                     var handler = new JwtSecurityTokenHandler();
                     var jsonToken = handler.ReadJwtToken(encodedJwt);
                     var x5c = jsonToken.Header.Where(header => header.Key == "x5c").FirstOrDefault();
-                    if (expectX5C)
+                    if (expectedX5C != null)
                     {
                         Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
-                        Assert.AreEqual(x5c.Value.ToString(), TestConstants.Defaultx5cValue);
+                        Assert.AreEqual(x5c.Value.ToString(), expectedX5C);
                     }
                     else
                     {
@@ -108,9 +110,8 @@ namespace Microsoft.Identity.Test.Unit
             using (var harness = CreateTestHarness())
             {
                 SetupMocks(harness.HttpManager);
-                var certificate = new X509Certificate2(
-                ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
-                TestConstants.DefaultPassword);
+                var certificate = CertHelper.GetOrCreateTestCert();
+                var exportedCertificate = Convert.ToBase64String(certificate.Export(X509ContentType.Cert));
 
                 var appBuilder = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
@@ -128,14 +129,8 @@ namespace Microsoft.Identity.Test.Unit
                 var app = appBuilder.BuildConcrete();
 
                 //Check for x5c claim
-                if (expectX5c)
-                {
-                    harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true));
-                }
-                else
-                {
-                    harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true, false));
-                }
+                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(
+                    true, expectX5c ? exportedCertificate : null));
 
                 var builder = app.AcquireTokenForClient(TestConstants.s_scope);
 
@@ -164,16 +159,15 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow(false, true, true)] // request overrides
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Suppressing RoslynAnalyzers: Rule: IA5352 - Do Not Misuse Cryptographic APIs in test only code")]
         public async Task JsonWebTokenWithX509PublicCertSendCertificateWithClaimsTestSendX5cCombinationsAsync(
-            bool? appFlag, 
-            bool? requestFlag, 
+            bool? appFlag,
+            bool? requestFlag,
             bool expectX5c)
         {
             using (var harness = CreateTestHarness())
             {
                 SetupMocks(harness.HttpManager);
-                var certificate = new X509Certificate2(
-                ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
-                TestConstants.DefaultPassword);
+                var certificate = CertHelper.GetOrCreateTestCert();
+                var exportedCertificate = Convert.ToBase64String(certificate.Export(X509ContentType.Cert));
 
                 IDictionary<string, string> claimsToSign = new Dictionary<string, string>();
                 claimsToSign.Add("Foo", "Bar");
@@ -194,14 +188,9 @@ namespace Microsoft.Identity.Test.Unit
                 var app = appBuilder.BuildConcrete();
 
                 //Check for x5c claim
-                if (expectX5c)
-                {
-                    harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true));
-                }
-                else
-                {
-                    harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true, false));
-                }
+                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(
+                    true, expectX5c ? exportedCertificate : null));
+
 
                 var builder = app.AcquireTokenForClient(TestConstants.s_scope);
 
@@ -225,9 +214,8 @@ namespace Microsoft.Identity.Test.Unit
             using (var harness = CreateTestHarness())
             {
                 SetupMocks(harness.HttpManager);
-                var certificate = new X509Certificate2(
-                    ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
-                    TestConstants.DefaultPassword);
+                var certificate = CertHelper.GetOrCreateTestCert();
+                var exportedCertificate = Convert.ToBase64String(certificate.Export(X509ContentType.Cert));
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
@@ -241,7 +229,8 @@ namespace Microsoft.Identity.Test.Unit
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
                 //Check for x5c claim
-                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(true));
+                harness.HttpManager.AddMockHandler(
+                    CreateTokenResponseHttpHandlerWithX5CValidation(true, exportedCertificate));
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync(CancellationToken.None)
@@ -275,9 +264,8 @@ namespace Microsoft.Identity.Test.Unit
             {
                 SetupMocks(harness.HttpManager);
 
-                var certificate = new X509Certificate2(
-                    ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
-                    TestConstants.DefaultPassword);
+                var certificate = CertHelper.GetOrCreateTestCert();
+                var exportedCertificate = Convert.ToBase64String(certificate.Export(X509ContentType.Cert));
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
@@ -293,7 +281,7 @@ namespace Microsoft.Identity.Test.Unit
                 var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
 
                 //Check for x5c claim
-                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
+                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false, exportedCertificate));
                 AuthenticationResult result = await app
                     .AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
                     .ExecuteAsync(CancellationToken.None)
@@ -325,9 +313,8 @@ namespace Microsoft.Identity.Test.Unit
             {
                 SetupMocks(harness.HttpManager);
 
-                var certificate = new X509Certificate2(
-                    ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
-                    TestConstants.DefaultPassword);
+                var certificate = CertHelper.GetOrCreateTestCert();
+                var exportedCertificate = Convert.ToBase64String(certificate.Export(X509ContentType.Cert));
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
@@ -343,7 +330,8 @@ namespace Microsoft.Identity.Test.Unit
                 var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
 
                 //Check for x5c claim
-                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
+                harness.HttpManager.AddMockHandler(
+                    CreateTokenResponseHttpHandlerWithX5CValidation(false, exportedCertificate));
                 AuthenticationResult result = await app
                     .AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
                     .ExecuteAsync(CancellationToken.None)
@@ -363,9 +351,8 @@ namespace Microsoft.Identity.Test.Unit
             {
                 SetupMocks(harness.HttpManager);
 
-                var certificate = new X509Certificate2(
-                    ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
-                    TestConstants.DefaultPassword);
+                var certificate = CertHelper.GetOrCreateTestCert();
+                var exportedCertificate = Convert.ToBase64String(certificate.Export(X509ContentType.Cert));
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
@@ -379,7 +366,8 @@ namespace Microsoft.Identity.Test.Unit
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
                 //Check for x5c claim
-                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
+                harness.HttpManager.AddMockHandler(
+                    CreateTokenResponseHttpHandlerWithX5CValidation(false, exportedCertificate));
                 AuthenticationResult result = await ((IByRefreshToken)app)
                     .AcquireTokenByRefreshToken(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
                     .ExecuteAsync(CancellationToken.None)
@@ -404,9 +392,8 @@ namespace Microsoft.Identity.Test.Unit
             using (var harness = CreateTestHarness())
             {
                 SetupMocks(harness.HttpManager, "https://login.microsoftonline.com/my-utid/");
-                var certificate = new X509Certificate2(
-                    ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
-                    TestConstants.DefaultPassword);
+                var certificate = CertHelper.GetOrCreateTestCert();
+                var exportedCertificate = Convert.ToBase64String(certificate.Export(X509ContentType.Cert));
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
@@ -421,7 +408,8 @@ namespace Microsoft.Identity.Test.Unit
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
                 //Check for x5c claim
-                harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(false));
+                harness.HttpManager.AddMockHandler(
+                    CreateTokenResponseHttpHandlerWithX5CValidation(false, exportedCertificate));
 
                 var result = await app
                     .AcquireTokenSilent(

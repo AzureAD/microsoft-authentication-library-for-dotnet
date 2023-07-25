@@ -91,11 +91,6 @@ namespace Microsoft.Identity.Client
 
         internal void ValidateAndCalculateApiId()
         {
-            if (CommonParameters.AuthorityOverride?.AuthorityType == AuthorityType.Ciam)
-            {
-                throw new MsalClientException(MsalError.SetCiamAuthorityAtRequestLevelNotSupported, MsalErrorMessage.SetCiamAuthorityAtRequestLevelNotSupported);
-            }
-
             Validate();
             CommonParameters.ApiId = CalculateApiEventId();
             CommonParameters.CorrelationId = CommonParameters.UseCorrelationIdFromUser ? CommonParameters.UserProvidedCorrelationId : Guid.NewGuid();

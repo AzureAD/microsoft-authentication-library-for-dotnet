@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Internal.Requests.Silent;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
@@ -987,6 +988,22 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 TokenType = "Bearer",
                 WamAccountId = "wam_account_id",
             };
+        }
+
+       
+        internal static IBroker CreateBroker(Type brokerType)
+        {
+            if (brokerType == typeof(NullBroker))
+            {
+                return new NullBroker(null);
+            }
+
+            if (brokerType == typeof(IosBrokerMock))
+            {
+                return new IosBrokerMock(null);
+            }
+
+            throw new NotImplementedException();
         }
     }
 

@@ -96,7 +96,6 @@ namespace Microsoft.Identity.Client
                     .IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority?.AuthorityInfo?.AuthorityType ?? AuthorityType.Aad);
         }
 
-
         [CLSCompliant(false)]
         public AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(
             IEnumerable<string> scopes)
@@ -133,7 +132,7 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreatePublicClientExecutor(this),
                 scopes);
         }
-
+        
         [Obsolete("Using SecureString is not recommended. Use AcquireTokenByUsernamePassword(IEnumerable<string> scopes, string username, string password) instead.", false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(

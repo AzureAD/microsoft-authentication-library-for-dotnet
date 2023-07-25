@@ -15,7 +15,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
-    public class TestBase
+    public partial class TestBase
     {
         [AssemblyInitialize]
         public static void AssemblyInit(TestContext context)
@@ -78,64 +78,6 @@ namespace Microsoft.Identity.Test.Unit
             {
                 Trace.Listeners.Add(new TextWriterTraceListener(traceFile, "testListener"));
             }
-        }
-
-        internal MsalTokenResponse CreateMsalRunTimeBrokerTokenResponse(string accessToken = null, string tokenType = null)
-        {
-            return new MsalTokenResponse()
-            {
-                AccessToken = accessToken ?? TestConstants.UserAccessToken,
-                IdToken = null,
-                CorrelationId = null,
-                Scope = TestConstants.ScopeStr,
-                ExpiresIn = 3600,
-                ClientInfo = null,
-                TokenType = tokenType ?? "Bearer",
-                WamAccountId = TestConstants.LocalAccountId,
-                TokenSource = TokenSource.Broker
-            };
-        }
-
-        internal class IosBrokerMock : NullBroker
-        {
-            public IosBrokerMock(ILoggerAdapter logger) : base(logger)
-            {
-
-            }
-            public override bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
-            {
-                if (authorityType == AuthorityType.Adfs)
-                {
-                    return false;
-                }
-
-                return true;
-            }
-        }
-
-        internal static IBroker CreateBroker(Type brokerType)
-        {
-            if (brokerType == typeof(NullBroker))
-            {
-                return new NullBroker(null);
-            }
-
-            if (brokerType == typeof(IosBrokerMock))
-            {
-                return new IosBrokerMock(null);
-            }
-
-            throw new NotImplementedException();
-        }
-
-        internal AppTokenProviderResult GetAppTokenProviderResult(string differentScopesForAt = "", long? refreshIn = 1000)
-        {
-            var token = new AppTokenProviderResult();
-            token.AccessToken = TestConstants.DefaultAccessToken + differentScopesForAt; //Used to indicate that there is a new access token for a different set of scopes
-            token.ExpiresInSeconds = 3600;
-            token.RefreshInSeconds = refreshIn;
-
-            return token;
         }
     }
 }
