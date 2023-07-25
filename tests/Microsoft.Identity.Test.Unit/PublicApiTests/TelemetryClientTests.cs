@@ -202,11 +202,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(3)]
-        [DataRow(4)]
-        [DataRow(5)]
+        [DataRow(AssertionType.Secret)]
+        [DataRow(AssertionType.CertificateWithSni)]
+        [DataRow(AssertionType.CertificateWithoutSni)]
+        [DataRow(AssertionType.ClientAssertion)]
+        [DataRow(AssertionType.ManagedIdentity)]
         public async Task AcquireTokenAssertionTypeTelemetryTestAsync(int assertionType)
         {
             using (_harness = CreateTestHarness())
@@ -515,10 +515,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private void CreateApplication(AssertionType assertionType = AssertionType.Secret)
         {
-            var certificate = new X509Certificate2(
-                                    ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
-                                    TestConstants.DefaultPassword);
-
             switch (assertionType)
             {
                 case AssertionType.Secret:
@@ -531,18 +527,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         .BuildConcrete();
                         break;
                 case AssertionType.CertificateWithoutSni:
+                    var certificate1 = CertHelper.GetOrCreateTestCert();
+
                     _cca = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
-                        .WithCertificate(certificate)
+                        .WithCertificate(certificate1)
                         .WithHttpManager(_harness.HttpManager)
                         .WithExperimentalFeatures()
                         .WithTelemetryClient(_telemetryClient)
                         .BuildConcrete();
                     break;
                 case AssertionType.CertificateWithSni:
+                    var certificate2 = CertHelper.GetOrCreateTestCert();
+
                     _cca = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
-                        .WithCertificate(certificate, true)
+                        .WithCertificate(certificate2, true)
                         .WithHttpManager(_harness.HttpManager)
                         .WithExperimentalFeatures()
                         .WithTelemetryClient(_telemetryClient)
@@ -568,8 +568,18 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     break;
             }
 
-
             TokenCacheHelper.PopulateCache(_cca.UserTokenCacheInternal.Accessor);
+        }
+
+
+        private AppTokenProviderResult GetAppTokenProviderResult(string differentScopesForAt = "", long? refreshIn = 1000)
+        {
+            var token = new AppTokenProviderResult();
+            token.AccessToken = TestConstants.DefaultAccessToken + differentScopesForAt; //Used to indicate that there is a new access token for a different set of scopes
+            token.ExpiresInSeconds = 3600;
+            token.RefreshInSeconds = refreshIn;
+
+            return token;
         }
     }
 }
