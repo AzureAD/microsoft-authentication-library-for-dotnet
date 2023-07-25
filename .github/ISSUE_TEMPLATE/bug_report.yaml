@@ -1,4 +1,4 @@
-name: Bug Report
+name: Bug report
 description: Broken or unintended behavior with one of our libraries.
 title: '[Bug] '
 labels: ["untriaged", "needs attention"]
@@ -20,7 +20,7 @@ body:
 - type: input
   attributes:
     label: Library version used
-    description: "Please enter the version of the library where you ran into the issue."
+    description: "Please enter the version of the library where you ran into the issue (e.g. 4.54.0)."
   validations:
     required: true
     
@@ -33,13 +33,13 @@ body:
 
 - type: dropdown
   attributes:
-    label: Public, confidential, or Managed Identity client?
+    label: MSAL client type
     description: "Are you using PublicClientApplication,  ConfidentialClientApplication or ManagedIdentityApplication?"
     multiple: true
     options: 
       - "Public"
       - "Confidential"
-      - "Managed Identity"
+      - "Managed identity"
   validations:
     required: true
 
@@ -71,7 +71,7 @@ body:
       - "Authorization code"
       - "On-Behalf-Of"
       - "Client credentials (service-to-service calls)"
-      - "Long-running On Behalf Of (OBO)"
+      - "Long-running On-Behalf-Of (OBO)"
       - "Managed Identity"
       - "Other"
   validations:
@@ -79,9 +79,9 @@ body:
 
 - type: dropdown
   attributes:
-    label: Is this a new or existing app?
+    label: Is this a new or an existing app?
     description: "Is this a new or existing app?"
-    multiple: true
+    multiple: false
     options: 
       - "The app is in production, and I have upgraded to a new version of MSAL"
       - "The app is in production, I haven't upgraded MSAL, but started seeing this issue"
@@ -92,24 +92,24 @@ body:
 - type: textarea
   attributes:
     label: Issue description and reproduction steps
-    description: "Briefly explain the issue you are seeing. Please also provide steps to reproduce or a link to a sample which demonstrates the behavior."
+    description: "Briefly explain the issue you are seeing. Provide steps to reproduce or a link to a sample which demonstrates the behavior."
   validations:
     required: true      
     
 - type: textarea
   attributes:
     label: Error message
-    description: "Please provide any error messages you are receiving along with a stack trace, if possible."
+    description: "Provide any error messages you are receiving along with a stack trace, if possible."
 
 - type: textarea
   attributes:
     label: MSAL-specific logs
-    description: "Please provide verbose level log messages from MSAL. [Learn more](https://learn.microsoft.com/azure/active-directory/develop/msal-logging-dotnet)"
+    description: "Provide verbose level log messages from MSAL. [Learn more](https://learn.microsoft.com/azure/active-directory/develop/msal-logging-dotnet)"
        
 - type: textarea
   attributes:
     label: Relevant code snippets
-    description: "Please provide relevant code snippets that can be used to reproduce the issue."
+    description: "Provide relevant code snippets that can be used to reproduce the issue."
     render: csharp
   validations:
     required: false
@@ -117,7 +117,7 @@ body:
 - type: textarea
   attributes:
     label: Expected behavior
-    description: "Please describe what you expect the behavior to be."
+    description: "Describe what you expect the behavior to be."
   validations:
     required: true
     
@@ -137,7 +137,7 @@ body:
 - type: input
   attributes:
     label: Regression
-    description: "If this behavior worked before, please enter the last working version(s) of MSAL."
+    description: "If this behavior worked before, enter the last working version(s) of MSAL."
     placeholder: "MSAL version: "
 
 - type: textarea
