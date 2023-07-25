@@ -1,7 +1,7 @@
 name: Feature request
 description: Suggest a new feature for MSAL.NET.
-labels: [feature request]
-title : '[Feature Request] '
+labels: ["feature request", "untriaged", "needs attention"]
+title : '[Feature Request]     '
 body:
 - type: markdown
   attributes:
@@ -12,33 +12,33 @@ body:
 - type: markdown
   attributes:
     value: |
-      ## Feature request
+      ## Feature request for MSAL.NET
       
 - type: dropdown
   attributes:
-    label: Public, confidential, or Managed Identity client?
-    description: Are you using PublicClientApplication (desktop and mobile apps), ConfidentialClientApplication (web sites, web apis, service-to-service) or ManagedIdentityApplication?
+    label: MSAL client type
+    description: Are you using PublicClientApplication (desktop and mobile apps), ConfidentialClientApplication (web apps, web APIs, service-to-service) or ManagedIdentityApplication?
     multiple: true
     options: 
       - "Public"
       - "Confidential"
-      - "Managed Identity"
+      - "Managed identity"
   validations:
     required: true
 
 - type: textarea
   attributes:
     label: Description
-    description: "Is your feature request related to a problem? Please describe."
+    description: "Describe the problem or context for this feature request."
   validations: 
     required: true
 
 - type: textarea
   attributes:
-    label: Solution
+    label: Proposed solution
     description: "Describe the solution you'd like."
   validations: 
-    required: true
+    required: false
 
 - type: textarea
   attributes:
@@ -52,14 +52,4 @@ body:
     label: Context
     description: "Additional context."
   validations: 
-    required: true    
-
-- type: dropdown
-  attributes:
-    label: Source
-    description: "Are you an internal or external customer?"
-    options: 
-      - Internal (Microsoft)
-      - External (outside Microsoft)
-  validations: 
-     required: true
+    required: false
