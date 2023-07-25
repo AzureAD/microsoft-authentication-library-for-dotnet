@@ -18,6 +18,6 @@ jobs:
           exempt-pr-labels: 'awaiting-approval,work-in-progress'
           only-labels: 'awaiting-feedback,awaiting-answers'
           days-before-issue-stale: 120
-          days-before-pr-stale: 60
+          days-before-pr-stale: 20
           days-before-issue-close: 5
-          days-before-pr-close: 10
+          days-before-pr-close: 5
