@@ -1,7 +1,7 @@
 name: Engineering Task
 description: New Engineering Task (For Internal Microsoft Use Only).
 labels: [internal]
-title : '[Engineering Task] '
+labels: ["untriaged", "internal"]
 body:     
 - type: markdown
   attributes:
@@ -41,18 +41,4 @@ body:
     label: Solution
     description: "Describe the solution you'd like."
   validations: 
-    required: true
-
-- type: textarea
-  attributes:
-    label: Alternatives
-    description: "Describe alternatives you've considered."
-  validations: 
-    required: true
-
-- type: textarea
-  attributes:
-    label: Context
-    description: "Additional context."
-  validations: 
-    required: true    
+    required: false
