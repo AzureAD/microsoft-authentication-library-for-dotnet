@@ -19,11 +19,6 @@ namespace Microsoft.Identity.Client.Instance
 
         internal override string TenantId => null;
 
-        internal override string GetTenantedAuthority(string tenantId, bool forceTenantless = false)
-        {
-            throw new NotImplementedException();
-        }
-
         internal override async Task<string> GetTokenEndpointAsync(RequestContext requestContext)
         {
             var configuration = await OidcRetrieverWithCache.GetOidcAsync(

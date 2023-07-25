@@ -298,7 +298,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
-
                 pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
 
                 pca.ServiceBundle.ConfigureMockWebUI();
@@ -398,7 +397,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 mockBroker.IsPopSupported.Returns(true);
                 mockBroker.AcquireTokenSilentAsync(
                     Arg.Any<AuthenticationRequestParameters>(),
-                    Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
+                    Arg.Any<AcquireTokenSilentParameters>()).Returns(
+                        MockHelpers.CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
 
                 var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithTestBroker(mockBroker)
@@ -576,6 +576,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
             Assert.IsTrue(JObject.DeepEquals(jwkInConfig, jwkInToken));
         }
+
+       
     }
 }
 

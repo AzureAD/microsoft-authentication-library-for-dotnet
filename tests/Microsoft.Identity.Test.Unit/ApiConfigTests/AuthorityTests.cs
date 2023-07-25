@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Reflection.Emit;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
@@ -48,12 +49,12 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             base.TestCleanup();
         }
 
-        [TestMethod]
-        public void WithTenantIdExceptions()
+        [TestMethod]      
+        public void WithTenantId_Adfs_Exception()
         {
             var app1 = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithAdfsAuthority(TestConstants.ADFSAuthority)
+                .WithAuthority(TestConstants.ADFSAuthority)
                 .WithClientSecret("secret")
                 .Build();
 
@@ -62,25 +63,161 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                     .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
                     .WithTenantId(TestConstants.TenantId));
 
-            var app2 = ConfidentialClientApplicationBuilder
-               .Create(TestConstants.ClientId)
-               .WithB2CAuthority(TestConstants.B2CAuthority)
-               .WithClientSecret("secret")
-               .Build();
+            Assert.AreEqual(ex1.ErrorCode, MsalError.TenantOverrideNonAad);
+        }
 
-            var ex2 = AssertException.Throws<MsalClientException>(() =>
-                app2
+
+        [TestMethod]
+        public void GenericAuthority_WithTenantId_Exceptions()
+        {
+            var app1 = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures(true)
+                .WithGenericAuthority(TestConstants.GenericAuthority)
+                .WithClientSecret("secret")
+                .Build();
+
+            var ex1 = AssertException.Throws<MsalClientException>(() =>
+                app1
                     .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
                     .WithTenantId(TestConstants.TenantId));
 
             Assert.AreEqual(ex1.ErrorCode, MsalError.TenantOverrideNonAad);
-            Assert.AreEqual(ex2.ErrorCode, MsalError.TenantOverrideNonAad);
         }
-       
+
+        [DataTestMethod]
+        [DataRow(TestConstants.DstsAuthorityCommon)]
+        [DataRow(TestConstants.DstsAuthorityTenanted)]
+        [DataRow(TestConstants.CiamAuthorityMainFormat)]
+        [DataRow(TestConstants.CiamAuthorityWithFriendlyName)]
+        [DataRow(TestConstants.CiamAuthorityWithGuid)]
+        public void WithTenantIdAtRequestLevel_NonAad(string inputAuthority)
+        {
+            var app = ConfidentialClientApplicationBuilder
+               .Create(TestConstants.ClientId)
+               .WithAuthority(inputAuthority)
+               .WithClientSecret("secret")
+               .Build();
+
+            var parameterBuilder = app
+                .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                .WithTenantId(TestConstants.TenantId2);
+
+            Assert.AreEqual(
+                new Uri(inputAuthority).Host, 
+                parameterBuilder.CommonParameters.AuthorityOverride.Host, 
+                "The host should have stayed the same");
+            
+            Assert.AreEqual(
+                TestConstants.TenantId2,
+                AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority),
+                "The tenant id should have been changed");
+        }
+
+        [DataTestMethod]
+        [DataRow(TestConstants.AuthorityCommonTenant)]
+        [DataRow(TestConstants.AuthorityCommonPpeAuthority)]
+        [DataRow(TestConstants.AuthorityConsumersTenant)]
+        [DataRow(TestConstants.AuthorityOrganizationsTenant)]
+        [DataRow(TestConstants.AuthorityGuidTenant)]
+        [DataRow(TestConstants.DstsAuthorityCommon)]
+        [DataRow(TestConstants.DstsAuthorityTenanted)]
+        [DataRow(TestConstants.CiamAuthorityMainFormat)]
+        [DataRow(TestConstants.CiamAuthorityWithFriendlyName)]
+        [DataRow(TestConstants.CiamAuthorityWithGuid)]
+        public void AppLevel_AuthorityAndTenant_TenantWins_Config(string inputAuthority)
+        {
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithTenantId(TestConstants.TenantId2)
+                .WithAuthority(inputAuthority)
+            .Build();
+
+            Assert.AreEqual(
+                new Uri(inputAuthority).Host,
+                (cca.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.Host,
+                "The host should have stayed the same");
+
+            Assert.AreEqual(
+                TestConstants.TenantId2, 
+                AuthorityHelpers.GetTenantId(new Uri(cca.Authority)));
+        }
+
+        [TestMethod]
+        public void B2CAuthorityWithTenantAppLevel()
+        {
+            var cca = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithTenantId(TestConstants.TenantId2)
+                .WithAuthority(TestConstants.B2CAuthority)
+            .Build();
+
+            Assert.AreEqual(
+                new Uri(TestConstants.B2CAuthority).Host,
+                (cca.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.Host,
+                "The host should have stayed the same");
+
+            Assert.AreEqual(
+               "tenant",
+               AuthorityHelpers.GetTenantId(new Uri(cca.Authority)));
+        }
+
+        [TestMethod]
+        public void GenericAuthorityWithTenant()
+        {
+            var ex  = AssertException.Throws<MsalClientException>(() =>
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithTenantId(TestConstants.TenantId2)
+                    .WithExperimentalFeatures(true)
+                    .WithGenericAuthority(TestConstants.GenericAuthority)
+                    .Build()
+            );
+
+            Assert.AreEqual(ex.ErrorCode, MsalError.TenantOverrideNonAad);
+        }
+
+        [TestMethod]
+        public void AdfsAuthorityWithTenant()
+        {
+            var ex = AssertException.Throws<MsalClientException>(() =>
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithTenantId(TestConstants.TenantId2)
+                    .WithAuthority(TestConstants.ADFSAuthority)
+                    .Build()
+            );
+
+            Assert.AreEqual(ex.ErrorCode, MsalError.TenantOverrideNonAad);
+        }
+
+        [TestMethod]
+        public void WithTenantId_B2C()
+        {
+            var app = ConfidentialClientApplicationBuilder
+            .Create(TestConstants.ClientId)
+            .WithAuthority(TestConstants.B2CAuthority)
+            .WithClientSecret("secret")
+            .Build();
+
+            var parameterBuilder = app
+                .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                .WithTenantId(TestConstants.TenantId);
+
+            Assert.AreEqual(
+                new Uri(TestConstants.B2CAuthority).Host,
+                parameterBuilder.CommonParameters.AuthorityOverride.Host,
+                "The host should have stayed the same");
+
+            Assert.AreEqual(
+                "tenant",
+                AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority),
+                "The tenant id should have NOT changed");
+        }
 
         [DataTestMethod]
         [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]
-        public void WithTenantId_Success(Uri authorityValue, string tenantId)
+        public void AADWithTenantId_Success(Uri authorityValue, string tenantId)
         {
             // Ignore authorityValue, it's just that we don't need to create another TestData method
 
@@ -103,7 +240,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 
         [DataTestMethod]
         [DynamicData(nameof(TestData.GetAuthorityWithExpectedTenantId), typeof(TestData), DynamicDataSourceType.Method)]
-        public void WithTenantIdFromAuthority_Success(Uri authorityValue, string expectedTenantId)
+        public void AADWithTenantIdFromAuthority_Success(Uri authorityValue, string expectedTenantId)
         {
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)

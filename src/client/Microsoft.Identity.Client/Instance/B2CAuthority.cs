@@ -18,10 +18,11 @@ namespace Microsoft.Identity.Client.Instance
 
         internal override string TenantId { get; }
 
-        internal override string GetTenantedAuthority(string tenantId, bool forceTenantless = false)
+        // B2C doesn't allow tenant update, but ignores it
+        internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant = false)
         {
-            // For B2C, tenant is not changeable
             return AuthorityInfo.CanonicalAuthority.ToString();
         }
+
     }
 }
