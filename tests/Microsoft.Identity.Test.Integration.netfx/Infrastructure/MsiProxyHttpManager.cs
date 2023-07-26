@@ -14,7 +14,7 @@ using System.Web;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Lab.Api;
 
 namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 {

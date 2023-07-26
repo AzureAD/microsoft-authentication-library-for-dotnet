@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Lab.Api;
 using Microsoft.Identity.Client;
 using System.Threading.Tasks;
 using System.Linq;
