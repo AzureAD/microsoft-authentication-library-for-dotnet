@@ -55,8 +55,8 @@ body:
       - "Web API"
       - "Daemon app" 
   validations:
-    required: true   
-
+    required: true
+    
 - type: dropdown
   attributes:
     label: Authentication flow type
@@ -75,8 +75,8 @@ body:
       - "Managed Identity"
       - "Other"
   validations:
-    required: true    
-
+    required: true
+    
 - type: dropdown
   attributes:
     label: Is this a new or an existing app?
@@ -87,20 +87,15 @@ body:
       - "The app is in production, I haven't upgraded MSAL, but started seeing this issue"
       - "This is a new app or experiment"
   validations:
-    required: true        
-
-- type: textarea
-  attributes:
-    label: Issue description and reproduction steps
-    description: "Briefly explain the issue you are seeing. Provide steps to reproduce or a link to a sample which demonstrates the behavior."
-  validations:
-    required: true      
+    required: true
     
 - type: textarea
   attributes:
-    label: Error message
-    description: "Provide any error messages you are receiving along with a stack trace, if possible."
-
+    label: Issue description and reproduction steps
+    description: "Briefly explain the issue you are seeing along with any error messages or stack trace. Provide steps to reproduce or a link to a sample which demonstrates the behavior."
+  validations:
+    required: true
+    
 - type: textarea
   attributes:
     label: MSAL-specific logs
