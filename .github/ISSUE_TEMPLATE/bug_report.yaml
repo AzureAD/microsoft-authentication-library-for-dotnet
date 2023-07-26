@@ -120,7 +120,7 @@ body:
   attributes:
     label: Identity provider
     options: 
-      - Microsoft Entra ID and/or MSA
+      - Microsoft Entra ID (Work and School accounts and Personal Microsoft accounts)
       - Azure B2C Basic Policy
       - Azure B2C Custom Policy
       - Azure Active Directory Federation Services (ADFS)
