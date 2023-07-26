@@ -40,6 +40,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string Endpoint = "Endpoint";
         public const string Scopes = "Scopes";
         public const string ClientId = "ClientId";
+        public const string Platform = "Platform";
 
         #endregion
     }

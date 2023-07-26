@@ -22,9 +22,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using System.Net.Http;
-#if NET6_0_OR_GREATER
 using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
-#endif
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -38,6 +36,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal AuthenticationRequestParameters AuthenticationRequestParameters { get; }
         internal ICacheSessionManager CacheManager => AuthenticationRequestParameters.CacheSessionManager;
         internal IServiceBundle ServiceBundle { get; }
+
+//#if NET6_0_OR_GREATER || NET462_OR_GREATER || NET20_OR_GREATER
+        internal Activity activity;
+//#endif
 
         protected RequestBase(
             IServiceBundle serviceBundle,
@@ -82,6 +84,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken = default)
         {
             Stopwatch sw = Stopwatch.StartNew();
+//#if NET6_0_OR_GREATER || NET462_OR_GREATER || NET20_OR_GREATER
+            activity = OpenTelemetryClient.AcquireTokenActivity.StartActivity("Token Acquisition", ActivityKind.Internal);
+            activity?.AddTag(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion());
+            activity?.AddTag(TelemetryConstants.Platform, ServiceBundle.PlatformProxy.GetProductName());
+            activity?.AddTag(TelemetryConstants.ClientId, AuthenticationRequestParameters.AppConfig.ClientId);
+            activity?.AddTag(TelemetryConstants.ActivityId, AuthenticationRequestParameters.RequestContext.CorrelationId);
+//#endif
 
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
             AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
@@ -101,13 +110,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
                     LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails, telemetryClients);
 
-#if NET6_0_OR_GREATER
-                    // Aggregates the successful requests based on client id, token source and cache refresh reason.
-                    OpenTelemetry.SuccessCounter.Add(1, 
-                        new (TelemetryConstants.ClientId, AuthenticationRequestParameters.AppConfig.ClientId), 
-                        new (TelemetryConstants.TokenSource, authenticationResult.AuthenticationResultMetadata.TokenSource), 
-                        new (TelemetryConstants.CacheInfoTelemetry, authenticationResult.AuthenticationResultMetadata.CacheRefreshReason));
-#endif
+                    OpenTelemetryClient.LogSuccessMetrics(
+                        ServiceBundle.PlatformProxy.GetProductName(), 
+                        AuthenticationRequestParameters.AppConfig.ClientId, 
+                        authenticationResult.AuthenticationResultMetadata, 
+                        GetCacheLevel(authenticationResult).ToString());
+
+                    LogMsalSuccessTelemetryToOTel(authenticationResult);
 
                     return authenticationResult;
                 }
@@ -116,12 +125,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     apiEvent.ApiErrorCode = ex.ErrorCode;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
-#if NET6_0_OR_GREATER
-                    // Aggregates the failed requests based on client id and error code.
-                    OpenTelemetry.FailureCounter.Add(1, 
-                        new (TelemetryConstants.ClientId, AuthenticationRequestParameters.AppConfig.ClientId),
-                        new(TelemetryConstants.ErrorCode, ex.ErrorCode));
-#endif
+
+                    OpenTelemetryClient.LogToFailureCounter(
+                        ServiceBundle.PlatformProxy.GetProductName(), 
+                        AuthenticationRequestParameters.AppConfig.ClientId, 
+                        ex.ErrorCode);
+                    LogMsalFailedTelemetryToOTel(ex);
                     throw;
                 }
                 catch (Exception ex)
@@ -129,19 +138,72 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     apiEvent.ApiErrorCode = ex.GetType().Name;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
-#if NET6_0_OR_GREATER
-                    // Aggregates the failed requests based on client id and error code.
-                    OpenTelemetry.FailureCounter.Add(1,
-                        new(TelemetryConstants.ClientId, AuthenticationRequestParameters.AppConfig.ClientId),
-                        new(TelemetryConstants.ErrorCode, ex.GetType().Name));
-#endif
+                    OpenTelemetryClient.LogToFailureCounter(
+                        ServiceBundle.PlatformProxy.GetProductName(), 
+                        AuthenticationRequestParameters.AppConfig.ClientId, 
+                        ex.GetType().Name);
+                    LogMsalFailedTelemetryToOTel(ex);
                     throw;
                 }
                 finally
                 {
+//#if NET6_0_OR_GREATER || NET462_OR_GREATER || NET20_OR_GREATER
+                    activity?.Stop();
+//#endif
                     telemetryClients.TrackEvent(telemetryEventDetails);
                 }
             }
+        }
+
+        private void LogMsalSuccessTelemetryToOTel(AuthenticationResult authenticationResult)
+        {
+//#if NET6_0_OR_GREATER || NET462_OR_GREATER || NET20_OR_GREATER
+            activity?.SetStatus(ActivityStatusCode.Ok, "Success");
+
+            activity?.AddTag(TelemetryConstants.CacheInfoTelemetry, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason));
+            activity?.AddTag(TelemetryConstants.TokenSource, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.TokenSource));
+            activity?.AddTag(TelemetryConstants.Duration, authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
+            activity?.AddTag(TelemetryConstants.DurationInCache, authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs);
+            activity?.AddTag(TelemetryConstants.DurationInHttp, authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs);
+            activity?.AddTag(TelemetryConstants.TokenType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.TokenType);
+            activity?.AddTag(TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds);
+            activity?.AddTag(TelemetryConstants.ActivityId, authenticationResult.CorrelationId);
+
+            if (authenticationResult.AuthenticationResultMetadata.RefreshOn.HasValue)
+            {
+                activity?.AddTag(TelemetryConstants.RefreshOn, DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value));
+            }
+            activity?.AddTag(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
+            activity?.AddTag(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
+            activity?.AddTag(TelemetryConstants.CacheLevel, (int)GetCacheLevel(authenticationResult));
+//#endif
+        }
+
+        private void LogMsalFailedTelemetryToOTel(Exception exception)
+        {
+//#if NET6_0_OR_GREATER || NET462_OR_GREATER || NET20_OR_GREATER
+            activity?.SetStatus(ActivityStatusCode.Error, "Success");
+
+            
+            activity?.AddTag(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
+            activity?.AddTag(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
+
+            activity?.AddTag(TelemetryConstants.ErrorMessage, exception.Message);
+            if (exception is MsalClientException clientException)
+            {
+                activity?.AddTag(TelemetryConstants.ErrorCode, clientException.ErrorCode);
+                return;
+            }
+
+            if (exception is MsalServiceException serviceException)
+            {
+                activity?.AddTag(TelemetryConstants.ErrorCode, serviceException.ErrorCode);
+                activity?.AddTag(TelemetryConstants.StsErrorCode, serviceException.ErrorCodes?.FirstOrDefault());
+                return;
+            }
+
+            activity?.AddTag(TelemetryConstants.ErrorCode, exception.GetType().ToString());
+//#endif
         }
 
         private void LogMsalErrorTelemetryToClient(Exception ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)

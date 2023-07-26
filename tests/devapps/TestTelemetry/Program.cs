@@ -1,10 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Diagnostics.Metrics;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 
 internal class Program
 {
@@ -14,6 +17,11 @@ internal class Program
 
         using var meterProvider = Sdk.CreateMeterProviderBuilder()
             .AddMeter("MSAL.Net.Meter")
+            .AddConsoleExporter()
+            .Build();
+
+        using var traceProvider = Sdk.CreateTracerProviderBuilder()
+            .AddSource("MSAL.Net")
             .AddConsoleExporter()
             .Build();
 
