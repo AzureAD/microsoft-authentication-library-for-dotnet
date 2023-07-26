@@ -95,10 +95,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             Assert.AreEqual(AuthorityType.Dsts, (app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.AuthorityType);
 
-            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.IsMultiTenantSupported);
+            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.CanBeTenanted);
             Assert.IsTrue((app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.IsClientInfoSupported);
             Assert.IsFalse((app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.IsInstanceDiscoverySupported);
-            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.IsTenantOverrideSupported);
             Assert.IsTrue((app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.IsUserAssertionSupported);
         }
 
@@ -163,7 +162,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(TestConstants.DstsAuthorityTenanted);
             Assert.AreEqual(TestConstants.TenantId, authority.TenantId);
             
-            string updatedAuthority = authority.GetTenantedAuthority("tenant2");            
+            string updatedAuthority = authority.GetTenantedAuthority("tenant2", false);            
 
             Assert.AreEqual(
                 TestConstants.DstsAuthorityTenanted,

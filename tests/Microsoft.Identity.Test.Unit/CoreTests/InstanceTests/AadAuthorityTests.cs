@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl("https://login.microsoft.com/tid");
 
-            string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id");
+            string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id", false);
             Assert.AreEqual("https://login.microsoft.com/tid/", updatedAuthority, "Not changed, original authority already has tenant id");
 
             string updatedAuthority2 = authority.GetTenantedAuthority("other_tenant_id", true);
@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         {
             Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl("https://login.microsoft.com/common");
 
-            string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id");
+            string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id", false);
             Assert.AreEqual("https://login.microsoft.com/other_tenant_id/", updatedAuthority, "Changed, original is common");
 
             string updatedAuthority2 = authority.GetTenantedAuthority("other_tenant_id", true);
@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             Assert.AreEqual("common", authority.TenantId);
 
-            string updatedAuthority = authority.GetTenantedAuthority(TestConstants.Utid);
+            string updatedAuthority = authority.GetTenantedAuthority(TestConstants.Utid, false);
             Assert.AreEqual(TestConstants.AuthorityUtidTenant, updatedAuthority);
             Assert.AreEqual(updatedAuthority, TestConstants.AuthorityUtidTenant);
 

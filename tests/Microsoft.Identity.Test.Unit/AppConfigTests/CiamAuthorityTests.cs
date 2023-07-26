@@ -2,16 +2,20 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static System.Net.WebRequestMethods;
 
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
 {
     [TestClass]
-    public class CiamAuthorityTests
+    public class CiamAuthorityTests : TestBase
     {
         private readonly string _ciamInstance = $"https://idgciamdemo{Constants.CiamAuthorityHostSuffix}";
         private readonly string _ciamTenantGuid = "5e156ef5-9bd2-480c-9de0-d8658f21d3f7";
@@ -93,7 +97,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(ciamTransformedAuthority, transformedAuthority.AbsoluteUri);
         }
 
-        [TestMethod]
+        [DataTestMethod]
         [DataRow("https://idgciamdemo.ciamlogin.com/", "https://idgciamdemo.ciamlogin.com/idgciamdemo.onmicrosoft.com/")]
         [DataRow("https://idgciamdemo.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d", "https://idgciamdemo.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d/")]
         [DataRow("https://idgciamdemo.ciamlogin.com/idgciamdemo.onmicrosoft.com", "https://idgciamdemo.ciamlogin.com/idgciamdemo.onmicrosoft.com/")]
@@ -110,48 +114,94 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(expectedAuthority, effectiveAuthority);
         }
 
-        [TestMethod]
-        public void CiamWithAuthorityRequestTest()
+
+        [DataTestMethod]
+        [DataRow("https://app.ciamlogin.com/")]
+        [DataRow("https://app.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d")]
+        [DataRow("https://app.ciamlogin.com/aDomain")]
+        public async Task CiamWithAuthorityRequestTestAsync(string appAuthority)
         {
-            var app = 
-            PublicClientApplicationBuilder.Create(Guid.NewGuid().ToString())
-                                                    .WithAuthority(_ciamInstance)
-                                                    .WithDefaultRedirectUri()
-                                                    .Build();
 
-            //Ensure that CIAM authorities cannot be set when building a request
-            var exception = Assert.ThrowsExceptionAsync<MsalClientException>(async () => 
+            using (var harness = base.CreateTestHarness())
             {
-                await app.AcquireTokenInteractive(new[] { "someScope" })
-                         .WithAuthority(_ciamInstance)
-                         .ExecuteAsync()
-                         .ConfigureAwait(false);
-            }).Result;
+                await TestRequestAuthorityAsync(
+                    harness,
+                    appAuthority,
+                    requestAuthority: "https://request.ciamlogin.com/",
+                    expectedEndpoint: "https://request.ciamlogin.com/request.onmicrosoft.com/oauth2/v2.0/token"
+                    ).ConfigureAwait(false);
 
-            Assert.AreEqual(MsalError.SetCiamAuthorityAtRequestLevelNotSupported, exception.ErrorCode);
-            Assert.AreEqual(MsalErrorMessage.SetCiamAuthorityAtRequestLevelNotSupported, exception.Message);
+                await TestRequestAuthorityAsync(
+                    harness,
+                    appAuthority,
+                    requestAuthority: $"https://request.ciamlogin.com/{TestConstants.TenantId2}",
+                    expectedEndpoint: $"https://request.ciamlogin.com/{TestConstants.TenantId2}/oauth2/v2.0/token"
+                    ).ConfigureAwait(false);
 
-            exception = Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                await TestRequestAuthorityAsync(
+                    harness,
+                    appAuthority,
+                    requestAuthority: $"https://request.ciamlogin.com/bDomain",
+                    expectedEndpoint: $"https://request.ciamlogin.com/bdomain/oauth2/v2.0/token"
+                    ).ConfigureAwait(false);
+
+                
+            }
+
+            static async Task TestRequestAuthorityAsync(MockHttpAndServiceBundle harness, string appAuthority, string requestAuthority, string expectedEndpoint)
             {
-                await app.AcquireTokenInteractive(new[] { "someScope" })
-                         .WithAuthority(_ciamInstance, "idgciamdemo.onmicrosoft.com", false)
-                         .ExecuteAsync()
-                         .ConfigureAwait(false);
-            }).Result;
+                var app = ConfidentialClientApplicationBuilder.Create(Guid.NewGuid().ToString())
+                                                                    .WithAuthority(appAuthority)
+                                                                    .WithClientSecret("secret")
+                                                                    .WithHttpManager(harness.HttpManager)
+                                                                    .Build();
 
-            Assert.AreEqual(MsalError.SetCiamAuthorityAtRequestLevelNotSupported, exception.ErrorCode);
-            Assert.AreEqual(MsalErrorMessage.SetCiamAuthorityAtRequestLevelNotSupported, exception.Message);
+                var handler = new MockHttpMessageHandler()
+                {
+                    ExpectedUrl = expectedEndpoint,
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                };
 
-            exception = Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                harness.HttpManager.AddMockHandler(handler);
+
+                var result = await app.AcquireTokenOnBehalfOf(new[] { "someScope" }, new UserAssertion("some_assertion"))
+                     .WithAuthority(requestAuthority)
+                     .ExecuteAsync()
+                     .ConfigureAwait(false);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow("https://app.ciamlogin.com/")]
+        [DataRow("https://app.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d")]
+        [DataRow("https://app.ciamlogin.com/aDomain")]
+        public async Task CiamWithTenantRequestTestAsync(string appAuthority)
+        {
+
+            using (var harness = base.CreateTestHarness())
             {
-                await app.AcquireTokenInteractive(new[] { "someScope" })
-                         .WithAuthority(_ciamInstance, Guid.NewGuid(), false)
-                         .ExecuteAsync()
-                         .ConfigureAwait(false);
-            }).Result;
+                var app = ConfidentialClientApplicationBuilder.Create(Guid.NewGuid().ToString())
+                                                                   .WithAuthority(appAuthority)
+                                                                   .WithClientSecret("secret")
+                                                                   .WithHttpManager(harness.HttpManager)
+                                                                   .Build();
 
-            Assert.AreEqual(MsalError.SetCiamAuthorityAtRequestLevelNotSupported, exception.ErrorCode);
-            Assert.AreEqual(MsalErrorMessage.SetCiamAuthorityAtRequestLevelNotSupported, exception.Message);
+                var handler = new MockHttpMessageHandler()
+                {
+                    ExpectedUrl = $"https://app.ciamlogin.com/{TestConstants.TenantId2}/oauth2/v2.0/token",
+                    ExpectedMethod = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                };
+
+                harness.HttpManager.AddMockHandler(handler);
+
+                
+                var result = await app.AcquireTokenOnBehalfOf(new[] { "someScope" }, new UserAssertion("some_assertion"))
+                     .WithTenantId(TestConstants.TenantId2)
+                     .ExecuteAsync()
+                     .ConfigureAwait(false);
+            }
         }
     }
 }

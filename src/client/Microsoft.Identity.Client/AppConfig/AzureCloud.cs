@@ -18,12 +18,12 @@ namespace Microsoft.Identity.Client
         AzurePublic,
 
         /// <summary>
-        /// Microsoft Chinese national cloud. Maps to https://login.chinacloudapi.cn
+        /// Microsoft Azure China cloud. Maps to https://login.chinacloudapi.cn
         /// </summary>
         AzureChina,
 
         /// <summary>
-        /// Microsoft German national cloud ("Black Forest"). Maps to https://login.microsoftonline.de
+        /// Microsoft Azure German cloud ("Black Forest"). Maps to https://login.microsoftonline.de
         /// </summary>
         AzureGermany,
 

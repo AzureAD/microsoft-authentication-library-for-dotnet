@@ -37,12 +37,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         /// </summary>
         public TestContext TestContext { get; set; }
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-        }
-
         [TestInitialize]
         public void TestInitialize()
         {

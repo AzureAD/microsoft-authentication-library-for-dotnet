@@ -49,7 +49,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             s_secretProvider = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
         }
 
