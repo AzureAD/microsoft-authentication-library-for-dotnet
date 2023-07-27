@@ -167,7 +167,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             activity?.AddTag(TelemetryConstants.DurationInHttp, authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs);
             activity?.AddTag(TelemetryConstants.TokenType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.TokenType);
             activity?.AddTag(TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds);
-            activity?.AddTag(TelemetryConstants.ActivityId, authenticationResult.CorrelationId);
 
             if (authenticationResult.AuthenticationResultMetadata.RefreshOn.HasValue)
             {

@@ -1,7 +1,7 @@
 <Project Sdk="MSBuild.Sdk.Extras">
 
   <PropertyGroup Label="Targets required for unit tests to run">
-    <TargetFrameworkNetDesktop461>net462</TargetFrameworkNetDesktop461>
+    <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
     <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
     <TargetFrameworkNet6>net6.0</TargetFrameworkNet6>
@@ -11,7 +11,7 @@
 
   <!-- Mobile and legacy targets - comment these out or set env variable INCLUDE_MOBILE_AND_LEGACY_TFM to speedup the build -->
   <PropertyGroup Condition="'$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
-    <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
+    <!--<TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>-->
     <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
     <TargetFrameworkAndroid9>MonoAndroid9.0</TargetFrameworkAndroid9>
     <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
