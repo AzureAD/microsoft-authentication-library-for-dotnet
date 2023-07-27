@@ -1,6 +1,5 @@
 name: Engineering Task
 description: New Engineering Task (For Internal Microsoft Use Only).
-labels: [internal]
 labels: ["untriaged", "internal"]
 body:     
 - type: markdown
