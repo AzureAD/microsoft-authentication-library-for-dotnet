@@ -92,7 +92,7 @@ body:
 - type: textarea
   attributes:
     label: Issue description and reproduction steps
-    description: "Briefly explain the issue you are seeing along with any error messages or stack trace. Provide steps to reproduce or a link to a sample which demonstrates the behavior."
+    description: "Briefly explain the issue you are seeing along with any error messages or stack trace. Provide a link to one of the [standard samples](https://learn.microsoft.com/azure/active-directory/develop/sample-v2-code?tabs=apptype) and steps to reproduce the behavior."
   validations:
     required: true
     
