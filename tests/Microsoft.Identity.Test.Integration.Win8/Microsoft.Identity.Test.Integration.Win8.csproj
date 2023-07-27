@@ -15,7 +15,7 @@
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
-    <PackageReference Include="Microsoft.Identity.Lab.Api" Version="0.11.0-preview" />
+    <PackageReference Include="Microsoft.Identity.Lab.Api" Version="0.11.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />

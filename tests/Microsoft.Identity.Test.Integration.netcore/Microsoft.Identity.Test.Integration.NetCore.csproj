@@ -19,7 +19,7 @@
     <ProjectReference Include="..\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.UIAutomation.Infrastructure.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
-    <PackageReference Include="Microsoft.Identity.Lab.Api" Version="0.11.0-preview" />
+    <PackageReference Include="Microsoft.Identity.Lab.Api" Version="0.11.0" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.22.0" />
     <PackageReference Include="Microsoft.IdentityModel.Protocols.SignedHttpRequest" Version="6.22.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
