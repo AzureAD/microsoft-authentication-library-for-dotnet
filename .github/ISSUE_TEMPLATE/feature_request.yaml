@@ -46,10 +46,3 @@ body:
     description: "Describe alternatives you've considered."
   validations: 
     required: false
-
-- type: textarea
-  attributes:
-    label: Context
-    description: "Additional context."
-  validations: 
-    required: false
