@@ -82,12 +82,19 @@ namespace Microsoft.Identity.Client.Instance
 
             string tenantedAuthority = initialAuthority.GetTenantedAuthority(tenantId, forceSpecifiedTenant: false);
 
-            return CreateAuthority(tenantedAuthority, authorityInfo.ValidateAuthority);
+            // don't re-create the whole authority info, no need for parsing, as the type cannot change
+            var newAuthorityInfo = new AuthorityInfo(
+                initialAuthority.AuthorityInfo.AuthorityType,
+                tenantedAuthority,
+                initialAuthority.AuthorityInfo.ValidateAuthority);
+
+            return CreateAuthority(newAuthorityInfo);
         }
 
         internal static Authority CreateAuthorityWithEnvironment(AuthorityInfo authorityInfo, string environment)
         {
-            if (authorityInfo.AuthorityType == AuthorityType.Generic)
+            // don't change the environment if it's not supported
+            if (!authorityInfo.IsInstanceDiscoverySupported)
             {
                 return CreateAuthority(authorityInfo);
             }
@@ -110,13 +117,8 @@ namespace Microsoft.Identity.Client.Instance
         /// </summary>
         /// <param name="tenantId">The new tenant id</param>
         /// <param name="forceSpecifiedTenant">Forces the change, even if the current tenant is not "common" or "organizations" or "consumers"</param>
-        internal virtual string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant)
-        {
-            throw new MsalClientException(
-                MsalError.TenantOverrideNonAad,
-                MsalErrorMessage.TenantOverrideNonAad);
-        }
-
+        internal abstract string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant);
+       
         internal abstract Task<string> GetTokenEndpointAsync(RequestContext requestContext);
 
         internal abstract Task<string> GetAuthorizationEndpointAsync(RequestContext requestContext);

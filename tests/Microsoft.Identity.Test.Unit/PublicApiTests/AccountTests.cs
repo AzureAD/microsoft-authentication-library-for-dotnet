@@ -20,6 +20,7 @@ using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
+
     [TestClass]
     public class AccountTests
     {
