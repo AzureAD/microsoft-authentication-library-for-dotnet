@@ -92,15 +92,10 @@ body:
 - type: textarea
   attributes:
     label: Issue description and reproduction steps
-    description: "Briefly explain the issue you are seeing along with any error messages or stack trace. Provide a link to one of the [standard samples](https://learn.microsoft.com/azure/active-directory/develop/sample-v2-code?tabs=apptype) and steps to reproduce the behavior."
+    description: "Briefly explain the issue you are seeing along with any error messages or stack trace. Provide a link to one of the [standard samples](https://learn.microsoft.com/azure/active-directory/develop/sample-v2-code?tabs=apptype) and steps to reproduce the behavior. Make sure to provide verbose level log messages from MSAL, if available. [Learn more](https://learn.microsoft.com/azure/active-directory/develop/msal-logging-dotnet)"
   validations:
     required: true
     
-- type: textarea
-  attributes:
-    label: MSAL-specific logs
-    description: "Provide verbose level log messages from MSAL. [Learn more](https://learn.microsoft.com/azure/active-directory/develop/msal-logging-dotnet)"
-       
 - type: textarea
   attributes:
     label: Relevant code snippets
