@@ -81,6 +81,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual("FTiFcJ97JrNoywo4SSdQjA", account.HomeAccountId.Identifier);
             Assert.AreEqual("FTiFcJ97JrNoywo4SSdQjA", account.HomeAccountId.ObjectId);
             Assert.IsNull(account.HomeAccountId.TenantId);
+            Assert.IsNull(account.GetTenantProfiles());
         }
     }
 }
