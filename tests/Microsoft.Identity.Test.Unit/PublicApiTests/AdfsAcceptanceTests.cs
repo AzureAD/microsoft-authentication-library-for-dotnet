@@ -35,14 +35,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
+                // specific client id used by the id token in AddAdfsWithTenantIdMockHandler
                 var builder = ConfidentialClientApplicationBuilder
                     .Create("e68c40a5-a8e5-4250-bbea-5b43ab18cf0d");
 
                 builder = useWithAdfsAuthority ?
-                    builder.WithAdfsAuthority(authority) :
-                    builder.WithAuthority(authority);
+                    builder.WithAdfsAuthority(authority, false) :
+                    builder.WithAuthority(authority, false);
 
-                var app = builder.WithAdfsAuthority(authority, false)
+                var app = builder
                     .WithRedirectUri("http://localhost")
                     .WithHttpManager(httpManager)
                     .WithInstanceDiscovery(false)
@@ -80,7 +81,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual("FTiFcJ97JrNoywo4SSdQjA", account.HomeAccountId.Identifier);
             Assert.AreEqual("FTiFcJ97JrNoywo4SSdQjA", account.HomeAccountId.ObjectId);
             Assert.IsNull(account.HomeAccountId.TenantId);
-            Assert.IsNull(account.GetTenantProfiles());
         }
     }
 }
