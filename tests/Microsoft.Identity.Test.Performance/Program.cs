@@ -5,6 +5,7 @@ using System;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
+using BenchmarkDotNet.Exporters.Json;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Order;
 using BenchmarkDotNet.Running;
@@ -21,8 +22,8 @@ namespace Microsoft.Identity.Test.Performance
             {
                 BenchmarkSwitcher.FromTypes(new[] {
                     typeof(AcquireTokenForClientCacheTests),
-                    typeof(AcquireTokenForOboCacheTests),
-                    typeof(TokenCacheTests),
+                    //typeof(AcquireTokenForOboCacheTests),
+                    //typeof(TokenCacheTests),
                     typeof(AcquireTokenNoCacheTests),
             }).RunAll(
 #if DEBUG
@@ -33,7 +34,7 @@ namespace Microsoft.Identity.Test.Performance
 #endif
                         .WithOptions(ConfigOptions.DisableLogFile)
                         .WithOptions(ConfigOptions.StopOnFirstError)
-                        .WithOptions(ConfigOptions.JoinSummary)
+                        //.WithOptions(ConfigOptions.JoinSummary)
                         .WithOrderer(new DefaultOrderer(SummaryOrderPolicy.Method))
                         .HideColumns(Column.UnrollFactor, Column.Type, Column.InvocationCount, Column.Error, Column.StdDev, Column.Median, Column.Job)
                         .AddDiagnoser(MemoryDiagnoser.Default) // https://benchmarkdotnet.org/articles/configs/diagnosers.html
