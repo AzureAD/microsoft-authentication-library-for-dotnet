@@ -14,7 +14,6 @@ namespace Microsoft.Identity.Client.Instance
         internal GenericAuthority(AuthorityInfo authorityInfo)
             : base(authorityInfo)
         {
-
         }
 
         internal override string TenantId => null;
@@ -42,6 +41,12 @@ namespace Microsoft.Identity.Client.Instance
         {
             // prevents device_code flow which requires knowledge of the device_authorization_endpoint.
             throw new NotImplementedException();
+        }
+
+        internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant)
+        {
+            // Assume generic authorities are not tenanted
+            return AuthorityInfo.CanonicalAuthority.ToString();
         }
     }
 }
