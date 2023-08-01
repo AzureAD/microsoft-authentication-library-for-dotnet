@@ -1,0 +1,20 @@
+name: CI
+
+# Run this workflow every time a commit gets pushed to main
+# This triggers the ADO OneBranch CI Pipeline
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+    build:
+        name: Call OneBranch ADO Pipeline (CI)
+        runs-on: ubuntu-latest
+        steps:
+        - name: Azure Pipelines Action
+          uses: Azure/pipelines@v1
+          with:
+            azure-devops-project-url: https://identitydivision.visualstudio.com/IDDP
+            azure-pipeline-name: 'MSAL.NET-OneBranch-Release-Official'
+            azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
