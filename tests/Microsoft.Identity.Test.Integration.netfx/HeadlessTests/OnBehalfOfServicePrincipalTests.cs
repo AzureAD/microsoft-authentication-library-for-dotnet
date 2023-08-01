@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string OBOClientPpeClientID = "9793041b-9078-4942-b1d2-babdc472cc0c";
         private const string OBOServicePpeClientID = "c84e9c32-0bc9-4a73-af05-9efe9982a322";
         private const string OBOServiceDownStreamApiPpeClientID = "23d08a1e-1249-4f7c-b5a5-cb11f29b6923";
-        private const string PPEAuthenticationAuthority = "https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd";
+        private const string PPEAuthenticationAuthority = "https://login.windows-ppe.net/94430a9c-83e9-4f08-bbb0-64fccd0661fc";
 
         /// <summary>
         /// Client -> Middletier -> RP
