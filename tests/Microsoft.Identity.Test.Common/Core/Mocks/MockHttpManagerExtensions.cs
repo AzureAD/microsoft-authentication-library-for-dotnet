@@ -247,6 +247,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             });
         }
 
+       
+
         public static MockHttpMessageHandler AddAllMocks(this MockHttpManager httpManager, TokenResponseType aadResponse)
         {
             httpManager.AddInstanceDiscoveryMockHandler();

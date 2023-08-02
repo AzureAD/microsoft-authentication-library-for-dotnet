@@ -44,6 +44,9 @@ namespace Microsoft.Identity.Client
             return string.Equals(account?.HomeAccountId?.Identifier, CurrentOSAccountDescriptor, StringComparison.Ordinal);
         }
 
+        /// <summary>
+        /// Returns true if the system web view can be used.
+        /// </summary>
         public bool IsSystemWebViewAvailable // TODO MSAL5: consolidate these helpers in the interface
         {
             get
@@ -96,7 +99,8 @@ namespace Microsoft.Identity.Client
                     .IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority?.AuthorityInfo?.AuthorityType ?? AuthorityType.Aad);
         }
 
-        [CLSCompliant(false)]
+        /// <inheritdoc cref="IPublicClientApplication.AcquireTokenInteractive(IEnumerable{string})"/>
+        [CLSCompliant(false)]        
         public AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(
             IEnumerable<string> scopes)
         {
