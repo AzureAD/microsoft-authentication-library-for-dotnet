@@ -5,7 +5,7 @@ on:
       - main
       - pmaytak/perf-benchmark-action
     paths:
-      - src/client/Microsoft.Identity.Client/*
+      - src/client/Microsoft.Identity.Client/**/*.cs
 
 permissions:
   # deployments permission to deploy GitHub pages website
