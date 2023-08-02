@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Performance
 #endif
                         .WithOptions(ConfigOptions.DisableLogFile)
                         .WithOptions(ConfigOptions.StopOnFirstError)
-                        //.WithOptions(ConfigOptions.JoinSummary)
+                        .WithOptions(ConfigOptions.JoinSummary)
                         .WithOrderer(new DefaultOrderer(SummaryOrderPolicy.Method))
                         .HideColumns(Column.UnrollFactor, Column.Type, Column.InvocationCount, Column.Error, Column.StdDev, Column.Median, Column.Job)
                         .AddDiagnoser(MemoryDiagnoser.Default) // https://benchmarkdotnet.org/articles/configs/diagnosers.html
