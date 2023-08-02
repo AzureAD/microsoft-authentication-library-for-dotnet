@@ -29,6 +29,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
+            var temp = string.Empty;
             if (AuthenticationRequestParameters.Scope == null || AuthenticationRequestParameters.Scope.Count == 0)
             {
                 throw new MsalClientException(

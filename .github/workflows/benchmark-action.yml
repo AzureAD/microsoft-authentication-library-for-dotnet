@@ -8,8 +8,10 @@ on:
       - src/client/Microsoft.Identity.Client/*
 
 permissions:
-  contents: write
+  # deployments permission to deploy GitHub pages website
   deployments: write
+  # contents permission to update benchmark contents in gh-pages branch
+  contents: write
 
 jobs:
   benchmark:
@@ -35,7 +37,7 @@ jobs:
           name: BenchmarkDotNet Benchmark
           tool: 'benchmarkdotnet'
           output-file-path: tests/Microsoft.Identity.Test.Performance/BenchmarkDotNet.Artifacts/results/*-report-full-compressed.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          #github-token: ${{ secrets.GITHUB_TOKEN }}
           # auto-push: true
           external-data-json-path: ./cache/benchmark-data.json
           # Show alert with commit comment on detecting possible performance regression
