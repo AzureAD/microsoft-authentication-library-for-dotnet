@@ -35,11 +35,10 @@ jobs:
       - name: Store AcquireTokenNoCacheTests result
         uses: benchmark-action/github-action-benchmark@v1
         with:
-          name: BenchmarkDotNet Benchmark
           tool: 'benchmarkdotnet'
           output-file-path: tests/Microsoft.Identity.Test.Performance/BenchmarkDotNet.Artifacts/results/Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests-report-full-compressed.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          # auto-push: true
+          auto-push: true
           external-data-json-path: ./cache/benchmark-data.json
           # Show alert with commit comment on detecting possible performance regression
           alert-threshold: '1%'
@@ -47,3 +46,5 @@ jobs:
           fail-on-alert: true
           alert-comment-cc-users: '@pmaytak'
           summary-always: true
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: benchmarks
