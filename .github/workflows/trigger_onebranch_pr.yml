@@ -1,0 +1,20 @@
+name: PR
+
+# Run this workflow every time on a PR
+# This triggers the ADO OneBranch PR Pipeline
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+    build:
+        name: Call OneBranch ADO Pipeline (PR)
+        runs-on: ubuntu-latest
+        steps:
+        - name: Azure Pipelines Action
+          uses: Azure/pipelines@v1
+          with:
+            azure-devops-project-url: https://identitydivision.visualstudio.com/IDDP
+            azure-pipeline-name: 'MSAL.NET-OneBranch-PullRequest'
+            azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
