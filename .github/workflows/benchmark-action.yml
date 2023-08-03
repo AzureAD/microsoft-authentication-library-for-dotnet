@@ -1,5 +1,6 @@
 name: Run performance benchmarks
 on:
+  workflow_dispatch: # Allows manual triggering of workflow
   push:
     branches:
       - main
@@ -8,9 +9,9 @@ on:
       - src/client/Microsoft.Identity.Client/**/*.cs
 
 permissions:
-  # deployments permission to deploy GitHub pages website
+  # Deployments permission to deploy GitHub pages website
   deployments: write
-  # contents permission to update benchmark contents in gh-pages branch
+  # Contents permission to update benchmark contents in gh-pages branch
   contents: write
 
 jobs:
@@ -23,7 +24,7 @@ jobs:
         with:
           dotnet-version: '6.0.101'
       - name: Run benchmark
-        run: cd tests/Microsoft.Identity.Test.Performance && dotnet run -c release --exporters json 
+        run: cd tests/Microsoft.Identity.Test.Performance && dotnet run -c release -f netcoreapp3.1 --exporters json 
 
       - name: Download previous benchmark data
         uses: actions/cache@v3
@@ -31,12 +32,12 @@ jobs:
           path: ./cache
           key: ${{ runner.os }}-benchmark
 
-      - name: Store benchmark result
+      - name: Store AcquireTokenNoCacheTests result
         uses: benchmark-action/github-action-benchmark@v1
         with:
           name: BenchmarkDotNet Benchmark
           tool: 'benchmarkdotnet'
-          output-file-path: tests/Microsoft.Identity.Test.Performance/BenchmarkDotNet.Artifacts/results/*-report-full-compressed.json
+          output-file-path: tests/Microsoft.Identity.Test.Performance/BenchmarkDotNet.Artifacts/results/Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests-report-full-compressed.json
           #github-token: ${{ secrets.GITHUB_TOKEN }}
           # auto-push: true
           external-data-json-path: ./cache/benchmark-data.json
