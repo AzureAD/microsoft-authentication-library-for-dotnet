@@ -81,7 +81,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
 
-
             Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
 
         }

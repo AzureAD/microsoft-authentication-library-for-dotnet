@@ -18,7 +18,6 @@ namespace Microsoft.Identity.Client.Instance
         {
         }
 
-
         internal override Task<string> GetTokenEndpointAsync(RequestContext requestContext)
         {
             string tokenEndpoint = string.Format(

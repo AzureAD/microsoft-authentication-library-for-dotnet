@@ -108,7 +108,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IReadOnlyList<string> middleTierApiScopes = new List<string>() { OBOServicePpeClientID + "/.default" };
             IReadOnlyList<string> downstreamApiScopes = new List<string>() { OBOServiceDownStreamApiPpeClientID + "/.default" };
 
-
             var clientConfidentialApp = ConfidentialClientApplicationBuilder
                                     .Create(OBOClientPpeClientID)
                                     .WithAuthority(PPEAuthenticationAuthority)

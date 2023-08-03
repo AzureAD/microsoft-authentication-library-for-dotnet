@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <inheritdoc cref="IPublicClientApplication.AcquireTokenInteractive(IEnumerable{string})"/>
-        [CLSCompliant(false)]        
+        [CLSCompliant(false)]
         public AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(
             IEnumerable<string> scopes)
         {
@@ -109,6 +109,7 @@ namespace Microsoft.Identity.Client
                 .WithParentActivityOrWindowFunc(ServiceBundle.Config.ParentActivityOrWindowFunc);
         }
 
+        /// <inheritdoc/>
         public AcquireTokenWithDeviceCodeParameterBuilder AcquireTokenWithDeviceCode(
             IEnumerable<string> scopes,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
@@ -119,6 +120,7 @@ namespace Microsoft.Identity.Client
                 deviceCodeResultCallback);
         }
 
+        /// <inheritdoc/>
         AcquireTokenByRefreshTokenParameterBuilder IByRefreshToken.AcquireTokenByRefreshToken(
             IEnumerable<string> scopes,
             string refreshToken)
@@ -129,6 +131,7 @@ namespace Microsoft.Identity.Client
                 refreshToken);
         }
 
+        /// <inheritdoc/>
         public AcquireTokenByIntegratedWindowsAuthParameterBuilder AcquireTokenByIntegratedWindowsAuth(
             IEnumerable<string> scopes)
         {
@@ -136,7 +139,8 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreatePublicClientExecutor(this),
                 scopes);
         }
-        
+
+        /// <inheritdoc/>
         [Obsolete("Using SecureString is not recommended. Use AcquireTokenByUsernamePassword(IEnumerable<string> scopes, string username, string password) instead.", false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
@@ -151,6 +155,7 @@ namespace Microsoft.Identity.Client
                 new string(password.PasswordToCharArray()));
         }
 
+        /// <inheritdoc/>
         public AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
             IEnumerable<string> scopes,
             string username,
