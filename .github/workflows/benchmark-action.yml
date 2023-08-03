@@ -38,7 +38,7 @@ jobs:
           tool: 'benchmarkdotnet'
           output-file-path: tests/Microsoft.Identity.Test.Performance/BenchmarkDotNet.Artifacts/results/Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests-report-full-compressed.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: true
+          auto-push: false
           external-data-json-path: ./cache/benchmark-data.json
           # Show alert with commit comment on detecting possible performance regression
           alert-threshold: '1%'
@@ -48,3 +48,6 @@ jobs:
           summary-always: true
           gh-pages-branch: gh-pages
           benchmark-data-dir-path: benchmarks
+
+      - name: Publish Gibhub Pages
+        run: git push origin gh-pages
