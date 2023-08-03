@@ -74,7 +74,6 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 "The tenant id should have been changed");
         }
 
-
         [DataTestMethod]
         [DataRow(TestConstants.DstsAuthorityCommon)]
         [DataRow(TestConstants.DstsAuthorityTenanted)]

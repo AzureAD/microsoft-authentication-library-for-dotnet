@@ -51,7 +51,6 @@ namespace Microsoft.Identity.Json.Utilities
             return cancellationToken.IsCancellationRequested ? FromCanceled<T>(cancellationToken) : null;
         }
 
-
         // From 4.6 on we could use Task.FromCanceled(), but we need an equivalent for
         // previous frameworks.
         public static Task FromCanceled(this CancellationToken cancellationToken)

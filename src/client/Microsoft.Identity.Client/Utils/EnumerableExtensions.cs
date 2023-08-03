@@ -49,9 +49,7 @@ namespace Microsoft.Identity.Client.Utils
                 list = list.Where(predicate).ToList();
             }
 
-
             logger.Verbose(() => $"{logPrefix} - item count after: {list.Count} ");
-
 
             return list;
         }
