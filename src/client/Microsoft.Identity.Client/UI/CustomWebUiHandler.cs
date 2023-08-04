@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.UI
             _customWebUi = customWebUi;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(
             Uri authorizationUri,
             Uri redirectUri,
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.UI
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public Uri UpdateRedirectUri(Uri redirectUri)
         {
             RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);

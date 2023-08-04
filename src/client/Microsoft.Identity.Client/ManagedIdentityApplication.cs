@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
         // Stores all app tokens
         internal ITokenCacheInternal AppTokenCacheInternal { get; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public AcquireTokenForManagedIdentityParameterBuilder AcquireTokenForManagedIdentity(string resource)
         {
             return AcquireTokenForManagedIdentityParameterBuilder.Create(

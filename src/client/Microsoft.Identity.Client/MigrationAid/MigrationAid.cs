@@ -215,10 +215,7 @@ namespace Microsoft.Identity.Client
         #endregion MSAL3X deprecations
     }
 
-    /// <summary>
-    /// Abstract class containing common API methods and properties. Both <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/>
-    /// extend this class. For details see https://aka.ms/msal-net-client-applications
-    /// </summary>
+    /// <inheritdoc/>
     public partial class ClientApplicationBase
     {
         /// <summary>
@@ -385,6 +382,7 @@ namespace Microsoft.Identity.Client
         public IUser User { get { throw new NotImplementedException(); } }
     }
 
+    /// <inheritdoc/>
     public partial interface IPublicClientApplication
     {
 #if WINDOWS_APP
@@ -826,7 +824,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", true)]
         public string KeychainSecurityGroup { get { throw new NotImplementedException(); } }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         [EditorBrowsable(EditorBrowsableState.Never)]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [Obsolete("See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration", true)]
@@ -1371,7 +1369,7 @@ namespace Microsoft.Identity.Client
     }
 
     /// <summary>
-    /// Interface defining common API methods and properties.
+    /// Interface defining common API methods and properties for public client applications.
     /// For details see https://aka.ms/msal-net-client-applications
     /// </summary>
     public partial interface IPublicClientApplication

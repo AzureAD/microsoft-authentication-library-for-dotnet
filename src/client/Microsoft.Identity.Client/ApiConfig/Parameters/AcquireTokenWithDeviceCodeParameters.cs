@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
     {
         public Func<DeviceCodeResult, Task> DeviceCodeResultCallback { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void LogParameters(ILoggerAdapter logger)
         {
         }

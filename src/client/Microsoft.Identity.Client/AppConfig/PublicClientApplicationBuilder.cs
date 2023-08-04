@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed class PublicClientApplicationBuilder : AbstractApplicationBuilder<PublicClientApplicationBuilder>
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal PublicClientApplicationBuilder(ApplicationConfiguration configuration)
             : base(configuration)
         {
@@ -399,7 +399,7 @@ namespace Microsoft.Identity.Client
             return new PublicClientApplication(BuildConfiguration());
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal override void Validate()
         {
             base.Validate();

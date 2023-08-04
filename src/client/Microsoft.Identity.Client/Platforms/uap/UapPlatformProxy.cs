@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return new WamBroker.WamBroker(uiParent, appConfig, Logger);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
         {
             if (useRecommendedRedirectUri)

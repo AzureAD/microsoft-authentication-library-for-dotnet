@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client
 #endif
     public class ConfidentialClientApplicationBuilder : AbstractApplicationBuilder<ConfidentialClientApplicationBuilder>
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal ConfidentialClientApplicationBuilder(ApplicationConfiguration configuration)
             : base(configuration)
         {
@@ -384,7 +384,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal override void Validate()
         {
             base.Validate();
