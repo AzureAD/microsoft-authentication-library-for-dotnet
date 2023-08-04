@@ -382,7 +382,6 @@ namespace Microsoft.Identity.Client
         public IUser User { get { throw new NotImplementedException(); } }
     }
 
-    /// <inheritdoc/>
     public partial interface IPublicClientApplication
     {
 #if WINDOWS_APP
@@ -1364,10 +1363,6 @@ namespace Microsoft.Identity.Client
         #endregion MSAL3X deprecations
     }
 
-    /// <summary>
-    /// Interface defining common API methods and properties for public client applications.
-    /// For details see https://aka.ms/msal-net-client-applications
-    /// </summary>
     public partial interface IPublicClientApplication
     {
 #if iOS
