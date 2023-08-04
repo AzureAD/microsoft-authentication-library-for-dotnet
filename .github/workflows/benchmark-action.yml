@@ -53,7 +53,7 @@ jobs:
       - name: Store AcquireTokenForClientCacheTests result
         uses: benchmark-action/github-action-benchmark@v1
         with:
-          name: AcquireTokenForClientCache
+          name: AcquireTokenForClientWithCache
           tool: 'benchmarkdotnet'
           output-file-path: tests/Microsoft.Identity.Test.Performance/BenchmarkDotNet.Artifacts/results/Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests-report-full-compressed.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -71,7 +71,7 @@ jobs:
       - name: Store AcquireTokenForOboCacheTests result
         uses: benchmark-action/github-action-benchmark@v1
         with:
-          name: AcquireTokenNoCache
+          name: AcquireTokenForOboWithCache
           tool: 'benchmarkdotnet'
           output-file-path: tests/Microsoft.Identity.Test.Performance/BenchmarkDotNet.Artifacts/results/Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests-report-full-compressed.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -89,7 +89,7 @@ jobs:
       - name: Store TokenCacheTests result
         uses: benchmark-action/github-action-benchmark@v1
         with:
-          name: AcquireTokenNoCache
+          name: TokenCacheTestsWithCache
           tool: 'benchmarkdotnet'
           output-file-path: tests/Microsoft.Identity.Test.Performance/BenchmarkDotNet.Artifacts/results/Microsoft.Identity.Test.Performance.TokenCacheTests-report-full-compressed.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
