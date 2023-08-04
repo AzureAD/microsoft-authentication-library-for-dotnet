@@ -6,23 +6,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security;
 using System.Threading.Tasks;
-using static System.Net.WebRequestMethods;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Class used to acquire tokens in desktop and mobile applications. Public client applications are not trusted to safely keep application secrets and therefore they can only access web APIs in the name of the authenticating user.
-    /// For more details on differences between public and confidential clients, refer to <see href="https://aka.ms/msal-net-client-applications">our documentation</see>.
+    /// Component to be used with public client applications like desktop or mobile applications.
     /// </summary>
-    /// <remarks>
-    /// <para>
-    /// Unlike <see cref="Microsoft.Identity.Client.IConfidentialClientApplication"/>, public clients are unable to securely store secrets on a client device and as a result do not require the use of a client secret.
-    /// </para>
-    /// <para>
-    /// The redirect URI needed for interactive authentication is automatically determined by the library. It does not need to be passed explicitly in the constructor. Depending
-    /// on the authentication strategy (e.g., through the <see href="https://learn.microsoft.com/entra/msal/dotnet/acquiring-tokens/desktop-mobile/wam?view=msal-dotnet-latest">Web Account Manager</see>, the Authenticator app, web browser, etc.), different redirect URIs will be used by MSAL. Redirect URIs must always be configured for the application in the Azure Portal.
-    /// </para>
-    /// </remarks>
     public partial interface IPublicClientApplication : IClientApplicationBase
     {
         /// <summary>
