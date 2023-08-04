@@ -137,7 +137,6 @@ namespace Microsoft.Identity.Client
         public IReadOnlyDictionary<string, string> AdditionalExceptionData { get; set; } 
             = CollectionHelpers.GetEmptyDictionary<string, string>();
 
-
         /// <summary>
         /// Creates and returns a string representation of the current exception.
         /// </summary>

@@ -114,7 +114,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(expectedAuthority, effectiveAuthority);
         }
 
-
         [DataTestMethod]
         [DataRow("https://app.ciamlogin.com/")]
         [DataRow("https://app.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d")]
