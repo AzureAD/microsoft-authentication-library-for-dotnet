@@ -797,10 +797,6 @@ namespace Microsoft.Identity.Client
         #endregion MSAL3X deprecations
     }
 
-    /// <summary>
-    /// Abstract class containing common API methods and properties.
-    /// For details see https://aka.ms/msal-net-client-applications
-    /// </summary>
     public partial class PublicClientApplication
     {
 #if WINDOWS_APP
