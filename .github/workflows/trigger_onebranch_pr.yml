@@ -18,4 +18,4 @@ jobs:
             azure-devops-project-url: https://identitydivision.visualstudio.com/IDDP
             azure-pipeline-name: 'MSAL.NET-OneBranch-PullRequest'
             azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
-            echo "PR Ref: ${{ github.event.pull_request.head.ref }}"
+            azure-pipeline-variables: '{"pull_request_ref": ${{ github.event.pull_request.head.ref }}}'
