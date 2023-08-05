@@ -109,4 +109,4 @@ jobs:
 
       - name: Publish GibHub Pages
         run: git push origin gh-pages
-        if: github.event_name != 'pull_request'
+        #if: github.event_name != 'pull_request'
