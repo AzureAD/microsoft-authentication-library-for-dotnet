@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1691192904685,
+  "lastUpdate": 1691198077473,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -108,6 +108,42 @@ window.BENCHMARK_DATA = {
             "value": 657118.7777777778,
             "unit": "ns",
             "range": "± 32481.13430086838"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "34331512+pmaytak@users.noreply.github.com",
+            "name": "pmaytak",
+            "username": "pmaytak"
+          },
+          "committer": {
+            "email": "34331512+pmaytak@users.noreply.github.com",
+            "name": "pmaytak",
+            "username": "pmaytak"
+          },
+          "distinct": true,
+          "id": "211046c9cda77631617aeb70724d16ed3fcab113",
+          "message": "Change threshold.",
+          "timestamp": "2023-08-04T18:07:15-07:00",
+          "tree_id": "0e01f83410e796f77d91ef5df69baa6c0b66d1cf",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/211046c9cda77631617aeb70724d16ed3fcab113"
+        },
+        "date": 1691198072991,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 379584.05555555556,
+            "unit": "ns",
+            "range": "± 12654.041479632268"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 522563.75,
+            "unit": "ns",
+            "range": "± 4036.003133727047"
           }
         ]
       }
