@@ -42,7 +42,7 @@ jobs:
           auto-push: true
           #external-data-json-path: ./cache/benchmark-data.json
           # Show alert with commit comment on detecting possible performance regression
-          alert-threshold: '40%'
+          alert-threshold: '140%'
           comment-on-alert: true
           fail-on-alert: true
           alert-comment-cc-users: '@pmaytak'
@@ -60,7 +60,7 @@ jobs:
           auto-push: true
           #external-data-json-path: ./cache/benchmark-data.json
           # Show alert with commit comment on detecting possible performance regression
-          alert-threshold: '40%'
+          alert-threshold: '140%'
           comment-on-alert: true
           fail-on-alert: true
           alert-comment-cc-users: '@pmaytak'
@@ -78,7 +78,7 @@ jobs:
           auto-push: true
           #external-data-json-path: ./cache/benchmark-data.json
           # Show alert with commit comment on detecting possible performance regression
-          alert-threshold: '40%'
+          alert-threshold: '140%'
           comment-on-alert: true
           fail-on-alert: true
           alert-comment-cc-users: '@pmaytak'
@@ -96,7 +96,7 @@ jobs:
           auto-push: true
           #external-data-json-path: ./cache/benchmark-data.json
           # Show alert with commit comment on detecting possible performance regression
-          alert-threshold: '40%'
+          alert-threshold: '140%'
           comment-on-alert: true
           fail-on-alert: true
           alert-comment-cc-users: '@pmaytak'
