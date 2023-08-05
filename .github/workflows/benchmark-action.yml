@@ -108,5 +108,5 @@ jobs:
           benchmark-data-dir-path: benchmarks
 
       - name: Publish GibHub Pages
-        run: git push origin gh-pages
+        run: git push origin gh-pages:gh-pages
         #if: github.event_name != 'pull_request'
