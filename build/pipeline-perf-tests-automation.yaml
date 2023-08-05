@@ -53,5 +53,5 @@ jobs:
 
     # The parameters currently are not used, but can be uploaded into the reporting system in the future.
     # Currently the build runs automatically but the results have to be compared manually.
-    - run: cd $(Build.SourcesDirectory)/tests/Microsoft.Identity.Test.Performance && dotnet run -c $(BuildConfiguration) -f $(BuildRuntime) --join -BranchName $(Build.SourceBranch) -BranchCommit $(Build.SourceVersion)
+    - script: 'cd $(Build.SourcesDirectory)/tests/Microsoft.Identity.Test.Performance && dotnet run -c $(BuildConfiguration) -f $(BuildRuntime) --join -BranchName $(Build.SourceBranch) -BranchCommit $(Build.SourceVersion)'
       displayName: 'Run performance tests'
