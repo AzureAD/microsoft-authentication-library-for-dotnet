@@ -86,9 +86,18 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
                 new(TelemetryConstants.CacheInfoTelemetry, authResultMetadata.CacheRefreshReason), 
                 new(TelemetryConstants.CacheLevel, cacheLevel));
 
-            DurationTotal.Record(authResultMetadata.DurationTotalInMs);
-            DurationInCache.Record(authResultMetadata.DurationInCacheInMs);
-            DurationInHttp.Record(authResultMetadata.DurationInHttpInMs);
+            DurationTotal.Record(authResultMetadata.DurationTotalInMs,
+                new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
+                new(TelemetryConstants.Platform, platform),
+                new(TelemetryConstants.ClientId, clientId));
+            DurationInCache.Record(authResultMetadata.DurationInCacheInMs,
+                new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
+                new(TelemetryConstants.Platform, platform),
+                new(TelemetryConstants.ClientId, clientId));
+            DurationInHttp.Record(authResultMetadata.DurationInHttpInMs,
+                new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
+                new(TelemetryConstants.Platform, platform),
+                new(TelemetryConstants.ClientId, clientId));
         }
 
         // Aggregates the failure requests based on client id, and MSAL's error code or exception name if the exception is not an MSAL exception.
