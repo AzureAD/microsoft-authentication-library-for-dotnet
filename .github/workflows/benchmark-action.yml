@@ -6,10 +6,10 @@ on:
       - main
     paths:
       - src/client/Microsoft.Identity.Client/**/*.cs
-  pull_request:
-    types: [opened, reopened, synchronize, ready_for_review]
-    paths:
-      - src/client/Microsoft.Identity.Client/**/*.cs
+  #pull_request: # Will re-enable once the code to not push to gh-pages is fixed
+  #  types: [opened, reopened, synchronize, ready_for_review]
+  #  paths:
+  #    - src/client/Microsoft.Identity.Client/**/*.cs
 
 permissions:
   # Deployments permission to deploy GitHub pages website
@@ -42,8 +42,8 @@ jobs:
           tool: 'benchmarkdotnet'
           output-file-path: tests/Microsoft.Identity.Test.Performance/BenchmarkDotNet.Artifacts/results/Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests-report-full-compressed.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          #auto-push: true
-          external-data-json-path: ./cache/benchmark-data.json
+          auto-push: true
+          #external-data-json-path: ./cache/benchmark-data.json
           # Show alert with commit comment on detecting possible performance regression
           alert-threshold: '140%'
           comment-on-alert: true
@@ -60,8 +60,8 @@ jobs:
           tool: 'benchmarkdotnet'
           output-file-path: tests/Microsoft.Identity.Test.Performance/BenchmarkDotNet.Artifacts/results/Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests-report-full-compressed.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          #auto-push: true
-          external-data-json-path: ./cache/benchmark-data.json
+          auto-push: true
+          #external-data-json-path: ./cache/benchmark-data.json
           # Show alert with commit comment on detecting possible performance regression
           alert-threshold: '140%'
           comment-on-alert: true
@@ -78,8 +78,8 @@ jobs:
           tool: 'benchmarkdotnet'
           output-file-path: tests/Microsoft.Identity.Test.Performance/BenchmarkDotNet.Artifacts/results/Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests-report-full-compressed.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          #auto-push: true
-          external-data-json-path: ./cache/benchmark-data.json
+          auto-push: true
+          #external-data-json-path: ./cache/benchmark-data.json
           # Show alert with commit comment on detecting possible performance regression
           alert-threshold: '140%'
           comment-on-alert: true
@@ -96,8 +96,8 @@ jobs:
           tool: 'benchmarkdotnet'
           output-file-path: tests/Microsoft.Identity.Test.Performance/BenchmarkDotNet.Artifacts/results/Microsoft.Identity.Test.Performance.TokenCacheTests-report-full-compressed.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          #auto-push: true
-          external-data-json-path: ./cache/benchmark-data.json
+          auto-push: true
+          #external-data-json-path: ./cache/benchmark-data.json
           # Show alert with commit comment on detecting possible performance regression
           alert-threshold: '140%'
           comment-on-alert: true
@@ -107,6 +107,6 @@ jobs:
           gh-pages-branch: gh-pages
           benchmark-data-dir-path: benchmarks
 
-      - name: Publish GibHub Pages
-        run: git push origin gh-pages:gh-pages
-        #if: github.event_name != 'pull_request'
+      #- name: Publish GibHub Pages
+      #  run: git push origin gh-pages:gh-pages
+      #  if: github.event_name != 'pull_request'
