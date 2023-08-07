@@ -37,9 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal ICacheSessionManager CacheManager => AuthenticationRequestParameters.CacheSessionManager;
         internal IServiceBundle ServiceBundle { get; }
 
-//#if NET6_0_OR_GREATER || NET462_OR_GREATER || NET20_OR_GREATER
         internal Activity activity;
-//#endif
 
         protected RequestBase(
             IServiceBundle serviceBundle,
@@ -84,13 +82,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken = default)
         {
             Stopwatch sw = Stopwatch.StartNew();
-//#if NET6_0_OR_GREATER || NET462_OR_GREATER || NET20_OR_GREATER
             activity = OpenTelemetryClient.AcquireTokenActivity.StartActivity("Token Acquisition", ActivityKind.Internal);
             activity?.AddTag(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion());
             activity?.AddTag(TelemetryConstants.Platform, ServiceBundle.PlatformProxy.GetProductName());
             activity?.AddTag(TelemetryConstants.ClientId, AuthenticationRequestParameters.AppConfig.ClientId);
             activity?.AddTag(TelemetryConstants.ActivityId, AuthenticationRequestParameters.RequestContext.CorrelationId);
-//#endif
 
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
             AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
@@ -147,9 +143,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 finally
                 {
-//#if NET6_0_OR_GREATER || NET462_OR_GREATER || NET20_OR_GREATER
                     activity?.Stop();
-//#endif
                     telemetryClients.TrackEvent(telemetryEventDetails);
                 }
             }
@@ -157,7 +151,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void LogMsalSuccessTelemetryToOTel(AuthenticationResult authenticationResult)
         {
-//#if NET6_0_OR_GREATER || NET462_OR_GREATER || NET20_OR_GREATER
             activity?.SetStatus(ActivityStatusCode.Ok, "Success");
 
             activity?.AddTag(TelemetryConstants.CacheInfoTelemetry, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason));
@@ -175,12 +168,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
             activity?.AddTag(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
             activity?.AddTag(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
             activity?.AddTag(TelemetryConstants.CacheLevel, (int)GetCacheLevel(authenticationResult));
-//#endif
+
+            var resourceAndScopes = ParseScopesForTelemetry();
+
+            if (resourceAndScopes.Item1 != null)
+            {
+                activity?.AddTag(TelemetryConstants.Resource, resourceAndScopes.Item1);
+            }
+            if (resourceAndScopes.Item2 != null)
+            {
+                activity?.AddTag(TelemetryConstants.Scopes, resourceAndScopes.Item2);
+            }
         }
 
         private void LogMsalFailedTelemetryToOTel(Exception exception)
         {
-//#if NET6_0_OR_GREATER || NET462_OR_GREATER || NET20_OR_GREATER
             activity?.SetStatus(ActivityStatusCode.Error, "Success");
 
             
@@ -202,7 +204,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             activity?.AddTag(TelemetryConstants.ErrorCode, exception.GetType().ToString());
-//#endif
         }
 
         private void LogMsalErrorTelemetryToClient(Exception ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
@@ -250,12 +251,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 telemetryEventDetails.SetProperty(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
                 telemetryEventDetails.SetProperty(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
                 telemetryEventDetails.SetProperty(TelemetryConstants.CacheLevel, (int)GetCacheLevel(authenticationResult));
-                ParseScopesForTelemetry(telemetryEventDetails);
+                Tuple<string, string> resourceAndScopes = ParseScopesForTelemetry();
+                if (resourceAndScopes.Item1 != null)
+                {
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Resource, resourceAndScopes.Item1);
+                }
+
+                if (resourceAndScopes.Item2 != null)
+                {
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, resourceAndScopes.Item2);
+                }
             }
         }
 
-        private void ParseScopesForTelemetry(MsalTelemetryEventDetails telemetryEventDetails)
+        private Tuple<string, string> ParseScopesForTelemetry()
         {
+            string resource = null;
+            string scopes = null;
             if (AuthenticationRequestParameters.Scope.Count > 0)
             {
                 string firstScope = AuthenticationRequestParameters.Scope.First();
@@ -263,7 +275,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (Uri.IsWellFormedUriString(firstScope, UriKind.Absolute))
                 {
                     Uri firstScopeAsUri = new Uri(firstScope);
-                    telemetryEventDetails.SetProperty(TelemetryConstants.Resource, $"{firstScopeAsUri.Scheme}://{firstScopeAsUri.Host}");
+                    resource = $"{firstScopeAsUri.Scheme}://{firstScopeAsUri.Host}";
 
                     StringBuilder stringBuilder = new StringBuilder();
 
@@ -274,13 +286,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         stringBuilder.Append(scopeToAppend);
                     }
 
-                    telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, stringBuilder.ToString().TrimEnd(' '));
+                    scopes = stringBuilder.ToString().TrimEnd(' ');
                 }
                 else
                 {
-                    telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, AuthenticationRequestParameters.Scope.AsSingleString());
+                    scopes = AuthenticationRequestParameters.Scope.AsSingleString();
                 }
             }
+
+            return new Tuple<string, string>(resource, scopes);
         }
 
         private CacheLevel GetCacheLevel(AuthenticationResult authenticationResult)

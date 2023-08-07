@@ -304,10 +304,6 @@
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
   </ItemGroup>
 
-  <!--<ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet6)'  Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' Or '$(TargetFramework)' == '$(TargetFrameworkNetStandard)' ">
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.2" />
-  </ItemGroup>-->
-
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.22.0" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.2" />
