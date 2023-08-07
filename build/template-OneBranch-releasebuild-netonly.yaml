@@ -84,10 +84,4 @@ steps:
   inputs:
     BuildDropPath: '$(Build.ArtifactStagingDirectory)\packages'
 
-- task: PublishPipelineArtifact@1
-  displayName: 'Publish Artifact: packages'
-  inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)\packages'
-    artifactName: packages
-
 - template: template-publish-analysis-and-cleanup.yaml
