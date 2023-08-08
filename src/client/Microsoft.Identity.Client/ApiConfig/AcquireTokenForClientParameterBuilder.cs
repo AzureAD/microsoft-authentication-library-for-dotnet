@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client
     {
         private AcquireTokenForClientParameters Parameters { get; } = new AcquireTokenForClientParameters();
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal AcquireTokenForClientParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
             : base(confidentialClientApplicationExecutor)
         {
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client
             throw new NotImplementedException();
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
             return ConfidentialClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
             return ApiEvent.ApiIds.AcquireTokenForClient;

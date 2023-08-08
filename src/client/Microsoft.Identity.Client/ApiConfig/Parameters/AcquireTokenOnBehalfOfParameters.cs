@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public bool ForceRefresh { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void LogParameters(ILoggerAdapter logger)
         {
             if (logger.IsLoggingEnabled(LogLevel.Info))

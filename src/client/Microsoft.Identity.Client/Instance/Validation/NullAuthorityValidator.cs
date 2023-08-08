@@ -8,7 +8,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
 {
     internal class NullAuthorityValidator : IAuthorityValidator
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public Task ValidateAuthorityAsync(
             AuthorityInfo authorityInfo)
         {

@@ -49,13 +49,13 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
             return ApiEvent.ApiIds.AcquireTokenByAuthorizationCode;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Validate()
         {
             base.Validate();
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
             return ConfidentialClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);

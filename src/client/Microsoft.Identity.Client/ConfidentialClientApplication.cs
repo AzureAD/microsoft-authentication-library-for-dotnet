@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client
                 userAssertion);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public AcquireTokenOnBehalfOfParameterBuilder InitiateLongRunningProcessInWebApi(
             IEnumerable<string> scopes,
             string userToken,
@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client
                 longRunningProcessSessionKey);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public AcquireTokenOnBehalfOfParameterBuilder AcquireTokenInLongRunningProcess(
             IEnumerable<string> scopes,
             string longRunningProcessSessionKey)

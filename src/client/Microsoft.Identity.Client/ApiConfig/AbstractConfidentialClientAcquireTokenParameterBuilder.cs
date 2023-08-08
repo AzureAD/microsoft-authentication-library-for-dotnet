@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client
 
         internal abstract Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken);
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             ClientApplicationBase.GuardMobileFrameworks();

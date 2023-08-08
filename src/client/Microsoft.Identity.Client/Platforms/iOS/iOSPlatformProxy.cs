@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return UIDevice.CurrentDevice.Model;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
         {
             return string.Format(CultureInfo.InvariantCulture, IosDefaultRedirectUriTemplate, clientId);
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return new iOSTokenCacheAccessor();
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override IWebUIFactory CreateWebUiFactory()
         {
             return new IosWebUIFactory();
