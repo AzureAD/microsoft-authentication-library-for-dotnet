@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
             Dispose(disposing: false);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(disposing: true);

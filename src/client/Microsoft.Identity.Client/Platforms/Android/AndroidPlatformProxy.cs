@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return global::Android.OS.Build.Model;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
         {
             return string.Format(CultureInfo.InvariantCulture, AndroidDefaultRedirectUriTemplate, clientId);
@@ -106,13 +106,13 @@ namespace Microsoft.Identity.Client.Platforms.Android
                 global::Android.Provider.Settings.Secure.AndroidId);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override ILegacyCachePersistence CreateLegacyCachePersistence()
         {
             return new AndroidLegacyCachePersistence(Logger);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override ITokenCacheAccessor CreateTokenCacheAccessor(
             CacheOptions cacheOptions, 
             bool isApplicationTokenCache = false)
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return new AndroidTokenCacheAccessor();
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override IWebUIFactory CreateWebUiFactory()
         {
             return new AndroidWebUIFactory();

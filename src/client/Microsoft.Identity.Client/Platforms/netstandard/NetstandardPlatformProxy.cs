@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard
         {
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override string InternalGetProductName()
         {
             return "MSAL.CoreCLR";

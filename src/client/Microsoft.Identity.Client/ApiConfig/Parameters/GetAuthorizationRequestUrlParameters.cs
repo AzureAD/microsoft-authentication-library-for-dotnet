@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             };
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void LogParameters(ILoggerAdapter logger)
         {
         }

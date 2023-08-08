@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IAccount Account { get; set; }
         public bool? SendX5C { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void LogParameters(ILoggerAdapter logger)
         {
             if (logger.IsLoggingEnabled(LogLevel.Info))

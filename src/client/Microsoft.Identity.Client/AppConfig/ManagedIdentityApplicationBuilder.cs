@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client
 #endif
     public sealed class ManagedIdentityApplicationBuilder : BaseAbstractApplicationBuilder<ManagedIdentityApplicationBuilder>
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal ManagedIdentityApplicationBuilder(ApplicationConfiguration configuration)
             : base(configuration)
         {

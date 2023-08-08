@@ -16,7 +16,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     /// <typeparam name="T"></typeparam>
     public abstract class AbstractAcquireTokenParameterBuilder<T> : BaseAbstractAcquireTokenParameterBuilder<T>
         where T : BaseAbstractAcquireTokenParameterBuilder<T>
