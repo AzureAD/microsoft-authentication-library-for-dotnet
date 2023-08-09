@@ -7,7 +7,6 @@ parameters:
   MsalSourceDir: 'microsoft-authentication-library-for-dotnet\' #Default MSAL Location
 
 steps:
-- template: template-prebuild-code-analysis.yaml
 
 - task: VSBuild@1
   displayName: 'Restore $(ProjectFilePath)'
