@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client
     {
         private AcquireTokenByRefreshTokenParameters Parameters { get; } = new AcquireTokenByRefreshTokenParameters();
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal AcquireTokenByRefreshTokenParameterBuilder(IClientApplicationBaseExecutor clientApplicationBaseExecutor)
             : base(clientApplicationBaseExecutor)
         {
@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
             return ClientApplicationBaseExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
             return ApiEvent.ApiIds.AcquireTokenByRefreshToken;

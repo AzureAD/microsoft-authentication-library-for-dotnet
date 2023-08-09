@@ -18,7 +18,7 @@ namespace CommonCache.Test.AdalV3
 
         private class AdalV3CacheExecutor : AbstractCacheExecutor
         {
-            /// <inheritdoc />
+            /// <inheritdoc/>
             protected override async Task<IEnumerable<CacheExecutorAccountResult>> InternalExecuteAsync(TestInputData testInputData)
             {
                 LoggerCallbackHandler.LogCallback = (LogLevel level, string message, bool containsPii) =>

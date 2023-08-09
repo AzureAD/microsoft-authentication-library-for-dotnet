@@ -266,7 +266,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             public Authority Authority { get; }
             public ITokenCacheInternal Cache { get; }
 
-            /// <inheritdoc />
+            /// <inheritdoc/>
             public void Dispose()
             {
                 _mockHttpAndServiceBundle.Dispose();

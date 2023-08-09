@@ -83,13 +83,13 @@ namespace CommonCache.Test.Common
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public ProcessRunResults RunProcess(string fileName, string arguments, Dictionary<string, string> environmentVars = null)
         {
             return RunProcess(fileName, arguments, environmentVars, null);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public ProcessRunResults RunProcess(string fileName, string arguments, IEnumerable<int> successfulExitCodes)
         {
             return RunProcess(
@@ -101,7 +101,7 @@ namespace CommonCache.Test.Common
                 successfulExitCodes);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public ProcessRunResults RunProcess(
             string fileName,
             string arguments,
@@ -118,7 +118,7 @@ namespace CommonCache.Test.Common
                 null);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public ProcessRunResults RunProcess(
             string fileName,
             string arguments,
@@ -204,25 +204,25 @@ namespace CommonCache.Test.Common
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public Task<ProcessRunResults> RunProcessAsync(string fileName, string arguments)
         {
             return Task.Run(() => RunProcess(fileName, arguments));
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public Task<ProcessRunResults> RunProcessAsync(string fileName, string arguments, IEnumerable<int> successfulExitCodes)
         {
             return Task.Run(() => RunProcess(fileName, arguments, successfulExitCodes));
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public Task<ProcessRunResults> RunProcessAsync(string fileName, string arguments, CancellationToken cancellationToken)
         {
             return Task.Run(() => RunProcess(fileName, arguments, null, cancellationToken.WaitHandle), cancellationToken);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public Task<ProcessRunResults> RunProcessAsync(
             string fileName,
             string arguments,
@@ -254,7 +254,7 @@ namespace CommonCache.Test.Common
                 cancellationToken);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public ProcessRunResults RunProcessFromKnownDirectory(string fileName, string arguments, string processWorkingDirectory)
         {
             return RunProcess(

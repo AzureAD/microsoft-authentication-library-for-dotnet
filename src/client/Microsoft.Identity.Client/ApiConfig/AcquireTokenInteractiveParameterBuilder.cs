@@ -388,7 +388,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Validate()
         {
             base.Validate();
@@ -417,7 +417,7 @@ namespace Microsoft.Identity.Client
                                           : Parameters.LoginHint;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
             return PublicClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
