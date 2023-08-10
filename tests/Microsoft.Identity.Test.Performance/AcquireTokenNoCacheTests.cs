@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Performance
               .ConfigureAwait(false);
         }
 
-        [Benchmark(Description = PerfConstants.AcquireTokenForObo)]
+        //[Benchmark(Description = PerfConstants.AcquireTokenForObo)]
         [BenchmarkCategory("No cache")]
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOf_TestAsync()
         {
