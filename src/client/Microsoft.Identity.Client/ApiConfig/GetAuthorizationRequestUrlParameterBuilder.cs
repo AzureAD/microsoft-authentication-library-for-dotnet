@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
             throw new InvalidOperationException("This is a developer BUG.  This should never get executed.");
@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Client
             return ExecuteAsync(CancellationToken.None);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
             return ApiEvent.ApiIds.GetAuthorizationRequestUrl;

@@ -2,24 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Cache.CacheImpl;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.Utils;
-using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
- 
+
 namespace Microsoft.Identity.Client
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public abstract class ApplicationBase : IApplicationBase
     {
         /// <summary>

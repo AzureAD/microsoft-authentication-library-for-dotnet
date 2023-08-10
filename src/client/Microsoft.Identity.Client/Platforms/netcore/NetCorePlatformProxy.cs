@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return null;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
         {
             if (useRecommendedRedirectUri)

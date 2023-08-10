@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
         {
             public string ClientId => UseAppIdUri? "api://microsoft.identity.9793041b-9078-4942-b1d2-babdc472cc0c" : "9793041b-9078-4942-b1d2-babdc472cc0c";
 
-            public string TenantId => "94430a9c-83e9-4f08-bbb0-64fccd0661fc";
+            public string TenantId => "19eea2f8-e17a-470f-954d-d897c47f311c";
 
             public string Environment => "login.windows-ppe.net";
 

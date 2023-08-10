@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client
     {
         private AcquireTokenByIntegratedWindowsAuthParameters Parameters { get; } = new AcquireTokenByIntegratedWindowsAuthParameters();
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal AcquireTokenByIntegratedWindowsAuthParameterBuilder(IPublicClientApplicationExecutor publicClientApplicationExecutor)
             : base(publicClientApplicationExecutor)
         {
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client
             return PublicClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
             return ApiEvent.ApiIds.AcquireTokenByIntegratedWindowsAuth;
