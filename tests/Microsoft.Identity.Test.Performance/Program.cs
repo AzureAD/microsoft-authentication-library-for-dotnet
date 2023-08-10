@@ -20,9 +20,9 @@ namespace Microsoft.Identity.Test.Performance
             try
             {
                 BenchmarkSwitcher.FromTypes(new[] {
-                    //typeof(AcquireTokenForClientCacheTests),
-                    //typeof(AcquireTokenForOboCacheTests),
-                    //typeof(TokenCacheTests),
+                    typeof(AcquireTokenForClientCacheTests),
+                    typeof(AcquireTokenForOboCacheTests),
+                    typeof(TokenCacheTests),
                     typeof(AcquireTokenNoCacheTests),
             }).RunAll(
 #if DEBUG
