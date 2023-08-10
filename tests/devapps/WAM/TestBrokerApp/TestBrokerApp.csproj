@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<h1>Hi</h1>
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworkNet48>net48</TargetFrameworkNet48>
