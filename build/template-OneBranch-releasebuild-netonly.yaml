@@ -1,4 +1,3 @@
-
 # Release build for -netonly package should be triggered after the normal release build
 parameters:
   BuildPlatform: 'AnyCPU'
@@ -10,33 +9,33 @@ parameters:
 steps:
 
 - task: VSBuild@1
-  displayName: 'Restore $(ProjectFilePath)'
+  displayName: 'Restore ${{ parameters.ProjectFilePath }}'
   inputs:
-    solution: $(ProjectFilePath)
+    solution: ${{ parameters.ProjectFilePath }}
     msbuildArgs: '/t:restore /p:NET_ONLY_INTERNAL_PACKAGE=true'
-    platform: ${{ variables.BuildPlatform }}
-    configuration: ${{ variables.BuildConfiguration }}
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
     
 - task: VSBuild@1
-  displayName: 'Build $(ProjectFilePath)'
+  displayName: 'Build ${{ parameters.ProjectFilePath }}'
   inputs:
-    solution: $(ProjectFilePath)
+    solution: ${{ parameters.ProjectFilePath }}
     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=$(MsalClientSemVer) /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true /p:NET_ONLY_INTERNAL_PACKAGE=true'
-    platform: ${{ variables.BuildPlatform }}
-    configuration: ${{ variables.BuildConfiguration }}
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
     maximumCpuCount: true
 
 - template: template-sign-binary.yaml
   parameters:
-    FolderPath: '${{ variables.ProjectFolderPath }}'
+    FolderPath: '${{ parameters.ProjectFolderPath }}'
     Pattern: '**\bin\**\Microsoft.Identity.Client.dll'
 
 - task: VSBuild@1
-  displayName: 'Pack ${{ variables.ProjectFilePath }}'
+  displayName: 'Pack ${{ parameters.ProjectFilePath }}'
   inputs:
-    solution: ${{ variables.ProjectFilePath }}
+    solution: ${{ parameters.ProjectFilePath }}
     msbuildArgs: '/t:pack /p:nobuild=true /p:IncludeSymbols=true /p:NET_ONLY_INTERNAL_PACKAGE=true'
-    configuration: ${{ variables.BuildConfiguration }}
+    configuration: ${{ parameters.BuildConfiguration }}
 
 - task: CopyFiles@2
   displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)\packages'
