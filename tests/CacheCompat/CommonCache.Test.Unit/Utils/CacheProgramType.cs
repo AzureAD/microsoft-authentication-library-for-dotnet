@@ -10,7 +10,6 @@ namespace CommonCache.Test.Unit.Utils
         AdalV5,
         MsalV2,
         MsalV3,
-        MsalPython,
         MsalJava, 
         MsalNode
     }
