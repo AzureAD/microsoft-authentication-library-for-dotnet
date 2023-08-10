@@ -1,10 +1,12 @@
 
 # Release build for -netonly package should be triggered after the normal release build
 parameters:
-  BuildPlatform: 'any cpu'
-  BuildConfiguration: 'release'
+  BuildPlatform: 'AnyCPU'
+  BuildConfiguration: 'Release'
   MsalClientSemVer: '4.55.0-devopsbuild'
   MsalSourceDir: 'microsoft-authentication-library-for-dotnet\' #Default MSAL Location
+  ProjectFilePath: '$(MsalSourceDir)\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+  ProjectFolderPath: '$(MsalSourceDir)\src\client\Microsoft.Identity.Client'
 
 steps:
 
