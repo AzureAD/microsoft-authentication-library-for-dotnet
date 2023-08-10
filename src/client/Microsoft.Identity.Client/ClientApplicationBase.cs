@@ -19,11 +19,7 @@ using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
  
 namespace Microsoft.Identity.Client
 {
-    /// <summary>
-    /// Abstract class containing common API methods and properties. Both <see cref="PublicClientApplication"/> and 
-    /// ConfidentialClientApplication
-    /// extend this class. For details see https://aka.ms/msal-net-client-applications
-    /// </summary>
+    /// <inheritdoc/>
     public abstract partial class ClientApplicationBase : ApplicationBase, IClientApplicationBase
     {
         /// <summary>

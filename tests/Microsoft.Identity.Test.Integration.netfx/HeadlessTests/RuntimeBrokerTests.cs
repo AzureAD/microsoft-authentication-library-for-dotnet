@@ -252,7 +252,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
                })
                .Build();
 
-
             // Acquire token using username password
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
 

@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
     /// </summary>
     internal class NetDesktopPlatformProxy : AbstractPlatformProxy
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public NetDesktopPlatformProxy(ILoggerAdapter logger)
             : base(logger)
         {
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             return sb.ToString();
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false)
         {
             if (useRecommendedRedirectUri)
@@ -98,52 +98,52 @@ namespace Microsoft.Identity.Client.Platforms.net45
             return Constants.DefaultRedirectUri;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override ILegacyCachePersistence CreateLegacyCachePersistence()
         {
             return new InMemoryLegacyCachePersistance();
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override IWebUIFactory CreateWebUiFactory()
         {
             return new NetDesktopWebUIFactory();
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override string InternalGetDeviceModel()
         {
             // Since MSAL .NET may be used on servers, for security reasons, we do not emit device type.
             return null;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override string InternalGetOperatingSystem()
         {
             return DesktopOsHelper.GetWindowsVersionString();
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override string InternalGetProcessorArchitecture()
         {
             return IsWindows ? WindowsNativeMethods.GetProcessorArchitecture() : null;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override string InternalGetCallingApplicationName()
         {
             // Considered PII, ensure that it is hashed.
             return Assembly.GetEntryAssembly()?.GetName()?.Name;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override string InternalGetCallingApplicationVersion()
         {
             // Considered PII, ensure that it is hashed.
             return Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString();
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override string InternalGetDeviceId()
         {
             try
@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override string InternalGetProductName()
         {
             return "MSAL.Desktop";
@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override ICryptographyManager InternalGetCryptographyManager() => new NetDesktopCryptographyManager();
 
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();

@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client
     {
         internal AcquireTokenOnBehalfOfParameters Parameters { get; } = new AcquireTokenOnBehalfOfParameters();
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal AcquireTokenOnBehalfOfParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
             : base(confidentialClientApplicationExecutor)
         {
@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
             return ConfidentialClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Client
                 Parameters.SendX5C = this.ServiceBundle.Config?.SendX5C ?? false;
             }
         }
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
             if (string.IsNullOrEmpty(Parameters.LongRunningOboCacheKey))

@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
             _requestContext.Logger.Info(() => $"Authority validation enabled? {authorityInfo.ValidateAuthority}. ");
             _requestContext.Logger.Info(() => $"Authority validation - is known env? {isKnownEnv}. ");
 
-            if (authorityInfo.ValidateAuthority && !isKnownEnv)
+            if (!isKnownEnv)
             {
                 _requestContext.Logger.Info("Authority validation is being performed. ");
 

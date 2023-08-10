@@ -570,7 +570,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             TokenCacheHelper.PopulateCache(_cca.UserTokenCacheInternal.Accessor);
         }
 
-
         private AppTokenProviderResult GetAppTokenProviderResult(string differentScopesForAt = "", long? refreshIn = 1000)
         {
             var token = new AppTokenProviderResult();

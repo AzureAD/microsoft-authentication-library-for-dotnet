@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Kerberos
             this.ErrorMessage = errorMessage;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"[ Realm: {Realm}, sp: {ServicePrincipalName}, cn: {ClientName}, KeyType: {KeyType} ]";

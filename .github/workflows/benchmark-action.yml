@@ -1,0 +1,96 @@
+name: Run performance benchmarks
+on:
+  workflow_dispatch: # Allows manual triggering of workflow
+  push:
+    branches:
+      - main
+    paths:
+      - src/client/Microsoft.Identity.Client/**/*.cs
+
+permissions:
+  # Deployments permission to deploy GitHub pages website
+  deployments: write
+  # Contents permission to update benchmark contents in gh-pages branch
+  contents: write
+
+jobs:
+  benchmark:
+    name: Run performance benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '3.1.426'
+      - name: Run benchmark
+        run: cd tests/Microsoft.Identity.Test.Performance && dotnet run -c release -f netcoreapp3.1 --exporters json 
+
+      - name: Download previous benchmark data
+        uses: actions/cache@v3
+        with:
+          path: ./cache
+          key: ${{ runner.os }}-benchmark
+
+      - name: Store AcquireTokenNoCacheTests result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: AcquireTokenNoCache
+          tool: 'benchmarkdotnet'
+          output-file-path: tests/Microsoft.Identity.Test.Performance/BenchmarkDotNet.Artifacts/results/Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests-report-full-compressed.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          # Show alert with commit comment on detecting possible performance regression
+          alert-threshold: '130%'
+          comment-on-alert: true
+          fail-on-alert: true
+          summary-always: true
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: benchmarks
+
+      - name: Store AcquireTokenForClientCacheTests result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: AcquireTokenForClientWithCache
+          tool: 'benchmarkdotnet'
+          output-file-path: tests/Microsoft.Identity.Test.Performance/BenchmarkDotNet.Artifacts/results/Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests-report-full-compressed.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          # Show alert with commit comment on detecting possible performance regression
+          alert-threshold: '130%'
+          comment-on-alert: true
+          fail-on-alert: true
+          summary-always: true
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: benchmarks
+
+      - name: Store AcquireTokenForOboCacheTests result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: AcquireTokenForOboWithCache
+          tool: 'benchmarkdotnet'
+          output-file-path: tests/Microsoft.Identity.Test.Performance/BenchmarkDotNet.Artifacts/results/Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests-report-full-compressed.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          # Show alert with commit comment on detecting possible performance regression
+          alert-threshold: '130%'
+          comment-on-alert: true
+          fail-on-alert: true
+          summary-always: true
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: benchmarks
+
+      - name: Store TokenCacheTests result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: TokenCacheTestsWithCache
+          tool: 'benchmarkdotnet'
+          output-file-path: tests/Microsoft.Identity.Test.Performance/BenchmarkDotNet.Artifacts/results/Microsoft.Identity.Test.Performance.TokenCacheTests-report-full-compressed.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          # Show alert with commit comment on detecting possible performance regression
+          alert-threshold: '130%'
+          comment-on-alert: true
+          fail-on-alert: true
+          summary-always: true
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: benchmarks
