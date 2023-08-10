@@ -5,8 +5,8 @@ parameters:
   BuildConfiguration: 'Release'
   MsalClientSemVer: '4.55.0-devopsbuild'
   MsalSourceDir: 'microsoft-authentication-library-for-dotnet\' #Default MSAL Location
-  ProjectFilePath: '$(MsalSourceDir)\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
-  ProjectFolderPath: '$(MsalSourceDir)\src\client\Microsoft.Identity.Client'
+  ProjectFilePath: '$(MsalSourceDir)src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+  ProjectFolderPath: '$(MsalSourceDir)src\client\Microsoft.Identity.Client'
 
 steps:
 
