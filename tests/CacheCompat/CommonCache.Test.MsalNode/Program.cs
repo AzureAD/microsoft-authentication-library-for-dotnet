@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 
-namespace CommonCache.Test.MsalPython
+namespace CommonCache.Test.MsalNode
 {
     public static class Program
     {
