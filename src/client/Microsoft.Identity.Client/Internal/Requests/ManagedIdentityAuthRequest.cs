@@ -18,6 +18,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class ManagedIdentityAuthRequest : RequestBase
     {
         private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
+        private static readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
 
         public ManagedIdentityAuthRequest(
             IServiceBundle serviceBundle,
@@ -113,6 +114,45 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)
+        {
+            AuthenticationResult authResult = null;
+
+            await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
+
+            try
+            {
+                MsalAccessTokenCacheItem cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+
+                if (cachedAccessTokenItem != null)
+                {
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
+
+                    Metrics.IncrementTotalAccessTokensFromCache();
+                    authResult = new AuthenticationResult(
+                                                            cachedAccessTokenItem,
+                                                            null,
+                                                            AuthenticationRequestParameters.AuthenticationScheme,
+                                                            AuthenticationRequestParameters.RequestContext.CorrelationId,
+                                                            TokenSource.Cache,
+                                                            AuthenticationRequestParameters.RequestContext.ApiEvent,
+                                                            account: null,
+                                                            spaAuthCode: null,
+                                                            additionalResponseParameters: null);
+                }
+                else
+                {
+                    authResult = await SendTokenRequestForManagedIdentityAsync(cancellationToken).ConfigureAwait(false);
+                }
+
+                return authResult;
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
+        }
+
+        private async Task<AuthenticationResult> SendTokenRequestForManagedIdentityAsync(CancellationToken cancellationToken)
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
