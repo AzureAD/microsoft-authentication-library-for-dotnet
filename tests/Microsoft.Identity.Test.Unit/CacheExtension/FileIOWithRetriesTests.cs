@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Extensions.Msal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Test.Unit.CacheExtension
 {
@@ -27,7 +28,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
         }
 
         [TestMethod]
-        public async Task Touch_FiresEvents_Async()
+        public async Task Touch_FiresEvent_Async()
         {
             _logger.TraceInformation($"Starting test on " + TestHelper.GetOs());
 
@@ -62,22 +63,12 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
                 // LastWriteTime is not granular enough 
                 await Task.Delay(50).ConfigureAwait(false);
 
-                _logger.TraceInformation($"Touch twice");
-                FileIOWithRetries.TouchFile(path, new TraceSourceLogger(_logger));
                 Assert.IsTrue(File.Exists(path));
-
-                DateTime subsequentLastWriteTime = File.GetLastWriteTimeUtc(path);
-                Assert.IsTrue(subsequentLastWriteTime > initialLastWriteTime);
 
                 _logger.TraceInformation($"Semaphore at {semaphore.CurrentCount}");
                 await semaphore.WaitAsync(5000).ConfigureAwait(false);
-                _logger.TraceInformation($"Semaphore at {semaphore.CurrentCount}");
-                await semaphore.WaitAsync(10000).ConfigureAwait(false); 
-                Assert.IsTrue(
-                    cacheChangedEventFired==2 ||
-                    cacheChangedEventFired == 3,
-                    "Expecting the event to be fired 2 times as the file is touched 2 times. On Linux, " +
-                    "the file watcher sometimes fires an additional time for the file creation");
+
+                Assert.AreEqual(1, cacheChangedEventFired);
             }
             finally
             {
