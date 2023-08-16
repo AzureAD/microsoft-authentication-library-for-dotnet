@@ -3,8 +3,8 @@ parameters:
   BuildPlatform: 'AnyCPU'
   BuildConfiguration: 'Release'
   MsalClientSemVer: '4.55.0-devopsbuild'
-  ProjectFilePath: 'microsoft-authentication-library-for-dotnet\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
   ProjectFolderPath: 'microsoft-authentication-library-for-dotnet\src\client\Microsoft.Identity.Client'
+  ProjectFilePath: '${{ parameters.ProjectFolderPath }}\Microsoft.Identity.Client.csproj'
 
 steps:
 
