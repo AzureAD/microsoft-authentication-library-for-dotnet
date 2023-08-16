@@ -36,6 +36,9 @@
     <PackageReference Include="System.Security.Cryptography.Cng" Version="5.0.0" />
     <PackageReference Include="System.Text.Json" Version="6.0.5" />
     <PackageReference Include="coverlet.collector" Version="3.1.2" />
+    <!-- Workaround for hitting exception invoking executor 'executor://nunit3testexecutor/': Could not load type 'System.Runtime.Remoting.Channels.IChannel'-->
+    <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>
