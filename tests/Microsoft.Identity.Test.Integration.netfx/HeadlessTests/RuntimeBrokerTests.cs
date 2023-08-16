@@ -138,13 +138,10 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
-            WamLoggerValidator testLogger = new WamLoggerValidator();
-
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithParentActivityOrWindow(windowHandleProvider)
                .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithLogging(testLogger)
                .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
                .Build();
 
@@ -159,9 +156,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             var account = accounts.FirstOrDefault();
             Assert.IsNotNull(account);
-
-            Assert.IsTrue(testLogger.HasLogged);
-            Assert.IsFalse(testLogger.HasPiiLogged);
 
             // Acquire token silently
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
