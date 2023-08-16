@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1691773680231,
+  "lastUpdate": 1692220094338,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -140,6 +140,42 @@ window.BENCHMARK_DATA = {
             "value": 542930.6,
             "unit": "ns",
             "range": "± 9409.630278147415"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4e8dd12ead0138ff3826332bc40967d7966bae42",
+          "message": "Fix Policheck issues (#4302)\n\nUpdate DefaultContractResolver.cs",
+          "timestamp": "2023-08-16T13:59:03-07:00",
+          "tree_id": "87e16a83853dd1200678c5b76a27e1c6fe342eb9",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/4e8dd12ead0138ff3826332bc40967d7966bae42"
+        },
+        "date": 1692220089864,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 494907.8658536585,
+            "unit": "ns",
+            "range": "± 67120.30283995642"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 631160.3369565217,
+            "unit": "ns",
+            "range": "± 51387.2319608626"
           }
         ]
       }
