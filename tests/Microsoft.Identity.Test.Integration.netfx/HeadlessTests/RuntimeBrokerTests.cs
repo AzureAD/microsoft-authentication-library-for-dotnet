@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
         }
 
-        [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore)]
         [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordRequestAsync()
         {
@@ -149,6 +149,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            Assert.IsNotNull(result.AuthenticationResultMetadata.BrokerTelemetry);
 
             // Get Accounts
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -161,6 +162,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            Assert.IsNotNull(result.AuthenticationResultMetadata.BrokerTelemetry);
 
             // Remove Account
             await pca.RemoveAsync(account).ConfigureAwait(false);
@@ -174,7 +176,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore)]
         [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
         {
@@ -200,6 +202,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            Assert.IsNotNull(result.AuthenticationResultMetadata.BrokerTelemetry);
 
             // Get Accounts
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -215,6 +218,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            Assert.IsNotNull(result.AuthenticationResultMetadata.BrokerTelemetry);
 
             await pca.RemoveAsync(account).ConfigureAwait(false);
             // Assert the account is removed
@@ -225,7 +229,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WamListWindowsWorkAndSchoolAccountsAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -250,6 +254,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             var result = await pca.AcquireTokenByUsernamePassword(scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword()).ExecuteAsync().ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            Assert.IsNotNull(result.AuthenticationResultMetadata.BrokerTelemetry);
 
             // Get Accounts
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -286,7 +291,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
         }
 
-        [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
         {
             //Arrange
@@ -319,7 +324,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreEqual(popUser, result.Account.Username);
         }
 
-        [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore)]
         [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
         {

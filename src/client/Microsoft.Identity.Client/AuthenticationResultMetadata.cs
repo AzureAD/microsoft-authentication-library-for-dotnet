@@ -70,5 +70,10 @@ namespace Microsoft.Identity.Client
         /// Contains the Outcome of the region discovery if Region was used.
         /// </summary>
         public RegionDetails RegionDetails { get; set; }
+
+        /// <summary>
+        /// Contains broker telemetry in JSON format
+        /// </summary>
+        public string BrokerTelemetry { get; set; }
     }
 }
