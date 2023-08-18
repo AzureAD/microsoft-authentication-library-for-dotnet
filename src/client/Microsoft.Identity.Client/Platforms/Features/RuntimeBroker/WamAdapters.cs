@@ -342,6 +342,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         authorityUrl = authorityUrl.Substring(0, authorityUrl.Length - "v2.0".Length);
                 }
 
+
+                authenticationRequestParameters.RequestContext.ApiEvent.WamTelemetry = authResult.TelemetryData;
+
                 MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
                 {
                     AuthorityUrl = authorityUrl,
