@@ -95,6 +95,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreEqual("User name is malformed.", ex.AdditionalExceptionData[MsalException.BrokerErrorContext]); // message might change. not a big deal
             Assert.AreEqual("ApiContractViolation", ex.AdditionalExceptionData[MsalException.BrokerErrorStatus]);
             Assert.AreEqual("3399811229", ex.AdditionalExceptionData[MsalException.BrokerErrorCode]);
+            Assert.IsNotNull(ex.AdditionalExceptionData[MsalException.BrokerTelemetry]);
         }
 
         [RunOn(TargetFrameworks.NetCore)]

@@ -198,14 +198,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             return authParams;
         }
 
-        private static MsalException DecorateExceptionWithRuntimeErrorProperties(MsalException exception, Error runtimeError)
-        {
+        private static MsalException DecorateExceptionWithRuntimeErrorProperties(MsalException exception, AuthResult wamAuthResult)
+        {            
             var result = new Dictionary<string, string>()
             {
-                { MsalException.BrokerErrorContext, runtimeError.Context },
-                { MsalException.BrokerErrorTag, $"0x{runtimeError.Tag:X}" },
-                { MsalException.BrokerErrorStatus, runtimeError.Status.ToString() },
-                { MsalException.BrokerErrorCode, (runtimeError.ErrorCode).ToString() },
+                { MsalException.BrokerErrorContext, wamAuthResult?.Error.Context },
+                { MsalException.BrokerErrorTag, $"0x{wamAuthResult?.Error.Tag:X}" },
+                { MsalException.BrokerErrorStatus, wamAuthResult?.Error.Status.ToString() },
+                { MsalException.BrokerErrorCode, (wamAuthResult?.Error.ErrorCode).ToString() },
+                { MsalException.BrokerTelemetry, (wamAuthResult?.TelemetryData).ToString() },
             };
 
             exception.AdditionalExceptionData = result;
@@ -275,7 +276,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             logger.Info($"[RuntimeBroker] {errorMessage} {authResult.Error}");
             MsalException ex = CreateExceptionFromWamError(authResult, authenticationRequestParameters, logger);
-            ex = DecorateExceptionWithRuntimeErrorProperties(ex, authResult.Error);
+            ex = DecorateExceptionWithRuntimeErrorProperties(ex, authResult);
             throw ex;
         }
 
