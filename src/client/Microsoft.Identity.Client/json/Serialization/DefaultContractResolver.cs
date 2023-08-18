@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Json.Serialization
         // Json.NET Schema requires a property
         internal static IContractResolver Instance => _instance;
 
-        private static readonly string[] BlacklistedTypeNames =
+        private static readonly string[] RestrictedTypeNames =
         {
             "System.IO.DriveInfo",
             "System.IO.FileInfo",
@@ -426,7 +426,7 @@ namespace Microsoft.Identity.Json.Serialization
 
             // serializing DirectoryInfo without ISerializable will stackoverflow
             // https://github.com/JamesNK/Newtonsoft.Json/issues/1541
-            if (Array.IndexOf(BlacklistedTypeNames, objectType.FullName) != -1)
+            if (Array.IndexOf(RestrictedTypeNames, objectType.FullName) != -1)
             {
                 contract.OnSerializingCallbacks.Add(ThrowUnableToSerializeError);
             }
@@ -887,7 +887,7 @@ namespace Microsoft.Identity.Json.Serialization
                 foreach (MethodInfo method in baseType.GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
                 {
                     // compact framework errors when getting parameters for a generic method
-                    // lame, but generic methods should not be callbacks anyway
+                    // generic methods should not be callbacks anyway
                     if (method.ContainsGenericParameters)
                     {
                         continue;
