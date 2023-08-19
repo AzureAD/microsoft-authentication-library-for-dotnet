@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1692220108741,
+  "lastUpdate": 1692408316575,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -212,6 +212,40 @@ window.BENCHMARK_DATA = {
             "value": 631160.3369565217,
             "unit": "ns",
             "range": "± 51387.2319608626"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Neha Bhargava",
+            "username": "neha-bhargava",
+            "email": "61847233+neha-bhargava@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "29de3eae8f07741bab1460afba13a4afdc8288c6",
+          "message": "Merge branch 'main' into nebharg/openTelemetry",
+          "timestamp": "2023-08-19T01:10:22Z",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/29de3eae8f07741bab1460afba13a4afdc8288c6"
+        },
+        "date": 1692408312118,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 416665.4646464646,
+            "unit": "ns",
+            "range": "± 30183.283152830492"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 658685.6,
+            "unit": "ns",
+            "range": "± 90486.9176668685"
           }
         ]
       }
