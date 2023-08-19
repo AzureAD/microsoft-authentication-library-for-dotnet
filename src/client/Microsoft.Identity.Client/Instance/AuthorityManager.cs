@@ -62,7 +62,11 @@ namespace Microsoft.Identity.Client.Instance
                                     _metadata.PreferredNetwork);
 
                 // We can only validate the initial environment, not regional environments
-                await ValidateAuthorityAsync(_initialAuthority).ConfigureAwait(false);
+                if (_initialAuthority.AuthorityInfo.ValidateAuthority &&
+                    _requestContext.ServiceBundle.Config.IsInstanceDiscoveryEnabled)
+                {
+                    await ValidateAuthorityAsync(_initialAuthority).ConfigureAwait(false);
+                }
 
                 _instanceDiscoveryAndValidationExecuted = true;
             }
@@ -77,7 +81,8 @@ namespace Microsoft.Identity.Client.Instance
         {
             // race conditions could occur here, where multiple requests validate the authority at the same time
             // but this is acceptable and once the cache is filled, no more HTTP requests will be made
-            if (!s_validatedEnvironments.Contains(authority.AuthorityInfo.Host))
+            if (
+                !s_validatedEnvironments.Contains(authority.AuthorityInfo.Host))
             {
                 // validate the original authority, as the resolved authority might be regionalized and we cannot validate regionalized authorities.
                 var validator = AuthorityInfoHelper.CreateAuthorityValidator(authority.AuthorityInfo, _requestContext);

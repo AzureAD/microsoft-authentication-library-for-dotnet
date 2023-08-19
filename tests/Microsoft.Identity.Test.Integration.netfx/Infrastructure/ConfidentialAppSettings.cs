@@ -50,6 +50,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             public Cloud Cloud => Cloud.Public;
 
             public bool UseAppIdUri { get; set; }
+
             public bool InstanceDiscoveryEndpoint { get; set; } = true;
 
             public X509Certificate2 GetCertificate()
@@ -104,7 +105,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
         {
             public string ClientId => UseAppIdUri? "api://microsoft.identity.9793041b-9078-4942-b1d2-babdc472cc0c" : "9793041b-9078-4942-b1d2-babdc472cc0c";
 
-            public string TenantId => "f686d426-8d16-42db-81b7-ab578e110ccd";
+            public string TenantId => "19eea2f8-e17a-470f-954d-d897c47f311c";
 
             public string Environment => "login.windows-ppe.net";
 
@@ -159,10 +160,13 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
         private static Lazy<IConfidentialAppSettings> s_publicCloudSettings =
             new Lazy<IConfidentialAppSettings>(() => new PublicCloudConfidentialAppSettings());
+        
         private static Lazy<IConfidentialAppSettings> s_ppeCloudSettings =
             new Lazy<IConfidentialAppSettings>(() => new PpeConfidentialAppSettings());
+        
         private static Lazy<IConfidentialAppSettings> s_arlingtonCloudSettings =
             new Lazy<IConfidentialAppSettings>(() => new ArlingtonConfidentialAppSettings());
+        
         private static Lazy<IConfidentialAppSettings> s_adfsCloudSettings =
           new Lazy<IConfidentialAppSettings>(() => new AdfsConfidentialAppSettings());
 

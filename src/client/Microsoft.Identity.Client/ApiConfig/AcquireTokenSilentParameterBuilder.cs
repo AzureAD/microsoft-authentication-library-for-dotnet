@@ -19,7 +19,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     /// <summary>
     /// Parameter builder for the <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
     /// operation. See https://aka.ms/msal-net-acquiretokensilent
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
             return ClientApplicationBaseExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
             return ApiEvent.ApiIds.AcquireTokenSilent;

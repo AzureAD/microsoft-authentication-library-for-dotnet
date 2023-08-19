@@ -59,18 +59,18 @@ namespace Microsoft.Identity.Client.Internal
         /// </summary>
         public ILoggerAdapter ApplicationLogger { get; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public IHttpManager HttpManager { get; }
 
         public IInstanceDiscoveryManager InstanceDiscoveryManager { get; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public IPlatformProxy PlatformProxy { get; private set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public ApplicationConfiguration Config { get; }
 
         public IDeviceAuthManager DeviceAuthManager { get; }

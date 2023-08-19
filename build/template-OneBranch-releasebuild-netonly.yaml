@@ -1,0 +1,86 @@
+# Release build for -netonly package should be triggered after the normal release build
+parameters:
+  BuildPlatform: 'AnyCPU'
+  BuildConfiguration: 'Release'
+  MsalClientSemVer: '4.55.0-devopsbuild'
+  ProjectFilePath: 'microsoft-authentication-library-for-dotnet\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+  ProjectFolderPath: 'microsoft-authentication-library-for-dotnet\src\client\Microsoft.Identity.Client'
+
+steps:
+
+- task: VSBuild@1
+  displayName: 'Restore ${{ parameters.ProjectFilePath }}'
+  inputs:
+    solution: ${{ parameters.ProjectFilePath }}
+    msbuildArgs: '/t:restore /p:NET_ONLY_INTERNAL_PACKAGE=true'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
+    
+- task: VSBuild@1
+  displayName: 'Build ${{ parameters.ProjectFilePath }}'
+  inputs:
+    solution: ${{ parameters.ProjectFilePath }}
+    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=$(MsalClientSemVer) /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true /p:NET_ONLY_INTERNAL_PACKAGE=true'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
+    maximumCpuCount: true
+
+- template: template-sign-binary.yaml
+  parameters:
+    FolderPath: '${{ parameters.ProjectFolderPath }}'
+    Pattern: '**\bin\**\Microsoft.Identity.Client.dll'
+
+- task: VSBuild@1
+  displayName: 'Pack ${{ parameters.ProjectFilePath }}'
+  inputs:
+    solution: ${{ parameters.ProjectFilePath }}
+    msbuildArgs: '/t:pack /p:nobuild=true /p:IncludeSymbols=true /p:NET_ONLY_INTERNAL_PACKAGE=true'
+    configuration: ${{ parameters.BuildConfiguration }}
+
+- task: CopyFiles@2
+  displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)\packages'
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)\'
+    Contents: '**\*nupkg'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)\packages'
+    flattenFolders: true
+
+- task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  displayName: 'Sign Packages'
+  inputs:
+    ConnectedServiceName: 'IDDP Code Signing'
+    FolderPath: '$(Build.ArtifactStagingDirectory)\packages'
+    Pattern: '*nupkg'
+    signConfigType: inlineSignParams
+    inlineOperation: |
+      [
+          {
+              "keyCode": "CP-401405",
+              "operationSetCode": "NuGetSign",
+              "parameters": [ ],
+              "toolName": "sign",
+              "toolVersion": "1.0"
+          },
+          {
+              "keyCode": "CP-401405",
+              "operationSetCode": "NuGetVerify",
+              "parameters": [ ],
+              "toolName": "sign",
+              "toolVersion": "1.0"
+          }
+      ]
+    SessionTimeout: 20
+    VerboseLogin: true
+  timeoutInMinutes: 5
+
+- task: CmdLine@2
+  displayName: 'Verify packages are signed'
+  inputs:
+    script: 'dotnet nuget verify $(Build.ArtifactStagingDirectory)\packages\*.nupkg'
+
+- task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+  displayName: 'Get Software Bill Of Materials (SBOM)'
+  inputs:
+    BuildDropPath: '$(Build.ArtifactStagingDirectory)\packages'
+
+- template: template-publish-analysis-and-cleanup.yaml

@@ -43,7 +43,6 @@ namespace Microsoft.Identity.Test.Performance
         // This is a workaround to specify the exact param combinations to be used.
         public IEnumerable<(int, int)> CacheSizeSource => new[] {
             (1, 10),
-            (1, 1000),
             (10000, 10),
         };
 

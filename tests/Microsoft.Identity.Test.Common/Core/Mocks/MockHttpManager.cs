@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             set;
         } = new ConcurrentQueue<HttpMessageHandler>();
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void Dispose()
         {
             // This ensures we only check the mock queue on dispose when we're not in the middle of an

@@ -1,0 +1,146 @@
+name: Bug report
+description: Broken or unintended behavior with one of our libraries.
+title: '[Bug] '
+labels: ["untriaged", "needs attention"]
+body:
+- type: markdown
+  attributes:
+    value: |
+      ## Before submitting your issue
+      Please make sure that your question or issue is not already covered in existing issues, [MSAL docs](https://learn.microsoft.com/en-us/entra/msal/dotnet/), or [samples](https://learn.microsoft.com/en-us/azure/active-directory/develop/sample-v2-code?tabs=apptype).
+
+      **Logs and network traces**
+      Without logs or traces, it is unlikely that the team can investigate your issue. Capturing logs and network traces is described in our [Docs](https://learn.microsoft.com/azure/active-directory/develop/msal-logging-dotnet).
+
+- type: markdown
+  attributes:
+    value: |
+      ## Issue details   
+    
+- type: input
+  attributes:
+    label: Library version used
+    description: "Please enter the version of the library where you ran into the issue (e.g. 4.54.0)."
+  validations:
+    required: true
+    
+- type: textarea
+  attributes:
+    label: .NET version
+    description: "Please enter the .NET platform version your application was developed in."
+  validations:
+    required: true
+
+- type: dropdown
+  attributes:
+    label: MSAL client type
+    description: "Are you using PublicClientApplication,  ConfidentialClientApplication or ManagedIdentityApplication?"
+    multiple: true
+    options: 
+      - "Public"
+      - "Confidential"
+      - "Managed identity"
+  validations:
+    required: true
+
+- type: dropdown
+  attributes:
+    label: Application type
+    description: "Please select your application type"
+    multiple: true
+    options: 
+      - "Desktop"
+      - "Mobile"
+      - "Web app"
+      - "Web API"
+      - "Daemon app" 
+  validations:
+    required: true
+    
+- type: dropdown
+  attributes:
+    label: Authentication flow type
+    description: "What authentication flow was used when the issue appeared?"
+    multiple: true
+    options: 
+      - "Interactive (with an authentication broker)"
+      - "Interactive (with embedded or system browser)"
+      - "Integrated Windows Authentication"
+      - "Username and password (ROPC)"
+      - "Device code (browserless)"
+      - "Authorization code"
+      - "On-Behalf-Of"
+      - "Client credentials (service-to-service calls)"
+      - "Long-running On-Behalf-Of (OBO)"
+      - "Managed Identity"
+      - "Other"
+  validations:
+    required: true
+    
+- type: dropdown
+  attributes:
+    label: Is this a new or an existing app?
+    description: "Is this a new or existing app?"
+    multiple: false
+    options: 
+      - "The app is in production, and I have upgraded to a new version of MSAL"
+      - "The app is in production, I haven't upgraded MSAL, but started seeing this issue"
+      - "This is a new app or experiment"
+  validations:
+    required: true
+    
+- type: textarea
+  attributes:
+    label: Issue description and reproduction steps
+    description: "Briefly explain the issue you are seeing along with any error messages or stack trace. Provide a link to one of the [standard samples](https://learn.microsoft.com/azure/active-directory/develop/sample-v2-code?tabs=apptype) and steps to reproduce the behavior. Make sure to provide verbose level log messages from MSAL, if available. [Learn more](https://learn.microsoft.com/azure/active-directory/develop/msal-logging-dotnet)"
+  validations:
+    required: true
+    
+- type: textarea
+  attributes:
+    label: Relevant code snippets
+    description: "Provide relevant code snippets that can be used to reproduce the issue."
+    render: csharp
+  validations:
+    required: false
+       
+- type: textarea
+  attributes:
+    label: Expected behavior
+    description: "Describe what you expect the behavior to be."
+  validations:
+    required: true
+    
+- type: dropdown
+  attributes:
+    label: Identity provider
+    options: 
+      - Microsoft Entra ID (Work and School accounts and Personal Microsoft accounts)
+      - Azure B2C Basic Policy
+      - Azure B2C Custom Policy
+      - Azure Active Directory Federation Services (ADFS)
+      - Microsoft Entra External ID
+      - Other
+  validations:
+    required: true
+       
+- type: input
+  attributes:
+    label: Regression
+    description: "If this behavior worked before, enter the last working version(s) of MSAL."
+    placeholder: "MSAL version: "
+
+- type: textarea
+  attributes:
+    label: Solution and workarounds
+    description: "Possible solution or workarounds, if you know of any."
+  validations:
+    required: false
+        
+- type: markdown
+  attributes:
+    value: "## Security Reporting"
+- type: markdown
+  attributes:
+    value: |
+      If you find a security issue with our libraries or services [please report it to the Microsoft Security Response Center (MSRC)](https://aka.ms/report-security-issue) with as much detail as possible. Your submission may be eligible for a bounty through the [Microsoft Bounty](http://aka.ms/bugbounty) program. Please do not post security issues to GitHub Issues or any other public site. We will contact you shortly upon receiving the information. We encourage you to get notifications of when security incidents occur by visiting [this page](https://www.microsoft.com/msrc/technical-security-notifications) and subscribing to Security Advisory Alerts.

@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         protected ILoggerAdapter Logger { get; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public IWebUIFactory GetWebUiFactory(ApplicationConfiguration appConfig)
         {
             return appConfig.WebUiFactoryCreator != null ?
@@ -54,61 +54,61 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
               CreateWebUiFactory();
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public string GetDeviceModel()
         {
             return _deviceModel.Value;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public string GetOperatingSystem()
         {
             return _operatingSystem.Value;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public string GetProcessorArchitecture()
         {
             return _processorArchitecture.Value;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public abstract Task<string> GetUserPrincipalNameAsync();
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public string GetCallingApplicationName()
         {
             return _callingApplicationName.Value;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public string GetCallingApplicationVersion()
         {
             return _callingApplicationVersion.Value;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public string GetDeviceId()
         {
             return _deviceId.Value;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public abstract string GetDefaultRedirectUri(string clientId, bool useRecommendedRedirectUri = false);
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public string GetProductName()
         {
             return _productName.Value;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public string GetRuntimeVersion()
         {
             return _runtimeVersion.Value;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public abstract ILegacyCachePersistence CreateLegacyCachePersistence();
 
         public ITokenCacheAccessor UserTokenCacheAccessorForTest { get; set; }
@@ -128,10 +128,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public ICryptographyManager CryptographyManager => _cryptographyManager.Value;
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public IPlatformLogger PlatformLogger => _platformLogger.Value;
 
         protected abstract IWebUIFactory CreateWebUiFactory();

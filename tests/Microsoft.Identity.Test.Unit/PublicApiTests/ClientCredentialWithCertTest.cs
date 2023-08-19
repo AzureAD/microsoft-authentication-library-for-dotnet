@@ -191,7 +191,6 @@ namespace Microsoft.Identity.Test.Unit
                 harness.HttpManager.AddMockHandler(CreateTokenResponseHttpHandlerWithX5CValidation(
                     true, expectX5c ? exportedCertificate : null));
 
-
                 var builder = app.AcquireTokenForClient(TestConstants.s_scope);
 
                 if (requestFlag != null)

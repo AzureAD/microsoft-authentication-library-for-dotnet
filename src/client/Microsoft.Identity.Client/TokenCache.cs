@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client
             LegacyCachePersistence = legacyCachePersistenceForTest;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void SetIosKeychainSecurityGroup(string securityGroup)
         {
 #if iOS
