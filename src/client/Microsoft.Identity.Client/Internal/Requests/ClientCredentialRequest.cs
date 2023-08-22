@@ -17,6 +17,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class ClientCredentialRequest : RequestBase
     {
         private readonly AcquireTokenForClientParameters _clientParameters;
+        private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
 
         public ClientCredentialRequest(
             IServiceBundle serviceBundle,
@@ -51,23 +52,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (!_clientParameters.ForceRefresh &&
                 string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
-                cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+                cachedAccessTokenItem = await TryGetCachedAccessTokenAsync().ConfigureAwait(false);
 
                 if (cachedAccessTokenItem != null)
                 {
-                    AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
-
-                    Metrics.IncrementTotalAccessTokensFromCache();
-                    authResult = new AuthenticationResult(
-                                                            cachedAccessTokenItem,
-                                                            null,
-                                                            AuthenticationRequestParameters.AuthenticationScheme,
-                                                            AuthenticationRequestParameters.RequestContext.CorrelationId,
-                                                            TokenSource.Cache,
-                                                            AuthenticationRequestParameters.RequestContext.ApiEvent,
-                                                            account: null,
-                                                            spaAuthCode: null,
-                                                            additionalResponseParameters: null);
+                    authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
                 }
                 else
                 {
@@ -106,7 +95,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
-                        () => FetchNewAccessTokenAsync(cancellationToken), logger);
+                        () => FetchNewAccessTokenAsync(cancellationToken, shouldRefresh), logger);
                     }
                 }
 
@@ -118,20 +107,40 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)
+        private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken, bool proactivelyRefreshed = false)
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
             MsalTokenResponse msalTokenResponse;
-            if (ServiceBundle.Config.AppTokenProvider != null)
-            {
-                msalTokenResponse = await SendTokenRequestToProviderAsync(cancellationToken).ConfigureAwait(false);
-            }
-            else
+
+            if (ServiceBundle.Config.AppTokenProvider == null)
             {
                 msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+                return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
             }
 
-            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+            //allow only one call to the provider 
+            await s_semaphoreSlim.WaitAsync().ConfigureAwait(false);
+
+            try
+            {
+                MsalAccessTokenCacheItem cachedAccessTokenItem = await TryGetCachedAccessTokenAsync().ConfigureAwait(false);
+
+                if (cachedAccessTokenItem != null && !_clientParameters.ForceRefresh && 
+                    !proactivelyRefreshed && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
+                {
+                    var authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
+                    return authResult;
+                }
+                else
+                {
+                    msalTokenResponse = await SendTokenRequestToProviderAsync(cancellationToken).ConfigureAwait(false);
+                    return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                s_semaphoreSlim.Release();
+            }
         }
 
         private async Task<MsalTokenResponse> SendTokenRequestToProviderAsync(CancellationToken cancellationToken)
@@ -151,6 +160,35 @@ namespace Microsoft.Identity.Client.Internal.Requests
             tokenResponse.Scope = appTokenProviderParameters.Scopes.AsSingleString();
             tokenResponse.CorrelationId = appTokenProviderParameters.CorrelationId;
             return tokenResponse;
+        }
+
+        private async Task<MsalAccessTokenCacheItem> TryGetCachedAccessTokenAsync()
+        {
+            MsalAccessTokenCacheItem cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+
+            if (cachedAccessTokenItem != null && !_clientParameters.ForceRefresh)
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
+                Metrics.IncrementTotalAccessTokensFromCache();
+                return cachedAccessTokenItem;
+            }
+
+            return null;
+        }
+
+        private AuthenticationResult CreateAuthenticationResultFromCache(MsalAccessTokenCacheItem cachedAccessTokenItem)
+        {
+            AuthenticationResult authResult = new AuthenticationResult(
+                                                            cachedAccessTokenItem,
+                                                            null,
+                                                            AuthenticationRequestParameters.AuthenticationScheme,
+                                                            AuthenticationRequestParameters.RequestContext.CorrelationId,
+                                                            TokenSource.Cache,
+                                                            AuthenticationRequestParameters.RequestContext.ApiEvent,
+                                                            account: null,
+                                                            spaAuthCode: null,
+                                                            additionalResponseParameters: null);
+            return authResult;
         }
 
         protected override SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)

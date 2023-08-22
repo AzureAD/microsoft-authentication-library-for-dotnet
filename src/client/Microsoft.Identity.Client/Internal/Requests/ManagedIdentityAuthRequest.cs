@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -18,7 +16,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class ManagedIdentityAuthRequest : RequestBase
     {
         private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
-        private static readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
 
         public ManagedIdentityAuthRequest(
             IServiceBundle serviceBundle,
@@ -45,23 +43,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (!_managedIdentityParameters.ForceRefresh)
             {
-                cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+                cachedAccessTokenItem = await TryGetCachedAccessTokenAsync().ConfigureAwait(false);
 
                 if (cachedAccessTokenItem != null)
                 {
-                    AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
-
-                    Metrics.IncrementTotalAccessTokensFromCache();
-                    authResult = new AuthenticationResult(
-                                                            cachedAccessTokenItem,
-                                                            null,
-                                                            AuthenticationRequestParameters.AuthenticationScheme,
-                                                            AuthenticationRequestParameters.RequestContext.CorrelationId,
-                                                            TokenSource.Cache,
-                                                            AuthenticationRequestParameters.RequestContext.ApiEvent,
-                                                            account: null, 
-                                                            spaAuthCode: null,
-                                                            additionalResponseParameters: null);
+                    authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
                 }
                 else
                 {
@@ -100,7 +86,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
-                        () => FetchNewAccessTokenAsync(cancellationToken), logger);
+                        () => FetchNewAccessTokenAsync(cancellationToken, shouldRefresh), logger);
                     }
                 }
 
@@ -113,31 +99,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         }
 
-        private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken)
+        private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken, bool proactivelyRefreshed = false)
         {
-            AuthenticationResult authResult = null;
+            AuthenticationResult authResult;
 
-            await _semaphoreSlim.WaitAsync().ConfigureAwait(false);
+            await s_semaphoreSlim.WaitAsync().ConfigureAwait(false);
 
             try
             {
-                MsalAccessTokenCacheItem cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+                MsalAccessTokenCacheItem cachedAccessTokenItem = await TryGetCachedAccessTokenAsync().ConfigureAwait(false);
 
-                if (cachedAccessTokenItem != null)
+                if (cachedAccessTokenItem != null && !_managedIdentityParameters.ForceRefresh && !proactivelyRefreshed)
                 {
-                    AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
-
-                    Metrics.IncrementTotalAccessTokensFromCache();
-                    authResult = new AuthenticationResult(
-                                                            cachedAccessTokenItem,
-                                                            null,
-                                                            AuthenticationRequestParameters.AuthenticationScheme,
-                                                            AuthenticationRequestParameters.RequestContext.CorrelationId,
-                                                            TokenSource.Cache,
-                                                            AuthenticationRequestParameters.RequestContext.ApiEvent,
-                                                            account: null,
-                                                            spaAuthCode: null,
-                                                            additionalResponseParameters: null);
+                    authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
                 }
                 else
                 {
@@ -148,7 +122,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             finally
             {
-                _semaphoreSlim.Release();
+                s_semaphoreSlim.Release();
             }
         }
 
@@ -158,7 +132,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ManagedIdentityClient managedIdentityClient = new ManagedIdentityClient(AuthenticationRequestParameters.RequestContext);
 
-            ManagedIdentityResponse managedIdentityResponse = 
+            ManagedIdentityResponse managedIdentityResponse =
                 await managedIdentityClient
                 .SendTokenRequestForManagedIdentityAsync(_managedIdentityParameters, cancellationToken)
                 .ConfigureAwait(false);
@@ -167,6 +141,35 @@ namespace Microsoft.Identity.Client.Internal.Requests
             msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
 
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+        }
+
+        private async Task<MsalAccessTokenCacheItem> TryGetCachedAccessTokenAsync()
+        {
+            MsalAccessTokenCacheItem cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+
+            if (cachedAccessTokenItem != null && !_managedIdentityParameters.ForceRefresh)
+            {
+                AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
+                Metrics.IncrementTotalAccessTokensFromCache();
+                return cachedAccessTokenItem;
+            }
+
+            return null;
+        }
+
+        private AuthenticationResult CreateAuthenticationResultFromCache(MsalAccessTokenCacheItem cachedAccessTokenItem)
+        {
+            AuthenticationResult authResult = new AuthenticationResult(
+                                                            cachedAccessTokenItem,
+                                                            null,
+                                                            AuthenticationRequestParameters.AuthenticationScheme,
+                                                            AuthenticationRequestParameters.RequestContext.CorrelationId,
+                                                            TokenSource.Cache,
+                                                            AuthenticationRequestParameters.RequestContext.ApiEvent,
+                                                            account: null,
+                                                            spaAuthCode: null,
+                                                            additionalResponseParameters: null);
+            return authResult;
         }
 
         protected override KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)

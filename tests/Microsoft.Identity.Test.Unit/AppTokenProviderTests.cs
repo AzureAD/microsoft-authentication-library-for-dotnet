@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -158,5 +159,60 @@ namespace Microsoft.Identity.Test.Unit
             return token;
         }
 
+        [TestMethod]
+        public async Task MultiThreadedAppTokenProviderCallHasOnlyOneTokenEndpointRequestAsync()
+        {
+            string differentScopesForAt = string.Empty;
+            int totalThreads = 10; // Number of threads to run concurrently
+            int identityProviderHits = 0;
+            int cacheHits = 0;
+            int threadCount = totalThreads;
+
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority("https://login.microsoftonline.com/tid")
+                .WithAppTokenProvider((AppTokenProviderParameters parameters) =>
+                {
+                    return Task.FromResult(GetAppTokenProviderResult(differentScopesForAt));
+                })
+                .BuildConcrete();
+
+#pragma warning disable VSTHRD101
+            ParallelLoopResult result = Parallel.For(0, totalThreads, async (i) =>
+            {
+                try
+                {
+                    var authResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                                    .ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
+
+                    if (authResult.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider)
+                    {
+                        // Increment identity hits count
+                        Interlocked.Increment(ref identityProviderHits);
+                    }
+                    else
+                    {
+                        // Increment cache hits count
+                        Interlocked.Increment(ref cacheHits);
+                    }
+                }
+                finally
+                {
+                    Interlocked.Decrement(ref threadCount);
+                }
+            });
+
+            while (threadCount != 0)
+            {
+                Thread.Sleep(100);
+                Thread.Yield();
+            }
+            
+            Assert.IsTrue(result.IsCompleted);
+
+            Debug.WriteLine($"Total Identity Hits: {identityProviderHits}");
+            Assert.IsTrue(identityProviderHits == 1);
+            Debug.WriteLine($"Total Cache Hits: {cacheHits}");
+            Assert.IsTrue(cacheHits == 9);
+        }
     }
 }
