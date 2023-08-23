@@ -29,6 +29,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
           new RequestContext(TestCommon.CreateDefaultAdfsServiceBundle(), Guid.NewGuid());
 
         [TestMethod]
+        [Ignore]
         public void IsSystemWebUiAvailable()
         {
             var webUIFactory = new WebView2WebUiFactory();

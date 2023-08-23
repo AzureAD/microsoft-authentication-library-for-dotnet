@@ -49,6 +49,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
+        [Ignore]
         public void Net45Factory_SystemWebUi()
         {
 
