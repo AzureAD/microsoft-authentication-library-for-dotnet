@@ -702,7 +702,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void MultiThreadedManagedIdentityCallHasOnlyOneTokenEndpointRequest()
+        public void ParallelRequests_CallTokenEndpointOnce()
         {
             int totalThreads = 10; // Number of threads to run concurrently
             int identityProviderHits = 0;

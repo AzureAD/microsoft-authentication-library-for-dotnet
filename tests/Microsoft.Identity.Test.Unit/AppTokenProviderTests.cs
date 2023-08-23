@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MultiThreadedAppTokenProviderCallHasOnlyOneTokenEndpointRequestAsync()
+        public async Task ParallelRequests_CallTokenEndpointOnce()
         {
             string differentScopesForAt = string.Empty;
             int totalThreads = 10; // Number of threads to run concurrently
