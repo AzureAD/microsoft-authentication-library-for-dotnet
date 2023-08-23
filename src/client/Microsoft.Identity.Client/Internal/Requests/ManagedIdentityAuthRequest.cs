@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 if (cachedAccessTokenItem == null)
                 {
-                    authResult = await FetchNewAccessTokenAsync(proactivelyRefresh, cancellationToken).ConfigureAwait(false);
+                    authResult = await GetAccessTokenAsync(proactivelyRefresh, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
-                        () => FetchNewAccessTokenAsync(proactivelyRefresh, cancellationToken), logger);
+                        () => GetAccessTokenAsync(proactivelyRefresh, cancellationToken), logger);
                     }
                 }
 
@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         }
 
-        private async Task<AuthenticationResult> FetchNewAccessTokenAsync(bool proactivelyRefresh, CancellationToken cancellationToken)
+        private async Task<AuthenticationResult> GetAccessTokenAsync(bool proactivelyRefresh, CancellationToken cancellationToken)
         {
             AuthenticationResult authResult;
             
