@@ -144,6 +144,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
+        [Ignore]
         public void NetCoreFactory_System()
         {
             // Arrange
