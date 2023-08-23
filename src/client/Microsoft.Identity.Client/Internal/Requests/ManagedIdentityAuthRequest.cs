@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (!_managedIdentityParameters.ForceRefresh)
             {
-                cachedAccessTokenItem = await TryGetCachedAccessTokenAsync().ConfigureAwait(false);
+                cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
 
                 if (cachedAccessTokenItem != null)
                 {
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             try
             {
-                MsalAccessTokenCacheItem cachedAccessTokenItem = await TryGetCachedAccessTokenAsync().ConfigureAwait(false);
+                MsalAccessTokenCacheItem cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
 
                 // Bypass cache and send request to token endpoint, when
                 // 1. Force refresh is requested, or
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 
-        private async Task<MsalAccessTokenCacheItem> TryGetCachedAccessTokenAsync()
+        private async Task<MsalAccessTokenCacheItem> GetCachedAccessTokenAsync()
         {
             MsalAccessTokenCacheItem cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 

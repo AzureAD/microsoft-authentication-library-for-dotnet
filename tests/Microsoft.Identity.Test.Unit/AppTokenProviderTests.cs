@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task ParallelRequests_CallTokenEndpointOnce()
+        public async Task ParallelRequests_CallTokenEndpointOnceAsync()
         {
             int numOfTasks = 10; 
             int identityProviderHits = 0;
