@@ -37,6 +37,9 @@ steps:
   parameters:
     BuildConfiguration: '$(BuildConfiguration)'
 
+- powershell: 'powershell.exe -File "$(MsalSourceDir)build\installChromeDriver.ps1" -ExecutionPolicy Bypass'
+  displayName: 'Install ChromeDriver'
+
 - task: VSTest@2
   displayName: 'Run cache compat tests'
   condition: and(succeeded(), eq(variables['RunTests'], 'true'))
