@@ -38,6 +38,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
+            bool proactivelyRefresh = false;
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
@@ -82,20 +83,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 if (cachedAccessTokenItem == null)
                 {
-                    authResult = await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                    authResult = await FetchNewAccessTokenAsync(proactivelyRefresh, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-                    var shouldRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
+                    proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
 
                     // may fire a request to get a new token in the background
-                    if (shouldRefresh)
+                    if (proactivelyRefresh)
                     {
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ProactivelyRefreshed;
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
-                        () => FetchNewAccessTokenAsync(cancellationToken, shouldRefresh), logger);
+                        () => FetchNewAccessTokenAsync(proactivelyRefresh, cancellationToken), logger);
                     }
                 }
 
@@ -107,10 +108,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken, bool proactivelyRefreshed = false)
+        private async Task<AuthenticationResult> FetchNewAccessTokenAsync(bool proactivelyRefresh, CancellationToken cancellationToken)
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
             MsalTokenResponse msalTokenResponse;
+            AuthenticationResult authResult;
 
             if (ServiceBundle.Config.AppTokenProvider == null)
             {
@@ -125,17 +127,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 MsalAccessTokenCacheItem cachedAccessTokenItem = await TryGetCachedAccessTokenAsync().ConfigureAwait(false);
 
-                if (cachedAccessTokenItem != null && !_clientParameters.ForceRefresh && 
-                    !proactivelyRefreshed && string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
+                //Bypass cache and send request to token endpoint, when 
+                // 1. Force refresh is requested, or
+                // 2. Claims are passed, or 
+                // 3. No AT is found in the cache, or
+                // 4. If the AT needs to be refreshed pro-actively 
+                if (cachedAccessTokenItem == null || _clientParameters.ForceRefresh ||
+                    proactivelyRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
                 {
-                    var authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
-                    return authResult;
+                    msalTokenResponse = await SendTokenRequestToProviderAsync(cancellationToken).ConfigureAwait(false);
+                    authResult = await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
                 }
                 else
                 {
-                    msalTokenResponse = await SendTokenRequestToProviderAsync(cancellationToken).ConfigureAwait(false);
-                    return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+                    authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
                 }
+                
+                return authResult;
             }
             finally
             {

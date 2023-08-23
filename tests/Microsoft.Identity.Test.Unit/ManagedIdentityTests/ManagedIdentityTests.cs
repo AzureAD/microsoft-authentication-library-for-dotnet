@@ -702,12 +702,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public void MultiThreadedManagedIdentityCallHasOnlyOneTokenEndpointRequest()
+        public async Task ParallelRequests_CallTokenEndpointOnceAsync()
         {
-            int totalThreads = 10; // Number of threads to run concurrently
+            int numOfTasks = 10; 
             int identityProviderHits = 0;
             int cacheHits = 0;
-            int threadCount = totalThreads;
 
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))
@@ -730,44 +729,42 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                         MockHelpers.GetMsiSuccessfulResponse(),
                         ManagedIdentitySource.AppService);
 
-#pragma warning disable VSTHRD101 
-                ParallelLoopResult result = Parallel.For(0, totalThreads, async (i) =>
+                Task[] tasks = new Task[numOfTasks];
+                for (int i = 0; i < numOfTasks; i++)
                 {
-                    try
+                    tasks[i] = Task.Run(async () =>
                     {
-                        var authResult = await mi.AcquireTokenForManagedIdentity(Resource)
-                        .ExecuteAsync()
-                        .ConfigureAwait(false);
-
-                        if (authResult.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider)
+                        try
                         {
-                            // Increment identity hits count
-                            Interlocked.Increment(ref identityProviderHits);
-                        }
-                        else
-                        {
-                            // Increment cache hits count
-                            Interlocked.Increment(ref cacheHits);
-                        }
-                    }
-                    finally
-                    {
-                        Interlocked.Decrement(ref threadCount);
-                    }
-                });
+                            AuthenticationResult authResult = await mi.AcquireTokenForManagedIdentity(Resource)
+                            .ExecuteAsync()
+                            .ConfigureAwait(false);
 
-                while (threadCount != 0)
-                {
-                    Thread.Sleep(100);
-                    Thread.Yield();
+                            if (authResult.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider)
+                            {
+                                // Increment identity hits count
+                                Interlocked.Increment(ref identityProviderHits);
+                                Assert.IsTrue(identityProviderHits == 1);
+                            }
+                            else
+                            {
+                                // Increment cache hits count
+                                Interlocked.Increment(ref cacheHits);
+                            }
+                        }
+                        finally
+                        {
+
+                        }
+                    });
                 }
-                Assert.IsTrue(result.IsCompleted);
-            }
 
-            Debug.WriteLine($"Total Identity Hits: {identityProviderHits}");
-            Assert.IsTrue(identityProviderHits == 1);
-            Debug.WriteLine($"Total Cache Hits: {cacheHits}");
-            Assert.IsTrue(cacheHits == 9);
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+
+                Debug.WriteLine($"Total Identity Hits: {identityProviderHits}");
+                Debug.WriteLine($"Total Cache Hits: {cacheHits}");
+                Assert.IsTrue(cacheHits == 9);
+            }
         }
     }
 }

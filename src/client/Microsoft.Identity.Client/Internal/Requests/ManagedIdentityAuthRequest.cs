@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -37,7 +38,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             AuthenticationResult authResult = null;
+            bool proactivelyRefresh = false;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
+
             var logger = AuthenticationRequestParameters.RequestContext.Logger;
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
@@ -73,20 +76,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 if (cachedAccessTokenItem == null)
                 {
-                    authResult = await FetchNewAccessTokenAsync(cancellationToken).ConfigureAwait(false);
+                    authResult = await FetchNewAccessTokenAsync(proactivelyRefresh, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-                    var shouldRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
+                    proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
 
                     // may fire a request to get a new token in the background
-                    if (shouldRefresh)
+                    if (proactivelyRefresh)
                     {
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ProactivelyRefreshed;
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
-                        () => FetchNewAccessTokenAsync(cancellationToken, shouldRefresh), logger);
+                        () => FetchNewAccessTokenAsync(proactivelyRefresh, cancellationToken), logger);
                     }
                 }
 
@@ -99,23 +102,27 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         }
 
-        private async Task<AuthenticationResult> FetchNewAccessTokenAsync(CancellationToken cancellationToken, bool proactivelyRefreshed = false)
+        private async Task<AuthenticationResult> FetchNewAccessTokenAsync(bool proactivelyRefresh, CancellationToken cancellationToken)
         {
             AuthenticationResult authResult;
-
+            
             await s_semaphoreSlim.WaitAsync().ConfigureAwait(false);
 
             try
             {
                 MsalAccessTokenCacheItem cachedAccessTokenItem = await TryGetCachedAccessTokenAsync().ConfigureAwait(false);
 
-                if (cachedAccessTokenItem != null && !_managedIdentityParameters.ForceRefresh && !proactivelyRefreshed)
+                // Bypass cache and send request to token endpoint, when
+                // 1. Force refresh is requested, or
+                // 2. No AT is found in the cache, or
+                // 3. If the AT needs to be refreshed pro-actively 
+                if (cachedAccessTokenItem == null || _managedIdentityParameters.ForceRefresh || proactivelyRefresh)
                 {
-                    authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
+                    authResult = await SendTokenRequestForManagedIdentityAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-                    authResult = await SendTokenRequestForManagedIdentityAsync(cancellationToken).ConfigureAwait(false);
+                    authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
                 }
 
                 return authResult;
