@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             bool proactivelyRefresh = false;
-            var logger = AuthenticationRequestParameters.RequestContext.Logger;
+            ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
             AuthenticationResult authResult = null;
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 if (cachedAccessTokenItem == null)
                 {
-                    authResult = await GetAccessTokenAsync(proactivelyRefresh, cancellationToken).ConfigureAwait(false);
+                    authResult = await GetAccessTokenAsync(proactivelyRefresh, cancellationToken, logger).ConfigureAwait(false);
                 }
                 else
                 {
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
-                        () => GetAccessTokenAsync(proactivelyRefresh, cancellationToken), logger);
+                        () => GetAccessTokenAsync(proactivelyRefresh, cancellationToken, logger), logger);
                     }
                 }
 
@@ -108,7 +108,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private async Task<AuthenticationResult> GetAccessTokenAsync(bool proactivelyRefresh, CancellationToken cancellationToken)
+        private async Task<AuthenticationResult> GetAccessTokenAsync(
+            bool proactivelyRefresh, 
+            CancellationToken cancellationToken, 
+            ILoggerAdapter logger)
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
             MsalTokenResponse msalTokenResponse;
@@ -121,7 +124,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             //allow only one call to the provider 
+            logger.Verbose(() => "[GetAccessTokenAsync] Entering token acquire for client credential request semaphore.");
             await s_semaphoreSlim.WaitAsync().ConfigureAwait(false);
+            logger.Verbose(() => "[GetAccessTokenAsync] Entered token acquire for client credential request semaphore.");
 
             try
             {
@@ -135,11 +140,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (cachedAccessTokenItem == null || _clientParameters.ForceRefresh ||
                     proactivelyRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
                 {
+                    logger.Info("[GetAccessTokenAsync] Sending Token response to client credential request endpoint ...");
                     msalTokenResponse = await SendTokenRequestToProviderAsync(cancellationToken).ConfigureAwait(false);
                     authResult = await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
                 }
                 else
                 {
+                    logger.Verbose(() => "[GetAccessTokenAsync] Getting Access token from cache ...");
                     authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
                 }
                 
@@ -148,6 +155,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             finally
             {
                 s_semaphoreSlim.Release();
+                logger.Verbose(() => "[GetAccessTokenAsync] Released token acquire for client credential request semaphore. ");
             }
         }
 
