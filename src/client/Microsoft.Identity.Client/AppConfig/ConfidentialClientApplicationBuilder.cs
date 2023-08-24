@@ -82,8 +82,7 @@ namespace Microsoft.Identity.Client
 
             var config = new ApplicationConfiguration(MsalClientType.ConfidentialClient);
             return new ConfidentialClientApplicationBuilder(config)
-                .WithClientId(clientId)
-                .WithCacheSynchronization(false);
+                .WithClientId(clientId);
         }
 
         /// <summary>
