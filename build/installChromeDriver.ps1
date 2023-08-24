@@ -1,5 +1,5 @@
-$url = "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/116.0.5845.96/win64/chrome-win64.zip" #Chrome Driver from https://chromedriver.chromium.org/downloads
-$fileName = "chrome-win64.zip"
+$url = "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/116.0.5845.96/win64/chromedriver-win64.zip" #Chrome Driver from https://chromedriver.chromium.org/downloads
+$fileName = "chromedriver-win64.zip"
 $source = "C:\Downloads\$fileName"
 $destination = "C:\Program Files\dotnet\"
 
