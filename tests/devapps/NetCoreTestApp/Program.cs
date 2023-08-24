@@ -11,6 +11,7 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
@@ -49,6 +50,8 @@ namespace NetCoreTestApp
             "72f988bf-86f1-41af-91ab-2d7cd011db47" };
 
         private static int s_currentTid = 0;
+
+        private static string s_scope = "https://management.azure.com";
 
         [DllImport("kernel32.dll")]
         static extern IntPtr GetConsoleWindow();
@@ -108,6 +111,15 @@ namespace NetCoreTestApp
             return pca;
         }
 
+        private static IManagedIdentityApplication CreateMia()
+        {
+            IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
+                            .Create(ManagedIdentityId.SystemAssigned)
+                            .Build();
+
+            return mia;
+        }
+
         private static async Task RunConsoleAppLogicAsync(IPublicClientApplication pca)
         {
             while (true)
@@ -136,6 +148,8 @@ namespace NetCoreTestApp
                        10. Acquire Token Interactive with Chrome
                        11. AcquireTokenForClient with multiple threads
                        12. Acquire Token Interactive with Broker
+                       13. Acquire Token using Managed Identity (VM)
+                       14. Acquire Token using Managed Identity (VM) - multiple requests in parallel
                         0. Exit App
                     Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);
@@ -302,6 +316,53 @@ namespace NetCoreTestApp
 
                                 await FetchTokenAndCallGraphAsync(pcaBroker, authTask).ConfigureAwait(false);
                             }
+                            break;
+
+                        case 'f': // managed identity on a vm
+
+                            IManagedIdentityApplication mia1 = CreateMia();
+
+                            AuthenticationResult authenticationResult1 = await mia1.AcquireTokenForManagedIdentity(s_scope)
+                                .ExecuteAsync()
+                                .ConfigureAwait(false);
+
+                            Console.WriteLine($"Managed Identity token - {authenticationResult1.AccessToken}");
+
+                            break;
+
+                        case 'g': // managed identity on a vm - multi threaded
+
+                            IManagedIdentityApplication mia2 = CreateMia();
+                            int identityProviderHits = 0;
+                            int cacheHits = 0;
+
+                            Task[] miTasks = new Task[10];
+                            for (int i = 0; i < 10; i++)
+                            {
+                                miTasks[i] = Task.Run(async () =>
+                                {
+                                    AuthenticationResult authResult = await mia2.AcquireTokenForManagedIdentity(s_scope)
+                                    .ExecuteAsync()
+                                    .ConfigureAwait(false);
+
+                                    if (authResult.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider)
+                                    {
+                                        // Increment identity hits count
+                                        Interlocked.Increment(ref identityProviderHits);
+                                    }
+                                    else
+                                    {
+                                        // Increment cache hits count
+                                        Interlocked.Increment(ref cacheHits);
+                                    }
+                                });
+                            }
+
+                            await Task.WhenAll(miTasks).ConfigureAwait(false);
+
+                            Console.WriteLine($"identity Provider Hits (must be 1 always) - {identityProviderHits}");
+                            Console.WriteLine($"cache Hits - {cacheHits}");
+
                             break;
 
                         case 0:

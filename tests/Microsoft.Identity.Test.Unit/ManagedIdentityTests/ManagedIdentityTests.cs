@@ -734,27 +734,20 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 {
                     tasks[i] = Task.Run(async () =>
                     {
-                        try
-                        {
-                            AuthenticationResult authResult = await mi.AcquireTokenForManagedIdentity(Resource)
-                            .ExecuteAsync()
-                            .ConfigureAwait(false);
+                        AuthenticationResult authResult = await mi.AcquireTokenForManagedIdentity(Resource)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
 
-                            if (authResult.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider)
-                            {
-                                // Increment identity hits count
-                                Interlocked.Increment(ref identityProviderHits);
-                                Assert.IsTrue(identityProviderHits == 1);
-                            }
-                            else
-                            {
-                                // Increment cache hits count
-                                Interlocked.Increment(ref cacheHits);
-                            }
+                        if (authResult.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider)
+                        {
+                            // Increment identity hits count
+                            Interlocked.Increment(ref identityProviderHits);
+                            Assert.IsTrue(identityProviderHits == 1);
                         }
-                        finally
+                        else
                         {
-
+                            // Increment cache hits count
+                            Interlocked.Increment(ref cacheHits);
                         }
                     });
                 }
