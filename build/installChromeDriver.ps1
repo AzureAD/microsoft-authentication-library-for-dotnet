@@ -2,6 +2,8 @@ $url = "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/116.0.5845.9
 $fileName = "chromedriver-win64.zip"
 $source = "C:\Downloads\$fileName"
 $destination = "C:\Program Files\dotnet\"
+$driverDestination = "C:\Program Files\dotnet\"
+$driverSource = "C:\Program Files\dotnet\chromedriver-win64\chromedriver.exe"
 
 #$ErrorActionPreference = "Stop"
 
@@ -20,4 +22,4 @@ Get-File -Url $url -FileName $fileName
 echo "Expanding"
 Expand-Archive -LiteralPath "$source" -DestinationPath $destination -Force
 
-#Expand-ArchiveWith7Zip -Source $source -Destination $destination
+Move-Item -Path $driverSource -Destination $driverDestination -Force
