@@ -97,50 +97,33 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        public void CacheSynchronizationWithDefaultCCA()
+        public void CacheSynchronization_Default_IsTrue()
         {
-            //Validate CacheSynchronizationEnabled when app is created from ApplicaitonOptions for CCA
-            var options = new ConfidentialClientApplicationOptions()
+            var ccaOptions = new ConfidentialClientApplicationOptions()
             {
                 ClientSecret = "secret",
                 ClientId = TestConstants.ClientId,
             };
-            var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
-            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+            var cca = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(ccaOptions).Build();
+            Assert.IsTrue((cca.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
 
-            options = new ConfidentialClientApplicationOptions
+            cca = ConfidentialClientApplicationBuilder.Create(Guid.NewGuid().ToString()).WithClientSecret(TestConstants.ClientSecret).Build();
+            Assert.IsTrue((cca.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+        }
+
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public void CacheSynchronization_WithOptions(bool enableCacheSynchronization)
+        {
+            var ccaOptions = new ConfidentialClientApplicationOptions
             {
                 ClientId = TestConstants.ClientId,
                 ClientSecret = "secret",
-                EnableCacheSynchronization = false
+                EnableCacheSynchronization = enableCacheSynchronization
             };
-            app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
-            Assert.AreEqual(false, (app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
-
-            options = new ConfidentialClientApplicationOptions
-            {
-                ClientId = TestConstants.ClientId,
-                ClientSecret = "secret",
-                EnableCacheSynchronization = true
-            };
-            app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
-            Assert.AreEqual(true, (app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
-
-            //Validate CacheSynchronizationEnabled is false by default when app is created from ConfidentialClientApplicationBuilder
-            app = ConfidentialClientApplicationBuilder.Create(Guid.NewGuid().ToString()).WithClientSecret(TestConstants.ClientSecret).BuildConcrete();
-            Assert.IsFalse((app.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
-
-            //Validate CacheSynchronizationEnabled when app is created from ApplicaitonOptions for PCA
-            var options2 = new PublicClientApplicationOptions()
-            {
-                ClientId = TestConstants.ClientId
-            };
-            var app2 = PublicClientApplicationBuilder.CreateWithApplicationOptions(options2).Build();
-            Assert.IsTrue((app2.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
-
-            //Validate CacheSynchronizationEnabled is true by default when app is created from PublicClientApplicationBuilder
-            app2 = PublicClientApplicationBuilder.Create(Guid.NewGuid().ToString()).BuildConcrete();
-            Assert.IsTrue((app2.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+            var cca = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(ccaOptions).Build();
+            Assert.AreEqual(enableCacheSynchronization, (cca.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
         }
 
         [DataTestMethod]
@@ -148,7 +131,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [DataRow(true, true, true)]
         [DataRow(true, false, false)]
         [DataRow(false, true, true)]
-        public void CacheSynchronizationNoDefault(bool optionFlag, bool builderFlag, bool result)
+        public void CacheSynchronization_WithCacheSynchronization_TakesPrecedence(bool optionFlag, bool builderFlag, bool result)
         {
             var options = new ConfidentialClientApplicationOptions
             {
