@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1692408331450,
+  "lastUpdate": 1692903124450,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -280,6 +280,40 @@ window.BENCHMARK_DATA = {
             "value": 658685.6,
             "unit": "ns",
             "range": "± 90486.9176668685"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Peter",
+            "username": "pmaytak",
+            "email": "34331512+pmaytak@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "80c848b5b7bfc033b11ee82107344bfc22efc0da",
+          "message": "Add perf links to README.md (#4306)\n\nUpdate README.md",
+          "timestamp": "2023-08-21T09:29:55Z",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/80c848b5b7bfc033b11ee82107344bfc22efc0da"
+        },
+        "date": 1692903119328,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 562021.425,
+            "unit": "ns",
+            "range": "± 83493.61240447522"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 934215.213483146,
+            "unit": "ns",
+            "range": "± 246422.65030290172"
           }
         ]
       }
