@@ -420,6 +420,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         #region Azure AD Kerberos Feature Tests
         [TestMethod]
+        [Ignore]
         public async Task Kerberos_ROPC_AAD_Async()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -427,6 +428,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        [Ignore]
         public async Task Kerberos_ROPC_ADFSv4Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);

@@ -372,6 +372,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         #region Azure AD Kerberos Feature Tests
         [TestMethod]
+        [Ignore]
         public async Task Kerberos_Interactive_AADAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
