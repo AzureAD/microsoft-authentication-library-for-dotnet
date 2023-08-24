@@ -110,6 +110,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationResult authResult;
 
             logger.Verbose(() => "[GetAccessTokenAsync] Entering token acquire for managed identity endpoint semaphore.");
+            // Requests to a managed identity endpoint must be throttled; 
+            // otherwise, the endpoint will throw an HTTP 429.
             await s_semaphoreSlim.WaitAsync().ConfigureAwait(false);
             logger.Verbose(() => "[GetAccessTokenAsync] Entered token acquire for managed identity endpoint semaphore.");
 
