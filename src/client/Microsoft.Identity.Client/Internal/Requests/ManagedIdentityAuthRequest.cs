@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
-            //when force refresh skip checking cache 
+            //skip checking cache for force refresh
             if (_managedIdentityParameters.ForceRefresh)
             {
                 cacheInfoTelemetry = CacheRefreshReason.ForceRefreshOrClaims;
@@ -57,6 +57,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (cachedAccessTokenItem != null)
             {
+                //return the token in the cache and check if it needs to be proactively refreshed
                 authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
 
                 try
@@ -95,7 +96,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         private async Task<AuthenticationResult> GetAccessTokenAsync(
-            bool proactivelyRefresh, 
+            bool proactiveRefresh, 
             CancellationToken cancellationToken, 
             ILoggerAdapter logger)
         {
@@ -110,27 +111,30 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             try
             {
-                //skip checking cache if a force refresh was initiated
-                if (!_managedIdentityParameters.ForceRefresh)
+                //Check cache only when it is not a force refresh or a pro active refresh
+                if (!_managedIdentityParameters.ForceRefresh && !proactiveRefresh)
                 {
                     logger.Info("[GetAccessTokenAsync] checking token cache inside managed identity endpoint semaphore.");
                     cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
+                }
+
+                //when multiple threads try reaching the managed identity endpoint 
+                //check cache again to make sure if a previous thread already acquired 
+                //a token from the endpoint and cached it
+                if (cachedAccessTokenItem != null)
+                {
+                    logger.Info("[GetAccessTokenAsync] Getting Access token from cache inside managed identity endpoint semaphore.");
+                    authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
+                    return authResult;   
                 }
 
                 // Bypass cache and send request to token endpoint, when
                 // 1. Force refresh is requested, or
                 // 2. No AT is found in the cache, or
                 // 3. If the AT needs to be refreshed pro-actively 
-                if (cachedAccessTokenItem == null || proactivelyRefresh)
-                {
-                    logger.Info("[GetAccessTokenAsync] Sending Token response to managed identity endpoint ...");
-                    authResult = await SendTokenRequestForManagedIdentityAsync(cancellationToken).ConfigureAwait(false);
-                }
-                else
-                {
-                    logger.Info("[GetAccessTokenAsync] Getting Access token from cache inside managed identity endpoint semaphore.");
-                    authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
-                }
+
+                logger.Info("[GetAccessTokenAsync] Sending Token response to managed identity endpoint ...");
+                authResult = await SendTokenRequestForManagedIdentityAsync(cancellationToken).ConfigureAwait(false);
 
                 return authResult;
             }
@@ -162,7 +166,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             MsalAccessTokenCacheItem cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
 
-            if (cachedAccessTokenItem != null && !_managedIdentityParameters.ForceRefresh)
+            if (cachedAccessTokenItem != null)
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
                 Metrics.IncrementTotalAccessTokensFromCache();
