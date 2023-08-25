@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Performance
                         //.AddDiagnoser(new EtwProfiler()) // https://adamsitnik.com/ETW-Profiler/
                 .AddJob(
                     Job.Default
-                        .WithId("Job-PerfTests")));
+                        .WithId("Job-PerfTests")), args);
             }
             catch (Exception ex)
             {
