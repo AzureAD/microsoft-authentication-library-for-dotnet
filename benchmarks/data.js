@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1692946167601,
+  "lastUpdate": 1692947359045,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -450,6 +450,40 @@ window.BENCHMARK_DATA = {
             "value": 530896.0625,
             "unit": "ns",
             "range": "± 10413.76025886743"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Peter",
+            "username": "pmaytak",
+            "email": "34331512+pmaytak@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "c6f4a21248aa02b829b0befdc73e9f48a03cc2d1",
+          "message": "Update pipeline-perf-tests-automation.yaml",
+          "timestamp": "2023-08-25T06:49:23Z",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/c6f4a21248aa02b829b0befdc73e9f48a03cc2d1"
+        },
+        "date": 1692947354533,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 400856.3469387755,
+            "unit": "ns",
+            "range": "± 15762.626361575214"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 526049.619047619,
+            "unit": "ns",
+            "range": "± 12247.310686335146"
           }
         ]
       }
