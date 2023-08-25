@@ -308,7 +308,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>
         /// This flag is <c>true</c> by default. The default behavior is recommended.
-        /// Not recommended for apps that call RemoveAsync.
         /// </remarks>
         public ConfidentialClientApplicationBuilder WithCacheSynchronization(bool enableCacheSynchronization)
         {
