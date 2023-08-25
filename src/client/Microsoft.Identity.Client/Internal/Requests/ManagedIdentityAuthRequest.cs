@@ -44,62 +44,54 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
-            if (!_managedIdentityParameters.ForceRefresh)
-            {
-                cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
-
-                if (cachedAccessTokenItem != null)
-                {
-                    authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
-                }
-                else
-                {
-                    if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != CacheRefreshReason.Expired)
-                    {
-                        cacheInfoTelemetry = CacheRefreshReason.NoCachedAccessToken;
-                    }
-                }
-            }
-            else
+            //when force refresh skip checking cache 
+            if (_managedIdentityParameters.ForceRefresh)
             {
                 cacheInfoTelemetry = CacheRefreshReason.ForceRefreshOrClaims;
-                logger.Info("Skipped looking for an Access Token in the cache because ForceRefresh or Claims were set. ");
+                logger.Info("Skipped looking for an Access Token in the cache because ForceRefresh was set.");
+                authResult = await GetAccessTokenAsync(false, cancellationToken, logger).ConfigureAwait(false);
+                return authResult;
             }
 
-            if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.NotApplicable)
-            {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = cacheInfoTelemetry;
-            }
+            cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
 
-            // No AT in the cache or AT needs to be refreshed
-            try
+            if (cachedAccessTokenItem != null)
             {
-                if (cachedAccessTokenItem == null)
-                {
-                    authResult = await GetAccessTokenAsync(proactivelyRefresh, cancellationToken, logger).ConfigureAwait(false);
-                }
-                else
-                {
+                authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
+
+                try
+                {  
                     proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
 
-                    // may fire a request to get a new token in the background
+                    // may fire a request to get a new token in the background when AT needs to be refreshed
                     if (proactivelyRefresh)
                     {
-                        AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ProactivelyRefreshed;
+                        cacheInfoTelemetry = CacheRefreshReason.ProactivelyRefreshed;
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
                         () => GetAccessTokenAsync(proactivelyRefresh, cancellationToken, logger), logger);
                     }
                 }
-
-                return authResult;
+                catch (MsalServiceException e)
+                {
+                    return await HandleTokenRefreshErrorAsync(e, cachedAccessTokenItem).ConfigureAwait(false);
+                }
             }
-            catch (MsalServiceException e)
+            else
             {
-                return await HandleTokenRefreshErrorAsync(e, cachedAccessTokenItem).ConfigureAwait(false);
+                //  No AT in the cache 
+                if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != CacheRefreshReason.Expired)
+                {
+                    cacheInfoTelemetry = CacheRefreshReason.NoCachedAccessToken;
+                }
+
+                authResult = await GetAccessTokenAsync(false, cancellationToken, logger).ConfigureAwait(false);
             }
 
+            AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = cacheInfoTelemetry;
+
+            return authResult;
         }
 
         private async Task<AuthenticationResult> GetAccessTokenAsync(
@@ -108,6 +100,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ILoggerAdapter logger)
         {
             AuthenticationResult authResult;
+            MsalAccessTokenCacheItem cachedAccessTokenItem = null;
 
             logger.Verbose(() => "[GetAccessTokenAsync] Entering token acquire for managed identity endpoint semaphore.");
             await s_semaphoreSlim.WaitAsync().ConfigureAwait(false);
@@ -115,20 +108,25 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             try
             {
-                MsalAccessTokenCacheItem cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
+                //skip checking cache if a force refresh was initiated
+                if (!_managedIdentityParameters.ForceRefresh)
+                {
+                    logger.Info("[GetAccessTokenAsync] checking token cache inside managed identity endpoint semaphore.");
+                    cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
+                }
 
                 // Bypass cache and send request to token endpoint, when
                 // 1. Force refresh is requested, or
                 // 2. No AT is found in the cache, or
                 // 3. If the AT needs to be refreshed pro-actively 
-                if (cachedAccessTokenItem == null || _managedIdentityParameters.ForceRefresh || proactivelyRefresh)
+                if (cachedAccessTokenItem == null || proactivelyRefresh)
                 {
                     logger.Info("[GetAccessTokenAsync] Sending Token response to managed identity endpoint ...");
                     authResult = await SendTokenRequestForManagedIdentityAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-                    logger.Info("[GetAccessTokenAsync] Getting Access token from cache ...");
+                    logger.Info("[GetAccessTokenAsync] Getting Access token from cache inside managed identity endpoint semaphore.");
                     authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
                 }
 
@@ -137,7 +135,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             finally
             {
                 s_semaphoreSlim.Release();
-                logger.Verbose(() => "[GetAccessTokenAsync] Released token acquire from managed identity endpoint semaphore. ");
+                logger.Verbose(() => "[GetAccessTokenAsync] Released semaphore on token acquire from managed identity endpoint.");
             }
         }
 
