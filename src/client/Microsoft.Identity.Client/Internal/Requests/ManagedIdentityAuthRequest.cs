@@ -38,7 +38,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             AuthenticationResult authResult = null;
-            bool proactivelyRefresh = false;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
 
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
@@ -49,10 +48,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 cacheInfoTelemetry = CacheRefreshReason.ForceRefreshOrClaims;
                 logger.Info("Skipped looking for an Access Token in the cache because ForceRefresh was set.");
-                authResult = await GetAccessTokenAsync(false, cancellationToken, logger).ConfigureAwait(false);
+                authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
                 return authResult;
             }
 
+            //check cache for AT
             cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
 
             if (cachedAccessTokenItem != null)
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 try
                 {  
-                    proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
+                    var proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
 
                     // may fire a request to get a new token in the background when AT needs to be refreshed
                     if (proactivelyRefresh)
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
-                        () => GetAccessTokenAsync(proactivelyRefresh, cancellationToken, logger), logger);
+                        () => SendTokenRequestForManagedIdentityAsync(cancellationToken), logger);
                     }
                 }
                 catch (MsalServiceException e)
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     cacheInfoTelemetry = CacheRefreshReason.NoCachedAccessToken;
                 }
 
-                authResult = await GetAccessTokenAsync(false, cancellationToken, logger).ConfigureAwait(false);
+                authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
             }
 
             AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = cacheInfoTelemetry;
@@ -96,7 +96,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         private async Task<AuthenticationResult> GetAccessTokenAsync(
-            bool proactiveRefresh, 
             CancellationToken cancellationToken, 
             ILoggerAdapter logger)
         {
@@ -111,8 +110,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             try
             {
-                //Check cache only when it is not a force refresh or a pro active refresh
-                if (!_managedIdentityParameters.ForceRefresh && !proactiveRefresh)
+                //Check cache only when it is not a force refresh
+                if (!_managedIdentityParameters.ForceRefresh)
                 {
                     logger.Info("[GetAccessTokenAsync] checking token cache inside managed identity endpoint semaphore.");
                     cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
@@ -130,8 +129,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 // Bypass cache and send request to token endpoint, when
                 // 1. Force refresh is requested, or
-                // 2. No AT is found in the cache, or
-                // 3. If the AT needs to be refreshed pro-actively 
+                // 2. No AT is found in the cache
 
                 logger.Info("[GetAccessTokenAsync] Sending Token response to managed identity endpoint ...");
                 authResult = await SendTokenRequestForManagedIdentityAsync(cancellationToken).ConfigureAwait(false);
