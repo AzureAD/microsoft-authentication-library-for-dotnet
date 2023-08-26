@@ -37,7 +37,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     MsalErrorMessage.ScopesRequired);
             }
 
-            MsalAccessTokenCacheItem cachedAccessTokenItem = null;
             bool proactivelyRefresh = false;
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
@@ -60,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             //check cache for AT
-            cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
+            MsalAccessTokenCacheItem cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
 
             if (cachedAccessTokenItem != null)
             {
@@ -116,6 +115,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationResult authResult;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
 
+            //calls to AAD
             if (ServiceBundle.Config.AppTokenProvider == null)
             {
                 msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
@@ -127,7 +127,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // 2. Claims are passed, or 
             // 3. If the AT needs to be refreshed pro-actively 
             if (_clientParameters.ForceRefresh ||
-                proactivelyRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
+                proactivelyRefresh || 
+                !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 authResult = await SendTokenRequestToProviderAsync(logger, cancellationToken).ConfigureAwait(false);
                 return authResult;

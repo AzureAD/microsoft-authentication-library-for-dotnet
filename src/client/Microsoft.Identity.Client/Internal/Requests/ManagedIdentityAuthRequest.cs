@@ -38,7 +38,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             AuthenticationResult authResult = null;
-            MsalAccessTokenCacheItem cachedAccessTokenItem = null;
 
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
             CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
@@ -53,7 +52,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             //check cache for AT
-            cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
+            MsalAccessTokenCacheItem cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
 
             if (cachedAccessTokenItem != null)
             {
