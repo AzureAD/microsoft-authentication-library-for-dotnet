@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1692947373911,
+  "lastUpdate": 1693221155186,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -518,6 +518,42 @@ window.BENCHMARK_DATA = {
             "value": 526049.619047619,
             "unit": "ns",
             "range": "± 12247.310686335146"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "208aa5896d0c579b8a3dcb8aca7586f4784619a4",
+          "message": "Move the MSAL desktop cache extension + tests (#4089)\n\n* Move the MSAL desktop cache extension + tests. No build.\r\n\r\n* Test fix\r\n\r\n* Move the MSAL desktop cache extension + tests. No build.\r\n\r\n* Test fix\r\n\r\n* Test fix\r\n\r\n* fix test\r\n\r\n* Build changes\r\n\r\n* Try net6\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* Address PR comments",
+          "timestamp": "2023-08-28T11:03:22Z",
+          "tree_id": "9687fc5c27879f21edb7c1e306eb952c455ff04a",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/208aa5896d0c579b8a3dcb8aca7586f4784619a4"
+        },
+        "date": 1693221144047,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 509074.6210526316,
+            "unit": "ns",
+            "range": "± 50297.46669293805"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 756752.6086956522,
+            "unit": "ns",
+            "range": "± 270247.2054130024"
           }
         ]
       }
