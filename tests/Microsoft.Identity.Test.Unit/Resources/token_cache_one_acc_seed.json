@@ -1,0 +1,57 @@
+﻿{
+    "AccessToken": {
+        "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-accesstoken-1d18b3b0-251b-4714-a02a-9956cec86c2d-49f548d0-12b7-4169-a390-bb5304d24462-files.readwrite files.readwrite.all openid profile user.read user.readbasic.all user.readwrite email": {
+            "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+            "environment": "login.windows.net",
+            "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+            "client_id": "1d18b3b0-251b-4714-a02a-9956cec86c2d",
+            "secret": "secret",
+            "credential_type": "AccessToken",
+            "realm": "49f548d0-12b7-4169-a390-bb5304d24462",
+            "target": "Files.ReadWrite Files.ReadWrite.All openid profile User.Read User.ReadBasic.All User.ReadWrite email",
+            "cached_at": "1583427476",
+            "expires_on": "1583431075",
+            "extended_expires_on": "1583431075",
+            "ext_expires_on": "1583431075"
+        }
+    },
+    "RefreshToken": {
+        "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-refreshtoken-1d18b3b0-251b-4714-a02a-9956cec86c2d--": {
+            "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+            "environment": "login.windows.net",
+            "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+            "client_id": "1d18b3b0-251b-4714-a02a-9956cec86c2d",
+            "secret": "secret",
+            "credential_type": "RefreshToken"
+        }
+    },
+    "IdToken": {
+        "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-idtoken-1d18b3b0-251b-4714-a02a-9956cec86c2d-49f548d0-12b7-4169-a390-bb5304d24462-": {
+            "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+            "environment": "login.windows.net",
+            "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+            "client_id": "1d18b3b0-251b-4714-a02a-9956cec86c2d",
+            "secret": "secret",
+            "credential_type": "IdToken",
+            "realm": "49f548d0-12b7-4169-a390-bb5304d24462"
+        }
+    },
+    "Account": {
+        "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462-login.windows.net-49f548d0-12b7-4169-a390-bb5304d24462": {
+            "home_account_id": "ae821e4d-f408-451a-af82-882691148603.49f548d0-12b7-4169-a390-bb5304d24462",
+            "environment": "login.windows.net",
+            "client_info": "eyJ1aWQiOiJhZTgyMWU0ZC1mNDA4LTQ1MWEtYWY4Mi04ODI2OTExNDg2MDMiLCJ1dGlkIjoiNDlmNTQ4ZDAtMTJiNy00MTY5LWEzOTAtYmI1MzA0ZDI0NDYyIn0",
+            "username": "liu.kang@bogavrilLTD.onmicrosoft.com",
+            "name": "Liu Kang",
+            "local_account_id": "ae821e4d-f408-451a-af82-882691148603",
+            "authority_type": "MSSTS",
+            "realm": "49f548d0-12b7-4169-a390-bb5304d24462"
+        }
+    },
+    "AppMetadata": {
+        "appmetadata-login.windows.net-1d18b3b0-251b-4714-a02a-9956cec86c2d": {
+            "environment": "login.windows.net",
+            "client_id": "1d18b3b0-251b-4714-a02a-9956cec86c2d"
+        }
+    }
+}

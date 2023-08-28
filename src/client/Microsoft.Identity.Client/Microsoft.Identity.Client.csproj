@@ -46,41 +46,17 @@
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
     <Version Condition="'$(NET_ONLY_INTERNAL_PACKAGE)' == ''">$(MsalClientSemVer)</Version>
     <Version Condition="'$(NET_ONLY_INTERNAL_PACKAGE)' != ''">$(MsalClientSemVer)-netonly</Version>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <LangVersion>latest</LangVersion>
 
     <XamarinAndroidSupportSkipVerifyVersions>true</XamarinAndroidSupportSkipVerifyVersions>
 
     <!-- Copyright needs to be in the form of © not (c) to be compliant -->
     <Title>Microsoft Authentication Library for .NET</Title>
-    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
-    <Company>Microsoft Corporation</Company>
-    <Authors>Microsoft</Authors>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
-    <PackageReleaseNotes>The release notes are available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases and the roadmap at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#roadmap. To provide feedback, fill-in the survey at https://ncv.microsoft.com/JrXkdySi0m. </PackageReleaseNotes>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Description>
-      This package contains the binaries of the Microsoft Authentication Library for .NET (MSAL.NET).
-      MSAL.NET makes it easy to obtain tokens from the Microsoft identity platform for developers (formally Azure AD v2.0) signing-in users with work &amp; school accounts, Microsoft personal accounts, and social identities via Azure AD B2C. These tokens provide access to Microsoft Cloud API and any other API secured by the Microsoft identity platform. This version supports adding authentication functionality to your .NET based clients - .NET, .NET Framework, .NET MAUI, Xamarin iOS, Xamarin Android and UWP
-    </Description>
-    <PackageTags>Microsoft Authentication Library MSA MSAL B2C Azure Active Directory AAD Identity Authentication .NET Windows Store Xamarin iOS Android MAUI</PackageTags>
-    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
-    <Company>Microsoft Corporation</Company>
-    <Product>Microsoft Authentication Library</Product>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <!-- Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+   
     <DisableExtraReferences>true</DisableExtraReferences>
-    <!-- for https://github.com/xamarin/xamarin-macios/issues/7249 -->
-    <IsPackable>true</IsPackable>
+    <!-- for https://github.com/xamarin/xamarin-macios/issues/7249 -->    
   </PropertyGroup>
 
-  <PropertyGroup Label="For CI build" Condition="'$(TF_BUILD)' == 'true'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-  </PropertyGroup>
+  
 
   <PropertyGroup>
     <PathToMsalSources>$(MSBuildThisFileDirectory)</PathToMsalSources>
@@ -287,7 +263,6 @@
   </ItemGroup>
 
   <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.RulesetToEditorconfigConverter" Version="3.3.3" PrivateAssets="All" />
   </ItemGroup>
 

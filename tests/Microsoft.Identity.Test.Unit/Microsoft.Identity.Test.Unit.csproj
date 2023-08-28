@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" Condition="'$(TargetFramework)' != '$(TargetFrameworkNet6Win)'" />
+    <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Extensions\Microsoft.Identity.Client.Extensions.csproj" />
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>
@@ -27,6 +28,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="NSubstitute" Version="4.4.0" />
     <PackageReference Include="NSubstitute.Analyzers.CSharp" Version="1.0.15">
+
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -38,12 +40,15 @@
     <!-- This reference is a workaround for a bug in .net46
     https://stackoverflow.com/questions/45563560/could-not-load-file-or-assembly-system-net-http-version-4-1-1-1-net-standard-->
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
     <PackageReference Include="Selenium.WebDriver" Version="4.4.0" />
 
     <PackageReference Include="coverlet.collector" Version="3.1.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="7.0.1" />
 
     <Compile Remove="Resources\**" />
     <EmbeddedResource Remove="Resources\**" />
@@ -64,6 +69,10 @@
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' or '$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
     <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="CacheExtension\" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
