@@ -122,7 +122,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
             }
 
-            // Bypass cache and send request to token endpoint, when 
+            // Requests to the app token provider delegate must be throttled.
+            // Bypass cache and send request to app token provider, when 
             // 1. Force refresh is requested, or
             // 2. Claims are passed, or 
             // 3. If the AT needs to be refreshed pro-actively 
