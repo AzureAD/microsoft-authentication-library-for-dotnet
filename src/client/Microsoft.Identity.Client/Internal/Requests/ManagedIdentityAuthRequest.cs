@@ -38,14 +38,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             AuthenticationResult authResult = null;
-
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
-            CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
             //skip checking cache for force refresh
             if (_managedIdentityParameters.ForceRefresh)
             {
-                cacheInfoTelemetry = CacheRefreshReason.ForceRefreshOrClaims;
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
                 logger.Info("[ManagedIdentityAuthRequest] Skipped looking for an Access Token in the cache because " +
                     "ForceRefresh was set.");
                 authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
@@ -71,7 +69,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     {
                         logger.Info("[ManagedIdentityAuthRequest] Initiating a proactive refresh.");
 
-                        cacheInfoTelemetry = CacheRefreshReason.ProactivelyRefreshed;
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ProactivelyRefreshed;
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
@@ -88,15 +86,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 //  No AT in the cache 
                 if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != CacheRefreshReason.Expired)
                 {
-                    cacheInfoTelemetry = CacheRefreshReason.NoCachedAccessToken;
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
                 }
 
                 logger.Info("[ManagedIdentityAuthRequest] No access token in the cache. Initiating a request to the " +
                     "managed identity endpoint.");
                 authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
             }
-
-            AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = cacheInfoTelemetry;
 
             return authResult;
         }

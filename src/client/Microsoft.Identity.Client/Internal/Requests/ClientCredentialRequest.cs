@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             bool proactivelyRefresh = false;
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
-            CacheRefreshReason cacheInfoTelemetry = CacheRefreshReason.NotApplicable;
 
             if (AuthenticationRequestParameters.Authority is AadAuthority aadAuthority &&
                 aadAuthority.IsCommonOrOrganizationsTenant())
@@ -52,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             //skip checking cache for force refresh or when claims are present
             if (_clientParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
-                cacheInfoTelemetry = CacheRefreshReason.ForceRefreshOrClaims;
+                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
                 logger.Info("[ClientCredentialRequest] Skipped looking for an Access Token in the cache because ForceRefresh was set.");
                 authResult = await GetAccessTokenAsync(false, cancellationToken, logger).ConfigureAwait(false);
                 return authResult;
@@ -73,7 +72,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     // may fire a request to get a new token in the background when AT needs to be refreshed
                     if (proactivelyRefresh)
                     {
-                        cacheInfoTelemetry = CacheRefreshReason.ProactivelyRefreshed;
+                        AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ProactivelyRefreshed;
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
@@ -90,17 +89,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 //  No AT in the cache 
                 if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != CacheRefreshReason.Expired)
                 {
-                    cacheInfoTelemetry = CacheRefreshReason.NoCachedAccessToken;
-                }
-                else
-                {
-                    cacheInfoTelemetry = CacheRefreshReason.Expired;
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
                 }
 
                 authResult = await GetAccessTokenAsync(false, cancellationToken, logger).ConfigureAwait(false);
             }
-
-            AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = cacheInfoTelemetry;
 
             return authResult;
         }
