@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (_clientParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 cacheInfoTelemetry = CacheRefreshReason.ForceRefreshOrClaims;
-                logger.Info("Skipped looking for an Access Token in the cache because ForceRefresh was set.");
+                logger.Info("[ClientCredentialRequest] Skipped looking for an Access Token in the cache because ForceRefresh was set.");
                 authResult = await GetAccessTokenAsync(false, cancellationToken, logger).ConfigureAwait(false);
                 return authResult;
             }
@@ -115,42 +115,44 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationResult authResult;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
 
-            //calls to AAD
+            //calls sent to AAD
             if (ServiceBundle.Config.AppTokenProvider == null)
             {
                 msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
             }
 
-            // Bypass cache and send request to token endpoint, when 
-            // 1. Force refresh is requested, or
-            // 2. Claims are passed, or 
-            // 3. If the AT needs to be refreshed pro-actively 
-            if (_clientParameters.ForceRefresh ||
-                proactivelyRefresh || 
-                !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
-            {
-                authResult = await SendTokenRequestToProviderAsync(logger, cancellationToken).ConfigureAwait(false);
-                return authResult;
-            }
-
-            //allow only one call to the provider 
-            logger.Verbose(() => "[GetAccessTokenAsync] Entering token acquire for client credential request semaphore.");
-            await s_semaphoreSlim.WaitAsync().ConfigureAwait(false);
-            logger.Verbose(() => "[GetAccessTokenAsync] Entered token acquire for client credential request semaphore.");
-
+            //calls sent to app token provider
             try
             {
-                cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
-
-                if (cachedAccessTokenItem == null)
+                //allow only one call to the provider 
+                logger.Verbose(() => "[ClientCredentialRequest] Entering token acquire for client credential request semaphore.");
+                await s_semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
+                logger.Verbose(() => "[ClientCredentialRequest] Entered token acquire for client credential request semaphore.");
+                
+                // Bypass cache and send request to token endpoint, when 
+                // 1. Force refresh is requested, or
+                // 2. Claims are passed, or 
+                // 3. If the AT needs to be refreshed pro-actively 
+                if (_clientParameters.ForceRefresh ||
+                    proactivelyRefresh ||
+                    !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
                 {
-                    authResult = await SendTokenRequestToProviderAsync(logger, cancellationToken).ConfigureAwait(false);
+                    authResult = await SendTokenRequestToAppTokenProviderAsync(logger, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-                    logger.Verbose(() => "[GetAccessTokenAsync] Getting Access token from cache ...");
-                    authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
+                    cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
+
+                    if (cachedAccessTokenItem == null)
+                    {
+                        authResult = await SendTokenRequestToAppTokenProviderAsync(logger, cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        logger.Verbose(() => "[ClientCredentialRequest] Getting Access token from cache ...");
+                        authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
+                    }
                 }
                 
                 return authResult;
@@ -158,24 +160,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             finally
             {
                 s_semaphoreSlim.Release();
-                logger.Verbose(() => "[GetAccessTokenAsync] Released token acquire for client credential request semaphore.");
+                logger.Verbose(() => "[ClientCredentialRequest] Released token acquire for client credential request semaphore.");
             }
         }
 
-        private async Task<AuthenticationResult> SendTokenRequestToProviderAsync(ILoggerAdapter logger, 
+        private async Task<AuthenticationResult> SendTokenRequestToAppTokenProviderAsync(ILoggerAdapter logger, 
             CancellationToken cancellationToken)
         {
-            logger.Info("[GetAccessTokenAsync] Sending Token response to client credential request endpoint ...");
-            MsalTokenResponse msalTokenResponse = await SendRequestToProviderAsync(cancellationToken).ConfigureAwait(false);
-
-            AuthenticationResult authResult = await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse)
-                .ConfigureAwait(false);
-
-            return authResult;
-        }
-
-        private async Task<MsalTokenResponse> SendRequestToProviderAsync(CancellationToken cancellationToken)
-        {
+            logger.Info("[ClientCredentialRequest] Sending Token response to client credential request endpoint ...");
             AppTokenProviderParameters appTokenProviderParameters = new AppTokenProviderParameters
             {
                 Scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope),
@@ -190,7 +182,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var tokenResponse = MsalTokenResponse.CreateFromAppProviderResponse(externalToken);
             tokenResponse.Scope = appTokenProviderParameters.Scopes.AsSingleString();
             tokenResponse.CorrelationId = appTokenProviderParameters.CorrelationId;
-            return tokenResponse;
+
+            AuthenticationResult authResult = await CacheTokenResponseAndCreateAuthenticationResultAsync(tokenResponse)
+                .ConfigureAwait(false);
+
+            return authResult;
         }
 
         private async Task<MsalAccessTokenCacheItem> GetCachedAccessTokenAsync()

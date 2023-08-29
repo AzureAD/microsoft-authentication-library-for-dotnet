@@ -318,7 +318,7 @@ namespace NetCoreTestApp
                             }
                             break;
 
-                        case 'f': // managed identity on a vm
+                        case 13: // managed identity on a vm
 
                             IManagedIdentityApplication mia1 = CreateMia();
 
@@ -330,7 +330,7 @@ namespace NetCoreTestApp
 
                             break;
 
-                        case 'g': // managed identity on a vm - multi threaded
+                        case 14: // managed identity on a vm - multi threaded
 
                             IManagedIdentityApplication mia2 = CreateMia();
                             int identityProviderHits = 0;
