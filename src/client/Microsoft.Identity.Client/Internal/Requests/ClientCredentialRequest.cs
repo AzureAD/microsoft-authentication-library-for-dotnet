@@ -37,7 +37,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     MsalErrorMessage.ScopesRequired);
             }
 
-            bool proactivelyRefresh = false;
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
 
             if (AuthenticationRequestParameters.Authority is AadAuthority aadAuthority &&
@@ -53,7 +52,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
                 logger.Info("[ClientCredentialRequest] Skipped looking for an Access Token in the cache because ForceRefresh was set.");
-                authResult = await GetAccessTokenAsync(false, cancellationToken, logger).ConfigureAwait(false);
+                authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
                 return authResult;
             }
 
@@ -67,7 +66,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 try
                 {
-                    proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
+                    var proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
 
                     // may fire a request to get a new token in the background when AT needs to be refreshed
                     if (proactivelyRefresh)
@@ -76,7 +75,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
-                        () => GetAccessTokenAsync(proactivelyRefresh, cancellationToken, logger), logger);
+                        () => GetAccessTokenAsync(cancellationToken, logger), logger);
                     }
                 }
                 catch (MsalServiceException e)
@@ -92,14 +91,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
                 }
 
-                authResult = await GetAccessTokenAsync(false, cancellationToken, logger).ConfigureAwait(false);
+                authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
             }
 
             return authResult;
         }
 
         private async Task<AuthenticationResult> GetAccessTokenAsync(
-            bool proactivelyRefresh, 
             CancellationToken cancellationToken, 
             ILoggerAdapter logger)
         {
@@ -128,7 +126,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // 2. Claims are passed, or 
                 // 3. If the AT needs to be refreshed pro-actively 
                 if (_clientParameters.ForceRefresh ||
-                    proactivelyRefresh ||
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
                     !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
                 {
                     authResult = await SendTokenRequestToAppTokenProviderAsync(logger, cancellationToken).ConfigureAwait(false);
