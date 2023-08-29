@@ -102,18 +102,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ILoggerAdapter logger)
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
-            MsalTokenResponse msalTokenResponse;
-            AuthenticationResult authResult;
-            MsalAccessTokenCacheItem cachedAccessTokenItem = null;
 
             //calls sent to AAD
             if (ServiceBundle.Config.AppTokenProvider == null)
             {
-                msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+                MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
             }
 
             //calls sent to app token provider
+            AuthenticationResult authResult;
+            MsalAccessTokenCacheItem cachedAccessTokenItem = null;
+
             try
             {
                 //allow only one call to the provider 
