@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1693350382128,
+  "lastUpdate": 1693350384566,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -2030,6 +2030,54 @@ window.BENCHMARK_DATA = {
             "value": 351709.34922572545,
             "unit": "ns",
             "range": "± 1100.1938212551056"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3e133830f074ae020d5ae9b2a7dd4022fdd85415",
+          "message": "concurrent token refresh fix for managed identity and app token provider (cc) (#4309)\n\n* mi\r\n\r\n* app token\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* pr comments\r\n\r\n* pr comments\r\n\r\n* pr comments\r\n\r\n* verbose logging\r\n\r\n* pr comments\r\n\r\n* Update src/client/Microsoft.Identity.Client/Internal/Requests/ManagedIdentityAuthRequest.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* mi fix\r\n\r\n* few more edits\r\n\r\n* app token provider\r\n\r\n* edits\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* pr comments\r\n\r\n* pr comments\r\n\r\n* ProactivelyRefreshed\r\n\r\n* move around\r\n\r\n---------\r\n\r\nCo-authored-by: Gladwin Johnson <gljohns@microsoft.com>\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>",
+          "timestamp": "2023-08-29T15:57:07-07:00",
+          "tree_id": "ae680d731353b083290e572c6f6edebe79abc00a",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/3e133830f074ae020d5ae9b2a7dd4022fdd85415"
+        },
+        "date": 1693350383670,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 46936.49463704427,
+            "unit": "ns",
+            "range": "± 482.6689395398243"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 458432.8483072917,
+            "unit": "ns",
+            "range": "± 6189.919369331528"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 78163.78783365885,
+            "unit": "ns",
+            "range": "± 1121.204515599845"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 449146.3023763021,
+            "unit": "ns",
+            "range": "± 6005.149332528937"
           }
         ]
       }
