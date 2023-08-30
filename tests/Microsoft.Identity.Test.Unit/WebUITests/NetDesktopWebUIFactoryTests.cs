@@ -49,7 +49,9 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
+#if ONEBRANCH_BUILD
         [Ignore]
+#endif
         public void Net45Factory_SystemWebUi()
         {
 

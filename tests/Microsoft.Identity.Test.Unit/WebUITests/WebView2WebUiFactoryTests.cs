@@ -29,7 +29,9 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
           new RequestContext(TestCommon.CreateDefaultAdfsServiceBundle(), Guid.NewGuid());
 
         [TestMethod]
+#if ONEBRANCH_BUILD
         [Ignore]
+#endif
         public void IsSystemWebUiAvailable()
         {
             var webUIFactory = new WebView2WebUiFactory();
@@ -144,7 +146,9 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
+#if ONEBRANCH_BUILD
         [Ignore]
+#endif
         public void NetCoreFactory_System()
         {
             // Arrange
