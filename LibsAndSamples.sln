@@ -243,7 +243,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Int
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreTestApp", "tests\devapps\NetCoreTestApp\NetCoreTestApp.csproj", "{4BEDCC7F-C027-4326-BAE4-AD62C1CD5572}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Extensions", "src\client\Microsoft.Identity.Client.Extensions\Microsoft.Identity.Client.Extensions.csproj", "{870F5BB7-68E4-44D5-B50A-71F41B1E726E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Extensions.Msal", "src\client\Microsoft.Identity.Client.Extensions\Microsoft.Identity.Client.Extensions.Msal.csproj", "{870F5BB7-68E4-44D5-B50A-71F41B1E726E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1A37FD75-94E9-4D6F-953A-0DABBD7B49E9}"
 	ProjectSection(SolutionItems) = preProject
