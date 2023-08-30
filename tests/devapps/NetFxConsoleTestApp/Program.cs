@@ -465,8 +465,8 @@ namespace NetFx
                             int identityProviderHits = 0;
                             int cacheHits = 0;
 
-                            Task[] miTasks = new Task[10000];
-                            for (int i = 0; i < 10000; i++)
+                            Task[] miTasks = new Task[10];
+                            for (int i = 0; i < 10; i++)
                             {
                                 miTasks[i] = Task.Run(async () =>
                                 {

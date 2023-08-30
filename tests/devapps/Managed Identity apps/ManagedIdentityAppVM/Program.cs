@@ -19,30 +19,8 @@ do
 
     try
     {
-        int identityProviderHits = 0;
-        int cacheHits = 0;
-
-        Task[] miTasks = new Task[10000];
-        for (int i = 0; i < 10000; i++)
-        {
-            miTasks[i] = Task.Run(async () =>
-            {
-                AuthenticationResult authResult = await mi.AcquireTokenForManagedIdentity(scope)
-            .WithForceRefresh(true)
+        var result = await mi.AcquireTokenForManagedIdentity(scope)
             .ExecuteAsync().ConfigureAwait(false);
-
-                if (authResult.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider)
-                {
-                    // Increment identity hits count
-                    Interlocked.Increment(ref identityProviderHits);
-                }
-                else
-                {
-                    // Increment cache hits count
-                    Interlocked.Increment(ref cacheHits);
-                }
-            });
-        }
 
         Console.WriteLine("Success");
         Console.ReadLine();
