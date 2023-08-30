@@ -429,6 +429,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await KerberosRunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
+#if ONEBRANCH_BUILD
+        [Ignore]
+#endif
         [TestMethod]
         public async Task Kerberos_ROPC_ADFSv4Federated_Async()
         {
