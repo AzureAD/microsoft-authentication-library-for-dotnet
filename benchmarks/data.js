@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1693420183852,
+  "lastUpdate": 1693420185748,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -698,6 +698,40 @@ window.BENCHMARK_DATA = {
             "value": 546144.8,
             "unit": "ns",
             "range": "± 12311.541703450039"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Gladwin Johnson",
+            "username": "gladjohn",
+            "email": "90415114+gladjohn@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "0ea350f977601b34c4d7c804db0c2d4de44d1404",
+          "message": "Update logging for Runtime Broker (#4318)\n\nUpdate WamAdapters.cs",
+          "timestamp": "2023-08-30T12:09:14Z",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/0ea350f977601b34c4d7c804db0c2d4de44d1404"
+        },
+        "date": 1693420179720,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 378830.6666666667,
+            "unit": "ns",
+            "range": "± 16942.760117827806"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 539826.7857142857,
+            "unit": "ns",
+            "range": "± 9171.770244183394"
           }
         ]
       },
