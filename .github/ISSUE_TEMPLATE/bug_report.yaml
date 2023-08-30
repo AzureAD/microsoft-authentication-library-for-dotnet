@@ -43,6 +43,7 @@ body:
       - "ConfidentialClient - web api (AcquireTokenOnBehalfOf)"
       - "ConfidentialClient - service to service (AcquireTokenForClient)"
       - "ManagedIdentityClient - managed identity"
+      - "Other - please specify"
   validations:
     required: true
    
