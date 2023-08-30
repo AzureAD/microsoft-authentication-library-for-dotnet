@@ -37,7 +37,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
         // This test should fail locally but succeed in a CI build.
         [RunOn(TargetFrameworks.NetCore)]
+#if ONEBRANCH_BUILD
         [Ignore]
+#endif
         public async Task WamSilentAuthUserInteractionRequiredAsync()
         {
             string[] scopes = new[]
@@ -71,7 +73,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [RunOn(TargetFrameworks.NetCore)]
+#if ONEBRANCH_BUILD
         [Ignore]
+#endif
         public async Task WamInvalidROPC_ThrowsException_TestAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -130,7 +134,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
         [ExpectedException(typeof(MsalUiRequiredException))]
+#if ONEBRANCH_BUILD
         [Ignore]
+#endif
         public async Task WamUsernamePasswordRequestAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -179,7 +185,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
         [ExpectedException(typeof(MsalUiRequiredException))]
+#if ONEBRANCH_BUILD
         [Ignore]
+#endif
         public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -230,7 +238,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+#if ONEBRANCH_BUILD
         [Ignore]
+#endif
         public async Task WamListWindowsWorkAndSchoolAccountsAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -269,7 +279,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [DataTestMethod]
         [DataRow(null)]
         [RunOn(TargetFrameworks.NetCore)]
+#if ONEBRANCH_BUILD
         [Ignore]
+#endif
         public async Task WamAddDefaultScopesWhenNoScopesArePassedAsync(string scopes)
         {
             IntPtr intPtr = GetForegroundWindow();
@@ -293,7 +305,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
+#if ONEBRANCH_BUILD
         [Ignore]
+#endif
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
         {
             //Arrange
@@ -328,7 +342,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
         [RunOn(TargetFrameworks.NetStandard | TargetFrameworks.NetCore)]
         [ExpectedException(typeof(MsalUiRequiredException))]
+#if ONEBRANCH_BUILD
         [Ignore]
+#endif
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
         {
             //Arrange
