@@ -4,8 +4,9 @@
 
     <TargetFrameworkNetDesktop Condition="$([MSBuild]::IsOsPlatform('Windows'))">net461</TargetFrameworkNetDesktop>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
+    <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
 
-    <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore)</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
@@ -26,7 +27,7 @@
     <Reference Include="System.Security" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
+  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' or '$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="4.5.0" />
     <PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
   </ItemGroup>
