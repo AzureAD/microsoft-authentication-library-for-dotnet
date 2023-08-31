@@ -301,6 +301,30 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
+        [DataRow("", ManagedIdentitySource.AppService, AppServiceEndpoint)]
+        [DataRow(null, ManagedIdentitySource.AppService, AppServiceEndpoint)]
+        public async Task ManagedIdentityTestNullOrEmptyScopeAsync(string resource, ManagedIdentitySource managedIdentitySource, string endpoint)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                var mi = miBuilder.Build();
+
+                MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(resource)
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(MsalError.ManagedIdentityScopesRequired, ex.ErrorCode);
+            }
+        }
+
+        [DataTestMethod]
         [DataRow(ManagedIdentitySource.AppService, AppServiceEndpoint)]
         [DataRow(ManagedIdentitySource.Imds, ImdsEndpoint)]
         [DataRow(ManagedIdentitySource.AzureArc, AzureArcEndpoint)]

@@ -45,6 +45,13 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc/>
         public AcquireTokenForManagedIdentityParameterBuilder AcquireTokenForManagedIdentity(string resource)
         {
+            if (string.IsNullOrEmpty(resource))
+            {
+                throw new MsalClientException(
+                    MsalError.ManagedIdentityScopesRequired,
+                    MsalErrorMessage.ScopesRequired);
+            }
+
             return AcquireTokenForManagedIdentityParameterBuilder.Create(
                 ClientExecutorFactory.CreateManagedIdentityExecutor(this),
                 resource);
