@@ -63,13 +63,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             long errorCode = authResult.Error.ErrorCode;
             string errorMessage;
 
-            logger.Info("[WamBroker] Processing WAM exception");
-            logger.Verbose(() => $"[WamBroker] TelemetryData: {authResult.TelemetryData}");
+            logger.Info("[RuntimeBroker] Processing WAM exception");
+            logger.Verbose(() => $"[RuntimeBroker] TelemetryData: {authResult.TelemetryData}");
 
             switch ((ResponseStatus)authResult.Error.Status)
             {
                 case ResponseStatus.UserCanceled:
-                    logger.Error($"[WamBroker] {MsalError.AuthenticationCanceledError} {MsalErrorMessage.AuthenticationCanceled}");
+                    logger.Error($"[RuntimeBroker] {MsalError.AuthenticationCanceledError} {MsalErrorMessage.AuthenticationCanceled}");
                     var clientEx = new MsalClientException(MsalError.AuthenticationCanceledError, MsalErrorMessage.AuthenticationCanceled);
                     return clientEx;
                 case ResponseStatus.InteractionRequired:
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         $" Error Code: {errorCode} \n" +
                         $" Error Message: {authResult.Error.Context} \n" +
                         $" Internal Error Code: {internalErrorCode} \n";
-                    logger.Error($"[WamBroker] {MsalError.FailedToAcquireTokenSilentlyFromBroker} {errorMessage}");
+                    logger.Error($"[RuntimeBroker] {MsalError.FailedToAcquireTokenSilentlyFromBroker} {errorMessage}");
                     var ex = new MsalUiRequiredException(MsalError.FailedToAcquireTokenSilentlyFromBroker, errorMessage);
                     return ex;
 
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         $" Possible causes: \n" +
                         $"- Invalid redirect uri - ensure you have configured the following url in the application registration in Azure Portal: " +
                         $"{GetExpectedRedirectUri(authenticationRequestParameters.AppConfig.ClientId)} \n";
-                    logger.Error($"[WamBroker] WAM_provider_error_{errorCode} {errorMessage}");
+                    logger.Error($"[RuntimeBroker] WAM_provider_error_{errorCode} {errorMessage}");
                     serviceException = new MsalServiceException($"WAM_provider_error_{errorCode}", errorMessage);
                     serviceException.IsRetryable = false;
                     return serviceException;
@@ -110,14 +110,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         $" Internal Error Code: {internalErrorCode} \n" +
                         $" Possible cause: no Internet connection ";
 
-                    logger.Error($"[WamBroker] WAM_network_error_{errorCode} {errorMessage}");
+                    logger.Error($"[RuntimeBroker] WAM_network_error_{errorCode} {errorMessage}");
                     serviceException = new MsalServiceException(errorCode.ToString(), errorMessage);
                     serviceException.IsRetryable = true;
                     return serviceException;
 
                 default:
                     errorMessage = $"Unknown {authResult.Error} (error code {errorCode}) (internal error code {internalErrorCode})";
-                    logger.Verbose(() => $"[WamBroker] {MsalError.UnknownBrokerError} {errorMessage}");
+                    logger.Verbose(() => $"[RuntimeBroker] {MsalError.UnknownBrokerError} {errorMessage}");
                     var ex2 = new MsalServiceException(MsalError.UnknownBrokerError, errorMessage);
                     return ex2;
             }
@@ -144,12 +144,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             if (!ScopeHelper.HasNonMsalScopes(authenticationRequestParameters.Scope))
             {
                 authParams.RequestedScopes = ScopeHelper.GetMsalRuntimeScopes();
-                logger.Verbose(() => "[WamBroker] No scopes were passed in the request. Adding default scopes.");
+                logger.Verbose(() => "[RuntimeBroker] No scopes were passed in the request. Adding default scopes.");
             }
             else
             {
                 authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
-                logger.Verbose(() => "[WamBroker] Scopes were passed in the request.");
+                logger.Verbose(() => "[RuntimeBroker] Scopes were passed in the request.");
             }
 
             //WAM redirect URi does not need to be configured by the user
@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             AddPopParams(authenticationRequestParameters, authParams);
 
-            logger.Verbose(() => "[WamBroker] Acquired Common Auth Parameters.");
+            logger.Verbose(() => "[RuntimeBroker] Acquired Common Auth Parameters.");
 
             return authParams;
         }
@@ -222,7 +222,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             // if PopAuthenticationConfiguration is set, proof of possession will be performed via the runtime broker
             if (authenticationRequestParameters.PopAuthenticationConfiguration != null)
             {
-                authenticationRequestParameters.RequestContext.Logger.Info("[WamBroker] Proof-of-Possession is configured. Using Proof-of-Possession with broker request. ");
+                authenticationRequestParameters.RequestContext.Logger.Info("[RuntimeBroker] Proof-of-Possession is configured. Using Proof-of-Possession with broker request. ");
                 authParams.PopParams.HttpMethod = authenticationRequestParameters.PopAuthenticationConfiguration.HttpMethod?.Method;
                 authParams.PopParams.UriHost = authenticationRequestParameters.PopAuthenticationConfiguration.HttpHost;
                 authParams.PopParams.UriPath = authenticationRequestParameters.PopAuthenticationConfiguration.HttpPath;
@@ -248,12 +248,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
                     if (tenantObjectId.Equals(Constants.MsaTenantId, StringComparison.OrdinalIgnoreCase))
                     {
-                        logger.Verbose(() => $"[WamBroker] MSALRuntime Identity provider set to MSA.");
+                        logger.Verbose(() => $"[RuntimeBroker] MSALRuntime Identity provider set to MSA.");
                         authParams.Properties[MsalIdentityProvider] = IdentityProviderTypeMSA;
                     }
                     else
                     {
-                        logger.Verbose(() => "[WamBroker] MSALRuntime Identity provider set to AAD");
+                        logger.Verbose(() => "[RuntimeBroker] MSALRuntime Identity provider set to AAD");
                         authParams.Properties[MsalIdentityProvider] = IdentityProviderTypeAAD;
                     }
                 }
@@ -270,11 +270,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             if (TokenReceivedFromWam(authResult, logger))
             {
                 msalTokenResponse = ParseRuntimeResponse(authResult, authenticationRequestParameters, logger);
-                logger.Verbose(() => "[WamBroker] Successfully retrieved token.");
+                logger.Verbose(() => "[RuntimeBroker] Successfully retrieved token.");
                 return msalTokenResponse;
             }
 
-            logger.Info($"[WamBroker] {errorMessage} {authResult.Error}");
+            logger.Info($"[RuntimeBroker] {errorMessage} {authResult.Error}");
             MsalException ex = CreateExceptionFromWamError(authResult, authenticationRequestParameters, logger);
             ex = DecorateExceptionWithRuntimeErrorProperties(ex, authResult);
             throw ex;
@@ -298,7 +298,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             if (authResult.Error != null
                 && (ResponseStatus)authResult.Error.Status == ResponseStatus.UserSwitch)
             {
-                logger.Info("[WamBroker] WAM response status account switch. Treating as success");
+                logger.Info("[RuntimeBroker] WAM response status account switch. Treating as success");
                 return true;
             }
 
@@ -324,7 +324,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
                 if (string.IsNullOrWhiteSpace(correlationId))
                 {
-                    logger.Warning("[WamBroker] No correlation ID in response");
+                    logger.Warning("[RuntimeBroker] No correlation ID in response");
                     correlationId = null;
                 }
 
@@ -359,13 +359,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     TokenSource = TokenSource.Broker
                 };
 
-                logger.Info("[WamBroker] WAM response status success");
+                logger.Info("[RuntimeBroker] WAM response status success");
 
                 return msalTokenResponse;
             }
             catch (MsalRuntimeException ex)
             {
-                logger.ErrorPii($"[WamBroker] Could not acquire token using WAM. {ex.Message}", string.Empty);
+                logger.ErrorPii($"[RuntimeBroker] Could not acquire token using WAM. {ex.Message}", string.Empty);
                 throw new MsalServiceException("wam_failed", $"Could not acquire token using WAM. {ex.Message}");
             }
 
@@ -442,7 +442,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             {
                 // Create PII enabled string builder
                 var builder = new StringBuilder(
-                    Environment.NewLine + "=== [WamBroker] Converting WAM Account to MSAL Account ===" +
+                    Environment.NewLine + "=== [RuntimeBroker] Converting WAM Account to MSAL Account ===" +
                     Environment.NewLine);
 
                 builder.AppendLine($"wamAccount.AccountId: {wamAccount.AccountId}.");
@@ -453,7 +453,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
                 // Create non PII enabled string builder
                 builder = new StringBuilder(
-                    Environment.NewLine + "=== [WamBroker] Converting WAM Account to MSAL Account ===" +
+                    Environment.NewLine + "=== [RuntimeBroker] Converting WAM Account to MSAL Account ===" +
                     Environment.NewLine);
 
                 builder.AppendLine($"wamAccount.AccountId: {string.IsNullOrEmpty(wamAccount.AccountId)}.");
@@ -464,7 +464,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 logger.InfoPii(messageWithPii, builder.ToString());
             }
 
-            logger.Error($"[WamBroker] WAM Account properties are missing. Cannot convert to MSAL Accounts.");
+            logger.Error($"[RuntimeBroker] WAM Account properties are missing. Cannot convert to MSAL Accounts.");
         }
     }
 }
