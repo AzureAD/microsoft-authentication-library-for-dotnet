@@ -206,7 +206,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 { MsalException.BrokerErrorTag, $"0x{runtimeAuthResult?.Error.Tag:X}" },
                 { MsalException.BrokerErrorStatus, runtimeAuthResult?.Error.Status.ToString() },
                 { MsalException.BrokerErrorCode, (runtimeAuthResult?.Error.ErrorCode).ToString() },
-                { MsalException.TelemetryBlob, (runtimeAuthResult?.TelemetryData).ToString() },
+                { MsalException.BrokerTelemetry, (runtimeAuthResult?.TelemetryData).ToString() },
             };
 
             exception.AdditionalExceptionData = result;
