@@ -303,6 +303,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataTestMethod]
         [DataRow("", ManagedIdentitySource.AppService, AppServiceEndpoint)]
         [DataRow(null, ManagedIdentitySource.AppService, AppServiceEndpoint)]
+        [ExpectedException(typeof(ArgumentNullException))]
         public async Task ManagedIdentityTestNullOrEmptyScopeAsync(string resource, ManagedIdentitySource managedIdentitySource, string endpoint)
         {
             using (new EnvVariableContext())
@@ -310,16 +311,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager);
+                var mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager).Build();
 
-                var mi = miBuilder.Build();
-
-                ArgumentNullException ex = await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity(resource)
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
-
-                Assert.IsNotNull(ex);
+                await mi.AcquireTokenForManagedIdentity(resource)
+                    .ExecuteAsync().ConfigureAwait(false);
             }
         }
 
