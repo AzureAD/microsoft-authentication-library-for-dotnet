@@ -72,8 +72,11 @@ namespace Microsoft.Identity.Client
         public RegionDetails RegionDetails { get; set; }
 
         /// <summary>
-        /// Contains broker telemetry in JSON format
+        /// Contains telemetry data, formatted as JSON.
         /// </summary>
-        public string BrokerTelemetry { get; set; }
+        /// <remarks>
+        /// Currently it is emitted only for desktop public client flows when the broker is used. 
+        /// </remarks>
+        public string TelemetryBlob { get; set; }
     }
 }
