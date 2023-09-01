@@ -198,15 +198,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             return authParams;
         }
 
-        private static MsalException DecorateExceptionWithRuntimeErrorProperties(MsalException exception, AuthResult wamAuthResult)
+        private static MsalException DecorateExceptionWithRuntimeErrorProperties(MsalException exception, AuthResult runtimeAuthResult)
         {            
             var result = new Dictionary<string, string>()
             {
-                { MsalException.BrokerErrorContext, wamAuthResult?.Error.Context },
-                { MsalException.BrokerErrorTag, $"0x{wamAuthResult?.Error.Tag:X}" },
-                { MsalException.BrokerErrorStatus, wamAuthResult?.Error.Status.ToString() },
-                { MsalException.BrokerErrorCode, (wamAuthResult?.Error.ErrorCode).ToString() },
-                { MsalException.BrokerTelemetry, (wamAuthResult?.TelemetryData).ToString() },
+                { MsalException.BrokerErrorContext, runtimeAuthResult?.Error.Context },
+                { MsalException.BrokerErrorTag, $"0x{runtimeAuthResult?.Error.Tag:X}" },
+                { MsalException.BrokerErrorStatus, runtimeAuthResult?.Error.Status.ToString() },
+                { MsalException.BrokerErrorCode, (runtimeAuthResult?.Error.ErrorCode).ToString() },
+                { MsalException.TelemetryBlob, (runtimeAuthResult?.TelemetryData).ToString() },
             };
 
             exception.AdditionalExceptionData = result;
@@ -343,8 +343,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         authorityUrl = authorityUrl.Substring(0, authorityUrl.Length - "v2.0".Length);
                 }
 
-
-                authenticationRequestParameters.RequestContext.ApiEvent.WamTelemetry = authResult.TelemetryData;
+                authenticationRequestParameters.RequestContext.ApiEvent.MsalRuntimeTelemetry = authResult.TelemetryData;
 
                 MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
                 {

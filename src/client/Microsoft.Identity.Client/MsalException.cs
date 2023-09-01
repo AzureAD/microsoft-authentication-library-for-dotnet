@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// An <see cref="AdditionalExceptionData"/> property key, available when using desktop brokers.
         /// </summary>
-        public const string BrokerTelemetry = "BrokerTelemetry";
+        public const string TelemetryBlob = "TelemetryBlob";
 
         private string _errorCode;
 
