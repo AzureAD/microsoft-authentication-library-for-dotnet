@@ -1,12 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-
-    <TargetFrameworkNetDesktop Condition="$([MSBuild]::IsOsPlatform('Windows'))">net45</TargetFrameworkNetDesktop>
-    <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
-    <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
-
-    <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore)</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
@@ -23,14 +18,9 @@
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
-    <Reference Include="System.Security" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' or '$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
+  <ItemGroup>
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="4.5.0" />
     <PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
   </ItemGroup>
-
 
 </Project>
