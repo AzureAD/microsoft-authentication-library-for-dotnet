@@ -77,6 +77,6 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// Currently it is emitted only for desktop public client flows when the broker is used. 
         /// </remarks>
-        public string TelemetryBlob { get; set; }
+        public string BrokerTelemetry { get; set; }
     }
 }
