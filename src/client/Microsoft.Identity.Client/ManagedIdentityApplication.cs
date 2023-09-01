@@ -47,9 +47,7 @@ namespace Microsoft.Identity.Client
         {
             if (string.IsNullOrEmpty(resource))
             {
-                throw new MsalClientException(
-                    MsalError.ManagedIdentityScopesRequired,
-                    MsalErrorMessage.ScopesRequired);
+                throw new ArgumentNullException(nameof(resource));
             }
 
             return AcquireTokenForManagedIdentityParameterBuilder.Create(

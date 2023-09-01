@@ -305,6 +305,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(null, ManagedIdentitySource.AppService, AppServiceEndpoint)]
         public async Task ManagedIdentityTestNullOrEmptyScopeAsync(string resource, ManagedIdentitySource managedIdentitySource, string endpoint)
         {
+            string expectedError = "Value cannot be null. (Parameter 'resource')";
+
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
@@ -315,12 +317,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                MsalClientException ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                ArgumentNullException ex = await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(MsalError.ManagedIdentityScopesRequired, ex.ErrorCode);
+                Assert.AreEqual(ex.Message, expectedError);
+
             }
         }
 
