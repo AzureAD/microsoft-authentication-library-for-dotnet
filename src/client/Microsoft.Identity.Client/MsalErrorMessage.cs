@@ -201,7 +201,6 @@ namespace Microsoft.Identity.Client
             "\nThis may occur if there are issues with your ADFS configuration. See https://aka.ms/msal-net-iwa-troubleshooting for more details." +
             "\nEnable logging to see more details. See https://aka.ms/msal-net-logging.";
 
-
         public const string InternalErrorCacheEmptyUsername =
             "Internal error - trying to remove an MSAL user with an empty username. Possible cache corruption. See https://aka.ms/adal_token_cache_serialization. ";
         public const string InternalErrorCacheEmptyIdentifier =

@@ -20,7 +20,6 @@
   <ItemGroup Condition="'$(UseIdentityWeb)' == 'true'">
     <PackageReference Include="Microsoft.Identity.Web.TokenCache" Version="*" />
     <PackageReference Include="Microsoft.Identity.Client" Version="*" />
-    <PackageReference Include="Microsoft.Identity.Client.Desktop" Version="*" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(UseIdentityWeb)' != 'true'">

@@ -1,0 +1,20 @@
+# template-OneBranch-Release-libsandsamples.yaml
+# Performs Nuget Restore and Build of LibsAndSamples.sln based on BuildPlatform and BuildConfiguration
+# This also includes a pack and sign of the MSAL.NET packages
+
+parameters:
+  BuildPlatform: 'any cpu'
+  BuildConfiguration: 'release'
+  MsalClientSemVer: '4.55.0-devopsbuild'
+  MsalSourceDir: 'microsoft-authentication-library-for-dotnet\' #Default MSAL Location
+
+steps:
+
+- template: template-OneBranch-CI-libsandsamples.yaml
+  parameters:
+    Solution: 'microsoft-authentication-library-for-dotnet/LibsAndSamples.sln'
+    MsalClientSemVer: $(MsalClientSemVer) #Default MSAL package version
+    MsalSourceDir: $(MsalSourceDir) #Default MSAL root directory
+    PipelineType: $(PipelineType) #Build type
+
+- template: template-pack-and-sign-all-nugets.yaml

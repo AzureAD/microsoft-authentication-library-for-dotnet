@@ -29,7 +29,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task CreateWwwAuthenticateResponseFromKeyVaultUrlAsync()
         {
-
             var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync("https://buildautomation.vault.azure.net/secrets/CertName/CertVersion").ConfigureAwait(false);
 
             Assert.AreEqual("login.microsoftonline.com", new Uri(authParams.Authority).Host);
@@ -61,7 +60,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// <param name="tenantId">Expected Tenant ID</param>
         [TestMethod]
         [DataRow("management.azure.com", "c1686c51-b717-4fe0-9af3-24a20a41fb0c", "login.windows.net", "72f988bf-86f1-41af-91ab-2d7cd011db47")]
-        [DataRow("api-dogfood.resources.windows-int.net", "1835ad3d-4585-4c5f-b55a-b0c3cbda1103", "login.windows-ppe.net", "f686d426-8d16-42db-81b7-ab578e110ccd")]
+        [DataRow("api-dogfood.resources.windows-int.net", "1835ad3d-4585-4c5f-b55a-b0c3cbda1103", "login.windows-ppe.net", "94430a9c-83e9-4f08-bbb0-64fccd0661fc")]
         public async Task CreateWwwAuthenticateResponseFromAzureResourceManagerUrlAsync(string hostName, string subscriptionId, string authority, string tenantId)
         {
             const string apiVersion = "2020-08-01"; // current latest API version for /subscriptions/get

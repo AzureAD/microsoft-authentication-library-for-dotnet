@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Platforms.net45.Native
         ///     Valid key sizes range from 384 to 16384 bits, in increments of 8. It's suggested that a
         ///     minimum size of 2048 bits be used for all keys.
         /// </summary>
-        /// <param name="keySize">size of hte key to generate, in bits</param>
+        /// <param name="keySize">size of the key to generate, in bits</param>
         /// <exception cref="CryptographicException">if <paramref name="keySize" /> is not valid</exception>
         public RSACng(int keySize)
         {

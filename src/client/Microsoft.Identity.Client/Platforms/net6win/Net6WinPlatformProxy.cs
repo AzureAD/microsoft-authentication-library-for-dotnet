@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Platforms.net6win
     /// </summary>
     internal class Net6WinPlatformProxy : NetCorePlatformProxy
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public Net6WinPlatformProxy(ILoggerAdapter logger)
             : base(logger)
         {

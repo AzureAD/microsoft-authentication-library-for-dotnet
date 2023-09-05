@@ -6,12 +6,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security;
 using System.Threading.Tasks;
-using static System.Net.WebRequestMethods;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Class used to acquire tokens in desktop and mobile applications. Public client applications are not trusted to safely keep application secrets and therefore they can only access web APIs in the name of the authenticating user.
+    /// Component used to acquire tokens in desktop and mobile applications. Public client applications are not trusted to safely keep application secrets and therefore they can only access web APIs in the name of the authenticating user.
     /// For more details on differences between public and confidential clients, refer to <see href="https://aka.ms/msal-net-client-applications">our documentation</see>.
     /// </summary>
     /// <remarks>

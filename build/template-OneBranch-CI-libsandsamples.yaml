@@ -1,4 +1,4 @@
-# template-OneBranch-PR-libsandsamples.yaml
+# template-OneBranch-CI-libsandsamples.yaml
 # Performs Nuget Restore and Build of LibsAndSamples.sln based on BuildPlatform and BuildConfiguration
 
 parameters:
@@ -31,5 +31,3 @@ steps:
     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
-
-- template: template-pack-and-sign-all-nugets.yaml

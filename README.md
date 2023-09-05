@@ -50,23 +50,6 @@ MSAL.NET became Generally Available with MSAL.NET 3.0.8. Since MSAL.NET moved to
 
 This is the correct repo to file [issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues).
 
-## Requirements
-
-Operating system:
-* Windows 7 or greater
-
-Platform of choice:
-* .NET 4.5 or greater
-* .NET Core 2.1 or greater
-* .NET Standard 2.0
-* Mono Android 9.0
-* UAP 10.0
-* Xamarin.iOS 10
-* Xamarin.Mac 2.0
-* Net6.0-android
-* Net6.0-ios
-* WINUI3
- 
 ## Community Help and Support
 
 We use [Stack Overflow](https://stackoverflow.com/questions/tagged/azure-ad-msal) with the community to provide support. We highly recommend you ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.

@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return hashed?.ToArray();
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
             // Used by Confidential Client, which is hidden on UWP

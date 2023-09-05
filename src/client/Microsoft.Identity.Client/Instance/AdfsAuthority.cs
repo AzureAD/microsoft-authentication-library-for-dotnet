@@ -18,7 +18,6 @@ namespace Microsoft.Identity.Client.Instance
         {
         }
 
-
         internal override Task<string> GetTokenEndpointAsync(RequestContext requestContext)
         {
             string tokenEndpoint = string.Format(
@@ -46,6 +45,19 @@ namespace Microsoft.Identity.Client.Instance
                   AuthorityInfo.CanonicalAuthority);
 
             return Task.FromResult(deviceEndpoint);  
+        }
+
+        /// <summary>
+        /// ADFS seems to support tenanted authorities, but the tenant ID is fixed so for all intents and purposes 
+        /// it remains constant
+        /// </summary>
+        /// <param name="tenantId"></param>
+        /// <param name="forceSpecifiedTenant"></param>
+        /// <returns></returns>
+        /// <exception cref="System.NotImplementedException"></exception>
+        internal override string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant)
+        {
+            return AuthorityInfo.CanonicalAuthority.ToString();
         }
 
         internal override string TenantId => null;

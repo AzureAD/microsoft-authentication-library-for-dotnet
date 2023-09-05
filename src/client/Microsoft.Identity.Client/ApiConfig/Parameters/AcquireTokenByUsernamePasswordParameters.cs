@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
     {
         public string Password { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void LogParameters(ILoggerAdapter logger)
         {
         }
