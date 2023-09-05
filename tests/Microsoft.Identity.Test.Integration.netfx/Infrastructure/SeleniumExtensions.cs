@@ -13,6 +13,7 @@ using Microsoft.Identity.Test.UIAutomation.Infrastructure;
 using System.Linq;
 using Microsoft.Identity.Client;
 using System.Threading;
+using OpenQA.Selenium.Edge;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
@@ -24,8 +25,9 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         public static IWebDriver CreateDefaultWebDriver()
         {
-            ChromeOptions options = new ChromeOptions();
-            ChromeDriver driver;
+            EdgeOptions options = new EdgeOptions();
+            //ChromeOptions options = new ChromeOptions();
+            EdgeDriver driver;
 
             // ~2x faster, no visual rendering
             // remove when debugging to see the UI automation
@@ -34,11 +36,11 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             var env = Environment.GetEnvironmentVariable("ChromeWebDriver");
             if (string.IsNullOrEmpty(env))
             {
-                driver = new ChromeDriver(options);
+                driver = new EdgeDriver(options);
             }
             else
             {
-                driver = new ChromeDriver(env, options);
+                driver = new EdgeDriver(env, options);
             }
 
             driver.Manage().Timeouts().ImplicitWait = ImplicitTimespan;
