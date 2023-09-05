@@ -198,14 +198,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             return authParams;
         }
 
-        private static MsalException DecorateExceptionWithRuntimeErrorProperties(MsalException exception, Error runtimeError)
-        {
+        private static MsalException DecorateExceptionWithRuntimeErrorProperties(MsalException exception, AuthResult runtimeAuthResult)
+        {            
             var result = new Dictionary<string, string>()
             {
-                { MsalException.BrokerErrorContext, runtimeError.Context },
-                { MsalException.BrokerErrorTag, $"0x{runtimeError.Tag:X}" },
-                { MsalException.BrokerErrorStatus, runtimeError.Status.ToString() },
-                { MsalException.BrokerErrorCode, (runtimeError.ErrorCode).ToString() },
+                { MsalException.BrokerErrorContext, runtimeAuthResult?.Error.Context },
+                { MsalException.BrokerErrorTag, $"0x{runtimeAuthResult?.Error.Tag:X}" },
+                { MsalException.BrokerErrorStatus, runtimeAuthResult?.Error.Status.ToString() },
+                { MsalException.BrokerErrorCode, (runtimeAuthResult?.Error.ErrorCode).ToString() },
+                { MsalException.BrokerTelemetry, (runtimeAuthResult?.TelemetryData).ToString() },
             };
 
             exception.AdditionalExceptionData = result;
@@ -275,7 +276,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             logger.Info($"[RuntimeBroker] {errorMessage} {authResult.Error}");
             MsalException ex = CreateExceptionFromWamError(authResult, authenticationRequestParameters, logger);
-            ex = DecorateExceptionWithRuntimeErrorProperties(ex, authResult.Error);
+            ex = DecorateExceptionWithRuntimeErrorProperties(ex, authResult);
             throw ex;
         }
 
@@ -341,6 +342,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     if (authorityUrl.EndsWith("v2.0"))
                         authorityUrl = authorityUrl.Substring(0, authorityUrl.Length - "v2.0".Length);
                 }
+
+                authenticationRequestParameters.RequestContext.ApiEvent.MsalRuntimeTelemetry = authResult.TelemetryData;
 
                 MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
                 {
