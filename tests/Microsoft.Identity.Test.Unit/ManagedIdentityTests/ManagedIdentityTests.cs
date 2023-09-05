@@ -700,5 +700,64 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
             }
         }
+
+        [TestMethod]
+        public async Task ParallelRequests_CallTokenEndpointOnceAsync()
+        {
+            int numOfTasks = 10; 
+            int identityProviderHits = 0;
+            int cacheHits = 0;
+
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
+
+                Trace.WriteLine("1. Setup an app with a token cache with one AT");
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.BuildConcrete();
+
+                httpManager.AddManagedIdentityMockHandler(
+                        AppServiceEndpoint,
+                        Resource,
+                        MockHelpers.GetMsiSuccessfulResponse(),
+                        ManagedIdentitySource.AppService);
+
+                Task[] tasks = new Task[numOfTasks];
+                for (int i = 0; i < numOfTasks; i++)
+                {
+                    tasks[i] = Task.Run(async () =>
+                    {
+                        AuthenticationResult authResult = await mi.AcquireTokenForManagedIdentity(Resource)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                        if (authResult.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider)
+                        {
+                            // Increment identity hits count
+                            Interlocked.Increment(ref identityProviderHits);
+                            Assert.IsTrue(identityProviderHits == 1);
+                        }
+                        else
+                        {
+                            // Increment cache hits count
+                            Interlocked.Increment(ref cacheHits);
+                        }
+                    });
+                }
+
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+
+                Debug.WriteLine($"Total Identity Hits: {identityProviderHits}");
+                Debug.WriteLine($"Total Cache Hits: {cacheHits}");
+                Assert.IsTrue(cacheHits == 9);
+            }
+        }
     }
 }

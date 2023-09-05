@@ -4,8 +4,11 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Integration.Infrastructure
+namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
+    /// <summary>
+    /// Important: this class must be in a project that is built on: netfx, netcore and netstandard (i.e. not on Test.Common!)
+    /// </summary>
     public class RunOnAttribute : TestMethodAttribute
     {
         private readonly TargetFrameworks _tfms;
@@ -17,9 +20,9 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         public override TestResult[] Execute(ITestMethod testMethod)
         {
-            if ((RunOnHelper.IsNetClassic() && ((_tfms & TargetFrameworks.NetFx) != TargetFrameworks.NetFx)) ||
-                (RunOnHelper.IsNetCore() && ((_tfms & TargetFrameworks.NetCore) != TargetFrameworks.NetCore)) ||
-                (RunOnHelper.IsNetStandard() && ((_tfms & TargetFrameworks.NetStandard) != TargetFrameworks.NetStandard)))
+            if (RunOnHelper.IsNetClassic() && (_tfms & TargetFrameworks.NetFx) != TargetFrameworks.NetFx ||
+                RunOnHelper.IsNetCore() && (_tfms & TargetFrameworks.NetCore) != TargetFrameworks.NetCore ||
+                RunOnHelper.IsNetStandard() && (_tfms & TargetFrameworks.NetStandard) != TargetFrameworks.NetStandard)
             {
                 return new[]
                 {
@@ -53,7 +56,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         {
             if (IsNetClassic() && (runOn & TargetFrameworks.NetFx) != TargetFrameworks.NetFx)
             {
-                Assert.Inconclusive("Test not configured to run on .Net Fx" );
+                Assert.Inconclusive("Test not configured to run on .Net Fx");
             }
 
             if (IsNetCore() && (runOn & TargetFrameworks.NetCore) != TargetFrameworks.NetCore)

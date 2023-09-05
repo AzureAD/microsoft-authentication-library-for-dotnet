@@ -116,6 +116,10 @@
         {
             "file": "OpenidConfiguration-OnPremise.json",
             "_justification": "Passwords and secrets used for test purposes only."
+        },
+        {
+            "file": "token_cache_adfs.json",
+            "_justification": "Fake token cache for test."
         }
 
     ]
