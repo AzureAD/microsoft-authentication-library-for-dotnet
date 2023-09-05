@@ -32,9 +32,6 @@ steps:
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
 
-- powershell: 'powershell.exe -File "$(MsalSourceDir)build\installChromeDriver.ps1" -ExecutionPolicy Bypass'
-  displayName: 'Install ChromeDriver'
-
   # Run All Desktop Tests
 - template: template-run-all-tests.yaml
   parameters:
