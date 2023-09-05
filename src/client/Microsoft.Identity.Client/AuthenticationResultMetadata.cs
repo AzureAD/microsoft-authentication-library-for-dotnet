@@ -72,11 +72,13 @@ namespace Microsoft.Identity.Client
         public RegionDetails RegionDetails { get; set; }
 
         /// <summary>
-        /// Contains telemetry data, formatted as JSON.
+        /// May contain telemetry data. 
         /// </summary>
         /// <remarks>
-        /// Currently it is emitted only for desktop public client flows when the broker is used. 
+        /// Currently it is emitted only for desktop public client flows when the broker is used and it is 
+        /// also included in the verbose logs. May contain Personal Identifiable Information (PII), as per the logging settings. 
+        /// See https://aka.ms/msal-net-logging for more details about logging.
         /// </remarks>
-        public string BrokerTelemetry { get; set; }
+        public string Telemetry { get; set; }
     }
 }
