@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken = default)
         {
             Stopwatch sw = Stopwatch.StartNew();
-            activity = OpenTelemetryClient.AcquireTokenActivity.StartActivity("Token Acquisition", ActivityKind.Internal);
+            activity = OpenTelemetryClient.s_acquireTokenActivity.StartActivity("Token Acquisition", ActivityKind.Internal);
             activity?.AddTag(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion());
             activity?.AddTag(TelemetryConstants.Platform, ServiceBundle.PlatformProxy.GetProductName());
             activity?.AddTag(TelemetryConstants.ClientId, AuthenticationRequestParameters.AppConfig.ClientId);
@@ -110,6 +110,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         ServiceBundle.PlatformProxy.GetProductName(), 
                         AuthenticationRequestParameters.AppConfig.ClientId, 
                         authenticationResult.AuthenticationResultMetadata, 
+                        apiEvent.ApiId.ToString(),
                         GetCacheLevel(authenticationResult).ToString());
 
                     LogMsalSuccessTelemetryToOTel(authenticationResult);

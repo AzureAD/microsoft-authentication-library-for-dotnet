@@ -41,7 +41,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string Scopes = "Scopes";
         public const string ClientId = "ClientId";
         public const string Platform = "Platform";
+        public const string ApiId = "ApiId";
 
-        #endregion
+#endregion
     }
 }
