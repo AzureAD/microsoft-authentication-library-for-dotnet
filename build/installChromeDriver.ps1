@@ -1,4 +1,4 @@
-$url = "https://msedgedriver.azureedge.net/116.0.1938.69/edgedriver_win64.zip" #Chrome Driver from https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
+$url = "https://msedgedriver.azureedge.net/114.0.1823.90/edgedriver_win64.zip" #Chrome Driver from https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
 $fileName = "edgedriver_win64.zip"
 $source = "C:\Downloads\$fileName"
 $destination = "C:\Program Files\dotnet\"
