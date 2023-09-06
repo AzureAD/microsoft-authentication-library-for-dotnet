@@ -5,7 +5,7 @@
 - Added `AuthenticationResult.AuthenticationResultMetadata.Telemetry` that currently contains telemetry from the [Windows broker (WAM)](https://learn.microsoft.com/entra/msal/dotnet/acquiring-tokens/desktop-mobile/wam). See [4159](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4159).  
 
 ### Bug Fixes
-- Added throttling logic for acquiring tokens with managed identity to prevent the throttling exceptions thrown by the managed identity endpoints. See [4196](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4196).  
+- Added throttling logic for acquiring tokens for managed identity (using `AcquireTokenForManagedIdentity` and `WithAppTokenProvider`) to prevent the throttling exceptions thrown by the managed identity endpoints. See [4196](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4196).  
 - Enabled cache synchronization by default. This helps to keep the cache consistent when a singleton confidential client application (CCA) is used with enabled external token cache serialization. The cache synchronization has a negligible performance effect when CCA is created per request. See [4268](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4268).  
 - Fixed an authority validation error in interactive flows when an Active Directory Federation Services (ADFS) authority with a tenant ID was used. See [4272](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4272).  
 - Added clarity to the Windows broker logs. See [4318](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/4318).  
