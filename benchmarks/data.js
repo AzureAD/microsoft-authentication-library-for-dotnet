@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1694021125330,
+  "lastUpdate": 1694030719843,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -1014,6 +1014,42 @@ window.BENCHMARK_DATA = {
             "value": 760415.0111111111,
             "unit": "ns",
             "range": "± 261512.2211211533"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "90ae6b9c6d33655a66cbc6413e8aadee487f052a",
+          "message": "Check for null and empty scopes in managed identity (#4328)\n\n* managed identity fix\r\n\r\n* ArgumentNullException\r\n\r\n* fix\r\n\r\n* exception\r\n\r\n---------\r\n\r\nCo-authored-by: Gladwin Johnson <gljohns@microsoft.com>",
+          "timestamp": "2023-09-06T17:15:40Z",
+          "tree_id": "d1247ec22650b6f61de984ce7e3f7f5efbca8d89",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/90ae6b9c6d33655a66cbc6413e8aadee487f052a"
+        },
+        "date": 1694030716179,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 536800.5365853659,
+            "unit": "ns",
+            "range": "± 19308.948573262038"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 550572.4,
+            "unit": "ns",
+            "range": "± 6823.8953559218235"
           }
         ]
       }
