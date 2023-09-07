@@ -45,6 +45,11 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc/>
         public AcquireTokenForManagedIdentityParameterBuilder AcquireTokenForManagedIdentity(string resource)
         {
+            if (string.IsNullOrEmpty(resource))
+            {
+                throw new ArgumentNullException(nameof(resource));
+            }
+
             return AcquireTokenForManagedIdentityParameterBuilder.Create(
                 ClientExecutorFactory.CreateManagedIdentityExecutor(this),
                 resource);

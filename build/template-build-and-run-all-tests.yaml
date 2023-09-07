@@ -30,37 +30,6 @@ jobs: #Build and stage projects
   # Bootstrap the build
   - template: template-build-and-prep-automation.yaml
 
-# Disabled because mono is unable to restore/build .NET 6 target in MSAL project
-# BUILD IOS APPCENTER APP PHASE
-#- job: 'BuildiOSAppCenterApp'
-#  dependsOn:
-#    - 'PreBuildCheck'
-#  pool:
-#      name: Azure Pipelines
-#      vmImage: macos-latest
-#  variables:
-#      runCodesignValidationInjection: false
-
-#  steps:
-#  - template: template-build-ios-automation.yaml
-
-# Disabling because Android App center tests are failing 
-#   # BUILD ANDROID APPCENTER APP PHASE
-# - job: 'BuildAndroidAppCenterApp'
-#   dependsOn:
-#     - 'PreBuildCheck'
-#   pool:
-#       vmImage: 'windows-2022'
-#       demands:
-#       - msbuild
-#       - visualstudio
-#   variables:
-#       runCodesignValidationInjection: false
-#       Codeql.SkipTaskAutoInjection: true
-
-#   steps:
-#   - template: template-build-android-automation.yaml
-
 # BUILD AND RUN CACHE COMPAT TESTS
 - job: 'BuildAndRunCacheCompatTests'
   dependsOn:
