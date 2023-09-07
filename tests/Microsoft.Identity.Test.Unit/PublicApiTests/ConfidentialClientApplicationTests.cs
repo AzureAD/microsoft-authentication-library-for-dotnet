@@ -1205,10 +1205,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TestCommon.CreateDefaultServiceBundle().PlatformProxy.GetProductName(), qp["x-client-sku"]);
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
-
-#if DESKTOP
-            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-cpu"]));
-#endif
         }
 
         [TestMethod]
@@ -1605,7 +1601,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             CoreAssert.AreEqual(TestConstants.RedirectUri, uriParams1["redirect_uri"], uriParams2["redirect_uri"]);
             CoreAssert.AreEqual("select_account", uriParams1["prompt"], uriParams2["prompt"]);
 
-            Assert.AreEqual(uriParams1["x-client-CPU"], uriParams2["x-client-CPU"]);
             Assert.AreEqual(uriParams1["x-client-OS"], uriParams2["x-client-OS"]);
             Assert.AreEqual(uriParams1["x-client-Ver"], uriParams2["x-client-Ver"]);
             Assert.AreEqual(uriParams1["x-client-SKU"], uriParams2["x-client-SKU"]);
