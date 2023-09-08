@@ -1,94 +1,91 @@
-# Microsoft Authentication Library (MSAL) for .NET, UWP, NetCore, MAUI, Xamarin Android and iOS
+# Microsoft Authentication Library (MSAL) for .NET
 
 The MSAL library for .NET is part of the [Microsoft identity platform for developers](https://aka.ms/aaddevv2) (formerly named Azure AD) v2.0. It enables you to acquire security tokens to call protected APIs. It uses industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/).
 
 Quick links:
 
-| [Conceptual documentation](https://aka.ms/msalnet) | [Getting Started](https://docs.microsoft.com/en-us/azure/active-directory/develop/#quickstarts) | [Sample Code](https://aka.ms/aaddevsamplesv2) | [Library Reference](https://docs.microsoft.com/dotnet/api/microsoft.identity.client?view=azure-dotnet) | [Support](README.md#community-help-and-support) | [Feedback](https://ncv.microsoft.com/JvKFQ1WGSh)
+| [Conceptual documentation](https://aka.ms/msalnet) | [Getting Started](https://learn.microsoft.com/entra/msal/dotnet/getting-started/choosing-msal-dotnet) | [Sample Code](https://aka.ms/aaddevsamplesv2) | [API Reference](https://learn.microsoft.com/dotnet/api/overview/) | [Support](README.md#community-help-and-support) | [Feedback](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues)
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 
-## NuGet package
+## NuGet packages
 
 **Microsoft.Identity.Client**  
-[![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)  
+[![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)
 
 **Microsoft.Identity.Client.Desktop**  
-[![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.Desktop.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client.Desktop/)  
+[![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.Desktop.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client.Desktop/)
 
 **Microsoft.Identity.Client.Broker**  
-[![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.Broker.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client.Broker/)  
+[![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.Broker.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client.Broker/)
 
 ## Build Status
- 
+
 [![Build Status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/CI/DotNet/.NET%20MSAL%20CI%20(YAML)?branchName=main)](https://identitydivision.visualstudio.com/IDDP/_build/latest?definitionId=922&branchName=main)
 
 ### Performance perspectives
 
-[This document](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Performance-testing) describes our approach to performance testing.
+[Our documentation](https://learn.microsoft.com/entra/msal/dotnet/advanced/performance-testing) describes the approach to performance testing.
 
-View some of the historical performance benchmark results in [this dashboard](https://azuread.github.io/microsoft-authentication-library-for-dotnet/benchmarks/).
+View some of the historical performance benchmark results in [our dashboard](https://azuread.github.io/microsoft-authentication-library-for-dotnet/benchmarks/).
 
-## Release notes, roadmap and SLA
+## Release notes, roadmap, and SLA
 
 ### Release notes and roadmap
 
-MSAL.NET roadmap is available from [Roadmap](../../wiki#roadmap) in the [Wiki pages](https://aka.ms/msal-net), along with release notes.
+MSAL.NET roadmap is available on the [Roadmap page](../../wiki#roadmap).
 
 ### Support SLA
 
-MSAL.NET became Generally Available with MSAL.NET 3.0.8. Since MSAL.NET moved to 4.x
+MSAL.NET became Generally Available with MSAL.NET 3.0.8. Since MSAL.NET moved to version 4:
 
 - Major versions are supported for twelve months after the release of the next major version.
 - Minor versions older than N-1 are not supported.
-  > Minor versions are bugfixes or features with non-breaking (additive) API changes.  It is expected apps can upgrade.  Therefore, we will not patch old minor versions of the library. You should also confirm, in issue repros, that you are using the latest minor version before the MSAL.NET team spends time investigating an issue.
+
+> **Note**
+> Minor versions include bug fixes or features with non-breaking (additive) API changes. It is expected that applications using the library can upgrade through the IDE or CLI with no friction. We will not patch old minor versions of the library. When opening new issues, please confirm that you are using the latest minor version.
 
 ## Using MSAL.NET
 
-- The conceptual documentation is currently available from the [Microsoft identity platform documentation](https://learn.microsoft.com/azure/active-directory/develop/msal-overview) and our [Wiki pages](https://aka.ms/msal-net)
-- The reference documentation is available from the .NET APIs reference on [learn.microsoft.com](https://learn.microsoft.com/dotnet/api/microsoft.identity.client?view=msal-dotnet-latest)
+- Guides, tutorials, and detailed walkthroughs are available [on Microsoft Learn](https://learn.microsoft.com/entra/msal/dotnet/getting-started/choosing-msal-dotnet).
+- API documentation is available [on Microsoft Learn](https://learn.microsoft.com/dotnet/api/microsoft.identity.client)
 - A number of quickstarts are available for:
   - [.NET desktop application](https://learn.microsoft.com/azure/active-directory/develop/desktop-app-quickstart?pivots=devlang-windows-desktop)
   - [Universal Windows Platform (UWP)](https://learn.microsoft.com/azure/active-directory/develop/desktop-app-quickstart?pivots=devlang-uwp)
   - [.NET Core daemon console](https://learn.microsoft.com/azure/active-directory/develop/console-app-quickstart?pivots=devlang-dotnet-core)
-- Code samples are available from [Samples](https://aka.ms/aaddevsamplesv2)
+- Code samples are available from our [Samples](https://aka.ms/aaddevsamplesv2) page.
 
 ## Where do I file issues
 
-This is the correct repo to file [issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues).
+You can file new issues in [this repository](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues).
 
-## Community Help and Support
+## Community help and support
 
-We use [Stack Overflow](https://stackoverflow.com/questions/tagged/azure-ad-msal) with the community to provide support. We highly recommend you ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
+We use [Stack Overflow](https://stackoverflow.com/questions/tagged/azure-ad-msal) with the community to provide support. We highly recommend you ask your questions on Stack Overflow first and browse [existing issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues) to see if someone has asked your question before.
 
 If you find a bug or have a feature request, please raise the issue on [GitHub Issues](../../issues).
 
-To provide a recommendation, visit our [User Voice page](https://feedback.azure.com/forums/169401-azure-active-directory).
-
-## Submit Feedback
-We'd like your thoughts on this library. Please complete [this short survey.](https://ncv.microsoft.com/JvKFQ1WGSh)
-
 ## Contribute
 
-We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now. Read our [Contribution Guide](CONTRIBUTING.md) for more information.
+We welcome contributions and feedback. You can fork and clone the repo and start contributing now. Read our [Contribution Guide](CONTRIBUTING.md) for more information.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-## Security Library
+## Security library
 
 This library controls how users sign-in and access services. We recommend you always take the latest version of our library in your app when possible. We use [semantic versioning](http://semver.org) so you can control the risk associated with updating your app. As an example, always downloading the latest minor version number (e.g. x.*y*.z) ensures you get the latest security and feature enhancements but our API surface remains the same. You can always see the latest version and release notes under the Releases tab of GitHub.
 
-## Security Reporting
+## Security reporting
 
-If you find a security issue with our libraries or services please report it to [secure@microsoft.com](mailto:secure@microsoft.com) with as much detail as possible. Your submission may be eligible for a bounty through the [Microsoft Bounty](https://aka.ms/bugbounty) program. Please do not post security issues to GitHub Issues or any other public site. We will contact you shortly upon receiving the information. We encourage you to get notifications of when security incidents occur by visiting the [Microsoft Technical Security Notifications page](https://www.microsoft.com/msrc/technical-security-notifications?rtc=1) and subscribing to Security Advisory Alerts.
+If you find a security issue with our libraries or services please report it to [secure@microsoft.com](mailto:secure@microsoft.com) in as much detail as possible. Your submission may be eligible for a bounty through the [Microsoft Bug Bounty](https://aka.ms/bugbounty) program. Please do not post security issues to GitHub Issues or any other public site. We will contact you shortly after receiving the information. We encourage you to get notifications of when security incidents occur by visiting the [Microsoft Technical Security Notifications page](https://www.microsoft.com/msrc/technical-security-notifications?rtc=1) and subscribing to Security Advisory Alerts.
 
-## Data Collection
+## Data collection
 
 The software may collect information about you and your use of the software and send it to Microsoft. Microsoft may use this information to provide services and improve our products and services. You may turn off the telemetry as described in the repository. There are also some features in the software that may enable you and Microsoft to collect data from users of your applications. If you use these features, you must comply with applicable law, including providing appropriate notices to users of your applications together with a copy of Microsoft's privacy statement. Our privacy statement is located at https://go.microsoft.com/fwlink/?LinkID=824704. You can learn more about data collection and use in the help documentation and our privacy statement. Your use of the software operates as your consent to these practices.
 
-See the [wiki](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/MSAL.NET-telemetry-solution-overview) for an example of the telemetry collected by MSAL.NET.
+See the [our telemetry documentation](https://learn.microsoft.com/entra/msal/dotnet/resources/telemetry-overview) for an example of the telemetry collected by MSAL.NET.
 
 ## Trademarks
 
 This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general). Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party's policies.
 
-Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MIT License (the "License");
+Copyright © Microsoft Corporation. All rights reserved. Licensed under the MIT License (the "License").
