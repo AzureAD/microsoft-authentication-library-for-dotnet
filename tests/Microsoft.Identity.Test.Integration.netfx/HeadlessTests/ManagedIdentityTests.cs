@@ -16,7 +16,7 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.ManagedIdentity;
-using Microsoft.Identity.Json;
+
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
@@ -227,8 +227,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //process the response
             if (!string.IsNullOrEmpty(environmentVariableResponse))
             {
-                environmentVariables = JsonConvert.DeserializeObject
+#if NET6_0_OR_GREATER
+                environmentVariables = System.Text.Json.JsonSerializer.Deserialize
                     <Dictionary<string, string>>(environmentVariableResponse);
+#else
+                environmentVariables = Microsoft.Identity.Json.JsonConvert.DeserializeObject
+                    <Dictionary<string, string>>(environmentVariableResponse);
+#endif
             }
 
             return environmentVariables;

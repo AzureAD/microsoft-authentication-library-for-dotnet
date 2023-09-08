@@ -17,11 +17,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class OnBehalfOfServicePrincipalTests
     {
-        //The following client ids are for applications that are within PPE
-        private const string OBOClientPpeClientID = "9793041b-9078-4942-b1d2-babdc472cc0c";
-        private const string OBOServicePpeClientID = "c84e9c32-0bc9-4a73-af05-9efe9982a322";
-        private const string OBOServiceDownStreamApiPpeClientID = "23d08a1e-1249-4f7c-b5a5-cb11f29b6923";
-        private const string PPEAuthenticationAuthority = "https://login.windows-ppe.net/f686d426-8d16-42db-81b7-ab578e110ccd";
+        //The following client ids are for applications that are within Lab PPE tenant
+        private const string OBOClientPpeClientID = "8ba9f044-e8fe-41ae-811b-04adfd9704cb";
+        private const string OBOServicePpeClientID = "8a446462-93a1-41ea-8c94-3dbcab79db34";
+        private const string OBOServiceDownStreamApiPpeClientID = "1e999007-0c4f-4242-9ca1-8e33397236a9";
+        private const string PPEAuthenticationAuthority = "https://login.windows-ppe.net/19eea2f8-e17a-470f-954d-d897c47f311c";
 
         /// <summary>
         /// Client -> Middletier -> RP
