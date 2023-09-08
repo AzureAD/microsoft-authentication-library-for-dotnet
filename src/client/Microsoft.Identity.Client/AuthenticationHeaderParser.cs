@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Creates a new <see cref="HttpClient"/>
+        /// Creates a new <see cref="HttpClient"/> instance.
         /// </summary>
         internal static HttpClient GetHttpClient()
         {
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Creates a key-value pair from an expression of the form a=b if possible.
-        /// Otherwise, the key value pair will be returned as (key:<paramref name="authScheme"/>, value:<paramref name="paramValue"/>)
+        /// Otherwise, the key value pair will be returned as (key:<paramref name="authScheme"/>, value:<paramref name="paramValue"/>).
         /// </summary>
         /// <param name="paramValue">assignment</param>
         /// <param name="authScheme">authScheme</param>
