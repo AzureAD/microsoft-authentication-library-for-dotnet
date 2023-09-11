@@ -28,13 +28,7 @@ Quick links:
 
 View some of the historical performance benchmark results in [our dashboard](https://azuread.github.io/microsoft-authentication-library-for-dotnet/benchmarks/).
 
-## Release notes, roadmap, and SLA
-
-### Release notes and roadmap
-
-MSAL.NET roadmap is available on the [Roadmap page](../../wiki#roadmap).
-
-### Support SLA
+## Support SLA
 
 MSAL.NET became Generally Available with MSAL.NET 3.0.8. Since MSAL.NET moved to version 4:
 
