@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 //#endif
@@ -77,8 +78,10 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             string clientId, 
             AuthenticationResultMetadata authResultMetadata,
             string apiId,
-            string cacheLevel)
+            string cacheLevel, 
+            ILoggerAdapter logger)
         {
+            logger.Info("[OpenTelemetry] Incrementing success counter.");
             s_successCounter.Value.Add(1,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
@@ -87,6 +90,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
                 new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
                 new(TelemetryConstants.CacheInfoTelemetry, authResultMetadata.CacheRefreshReason), 
                 new(TelemetryConstants.CacheLevel, cacheLevel));
+            logger.Info("[OpenTelemetry] Completed incrementing to success counter.");
 
             s_durationTotal.Record(authResultMetadata.DurationTotalInMs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),

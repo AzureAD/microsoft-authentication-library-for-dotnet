@@ -106,12 +106,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
                     LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails, telemetryClients);
 
+                    
                     OpenTelemetryClient.LogSuccessMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(), 
                         AuthenticationRequestParameters.AppConfig.ClientId, 
                         authenticationResult.AuthenticationResultMetadata, 
                         apiEvent.ApiId.ToString(),
-                        GetCacheLevel(authenticationResult).ToString());
+                        GetCacheLevel(authenticationResult).ToString(), 
+                        AuthenticationRequestParameters.RequestContext.Logger);
 
                     LogMsalSuccessTelemetryToOTel(authenticationResult);
 
