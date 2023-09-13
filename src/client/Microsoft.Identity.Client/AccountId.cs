@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client
                 return new AccountId(str); //Account ID is from ADFS; no . in the string
             }
 
-            return new AccountId(str, str[..lastIndexOfDot], str[(lastIndexOfDot + 1)..]);
+            return new AccountId(str, str.Substring(0, lastIndexOfDot), str.Substring(lastIndexOfDot + 1));
         }
 
         /// <summary>
