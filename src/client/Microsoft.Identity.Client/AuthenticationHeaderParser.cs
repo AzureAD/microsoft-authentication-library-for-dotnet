@@ -19,45 +19,41 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public class AuthenticationHeaderParser
     {
-        private static readonly Lazy<IMsalHttpClientFactory> _httpClientFactory = new Lazy<IMsalHttpClientFactory>(
+        private static readonly Lazy<IMsalHttpClientFactory> _httpClientFactory = new(
                                                                           () => PlatformProxyFactory.CreatePlatformProxy(null).CreateDefaultHttpClientFactory());
 
         /// <summary>
-        /// Parameters returned by the WWW-Authenticate header. This allows for dynamic
-        /// scenarios such as claim challenge, CAE, CA auth context.
-        /// See https://aka.ms/msal-net/wwwAuthenticate.
+        /// Parameters returned by the <c>WWW-Authenticate</c> header. This allows for dynamic
+        /// scenarios such as claim challenge, Cotninuous Access Evaluation (CAE), and CA auth context.
+        /// See <see href="https://aka.ms/msal-net/wwwAuthenticate">our documentation</see> for additional details.
         /// </summary>
         public IReadOnlyList<WwwAuthenticateParameters> WwwAuthenticateParameters { get; private set; }
 
         /// <summary>
-        /// Parameters returned by the Authentication-Info header. 
-        /// This allows for authentication scenarios such as Proof-Of-Possession.
+        /// Parameters returned by the <c>Authentication-Info</c> header. 
+        /// This allows for more complex authentication scenarios, such as Proof-Of-Possession.
         /// </summary>
         public AuthenticationInfoParameters AuthenticationInfoParameters { get; private set; }
 
         /// <summary>
-        /// Nonce parsed from HttpResponseHeaders. This is acquired from with the POP WWW-Authenticate header or the Authetnciation-Info header
+        /// Nonce parsed from <see cref="HttpResponseHeaders"/>. This is acquired from the PoP <c>WWW-Authenticate</c> header or the <c>Authentication-Info</c> header
         /// </summary>
         public string PopNonce { get; private set; }
 
         /// <summary>
-        /// Creates the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
+        /// Creates the authentication parameters by attempting to call the resource unauthenticated and analyzing the response.
         /// </summary>
-        /// <param name="resourceUri">URI of the resource.</param>
-        /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
-        /// <returns></returns>
+        /// <param name="resourceUri">Resource URI.</param>
+        /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+        /// <returns>An instance of <see cref="AuthenticationHeaderParser"/> containing authentication header data.</returns>
+        /// <overloads></overloads>
         public static async Task<AuthenticationHeaderParser> ParseAuthenticationHeadersAsync(string resourceUri, CancellationToken cancellationToken = default)
         {
             return await ParseAuthenticationHeadersAsync(resourceUri, GetHttpClient(), cancellationToken).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Creates the authenticate parameters by attempting to call the resource unauthenticated, and analyzing the response.
-        /// </summary>
-        /// <param name="resourceUri">URI of the resource.</param>
-        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <inheritdoc cref="ParseAuthenticationHeadersAsync(string, CancellationToken)"/>
         /// <param name="httpClient">Instance of <see cref="HttpClient"/> to make the request with.</param>
-        /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         public static async Task<AuthenticationHeaderParser> ParseAuthenticationHeadersAsync(string resourceUri, HttpClient httpClient, CancellationToken cancellationToken = default)
         {
@@ -77,22 +73,22 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Creates a parsed set of parameters from the provided HttpResponseHeaders.
+        /// Creates a parsed set of parameters from the provided <see cref="HttpResponseHeaders"/>.
         /// </summary>
-        /// <param name="httpResponseHeaders"></param>
-        /// <remarks>For known values, such as the nonce used for Proof-of-Possession, the parser will first check for it in the WWW-Authenticate headers
-        /// If it cannot find it, it will then check the Authentication-Info parameters for the value.</remarks>
-        /// <returns></returns>
+        /// <param name="httpResponseHeaders">HTTP response headers.</param>
+        /// <remarks>For known values, such as the nonce used for Proof-of-Possession, the parser will first check for it in the <c>WWW-Authenticate</c> headers
+        /// If it cannot find it, it will then check the <c>Authentication-Info</c> parameters for the value.</remarks>
+        /// <returns>An instance of <see cref="AuthenticationHeaderParser"/>.</returns>
         public static AuthenticationHeaderParser ParseAuthenticationHeaders(HttpResponseHeaders httpResponseHeaders)
         {
-            AuthenticationHeaderParser authenticationHeaderParser = new AuthenticationHeaderParser();
-            AuthenticationInfoParameters authenticationInfoParameters = new AuthenticationInfoParameters();
+            AuthenticationHeaderParser authenticationHeaderParser = new();
+            AuthenticationInfoParameters authenticationInfoParameters = new();
             string serverNonce = null;
 
             //Check for WWW-AuthenticateHeaders
             if (httpResponseHeaders.WwwAuthenticate.Count != 0)
             {
-                var wwwParameters = Client.WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponseHeaders);
+                IReadOnlyList<WwwAuthenticateParameters> wwwParameters = Client.WwwAuthenticateParameters.CreateFromAuthenticationHeaders(httpResponseHeaders);
 
                 serverNonce = wwwParameters.SingleOrDefault(parameter => string.Equals(parameter.AuthenticationScheme, Constants.PoPAuthHeaderPrefix, StringComparison.Ordinal))?.Nonce;
 
@@ -114,7 +110,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Creates a HttpClient
+        /// Creates a new <see cref="HttpClient"/> instance.
         /// </summary>
         internal static HttpClient GetHttpClient()
         {
@@ -122,12 +118,12 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Creates a key value pair from an expression of the form a=b is possible.
-        /// Otherwise, the key value pair will be returned as (key:<paramref name="authScheme"/>, value:<paramref name="paramValue"/>)
+        /// Creates a key-value pair from an expression of the form a=b if possible.
+        /// Otherwise, the key value pair will be returned as (key:<paramref name="authScheme"/>, value:<paramref name="paramValue"/>).
         /// </summary>
         /// <param name="paramValue">assignment</param>
         /// <param name="authScheme">authScheme</param>
-        /// <returns>Key Value pair</returns>
+        /// <returns>An instance of <see cref="KeyValuePair{TKey, TValue}"/>.</returns>
         internal static KeyValuePair<string, string> CreateKeyValuePair(string paramValue, string authScheme)
         {
             string[] segments = CoreHelpers.SplitWithQuotes(paramValue, '=')
