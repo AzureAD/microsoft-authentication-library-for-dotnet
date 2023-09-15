@@ -2,13 +2,13 @@
 
 Microsoft Authentication Library (MSAL) for .NET welcomes new contributors.  This document will guide you through the process.
 
-## Contributor License agreement
+## Contributor License Agreement
 
 Please visit [https://cla.microsoft.com/](https://cla.microsoft.com/) and sign the Contributor License Agreement.  You only need to do that once. We can not look at your code until you've submitted this request.
 
 ## Tests
 
-It's all standard stuff, but please note that you won't be able to run integration tests locally because they connect to a KeyVault to fetch some test users and passwords. The CI will run them for you.
+It's all standard stuff, but please note that you won't be able to run integration tests locally because they connect to Azure Key Vault to fetch some test users and passwords.
 
 ## How the MSAL team deals with forks
 
@@ -35,7 +35,7 @@ git push origin
 
 ### Before submitting an issue
 
-First, please do a search of [open issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues) to see if the issue or feature request has already been filed. Use the tags to narrow down your search. Here's an example of a [query for Xamarin iOS specific issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues?utf8=%E2%9C%93&q=is:issue+is:open+label:scenario:Mobile-iOS).
+First, please do a search for [open issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues) to see if the issue or feature request has already been filed. Use the tags to narrow down your search. Here's an example of a [query for Xamarin iOS specific issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues?utf8=%E2%9C%93&q=is:issue+is:open+label:scenario:Mobile-iOS).
 
 If you find your issue already exists, add a relevant comment. You can also use an upvote or downvote reaction in place of a "+1" comment.
 
@@ -50,28 +50,28 @@ File a single issue per bug and feature request:
 - Do not enumerate multiple bugs or feature requests in the same issue.
 - Do not add your issue as a comment to an existing issue unless it's for the identical input. Many issues look similar, but have different causes.
 
-When [submitting an issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new/choose), select the correct category, **Bug Report**, **Documentation**, or **Feature request**.
+When [submitting an issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new/choose), select the correct category, **Bug report**, **Documentation**, or **Feature request**.
 
-#### Bug report
+#### Bug reports
 
 The more information you provide, the more likely someone will be successful in reproducing the issue and finding a fix.
-Please use the [Bug Report template](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new?template=bug_report.md) and complete as much of the information listed as possible. Please use the [latest version of the library](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases) and see if your bug still exists before filing an issue.
+Please use the [Bug report template](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new?assignees=&labels=untriaged%2Cneeds+attention&projects=&template=bug_report.yaml&title=%5BBug%5D+) and complete as much of the information listed as possible. Please use the [latest version of the library](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases) and see if your bug still exists before filing an issue.
 
 Remember to do the following:
 
 - Search the issue repository to see if there exists a duplicate issue.
 - Update to the latest version of the library to see if the issue still exists.
-- Submit an issue by filling out all as much of the information in the Bug Report as possible.
+- Submit an issue by filling out all as much of the information in the Bug report as possible.
 
-#### Documentation Requests
+#### Documentation requests
 
-If you find our documentation or XML comments lacking in necessary detail, submit a [Documentation request](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new?template=documentation.md).
+If you find our documentation or XML comments lacking in necessary detail, submit a [Documentation request](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new?assignees=&labels=documentation&projects=&template=documentation.md&title=%5BDocumentation%5D+).
 
 If you have found errors in the documentation, or if an example or code snippet is needed, [open an issue in the documentation repository](https://github.com/MicrosoftDocs/microsoft-authentication-library-dotnet/issues).
 
 #### Feature requests
 
-Have a feature request for MSAL? Complete a [Feature Request](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new?template=feature_request.md) or consider making a [contribution](../contribute/overview.md) to the library. Make sure your feature request is clear and concise and contains a detailed description of the problem. Please include any alternative solutions or features you may have considered.
+Have a feature request for MSAL? Complete a [Feature request](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new?assignees=&labels=feature+request%2Cuntriaged%2Cneeds+attention&projects=&template=feature_request.yaml&title=%5BFeature+Request%5D+++++) or consider making a contribution to the library. Make sure your feature request is clear and concise and contains a detailed description of the problem. Please include any alternative solutions or features you may have considered.
 
 ## Building and testing MSAL.NET
 
@@ -123,7 +123,7 @@ The steps above should enable you to compile `Libs.sln`. You will need a develop
 
 MSAL.NET supports several target frameworks, but most of the time contributors are only interested in one or two. To get MSAL to build for all frameworks, contributors will need a [hefty Visual Studio installation as well as several SDKs](#prerequisites-to-build-msalnet).
 
-To work around this requirement, open [`Microsoft.Identity.Client.csproj`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/master/src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj) and comment out the targets you are not interested in. Keeping the pure .NET targets and eliminating UWP and Xamarin results in a fast build as well as the ability to run all unit tests.
+To work around this requirement, open [`Microsoft.Identity.Client.csproj`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj) and comment out the targets you are not interested in. Keeping the pure .NET targets and eliminating UWP and Xamarin results in a fast build as well as the ability to run all unit tests.
 
 Visual Studio may need to be restarted to ensure that updated target frameworks take effect.
 
@@ -144,7 +144,7 @@ MSAL is a multi-target library and at the time of writing, Visual Studio for Mac
 >```
 
 >**Note**
->You won't be able to run the integration or automation tests because they require access to a Microsoft Key Vault instance which is only accessible to the MSAL.NET engineering team. These tests will run as part of our automation pipelines in GitHub.
+>You won't be able to run the integration or automation tests because they require access to a Azure Key Vault instance which is only accessible to the MSAL.NET engineering team. These tests will run as part of our automation pipelines in GitHub.
 
 ### Package
 
