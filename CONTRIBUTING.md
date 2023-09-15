@@ -61,7 +61,7 @@ Remember to do the following:
 
 - Search the issue repository to see if there exists a duplicate issue.
 - Update to the latest version of the library to see if the issue still exists.
-- Submit an issue by filling out all as much of the information in the Bug Report as possible.
+- Submit an issue by filling out all as much of the information in the Bug report as possible.
 
 #### Documentation requests
 
