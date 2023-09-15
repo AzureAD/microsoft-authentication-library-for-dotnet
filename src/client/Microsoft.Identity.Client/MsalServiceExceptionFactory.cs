@@ -46,10 +46,7 @@ namespace Microsoft.Identity.Client
                     innerException);
             }
 
-            if (ex == null)
-            {
-                ex = new MsalServiceException(errorCode, errorMessage, innerException);
-            }
+            ex ??= new MsalServiceException(errorCode, errorMessage, innerException);
 
             SetHttpExceptionData(ex, httpResponse);
 
