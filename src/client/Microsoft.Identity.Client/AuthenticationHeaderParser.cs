@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Parameters returned by the <c>WWW-Authenticate</c> header. This allows for dynamic
-        /// scenarios such as claim challenge, Cotninuous Access Evaluation (CAE), and CA auth context.
+        /// scenarios such as claim challenge, Continuous Access Evaluation (CAE), and Conditional Access.
         /// See <see href="https://aka.ms/msal-net/wwwAuthenticate">our documentation</see> for additional details.
         /// </summary>
         public IReadOnlyList<WwwAuthenticateParameters> WwwAuthenticateParameters { get; private set; }
