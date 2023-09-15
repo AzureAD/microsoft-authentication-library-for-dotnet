@@ -55,7 +55,7 @@ When [submitting an issue](https://github.com/AzureAD/microsoft-authentication-l
 #### Bug reports
 
 The more information you provide, the more likely someone will be successful in reproducing the issue and finding a fix.
-Please use the [Bug Report template](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new?template=bug_report.md) and complete as much of the information listed as possible. Please use the [latest version of the library](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases) and see if your bug still exists before filing an issue.
+Please use the [Bug report template](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new?assignees=&labels=untriaged%2Cneeds+attention&projects=&template=bug_report.yaml&title=%5BBug%5D+) and complete as much of the information listed as possible. Please use the [latest version of the library](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases) and see if your bug still exists before filing an issue.
 
 Remember to do the following:
 
