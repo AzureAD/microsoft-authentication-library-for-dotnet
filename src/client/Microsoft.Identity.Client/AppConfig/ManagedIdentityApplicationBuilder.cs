@@ -118,18 +118,16 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Builds the ManagedIdentityApplication from the parameters set
-        /// in the builder
+        /// Builds an instance of <see cref="IManagedIdentityApplication"/> 
+        /// from the parameters set in the <see cref="ManagedIdentityApplicationBuilder"/>.
         /// </summary>
-        /// <returns></returns>
+        /// <exception cref="MsalClientException">Thrown when errors occur locally in the library itself (for example, because of incorrect configuration).</exception>
+        /// <returns>An instance of <see cref="IManagedIdentityApplication"/></returns>
         public IManagedIdentityApplication Build()
         {
             return BuildConcrete();
         }
 
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
         internal ManagedIdentityApplication BuildConcrete()
         {
             DefaultConfiguration();

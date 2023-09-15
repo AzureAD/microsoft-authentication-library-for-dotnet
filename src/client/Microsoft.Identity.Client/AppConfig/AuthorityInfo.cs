@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client
             AuthorityType authorityType,
             string authority,
             bool validateAuthority)
-            : this(authorityType, new Uri(authority), validateAuthority)
+            : this(authorityType, ValidateAndCreateAuthorityUri(authority), validateAuthority)
         {
 
         }
@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Client
             AuthorityType != AuthorityType.B2C;
 
         /// <summary>
-        /// Authority support multi-tenantcy. ADFS and Generic authorities are not tenanted.
+        /// Authority supports multi-tenancy. ADFS and Generic authorities are not tenanted.
         /// B2C doesn't allow multi-tenancy scenarios, but the authority itself is tenanted. 
         /// For CIAM, we allow multi-tenancy scenarios, and expect the STS to fail.
         /// </summary>

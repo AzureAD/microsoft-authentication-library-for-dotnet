@@ -1074,7 +1074,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// <para>What happens?</para>You configured WithTenant at the request level, but the application is using a non-AAD authority
         /// These are mutually exclusive.
-        /// <para>Mitigation</para> WithTenantId can only be used in conjunction with AAD authorities
+        /// <para>Mitigation</para> WithTenantId can only be used in conjunction with AAD authorities.
         /// </summary>
         public const string TenantOverrideNonAad = "tenant_override_non_aad";
 

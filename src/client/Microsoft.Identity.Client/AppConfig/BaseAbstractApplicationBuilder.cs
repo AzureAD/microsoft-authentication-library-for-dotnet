@@ -222,7 +222,7 @@ namespace Microsoft.Identity.Client
                     {
                         throw new MsalClientException(
                             MsalError.TenantOverrideNonAad,
-                            $"Cannot use WithTenantId() in the application builder, because the authority {Config.Authority.AuthorityInfo.AuthorityType} doesn't support it");
+                            $"Cannot use WithTenantId(tenantId) in the application builder, because the authority {Config.Authority.AuthorityInfo.AuthorityType} doesn't support it.");
                     }
 
                     string tenantedAuthority = Config.Authority.GetTenantedAuthority(
