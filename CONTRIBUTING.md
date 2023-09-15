@@ -71,7 +71,7 @@ If you have found errors in the documentation, or if an example or code snippet 
 
 #### Feature requests
 
-Have a feature request for MSAL? Complete a [Feature Request](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new?template=feature_request.md) or consider making a [contribution](../contribute/overview.md) to the library. Make sure your feature request is clear and concise and contains a detailed description of the problem. Please include any alternative solutions or features you may have considered.
+Have a feature request for MSAL? Complete a [Feature request](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new?assignees=&labels=feature+request%2Cuntriaged%2Cneeds+attention&projects=&template=feature_request.yaml&title=%5BFeature+Request%5D+++++) or consider making a contribution to the library. Make sure your feature request is clear and concise and contains a detailed description of the problem. Please include any alternative solutions or features you may have considered.
 
 ## Building and testing MSAL.NET
 
