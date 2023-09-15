@@ -254,8 +254,8 @@ namespace Microsoft.Identity.Client
         /// 
         /// If an authority was not specified at the application level, the default used is https://login.microsoftonline.com/common.
         /// </summary>
-        /// <param name="tenantId">tenant ID of the Azure AD tenant
-        /// or a domain associated with this Azure AD tenant, in order to sign-in a user of a specific organization only</param>
+        /// <param name="tenantId">Tenant ID of the Microsoft Entra ID tenant
+        /// or a domain associated with this Microsoft Entra ID tenant, in order to sign-in a user of a specific organization only.</param>
         /// <returns>The builder to chain the .With methods.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="tenantId"/> is null or an empty string.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="tenantId"/> is not well-formatted (for example, has spaces).</exception>
@@ -289,7 +289,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="authorityUri"/> is null or an empty string.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="authorityUri"/> is not well-formatted (for example, has spaces).</exception>
-        /// <exception cref="MsalClientException">Thrown in more general exception scenarios (for ex. if the application was configured with an authority that does not allow tenants).</exception>
+        /// <exception cref="MsalClientException">Thrown in general exception scenarios (for example if the application was configured with an authority that does not allow tenants).</exception>
         /// <remarks>
         /// The tenant should be more restrictive than the one configured at the application level, e.g. don't use "common".
         /// Does not affect authority validation, which is specified at the application level.

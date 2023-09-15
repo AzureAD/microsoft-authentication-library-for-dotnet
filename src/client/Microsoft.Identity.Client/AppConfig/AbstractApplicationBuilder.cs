@@ -431,7 +431,7 @@ namespace Microsoft.Identity.Client
 
 
         /// <summary>
-        /// Adds a known authority to the application. See https://aka.ms/msal-net-application-configuration.
+        /// Adds a known authority to the application. See <see href="https://aka.ms/msal-net-application-configuration">Application configuration options</see>.
         /// This constructor is mainly used for scenarios where the authority is not a standard Azure AD authority,
         /// nor an ADFS authority, nor an Azure AD B2C authority. For Azure AD, even in sovereign clouds, prefer
         /// using other overrides such as <see cref="WithAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
@@ -440,7 +440,7 @@ namespace Microsoft.Identity.Client
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="authorityUri"/> is null.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="authorityUri"/> is not well-formatted (for example, has spaces).</exception>
-        /// <exception cref="MsalClientException">Thrown in more general exception scenarios (for ex. if the application was configured with multiple different authority hosts).</exception>
+        /// <exception cref="MsalClientException">Thrown in general exception scenarios (for example if the application was configured with multiple different authority hosts).</exception>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAuthority(Uri authorityUri, bool validateAuthority = true)
         {
@@ -454,7 +454,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Adds a known Azure AD authority to the application to sign-in users specifying
-        /// the full authority URI. See https://aka.ms/msal-net-application-configuration.
+        /// the full authority URI. See <see href="https://aka.ms/msal-net-application-configuration">Application configuration options</see>.
         /// </summary>
         /// <param name="authorityUri">URI of the authority from which MSAL.NET will acquire the tokens.
         ///  Usual authorities endpoints for the Azure public Cloud are:
@@ -469,7 +469,7 @@ namespace Microsoft.Identity.Client
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="authorityUri"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="authorityUri"/> is not well-formatted (for example, has spaces).</exception>
-        /// <exception cref="MsalClientException">Thrown in more general exception scenarios (for ex. if the application was configured with multiple different authority hosts).</exception>
+        /// <exception cref="MsalClientException">Thrown in general exception scenarios (for example if the application was configured with multiple different authority hosts).</exception>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAuthority(string authorityUri, bool validateAuthority = true)
         {
@@ -485,14 +485,14 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Adds a known Azure AD authority to the application to sign-in users from a single
-        /// organization (single-tenant application) specified by its tenant ID. See https://aka.ms/msal-net-application-configuration.
+        /// organization (single-tenant application) specified by its tenant ID. See <see href="https://aka.ms/msal-net-application-configuration">Application configuration options</see>.
         /// </summary>
         /// <param name="cloudInstanceUri">Azure cloud instance.</param>
         /// <param name="tenantId">GUID of the tenant from which to sign-in users.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="cloudInstanceUri"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="cloudInstanceUri"/> is not well-formatted (for example, has spaces).</exception>
-        /// <exception cref="MsalClientException">Thrown in more general exception scenarios (for ex. if the application was configured with multiple different authority hosts).</exception>
+        /// <exception cref="MsalClientException">Thrown in more general exception scenarios (for example if the application was configured with multiple different authority hosts).</exception>
         /// <returns>The builder to chain the .With methods.</returns>
         public T WithAuthority(
             string cloudInstanceUri,
@@ -519,7 +519,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="cloudInstanceUri"/> or <paramref name="tenant"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="cloudInstanceUri"/> or <paramref name="tenant"/> is not well-formatted (for example, has spaces).</exception>
-        /// <exception cref="MsalClientException">Thrown in more general exception scenarios (for ex. if the application was configured with multiple different authority hosts).</exception>
+        /// <exception cref="MsalClientException">Thrown in more general exception scenarios (for example if the application was configured with multiple different authority hosts).</exception>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAuthority(
             string cloudInstanceUri,
@@ -549,8 +549,8 @@ namespace Microsoft.Identity.Client
         /// organization (single tenant application) described by its cloud instance and its tenant ID.
         /// See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <param name="azureCloudInstance">Instance of Azure cloud (for instance, Azure
-        /// worldwide cloud, Azure German Cloud, US government).</param>
+        /// <param name="azureCloudInstance">Instance of Azure cloud (for example, Azure
+        /// public cloud, Azure Germany, or Azure Government).</param>
         /// <param name="tenantId">Tenant Id of the tenant from which to sign-in users</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
@@ -568,8 +568,8 @@ namespace Microsoft.Identity.Client
         /// organization (single tenant application) described by its cloud instance and its domain
         /// name or tenant ID. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <param name="azureCloudInstance">Instance of Azure cloud (for instance, Azure
-        /// worldwide cloud, Azure German Cloud, US government).</param>
+        /// <param name="azureCloudInstance">Instance of Azure cloud (for example, Azure
+        /// public cloud, Azure Germany, or Azure Government).</param>
         /// <param name="tenant">Domain name associated with the Azure AD tenant from which
         /// to sign-in users. This can also be a GUID.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
