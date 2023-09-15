@@ -301,12 +301,11 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithTenantId()
         {
-            const string TenantId = "a_tenant id";
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                    .WithTenantId(TenantId)
+                                                    .WithTenantId(TestConstants.TenantId)
                                                     .Build();
 
-            Assert.AreEqual(TenantId, pca.AppConfig.TenantId);
+            Assert.AreEqual(TestConstants.TenantId, pca.AppConfig.TenantId);
         }
 
         [TestMethod]

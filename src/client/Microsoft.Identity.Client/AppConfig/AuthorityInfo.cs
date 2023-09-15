@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client
             AuthorityType authorityType,
             string authority,
             bool validateAuthority)
-            : this(authorityType, ValidateAndCreateAuthorityUri(authority), validateAuthority)
+            : this(authorityType, ValidateAndCreateAuthorityUri(authority, authorityType), validateAuthority)
         {
 
         }
@@ -375,14 +375,14 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentException(MsalErrorMessage.AuthorityUriInsecure, nameof(authority));
             }
 
-            string path = authorityUri.AbsolutePath.Substring(1);
-            if (string.IsNullOrWhiteSpace(path) && !IsCiamAuthority(authorityUri))
-            {
-                throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, nameof(authority));
-            }
-
             if (authorityType is not AuthorityType.Generic)
             {
+                string path = authorityUri.AbsolutePath.Substring(1);
+                if (string.IsNullOrWhiteSpace(path) && !IsCiamAuthority(authorityUri))
+                {
+                    throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, nameof(authority));
+                }
+
                 string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split('/');
                 if (pathSegments == null || pathSegments.Length == 0)
                 {

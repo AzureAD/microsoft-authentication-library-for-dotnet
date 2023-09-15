@@ -3,13 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -25,7 +22,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [DataRow(false)]
         /// AAD doesn't returns the "scope" in the response
         /// Duende does return the "scope" in the response
-        public async Task GenericClientCredentialSuccessfulTestAsync(bool includeScopeInResonse)
+        public async Task ClientCredential_Success_Async(bool includeScopeInResponse)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -42,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     CreateOidcHttpHandler(authority + @"/" + Constants.WellKnownOpenIdConfigurationPath));
 
                 httpManager.AddMockHandler(
-                    CreateTokenResponseHttpHandler(authority + "/connect/token", "api", includeScopeInResonse ? "api" : null));
+                    CreateTokenResponseHttpHandler(authority + "/connect/token", "api", includeScopeInResponse ? "api" : null));
 
                 Assert.AreEqual(authority + "/", app.Authority);
                 var confidentailClientApp = (ConfidentialClientApplication)app;
@@ -69,9 +66,23 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [DataTestMethod]
+        [DataRow("https://demo.duend esoftware.com")]
+        public void MalformedAuthority_ThrowsException(string malformedAuthority)
+        {
+            // Tenant and authority modifiers
+            Assert.ThrowsException<ArgumentException>(() =>
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures()
+                    .WithGenericAuthority(malformedAuthority)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build());
+        }
+
+        [DataTestMethod]
         [DataRow("oidc_response_not_json")]
         [DataRow("oidc_response_http_error")]
-        public async Task BadOidcResponseAsync(string badOidcResponseType)
+        public async Task BadOidcResponse_ThrowsException_Async(string badOidcResponseType)
         {
             using (var httpManager = new MockHttpManager())
             {

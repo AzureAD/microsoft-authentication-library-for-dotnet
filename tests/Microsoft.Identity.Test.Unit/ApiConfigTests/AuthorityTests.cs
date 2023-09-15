@@ -249,19 +249,68 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         }
 
         [DataTestMethod]
+        [DataRow("malformed tenant")]
+        public void WithTenantId_AppLevel_MalformedTenant_ThrowsException(string tenantId)
+        {
+            // Tenant and authority modifiers
+            Assert.ThrowsException<ArgumentException>(() =>
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithTenantId(tenantId)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build());
+
+            // Tenant only modifier
+            Assert.ThrowsException<ArgumentException>(() =>
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithTenantId(tenantId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build());
+        }
+
+        [DataTestMethod]
+        [DataRow("malformed tenant")]
+        public void WithTenantId_RequestLevel_MalformedTenant_ThrowsException(string tenantId)
+        {
+            var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build();
+
+            // Tenant and authority modifiers
+            Assert.ThrowsException<ArgumentException>(() =>
+                    app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                       .WithTenantId(tenantId));
+        }
+
+        [DataTestMethod]
         [DataRow(null)]
-        public void WithTenantIdFromAuthority_NullUriAuthority_Failure(Uri authorityValue)
+        public void WithTenantIdFromAuthority_NullUriAuthority_ThrowsException(Uri authorityValue)
         {
             var app = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithAuthority(TestConstants.AuthorityCommonTenant)
                 .WithClientSecret("secret")
                 .Build();
 
             AssertException.Throws<ArgumentNullException>(() =>
-                app
-                    .AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
-                    .WithTenantIdFromAuthority(authorityValue));
+                app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                   .WithTenantIdFromAuthority(authorityValue));
+        }
+
+        [TestMethod]
+        public void WithTenantIdFromAuthority_MalformedTenant_ThrowsException()
+        {
+            var invalidAuthorityUri = new Uri("https://login.microsoftonline.com/invalid tenant/");
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithClientSecret("secret")
+                .Build();
+
+            AssertException.Throws<ArgumentException>(() =>
+                app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+                   .WithTenantIdFromAuthority(invalidAuthorityUri));
         }
 
         [TestMethod]
