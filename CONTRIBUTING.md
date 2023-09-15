@@ -133,7 +133,7 @@ MSAL is a multi-target library and at the time of writing, Visual Studio for Mac
 
 ### Visual Studio
 
-1. Load `LibsAndSamples.sln` for a bigger solution with lots of apps that showcase and exercise MSAL. Load `LibsNoSamples.sln` for a small solution that has the library and the tests.
+1. Load `LibsAndSamples.sln` for a bigger solution with lots of apps that showcase and exercise MSAL.
 2. Build in Visual Studio (if configured) or via the command line with `msbuild /t:restore` and `msbuild`. If using the command line, developers might need to use the [Visual Studio Developer Command Prompt](/visualstudio/ide/reference/command-prompt-powershell).
 
 >**Note**
