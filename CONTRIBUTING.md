@@ -50,7 +50,7 @@ File a single issue per bug and feature request:
 - Do not enumerate multiple bugs or feature requests in the same issue.
 - Do not add your issue as a comment to an existing issue unless it's for the identical input. Many issues look similar, but have different causes.
 
-When [submitting an issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new/choose), select the correct category, **Bug Report**, **Documentation**, or **Feature request**.
+When [submitting an issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new/choose), select the correct category, **Bug report**, **Documentation**, or **Feature request**.
 
 #### Bug report
 
