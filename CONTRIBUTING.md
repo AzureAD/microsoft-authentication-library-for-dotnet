@@ -65,7 +65,7 @@ Remember to do the following:
 
 #### Documentation requests
 
-If you find our documentation or XML comments lacking in necessary detail, submit a [Documentation request](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new?template=documentation.md).
+If you find our documentation or XML comments lacking in necessary detail, submit a [Documentation request](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new?assignees=&labels=documentation&projects=&template=documentation.md&title=%5BDocumentation%5D+).
 
 If you have found errors in the documentation, or if an example or code snippet is needed, [open an issue in the documentation repository](https://github.com/MicrosoftDocs/microsoft-authentication-library-dotnet/issues).
 
