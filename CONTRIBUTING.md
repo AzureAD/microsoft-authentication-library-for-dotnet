@@ -144,7 +144,7 @@ MSAL is a multi-target library and at the time of writing, Visual Studio for Mac
 >```
 
 >**Note**
->You won't be able to run the integration or automation tests because they require access to a Microsoft Key Vault instance which is only accessible to the MSAL.NET engineering team. These tests will run as part of our automation pipelines in GitHub.
+>You won't be able to run the integration or automation tests because they require access to a Azure Key Vault instance which is only accessible to the MSAL.NET engineering team. These tests will run as part of our automation pipelines in GitHub.
 
 ### Package
 
