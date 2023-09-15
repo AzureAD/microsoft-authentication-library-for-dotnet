@@ -5,17 +5,15 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.OAuth2.Throttling;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
     internal class MsalServiceExceptionFactory
     {
-        static ISet<string> s_nonUiSubErrors = new HashSet<string>(
+        static readonly ISet<string> s_nonUiSubErrors = new HashSet<string>(
             new[] { MsalError.ClientMismatch, MsalError.ProtectionPolicyRequired },
             StringComparer.OrdinalIgnoreCase);
 
@@ -26,7 +24,7 @@ namespace Microsoft.Identity.Client
           Exception innerException = null)
         {
             MsalServiceException ex = null;
-            var oAuth2Response = JsonHelper.TryToDeserializeFromJson<OAuth2ResponseBase>(httpResponse?.Body);
+            OAuth2ResponseBase oAuth2Response = JsonHelper.TryToDeserializeFromJson<OAuth2ResponseBase>(httpResponse?.Body);
 
             if (IsInvalidGrant(oAuth2Response?.Error, oAuth2Response?.SubError) || IsInteractionRequired(oAuth2Response?.Error))
             {
@@ -133,7 +131,7 @@ namespace Microsoft.Identity.Client
             string errorCode,
             HttpResponse httpResponse)
         {
-            var managedIdentityResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(httpResponse?.Body);
+            ManagedIdentityErrorResponse managedIdentityResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(httpResponse?.Body);
 
             string message = managedIdentityResponse == null ? 
                 "Empty error response received." :
