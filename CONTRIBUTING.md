@@ -35,7 +35,7 @@ git push origin
 
 ### Before submitting an issue
 
-First, please do a search of [open issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues) to see if the issue or feature request has already been filed. Use the tags to narrow down your search. Here's an example of a [query for Xamarin iOS specific issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues?utf8=%E2%9C%93&q=is:issue+is:open+label:scenario:Mobile-iOS).
+First, please do a search for [open issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues) to see if the issue or feature request has already been filed. Use the tags to narrow down your search. Here's an example of a [query for Xamarin iOS specific issues](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues?utf8=%E2%9C%93&q=is:issue+is:open+label:scenario:Mobile-iOS).
 
 If you find your issue already exists, add a relevant comment. You can also use an upvote or downvote reaction in place of a "+1" comment.
 
