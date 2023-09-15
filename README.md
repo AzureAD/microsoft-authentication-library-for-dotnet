@@ -2,7 +2,7 @@
 
 The MSAL library for .NET is part of the [Microsoft identity platform for developers](https://aka.ms/aaddevv2) (formerly named Azure AD) v2.0. It enables you to acquire security tokens to call protected APIs. It uses industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/).
 
-Quick links:
+**Quick links:**
 
 | [Conceptual documentation](https://aka.ms/msalnet) | [Getting Started](https://learn.microsoft.com/entra/msal/dotnet/getting-started/choosing-msal-dotnet) | [Sample Code](https://aka.ms/aaddevsamplesv2) | [API Reference](https://learn.microsoft.com/dotnet/api/overview/) | [Support](README.md#community-help-and-support) | [Feedback](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues)
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
