@@ -63,7 +63,7 @@ Remember to do the following:
 - Update to the latest version of the library to see if the issue still exists.
 - Submit an issue by filling out all as much of the information in the Bug Report as possible.
 
-#### Documentation Requests
+#### Documentation requests
 
 If you find our documentation or XML comments lacking in necessary detail, submit a [Documentation request](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new?template=documentation.md).
 
