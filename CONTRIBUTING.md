@@ -8,7 +8,7 @@ Please visit [https://cla.microsoft.com/](https://cla.microsoft.com/) and sign t
 
 ## Tests
 
-It's all standard stuff, but please note that you won't be able to run integration tests locally because they connect to a KeyVault to fetch some test users and passwords. The CI will run them for you.
+It's all standard stuff, but please note that you won't be able to run integration tests locally because they connect to Azure Key Vault to fetch some test users and passwords.
 
 ## How the MSAL team deals with forks
 
