@@ -1,35 +1,31 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Microsoft.Identity.Client.Cache
 {
     /// <summary>
-    /// Identifies the type of cache that the token was read from. Cache implementations must provide this.
+    /// Identifies the type of cache that the token was read from.
     /// </summary>
+    /// <remarks>
+    /// Token cache serialization implementations must provide this value.
+    /// </remarks>
     public enum CacheLevel
     {
         /// <summary>
-        /// Specifies that the cache level used is None.
-        /// Token was retrieved from ESTS
+        /// Indicates that the token was retrieved from the identity provider.
         /// </summary>
         None = 0,
         /// <summary>
-        /// Specifies that the cache level used is unknown.
+        /// Indicates that the cache level used is unknown.
         /// Token was retrieved from cache but the token cache implementation didn't specify which cache level was used.
         /// </summary>
         Unknown = 1,
         /// <summary>
-        /// Specifies if the L1 cache is used.
+        /// Indicates that the token was read from the L1 cache.
         /// </summary>
         L1Cache = 2,
         /// <summary>
-        /// Specifies if the L2 cache is used.
+        /// Indicates that the token was read from the L2 cache.
         /// </summary>
         L2Cache = 3
     }
