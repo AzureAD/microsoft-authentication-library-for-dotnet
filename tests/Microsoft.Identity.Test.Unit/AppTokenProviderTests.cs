@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -158,5 +159,48 @@ namespace Microsoft.Identity.Test.Unit
             return token;
         }
 
+        [TestMethod]
+        public async Task ParallelRequests_CallTokenEndpointOnceAsync()
+        {
+            int numOfTasks = 10; 
+            int identityProviderHits = 0;
+            int cacheHits = 0;
+
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithAuthority("https://login.microsoftonline.com/tid")
+                .WithAppTokenProvider((AppTokenProviderParameters parameters) =>
+                {
+                    return Task.FromResult(GetAppTokenProviderResult());
+                })
+                .BuildConcrete();
+
+            Task[] tasks = new Task[numOfTasks];
+            for (int i = 0; i < numOfTasks; i++)
+            {
+                tasks[i] = Task.Run(async () =>
+                {
+                    AuthenticationResult authResult = await app.AcquireTokenForClient(TestConstants.s_scope)
+                                                .ExecuteAsync(new CancellationToken()).ConfigureAwait(false);
+
+                    if (authResult.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider)
+                    {
+                        // Increment identity hits count
+                        Interlocked.Increment(ref identityProviderHits);
+                        Assert.IsTrue(identityProviderHits == 1);
+                    }
+                    else
+                    {
+                        // Increment cache hits count
+                        Interlocked.Increment(ref cacheHits);
+                    }
+                });
+            }
+
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            Debug.WriteLine($"Total Identity Hits: {identityProviderHits}");
+            Debug.WriteLine($"Total Cache Hits: {cacheHits}");
+            Assert.IsTrue(cacheHits == 9);
+        }
     }
 }

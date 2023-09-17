@@ -622,6 +622,20 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual($"https://login.microsoftonline.com/{TestConstants.TenantId}/", app6.Authority);
         }
 
+        [TestMethod]
+        public void CacheSynchronization_Default_IsTrue()
+        {
+            var pcaOptions = new PublicClientApplicationOptions()
+            {
+                ClientId = TestConstants.ClientId
+            };
+            var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(pcaOptions).Build();
+            Assert.IsTrue((pca.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+
+            pca = PublicClientApplicationBuilder.Create(Guid.NewGuid().ToString()).Build();
+            Assert.IsTrue((pca.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
+        }
+
 #if NET6_WIN
         [TestMethod]
         public void IsBrokerAvailable_net6()

@@ -18,6 +18,9 @@ Quick links:
 **Microsoft.Identity.Client.Broker**  
 [![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.Broker.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client.Broker/)  
 
+**Microsoft.Identity.Client.Extensions.Msal**  
+[![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.Extensions.Msal.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client.Extensions.Msal/)  
+
 ## Build Status
  
 [![Build Status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/CI/DotNet/.NET%20MSAL%20CI%20(YAML)?branchName=main)](https://identitydivision.visualstudio.com/IDDP/_build/latest?definitionId=922&branchName=main)

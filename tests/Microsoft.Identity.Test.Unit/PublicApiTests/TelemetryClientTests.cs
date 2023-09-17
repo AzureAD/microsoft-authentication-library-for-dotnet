@@ -30,6 +30,7 @@ using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
+    [DeploymentItem(@"Resources\valid_cert.pfx")]
     public class TelemetryClientTests : TestBase
     {
         private MockHttpAndServiceBundle _harness;
@@ -432,10 +433,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsFalse((bool?)eventDetails.Properties[TelemetryConstants.Succeeded]);
 
                 //Test for MsalClientException
-                _harness.HttpManager.AddTokenResponse(TokenResponseType.InvalidClient);
-
                 MsalClientException exClient = await AssertException.TaskThrowsAsync<MsalClientException>(
-                    () => _cca.AcquireTokenForClient(null)
+                    () => _cca.AcquireTokenForClient(null) // null scope -> client exception
                     .WithAuthority(TestConstants.AuthorityUtidTenant)
                     .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
 

@@ -19,7 +19,7 @@ do
 
     try
     {
-        var result = await mi.AcquireTokenForManagedIdentity(scope )
+        var result = await mi.AcquireTokenForManagedIdentity(scope)
             .ExecuteAsync().ConfigureAwait(false);
 
         Console.WriteLine("Success");
