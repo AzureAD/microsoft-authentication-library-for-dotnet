@@ -13,9 +13,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
     // This IDisposable class doe not need to implement Dispose method in standard way, because it is sealed.
     // If it ever needs to become inheritable, it should follow the standard pattern as described in http://msdn.microsoft.com/en-us/library/fs2xkftw(v=vs.110).aspx.
     /// <summary>Provides a scheduler that uses STA threads.</summary>
-#if NET6_WIN
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-#endif
     internal sealed class StaTaskScheduler : TaskScheduler, IDisposable
     {
         /// <summary>The STA threads used by the scheduler.</summary>

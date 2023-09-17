@@ -5,7 +5,6 @@
     <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
     <TargetFrameworkNet6>net6.0</TargetFrameworkNet6>
-    <TargetFrameworkNet6Win>net6.0-windows</TargetFrameworkNet6Win>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
@@ -30,7 +29,7 @@
 
   <!-- Package that includes all the TFMs https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3863 -->
   <PropertyGroup Condition="'$(NET_ONLY_INTERNAL_PACKAGE)' == ''">
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Mac);$(TargetFrameworkNet6);$(TargetFrameworkNet6Win);</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop45);$(TargetFrameworkNetDesktop461);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Mac);$(TargetFrameworkNet6);</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Mac);$(TargetFrameworkNet6)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkNet6)</TargetFrameworks>
   </PropertyGroup>
@@ -148,38 +147,11 @@
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
   </ItemGroup>
   
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)'">
     <IsTrimmable>true</IsTrimmable>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
   </PropertyGroup>
   
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
-    <Compile Include="$(PathToMsalSources)\Platforms\net6\**\*.cs" LinkBase="Platforms\net6" />
-    <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
-    <Compile Include="$(PathToMsalSources)\Platforms\net6win\**\*.cs" LinkBase="Platforms\net6win" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\RuntimeBroker\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\WebView2WebUi\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
-
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.864.35" />
-    <PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="$(MSALRuntimeNativeInteropVersion)" IncludeAssets="all" />
-
-    <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
-    <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
-  </ItemGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
-    <UseWindowsForms>true</UseWindowsForms>
-    <!-- 
-    MSAL will run on Windows 7 and 8 but requires to be built against Win10 to use WinRT APIs for WAM 
-    See https://docs.microsoft.com/en-us/dotnet/standard/analyzers/platform-compat-analyzer and 
-    https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md for details
-    -->
-    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
-  </PropertyGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop461)' ">
   </ItemGroup>
 
