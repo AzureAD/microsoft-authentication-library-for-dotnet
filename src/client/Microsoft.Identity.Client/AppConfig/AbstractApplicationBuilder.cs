@@ -457,7 +457,7 @@ namespace Microsoft.Identity.Client
         /// the full authority URI. See <see href="https://aka.ms/msal-net-application-configuration">Application configuration options</see>.
         /// </summary>
         /// <param name="authorityUri">URI of the authority from which MSAL.NET will acquire the tokens.
-        ///  Usual authorities endpoints for the Azure public Cloud are:
+        ///  Authority endpoints for the Azure public Cloud are:
         ///  <list type="bullet">
         ///  <item><description><c>https://login.microsoftonline.com/tenant/</c> where <c>tenant</c> is the tenant ID of the Azure AD tenant
         ///  or a domain associated with this Azure AD tenant, in order to sign-in users of a specific organization only</description></item>
@@ -505,11 +505,11 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Adds a known Azure AD authority to the application to sign-in users from a single
-        /// organization (single tenant application) described by its domain name. See https://aka.ms/msal-net-application-configuration.
+        /// organization (single-tenant application) described by its domain name. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
         /// <param name="cloudInstanceUri">Uri to the Azure cloud instance (for instance
         /// <c>https://login.microsoftonline.com)</c></param>
-        /// <param name="tenant">domain name associated with the tenant from which to sign-in users</param>
+        /// <param name="tenant">Domain name associated with the tenant from which to sign-in users</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <remarks>
         /// <paramref name="tenant"/> can also contain the string representation of a GUID (tenantId),
@@ -565,7 +565,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Adds a known Azure AD authority to the application to sign-in users from a single
-        /// organization (single tenant application) described by its cloud instance and its domain
+        /// organization (single-tenant application) described by its cloud instance and its domain
         /// name or tenant ID. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
         /// <param name="azureCloudInstance">Instance of Azure cloud (for example, Azure
