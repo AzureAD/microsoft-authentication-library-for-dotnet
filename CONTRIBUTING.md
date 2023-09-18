@@ -4,7 +4,7 @@ Microsoft Authentication Library (MSAL) for .NET welcomes new contributors.  Thi
 
 ## Contributor License Agreement
 
-Please visit [https://cla.microsoft.com/](https://cla.microsoft.com/) and sign the Contributor License Agreement.  You only need to do that once. We can not look at your code until you've submitted this request.
+Please visit [https://cla.microsoft.com/](https://cla.microsoft.com/) and sign the Contributor License Agreements.  You only need to do that once. We can not look at your code until you've submitted this request.
 
 ## Tests
 
