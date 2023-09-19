@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             return msalTokenResponse;
         }
 
-        public async Task<MsalTokenResponse> SignInInteractivelyAsync(
+        private async Task<MsalTokenResponse> SignInInteractivelyAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
@@ -230,7 +230,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             return msalTokenResponse;
         }
 
-        public async Task<MsalTokenResponse> AcquireTokenInteractiveDefaultUserAsync(
+        private async Task<MsalTokenResponse> AcquireTokenInteractiveDefaultUserAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
