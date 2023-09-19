@@ -200,7 +200,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             MsalTokenResponse msalTokenResponse = null;
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
@@ -235,7 +234,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
-            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
 
             MsalTokenResponse msalTokenResponse = null;
