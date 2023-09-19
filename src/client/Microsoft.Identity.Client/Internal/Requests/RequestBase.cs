@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -21,7 +20,6 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
-using System.Net.Http;
 using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -37,7 +35,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal ICacheSessionManager CacheManager => AuthenticationRequestParameters.CacheSessionManager;
         internal IServiceBundle ServiceBundle { get; }
 
-        internal Activity activity;
+        internal IOpenTelemetryClient OpenTelemetryClient { get; }
 
         protected RequestBase(
             IServiceBundle serviceBundle,
@@ -54,6 +52,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new ArgumentNullException(nameof(acquireTokenParameters));
             }
+
+            OpenTelemetryClient = (OpenTelemetryClient)OpenTelemetryFactory.CreateClient();
 
             ValidateScopeInput(authenticationRequestParameters.Scope);
             acquireTokenParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
@@ -82,11 +82,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken = default)
         {
             Stopwatch sw = Stopwatch.StartNew();
-            activity = OpenTelemetryClient.s_acquireTokenActivity.StartActivity("Token Acquisition", ActivityKind.Internal);
-            activity?.AddTag(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion());
-            activity?.AddTag(TelemetryConstants.Platform, ServiceBundle.PlatformProxy.GetProductName());
-            activity?.AddTag(TelemetryConstants.ClientId, AuthenticationRequestParameters.AppConfig.ClientId);
-            activity?.AddTag(TelemetryConstants.ActivityId, AuthenticationRequestParameters.RequestContext.CorrelationId);
+
+            OpenTelemetryClient?.LogActivity(new Dictionary<string, object> { 
+                { TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion() },
+                { TelemetryConstants.Platform, ServiceBundle.PlatformProxy.GetProductName() },
+                { TelemetryConstants.ClientId, AuthenticationRequestParameters.AppConfig.ClientId },
+                { TelemetryConstants.ActivityId, AuthenticationRequestParameters.RequestContext.CorrelationId }
+            });
 
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
             AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
@@ -106,7 +108,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
                     LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails, telemetryClients);
 
-                    OpenTelemetryClient.LogSuccessMetrics(
+                    OpenTelemetryClient?.LogSuccessMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(), 
                         AuthenticationRequestParameters.AppConfig.ClientId, 
                         authenticationResult.AuthenticationResultMetadata, 
@@ -123,7 +125,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
 
-                    OpenTelemetryClient.LogToFailureCounter(
+                    OpenTelemetryClient.LogFailedMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(), 
                         AuthenticationRequestParameters.AppConfig.ClientId, 
                         ex.ErrorCode);
@@ -135,7 +137,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     apiEvent.ApiErrorCode = ex.GetType().Name;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
-                    OpenTelemetryClient.LogToFailureCounter(
+                    OpenTelemetryClient.LogFailedMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(), 
                         AuthenticationRequestParameters.AppConfig.ClientId, 
                         ex.GetType().Name);
@@ -144,7 +146,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 finally
                 {
-                    activity?.Stop();
+                    OpenTelemetryClient?.StopActivity();
                     telemetryClients.TrackEvent(telemetryEventDetails);
                 }
             }
@@ -152,59 +154,78 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void LogMsalSuccessTelemetryToOTel(AuthenticationResult authenticationResult)
         {
-            activity?.SetStatus(ActivityStatusCode.Ok, "Success");
+            if (OpenTelemetryClient == null)
+            {
+                return;
+            }
 
-            activity?.AddTag(TelemetryConstants.CacheInfoTelemetry, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason));
-            activity?.AddTag(TelemetryConstants.TokenSource, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.TokenSource));
-            activity?.AddTag(TelemetryConstants.Duration, authenticationResult.AuthenticationResultMetadata.DurationTotalInMs);
-            activity?.AddTag(TelemetryConstants.DurationInCache, authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs);
-            activity?.AddTag(TelemetryConstants.DurationInHttp, authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs);
-            activity?.AddTag(TelemetryConstants.TokenType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.TokenType);
-            activity?.AddTag(TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds);
+            OpenTelemetryClient.LogActivityStatus(true);
+
+            Dictionary<string, object> tags = new Dictionary<string, object> { 
+                { TelemetryConstants.CacheInfoTelemetry, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason) },
+                { TelemetryConstants.TokenSource, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.TokenSource) },
+                { TelemetryConstants.Duration, authenticationResult.AuthenticationResultMetadata.DurationTotalInMs },
+                { TelemetryConstants.DurationInCache, authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs },
+                { TelemetryConstants.DurationInHttp, authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs },
+                { TelemetryConstants.TokenType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.TokenType },
+                { TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds } 
+            };
 
             if (authenticationResult.AuthenticationResultMetadata.RefreshOn.HasValue)
             {
-                activity?.AddTag(TelemetryConstants.RefreshOn, DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value));
+                tags.Add(TelemetryConstants.RefreshOn, DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value));
             }
-            activity?.AddTag(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
-            activity?.AddTag(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
-            activity?.AddTag(TelemetryConstants.CacheLevel, (int)GetCacheLevel(authenticationResult));
+            tags.Add(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
+            tags.Add(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
+            tags.Add(TelemetryConstants.CacheLevel, (int)GetCacheLevel(authenticationResult));
 
             var resourceAndScopes = ParseScopesForTelemetry();
 
             if (resourceAndScopes.Item1 != null)
             {
-                activity?.AddTag(TelemetryConstants.Resource, resourceAndScopes.Item1);
+                tags.Add(TelemetryConstants.Resource, resourceAndScopes.Item1);
             }
             if (resourceAndScopes.Item2 != null)
             {
-                activity?.AddTag(TelemetryConstants.Scopes, resourceAndScopes.Item2);
+                tags.Add(TelemetryConstants.Scopes, resourceAndScopes.Item2);
             }
+
+            OpenTelemetryClient.LogActivity(tags);
         }
 
         private void LogMsalFailedTelemetryToOTel(Exception exception)
         {
-            activity?.SetStatus(ActivityStatusCode.Error, "Success");
+            if (OpenTelemetryClient == null)
+            {
+                return;
+            }   
 
-            
-            activity?.AddTag(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
-            activity?.AddTag(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
+            OpenTelemetryClient.LogActivityStatus(false);
 
-            activity?.AddTag(TelemetryConstants.ErrorMessage, exception.Message);
+            Dictionary<string, object> tags = new Dictionary<string, object>
+            {
+                { TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType },
+                { TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString() },
+
+                { TelemetryConstants.ErrorMessage, exception.Message }
+            };
+
             if (exception is MsalClientException clientException)
             {
-                activity?.AddTag(TelemetryConstants.ErrorCode, clientException.ErrorCode);
+                tags.Add(TelemetryConstants.ErrorCode, clientException.ErrorCode);
                 return;
             }
 
             if (exception is MsalServiceException serviceException)
             {
-                activity?.AddTag(TelemetryConstants.ErrorCode, serviceException.ErrorCode);
-                activity?.AddTag(TelemetryConstants.StsErrorCode, serviceException.ErrorCodes?.FirstOrDefault());
+                tags.Add(TelemetryConstants.ErrorCode, serviceException.ErrorCode);
+                tags.Add(TelemetryConstants.StsErrorCode, serviceException.ErrorCodes?.FirstOrDefault());
                 return;
             }
 
-            activity?.AddTag(TelemetryConstants.ErrorCode, exception.GetType().ToString());
+            tags.Add(TelemetryConstants.ErrorCode, exception.GetType().ToString());
+
+            OpenTelemetryClient.LogActivity(tags);
         }
 
         private void LogMsalErrorTelemetryToClient(Exception ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)

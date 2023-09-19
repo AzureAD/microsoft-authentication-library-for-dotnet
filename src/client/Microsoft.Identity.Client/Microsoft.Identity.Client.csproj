@@ -2,7 +2,7 @@
 
   <PropertyGroup Label="Targets required for unit tests to run">
     <TargetFrameworkNetDesktop461>net461</TargetFrameworkNetDesktop461>
-    <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
+    <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
     <TargetFrameworkNet6>net6.0</TargetFrameworkNet6>
     <TargetFrameworkNet6Win>net6.0-windows</TargetFrameworkNet6Win>
@@ -11,7 +11,8 @@
 
   <!-- Mobile and legacy targets - comment these out or set env variable INCLUDE_MOBILE_AND_LEGACY_TFM to speedup the build -->
   <PropertyGroup Condition="'$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
-    <!--<TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>-->
+    <TargetFrameworkNetDesktop462>net462</TargetFrameworkNetDesktop462>
+    <TargetFrameworkNetDesktop45>net45</TargetFrameworkNetDesktop45>
     <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
     <TargetFrameworkAndroid9>MonoAndroid9.0</TargetFrameworkAndroid9>
     <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
@@ -122,7 +123,6 @@
     <Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />
     <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
     <Compile Remove="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
-    <Compile Include="TelemetryCore\OpenTelemetry\OpenTelemetryClient.cs" />
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>
 
@@ -281,6 +281,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.22.0" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet6)' Or '$(TargetFramework)' == '$(TargetFrameworkNetStandard)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' ">
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.2" />
   </ItemGroup>
 </Project>

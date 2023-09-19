@@ -1,19 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-//#if NET6_0_OR_GREATER || NET461_OR_GREATER || NET20_OR_GREATER
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+#if NETSTANDARD || NET6_0 || NET462
 using System.Diagnostics.Metrics;
+#endif
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Requests;
-//#endif
 
 namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 {
     /// <summary>
     /// Class to hold the OpenTelemetry objects used by MSAL.
     /// </summary>
-    public class OpenTelemetryClient
+    internal class OpenTelemetryClient : IOpenTelemetryClient
 
     {
         /// <summary>
@@ -26,10 +26,16 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         /// </summary>
         public const string ActivitySourceName = "MSAL_Activity";
 
+#if NETSTANDARD || NET6_0 || NET462
         /// <summary>
         /// Meter to hold the MSAL metrics.
         /// </summary>
         internal static readonly Meter Meter = new Meter(MeterName, "1.0.0");
+
+        /// <summary>
+        /// ActivitySource to hold the MSAL activities.
+        /// </summary>
+        internal static readonly ActivitySource s_acquireTokenActivity = new ActivitySource(ActivitySourceName, "1.0.0");
 
         /// <summary>
         /// Counter to hold the number of successful token acquisition calls.
@@ -69,23 +75,50 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             unit: "ms",
             description: "Performance of token acquisition calls network latency");
 
-        internal static readonly ActivitySource s_acquireTokenActivity = new ActivitySource(ActivitySourceName, "1.0.0");
+        internal static readonly Lazy<Activity> s_activity = new Lazy<Activity>(() => s_acquireTokenActivity.StartActivity("Token Acquisition", ActivityKind.Internal));
+#endif
 
-        // Aggregates the successful requests based on client id, token source and cache refresh reason.
-        internal static void LogSuccessMetrics(
-            string platform, 
-            string clientId, 
-            AuthenticationResultMetadata authResultMetadata,
-            string apiId,
-            string cacheLevel)
+        void IOpenTelemetryClient.LogActivity(Dictionary<string, object> tags)
         {
+#if NETSTANDARD || NET6_0 || NET462
+            foreach (KeyValuePair<string, object> tag in tags)
+            {
+                s_activity.Value?.AddTag(tag.Key, tag.Value);
+            }
+#endif
+        }
+
+        void IOpenTelemetryClient.LogActivityStatus(bool success)
+        {
+#if NETSTANDARD || NET6_0 || NET462
+            if (success)
+            {
+                s_activity.Value?.SetStatus(ActivityStatusCode.Ok, "Success");
+            }
+            else
+            {
+                s_activity.Value?.SetStatus(ActivityStatusCode.Error, "Request failed");
+            }
+#endif
+        }
+
+        void IOpenTelemetryClient.StopActivity()
+        {
+#if NETSTANDARD || NET6_0 || NET462
+            s_activity.Value?.Stop();
+#endif
+        }
+
+        void IOpenTelemetryClient.LogSuccessMetrics(string platform, string clientId, AuthenticationResultMetadata authResultMetadata, string apiId, string cacheLevel)
+        {
+#if NETSTANDARD || NET6_0 || NET462
             s_successCounter.Value.Add(1,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
                 new(TelemetryConstants.ClientId, clientId),
                 new(TelemetryConstants.ApiId, apiId),
                 new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
-                new(TelemetryConstants.CacheInfoTelemetry, authResultMetadata.CacheRefreshReason), 
+                new(TelemetryConstants.CacheInfoTelemetry, authResultMetadata.CacheRefreshReason),
                 new(TelemetryConstants.CacheLevel, cacheLevel));
 
             s_durationTotal.Record(authResultMetadata.DurationTotalInMs,
@@ -103,16 +136,18 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
                 new(TelemetryConstants.Platform, platform),
                 new(TelemetryConstants.ApiId, apiId),
                 new(TelemetryConstants.ClientId, clientId));
+#endif
         }
 
-        // Aggregates the failure requests based on client id, and MSAL's error code or exception name if the exception is not an MSAL exception.
-        internal static void LogToFailureCounter(string platform, string clientId, string errorCode)
+        void IOpenTelemetryClient.LogFailedMetrics(string platform, string clientId, string errorCode)
         {
+#if NETSTANDARD || NET6_0 || NET462
             s_failureCounter.Value.Add(1,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
                 new(TelemetryConstants.ClientId, clientId),
                 new(TelemetryConstants.ErrorCode, errorCode));
+#endif
         }
     }
 }

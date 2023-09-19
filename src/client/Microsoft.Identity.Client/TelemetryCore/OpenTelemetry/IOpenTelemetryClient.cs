@@ -1,0 +1,23 @@
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
+using System.Collections.Generic;
+
+namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
+{
+    internal interface IOpenTelemetryClient
+    {
+        internal void LogActivity(Dictionary<string, object> tags);
+        internal void LogActivityStatus(bool success);
+        internal void StopActivity();
+        internal void LogSuccessMetrics(
+            string platform,
+            string clientId,
+            AuthenticationResultMetadata authResultMetadata,
+            string apiId,
+            string cacheLevel);
+        internal void LogFailedMetrics(string platform, string clientId, string errorCode);
+
+    }
+}
