@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1695159221051,
+  "lastUpdate": 1695159222733,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -1122,6 +1122,42 @@ window.BENCHMARK_DATA = {
             "value": 517141.9285714286,
             "unit": "ns",
             "range": "± 7235.4150427366185"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "fe3c8eacfb013b73404b3295ec5a36b3a60b3ed8",
+          "message": "Fix for WAM Runtime error logs duplicated info (#4354)\n\n* Update RuntimeBroker.cs\r\n\r\n* Update RuntimeBroker.cs",
+          "timestamp": "2023-09-19T14:24:56-07:00",
+          "tree_id": "e70a2e1aab89831139cede5cbd30c11f05df7ed4",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/fe3c8eacfb013b73404b3295ec5a36b3a60b3ed8"
+        },
+        "date": 1695159217113,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 378882.47826086957,
+            "unit": "ns",
+            "range": "± 14446.853793187607"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 539907.2619047619,
+            "unit": "ns",
+            "range": "± 36330.32476453858"
           }
         ]
       },
