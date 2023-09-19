@@ -109,7 +109,14 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 #endif
         }
 
-        void IOpenTelemetryClient.LogSuccessMetrics(string platform, string clientId, AuthenticationResultMetadata authResultMetadata, string apiId, string cacheLevel)
+        // Aggregates the successful requests based on client id, token source and cache refresh reason.
+        internal static void IOpenTelemetryClient.LogSuccessMetrics(
+            string platform, 
+            string clientId, 
+            AuthenticationResultMetadata authResultMetadata,
+            string apiId,
+            string cacheLevel, 
+            ILoggerAdapter logger)
         {
 #if NETSTANDARD || NET6_0 || NET462
             s_successCounter.Value.Add(1,
@@ -120,6 +127,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
                 new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
                 new(TelemetryConstants.CacheInfoTelemetry, authResultMetadata.CacheRefreshReason),
                 new(TelemetryConstants.CacheLevel, cacheLevel));
+            logger.Info("[OpenTelemetry] Completed incrementing to success counter.");
 
             s_durationTotal.Record(authResultMetadata.DurationTotalInMs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),

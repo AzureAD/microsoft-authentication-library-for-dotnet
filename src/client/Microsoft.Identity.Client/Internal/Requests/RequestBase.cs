@@ -113,7 +113,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         AuthenticationRequestParameters.AppConfig.ClientId, 
                         authenticationResult.AuthenticationResultMetadata, 
                         apiEvent.ApiId.ToString(),
-                        GetCacheLevel(authenticationResult).ToString());
+                        GetCacheLevel(authenticationResult).ToString(), 
+                        AuthenticationRequestParameters.RequestContext.Logger);
 
                     LogMsalSuccessTelemetryToOTel(authenticationResult);
 
