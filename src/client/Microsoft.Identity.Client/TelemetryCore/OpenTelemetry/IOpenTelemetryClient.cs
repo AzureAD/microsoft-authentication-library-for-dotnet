@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 {
@@ -16,7 +17,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             string clientId,
             AuthenticationResultMetadata authResultMetadata,
             string apiId,
-            string cacheLevel);
+            string cacheLevel,
+            ILoggerAdapter logger);
         internal void LogFailedMetrics(string platform, string clientId, string errorCode);
 
     }

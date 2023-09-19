@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Identity.Client.Core;
 #if NETSTANDARD || NET6_0 || NET462
 using System.Diagnostics.Metrics;
 #endif
@@ -110,7 +111,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         }
 
         // Aggregates the successful requests based on client id, token source and cache refresh reason.
-        internal static void IOpenTelemetryClient.LogSuccessMetrics(
+        void IOpenTelemetryClient.LogSuccessMetrics(
             string platform, 
             string clientId, 
             AuthenticationResultMetadata authResultMetadata,
