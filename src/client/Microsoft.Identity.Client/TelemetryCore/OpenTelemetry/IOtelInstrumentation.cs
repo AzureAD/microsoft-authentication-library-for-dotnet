@@ -7,7 +7,7 @@ using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 {
-    internal interface IOpenTelemetryClient
+    internal interface IOtelInstrumentation
     {
         internal void LogActivity(Dictionary<string, object> tags);
         internal void LogActivityStatus(bool success);

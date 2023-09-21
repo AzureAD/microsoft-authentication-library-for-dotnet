@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Identity.Client.Core;
-#if NETSTANDARD || NET6_0 || NET462
+#if SUPPORTS_OTEL
 using System.Diagnostics.Metrics;
 #endif
 using Microsoft.Identity.Client.Internal;
@@ -14,8 +14,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
     /// <summary>
     /// Class to hold the OpenTelemetry objects used by MSAL.
     /// </summary>
-    internal class OpenTelemetryClient : IOpenTelemetryClient
-
+    internal class OtelInstrumentation : IOtelInstrumentation
     {
         /// <summary>
         /// Constant to hold the name of the Meter.
@@ -27,7 +26,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         /// </summary>
         public const string ActivitySourceName = "MSAL_Activity";
 
-#if NETSTANDARD || NET6_0 || NET462
+#if SUPPORTS_OTEL
         /// <summary>
         /// Meter to hold the MSAL metrics.
         /// </summary>
@@ -79,9 +78,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         internal static readonly Lazy<Activity> s_activity = new Lazy<Activity>(() => s_acquireTokenActivity.StartActivity("Token Acquisition", ActivityKind.Internal));
 #endif
 
-        void IOpenTelemetryClient.LogActivity(Dictionary<string, object> tags)
+        void IOtelInstrumentation.LogActivity(Dictionary<string, object> tags)
         {
-#if NETSTANDARD || NET6_0 || NET462
+#if SUPPORTS_OTEL
             foreach (KeyValuePair<string, object> tag in tags)
             {
                 s_activity.Value?.AddTag(tag.Key, tag.Value);
@@ -89,9 +88,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 #endif
         }
 
-        void IOpenTelemetryClient.LogActivityStatus(bool success)
+        void IOtelInstrumentation.LogActivityStatus(bool success)
         {
-#if NETSTANDARD || NET6_0 || NET462
+#if SUPPORTS_OTEL
             if (success)
             {
                 s_activity.Value?.SetStatus(ActivityStatusCode.Ok, "Success");
@@ -103,15 +102,15 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 #endif
         }
 
-        void IOpenTelemetryClient.StopActivity()
+        void IOtelInstrumentation.StopActivity()
         {
-#if NETSTANDARD || NET6_0 || NET462
+#if SUPPORTS_OTEL
             s_activity.Value?.Stop();
 #endif
         }
 
         // Aggregates the successful requests based on client id, token source and cache refresh reason.
-        void IOpenTelemetryClient.LogSuccessMetrics(
+        void IOtelInstrumentation.LogSuccessMetrics(
             string platform, 
             string clientId, 
             AuthenticationResultMetadata authResultMetadata,
@@ -119,7 +118,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             string cacheLevel, 
             ILoggerAdapter logger)
         {
-#if NETSTANDARD || NET6_0 || NET462
+#if SUPPORTS_OTEL
             s_successCounter.Value.Add(1,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
@@ -148,9 +147,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 #endif
         }
 
-        void IOpenTelemetryClient.LogFailedMetrics(string platform, string clientId, string errorCode)
+        void IOtelInstrumentation.LogFailedMetrics(string platform, string clientId, string errorCode)
         {
-#if NETSTANDARD || NET6_0 || NET462
+#if SUPPORTS_OTEL
             s_failureCounter.Value.Add(1,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),

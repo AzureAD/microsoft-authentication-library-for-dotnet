@@ -35,8 +35,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal ICacheSessionManager CacheManager => AuthenticationRequestParameters.CacheSessionManager;
         internal IServiceBundle ServiceBundle { get; }
 
-        internal IOpenTelemetryClient OpenTelemetryClient { get; }
-
         protected RequestBase(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
@@ -52,8 +50,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new ArgumentNullException(nameof(acquireTokenParameters));
             }
-
-            OpenTelemetryClient = (OpenTelemetryClient)OpenTelemetryFactory.CreateClient();
 
             ValidateScopeInput(authenticationRequestParameters.Scope);
             acquireTokenParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
@@ -83,7 +79,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             Stopwatch sw = Stopwatch.StartNew();
 
-            OpenTelemetryClient?.LogActivity(new Dictionary<string, object> { 
+            ServiceBundle.PlatformProxy.OtelInstrumentation?.LogActivity(new Dictionary<string, object> { 
                 { TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion() },
                 { TelemetryConstants.Platform, ServiceBundle.PlatformProxy.GetProductName() },
                 { TelemetryConstants.ClientId, AuthenticationRequestParameters.AppConfig.ClientId },
@@ -108,7 +104,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
                     LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails, telemetryClients);
 
-                    OpenTelemetryClient?.LogSuccessMetrics(
+                    ServiceBundle.PlatformProxy.OtelInstrumentation?.LogSuccessMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(), 
                         AuthenticationRequestParameters.AppConfig.ClientId, 
                         authenticationResult.AuthenticationResultMetadata, 
@@ -126,7 +122,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
 
-                    OpenTelemetryClient.LogFailedMetrics(
+                        ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailedMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(), 
                         AuthenticationRequestParameters.AppConfig.ClientId, 
                         ex.ErrorCode);
@@ -138,7 +134,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     apiEvent.ApiErrorCode = ex.GetType().Name;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
-                    OpenTelemetryClient.LogFailedMetrics(
+                    ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailedMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(), 
                         AuthenticationRequestParameters.AppConfig.ClientId, 
                         ex.GetType().Name);
@@ -147,7 +143,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 finally
                 {
-                    OpenTelemetryClient?.StopActivity();
+                    ServiceBundle.PlatformProxy.OtelInstrumentation?.StopActivity();
                     telemetryClients.TrackEvent(telemetryEventDetails);
                 }
             }
@@ -155,12 +151,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void LogMsalSuccessTelemetryToOTel(AuthenticationResult authenticationResult)
         {
-            if (OpenTelemetryClient == null)
+            if (ServiceBundle.PlatformProxy.OtelInstrumentation == null)
             {
                 return;
             }
 
-            OpenTelemetryClient.LogActivityStatus(true);
+            ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivityStatus(true);
 
             Dictionary<string, object> tags = new Dictionary<string, object> { 
                 { TelemetryConstants.CacheInfoTelemetry, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason) },
@@ -191,17 +187,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 tags.Add(TelemetryConstants.Scopes, resourceAndScopes.Item2);
             }
 
-            OpenTelemetryClient.LogActivity(tags);
+            ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivity(tags);
         }
 
         private void LogMsalFailedTelemetryToOTel(Exception exception)
         {
-            if (OpenTelemetryClient == null)
+            if (ServiceBundle.PlatformProxy.OtelInstrumentation == null)
             {
                 return;
             }   
 
-            OpenTelemetryClient.LogActivityStatus(false);
+            ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivityStatus(false);
 
             Dictionary<string, object> tags = new Dictionary<string, object>
             {
@@ -226,7 +222,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             tags.Add(TelemetryConstants.ErrorCode, exception.GetType().ToString());
 
-            OpenTelemetryClient.LogActivity(tags);
+            ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivity(tags);
         }
 
         private void LogMsalErrorTelemetryToClient(Exception ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
