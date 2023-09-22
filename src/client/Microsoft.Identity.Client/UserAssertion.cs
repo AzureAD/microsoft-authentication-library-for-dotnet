@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(assertionType));
             }
 
-            PlatformsCommon.Interfaces.ICryptographyManager crypto = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
+            ICryptographyManager crypto = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
 
             AssertionType = assertionType;
             Assertion = assertion;
