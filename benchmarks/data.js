@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1695658993713,
+  "lastUpdate": 1695658995553,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -2668,6 +2668,54 @@ window.BENCHMARK_DATA = {
             "value": 293644.50556640624,
             "unit": "ns",
             "range": "± 1911.3920088163766"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "53200638+localden@users.noreply.github.com",
+            "name": "Den Delimarsky",
+            "username": "localden"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b898ab8193bc751ae5aabe5ff7e5f079eccd3f85",
+          "message": "Updates to documentation and minor code cleanup (#4339) (#4346)\n\n* Updates to documentation (#4339)\r\n\r\n* Update PublicClientApplication.cs\r\n\r\n* Update inheritdoc comments\r\n\r\n* Update documentation inheritance logic for PCA\r\n\r\n* Update documentation\r\n\r\n* Cleanup unused namespaces\r\n\r\n* Some extra cleanup\r\n\r\n* Update README.md\r\n\r\n* Documentation and minor cleanup\r\n\r\n* Update AuthenticationHeaderParser.cs\r\n\r\n* Update README.md\r\n\r\n* Update contributing documentation\r\n\r\nThis tackles the merge from https://github.com/MicrosoftDocs/microsoft-authentication-library-dotnet/pull/135\r\n\r\n* Roll back this change because we're building on .NET Fx, which doesn't support ranges\r\n\r\n* Update CONTRIBUTING.md\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update CONTRIBUTING.md\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update CONTRIBUTING.md\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update CONTRIBUTING.md\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update CONTRIBUTING.md\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update CONTRIBUTING.md\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update CONTRIBUTING.md\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update CONTRIBUTING.md\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update CONTRIBUTING.md\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update CONTRIBUTING.md\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update CONTRIBUTING.md\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/AuthenticationHeaderParser.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update CONTRIBUTING.md\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Update README.md\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Small documentation cleanup items\r\n\r\n* Update CONTRIBUTING.md\r\n\r\n* Cleanup\r\n\r\n* More cleanup - this time with some code\r\n\r\n* Update MsalServiceExceptionFactory.cs\r\n\r\n* Update MsalServiceExceptionFactory.cs\r\n\r\n* Update CONTRIBUTING.md\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/UserAssertion.cs\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Add missing Using statement\r\n\r\n---------\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\nCo-authored-by: Bogdan Gavril <bogavril@microsoft.com>",
+          "timestamp": "2023-09-25T13:11:55Z",
+          "tree_id": "b514ea57ab8de82c8840ca5149c4407d0b7a4c6a",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/b898ab8193bc751ae5aabe5ff7e5f079eccd3f85"
+        },
+        "date": 1695658994911,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 23243.49473063151,
+            "unit": "ns",
+            "range": "± 98.52740009707684"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 281186.20068359375,
+            "unit": "ns",
+            "range": "± 2684.3256677632266"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 50216.11032104492,
+            "unit": "ns",
+            "range": "± 33.20239515742203"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 285085.8111653646,
+            "unit": "ns",
+            "range": "± 2517.953390945688"
           }
         ]
       }
