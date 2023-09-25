@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="accountId">Account identifier. The identifier is typically the
         /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>.
-        /// You typically get the account id from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property>
+        /// You typically get the account ID from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property>
         /// </param>
         /// <param name="cancellationToken">Cancellation token </param>
         public async Task<IAccount> GetAccountAsync(string accountId, CancellationToken cancellationToken = default)
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="accountId">Account identifier. The identifier is typically the
         /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>.
-        /// You typically get the account id from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property>
+        /// You typically get the account ID from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property>
         /// </param>
         public async Task<IAccount> GetAccountAsync(string accountId)
         {
