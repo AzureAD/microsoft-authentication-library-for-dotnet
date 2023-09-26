@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1695710061878,
+  "lastUpdate": 1695710064203,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -1302,6 +1302,42 @@ window.BENCHMARK_DATA = {
             "value": 509979.3076923077,
             "unit": "ns",
             "range": "± 7176.787551830036"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "34331512+pmaytak@users.noreply.github.com",
+            "name": "Peter",
+            "username": "pmaytak"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "80c3be514c4bd59412b20b7c1f792452be3943ea",
+          "message": "Add CacheLevel to AuthResultMetadata (#4349)",
+          "timestamp": "2023-09-26T06:26:38Z",
+          "tree_id": "94eabae8ba8aa46440d553e91a36efc0b90018e4",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/80c3be514c4bd59412b20b7c1f792452be3943ea"
+        },
+        "date": 1695710057115,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 374213.1489361702,
+            "unit": "ns",
+            "range": "± 14329.645230565118"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 519182.75757575757,
+            "unit": "ns",
+            "range": "± 16150.007565846337"
           }
         ]
       },
