@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client
 {
@@ -67,7 +68,12 @@ namespace Microsoft.Identity.Client
         public CacheRefreshReason CacheRefreshReason { get; set; }
 
         /// <summary>
-        /// Contains the Outcome of the region discovery if Region was used.
+        /// Indicates the type of cache that the token was read from.
+        /// </summary>
+        public CacheLevel CacheLevel { get; set; } 
+
+        /// <summary>
+        /// Contains the outcome of the region discovery if region was used.
         /// </summary>
         public RegionDetails RegionDetails { get; set; }
 
