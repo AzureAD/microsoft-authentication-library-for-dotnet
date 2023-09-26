@@ -4,8 +4,11 @@
 using System;
 using System.Drawing.Text;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
+using System.Threading.Tasks;
+using System.Threading;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
@@ -461,6 +464,51 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                       .Build();
 
             Assert.AreEqual(isLegacyCacheCompatibilityEnabled, cca.AppConfig.LegacyCacheCompatibilityEnabled);
+        }
+
+        [TestMethod]
+        public void WithClientCapabilities()
+        {
+            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithClientCapabilities(new[] { "cp1", "cp2" })
+                .Build();
+
+            CollectionAssert.AreEquivalent(new[] { "cp1", "cp2" }, cca.AppConfig.ClientCapabilities.ToList());
+        }
+
+        [TestMethod]
+        public void WithClientCapabilitiesViaOptions()
+        {
+            var options = new ConfidentialClientApplicationOptions
+            {
+                Instance = "https://login.microsoftonline.com",
+                TenantId = "organizations",
+                ClientId = TestConstants.ClientId,
+                ClientCapabilities = new[] { "cp1", "cp2" }
+            };
+
+            var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options)
+                .Build();
+
+            CollectionAssert.AreEquivalent(new string[] { "cp1", "cp2" }, app.AppConfig.ClientCapabilities.ToList());
+        }
+
+        [TestMethod]
+        public async Task Claims_Fail_WhenClaimsIsNotJson_Async()
+        {
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                            .WithClientSecret(TestConstants.ClientSecret)
+                            .WithClientCapabilities(TestConstants.ClientCapabilities)
+                            .BuildConcrete();
+
+            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                () => app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .WithClaims("claims_that_are_not_json")
+                    .ExecuteAsync(CancellationToken.None))
+                .ConfigureAwait(false);
+
+            Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
         }
     }
 }

@@ -725,7 +725,7 @@ namespace Microsoft.Identity.Client
         internal const string TokenExpired = "token_expired";
 
         /// <summary>
-        /// Internal to MSALs. Needed in ios/android to complete the end-to-end true MAM flow. This suberror code is re-mapped to a different top level error code (IntuneAppProtectionPoliciesRequired), and not InteractionRequired
+        /// Internal to MSALs. Needed in ios/android to complete the end-to-end true MAM flow. This sub-error code is re-mapped to a different top level error code (IntuneAppProtectionPoliciesRequired), and not InteractionRequired
         /// </summary>
         internal const string ProtectionPolicyRequired = "protection_policy_required";
 
