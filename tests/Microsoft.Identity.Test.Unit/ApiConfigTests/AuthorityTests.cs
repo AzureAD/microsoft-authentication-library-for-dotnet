@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [DataRow(TestConstants.DstsAuthorityTenanted)]
         [DataRow(TestConstants.CiamAuthorityMainFormat)]
         [DataRow(TestConstants.CiamAuthorityWithFriendlyName)]
-        [DataRow(TestConstants.CiamAuthorityWithGuid)]        
+        [DataRow(TestConstants.CiamAuthorityWithGuid)]
         public void WithTenantIdAtRequestLevel_NonAad(string inputAuthority)
         {
             var app = ConfidentialClientApplicationBuilder
@@ -93,10 +93,10 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 .WithTenantId(TestConstants.TenantId2);
 
             Assert.AreEqual(
-                new Uri(inputAuthority).Host, 
-                parameterBuilder.CommonParameters.AuthorityOverride.Host, 
+                new Uri(inputAuthority).Host,
+                parameterBuilder.CommonParameters.AuthorityOverride.Host,
                 "The host should have stayed the same");
-            
+
             Assert.AreEqual(
                 TestConstants.TenantId2,
                 AuthorityHelpers.GetTenantId(parameterBuilder.CommonParameters.AuthorityOverride.CanonicalAuthority),
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 "The host should have stayed the same");
 
             Assert.AreEqual(
-                TestConstants.TenantId2, 
+                TestConstants.TenantId2,
                 AuthorityHelpers.GetTenantId(new Uri(cca.Authority)));
         }
 
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         [TestMethod]
         public void GenericAuthorityWithTenant()
         {
-            var ex  = AssertException.Throws<MsalClientException>(() =>
+            var ex = AssertException.Throws<MsalClientException>(() =>
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithTenantId(TestConstants.TenantId2)
@@ -272,6 +272,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 
         [DataTestMethod]
         [DataRow("malformed tenant")]
+        [ExpectedException(typeof(ArgumentException))]
         public void WithTenantId_RequestLevel_MalformedTenant_ThrowsException(string tenantId)
         {
             var app = ConfidentialClientApplicationBuilder
@@ -280,13 +281,13 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                     .Build();
 
             // Tenant and authority modifiers
-            Assert.ThrowsException<ArgumentException>(() =>
-                    app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
-                       .WithTenantId(tenantId));
+            app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+               .WithTenantId(tenantId);
         }
 
         [DataTestMethod]
         [DataRow(null)]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void WithTenantIdFromAuthority_NullUriAuthority_ThrowsException(Uri authorityValue)
         {
             var app = ConfidentialClientApplicationBuilder
@@ -294,12 +295,12 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 .WithClientSecret("secret")
                 .Build();
 
-            AssertException.Throws<ArgumentNullException>(() =>
-                app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
-                   .WithTenantIdFromAuthority(authorityValue));
+            app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+               .WithTenantIdFromAuthority(authorityValue);
         }
 
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
         public void WithTenantIdFromAuthority_MalformedTenant_ThrowsException()
         {
             var invalidAuthorityUri = new Uri("https://login.microsoftonline.com/invalid tenant/");
@@ -308,9 +309,8 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 .WithClientSecret("secret")
                 .Build();
 
-            AssertException.Throws<ArgumentException>(() =>
-                app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
-                   .WithTenantIdFromAuthority(invalidAuthorityUri));
+            app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, "code")
+               .WithTenantIdFromAuthority(invalidAuthorityUri);
         }
 
         [TestMethod]

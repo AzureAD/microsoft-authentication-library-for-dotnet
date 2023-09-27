@@ -406,11 +406,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var claimsIdentityResult = ToClaimsPrincipal(account).Identity as ClaimsIdentity;
 
             Assert.IsNotNull(claimsIdentityResult, "The ClaimsIdentity should not be null.");
-Assert.AreEqual(3, claimsIdentityResult.Claims.Count(), "Expected 3 claims in the ClaimsIdentity.");
-Assert.AreEqual(username, claimsIdentityResult.FindFirst(ClaimTypes.Upn)?.Value, "UPN claim value should match.");
-Assert.AreEqual(oid, claimsIdentityResult.FindFirst("oid")?.Value, "OID claim value should match.");
-Assert.AreEqual(tid, claimsIdentityResult.FindFirst("tid")?.Value, "TID claim value should match.");
-
+            Assert.AreEqual(3, claimsIdentityResult.Claims.Count(), "Expected 3 claims in the ClaimsIdentity.");
+            Assert.AreEqual(username, claimsIdentityResult.FindFirst(ClaimTypes.Upn)?.Value, "UPN claim value should match.");
+            Assert.AreEqual(oid, claimsIdentityResult.FindFirst("oid")?.Value, "OID claim value should match.");
+            Assert.AreEqual(tid, claimsIdentityResult.FindFirst("tid")?.Value, "TID claim value should match.");
         }
 
         private async Task ValidateGetAccountsWithDiscoveryAsync(string tokenCacheAsString)

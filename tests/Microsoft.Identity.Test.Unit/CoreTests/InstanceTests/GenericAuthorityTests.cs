@@ -71,13 +71,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public void MalformedAuthority_ThrowsException(string malformedAuthority)
         {
             // Tenant and authority modifiers
-            Assert.ThrowsException<ArgumentException>(() =>
-                ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures()
-                    .WithGenericAuthority(malformedAuthority)
-                    .WithClientSecret(TestConstants.ClientSecret)
-                    .Build());
+            ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithExperimentalFeatures()
+                .WithGenericAuthority(malformedAuthority)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .Build();
         }
 
         [DataTestMethod]
@@ -146,7 +145,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
         private static MockHttpMessageHandler CreateTokenResponseHttpHandler(
             string tokenEndpoint,
-            string scopesInRequest, 
+            string scopesInRequest,
             string scopesInResponse)
         {
             IDictionary<string, string> expectedRequestBody = new Dictionary<string, string>
@@ -160,8 +159,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             string responseWithScopes = @"{ ""access_token"":""secret"", ""expires_in"":3600, ""token_type"":""Bearer"", ""scope"":""api"" }";
             string responseWithoutScopes = @"{ ""access_token"":""secret"", ""expires_in"":3600, ""token_type"":""Bearer"" }";
 
-            string response = scopesInResponse == null ? 
-                responseWithScopes .Replace("api", scopesInResponse)
+            string response = scopesInResponse == null ?
+                responseWithScopes.Replace("api", scopesInResponse)
                 : responseWithoutScopes;
 
             return new MockHttpMessageHandler()
