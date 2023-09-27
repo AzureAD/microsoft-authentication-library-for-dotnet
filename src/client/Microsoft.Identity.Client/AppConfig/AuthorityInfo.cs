@@ -356,6 +356,11 @@ namespace Microsoft.Identity.Client
 
         #endregion
 
+        /// <summary>
+        /// Validates the authority string and creates a Uri object out of it.
+        /// Authority must not be null or whitespace, must be a well-formed URI (e.g. not include spaces), and must have an HTTPS schema.
+        /// Non-generic authorities must have at least one segment in the path.
+        /// </summary>
         private static Uri ValidateAndCreateAuthorityUri(string authority, AuthorityType? authorityType = null)
         {
             if (string.IsNullOrWhiteSpace(authority))
