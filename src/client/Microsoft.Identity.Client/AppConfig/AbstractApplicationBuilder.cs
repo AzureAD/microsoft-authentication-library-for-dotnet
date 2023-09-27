@@ -550,7 +550,7 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-application-configuration.
         /// </summary>
         /// <param name="azureCloudInstance">Instance of Azure cloud (for example, Azure
-        /// public cloud, Azure Germany, or Azure Government).</param>
+        /// public cloud, Azure China, or Azure Government).</param>
         /// <param name="tenantId">Tenant Id of the tenant from which to sign-in users</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
@@ -569,7 +569,7 @@ namespace Microsoft.Identity.Client
         /// name or tenant ID. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
         /// <param name="azureCloudInstance">Instance of Azure cloud (for example, Azure
-        /// public cloud, Azure Germany, or Azure Government).</param>
+        /// public cloud, Azure China, or Azure Government).</param>
         /// <param name="tenant">Domain name associated with the Azure AD tenant from which
         /// to sign-in users. This can also be a GUID.</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
