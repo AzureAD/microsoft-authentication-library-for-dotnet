@@ -494,11 +494,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs, eventDetails.Properties[TelemetryConstants.Duration]);
             Assert.AreEqual(authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs, eventDetails.Properties[TelemetryConstants.DurationInHttp]);
             Assert.AreEqual(authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs, eventDetails.Properties[TelemetryConstants.DurationInCache]);
-            Assert.AreEqual(authenticationResult.AuthenticationResultMetadata.DurationTotalInMs, eventDetails.Properties[TelemetryConstants.Duration]);
             Assert.AreEqual(Convert.ToInt64(assertionType), eventDetails.Properties[TelemetryConstants.AssertionType]);
             Assert.AreEqual(Convert.ToInt64(tokenType), eventDetails.Properties[TelemetryConstants.TokenType]);
             Assert.AreEqual(endpoint, eventDetails.Properties[TelemetryConstants.Endpoint]);
             Assert.AreEqual(Convert.ToInt64(cacheLevel), eventDetails.Properties[TelemetryConstants.CacheLevel]);
+            Assert.AreEqual(cacheLevel, authenticationResult.AuthenticationResultMetadata.CacheLevel);
 
             if (!string.IsNullOrWhiteSpace(scopes))
             {

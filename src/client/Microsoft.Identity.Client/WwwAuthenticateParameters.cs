@@ -10,7 +10,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 
@@ -18,7 +17,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Parameters returned by the WWW-Authenticate header. This allows for dynamic
-    /// scenarios such as claim challenge, CAE, CA auth context.
+    /// scenarios such as Claims challenge, Continuous Access Evaluation (CAE), and Conditional Access (CA).
     /// See https://aka.ms/msal-net/wwwAuthenticate.
     /// </summary>
     public class WwwAuthenticateParameters
@@ -75,7 +74,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// AuthScheme.
-        /// See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate#syntax for more details
+        /// See the <see href="https://developer.mozilla.org/docs/Web/HTTP/Headers/WWW-Authenticate#syntax">documentation on WWW-Authenticate</see> for more details
         /// </summary>
         public string AuthenticationScheme { get; private set; }
 
@@ -347,7 +346,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Gets the claim challenge from HTTP header.
-        /// Used, for example, for CA auth context.
+        /// Used, for example, for Conditional Access (CA).
         /// </summary>
         /// <param name="httpResponseHeaders">The HTTP response headers.</param>
         /// <param name="scheme">Authentication scheme. Default is Bearer.</param>
@@ -395,7 +394,7 @@ namespace Microsoft.Identity.Client
         {
             string[] result;
             char[] charsToTrim = { ',', ' ' };
-            var authValuesSplit = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ' ' );
+            List<string> authValuesSplit = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ' ');
 
             //Ensure that known headers are not being parsed.
             if (s_knownAuthenticationSchemes.Contains(authValuesSplit[0]))
@@ -422,9 +421,7 @@ namespace Microsoft.Identity.Client
 
             wwwAuthenticateParameters.RawParameters = values;
 
-            string value;
-
-            if (values.TryGetValue("authorization_uri", out value))
+            if (values.TryGetValue("authorization_uri", out string value))
             {
                 wwwAuthenticateParameters.Authority = value.Replace("/oauth2/authorize", string.Empty);
             }
@@ -465,7 +462,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Checks if input is a base-64 encoded string.
-        /// If it is one, decodes it to get a json fragment.
+        /// If it is one, decodes it to get a JSON fragment.
         /// </summary>
         /// <param name="inputString">Input string</param>
         /// <returns>a json fragment (original input string or decoded from base64 encoded).</returns>
