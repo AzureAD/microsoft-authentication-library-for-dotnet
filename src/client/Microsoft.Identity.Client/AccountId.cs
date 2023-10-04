@@ -16,28 +16,28 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>
         /// For the Microsoft identity platform (formerly named Azure AD v2.0), the identifier is the concatenation of
-        /// <see cref="ObjectId"/> and <see cref="TenantId"/> separated by a dot.
-        /// Contrary to what was happening in ADAL.NET, these two segments are no longer base64 encoded.
-        /// Note that there are some legitimate cases (for instance domain takeover), where the same ObjectId may show up in multiple tenants.
+        /// <see cref="ObjectId"/> and <see cref="TenantId"/> separated by a period.
+        /// Unlike in ADAL.NET, these two segments are no longer base64-encoded.
+        /// Note that there are some legitimate cases (for instance domain takeover) where the same <c>ObjectId</c> may show up in multiple tenants.
         /// </remarks>
         public string Identifier { get; }
 
         /// <summary>
-        /// For Azure AD, a string representation for a GUID which is the Object ID of the user owning the account in the tenant
+        /// For Microsoft Entra ID, a string representation for a GUID which is the object ID of the user owning the account in the tenant
         /// </summary>
         public string ObjectId { get; }
 
         /// <summary>
-        /// For Azure AD, a string representation for a GUID, which is the ID of the tenant where the account resides.
+        /// For Microsoft Entra ID, a string representation for a GUID which is the ID of the tenant where the account resides.
         /// </summary>
         public string TenantId { get; }
 
         /// <summary>
-        /// Constructor of an AccountId
+        /// Constructor for an account ID.
         /// </summary>
         /// <param name="identifier">Unique identifier for the account.</param>
-        /// <param name="objectId">A string representation for a GUID which is the ID of the user owning the account in the tenant</param>
-        /// <param name="tenantId">A string representation for a GUID, which is the ID of the tenant where the account resides</param>
+        /// <param name="objectId">A string representation for a GUID which is the ID of the user owning the account in the tenant.</param>
+        /// <param name="tenantId">A string representation for a GUID which is the ID of the tenant where the account resides.</param>
         public AccountId(string identifier, string objectId, string tenantId)
         {
             Identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
@@ -48,9 +48,9 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Constructor of an AccountId meant for ADFS scenarios since ADFS instances lack tenant ids.
+        /// Constructor of an AccountId meant for Active Directory Federation Services (ADFS) scenarios since ADFS instances lack tenant IDs.
         /// </summary>
-        /// <param name="adfsIdentifier">Unique identifier for the account if authority is ADFS</param>
+        /// <param name="adfsIdentifier">Unique identifier for the account if authority is ADFS.</param>
         public AccountId(string adfsIdentifier)
             : this(adfsIdentifier, adfsIdentifier, null)
         { }
@@ -65,18 +65,18 @@ namespace Microsoft.Identity.Client
 
             if (lastIndexOfDot == -1)
             {
-                return new AccountId(str); //Account id is from ADFS; no . in the string
+                return new AccountId(str); //Account ID is from ADFS; no . in the string
             }
 
             return new AccountId(str, str.Substring(0, lastIndexOfDot), str.Substring(lastIndexOfDot + 1));
         }
 
         /// <summary>
-        /// Two accounts are equal when their <see cref="Identifier"/> properties match
+        /// Two accounts are equal when their <see cref="Identifier"/> properties match.
         /// </summary>
         public override bool Equals(object obj)
         {
-            if (!(obj is AccountId otherMsalAccountId))
+            if (obj is not AccountId otherMsalAccountId)
             {
                 return false;
             }
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// GetHashCode implementation to match <see cref="Equals(object)"/>
+        /// GetHashCode implementation to match <see cref="Equals(object)"/>.
         /// </summary>
         public override int GetHashCode()
         {
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Textual description of an <see cref="AccountId"/>
+        /// Textual description of an <see cref="AccountId"/>.
         /// </summary>
         public override string ToString()
         {

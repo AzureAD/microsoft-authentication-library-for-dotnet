@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MetricsUpdatedSucessfully_AcquireTokenForClient_Async()
+        public async Task MetricsUpdatedSuccessfully_AcquireTokenForClient_Async()
         {
             using (var harness = CreateTestHarness())
             {
@@ -258,7 +258,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MetricsUpdatedSucessfully_AcquireTokenInteractive_Async()
+        public async Task MetricsUpdatedSuccessfully_AcquireTokenInteractive_Async()
         {
             using (var harness = CreateTestHarness())
             {
@@ -271,7 +271,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MetricsUpdatedSucessfully_AcquireTokenSilent_Async()
+        public async Task MetricsUpdatedSuccessfully_AcquireTokenSilent_Async()
         {
             using (var harness = CreateTestHarness())
             {
@@ -281,7 +281,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MetricsUpdatedSucessfully_AcquireTokenInteractiveAndSilent_Async()
+        public async Task MetricsUpdatedSuccessfully_AcquireTokenInteractiveAndSilent_Async()
         {
             using (var harness = CreateTestHarness())
             {
