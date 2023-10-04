@@ -124,7 +124,6 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
             Assert.IsNotNull(krbCred);
         }
 
-#if !NETCOREAPP3_1
         [TestMethod]
         public void GetKerberosTicketClaim_IdToken()
         {
@@ -160,7 +159,6 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
 
             CheckKerberosClaim(accessToken);
         }
-#endif
 
         private void CheckKerberosClaim(JsonObject claim)
         {

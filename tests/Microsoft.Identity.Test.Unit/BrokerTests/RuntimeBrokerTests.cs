@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if !NET6_0
-#if !NET48
+#if NET6_WIN
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,11 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-
-#if NET6_WIN
 using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
-#endif
-
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
@@ -34,9 +29,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Account = Microsoft.Identity.Client.Account;
 using Microsoft.Identity.Client.AppConfig;
-#if !NET6_WIN
-using Microsoft.Identity.Client.Desktop;
-#endif
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -202,5 +194,4 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
     }
 }
-#endif
 #endif
