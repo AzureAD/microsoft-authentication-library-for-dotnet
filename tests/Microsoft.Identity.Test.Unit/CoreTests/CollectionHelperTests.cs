@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
     [TestClass]
     public class CollectionHelperTests
     {
-#if NET6_WIN
+#if NET6_WIN || NET6_0
 
         [TestMethod]
         public void EmptyStringDictionaryIsImmutable()
