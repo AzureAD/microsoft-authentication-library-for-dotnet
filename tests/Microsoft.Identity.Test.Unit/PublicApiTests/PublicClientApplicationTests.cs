@@ -14,7 +14,7 @@ using Microsoft.Identity.Client.Advanced;
 #if !NET5_0_OR_GREATER
 using Microsoft.Identity.Client.Desktop;
 #endif
-#if NET_CORE
+#if !NET6_0
 using Microsoft.Identity.Client.Broker;
 #endif
 using Microsoft.Identity.Client.Instance;
@@ -1056,9 +1056,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             if (enableBroker)
             {
-#if NET6_WIN
+#if NET6_WIN && !NET6_0
                 pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
-#else
+#elif !NET6_0
                 WamExtension.WithBroker(pcaBuilder, new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
 #endif
             }

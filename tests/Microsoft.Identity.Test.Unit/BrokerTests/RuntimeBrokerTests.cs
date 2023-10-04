@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if !NET48 && !NET7_0
+#if !NET6_0
+#if !NET48
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 
-#if NET6_WIN || NETCOREAPP3_1
+#if NET6_WIN
 using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
 #endif
 
@@ -201,4 +202,5 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
     }
 }
+#endif
 #endif
