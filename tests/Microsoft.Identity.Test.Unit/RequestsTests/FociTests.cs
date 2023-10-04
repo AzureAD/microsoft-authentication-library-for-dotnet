@@ -116,8 +116,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // B cannot acquire a token interactivelty, but will try to use FRT
                 var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
                     () => SilentAsync(_appB, ServerTokenResponse.OtherError)).ConfigureAwait(false);
+#if NET_CORE
+                Assert.AreEqual(MsalError.NoTokensFoundError, ex.ErrorCode);
+#else
                 Assert.AreEqual(MsalError.InvalidGrantError, ex.ErrorCode);
                 Assert.IsTrue(!String.IsNullOrEmpty(ex.CorrelationId));
+#endif
 
                 // B performs interactive auth and everything goes back to normal - both A and B can silently sing in
                 await InteractiveAsync(_appB, ServerTokenResponse.FociToken).ConfigureAwait(false);
