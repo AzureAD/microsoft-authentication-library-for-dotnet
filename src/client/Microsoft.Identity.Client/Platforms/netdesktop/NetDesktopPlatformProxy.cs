@@ -207,7 +207,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
 
         /// <inheritdoc/>
-        protected override ICryptographyManager InternalGetCryptographyManager() => new NetDesktopCryptographyManager();
+        protected override ICryptographyManager InternalGetCryptographyManager() => new NetDesktopCryptographyManager(Logger);
 
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
