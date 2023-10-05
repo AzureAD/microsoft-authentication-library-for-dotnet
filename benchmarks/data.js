@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1696485266665,
+  "lastUpdate": 1696494228681,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -1478,6 +1478,42 @@ window.BENCHMARK_DATA = {
             "value": 531205.7142857143,
             "unit": "ns",
             "range": "± 14741.275370366484"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b259cf00936a11a9cff789bf094935d8d31aea7f",
+          "message": "Disabling x-client-CPU (#4337)\n\nCo-authored-by: trwalke <trwalke@microsoft.com>",
+          "timestamp": "2023-10-05T08:16:41Z",
+          "tree_id": "41b84f6aa61c6b639b41d2fbf9b4f36b5cf13479",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/b259cf00936a11a9cff789bf094935d8d31aea7f"
+        },
+        "date": 1696494224103,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 381486.5319148936,
+            "unit": "ns",
+            "range": "± 14794.855089657327"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 520742.75,
+            "unit": "ns",
+            "range": "± 10230.99661160469"
           }
         ]
       }
