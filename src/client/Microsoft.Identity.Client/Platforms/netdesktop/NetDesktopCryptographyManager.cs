@@ -3,14 +3,13 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Globalization;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
 using System.Text;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.Platforms.net45.Native;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -27,6 +26,12 @@ namespace Microsoft.Identity.Client.Platforms.net45
     {
         private static readonly ConcurrentDictionary<string, RSACryptoServiceProvider> s_certificateToRsaCspMap = new ConcurrentDictionary<string, RSACryptoServiceProvider>();
         private static readonly int s_maximumMapSize = 1000;
+
+#if NET45
+        public NetDesktopCryptographyManager(ILoggerAdapter logger = null) { }
+#else
+        public NetDesktopCryptographyManager(ILoggerAdapter logger = null) : base(logger) { }
+#endif
 #if NET45
         public string CreateBase64UrlEncodedSha256Hash(string input)
         {
