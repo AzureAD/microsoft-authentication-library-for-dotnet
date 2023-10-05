@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1695710078102,
+  "lastUpdate": 1696469286390,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -1374,6 +1374,42 @@ window.BENCHMARK_DATA = {
             "value": 519182.75757575757,
             "unit": "ns",
             "range": "± 16150.007565846337"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "34331512+pmaytak@users.noreply.github.com",
+            "name": "Peter",
+            "username": "pmaytak"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "118ab93b5afb78c8c4a594dc27a3288725f76213",
+          "message": "Add one retry to assertion signing. (#4365)\n\n* Add one retry to assertion signing.\r\n\r\n* Fix.",
+          "timestamp": "2023-10-04T18:13:42-07:00",
+          "tree_id": "9e28b0749136868369fc637d0dfc253f9ffe26bd",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/118ab93b5afb78c8c4a594dc27a3288725f76213"
+        },
+        "date": 1696469281155,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 607331.8426966292,
+            "unit": "ns",
+            "range": "± 247990.09336233843"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 705936.375,
+            "unit": "ns",
+            "range": "± 73020.3934273087"
           }
         ]
       }
