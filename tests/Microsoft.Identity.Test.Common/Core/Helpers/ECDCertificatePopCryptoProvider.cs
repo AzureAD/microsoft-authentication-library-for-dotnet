@@ -28,19 +28,18 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
 
         private void InitializeSigningKey()
         {
-            ECCurve eCCurve = ECCurve.CreateFromFriendlyName(ECCurve.NamedCurves.nistP256.Oid.FriendlyName);
-            _signingKey = ECDsa.Create(eCCurve);
+            _signingKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
             ECParameters publicKeyInfo = _signingKey.ExportParameters(false);
 
-            CannonicalPublicKeyJwk = ComputeCannonicalJwk(publicKeyInfo);
+            CannonicalPublicKeyJwk = ComputeCanonicalJwk(publicKeyInfo);
         }
 
         /// <summary>
-        /// Creates the cannonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
+        /// Creates the canonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
         /// The number of parameters as well as the lexicographic order is important, as this string will be hashed to get a thumbprint
         /// </summary>
-        private static string ComputeCannonicalJwk(ECParameters ecdPublicKey)
+        private static string ComputeCanonicalJwk(ECParameters ecdPublicKey)
         {
             string x = ecdPublicKey.Q.X != null ? Base64UrlHelpers.Encode(ecdPublicKey.Q.X) : null;
             string y = ecdPublicKey.Q.Y != null ? Base64UrlHelpers.Encode(ecdPublicKey.Q.Y) : null;
@@ -70,12 +69,10 @@ namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
         /// </summary>
         private static class JsonWebKeyECTypes
         {
-#pragma warning disable 1591
             public const string P256 = "P-256";
             public const string P384 = "P-384";
             public const string P512 = "P-512";
             public const string P521 = "P-521";
-#pragma warning restore 1591
         }
     }
 }

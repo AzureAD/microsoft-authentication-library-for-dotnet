@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#if !NET6_0
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -13,7 +14,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
-#if !NET6_WIN
+#if !NET6_WIN && !NET6_0
 using Microsoft.Identity.Client.Broker;
 #endif
 
@@ -580,4 +581,4 @@ namespace Microsoft.Identity.Test.Unit.Pop
        
     }
 }
-
+#endif
