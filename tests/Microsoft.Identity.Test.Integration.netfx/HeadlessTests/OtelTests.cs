@@ -25,53 +25,52 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class OTelTests
     {
-        private static MetricReader? _reader;
-        private ICollection<Metric> ExportedItems;
-        private ICollection<Activity> ExportedActivity;
+        private static MeterProvider s_meterProvider;
+        private static TracerProvider s_activityProvider;
 
         [TestCleanup]
         public void TestCleanup()
         {
-            _reader?.Shutdown();
-            _reader?.Dispose();
-            ExportedItems?.Clear();
-            ExportedActivity?.Clear();
+            s_meterProvider?.Dispose();
+            s_activityProvider?.Dispose();
 
             TestCommon.ResetInternalStaticCaches();
         }
 
         [TestMethod]
-        [DataRow(TargetFrameworks.NetFx | TargetFrameworks.NetCore | TargetFrameworks.NetStandard )]
+        [DataRow(TargetFrameworks.NetFx |  TargetFrameworks.NetCore | TargetFrameworks.NetStandard )]
         public async Task WithCertificate_TestAsync(TargetFrameworks runOn)
         {
+            var exportedMetrics = new List<Metric>();
+            var exportedActivities = new List<Activity>();
+
             runOn.AssertFramework();
-            ExportMetricsAndActivity();
+            ExportMetricsAndActivity(exportedMetrics, exportedActivities);
             await RunClientCredsAsync().ConfigureAwait(false);
 
-            await Task.Delay(60000).ConfigureAwait(true);
-            VerifyMetrics();
-            VerifyActivity();
+            Thread.Sleep(70000);
+
+            VerifyMetrics(exportedMetrics, 4);
+            VerifyActivity(exportedActivities, 6);
         }
 
-        private void ExportMetricsAndActivity()
+        private void ExportMetricsAndActivity(List<Metric> exportedMetrics, List<Activity> exportedActivities)
         {
-            ExportedItems = new List<Metric>();
-            ExportedActivity = new List<Activity>();
-            var inMemoryExporter = new InMemoryExporter<Metric>(ExportedItems);
-            _reader = new PeriodicExportingMetricReader(inMemoryExporter)
-            {
-                TemporalityPreference = MetricReaderTemporalityPreference.Delta
+            
+            int collectionPeriodMilliseconds = 30000;
 
-            };
-
-            using var meterProvider = Sdk.CreateMeterProviderBuilder()
-                .AddMeter("ID4S_MSAL")
-                .AddReader(_reader)
+            s_meterProvider = Sdk.CreateMeterProviderBuilder()
+                .AddMeter("MicrosoftIdentityClient_Common_Meter")
+                .AddInMemoryExporter(exportedMetrics, metricReaderOptions =>
+                {
+                    metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = collectionPeriodMilliseconds;
+                    metricReaderOptions.TemporalityPreference = MetricReaderTemporalityPreference.Delta;
+                })
                 .Build();
 
-            using var activityProvider = Sdk.CreateTracerProviderBuilder()
-                .AddSource("MSAL_Activity")
-                .AddInMemoryExporter(ExportedActivity)
+            s_activityProvider = Sdk.CreateTracerProviderBuilder()
+                .AddSource("MicrosoftIdentityClient_Activity")
+                .AddInMemoryExporter(exportedActivities)
                 .Build();
         }
 
@@ -91,22 +90,26 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAssert.AssertAuthResult(authResult);
         }
 
-        private void VerifyActivity()
+        private void VerifyActivity(List<Activity> exportedActivities, int expectedTagCount)
         {
-            Assert.AreEqual(1, ExportedActivity.Count);
-            foreach (var activity in ExportedActivity)
+            s_activityProvider.ForceFlush();
+
+            Assert.AreEqual(1, exportedActivities.Count);
+            foreach (var activity in exportedActivities)
             {
-                Assert.AreEqual(6, activity.Tags.Count());
+                Assert.AreEqual(expectedTagCount, activity.Tags.Count());
             }
         }
 
-        private void VerifyMetrics()
+        private void VerifyMetrics(List<Metric> exportedMetrics, int expectedMetricCount)
         {
-            Assert.AreEqual(4, ExportedItems.Count);
+            s_meterProvider.ForceFlush();
 
-            foreach (var exportedItem in ExportedItems)
+            Assert.AreEqual(expectedMetricCount, exportedMetrics.Count);
+
+            foreach (Metric exportedItem in exportedMetrics)
             {
-                Assert.AreEqual("ID4S_MSAL", exportedItem.MeterName);
+                Assert.AreEqual("MicrosoftIdentityClient_Common_Meter", exportedItem.MeterName);
 
 
                 switch (exportedItem.Name)
@@ -128,6 +131,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         Assert.Fail("Unexpected metrics logged.");
                         break;
 
+                }
+
+                foreach (var metricPoint in exportedItem.GetMetricPoints())
+                {
+                    foreach (var tag in metricPoint.Tags)
+                    {
+                        var tagStringValue = tag.Value as string;
+                        Assert.IsFalse(string.IsNullOrEmpty(tagStringValue));
+                    }
                 }
             }
         }

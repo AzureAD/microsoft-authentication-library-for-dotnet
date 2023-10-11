@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             tags.Add(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
             tags.Add(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
-            tags.Add(TelemetryConstants.CacheLevel, (int)GetCacheLevel(authenticationResult));
+            tags.Add(TelemetryConstants.CacheLevel, (int)authenticationResult.AuthenticationResultMetadata.CacheLevel);
 
             var resourceAndScopes = ParseScopesForTelemetry();
 

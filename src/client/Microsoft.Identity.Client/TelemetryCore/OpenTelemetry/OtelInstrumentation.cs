@@ -19,12 +19,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         /// <summary>
         /// Constant to hold the name of the Meter.
         /// </summary>
-        public const string MeterName = "ID4S_MSAL";
+        public const string MeterName = "MicrosoftIdentityClient_Common_Meter";
 
         /// <summary>
         /// Constant to holt the name of the ActivitySource.
         /// </summary>
-        public const string ActivitySourceName = "MSAL_Activity";
+        public const string ActivitySourceName = "MicrosoftIdentityClient_Activity";
 
 #if SUPPORTS_OTEL
         /// <summary>
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         /// Histogram to record total duration of token acquisition calls.
         /// </summary>
         internal static readonly Histogram<long> s_durationTotal = Meter.CreateHistogram<long>(
-            "MsalTotalDurationHistogram",
+            "MsalTotalDuration",
             unit: "ms",
             description: "Performance of token acquisition calls total latency");
 
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         /// Histogram to record duration in cache of token acquisition calls.
         /// </summary>
         internal static readonly Histogram<long> s_durationInCache = Meter.CreateHistogram<long>(
-            "MsalDurationInCacheHistogram",
+            "MsalDurationInCache",
             unit: "ms",
             description: "Performance of token acquisition calls cache latency");
 
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         /// Histogram to record duration in http of token acquisition calls.
         /// </summary>
         internal static readonly Histogram<long> s_durationInHttp = Meter.CreateHistogram<long>(
-            "MsalDurationInHttpHistogram",
+            "MsalDurationInHttp",
             unit: "ms",
             description: "Performance of token acquisition calls network latency");
 
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 #endif
         }
 
-        // Aggregates the successful requests based on client id, token source and cache refresh reason.
+        // Aggregates the successful requests based on token source and cache refresh reason.
         void IOtelInstrumentation.LogSuccessMetrics(
             string platform, 
             string clientId, 
