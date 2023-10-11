@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1696983676678,
+  "lastUpdate": 1696983678454,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5114,6 +5114,54 @@ window.BENCHMARK_DATA = {
             "value": 355657.9146484375,
             "unit": "ns",
             "range": "± 1093.6919549978359"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "34331512+pmaytak@users.noreply.github.com",
+            "name": "Peter",
+            "username": "pmaytak"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "474026f56b1c3dfe2628fea104b8c80c46ce7e57",
+          "message": "Throw ArgumentException for malformed authorities (#4347)\n\n* Throw argument exceptions for consistency when authority or tenant are invalid. Update method comments.\r\n\r\n* Update and add tests.\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Den Delimarsky <53200638+localden@users.noreply.github.com>\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Small test fixes.\r\n\r\n* Update comments.\r\n\r\n---------\r\n\r\nCo-authored-by: Den Delimarsky <53200638+localden@users.noreply.github.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2023-10-10T17:11:08-07:00",
+          "tree_id": "5489e2487eb172ef71a482b92a3b09aa4b60fde3",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/474026f56b1c3dfe2628fea104b8c80c46ce7e57"
+        },
+        "date": 1696983676166,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 44257.0834917341,
+            "unit": "ns",
+            "range": "± 309.3992350392304"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 440307.2558268229,
+            "unit": "ns",
+            "range": "± 4748.035247271118"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 71598.68501164363,
+            "unit": "ns",
+            "range": "± 62.43065910505695"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 447297.14794921875,
+            "unit": "ns",
+            "range": "± 4608.781143281643"
           }
         ]
       },
