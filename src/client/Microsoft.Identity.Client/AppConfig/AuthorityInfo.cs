@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client
             AuthorityType authorityType,
             string authority,
             bool validateAuthority)
-            : this(authorityType, new Uri(authority), validateAuthority)
+            : this(authorityType, ValidateAndCreateAuthorityUri(authority, authorityType), validateAuthority)
         {
 
         }
@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Client
             AuthorityType != AuthorityType.B2C;
 
         /// <summary>
-        /// Authority support multi-tenantcy. ADFS and Generic authorities are not tenanted.
+        /// Authority supports multi-tenancy. ADFS and Generic authorities are not tenanted.
         /// B2C doesn't allow multi-tenancy scenarios, but the authority itself is tenanted. 
         /// For CIAM, we allow multi-tenancy scenarios, and expect the STS to fail.
         /// </summary>
@@ -356,6 +356,11 @@ namespace Microsoft.Identity.Client
 
         #endregion
 
+        /// <summary>
+        /// Validates the authority string and creates a Uri object out of it.
+        /// Authority must not be null or whitespace, must be a well-formed URI (e.g. not include spaces), and must have an HTTPS schema.
+        /// Non-generic authorities must have at least one segment in the path.
+        /// </summary>
         private static Uri ValidateAndCreateAuthorityUri(string authority, AuthorityType? authorityType = null)
         {
             if (string.IsNullOrWhiteSpace(authority))
@@ -375,14 +380,14 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentException(MsalErrorMessage.AuthorityUriInsecure, nameof(authority));
             }
 
-            string path = authorityUri.AbsolutePath.Substring(1);
-            if (string.IsNullOrWhiteSpace(path) && !IsCiamAuthority(authorityUri))
-            {
-                throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, nameof(authority));
-            }
-
             if (authorityType is not AuthorityType.Generic)
             {
+                string path = authorityUri.AbsolutePath.Substring(1);
+                if (string.IsNullOrWhiteSpace(path) && !IsCiamAuthority(authorityUri))
+                {
+                    throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, nameof(authority));
+                }
+
                 string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split('/');
                 if (pathSegments == null || pathSegments.Length == 0)
                 {

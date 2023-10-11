@@ -113,9 +113,9 @@ namespace Microsoft.Identity.Client.Instance
         internal abstract string TenantId { get; }
 
         /// <summary>
-        /// Changes the tenant id of the authority, if the authority supports tenants. If not, throws exception,.
+        /// Changes the tenant ID of the authority, if the authority supports tenants. If not, throws exception.
         /// </summary>
-        /// <param name="tenantId">The new tenant id</param>
+        /// <param name="tenantId">The new tenant ID</param>
         /// <param name="forceSpecifiedTenant">Forces the change, even if the current tenant is not "common" or "organizations" or "consumers"</param>
         internal abstract string GetTenantedAuthority(string tenantId, bool forceSpecifiedTenant);
        
