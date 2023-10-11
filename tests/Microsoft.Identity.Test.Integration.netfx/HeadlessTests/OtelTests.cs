@@ -121,9 +121,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         Assert.AreEqual(MetricType.LongSum, exportedItem.MetricType);
                         break;
 
-                    case "MsalTotalDurationHistogram":
-                    case "MsalDurationInCacheHistogram":
-                    case "MsalDurationInHttpHistogram":
+                    case "MsalTotalDuration":
+                    case "MsalDurationInCache":
+                    case "MsalDurationInHttp":
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
                         break;
 
