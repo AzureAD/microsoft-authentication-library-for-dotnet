@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1697004638474,
+  "lastUpdate": 1697004640417,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -3600,6 +3600,52 @@ window.BENCHMARK_DATA = {
             "value": 319454.60857282364,
             "unit": "ns",
             "range": "± 3088.7276798427933"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Peter",
+            "username": "pmaytak",
+            "email": "34331512+pmaytak@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "474026f56b1c3dfe2628fea104b8c80c46ce7e57",
+          "message": "Throw ArgumentException for malformed authorities (#4347)\n\n* Throw argument exceptions for consistency when authority or tenant are invalid. Update method comments.\r\n\r\n* Update and add tests.\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Den Delimarsky <53200638+localden@users.noreply.github.com>\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Small test fixes.\r\n\r\n* Update comments.\r\n\r\n---------\r\n\r\nCo-authored-by: Den Delimarsky <53200638+localden@users.noreply.github.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2023-10-11T00:11:08Z",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/474026f56b1c3dfe2628fea104b8c80c46ce7e57"
+        },
+        "date": 1697004639837,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 23558.57816205706,
+            "unit": "ns",
+            "range": "± 44.54434574700773"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 285848.8853190104,
+            "unit": "ns",
+            "range": "± 4180.34975791758"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 50243.17415945871,
+            "unit": "ns",
+            "range": "± 48.378099879252225"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 297243.56588541664,
+            "unit": "ns",
+            "range": "± 2348.733171054384"
           }
         ]
       }
