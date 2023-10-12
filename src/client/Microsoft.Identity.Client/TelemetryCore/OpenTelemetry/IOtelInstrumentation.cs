@@ -14,12 +14,11 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         internal void StopActivity();
         internal void LogSuccessMetrics(
             string platform,
-            string clientId,
             AuthenticationResultMetadata authResultMetadata,
             string apiId,
             string cacheLevel,
             ILoggerAdapter logger);
-        internal void LogFailedMetrics(string platform, string clientId, string errorCode);
+        internal void LogFailedMetrics(string platform, string errorCode);
 
     }
 }

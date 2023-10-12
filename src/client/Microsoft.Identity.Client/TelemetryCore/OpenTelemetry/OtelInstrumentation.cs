@@ -112,7 +112,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         // Aggregates the successful requests based on token source and cache refresh reason.
         void IOtelInstrumentation.LogSuccessMetrics(
             string platform, 
-            string clientId, 
             AuthenticationResultMetadata authResultMetadata,
             string apiId,
             string cacheLevel, 
@@ -122,7 +121,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             s_successCounter.Value.Add(1,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
-                new(TelemetryConstants.ClientId, clientId),
                 new(TelemetryConstants.ApiId, apiId),
                 new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
                 new(TelemetryConstants.CacheInfoTelemetry, authResultMetadata.CacheRefreshReason),
@@ -132,28 +130,24 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             s_durationTotal.Record(authResultMetadata.DurationTotalInMs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
-                new(TelemetryConstants.ApiId, apiId),
-                new(TelemetryConstants.ClientId, clientId));
+                new(TelemetryConstants.ApiId, apiId));
             s_durationInCache.Record(authResultMetadata.DurationInCacheInMs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
-                new(TelemetryConstants.ApiId, apiId),
-                new(TelemetryConstants.ClientId, clientId));
+                new(TelemetryConstants.ApiId, apiId));
             s_durationInHttp.Record(authResultMetadata.DurationInHttpInMs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
-                new(TelemetryConstants.ApiId, apiId),
-                new(TelemetryConstants.ClientId, clientId));
+                new(TelemetryConstants.ApiId, apiId));
 #endif
         }
 
-        void IOtelInstrumentation.LogFailedMetrics(string platform, string clientId, string errorCode)
+        void IOtelInstrumentation.LogFailedMetrics(string platform, string errorCode)
         {
 #if SUPPORTS_OTEL
             s_failureCounter.Value.Add(1,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
-                new(TelemetryConstants.ClientId, clientId),
                 new(TelemetryConstants.ErrorCode, errorCode));
 #endif
         }

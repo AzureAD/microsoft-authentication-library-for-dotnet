@@ -106,7 +106,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                     ServiceBundle.PlatformProxy.OtelInstrumentation?.LogSuccessMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(), 
-                        AuthenticationRequestParameters.AppConfig.ClientId, 
                         authenticationResult.AuthenticationResultMetadata, 
                         apiEvent.ApiId.ToString(),
                         GetCacheLevel(authenticationResult).ToString(), 
@@ -124,7 +123,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                         ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailedMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(), 
-                        AuthenticationRequestParameters.AppConfig.ClientId, 
                         ex.ErrorCode);
                     LogMsalFailedTelemetryToOTel(ex);
                     throw;
@@ -136,7 +134,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
                     ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailedMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(), 
-                        AuthenticationRequestParameters.AppConfig.ClientId, 
                         ex.GetType().Name);
                     LogMsalFailedTelemetryToOTel(ex);
                     throw;

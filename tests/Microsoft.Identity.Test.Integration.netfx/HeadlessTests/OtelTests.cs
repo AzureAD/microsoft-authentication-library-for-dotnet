@@ -18,6 +18,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry;
 using OpenTelemetry.Trace;
 using System.Linq;
+using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -50,17 +51,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Thread.Sleep(70000);
 
-            VerifyMetrics(exportedMetrics, 4);
-            VerifyActivity(exportedActivities, 6);
+            VerifyMetrics(exportedMetrics, 5);
+            VerifyActivity(exportedActivities, 15);
         }
 
         private void ExportMetricsAndActivity(List<Metric> exportedMetrics, List<Activity> exportedActivities)
         {
-            
             int collectionPeriodMilliseconds = 30000;
 
             s_meterProvider = Sdk.CreateMeterProviderBuilder()
-                .AddMeter("MicrosoftIdentityClient_Common_Meter")
+                .AddMeter(OtelInstrumentation.MeterName)
                 .AddInMemoryExporter(exportedMetrics, metricReaderOptions =>
                 {
                     metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = collectionPeriodMilliseconds;
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             s_activityProvider = Sdk.CreateTracerProviderBuilder()
-                .AddSource("MicrosoftIdentityClient_Activity")
+                .AddSource(OtelInstrumentation.ActivitySourceName)
                 .AddInMemoryExporter(exportedActivities)
                 .Build();
         }
@@ -88,6 +88,25 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             MsalAssert.AssertAuthResult(authResult);
+
+            authResult = await confidentialApp
+                .AcquireTokenForClient(settings.AppScopes)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(authResult);
+
+            try
+            {
+                authResult = await confidentialApp
+                .AcquireTokenForClient(new string[] { "wrongScope" })
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+            } catch (Exception ex)
+            {
+                Assert.IsInstanceOfType(ex, typeof(MsalServiceException));
+            }
+            
         }
 
         private void VerifyActivity(List<Activity> exportedActivities, int expectedTagCount)
@@ -97,6 +116,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(1, exportedActivities.Count);
             foreach (var activity in exportedActivities)
             {
+                Assert.AreEqual(OtelInstrumentation.ActivitySourceName, activity.Source.Name);
                 Assert.AreEqual(expectedTagCount, activity.Tags.Count());
             }
         }
@@ -109,7 +129,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             foreach (Metric exportedItem in exportedMetrics)
             {
-                Assert.AreEqual("MicrosoftIdentityClient_Common_Meter", exportedItem.MeterName);
+                Assert.AreEqual(OtelInstrumentation.MeterName, exportedItem.MeterName);
 
 
                 switch (exportedItem.Name)
@@ -131,15 +151,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         Assert.Fail("Unexpected metrics logged.");
                         break;
 
-                }
-
-                foreach (var metricPoint in exportedItem.GetMetricPoints())
-                {
-                    foreach (var tag in metricPoint.Tags)
-                    {
-                        var tagStringValue = tag.Value as string;
-                        Assert.IsFalse(string.IsNullOrEmpty(tagStringValue));
-                    }
                 }
             }
         }

@@ -29,7 +29,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 
         public void LogSuccessMetrics(
             string platform,
-            string clientId,
             AuthenticationResultMetadata authResultMetadata,
             string apiId,
             string cacheLevel,
@@ -38,7 +37,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             // No op
         }
 
-        public void LogFailedMetrics(string platform, string clientId, string errorCode)
+        public void LogFailedMetrics(string platform, string errorCode)
         {
             // No op
         }
