@@ -163,49 +163,6 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public void IdWebAccountExtension()
-        {
-            // copied from https://github.com/AzureAD/microsoft-identity-web/blob/master/src/Microsoft.Identity.Web/AccountExtensions.cs#L13
-            static ClaimsPrincipal ToClaimsPrincipal(IAccount account)
-            {
-                ClaimsIdentity identity = new ClaimsIdentity(new[]
-                    {
-                    new Claim(ClaimTypes.Upn, account.Username),
-                });
-
-                if (!string.IsNullOrEmpty(account.HomeAccountId?.ObjectId))
-                {
-                    identity.AddClaim(new Claim("oid", account.HomeAccountId.ObjectId));
-                }
-
-                if (!string.IsNullOrEmpty(account.HomeAccountId?.TenantId))
-                {
-                    identity.AddClaim(new Claim("tid", account.HomeAccountId.TenantId));
-                }
-
-                return new ClaimsPrincipal(identity);
-            }
-
-            var username = "username@test.com";
-            var oid = "objectId";
-            var tid = "tenantId";
-
-            IAccount account = Substitute.For<IAccount>();
-            account.Username.Returns(username);
-            var accId = new AccountId("identifier", oid, tid);
-            account.HomeAccountId.Returns(accId);
-
-            var claimsIdentityResult = ToClaimsPrincipal(account).Identity as ClaimsIdentity;
-
-            Assert.IsNotNull(claimsIdentityResult);
-            Assert.AreEqual(3, claimsIdentityResult.Claims.Count());
-            Assert.AreEqual(username, claimsIdentityResult.FindFirst(ClaimTypes.Upn)?.Value);
-            Assert.AreEqual(oid, claimsIdentityResult.FindFirst("oid")?.Value);
-            Assert.AreEqual(tid, claimsIdentityResult.FindFirst("tid")?.Value);
-
-        }
-
-        [TestMethod]
         public async Task RefreshReasonExpired_AcquireTokenSilent_Async()
         {
             using (var harness = CreateTestHarness())

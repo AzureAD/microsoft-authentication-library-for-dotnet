@@ -254,13 +254,16 @@ namespace Microsoft.Identity.Client
         /// 
         /// If an authority was not specified at the application level, the default used is https://login.microsoftonline.com/common.
         /// </summary>
-        /// <param name="tenantId">The tenant ID, which can be either in GUID format or a domain name. Also known as the Directory ID.</param>
+        /// <param name="tenantId">Tenant ID of the Microsoft Entra ID tenant
+        /// or a domain associated with this Microsoft Entra ID tenant, in order to sign-in a user of a specific organization only.</param>
         /// <returns>The builder to chain the .With methods.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if tenantId is null or an empty string</exception>
-        /// <exception cref="MsalClientException">Thrown if the application was configured with an authority that is not AAD specific (e.g. ADFS or B2C).</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="tenantId"/> is null or an empty string.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="tenantId"/> is not well-formatted (for example, has spaces).</exception>
+        /// <exception cref="MsalClientException">Thrown in more general exception scenarios (for ex. if the application was configured with an authority that does not allow tenants).</exception>
         /// <remarks>
         /// The tenant should be more restrictive than the one configured at the application level, e.g. don't use "common".
-        /// Does not affect authority validation, which is specified at the application level.</remarks>
+        /// Does not affect authority validation, which is specified at the application level.
+        /// </remarks>
         public T WithTenantId(string tenantId)
         {
             if (string.IsNullOrEmpty(tenantId))
@@ -280,17 +283,17 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Extracts the tenant ID from the provided authority URI and overrides the tenant ID specified in the authority at the application level. This operation preserves the authority host (environment) provided to the application builder.
-        /// 
         /// If an authority was not provided to the application builder, this method will replace the tenant ID in the default authority - https://login.microsoftonline.com/common.
         /// </summary>
         /// <param name="authorityUri">URI from which to extract the tenant ID</param>
-
         /// <returns>The builder to chain the .With methods.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="authorityUri"/> is null or an empty string</exception>
-        /// <exception cref="MsalClientException">Thrown if the application was configured with an authority that is not AAD specific (e.g. ADFS or B2C).</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="authorityUri"/> is null or an empty string.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="authorityUri"/> is not well-formatted (for example, has spaces).</exception>
+        /// <exception cref="MsalClientException">Thrown in general exception scenarios (for example if the application was configured with an authority that does not allow tenants).</exception>
         /// <remarks>
         /// The tenant should be more restrictive than the one configured at the application level, e.g. don't use "common".
-        /// Does not affect authority validation, which is specified at the application level.</remarks>
+        /// Does not affect authority validation, which is specified at the application level.
+        /// </remarks>
         public T WithTenantIdFromAuthority(Uri authorityUri)
         {
             if (authorityUri == null)
