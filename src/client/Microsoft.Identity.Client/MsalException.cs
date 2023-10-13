@@ -8,6 +8,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
+using System.Text.Json.Nodes;
 using JObject = System.Text.Json.Nodes.JsonObject;
 #else
 using Microsoft.Identity.Json;
@@ -41,7 +42,6 @@ namespace Microsoft.Identity.Client
         /// An <see cref="AdditionalExceptionData"/> property key, available when using desktop brokers.
         /// </summary>
         public const string BrokerErrorCode = "BrokerErrorCode";
-
         /// <summary>
         /// An <see cref="AdditionalExceptionData"/> property key, available when using desktop brokers.
         /// </summary>
@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// A property bag with extra details for this exception.
         /// </summary>
-        public IReadOnlyDictionary<string, string> AdditionalExceptionData { get; set; } 
+        public IReadOnlyDictionary<string, string> AdditionalExceptionData { get; set; }
             = CollectionHelpers.GetEmptyDictionary<string, string>();
 
         /// <summary>
@@ -174,15 +174,50 @@ namespace Microsoft.Identity.Client
         private const string ErrorCodeKey = "error_code";
         private const string ErrorDescriptionKey = "error_description";
 
-        internal virtual void PopulateJson(JObject jobj)
+        internal virtual void PopulateJson(JObject jObject)
         {
-            jobj[ExceptionTypeKey] = GetType().Name;
-            jobj[ErrorCodeKey] = ErrorCode;
-            jobj[ErrorDescriptionKey] = Message;
+            jObject[ExceptionTypeKey] = GetType().Name;
+            jObject[ErrorCodeKey] = ErrorCode;
+            jObject[ErrorDescriptionKey] = Message;
+
+#if SUPPORTS_SYSTEM_TEXT_JSON
+            var exceptionData = new JsonObject();
+
+            foreach (KeyValuePair<string, string> pair in AdditionalExceptionData)
+            {
+                exceptionData[pair.Key] = pair.Value;
+            }
+
+            jObject[nameof(AdditionalExceptionData)] = exceptionData;
+#else
+            jObject[nameof(AdditionalExceptionData)] = JObject.FromObject(AdditionalExceptionData);
+#endif
+
+            //if (AdditionalExceptionData.TryGetValue(BrokerErrorContext, out string brokerErrorContext))
+            //{
+            //    jObject[BrokerErrorContext] = brokerErrorContext;
+            //}
+            //if (AdditionalExceptionData.TryGetValue(BrokerErrorTag, out string brokerErrorTag))
+            //{
+            //    jObject[BrokerErrorTag] = brokerErrorTag;
+            //}
+            //if (AdditionalExceptionData.TryGetValue(BrokerErrorStatus, out string brokerErrorStatus))
+            //{
+            //    jObject[BrokerErrorStatus] = brokerErrorStatus;
+            //}
+            //if (AdditionalExceptionData.TryGetValue(BrokerErrorCode, out string brokerErrorCode))
+            //{
+            //    jObject[BrokerErrorCode] = brokerErrorCode;
+            //}
+            //if (AdditionalExceptionData.TryGetValue(BrokerTelemetry, out string brokerTelemetry))
+            //{
+            //    jObject[BrokerTelemetry] = brokerTelemetry;
+            //}
         }
 
-        internal virtual void PopulateObjectFromJson(JObject jobj)
+        internal virtual void PopulateObjectFromJson(JObject jObject)
         {
+            AdditionalExceptionData = (IReadOnlyDictionary<string, string>)JsonHelper.ExtractInnerJsonAsDictionary(jObject, nameof(AdditionalExceptionData));
         }
 
         /// <summary>
@@ -191,9 +226,9 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public string ToJsonString()
         {
-            JObject jobj = new JObject();
-            PopulateJson(jobj);
-            return jobj.ToString();
+            JObject jObject = new JObject();
+            PopulateJson(jObject);
+            return jObject.ToString();
         }
 
         /// <summary>
@@ -203,11 +238,11 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public static MsalException FromJsonString(string json)
         {
-            JObject jobj = JsonHelper.ParseIntoJsonObject(json);
-            string type = JsonHelper.GetValue<string>(jobj[ExceptionTypeKey]);
+            JObject jObject = JsonHelper.ParseIntoJsonObject(json);
+            string type = JsonHelper.GetValue<string>(jObject[ExceptionTypeKey]);
 
-            string errorCode = JsonHelper.GetExistingOrEmptyString(jobj, ErrorCodeKey);
-            string errorMessage = JsonHelper.GetExistingOrEmptyString(jobj, ErrorDescriptionKey);
+            string errorCode = JsonHelper.GetExistingOrEmptyString(jObject, ErrorCodeKey);
+            string errorMessage = JsonHelper.GetExistingOrEmptyString(jObject, ErrorDescriptionKey);
 
             MsalException ex = type switch
             {
@@ -218,7 +253,7 @@ namespace Microsoft.Identity.Client
                 _ => throw new MsalClientException(MsalError.JsonParseError, MsalErrorMessage.MsalExceptionFailedToParse),
             };
 
-            ex.PopulateObjectFromJson(jobj);
+            ex.PopulateObjectFromJson(jObject);
             return ex;
         }
 

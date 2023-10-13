@@ -257,24 +257,24 @@ namespace Microsoft.Identity.Client
 
         // DEPRECATE / OBSOLETE - this functionality is not used and should be removed in a next major version
 
-        internal override void PopulateJson(JObject jobj)
+        internal override void PopulateJson(JObject jObject)
         {
-            base.PopulateJson(jobj);
+            base.PopulateJson(jObject);
 
-            jobj[ClaimsKey] = Claims;
-            jobj[ResponseBodyKey] = ResponseBody;
-            jobj[CorrelationIdKey] = CorrelationId;
-            jobj[SubErrorKey] = SubError;
+            jObject[ClaimsKey] = Claims;
+            jObject[ResponseBodyKey] = ResponseBody;
+            jObject[CorrelationIdKey] = CorrelationId;
+            jObject[SubErrorKey] = SubError;
         }
 
-        internal override void PopulateObjectFromJson(JObject jobj)
+        internal override void PopulateObjectFromJson(JObject jObject)
         {
-            base.PopulateObjectFromJson(jobj);
+            base.PopulateObjectFromJson(jObject);
 
-            Claims = JsonHelper.GetExistingOrEmptyString(jobj, ClaimsKey);
-            ResponseBody = JsonHelper.GetExistingOrEmptyString(jobj, ResponseBodyKey);
-            CorrelationId = JsonHelper.GetExistingOrEmptyString(jobj, CorrelationIdKey);
-            SubError = JsonHelper.GetExistingOrEmptyString(jobj, SubErrorKey);
+            Claims = JsonHelper.GetExistingOrEmptyString(jObject, ClaimsKey);
+            ResponseBody = JsonHelper.GetExistingOrEmptyString(jObject, ResponseBodyKey);
+            CorrelationId = JsonHelper.GetExistingOrEmptyString(jObject, CorrelationIdKey);
+            SubError = JsonHelper.GetExistingOrEmptyString(jObject, SubErrorKey);
         }
         #endregion
     }
