@@ -170,54 +170,82 @@ namespace Microsoft.Identity.Client
 
         // DEPRECATE / OBSOLETE - this functionality is not used and should be removed in a next major version
 
-        private const string ExceptionTypeKey = "type";
-        private const string ErrorCodeKey = "error_code";
-        private const string ErrorDescriptionKey = "error_description";
+        private class ExceptionSerializationKey
+        {
+            internal const string ExceptionTypeKey = "type";
+            internal const string ErrorCodeKey = "error_code";
+            internal const string ErrorDescriptionKey = "error_description";
+            internal const string AdditionalExceptionData = "additional_exception_data";
+            internal const string BrokerErrorContext = "broker_error_context";
+            internal const string BrokerErrorTag = "broker_error_tag";
+            internal const string BrokerErrorStatus = "broker_error_status";
+            internal const string BrokerErrorCode = "broker_error_code";
+            internal const string BrokerTelemetry = "broker_telemetry";
+        }
 
         internal virtual void PopulateJson(JObject jObject)
         {
-            jObject[ExceptionTypeKey] = GetType().Name;
-            jObject[ErrorCodeKey] = ErrorCode;
-            jObject[ErrorDescriptionKey] = Message;
+            jObject[ExceptionSerializationKey.ExceptionTypeKey] = GetType().Name;
+            jObject[ExceptionSerializationKey.ErrorCodeKey] = ErrorCode;
+            jObject[ExceptionSerializationKey.ErrorDescriptionKey] = Message;
 
-#if SUPPORTS_SYSTEM_TEXT_JSON
-            var exceptionData = new JsonObject();
+            var exceptionData = new JObject();
 
-            foreach (KeyValuePair<string, string> pair in AdditionalExceptionData)
+            if (AdditionalExceptionData.TryGetValue(BrokerErrorContext, out string brokerErrorContext))
             {
-                exceptionData[pair.Key] = pair.Value;
+                exceptionData[ExceptionSerializationKey.BrokerErrorContext] = brokerErrorContext;
+            }
+            if (AdditionalExceptionData.TryGetValue(BrokerErrorTag, out string brokerErrorTag))
+            {
+                exceptionData[ExceptionSerializationKey.BrokerErrorTag] = brokerErrorTag;
+            }
+            if (AdditionalExceptionData.TryGetValue(BrokerErrorStatus, out string brokerErrorStatus))
+            {
+                exceptionData[ExceptionSerializationKey.BrokerErrorStatus] = brokerErrorStatus;
+            }
+            if (AdditionalExceptionData.TryGetValue(BrokerErrorCode, out string brokerErrorCode))
+            {
+                exceptionData[ExceptionSerializationKey.BrokerErrorCode] = brokerErrorCode;
+            }
+            if (AdditionalExceptionData.TryGetValue(BrokerTelemetry, out string brokerTelemetry))
+            {
+                exceptionData[ExceptionSerializationKey.BrokerTelemetry] = brokerTelemetry;
             }
 
-            jObject[nameof(AdditionalExceptionData)] = exceptionData;
-#else
-            jObject[nameof(AdditionalExceptionData)] = JObject.FromObject(AdditionalExceptionData);
-#endif
-
-            //if (AdditionalExceptionData.TryGetValue(BrokerErrorContext, out string brokerErrorContext))
-            //{
-            //    jObject[BrokerErrorContext] = brokerErrorContext;
-            //}
-            //if (AdditionalExceptionData.TryGetValue(BrokerErrorTag, out string brokerErrorTag))
-            //{
-            //    jObject[BrokerErrorTag] = brokerErrorTag;
-            //}
-            //if (AdditionalExceptionData.TryGetValue(BrokerErrorStatus, out string brokerErrorStatus))
-            //{
-            //    jObject[BrokerErrorStatus] = brokerErrorStatus;
-            //}
-            //if (AdditionalExceptionData.TryGetValue(BrokerErrorCode, out string brokerErrorCode))
-            //{
-            //    jObject[BrokerErrorCode] = brokerErrorCode;
-            //}
-            //if (AdditionalExceptionData.TryGetValue(BrokerTelemetry, out string brokerTelemetry))
-            //{
-            //    jObject[BrokerTelemetry] = brokerTelemetry;
-            //}
+            jObject[ExceptionSerializationKey.AdditionalExceptionData] = exceptionData;
         }
 
         internal virtual void PopulateObjectFromJson(JObject jObject)
         {
-            AdditionalExceptionData = (IReadOnlyDictionary<string, string>)JsonHelper.ExtractInnerJsonAsDictionary(jObject, nameof(AdditionalExceptionData));
+            var exceptionData = JsonHelper.ExtractInnerJsonAsDictionary(jObject, ExceptionSerializationKey.AdditionalExceptionData);
+
+            if (exceptionData.TryGetValue(ExceptionSerializationKey.BrokerErrorContext, out string brokerErrorContext))
+            {
+                exceptionData[BrokerErrorContext] = brokerErrorContext;
+                exceptionData.Remove(ExceptionSerializationKey.BrokerErrorContext);
+            }
+            if (exceptionData.TryGetValue(ExceptionSerializationKey.BrokerErrorTag, out string brokerErrorTag))
+            {
+                exceptionData[BrokerErrorTag] = brokerErrorTag;
+                exceptionData.Remove(ExceptionSerializationKey.BrokerErrorTag);
+            }
+            if (exceptionData.TryGetValue(ExceptionSerializationKey.BrokerErrorStatus, out string brokerErrorStatus))
+            {
+                exceptionData[BrokerErrorStatus] = brokerErrorStatus;
+                exceptionData.Remove(ExceptionSerializationKey.BrokerErrorStatus);
+            }
+            if (exceptionData.TryGetValue(ExceptionSerializationKey.BrokerErrorCode, out string brokerErrorCode))
+            {
+                exceptionData[BrokerErrorCode] = brokerErrorCode;
+                exceptionData.Remove(ExceptionSerializationKey.BrokerErrorCode);
+            }
+            if (exceptionData.TryGetValue(ExceptionSerializationKey.BrokerTelemetry, out string brokerTelemetry))
+            {
+                exceptionData[BrokerTelemetry] = brokerTelemetry;
+                exceptionData.Remove(ExceptionSerializationKey.BrokerTelemetry);
+            }
+
+            AdditionalExceptionData = (IReadOnlyDictionary<string, string>)exceptionData;
         }
 
         /// <summary>
@@ -239,10 +267,10 @@ namespace Microsoft.Identity.Client
         public static MsalException FromJsonString(string json)
         {
             JObject jObject = JsonHelper.ParseIntoJsonObject(json);
-            string type = JsonHelper.GetValue<string>(jObject[ExceptionTypeKey]);
+            string type = JsonHelper.GetValue<string>(jObject[ExceptionSerializationKey.ExceptionTypeKey]);
 
-            string errorCode = JsonHelper.GetExistingOrEmptyString(jObject, ErrorCodeKey);
-            string errorMessage = JsonHelper.GetExistingOrEmptyString(jObject, ErrorDescriptionKey);
+            string errorCode = JsonHelper.GetExistingOrEmptyString(jObject, ExceptionSerializationKey.ErrorCodeKey);
+            string errorMessage = JsonHelper.GetExistingOrEmptyString(jObject, ExceptionSerializationKey.ErrorDescriptionKey);
 
             MsalException ex = type switch
             {
