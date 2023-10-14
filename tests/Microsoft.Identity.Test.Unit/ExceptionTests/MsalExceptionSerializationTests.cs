@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         private const string BrokerErrorTag = "0x123456";
         private const string BrokerErrorStatus = "broker error status";
         private const string BrokerErrorCode = "broker error code";
-        private const string BrokerTelemetry = "broker telemetry";
+        private const string BrokerTelemetry = "{\"error-property1\": \"0\",\"error-property2\": \"abc\"}";
 
         [DataTestMethod]
         [DataRow(false)]

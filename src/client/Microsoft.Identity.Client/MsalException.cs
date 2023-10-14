@@ -8,7 +8,9 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
-using System.Text.Json.Nodes;
+using System.Text.Json;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
 using JObject = System.Text.Json.Nodes.JsonObject;
 #else
 using Microsoft.Identity.Json;
@@ -256,7 +258,19 @@ namespace Microsoft.Identity.Client
         {
             JObject jObject = new JObject();
             PopulateJson(jObject);
+
+#if SUPPORTS_SYSTEM_TEXT_JSON
+            // By default, STJ is more restrictive (escapes more characters) than Newtonsoft,
+            // so the telemetry string is less readable.
+            // Relax the encoding rules to match Newtonsoft behavior.
+            return jObject.ToJsonString(new JsonSerializerOptions()
+            {
+                WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            });
+#else
             return jObject.ToString();
+#endif
         }
 
         /// <summary>
