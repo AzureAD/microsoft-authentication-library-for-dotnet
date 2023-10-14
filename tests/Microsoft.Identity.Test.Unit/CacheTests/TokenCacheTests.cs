@@ -1427,6 +1427,32 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void AccessTokenCacheItem_ToLogString_UsesPiiFlag_Test(bool enablePii)
+        {
+            var accessTokenCacheItem = TokenCacheHelper.CreateAccessTokenItem();
+
+            var log = accessTokenCacheItem.ToLogString(enablePii);
+
+            Assert.AreEqual(enablePii, log.Contains(accessTokenCacheItem.HomeAccountId));
+            Assert.AreNotEqual(enablePii, log.Contains(accessTokenCacheItem.HomeAccountId.GetHashCode().ToString()));
+        }
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void RefreshTokenCacheItem_ToLogString_UsesPiiFlag_Test(bool enablePii)
+        {
+            var refreshTokenCacheItem = TokenCacheHelper.CreateRefreshTokenItem();
+
+            var log = refreshTokenCacheItem.ToLogString(enablePii);
+
+            Assert.AreEqual(enablePii, log.Contains(refreshTokenCacheItem.HomeAccountId));
+            Assert.AreNotEqual(enablePii, log.Contains(refreshTokenCacheItem.HomeAccountId.GetHashCode().ToString()));
+        }
+
         private void ValidateIsFociMember(
             ITokenCacheInternal cache,
             AuthenticationRequestParameters requestParams,
