@@ -15,7 +15,7 @@ using Microsoft.Identity.Client.Utils;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Parsed authentication headers to retrieve header values from HttpResponseHeaders.
+    /// Parsed authentication headers to retrieve header values from <see cref="HttpResponseHeaders"/>.
     /// </summary>
     public class AuthenticationHeaderParser
     {
@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client
         public AuthenticationInfoParameters AuthenticationInfoParameters { get; private set; }
 
         /// <summary>
-        /// Nonce parsed from <see cref="HttpResponseHeaders"/>. This is acquired from the PoP <c>WWW-Authenticate</c> header or the <c>Authentication-Info</c> header
+        /// Nonce parsed from <see cref="HttpResponseHeaders"/>. This is acquired from the Proof-of-Possession <c>WWW-Authenticate</c> header or the <c>Authentication-Info</c> header
         /// </summary>
         public string PopNonce { get; private set; }
 
@@ -53,8 +53,10 @@ namespace Microsoft.Identity.Client
         }
 
         /// <inheritdoc cref="ParseAuthenticationHeadersAsync(string, CancellationToken)"/>
+        /// <param name="resourceUri">Resource URI.</param>
         /// <param name="httpClient">Instance of <see cref="HttpClient"/> to make the request with.</param>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+        /// <exception cref="ArgumentNullException">Thrown if the <c>resourceUri</c> or <c>httpClient</c> is null.</exception>
         public static async Task<AuthenticationHeaderParser> ParseAuthenticationHeadersAsync(string resourceUri, HttpClient httpClient, CancellationToken cancellationToken = default)
         {
             if (httpClient is null)
