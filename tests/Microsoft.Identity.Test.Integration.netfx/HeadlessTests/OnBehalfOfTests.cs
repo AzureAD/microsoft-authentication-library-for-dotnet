@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ArlingtonWebAPIAccessingGraphOnBehalfOfUserTestAsync()
         {
             var arligntonUser = (await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false)).User;
-            
+
             var msalPublicClient = PublicClientApplicationBuilder.Create("cb7faed4-b8c0-49ee-b421-f5ed16894c83")
                                                                  .WithAuthority("https://login.microsoftonline.us/organizations")
                                                                  .WithRedirectUri(TestConstants.RedirectUri)
@@ -417,7 +417,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithTestLogging()
                 .Build();
             s_inMemoryTokenCache.Bind(pca.UserTokenCache);
-            
+
             try
             {
                 authResult = await pca
@@ -498,11 +498,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             if (withRegion)
             {
                 builder
-                    .WithAzureRegion(TestConstants.Region)
-                    .WithExtraQueryParameters(new Dictionary<string, string>
-                    {
-                        ["allowestsrnonmsi"] = "true" // allow regional for testing
-                    });
+                    .WithAzureRegion(TestConstants.Region);
             }
 
             return builder.BuildConcrete();
