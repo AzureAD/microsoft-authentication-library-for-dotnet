@@ -28,11 +28,11 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         [DataTestMethod]
         [DataRow(false)]
         [DataRow(true)]
-        public void MsalException_CanSerializeAndDeserializeRoundTrip(bool includeAdditionalData)
+        public void MsalException_CanSerializeAndDeserializeRoundTrip(bool includeAdditionalExceptionData)
         {
             var ex = new MsalException(SomeErrorCode, SomeErrorMessage);
 
-            if (includeAdditionalData)
+            if (includeAdditionalExceptionData)
             {
                 ex.AdditionalExceptionData = new Dictionary<string, string>()
                 {
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 };
             }
 
-            SerializeDeserializeAndValidate(ex, typeof(MsalException), false, includeAdditionalData);
+            SerializeDeserializeAndValidate(ex, typeof(MsalException), false, includeAdditionalExceptionData);
         }
 
         [TestMethod]
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             SerializeDeserializeAndValidate(ex, typeof(MsalUiRequiredException), true);
         }
 
-        private void SerializeDeserializeAndValidate(MsalException ex, Type expectedType, bool isServiceExceptionDerived, bool includesAdditionalData = false)
+        private void SerializeDeserializeAndValidate(MsalException ex, Type expectedType, bool isServiceExceptionDerived, bool includeAdditionalExceptionData = false)
         {
             string json = ex.ToJsonString();
 
@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual(ex.ErrorCode, exDeserialized.ErrorCode);
             Assert.AreEqual(ex.Message, exDeserialized.Message);
 
-            if (includesAdditionalData)
+            if (includeAdditionalExceptionData)
             {
                 Assert.AreEqual(ex.AdditionalExceptionData[MsalException.BrokerErrorContext], exDeserialized.AdditionalExceptionData[MsalException.BrokerErrorContext]);
                 Assert.AreEqual(ex.AdditionalExceptionData[MsalException.BrokerErrorTag], exDeserialized.AdditionalExceptionData[MsalException.BrokerErrorTag]);
