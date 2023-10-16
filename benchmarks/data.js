@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1697484263232,
+  "lastUpdate": 1697484265555,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -1830,6 +1830,42 @@ window.BENCHMARK_DATA = {
             "value": 516880.9032258064,
             "unit": "ns",
             "range": "± 13563.385197790996"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "34331512+pmaytak@users.noreply.github.com",
+            "name": "Peter",
+            "username": "pmaytak"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a8b93d42c8083097bfa452d313504e92d1ebc414",
+          "message": "Print refresh token cache keys to logs (#4375)\n\n* Print RTs to cache.\r\n\r\n* Add tests.",
+          "timestamp": "2023-10-16T12:15:40-07:00",
+          "tree_id": "0e6d34d0b69bca92a076c60a4f162dbf59a232b7",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/a8b93d42c8083097bfa452d313504e92d1ebc414"
+        },
+        "date": 1697484258559,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 409946.9456521739,
+            "unit": "ns",
+            "range": "± 26414.54876603985"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 601911.156626506,
+            "unit": "ns",
+            "range": "± 50751.154291926934"
           }
         ]
       },
