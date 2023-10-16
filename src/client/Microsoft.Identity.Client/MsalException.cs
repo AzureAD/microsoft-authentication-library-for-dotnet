@@ -168,10 +168,7 @@ namespace Microsoft.Identity.Client
                 innerExceptionContents);
         }
 
-        #region SERIALIZATION
-
-        // DEPRECATE / OBSOLETE - this functionality is not used and should be removed in a next major version
-
+        #region Serialization
         private class ExceptionSerializationKey
         {
             internal const string ExceptionTypeKey = "type";
@@ -191,6 +188,7 @@ namespace Microsoft.Identity.Client
             jObject[ExceptionSerializationKey.ErrorCodeKey] = ErrorCode;
             jObject[ExceptionSerializationKey.ErrorDescriptionKey] = Message;
 
+            // Populate JSON string with broker exception data
             var exceptionData = new JObject();
 
             if (AdditionalExceptionData.TryGetValue(BrokerErrorContext, out string brokerErrorContext))
@@ -219,6 +217,7 @@ namespace Microsoft.Identity.Client
 
         internal virtual void PopulateObjectFromJson(JObject jObject)
         {
+            // Populate this exception instance with broker exception data from JSON
             var exceptionData = JsonHelper.ExtractInnerJsonAsDictionary(jObject, ExceptionSerializationKey.AdditionalExceptionData);
 
             if (exceptionData.TryGetValue(ExceptionSerializationKey.BrokerErrorContext, out string brokerErrorContext))
@@ -299,6 +298,6 @@ namespace Microsoft.Identity.Client
             return ex;
         }
 
-        #endregion // SERIALIZATION
+        #endregion
     }
 }

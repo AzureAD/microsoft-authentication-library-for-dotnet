@@ -254,9 +254,6 @@ namespace Microsoft.Identity.Client
         }
 
         #region Serialization
-
-        // DEPRECATE / OBSOLETE - this functionality is not used and should be removed in a next major version
-
         internal override void PopulateJson(JObject jObject)
         {
             base.PopulateJson(jObject);
