@@ -81,6 +81,17 @@ namespace Microsoft.Identity.Client.Cache.Items
             iOSCacheKeyLazy = new Lazy<IiOSKey>(() => InitiOSKey());
         }
 
+        internal string ToLogString(bool piiEnabled = false)
+        {
+            return MsalCacheKeys.GetCredentialKey(
+                piiEnabled ? HomeAccountId : HomeAccountId?.GetHashCode().ToString(),
+                Environment,
+                StorageJsonValues.CredentialTypeRefreshToken,
+                ClientId,
+                tenantId: null,
+                scopes: null);
+        }
+
         #region iOS
         private IiOSKey InitiOSKey()
         {
