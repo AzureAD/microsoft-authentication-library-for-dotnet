@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Cache;
 #if SUPPORTS_OTEL
 using System.Diagnostics.Metrics;
 #endif
@@ -131,10 +132,16 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
                 new(TelemetryConstants.ApiId, apiId));
-            s_durationInCache.Record(authResultMetadata.DurationInCacheInMs,
+
+            // Only log cache duration if L2 cache was used.
+            if (cacheLevel.Equals(CacheLevel.L2Cache))
+            {
+                s_durationInCache.Record(authResultMetadata.DurationInCacheInMs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
                 new(TelemetryConstants.ApiId, apiId));
+            }
+            
             s_durationInHttp.Record(authResultMetadata.DurationInHttpInMs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
