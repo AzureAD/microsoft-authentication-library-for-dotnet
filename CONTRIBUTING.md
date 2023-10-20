@@ -45,15 +45,6 @@ If your pull request contains any of the below, it's less likely to be merged.
 
 Very large PRs that would take hours to review (remember, we're trying to help lots of people at once). For larger work areas, please discuss with us to find ways of breaking it down into smaller, incremental pieces that can go into separate PRs.
 
-### During a pull request review
-
-A core contributor will review your pull request and provide feedback. To ensure that there is not a large backlog of inactive PRs, the pull request will be marked as stale after two weeks of no activity. After another four days, it will be closed.
-
-### Submitting a pull request
-
-If you're not sure how to create a pull request, read GitHub's [About pull requests
-](https://help.github.com/articles/using-pull-requests) article. Make sure the repository can build and all tests pass. Familiarize yourself with the project workflow and our coding conventions. The coding style and general engineering guidelines are published on the Engineering guidelines page.
-
 ### Ensuring test coverage
 
 - Tests need to be provided for every bug and feature that is completed.
@@ -63,18 +54,23 @@ If you're not sure how to create a pull request, read GitHub's [About pull reque
 
 Note that you won't be able to run integration tests locally because they connect to Azure Key Vault to fetch some test users and passwords.
 
+### Submitting a pull request
+
+If you're not sure how to create a pull request, read GitHub's [About pull requests
+](https://help.github.com/articles/using-pull-requests) article. Make sure the repository can build and all tests pass. Familiarize yourself with the project workflow and our coding conventions. The coding style and general engineering guidelines are published on the Engineering guidelines page.
+
 ### Pull request feedback
 
-Your pull request will now go through extensive checks by the subject matter experts on our team. Please be patient; we have hundreds of pull requests across all of our repositories. Update your pull request according to feedback until it is approved by one of the team members.
+The subject matter experts on our team will review your pull request and provide feedback. Please be patient; we have hundreds of pull requests across all of our repositories. Update your pull request according to feedback until it is approved by one of the team members.
 
 ### Merging a pull request
 
-When your pull request has had all feedback addressed, it has been signed off by one or more reviewers with commit access, and all checks are green, we will commit it.
+When your pull request has had all feedback addressed and has been signed off by one or more core contributors, we will finalize and commit it.
 We commit pull requests as a single Squash commit unless there are special circumstances. This creates a simpler history than a Merge or Rebase commit. "Special circumstances" are rare, and typically mean that there are a series of cleanly separated changes that will be too hard to understand if squashed together, or for some reason we want to preserve the ability to dissect them.
 
 #### How the MSAL team deals with forks
 
-The Continuous Integration build will not run on a pull request opened from a fork, as a security measure. The MSAL team will manually move your branch from your fork to the main repository to be able to run the CI. This will preserve the identity of the commit.
+The Continuous Integration builds will not run on a pull request opened from a fork, as a security measure. The MSAL team will manually move your branch from your fork to the main repository to be able to run the CI. This will preserve the identity of the commit to give you credit for your work.
 
 ```bash
 # list existing remotes
