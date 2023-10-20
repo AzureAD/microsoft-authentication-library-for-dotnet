@@ -6,32 +6,9 @@ Microsoft Authentication Library (MSAL) for .NET welcomes new contributors.  Thi
 
 Please visit [https://cla.microsoft.com/](https://cla.microsoft.com/) and sign the Contributor License Agreements.  You only need to do that once. We can not look at your code until you've submitted this request.
 
-## Tests
+## Contributing your own code changes
 
-It's all standard stuff, but please note that you won't be able to run integration tests locally because they connect to Azure Key Vault to fetch some test users and passwords.
-
-## How the MSAL team deals with forks
-
-The CI build will not run on a PR opened from a fork, as a security measure. The MSAL team will manually move your branch from your fork to the main repository, to be able to run the CI. This will preserve the identity of the commit.
-
-```bash
-# list existing remotes
-git remote -v 
-
-# add a remote to the fork of the contributor
-git remote add joe joes_repo_url
-
-# sync
-git fetch joe
-
-# checkout the contributor's branch 
-git checkout joes_feature_branch
-
-# push it to the original repository (AzureAD/MSAL)
-git push origin
-```
-
-## Finding an issue to work on
+### Finding an issue to work on
 
 Over the years we've seen many pull requests targeting areas of the code which are not urgent or critical for us to address, or areas which we didn't plan to expand further at the time. In all these cases we had to say no to those PRs and close them. That, obviously, is not a great outcome for us. And it's especially bad for the contributor, as they've spent a lot of effort preparing the change. To resolve this problem, we've decided to separate a bucket of issues, which would be great candidates for community members to contribute to. We mark these issues with the `help wanted` label. You can find all these issues [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+label%3A%22good+first+issue%22+).
 
@@ -41,15 +18,15 @@ If you would like to make a contribution to an [area not captured](https://githu
 
 If you would like to work on an involved feature, please file a design proposal first; more instructions can be found below, under [Before writing code](#before-writing-code).
 
-## Before writing code
+### Before writing code
 
 We've seen pull requests, where customers would solve an issue in a way which either wouldn't fit into the end-to-end design because of how it's implemented, or it would affect the design in a way, which is not something we'd like to do. To avoid these situations and potentially save you a lot of time, we encourage customers to discuss the preferred design with the team first. To do so, file a [new design proposal issue]((https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/new?assignees=&labels=design-proposal&projects=&template=design_proposal.md)), link it to the issue you'd like to address, and provide detailed information about how you'd like to solve a specific problem.
 
-## Identifying scale
+### Identifying scale
 
 If you would like to contribute to one of our repositories, first identify the scale of what you would like to change. If it is small (grammar/spelling or a bug fix), feel free to start working on a fix. If you are submitting a feature or a substantial code contribution, please discuss it with the team and ensure it follows the product roadmap. You might also read these two blogs posts on contributing code: [Open Source Contribution Etiquette by Miguel de Icaza](http://tirania.org/blog/archive/2010/Dec-31.html) and [Don't "Push" Your Pull Requests by Ilya Grigorik](https://www.igvita.com/2011/12/19/dont-push-your-pull-requests/). All code submissions will be rigorously reviewed and tested further by the team, and only those that meet an extremely high bar for both quality and design/roadmap appropriateness will be merged into the source.
 
-## Before submitting a pull request
+### Before submitting a pull request
 
 Before submitting a pull request, make sure that it passes the following requirements:
 
@@ -68,30 +45,53 @@ If your pull request contains any of the below, it's less likely to be merged.
 
 Very large PRs that would take hours to review (remember, we're trying to help lots of people at once). For larger work areas, please discuss with us to find ways of breaking it down into smaller, incremental pieces that can go into separate PRs.
 
-## During a pull request review
+### During a pull request review
 
 A core contributor will review your pull request and provide feedback. To ensure that there is not a large backlog of inactive PRs, the pull request will be marked as stale after two weeks of no activity. After another four days, it will be closed.
 
-## Submitting a pull request
+### Submitting a pull request
 
 If you're not sure how to create a pull request, read GitHub's [About pull requests
 ](https://help.github.com/articles/using-pull-requests) article. Make sure the repository can build and all tests pass. Familiarize yourself with the project workflow and our coding conventions. The coding style and general engineering guidelines are published on the Engineering guidelines page.
 
-## Ensuring test coverage
+### Ensuring test coverage
 
 - Tests need to be provided for every bug and feature that is completed.
   - Unit tests must cover all new aspects of the code.
 - Before and after performance and stress tests results are successfully evaluated - no regressions are allowed.
 - Performance and stress tests are extended as relevant.
 
-## Pull request feedback
+Note that you won't be able to run integration tests locally because they connect to Azure Key Vault to fetch some test users and passwords.
+
+### Pull request feedback
 
 Your pull request will now go through extensive checks by the subject matter experts on our team. Please be patient; we have hundreds of pull requests across all of our repositories. Update your pull request according to feedback until it is approved by one of the team members.
 
-## Merging a pull request
+### Merging a pull request
 
 When your pull request has had all feedback addressed, it has been signed off by one or more reviewers with commit access, and all checks are green, we will commit it.
 We commit pull requests as a single Squash commit unless there are special circumstances. This creates a simpler history than a Merge or Rebase commit. "Special circumstances" are rare, and typically mean that there are a series of cleanly separated changes that will be too hard to understand if squashed together, or for some reason we want to preserve the ability to dissect them.
+
+#### How the MSAL team deals with forks
+
+The Continuous Integration build will not run on a pull request opened from a fork, as a security measure. The MSAL team will manually move your branch from your fork to the main repository to be able to run the CI. This will preserve the identity of the commit.
+
+```bash
+# list existing remotes
+git remote -v 
+
+# add a remote to the fork of the contributor
+git remote add joe joes_repo_url
+
+# sync
+git fetch joe
+
+# checkout the contributor's branch 
+git checkout joes_feature_branch
+
+# push it to the original repository (AzureAD/MSAL)
+git push origin
+```
 
 ## Submitting bugs and feature requests
 
