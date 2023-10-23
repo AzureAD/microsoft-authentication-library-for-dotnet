@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Identity.Client;
-#if !NET6_WIN && !NET7_0
+#if !NET6_WIN && !NET7_0 && !NET6_0_OR_GREATER
 using Microsoft.Identity.Client.Desktop;
 #endif
 using Microsoft.Identity.Client.Internal;
@@ -301,12 +301,11 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithTenantId()
         {
-            const string TenantId = "a_tenant id";
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                    .WithTenantId(TenantId)
+                                                    .WithTenantId(TestConstants.TenantId)
                                                     .Build();
 
-            Assert.AreEqual(TenantId, pca.AppConfig.TenantId);
+            Assert.AreEqual(TestConstants.TenantId, pca.AppConfig.TenantId);
         }
 
         [TestMethod]

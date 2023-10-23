@@ -1,3 +1,18 @@
+4.57.0
+==========
+### New Features
+- Removed support for deprecated .NET Core 2.1 framework. MSAL.NET packages will no longer include `netcoreapp2.1` binary. Existing .NET Core 2.1 apps will now reference .NET Standard 2.0 MSAL binary. See [4313](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4313).
+- Added additional logging in the cache. See [3957](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3957).
+- Removed unused HTTP telemetry data (`x-client-info`). See [4167](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4167).
+- Updated `Microsoft.Identity.Client.NativeInterop` reference to version 0.13.12, which includes bug fixes and stability improvements. See [4374](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/4374).
+
+### Bug Fixes
+- Added simple retry logic for signing client assertions failures. See [4366](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4366).
+- Fixed inconsistencies in throwing exceptions for badly formatted authorities. Now MSAL will always throw an `ArgumentException` if an authority is in incorrect format (e.g., doesn't start with HTTPS, has spaces, etc.) See [4280](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4280).
+- Included missing Windows broker-related exception data when serializing MSAL exceptions. See [4371](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4371).
+- Fixed a crash when using managed identity and provided resource is null. See [4332](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4332).
+- Removed duplicate Windows broker logs. See [4353](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4353).
+
 4.56.0
 ==========
 ### New Features

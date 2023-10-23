@@ -384,16 +384,16 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Builds an instance of <see cref="IPublicClientApplication"/> 
+        /// from the parameters set in the <see cref="PublicClientApplicationBuilder"/>.
         /// </summary>
-        /// <returns></returns>
+        /// <exception cref="MsalClientException">Thrown when errors occur locally in the library itself (for example, because of incorrect configuration).</exception>
+        /// <returns>An instance of <see cref="IPublicClientApplication"/></returns>
         public IPublicClientApplication Build()
         {
             return BuildConcrete();
         }
 
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
         internal PublicClientApplication BuildConcrete()
         {
             return new PublicClientApplication(BuildConfiguration());

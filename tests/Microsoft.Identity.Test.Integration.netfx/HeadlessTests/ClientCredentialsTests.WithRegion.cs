@@ -7,11 +7,8 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 #if NET_CORE
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -31,10 +28,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class RegionalAuthIntegrationTests
     {
         private KeyVaultSecretsProvider _keyVault;
-        private Dictionary<string, string> _dict = new Dictionary<string, string>
-        {
-            ["allowestsrnonmsi"] = "true"
-        };
 
         private const string RegionalHost = "centralus.login.microsoft.com";
         private const string GlobalHost = "login.microsoftonline.com";
@@ -158,7 +151,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             bool withForceRefresh = false)
         {
             var result = await _confidentialClientApplication.AcquireTokenForClient(scope)
-                            .WithExtraQueryParameters(_dict)
                             .WithForceRefresh(withForceRefresh)
                             .ExecuteAsync()
                             .ConfigureAwait(false);
@@ -200,7 +192,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var jwtToken = new Client.Internal.JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
             var cert = ConfidentialAppSettings.GetSettings(Cloud.Public).GetCertificate();
-            
+
             return jwtToken.Sign(cert, Base64UrlHelpers.Encode(cert.GetCertHash()), true);
         }
     }

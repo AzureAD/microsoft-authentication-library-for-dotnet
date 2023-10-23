@@ -116,6 +116,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // B cannot acquire a token interactivelty, but will try to use FRT
                 var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
                     () => SilentAsync(_appB, ServerTokenResponse.OtherError)).ConfigureAwait(false);
+
                 Assert.AreEqual(MsalError.InvalidGrantError, ex.ErrorCode);
                 Assert.IsTrue(!String.IsNullOrEmpty(ex.CorrelationId));
 

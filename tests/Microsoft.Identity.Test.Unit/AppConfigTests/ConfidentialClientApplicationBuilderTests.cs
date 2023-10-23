@@ -299,14 +299,13 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithTenantId()
         {
-            const string TenantId = "a_tenant id";
             var cca = ConfidentialClientApplicationBuilder
                       .Create(TestConstants.ClientId)
                       .WithClientSecret("cats")
-                      .WithTenantId(TenantId)
+                      .WithTenantId(TestConstants.TenantId)
                       .Build();
 
-            Assert.AreEqual(TenantId, cca.AppConfig.TenantId);
+            Assert.AreEqual(TestConstants.TenantId, cca.AppConfig.TenantId);
         }
 
         [TestMethod]
