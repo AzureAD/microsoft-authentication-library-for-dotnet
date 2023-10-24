@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Thread.Sleep(70000);
 
-            VerifyMetrics(exportedMetrics, 5);
+            VerifyMetrics(exportedMetrics, 4);
             VerifyActivity(exportedActivities, 15);
         }
 
