@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Castle.Core.Internal;
 using Microsoft.Identity.Client;
@@ -25,7 +24,6 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using NSubstitute.Extensions;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -497,7 +495,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var userAccessorExpiration = TokenCache.CalculateSuggestedCacheExpiry(userTokenCache.Accessor, logger);
 
                 // Assert
-                Assert.IsNull(appAccessorExpiration );
+                Assert.IsNull(appAccessorExpiration);
                 Assert.IsNull(userAccessorExpiration);
                 Assert.IsFalse(appTokenCache.Accessor.HasAccessOrRefreshTokens());
                 Assert.IsFalse(userTokenCache.Accessor.HasAccessOrRefreshTokens());
@@ -1371,7 +1369,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                         "1"));
 
                 // Act
-                bool? result = cache.IsFociMemberAsync(requestParams, "1").Result; //requst params uses ProductionPrefEnvAlias
+                bool? result = cache.IsFociMemberAsync(requestParams, "1").Result; //request params uses ProductionPrefEnvAlias
 
                 // Assert
                 Assert.AreEqual(true, result.Value);
@@ -1380,58 +1378,80 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         [TestMethod]
         [TestCategory(TestCategories.TokenCacheTests)]
-        public async Task ValidateTokenCacheIsDumpedToLogsTestAsync()
+        public async Task ValidateTokenCacheContentsAreLogged_TestAsync()
         {
-            using (MockHttpAndServiceBundle harness = CreateTestHarness())
-            {
-                //Arrange
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+            using MockHttpAndServiceBundle harness = CreateTestHarness();
 
-                string dump = string.Empty;
-                LogCallback callback = (LogLevel level, string message, bool containsPii) =>
+            //Arrange
+            harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+            string logs = string.Empty;
+            LogCallback logCallback = (LogLevel level, string message, bool containsPii) =>
+                                    {
+                                        if (level == LogLevel.Verbose)
                                         {
-                                            if (level == LogLevel.Verbose)
-                                            {
-                                                dump += $"MSAL Test: {message}\n";
-                                            }
-                                        };
+                                            logs += message;
+                                        }
+                                    };
 
-                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(harness.HttpManager, logCallback: callback);
-                ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
-                cache.SetAfterAccess((args) => { return; });
+            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(harness.HttpManager, logCallback: logCallback);
+            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
+            cache.SetAfterAccess((args) => { return; });
 
-                var ex = TokenCacheHelper.PopulateCacheWithAccessTokens(cache.Accessor, 19);
+            TokenCacheHelper.PopulateCacheWithAccessTokens(cache.Accessor, 11);
 
-                var requestParams = TestCommon.CreateAuthenticationRequestParameters(
-                    serviceBundle,
-                    scopes: new HashSet<string>());
-                requestParams.Account = TestConstants.s_user;
-                requestParams.RequestContext.ApiEvent = new ApiEvent(Guid.NewGuid());
+            var requestParams = TestCommon.CreateAuthenticationRequestParameters(
+                serviceBundle,
+                scopes: new HashSet<string>());
+            requestParams.Account = TestConstants.s_user;
+            requestParams.RequestContext.ApiEvent = new ApiEvent(Guid.NewGuid());
 
-                var response = TokenCacheHelper.CreateMsalTokenResponse(true);
+            var response = TokenCacheHelper.CreateMsalTokenResponse(true);
 
-                //Act
-                await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
+            //Act
+            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(false);
 
-                //Assert
-                Assert.IsTrue(dump != string.Empty);
-                Assert.IsTrue(dump.Contains("Total number of access tokens in cache: 20"));
-                Assert.IsTrue(dump.Contains("Total number of refresh tokens in cache: 20"));
-                Assert.IsTrue(dump.Contains("Token cache dump of the first 10 cache keys"));
+            //Assert
+            Assert.IsTrue(logs != string.Empty);
+            Assert.IsTrue(logs.Contains("Total number of access tokens in the cache: 12"));
+            Assert.IsTrue(logs.Contains("Total number of refresh tokens in the cache: 12"));
+            Assert.IsTrue(logs.Contains("First 10 access token cache keys:"));
+            Assert.IsTrue(logs.Contains("First 10 refresh token cache keys:"));
 
-                var accessTokens = cache.Accessor.GetAllAccessTokens().ToList();
-                foreach (MsalAccessTokenCacheItem item in accessTokens)
-                {
-                    Assert.IsTrue(dump.Contains(item.ToLogString()));
-                    if (accessTokens.IndexOf(item) >= 9)
-                    {
-                        break;
-                    }
-                }
+            var accessTokens = cache.Accessor.GetAllAccessTokens().ToList();
+            var refreshTokens = cache.Accessor.GetAllRefreshTokens().ToList();
+            for (int i = 0; i < 10; i++)
+            {
+                Assert.IsTrue(logs.Contains(accessTokens[i].ToLogString()));
+                Assert.IsTrue(logs.Contains(refreshTokens[i].ToLogString()));
             }
         }
 
-        
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void AccessTokenCacheItem_ToLogString_UsesPiiFlag_Test(bool enablePii)
+        {
+            var accessTokenCacheItem = TokenCacheHelper.CreateAccessTokenItem();
+
+            var log = accessTokenCacheItem.ToLogString(enablePii);
+
+            Assert.AreEqual(enablePii, log.Contains(accessTokenCacheItem.HomeAccountId));
+            Assert.AreNotEqual(enablePii, log.Contains(accessTokenCacheItem.HomeAccountId.GetHashCode().ToString()));
+        }
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void RefreshTokenCacheItem_ToLogString_UsesPiiFlag_Test(bool enablePii)
+        {
+            var refreshTokenCacheItem = TokenCacheHelper.CreateRefreshTokenItem();
+
+            var log = refreshTokenCacheItem.ToLogString(enablePii);
+
+            Assert.AreEqual(enablePii, log.Contains(refreshTokenCacheItem.HomeAccountId));
+            Assert.AreNotEqual(enablePii, log.Contains(refreshTokenCacheItem.HomeAccountId.GetHashCode().ToString()));
+        }
 
         private void ValidateIsFociMember(
             ITokenCacheInternal cache,

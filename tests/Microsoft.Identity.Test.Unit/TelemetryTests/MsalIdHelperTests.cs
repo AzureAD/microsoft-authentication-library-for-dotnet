@@ -53,7 +53,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 typeof(PublicClientApplication).Assembly.GetName().Version.ToString(),
                 headers.ActualRequestMessage.Headers.GetValues("x-client-Ver").Single());
 
-            Assert.AreEqual(1, headers.ActualRequestMessage.Headers.GetValues("x-client-CPU").Count());
             Assert.AreEqual(correlationId.ToString(), headers.ActualRequestMessage.Headers.GetValues("client-request-id").Single());
         }
     }

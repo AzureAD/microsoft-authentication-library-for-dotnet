@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void CreateAuthorityFromTenantedWithTenantTest()
         {            
-            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(TestConstants.DstsAuthorityTenanted);
+            Authority authority = Authority.CreateAuthority(TestConstants.DstsAuthorityTenanted);
             Assert.AreEqual(TestConstants.TenantId, authority.TenantId);
             
             string updatedAuthority = authority.GetTenantedAuthority("tenant2", false);            
@@ -179,8 +179,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public void TenantlessAuthorityChanges()
         {
             string commonAuth = TestConstants.DstsAuthorityTenantless + "common/";
-            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(
-                commonAuth);
+            Authority authority = Authority.CreateAuthority(commonAuth);
 
             Assert.AreEqual("common", authority.TenantId);
         }
