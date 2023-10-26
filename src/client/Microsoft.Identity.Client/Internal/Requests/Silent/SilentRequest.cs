@@ -66,19 +66,11 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     _logger.Info("Broker is configured and enabled, attempting to use broker instead.");
                     var brokerResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
 
+                    // fallback to local cache if broker fails
                     if (brokerResult != null)
                     {
                         _logger.Verbose(() => "Broker responded to silent request.");
                         return brokerResult;
-                    }
-                    else
-                    {
-                        _logger.Verbose(() => "Broker could not satisfy the silent request.");
-                        throw new MsalUiRequiredException(
-                           MsalError.FailedToAcquireTokenSilentlyFromBroker,
-                           "Broker could not satisfy the silent request.",
-                           null,
-                           UiRequiredExceptionClassification.AcquireTokenSilentFailed);
                     }
                 }
 
