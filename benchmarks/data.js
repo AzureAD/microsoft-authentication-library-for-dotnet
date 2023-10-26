@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1697495326428,
+  "lastUpdate": 1698364071635,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -1974,6 +1974,42 @@ window.BENCHMARK_DATA = {
             "value": 567250.2666666667,
             "unit": "ns",
             "range": "± 15248.966718942052"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "61847233+neha-bhargava@users.noreply.github.com",
+            "name": "Neha Bhargava",
+            "username": "neha-bhargava"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4b1c58a0ee196b6f12ea172f1df252d9bcc3b972",
+          "message": "Bump Net461 to Net462 (#4367)\n\n* Bump Net461 to Net462\r\n\r\n* Update PublicClientApplicationBuilder.cs\r\n\r\n* Address comments\r\n\r\n* Bump broker and desktop projects to 462 as well",
+          "timestamp": "2023-10-26T16:39:04-07:00",
+          "tree_id": "f03444b94796040f06465ab6c78faac2ac23161d",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/4b1c58a0ee196b6f12ea172f1df252d9bcc3b972"
+        },
+        "date": 1698364066590,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 447460.29545454547,
+            "unit": "ns",
+            "range": "± 16592.443343883348"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 918668.8152173914,
+            "unit": "ns",
+            "range": "± 342267.0913205204"
           }
         ]
       }
