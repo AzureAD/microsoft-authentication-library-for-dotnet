@@ -27,6 +27,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         /// </summary>
         public const string ActivitySourceName = "MicrosoftIdentityClient_Activity";
 
+        private const string SuccessCounterName = "MsalSuccess";
+        private const string FailedCounterName = "MsalFailed";
+        private const string TotalDurationHistogramName = "MsalTotalDuration.1A";
+        private const string DurationInCacheHistogramName = "MsalDurationInCache.1A";
+        private const string DurationInHttpHistogramName = "MsalDurationInHttp.1A";
+
 #if SUPPORTS_OTEL
         /// <summary>
         /// Meter to hold the MSAL metrics.
@@ -42,21 +48,21 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         /// Counter to hold the number of successful token acquisition calls.
         /// </summary>
         internal static readonly Lazy<Counter<long>> s_successCounter = new(() => Meter.CreateCounter<long>(
-            "MsalSuccess",
+            SuccessCounterName,
             description: "Number of successful token acquisition calls"));
 
         /// <summary>
         /// Counter to hold the number of failed token acquisition calls.
         /// </summary>
         internal static readonly Lazy<Counter<long>> s_failureCounter = new(() => Meter.CreateCounter<long>(
-            "MsalFailed",
+            FailedCounterName,
             description: "Number of failed token acquisition calls"));
 
         /// <summary>
         /// Histogram to record total duration of token acquisition calls.
         /// </summary>
         internal static readonly Histogram<long> s_durationTotal = Meter.CreateHistogram<long>(
-            "MsalTotalDuration",
+            TotalDurationHistogramName,
             unit: "ms",
             description: "Performance of token acquisition calls total latency");
 
@@ -64,7 +70,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         /// Histogram to record duration in cache of token acquisition calls.
         /// </summary>
         internal static readonly Histogram<long> s_durationInCache = Meter.CreateHistogram<long>(
-            "MsalDurationInCache",
+            DurationInCacheHistogramName,
             unit: "ms",
             description: "Performance of token acquisition calls cache latency");
 
@@ -72,7 +78,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         /// Histogram to record duration in http of token acquisition calls.
         /// </summary>
         internal static readonly Histogram<long> s_durationInHttp = Meter.CreateHistogram<long>(
-            "MsalDurationInHttp",
+            DurationInHttpHistogramName,
             unit: "ms",
             description: "Performance of token acquisition calls network latency");
 
@@ -142,10 +148,13 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
                 new(TelemetryConstants.ApiId, apiId));
             }
             
-            s_durationInHttp.Record(authResultMetadata.DurationInHttpInMs,
+            if (!authResultMetadata.TokenSource.Equals(TokenSource.Cache))
+            {
+                s_durationInHttp.Record(authResultMetadata.DurationInHttpInMs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
                 new(TelemetryConstants.ApiId, apiId));
+            }
 #endif
         }
 
