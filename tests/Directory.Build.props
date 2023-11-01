@@ -15,7 +15,6 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="2.2.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.2.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
-    <PackageVersion Include="Microsoft.IdentityModel.Abstractions" Version="6.22.0" />
     <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.22.0" />
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.SignedHttpRequest" Version="6.22.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.7.0" />
@@ -33,11 +32,10 @@
     <PackageVersion Include="StrongNamer" Version="0.2.5" />
     <PackageVersion Include="System.CodeDom" Version="6.0.0" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="6.22.0" />
-    <PackageVersion Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Reflection.TypeExtensions" Version="4.7.0" />
     <PackageVersion Include="System.Security.Cryptography.Cng" Version="5.0.0" />
-    <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="7.0.1" />
+    <PackageVersion Update="System.Security.Cryptography.ProtectedData" Version="7.0.1" />
     <PackageVersion Include="System.Text.Json" Version="6.0.5" />
     <PackageVersion Include="System.Threading" Version="4.3.0" />
     <PackageVersion Include="System.Threading.Tasks" Version="4.3.0" />
