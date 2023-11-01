@@ -1,0 +1,37 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+
+    <!-- Version of the Microsoft.Identity.Client.NativeInterop package. -->
+    <MSALRuntimeNativeInteropVersion>0.13.12</MSALRuntimeNativeInteropVersion>
+
+    <!-- Version of MSAL if not defined by the CI-->
+    <MsalInternalVersion>4.51.0</MsalInternalVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Add packages, then highlight all lines and go to Edit > Advanced > Sort Lines -->
+    <PackageVersion Include="Microsoft.CodeAnalysis.RulesetToEditorconfigConverter" Version="3.3.3" PrivateAssets="All" />
+    <PackageVersion Include="Microsoft.CSharp" Version="4.5.0" />
+    <PackageVersion Include="Microsoft.Identity.Client.NativeInterop" Version="$(MSALRuntimeNativeInteropVersion)" IncludeAssets="all" />
+    <PackageVersion Include="Microsoft.IdentityModel.Abstractions" Version="6.22.0" />
+    <PackageVersion Include="Microsoft.Web.WebView2" Version="1.0.864.35" />
+    <PackageVersion Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
+    <PackageVersion Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
+    <PackageVersion Include="System.Net.NameResolution" Version="4.3.0" />
+    <PackageVersion Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+    <PackageVersion Include="System.Runtime.Serialization.Json" Version="4.3.0" />
+    <PackageVersion Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+    <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="4.5.0" />
+    <PackageVersion Include="System.Security.SecureString" Version="4.3.0" />
+    <PackageVersion Include="System.ServiceModel.Http" Version="4.5.3" />
+    <PackageVersion Include="System.ServiceModel.NetTcp" Version="4.5.3" />
+    <PackageVersion Include="System.ServiceModel.Security" Version="4.5.3" />
+    <PackageVersion Include="System.Xml.XDocument" Version="4.3.0" />
+    <PackageVersion Include="System.Xml.XmlDocument" Version="4.3.0" />
+    <PackageVersion Include="Xamarin.Android.Support.CustomTabs" Version="28.0.0.3" />
+    <PackageVersion Include="Xamarin.AndroidX.Browser" Version="1.4.0" PrivateAssets="All" />
+    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.7.30" PrivateAssets="All" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.4" PrivateAssets="All" />
+  </ItemGroup>
+</Project>

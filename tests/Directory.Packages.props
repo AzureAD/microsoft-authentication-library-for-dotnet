@@ -1,0 +1,45 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Packages.props', '$(MSBuildThisFileDirectory)..\'))" />
+
+  <ItemGroup>
+    <PackageVersion Include="Azure.Security.KeyVault.Certificates" Version="4.3.0" />
+    <PackageVersion Include="Azure.Security.KeyVault.Secrets" Version="4.3.0" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.13.6" />
+    <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.6" />
+    <PackageVersion Include="coverlet.collector" Version="3.1.2" />
+    <PackageVersion Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="2.2.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.2.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.22.0" />
+    <PackageVersion Include="Microsoft.IdentityModel.Protocols.SignedHttpRequest" Version="6.22.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.7.0" />
+    <PackageVersion Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="3.1.1" />
+    <PackageVersion Include="MSTest.TestFramework" Version="3.1.1" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageVersion Include="NSubstitute" Version="4.4.0" />
+    <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.15" />
+    <PackageVersion Include="NUnit" Version="3.13.3" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0" />
+    <PackageVersion Include="Polly" Version="7.2.3" />
+    <PackageVersion Include="Selenium.Support" Version="4.4.0" />
+    <PackageVersion Include="Selenium.WebDriver" Version="4.4.0" />
+    <PackageVersion Include="StrongNamer" Version="0.2.5" />
+    <PackageVersion Include="System.CodeDom" Version="6.0.0" />
+    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="6.22.0" />
+    <PackageVersion Include="System.Net.Http" Version="4.3.4" />
+    <PackageVersion Include="System.Reflection.TypeExtensions" Version="4.7.0" />
+    <PackageVersion Include="System.Security.Cryptography.Cng" Version="5.0.0" />
+    <PackageVersion Update="System.Security.Cryptography.ProtectedData" Version="7.0.1" />
+    <PackageVersion Include="System.Text.Json" Version="6.0.5" />
+    <PackageVersion Include="System.Threading" Version="4.3.0" />
+    <PackageVersion Include="System.Threading.Tasks" Version="4.3.0" />
+    <PackageVersion Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
+    <PackageVersion Include="System.Threading.Thread" Version="4.3.0" />
+    <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
+    <PackageVersion Include="System.Windows.Forms" Version="4.0.0" />
+    <PackageVersion Include="Xamarin.UITest" Version="3.2.8" />
+  </ItemGroup>
+</Project>
