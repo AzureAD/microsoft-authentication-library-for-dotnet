@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1698927432784,
+  "lastUpdate": 1698927435473,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -2010,6 +2010,42 @@ window.BENCHMARK_DATA = {
             "value": 918668.8152173914,
             "unit": "ns",
             "range": "± 342267.0913205204"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "83938949+ashok672@users.noreply.github.com",
+            "name": "Ashok Kumar Ramakrishnan",
+            "username": "ashok672"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4b0b6cdc73e079cc6a73c20f3ab01058da29e2b0",
+          "message": "Fall back to local cache if broker fails to return result for silent token call  (#4395)\n\n* Update SilentRequest.cs\r\n\r\n* Fix failing unit tests",
+          "timestamp": "2023-11-02T12:10:02Z",
+          "tree_id": "7c1ab0ab79280c1535ba0365d55bca60c0e05432",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/4b0b6cdc73e079cc6a73c20f3ab01058da29e2b0"
+        },
+        "date": 1698927427078,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 375374.23333333334,
+            "unit": "ns",
+            "range": "± 10702.177202546809"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 555390.42,
+            "unit": "ns",
+            "range": "± 40388.19375049941"
           }
         ]
       },
