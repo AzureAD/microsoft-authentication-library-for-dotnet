@@ -130,25 +130,15 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 var request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
 
-                if (brokerConfiguredByUser) //When broker is enabled, local cache should not be used
-                {
-                    var exception = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(() =>
-                        request.RunAsync(default)
-                        ,false
-                        ).ConfigureAwait(false);
+                var result = await request.RunAsync(default).ConfigureAwait(false);
 
-                    Assert.IsNotNull(exception);
-                    Assert.AreEqual(MsalError.FailedToAcquireTokenSilentlyFromBroker, exception.ErrorCode);
-                    Assert.AreEqual("Broker could not satisfy the silent request.", exception.Message);
-                }
-                else
+                // even if broker is configured by user but not installed, the result will be from the local cache
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
+                Assert.AreEqual(brokerID, result.Account.Username);
+                if (!brokerConfiguredByUser)
                 {
-                    var result = await request.RunAsync(default).ConfigureAwait(false);
-
-                    Assert.IsNotNull(result);
-                    Assert.IsNotNull(result.AccessToken);
-                    Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
-                    Assert.AreEqual(brokerID, result.Account.Username);
                     await mockBroker.DidNotReceiveWithAnyArgs().AcquireTokenSilentAsync(null, null).ConfigureAwait(false);
                 }
             }
