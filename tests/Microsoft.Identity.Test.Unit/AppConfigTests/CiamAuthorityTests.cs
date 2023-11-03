@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 harness.HttpManager.AddMockHandler(handler);
 
                 var result = await app.AcquireTokenOnBehalfOf(new[] { "someScope" }, new UserAssertion("some_assertion"))
-                     .WithAuthority(requestAuthority)
+                     .WithTenantIdFromAuthority(new Uri(requestAuthority))
                      .ExecuteAsync()
                      .ConfigureAwait(false);
             }

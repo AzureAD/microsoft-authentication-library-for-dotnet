@@ -207,6 +207,7 @@ namespace NetDesktopWinForms
                     if (acc.HomeAccountId.TenantId == PersonalTenantIdV2AAD)
                     {
                         var msaAuthority = $"{publicCloudEnv}{msaTenantIdPublicCloud}";
+#pragma warning disable CS0618 // Type or member is obsolete
                         builder = builder.WithAuthority(msaAuthority);
                     }
                 }
@@ -214,6 +215,7 @@ namespace NetDesktopWinForms
                 {
                     builder = builder.WithAuthority(reqAuthority);
                 }
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
                 return await builder
