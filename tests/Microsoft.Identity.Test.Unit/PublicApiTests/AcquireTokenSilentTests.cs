@@ -697,7 +697,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #pragma warning disable CS0618 // Type or member is obsolete
                 AuthenticationResult result = await app
                     .AcquireTokenSilent(TestConstants.s_scope, acc)
-                    .WithAuthority(ClientApplicationBase.DefaultAuthority) // this override should do nothing, it's mean to specify a tenant id
+                    .WithAuthority(ApplicationBase.DefaultAuthority) // this override should do nothing, it's mean to specify a tenant id
 #pragma warning restore CS0618 // Type or member is obsolete
                     .ExecuteAsync().ConfigureAwait(false);
             }
