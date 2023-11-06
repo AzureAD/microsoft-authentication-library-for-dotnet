@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Acquire token for client with scope
                 var result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Acquire token silently
                 var account = (await _cca.GetAccountsAsync().ConfigureAwait(false)).Single();
                 result = await _cca.AcquireTokenSilent(TestConstants.s_scope, account)
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync().ConfigureAwait(false);
                 Assert.IsNotNull(result);
 
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Acquire token forclient with resource
                 result = await _cca.AcquireTokenForClient(new[] { TestConstants.DefaultGraphScope })
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -182,7 +182,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Acquire token for client with scope
                 var result = await _cca.AcquireTokenForClient(input)
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 }
 
                 var result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -266,7 +266,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Acquire Token
                 var result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -291,7 +291,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Acquire Token
                 result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -316,7 +316,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Acquire Token
                 result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -341,7 +341,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 //Acquire Token
                 result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
@@ -420,7 +420,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 //Test for MsalServiceException
                 MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
                     () => _cca.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
@@ -435,7 +435,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 //Test for MsalClientException
                 MsalClientException exClient = await AssertException.TaskThrowsAsync<MsalClientException>(
                     () => _cca.AcquireTokenForClient(null) // null scope -> client exception
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
 
                 Assert.IsNotNull(exClient);
@@ -464,7 +464,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             MsalClientException exClient = await AssertException.TaskThrowsAsync<MsalClientException>(
                 () => cca.AcquireTokenForClient(null)
-                .WithAuthority(TestConstants.AuthorityUtidTenant)
+                .WithTenantId(TestConstants.Utid)
                 .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
 
             Assert.IsNotNull(exClient);
