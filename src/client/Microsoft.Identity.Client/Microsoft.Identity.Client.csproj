@@ -248,6 +248,7 @@
     <PackageReference Include="Xamarin.Android.Support.CustomTabs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkAndroid10)'">
+    <!-- net6.0-android uses the latest package version declared in Directory.Packages.props; this overrides to an older version -->
     <PackageReference Include="Xamarin.AndroidX.Browser" VersionOverride="1.0.0" />
   </ItemGroup>
 
