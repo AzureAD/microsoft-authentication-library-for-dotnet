@@ -166,8 +166,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
 #pragma warning disable CS0618 // Type or member is obsolete
                 var result = await app.AcquireTokenOnBehalfOf(new[] { "someScope" }, new UserAssertion("some_assertion"))
-                    // .WithTenantIdFromAuthority(new Uri(requestAuthority))
-                    .WithAuthority(requestAuthority)
+                     .WithAuthority(requestAuthority)
                      .ExecuteAsync()
                      .ConfigureAwait(false);
 #pragma warning restore CS0618 // Type or member is obsolete
