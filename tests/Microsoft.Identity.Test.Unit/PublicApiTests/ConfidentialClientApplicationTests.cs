@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithTenantId(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);

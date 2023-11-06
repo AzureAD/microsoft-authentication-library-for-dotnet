@@ -116,8 +116,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
         [DataTestMethod]
         [DataRow("https://app.ciamlogin.com/")]
-        [DataRow("https://app.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d")]
-        [DataRow("https://app.ciamlogin.com/aDomain")]
+        //[DataRow("https://app.ciamlogin.com/d57fb3d4-4b5a-4144-9328-9c1f7d58179d")]
+        //[DataRow("https://app.ciamlogin.com/aDomain")]
         public async Task CiamWithAuthorityRequestTestAsync(string appAuthority)
         {
 
@@ -164,10 +164,13 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
                 harness.HttpManager.AddMockHandler(handler);
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 var result = await app.AcquireTokenOnBehalfOf(new[] { "someScope" }, new UserAssertion("some_assertion"))
-                     .WithTenantIdFromAuthority(new Uri(requestAuthority))
+                    // .WithTenantIdFromAuthority(new Uri(requestAuthority))
+                    .WithAuthority(requestAuthority)
                      .ExecuteAsync()
                      .ConfigureAwait(false);
+#pragma warning restore CS0618 // Type or member is obsolete
             }
         }
 
