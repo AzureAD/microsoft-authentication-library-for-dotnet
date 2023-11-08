@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MetricsUpdatedSucessfully_AcquireTokenForClient_Async()
+        public async Task MetricsUpdatedSuccessfully_AcquireTokenForClient_Async()
         {
             using (var harness = CreateTestHarness())
             {
@@ -163,49 +163,6 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public void IdWebAccountExtension()
-        {
-            // copied from https://github.com/AzureAD/microsoft-identity-web/blob/master/src/Microsoft.Identity.Web/AccountExtensions.cs#L13
-            static ClaimsPrincipal ToClaimsPrincipal(IAccount account)
-            {
-                ClaimsIdentity identity = new ClaimsIdentity(new[]
-                    {
-                    new Claim(ClaimTypes.Upn, account.Username),
-                });
-
-                if (!string.IsNullOrEmpty(account.HomeAccountId?.ObjectId))
-                {
-                    identity.AddClaim(new Claim("oid", account.HomeAccountId.ObjectId));
-                }
-
-                if (!string.IsNullOrEmpty(account.HomeAccountId?.TenantId))
-                {
-                    identity.AddClaim(new Claim("tid", account.HomeAccountId.TenantId));
-                }
-
-                return new ClaimsPrincipal(identity);
-            }
-
-            var username = "username@test.com";
-            var oid = "objectId";
-            var tid = "tenantId";
-
-            IAccount account = Substitute.For<IAccount>();
-            account.Username.Returns(username);
-            var accId = new AccountId("identifier", oid, tid);
-            account.HomeAccountId.Returns(accId);
-
-            var claimsIdentityResult = ToClaimsPrincipal(account).Identity as ClaimsIdentity;
-
-            Assert.IsNotNull(claimsIdentityResult);
-            Assert.AreEqual(3, claimsIdentityResult.Claims.Count());
-            Assert.AreEqual(username, claimsIdentityResult.FindFirst(ClaimTypes.Upn)?.Value);
-            Assert.AreEqual(oid, claimsIdentityResult.FindFirst("oid")?.Value);
-            Assert.AreEqual(tid, claimsIdentityResult.FindFirst("tid")?.Value);
-
-        }
-
-        [TestMethod]
         public async Task RefreshReasonExpired_AcquireTokenSilent_Async()
         {
             using (var harness = CreateTestHarness())
@@ -258,7 +215,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MetricsUpdatedSucessfully_AcquireTokenInteractive_Async()
+        public async Task MetricsUpdatedSuccessfully_AcquireTokenInteractive_Async()
         {
             using (var harness = CreateTestHarness())
             {
@@ -271,7 +228,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MetricsUpdatedSucessfully_AcquireTokenSilent_Async()
+        public async Task MetricsUpdatedSuccessfully_AcquireTokenSilent_Async()
         {
             using (var harness = CreateTestHarness())
             {
@@ -281,7 +238,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task MetricsUpdatedSucessfully_AcquireTokenInteractiveAndSilent_Async()
+        public async Task MetricsUpdatedSuccessfully_AcquireTokenInteractiveAndSilent_Async()
         {
             using (var harness = CreateTestHarness())
             {
@@ -332,12 +289,14 @@ namespace Microsoft.Identity.Test.Unit
 
         private async Task TestAcquireTokenSilent_Async(PublicClientApplication pca, int expectedTokensFromIdp = 0, int expectedTokensFromCache = 0, int expectedTokensFromBroker = 0)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             AuthenticationResult result = await pca.AcquireTokenSilent(
                 TestConstants.s_scope.ToArray(),
                 TestConstants.DisplayableId)
                 .WithAuthority(pca.Authority, false)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);

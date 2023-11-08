@@ -180,6 +180,33 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.AreEqual(publicClient.Authority, expectedAuthority);
         }
 
+        [DataTestMethod]
+        [DataRow("http://login.microsoftonline.com/", "ten ant")]
+        [DataRow("https://login.microsoftonline.com/", "ten ant")]
+        public void MalformedAuthority_ThrowsException(string malformedCloudInstanceUri, string malformedTenant)
+        {
+            Assert.ThrowsException<ArgumentException>(() =>
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority($"{malformedCloudInstanceUri}{malformedTenant}")
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build());
+
+            Assert.ThrowsException<ArgumentException>(() =>
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(malformedCloudInstanceUri, malformedTenant)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build());
+
+            Assert.ThrowsException<ArgumentException>(() =>
+                ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithAuthority(AzureCloudInstance.AzurePublic, malformedTenant)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build());
+        }
+
         [TestMethod]
         public void CheckConsistentAuthorityTypeUriAndString()
         {
@@ -209,7 +236,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void CreateAuthorityFromTenantedWithTenantTest()
         {
-            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl("https://login.microsoft.com/tid");
+            Authority authority = Authority.CreateAuthority("https://login.microsoft.com/tid");
 
             string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id", false);
             Assert.AreEqual("https://login.microsoft.com/tid/", updatedAuthority, "Not changed, original authority already has tenant id");
@@ -221,7 +248,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void CreateAuthorityFromCommonWithTenantTest()
         {
-            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl("https://login.microsoft.com/common");
+            Authority authority = Authority.CreateAuthority("https://login.microsoft.com/common");
 
             string updatedAuthority = authority.GetTenantedAuthority("other_tenant_id", false);
             Assert.AreEqual("https://login.microsoft.com/other_tenant_id/", updatedAuthority, "Changed, original is common");
@@ -233,8 +260,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void TenantlessAuthorityChanges()
         {
-            Authority authority = AuthorityTestHelper.CreateAuthorityFromUrl(
-                TestConstants.AuthorityCommonTenant);
+            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityCommonTenant);
 
             Assert.AreEqual("common", authority.TenantId);
 

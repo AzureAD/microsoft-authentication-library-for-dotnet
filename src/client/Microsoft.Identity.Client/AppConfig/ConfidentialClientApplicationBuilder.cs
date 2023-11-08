@@ -405,18 +405,16 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Builds the ConfidentialClientApplication from the parameters set
-        /// in the builder
+        /// Builds an instance of <see cref="IConfidentialClientApplication"/> 
+        /// from the parameters set in the <see cref="ConfidentialClientApplicationBuilder"/>.
         /// </summary>
-        /// <returns></returns>
+        /// <exception cref="MsalClientException">Thrown when errors occur locally in the library itself (for example, because of incorrect configuration).</exception>
+        /// <returns>An instance of <see cref="IConfidentialClientApplication"/></returns>
         public IConfidentialClientApplication Build()
         {
             return BuildConcrete();
         }
 
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
         internal ConfidentialClientApplication BuildConcrete()
         {
             return new ConfidentialClientApplication(BuildConfiguration());

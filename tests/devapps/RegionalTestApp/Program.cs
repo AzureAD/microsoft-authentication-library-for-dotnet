@@ -2,10 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 
 /**
  * Note: Restart the application between the test cases to clear the statics.
@@ -174,10 +171,6 @@ namespace TestApp
             }
 
             string[] scopes = new string[] { $"{s_appSettings.ClientId}/.default", };
-            Dictionary<string, string> dict = new Dictionary<string, string>
-            {
-                ["allowestsrnonmsi"] = "true"
-            };
 
             var builder = ConfidentialClientApplicationBuilder.Create(s_appSettings.ClientId)
                 .WithAuthority(s_appSettings.Authority, false)
@@ -195,7 +188,6 @@ namespace TestApp
             Console.WriteLine($"CCA created. Is regional:{region}, Set env var:{setEnvVariable}.");
 
             AuthenticationResult result = await cca.AcquireTokenForClient(scopes)
-                .WithExtraQueryParameters(dict)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 

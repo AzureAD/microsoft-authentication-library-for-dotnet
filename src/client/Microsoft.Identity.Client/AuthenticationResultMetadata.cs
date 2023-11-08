@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client
 {
@@ -67,8 +68,23 @@ namespace Microsoft.Identity.Client
         public CacheRefreshReason CacheRefreshReason { get; set; }
 
         /// <summary>
-        /// Contains the Outcome of the region discovery if Region was used.
+        /// Indicates the type of cache that the token was read from.
+        /// </summary>
+        public CacheLevel CacheLevel { get; set; } 
+
+        /// <summary>
+        /// Contains the outcome of the region discovery if region was used.
         /// </summary>
         public RegionDetails RegionDetails { get; set; }
+
+        /// <summary>
+        /// May contain telemetry data. 
+        /// </summary>
+        /// <remarks>
+        /// Currently it is emitted only for desktop public client flows when the broker is used and it is 
+        /// also included in the verbose logs. May contain Personal Identifiable Information (PII), as per the logging settings. 
+        /// See https://aka.ms/msal-net-logging for more details about logging.
+        /// </remarks>
+        public string Telemetry { get; set; }
     }
 }

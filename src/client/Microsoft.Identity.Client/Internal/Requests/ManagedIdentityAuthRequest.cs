@@ -30,13 +30,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(_managedIdentityParameters.Resource))
-            {
-                throw new MsalClientException(
-                    MsalError.ScopesRequired,
-                    MsalErrorMessage.ScopesRequired);
-            }
-
             AuthenticationResult authResult = null;
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
 

@@ -128,12 +128,12 @@ namespace Microsoft.Identity.Client
         public const string BrokerResponseError = "Broker response returned error: ";
         public const string CannotInvokeBroker = "MSAL cannot invoke the broker. The Authenticator App (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
             "Check logs for more details and see https://aka.ms/msal-brokers. ";
-        public const string CannotInvokeBrokerForPop = "MSAL cannot invoke the broker and it is required for Proof-of-Possession. WAM (Broker) may not be installed on the user's device or there was an error invoking the broker. Use IPublicCleintApplication.IsProofOfPossessionSupportedByClient to ensure Proof-of-Possession can be performed before using WithProofOfPossession." +
+        public const string CannotInvokeBrokerForPop = "MSAL cannot invoke the broker and it is required for Proof-of-Possession. WAM (Broker) may not be installed on the user's device or there was an error invoking the broker. Use IPublicClientApplication.IsProofOfPossessionSupportedByClient to ensure Proof-of-Possession can be performed before using WithProofOfPossession." +
             "Check logs for more details and see https://aka.ms/msal-net-pop. ";
         public const string BrokerDoesNotSupportPop = "The broker does not support Proof-of-Possession on the current platform.";
-        public const string BrokerRequiredForPop = "The request has Proof-of-Possession configured but does not have broker enabled. Broker is required to use Proof-of-Possession on public clients. Use IPublicCleintApplication.IsProofOfPossessionSupportedByClient to ensure Proof-of-Possession can be performed before using WithProofOfPossession.";
+        public const string BrokerRequiredForPop = "The request has Proof-of-Possession configured but does not have broker enabled. Broker is required to use Proof-of-Possession on public clients. Use IPublicClientApplication.IsProofOfPossessionSupportedByClient to ensure Proof-of-Possession can be performed before using WithProofOfPossession.";
         public const string NonceRequiredForPop = "The request has Proof-of-Possession configured for public clients but does not have a nonce provided. A nonce is required for Proof-of-Possession on public clients.";
-        public const string AdfsNotSupportedWithBroker = "Broker does not support ADFS environments. If using Proof-of-Possession, use IPublicCleintApplication.IsProofOfPossessionSupportedByClient to ensure Proof-of-Possession can be performed before calling WithProofOfPossession.";
+        public const string AdfsNotSupportedWithBroker = "Broker does not support ADFS environments. If using Proof-of-Possession, use IPublicClientApplication.IsProofOfPossessionSupportedByClient to ensure Proof-of-Possession can be performed before calling WithProofOfPossession.";
 
         public const string NullIntentReturnedFromBroker = "Broker returned a null intent. Check the Xamarin Android app settings and logs for more information. ";
         public const string NoAccountForLoginHint = "You are trying to acquire a token silently using a login hint. No account was found in the token cache having this login hint. ";
@@ -143,22 +143,22 @@ namespace Microsoft.Identity.Client
 
         public const string HttpRequestUnsuccessful = "Response status code does not indicate success: {0} ({1}). ";
 
-        public const string AuthorityInvalidUriFormat = "'authority' should be in URI format. ";
+        public const string AuthorityInvalidUriFormat = "The authority (including the tenant ID) must be in a well-formed URI format. ";
 
         public const string AuthorityNotSupported = "'authority' is not supported. ";
 
         public const string AuthorityValidationFailed = "Authority validation failed. ";
 
-        public const string AuthorityUriInsecure = "'authority' should use the 'https' scheme. ";
+        public const string AuthorityUriInsecure = "The authority must use HTTPS scheme. ";
 
         public const string AuthorityUriInvalidPath =
-         "'authority' Uri should have at least one segment in the path (i.e. https://<host>/<path>/...). ";
+         "The authority URI should have at least one segment in the path (i.e. https://<host>/<path>/...). ";
 
         public const string B2cAuthorityUriInvalidPath =
-          "B2C 'authority' Uri should have at least 3 segments in the path (i.e. https://<host>/tfp/<tenant>/<policy>/...). ";
+          "The B2C authority URI should have at least 3 segments in the path (i.e. https://<host>/tfp/<tenant>/<policy>/...). ";
 
         public const string DstsAuthorityUriInvalidPath =
-          "DSTS authority URI should have at least 2 segments in the path (i.e. https://<host>/dstsv2/<tenant>/...). ";
+          "The DSTS authority URI should have at least 2 segments in the path (i.e. https://<host>/dstsv2/<tenant>/...). ";
 
         public const string UnsupportedAuthorityValidation =
             "Authority validation is not supported for this type of authority. See http://aka.ms/valid-authorities for details. ";
@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Client
 
         public const string AuthorizationServerInvalidResponse = "The authorization server returned an invalid response. ";
 
-        public const string NonHttpsRedirectNotSupported = "Non-HTTPS URL redirect is not supported in webview. " +
+        public const string NonHttpsRedirectNotSupported = "Non-HTTPS URL redirect is not supported in a web view. " +
             "This error happens when the authorization flow, which collects user credentials, gets redirected " +
             "to a page that is not supported, for example if the redirect occurs over http. " +
             "This error does not trigger for the final redirect, which can be http://localhost, but for intermediary redirects." +
@@ -183,7 +183,7 @@ namespace Microsoft.Identity.Client
         public const string FailedToParseIDToken = "Failed to parse the returned id token. ";
 
         public const string InvalidAuthorityOpenId = "invalid authority while getting the open id config endpoint. ";
-        public const string UpnRequiredForAuthroityValidation = "UPN is required for ADFS authority validation. ";
+        public const string UpnRequiredForAuthorityValidation = "UPN is required for ADFS authority validation. ";
         public const string CannotFindTheAuthEndpoint = "Cannot find the auth endpoint. ";
 
         public const string UapCannotFindUpn =

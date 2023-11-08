@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
@@ -11,7 +12,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Type containing an assertion representing a user's credentials. This type is used in the
     /// On-Behalf-Of flow in confidential client applications, enabling a web API to request a token
-    /// for another downstream API in the name of the user whose credentials are held by this <c>UserAssertion</c>
+    /// for another downstream API in the name of the user whose credentials are held by this <see cref="UserAssertion"/>.
     /// See https://aka.ms/msal-net-on-behalf-of
     /// </summary>
 #if SUPPORTS_CONFIDENTIAL_CLIENT
@@ -51,7 +52,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(assertionType));
             }
 
-            var crypto = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
+            ICryptographyManager crypto = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
 
             AssertionType = assertionType;
             Assertion = assertion;

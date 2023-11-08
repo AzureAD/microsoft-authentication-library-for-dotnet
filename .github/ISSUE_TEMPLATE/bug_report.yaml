@@ -33,50 +33,20 @@ body:
 
 - type: dropdown
   attributes:
-    label: MSAL client type
+    label: Scenario
     description: "Are you using PublicClientApplication,  ConfidentialClientApplication or ManagedIdentityApplication?"
     multiple: true
     options: 
-      - "Public"
-      - "Confidential"
-      - "Managed identity"
+      - "PublicClient - desktop app"
+      - "PublicClient - mobile app"
+      - "ConfidentialClient - web site (AcquireTokenByAuthCode)"
+      - "ConfidentialClient - web api (AcquireTokenOnBehalfOf)"
+      - "ConfidentialClient - service to service (AcquireTokenForClient)"
+      - "ManagedIdentityClient - managed identity"
+      - "Other - please specify"
   validations:
     required: true
-
-- type: dropdown
-  attributes:
-    label: Application type
-    description: "Please select your application type"
-    multiple: true
-    options: 
-      - "Desktop"
-      - "Mobile"
-      - "Web app"
-      - "Web API"
-      - "Daemon app" 
-  validations:
-    required: true
-    
-- type: dropdown
-  attributes:
-    label: Authentication flow type
-    description: "What authentication flow was used when the issue appeared?"
-    multiple: true
-    options: 
-      - "Interactive (with an authentication broker)"
-      - "Interactive (with embedded or system browser)"
-      - "Integrated Windows Authentication"
-      - "Username and password (ROPC)"
-      - "Device code (browserless)"
-      - "Authorization code"
-      - "On-Behalf-Of"
-      - "Client credentials (service-to-service calls)"
-      - "Long-running On-Behalf-Of (OBO)"
-      - "Managed Identity"
-      - "Other"
-  validations:
-    required: true
-    
+   
 - type: dropdown
   attributes:
     label: Is this a new or an existing app?
@@ -87,7 +57,7 @@ body:
       - "The app is in production, I haven't upgraded MSAL, but started seeing this issue"
       - "This is a new app or experiment"
   validations:
-    required: true
+    required: false
     
 - type: textarea
   attributes:
@@ -109,7 +79,7 @@ body:
     label: Expected behavior
     description: "Describe what you expect the behavior to be."
   validations:
-    required: true
+    required: false
     
 - type: dropdown
   attributes:
