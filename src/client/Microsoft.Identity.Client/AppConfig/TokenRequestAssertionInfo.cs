@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if NET6_0
+#if NET6_0 || NET6_WIN
 using System;
 using System.Linq;
 using System.Net.Http;
