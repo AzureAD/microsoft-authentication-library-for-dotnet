@@ -84,7 +84,7 @@ namespace DesktopTestApp
                     .WithAccount(CurrentUser)
                     .WithPrompt(uiBehavior)
                     .WithExtraQueryParameters(extraQueryParams)
-                    .WithAuthority(AuthorityOverride)
+                    .WithTenantIdFromAuthority(new Uri(AuthorityOverride))
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
@@ -95,7 +95,7 @@ namespace DesktopTestApp
                     .WithLoginHint(LoginHint)
                     .WithPrompt(uiBehavior)
                     .WithExtraQueryParameters(extraQueryParams)
-                    .WithAuthority(AuthorityOverride)
+                    .WithTenantIdFromAuthority(new Uri(AuthorityOverride))
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
@@ -112,7 +112,8 @@ namespace DesktopTestApp
 
             if (!string.IsNullOrWhiteSpace(AuthorityOverride))
             {
-                builder = builder.WithAuthority(AuthorityOverride);
+                builder = builder
+                    .WithTenantIdFromAuthority(new Uri(AuthorityOverride));
             }
 
             return await builder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);

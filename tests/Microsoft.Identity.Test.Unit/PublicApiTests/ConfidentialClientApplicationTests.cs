@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.AreEqual(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().TenantId, TestConstants.Utid);
@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAuthority(TestConstants.AuthorityUtid2Tenant)
+                    .WithTenantId(TestConstants.Utid2)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single(at => at.TenantId == TestConstants.Utid2));
@@ -239,7 +239,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 var result = await app.AcquireTokenForClient(new[] { "scope1" })
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 // One tenant partition with one token
@@ -253,7 +253,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 result = await app.AcquireTokenForClient(new[] { "scope2" })
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 // One tenant partition with two tokens
@@ -265,7 +265,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 result = await app.AcquireTokenForClient(new[] { "scope1" })
-                    .WithAuthority(TestConstants.AuthorityUtid2Tenant)
+                    .WithTenantId(TestConstants.Utid2)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 // Two tenant partitions with three tokens total
@@ -300,7 +300,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 };
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAuthority(TestConstants.AuthorityUtidTenant)
+                    .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
             }
@@ -926,6 +926,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                     .CreateWithApplicationOptions(applicationOptions);
                 var confidentialClientApplication = confidentialClientApplicationBuilder.Build();
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 Uri authorizationRequestUrl = confidentialClientApplication
                     .GetAuthorizationRequestUrl(new List<string> { "" })
                     .WithAuthority(AzureCloudInstance.AzurePublic, Constants.ConsumerTenant)
@@ -933,6 +934,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false)
                     .GetAwaiter()
                     .GetResult();
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 Assert.IsTrue(authorizationRequestUrl.Segments[1].StartsWith(Constants.CommonTenant));
             }
@@ -1164,6 +1166,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
                 const string CustomRedirectUri = "custom://redirect-uri";
+#pragma warning disable CS0618 // Type or member is obsolete
                 Task<Uri> task = app
                     .GetAuthorizationRequestUrl(TestConstants.s_scope)
                     .WithRedirectUri(CustomRedirectUri)
@@ -1172,6 +1175,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithExtraScopesToConsent(TestConstants.s_scopeForAnotherResource)
                     .WithAuthority(TestConstants.AuthorityGuestTenant)
                     .ExecuteAsync(CancellationToken.None);
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 var uri = task.Result;
                 Assert.IsNotNull(uri);
@@ -1205,10 +1209,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(TestCommon.CreateDefaultServiceBundle().PlatformProxy.GetProductName(), qp["x-client-sku"]);
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
-
-#if DESKTOP
-            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-cpu"]));
-#endif
         }
 
         [TestMethod]
@@ -1605,7 +1605,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             CoreAssert.AreEqual(TestConstants.RedirectUri, uriParams1["redirect_uri"], uriParams2["redirect_uri"]);
             CoreAssert.AreEqual("select_account", uriParams1["prompt"], uriParams2["prompt"]);
 
-            Assert.AreEqual(uriParams1["x-client-CPU"], uriParams2["x-client-CPU"]);
             Assert.AreEqual(uriParams1["x-client-OS"], uriParams2["x-client-OS"]);
             Assert.AreEqual(uriParams1["x-client-Ver"], uriParams2["x-client-Ver"]);
             Assert.AreEqual(uriParams1["x-client-SKU"], uriParams2["x-client-SKU"]);
@@ -1778,6 +1777,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithLogging((LogLevel level, string message, bool containsPii) => log = log + message)
                     .BuildConcrete();
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 var result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
                     .WithAuthority(TestConstants.AuthorityCommonTenant, true)
@@ -1792,6 +1792,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithAuthority(TestConstants.AuthorityOrganizationsTenant, true)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 Assert.IsTrue(log.Contains(MsalErrorMessage.ClientCredentialWrongAuthority));
             }

@@ -7,17 +7,24 @@
     <DelaySign>false</DelaySign>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    
+    <!-- Projects must set this individually -->
     <IsPackable>false</IsPackable>
     <!-- Version of the Microsoft.Identity.Client.NativeInterop package. -->
-    <MSALRuntimeNativeInteropVersion>0.13.8</MSALRuntimeNativeInteropVersion>
+    <MSALRuntimeNativeInteropVersion>0.13.12</MSALRuntimeNativeInteropVersion>
     
     <!-- Version of MSAL if not defined by the CI-->
     <MsalInternalVersion>4.51.0</MsalInternalVersion>
   </PropertyGroup>
-
-  <ItemGroup Label="For ContinuousIntegrationBuild support">
+  
+  <PropertyGroup Label="For CI build" Condition="'$(TF_BUILD)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+  
+  <ItemGroup Label="For CI build">
     <SourceRoot Include="$(MSBuildThisFileDirectory)/"/> <!-- defines repository top level dir-->
   </ItemGroup>
+  
   <ItemGroup>
     <!-- PrivateAssets="All" is on these packages to ensure they're development dependencies
          and aren't included as transitionary dependencies to package consumers.

@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client
     public abstract class ApplicationBase : IApplicationBase
     {
         /// <summary>
-        /// Default Authority used for interactive calls.
+        /// Default authority used for interactive calls.
         /// </summary>
         internal const string DefaultAuthority = "https://login.microsoftonline.com/common/";
 
@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client
             RequestContext requestContext,
             ITokenCacheInternal cache)
         {
-            var authority = await Instance.Authority.CreateAuthorityForRequestAsync(
+            Instance.Authority authority = await Instance.Authority.CreateAuthorityForRequestAsync(
                requestContext,
                commonParameters.AuthorityOverride).ConfigureAwait(false);
 

@@ -87,6 +87,8 @@ namespace NetFx
 
         private static int s_currentAuthority = 0;
 
+        private static string s_scope = "https://management.azure.com";
+
 #pragma warning disable UseAsyncSuffix // Use Async suffix
         public static async Task Main(string[] args)
 #pragma warning restore UseAsyncSuffix // Use Async suffix
@@ -117,6 +119,16 @@ namespace NetFx
 
             return cca;
         }
+
+        private static IManagedIdentityApplication CreateMia()
+        {
+            IManagedIdentityApplication mia = ManagedIdentityApplicationBuilder
+                            .Create(ManagedIdentityId.SystemAssigned)
+                            .Build();
+
+            return mia;
+        }
+
         [DllImport("kernel32.dll")]
         static extern IntPtr GetConsoleWindow();
 
@@ -208,6 +220,8 @@ namespace NetFx
                         c. Clear cache
                         r. Rotate Tenant ID
                         e. Expire all ATs
+                        f. Acquire Token using Managed Identity (VM)
+                        g. Acquire Token using Managed Identity (VM) - multiple requests in parallel
                         x. Exit app
                     Enter your Selection: ");
                 char.TryParse(Console.ReadLine(), out var selection);
@@ -323,9 +337,7 @@ namespace NetFx
 
                             if (account != null && account.HomeAccountId.TenantId == PersonalTenantIdV2AAD)
                             {
-                                var msaAuthority = $"{publicCloudEnv}{msaTenantIdPublicCloud}";
-
-                                silentBuilder = silentBuilder.WithAuthority(msaAuthority);
+                                silentBuilder = silentBuilder.WithTenantId(msaTenantIdPublicCloud);
                             }
 
                             result = await silentBuilder.ExecuteAsync().ConfigureAwait(false);
@@ -431,6 +443,53 @@ namespace NetFx
                             s_currentAuthority = (s_currentAuthority + 1) % s_authorities.Length;
                             pca = CreatePca();
                             RunConsoleAppLogicAsync(pca).Wait();
+                            break;
+
+                        case 'f': // managed identity on a vm
+
+                            IManagedIdentityApplication mia1 = CreateMia();
+
+                            AuthenticationResult authenticationResult1 = await mia1.AcquireTokenForManagedIdentity(s_scope)
+                                .ExecuteAsync()
+                                .ConfigureAwait(false);
+
+                            Console.WriteLine($"Managed Identity token - {authenticationResult1.AccessToken}");
+
+                            break;
+                        
+                        case 'g': // managed identity on a vm - multi threaded
+
+                            IManagedIdentityApplication mia2 = CreateMia();
+                            int identityProviderHits = 0;
+                            int cacheHits = 0;
+
+                            Task[] miTasks = new Task[10];
+                            for (int i = 0; i < 10; i++)
+                            {
+                                miTasks[i] = Task.Run(async () =>
+                                {
+                                    AuthenticationResult authResult = await mia2.AcquireTokenForManagedIdentity(s_scope)
+                                    .ExecuteAsync()
+                                    .ConfigureAwait(false);
+
+                                    if (authResult.AuthenticationResultMetadata.TokenSource == TokenSource.IdentityProvider)
+                                    {
+                                        // Increment identity hits count
+                                        Interlocked.Increment(ref identityProviderHits);
+                                    }
+                                    else
+                                    {
+                                        // Increment cache hits count
+                                        Interlocked.Increment(ref cacheHits);
+                                    }
+                                });
+                            }
+
+                            await Task.WhenAll(miTasks).ConfigureAwait(false);
+
+                            Console.WriteLine($"identity Provider Hits (must be 1 always) - { identityProviderHits }");
+                            Console.WriteLine($"cache Hits - { cacheHits }");
+
                             break;
 
                         case 'e': // expire all ATs

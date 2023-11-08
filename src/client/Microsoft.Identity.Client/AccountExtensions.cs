@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client
         /// The same account can exist in its home tenant and also as a guest in multiple other tenants. 
         /// <see cref="TenantProfile"/> is derived from the ID token for that tenant.
         /// </summary>
-        /// <remarks>Only tenants for which a token was acquired will be available in <c>TenantProfiles</c> property</remarks>
+        /// <remarks>Only tenants for which a token was acquired will be available in <see cref="Account.TenantProfiles"/> property.</remarks>
         public static IEnumerable<TenantProfile> GetTenantProfiles(this IAccount account)
         {
             return (account as Account)?.TenantProfiles;

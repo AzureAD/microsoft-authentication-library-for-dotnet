@@ -266,7 +266,7 @@ namespace Microsoft.Identity.Client
                         await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
 
-                        DumpCacheToLogs(requestParams);
+                        LogCacheContents(requestParams);
                     }
 
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -294,27 +294,34 @@ namespace Microsoft.Identity.Client
 
         //This method pulls all of the access and refresh tokens from the cache and can therefore be very impactful on performance.
         //This will run on a background thread to mitigate this.
-        private void DumpCacheToLogs(AuthenticationRequestParameters requestParameters)
+        private void LogCacheContents(AuthenticationRequestParameters requestParameters)
         {
 
             if (requestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Verbose))
             {
                 var accessTokenCacheItems = Accessor.GetAllAccessTokens();
                 var refreshTokenCacheItems = Accessor.GetAllRefreshTokens();
-                var accessTokenCacheItemsSubset = accessTokenCacheItems.Take(10).Select(item => item).ToList();
+                var accessTokenCacheItemsSubset = accessTokenCacheItems.Take(10).ToList();
+                var refreshTokenCacheItemsSubset = refreshTokenCacheItems.Take(10).ToList();
 
-                StringBuilder tokenCacheKeyDump = new StringBuilder();
+                StringBuilder tokenCacheKeyLog = new StringBuilder();
 
-                tokenCacheKeyDump.AppendLine($"Total number of access tokens in cache: {accessTokenCacheItems.Count}");
-                tokenCacheKeyDump.AppendLine($"Total number of refresh tokens in cache: {refreshTokenCacheItems.Count}");
+                tokenCacheKeyLog.AppendLine($"Total number of access tokens in the cache: {accessTokenCacheItems.Count}");
+                tokenCacheKeyLog.AppendLine($"Total number of refresh tokens in the cache: {refreshTokenCacheItems.Count}");
 
-                tokenCacheKeyDump.AppendLine($"Token cache dump of the first {accessTokenCacheItemsSubset.Count} cache keys.");
+                tokenCacheKeyLog.AppendLine($"First {accessTokenCacheItemsSubset.Count} access token cache keys:");
                 foreach (var cacheItem in accessTokenCacheItemsSubset)
                 {
-                    tokenCacheKeyDump.AppendLine($"AT Cache Key: {cacheItem.ToLogString(requestParameters.RequestContext.Logger.PiiLoggingEnabled)}");
+                    tokenCacheKeyLog.AppendLine($"AT Cache Key: {cacheItem.ToLogString(requestParameters.RequestContext.Logger.PiiLoggingEnabled)}");
                 }
 
-                requestParameters.RequestContext.Logger.Verbose(() => tokenCacheKeyDump.ToString());
+                tokenCacheKeyLog.AppendLine($"First {refreshTokenCacheItemsSubset.Count} refresh token cache keys:");
+                foreach (var cacheItem in refreshTokenCacheItemsSubset)
+                {
+                    tokenCacheKeyLog.AppendLine($"RT Cache Key: {cacheItem.ToLogString(requestParameters.RequestContext.Logger.PiiLoggingEnabled)}");
+                }
+
+                requestParameters.RequestContext.Logger.Verbose(() => tokenCacheKeyLog.ToString());
             }
         }
 

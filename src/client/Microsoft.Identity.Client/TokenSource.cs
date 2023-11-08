@@ -1,12 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Microsoft.Identity.Client
 {
     /// <summary>
@@ -15,7 +9,7 @@ namespace Microsoft.Identity.Client
     public enum TokenSource
     {
         /// <summary>
-        /// The source of the access and Id token is Identity Provider - Azure Active Directory (AAD), ADFS or AAD B2C.
+        /// The source of the access and Id token is Identity Provider - Microsoft Entra ID, ADFS or AAD B2C.
         /// </summary>
         IdentityProvider,
         /// <summary>

@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Client
                 "The Windows broker is not available on .NET Framework 4.5, use at least .NET Framework 4.6.2");
 #endif
 
-#if NET461
+#if NET462
             if (Config.BrokerCreatorFunc == null)
             {
                 throw new PlatformNotSupportedException(
@@ -384,16 +384,16 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Builds an instance of <see cref="IPublicClientApplication"/> 
+        /// from the parameters set in the <see cref="PublicClientApplicationBuilder"/>.
         /// </summary>
-        /// <returns></returns>
+        /// <exception cref="MsalClientException">Thrown when errors occur locally in the library itself (for example, because of incorrect configuration).</exception>
+        /// <returns>An instance of <see cref="IPublicClientApplication"/></returns>
         public IPublicClientApplication Build()
         {
             return BuildConcrete();
         }
 
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
         internal PublicClientApplication BuildConcrete()
         {
             return new PublicClientApplication(BuildConfiguration());

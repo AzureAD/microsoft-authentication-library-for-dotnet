@@ -23,11 +23,6 @@ namespace Microsoft.Identity.Client.Internal
         public const string Version = "x-client-Ver";
 
         /// <summary>
-        ///     CPU platform with x86, x64 or ARM as value
-        /// </summary>
-        public const string CpuPlatform = "x-client-CPU";
-
-        /// <summary>
         ///     Version of the operating system. This will not be sent on WinRT
         /// </summary>
         public const string OS = "x-client-OS";
@@ -79,12 +74,6 @@ namespace Microsoft.Identity.Client.Internal
                 [MsalIdParameter.Product] = platformProxy.GetProductName(),
                 [MsalIdParameter.Version] = GetMsalVersion()
             };
-
-            string processorInformation = platformProxy.GetProcessorArchitecture();
-            if (processorInformation != null)
-            {
-                parameters[MsalIdParameter.CpuPlatform] = processorInformation;
-            }
 
             string osInformation = platformProxy.GetOperatingSystem();
             if (osInformation != null)

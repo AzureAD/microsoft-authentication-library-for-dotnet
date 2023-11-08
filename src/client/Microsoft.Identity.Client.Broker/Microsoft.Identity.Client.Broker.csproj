@@ -2,7 +2,7 @@
   
   <PropertyGroup>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
-    <TargetFrameworkNetDesktop Condition="$([MSBuild]::IsOsPlatform('Windows'))">net461</TargetFrameworkNetDesktop>
+    <TargetFrameworkNetDesktop Condition="$([MSBuild]::IsOsPlatform('Windows'))">net462</TargetFrameworkNetDesktop>
 
     <LangVersion>8.0</LangVersion>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -61,9 +61,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="$(MSALRuntimeNativeInteropVersion)" IncludeAssets="all" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
-  </ItemGroup>
-  <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

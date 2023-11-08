@@ -3,12 +3,11 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Globalization;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
@@ -23,6 +22,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     {
         private static readonly ConcurrentDictionary<string, RSA> s_certificateToRsaMap = new ConcurrentDictionary<string, RSA>();
         private static readonly int s_maximumMapSize = 1000;
+
+        protected ILoggerAdapter Logger { get; }
+
+        public CommonCryptographyManager(ILoggerAdapter logger = null)
+        {
+            Logger = logger;
+        }
 
         public string CreateBase64UrlEncodedSha256Hash(string input)
         {
@@ -67,12 +73,27 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 rsa = certificate.GetRSAPrivateKey();
             }
 
-            var signedData = rsa.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            try
+            {
+                return SignDataAndCacheProvider(message);
+            }
+            catch (Exception ex)
+            {
+                Logger?.Warning($"Exception occurred when signing data with a certificate. {ex}");
 
-            // Cache only valid RSA crypto providers, which are able to sign data successfully
-            s_certificateToRsaMap[certificate.Thumbprint] = rsa;
-            return signedData;
+                rsa = certificate.GetRSAPrivateKey();
 
-        }        
+                return SignDataAndCacheProvider(message);
+            }
+
+            byte[] SignDataAndCacheProvider(string message)
+            {
+                var signedData = rsa.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                
+                // Cache only valid RSA crypto providers, which are able to sign data successfully
+                s_certificateToRsaMap[certificate.Thumbprint] = rsa;
+                return signedData;
+            }
+        }
     }
 }

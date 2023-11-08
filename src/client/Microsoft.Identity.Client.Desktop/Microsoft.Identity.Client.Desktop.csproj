@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
 
-    <TargetFrameworkNetDesktop>net461</TargetFrameworkNetDesktop>
+    <TargetFrameworkNetDesktop>net462</TargetFrameworkNetDesktop>
     <TargetFrameworkNetCore>netcoreapp3.1</TargetFrameworkNetCore>
     <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetCore)</TargetFrameworks>
 
@@ -64,6 +64,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" LinkBase="Features\WinFormsLegacyWebUi" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\StaTaskScheduler.cs" LinkBase="Features\DesktopOS" />
   </ItemGroup>
 
   <ItemGroup>
@@ -74,9 +75,5 @@
     <ProjectReference Include="..\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
-
-  <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-  </ItemGroup>  
 
 </Project>
