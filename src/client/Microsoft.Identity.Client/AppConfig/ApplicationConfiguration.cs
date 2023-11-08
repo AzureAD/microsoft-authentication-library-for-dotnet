@@ -118,13 +118,33 @@ namespace Microsoft.Identity.Client
 
         public bool RetryOnServerErrors { get; set; } = true;
 
-        public ManagedIdentityId ManagedIdentityId { get; internal set; }
-
-        public bool IsManagedIdentity { get; }
-
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
-#region ClientCredentials
+        #region ManagedIdentity
+        public ManagedIdentityId ManagedIdentityId { get; internal set; }
+        public bool IsManagedIdentity { get; }
+#if NET6_0 || NET6_WIN
+        public KeyMaterialInfo KeyMaterialInfo { get; internal set; }
+
+        public bool ManagedIdentityLatchSupported
+        {
+            get
+            {
+                // Calculate the value based on Managed Identity Pop Support 
+                if (KeyMaterialInfo.IsPoPSupported)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+#endif
+#endregion
+
+        #region ClientCredentials
 
         public IClientCredential ClientCredential { get; internal set; }
 

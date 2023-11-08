@@ -443,6 +443,26 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     });
         }
 
+        public static void AddManagedIdentityCredentialMockHandler(
+            this MockHttpManager httpManager,
+            string expectedUrl,
+            bool sendHeaders = false)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
+            if (sendHeaders)
+            {
+                responseMessage.Headers.Add("Server", "IMDS");
+            }
+
+            httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Post,
+                        ExpectedUrl = expectedUrl,
+                        ResponseMessage = responseMessage
+                    });
+        }
+
         public static void AddRegionDiscoveryMockHandlerNotFound(
             this MockHttpManager httpManager)
         {

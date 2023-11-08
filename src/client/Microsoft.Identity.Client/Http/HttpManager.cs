@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -29,13 +30,23 @@ namespace Microsoft.Identity.Client.Http
 
         public HttpManager(IMsalHttpClientFactory httpClientFactory)
         {
-            _httpClientFactory = httpClientFactory ?? 
+            _httpClientFactory = httpClientFactory ??
                 throw new ArgumentNullException(nameof(httpClientFactory));
         }
 
-        protected virtual HttpClient GetHttpClient()
+        protected virtual HttpClient GetHttpClient(X509Certificate2 x509Certificate2)
         {
-            return _httpClientFactory.GetHttpClient();
+            if (x509Certificate2 is null)
+            {
+                return _httpClientFactory.GetHttpClient();
+            }
+
+            if (_httpClientFactory is IMsalMtlsHttpClientFactory msalMtlsHttpClientFactory)
+            {
+                return msalMtlsHttpClientFactory.GetHttpClient(x509Certificate2);
+            }
+
+            throw new MsalClientException("http_client_factory", "You customized HttpClient factory but you are using APIs which require provisioning of a client certificate in HttpClient. Implement IMsalMtlsHttpClientFactory");
         }
 
         public async Task<HttpResponse> SendPostAsync(
@@ -115,6 +126,34 @@ namespace Microsoft.Identity.Client.Http
             return await SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
+        public virtual async Task<HttpResponse> SendPostForceResponseAsync(
+            Uri uri,
+            IDictionary<string, string> headers,
+            IDictionary<string, string> bodyParameters,
+            X509Certificate2 bindingCertificate,
+            ILoggerAdapter logger,
+            CancellationToken cancellationToken = default)
+        {
+            HttpContent body = bodyParameters == null ? null : new FormUrlEncodedContent(bodyParameters);
+            return await SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, bindingCertificate, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Performs the POST request just like <see cref="SendPostAsync(Uri, IDictionary{string, string}, HttpContent, ILoggerAdapter, CancellationToken)"/>
+        /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="HttpResponse"/> associated
+        /// with the request.
+        /// </summary>
+        public virtual async Task<HttpResponse> SendPostForceResponseAsync(
+            Uri uri,
+            IDictionary<string, string> headers,
+            StringContent body,
+            X509Certificate2 bindingCert,
+            ILoggerAdapter logger,
+            CancellationToken cancellationToken = default)
+        {
+            return await SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, bindingCert, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+
         private HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage { RequestUri = endpoint };
@@ -136,12 +175,13 @@ namespace Microsoft.Identity.Client.Http
             HttpContent body,
             HttpMethod method,
             ILoggerAdapter logger,
+            X509Certificate2 bindingCertificate = null,
             bool doNotThrow = false,
             bool retry = false,
             CancellationToken cancellationToken = default)
         {
             HttpResponse response = null;
-            
+
             try
             {
                 HttpContent clonedBody = body;
@@ -154,7 +194,7 @@ namespace Microsoft.Identity.Client.Http
 
                 using (logger.LogBlockDuration("[HttpManager] ExecuteAsync"))
                 {
-                    response = await ExecuteAsync(endpoint, headers, clonedBody, method, logger, cancellationToken).ConfigureAwait(false);
+                    response = await ExecuteAsync(endpoint, headers, clonedBody, method, bindingCertificate, logger, cancellationToken).ConfigureAwait(false);
                 }
 
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -203,6 +243,7 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             HttpContent body,
             HttpMethod method,
+            X509Certificate2 bindingCertificate,
             ILoggerAdapter logger,
             CancellationToken cancellationToken = default)
         {
@@ -217,13 +258,13 @@ namespace Microsoft.Identity.Client.Http
 
                 Stopwatch sw = Stopwatch.StartNew();
 
-                HttpClient client = GetHttpClient();
+                HttpClient client = GetHttpClient(bindingCertificate);
 
                 using (HttpResponseMessage responseMessage =
                     await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
                 {
                     LastRequestDurationInMs = sw.ElapsedMilliseconds;
-                    logger.Verbose(()=>$"[HttpManager] Received response. Status code: {responseMessage.StatusCode}. ");
+                    logger.Verbose(() => $"[HttpManager] Received response. Status code: {responseMessage.StatusCode}. ");
 
                     HttpResponse returnValue = await CreateResponseAsync(responseMessage).ConfigureAwait(false);
                     returnValue.UserAgent = requestMessage.Headers.UserAgent.ToString();
@@ -279,7 +320,7 @@ namespace Microsoft.Identity.Client.Http
         /// </summary>
         protected virtual bool IsRetryableStatusCode(int statusCode)
         {
-            return statusCode >= 500 && statusCode < 600;                
+            return statusCode >= 500 && statusCode < 600;
         }
     }
 }

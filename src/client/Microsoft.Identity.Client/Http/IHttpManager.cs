@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -45,7 +46,23 @@ namespace Microsoft.Identity.Client.Http
         Task<HttpResponse> SendPostForceResponseAsync(
             Uri uri,
             IDictionary<string, string> headers,
+            StringContent body,
+            X509Certificate2 bindingCertificate,
+            ILoggerAdapter logger,
+            CancellationToken cancellationToken = default);
+
+        Task<HttpResponse> SendPostForceResponseAsync(
+            Uri uri,
+            IDictionary<string, string> headers,
             IDictionary<string, string> bodyParameters,
+            ILoggerAdapter logger,
+            CancellationToken cancellationToken = default);
+
+        Task<HttpResponse> SendPostForceResponseAsync(
+            Uri uri,
+            IDictionary<string, string> headers,
+            IDictionary<string, string> bodyParameters,
+            X509Certificate2 bindingCertificate,
             ILoggerAdapter logger,
             CancellationToken cancellationToken = default);
 

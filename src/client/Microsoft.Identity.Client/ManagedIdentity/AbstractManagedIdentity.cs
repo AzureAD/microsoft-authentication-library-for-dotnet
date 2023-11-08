@@ -21,16 +21,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/ManagedIdentitySource.cs
     /// </summary>
     internal abstract class AbstractManagedIdentity
-
     {
         protected readonly RequestContext _requestContext;
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
         internal readonly ManagedIdentitySource _sourceType;
-
+#if NET6_0 || NET6_WIN
+        private readonly CredentialResponseCache _credentialResponseCache;
+#endif
         protected AbstractManagedIdentity(RequestContext requestContext, ManagedIdentitySource sourceType)
         {
             _requestContext = requestContext;
             _sourceType = sourceType;
+#if NET6_0 || NET6_WIN
+            _credentialResponseCache = CredentialResponseCache.GetCredentialInstance(_requestContext);
+#endif
         }
 
         public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(
@@ -48,28 +52,63 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             ManagedIdentityRequest request = CreateRequest(resource);
 
+            HttpResponse response = await PerformHttpRequestAsync(request, cancellationToken).ConfigureAwait(false);
+
+            return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<HttpResponse> PerformHttpRequestAsync(
+            ManagedIdentityRequest request, 
+            CancellationToken cancellationToken)
+        {
+            _requestContext.Logger.Info("[Managed Identity] sending request to managed identity endpoints."); 
+
             try
             {
-                HttpResponse response =
-                    request.Method == HttpMethod.Get ?
-                    await _requestContext.ServiceBundle.HttpManager
-                        .SendGetForceResponseAsync(
-                            request.ComputeUri(), 
-                            request.Headers, 
-                            _requestContext.Logger, 
-                            cancellationToken: cancellationToken).ConfigureAwait(false) :
-                    await _requestContext.ServiceBundle.HttpManager
-                        .SendPostForceResponseAsync(
-                            request.ComputeUri(), 
-                            request.Headers, 
-                            request.BodyParameters, 
-                            _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
+                HttpResponse response = null;
 
-                return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
+                if (request.Method == HttpMethod.Get)
+                {
+                    response = await _requestContext.ServiceBundle.HttpManager
+                        .SendGetForceResponseAsync(
+                            request.ComputeUri(),
+                            request.Headers,
+                            _requestContext.Logger,
+                            cancellationToken: cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+#if NET6_0 || NET6_WIN
+                    if (_sourceType == ManagedIdentitySource.Credential)
+                    {
+                        string credentialCacheKey = request.GetCredentialCacheKey();
+
+                        response = await _credentialResponseCache.GetOrFetchCredentialAsync(
+                                                        request,
+                                                        credentialCacheKey,
+                                                        CancellationToken.None).ConfigureAwait(false);
+                    }
+                    else
+                    {
+#else
+                        response = await _requestContext.ServiceBundle.HttpManager
+                            .SendPostForceResponseAsync(
+                                request.ComputeUri(),
+                                request.Headers,
+                                request.BodyParameters,
+                                _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
+#endif
+#if NET6_0 || NET6_WIN
+                    }
+#endif
+                }
+
+                return response;
             }
             catch (HttpRequestException ex)
             {
-                throw new MsalManagedIdentityException(MsalError.ManagedIdentityUnreachableNetwork, ex.Message, ex.InnerException, _sourceType);
+                throw new MsalManagedIdentityException(
+                    MsalError.ManagedIdentityUnreachableNetwork, ex.Message, ex.InnerException, _sourceType);
             }
             catch (TaskCanceledException)
             {
@@ -113,7 +152,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             ManagedIdentityResponse managedIdentityResponse = JsonHelper.DeserializeFromJson<ManagedIdentityResponse>(response.Body);
 
-            if (managedIdentityResponse == null || managedIdentityResponse.AccessToken.IsNullOrEmpty() || managedIdentityResponse.ExpiresOn.IsNullOrEmpty())
+            if (managedIdentityResponse == null || managedIdentityResponse.AccessToken.IsNullOrEmpty() 
+                && (managedIdentityResponse.ExpiresOn.IsNullOrEmpty() || managedIdentityResponse.ExpiresIn.IsNullOrEmpty()))
             {
                 _requestContext.Logger.Error("[Managed Identity] Response is either null or insufficient for authentication.");
                 throw new MsalManagedIdentityException(
@@ -128,6 +168,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal string GetMessageFromErrorResponse(HttpResponse response)
         {
             var managedIdentityErrorResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
+            string additionalErrorInfo = string.Empty;
 
             if (managedIdentityErrorResponse == null)
             {
@@ -136,10 +177,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (!string.IsNullOrEmpty(managedIdentityErrorResponse.Message))
             { 
-                return $"[Managed Identity] Error Message: {managedIdentityErrorResponse.Message} Managed Identity Correlation ID: {managedIdentityErrorResponse.CorrelationId} Use this Correlation ID for further investigation.";
+                return $"[Managed Identity] Error Message: {managedIdentityErrorResponse.Message} " +
+                    $"Managed Identity Correlation ID: {managedIdentityErrorResponse.CorrelationId} " +
+                    $"Use this Correlation ID for further investigation.";
             }
 
-            return $"[Managed Identity] Error Code: {managedIdentityErrorResponse.Error} Error Message: {managedIdentityErrorResponse.ErrorDescription}";
+            if (_sourceType == ManagedIdentitySource.Credential)
+            {
+                additionalErrorInfo = MsalErrorMessage.CredentialEndpointNoResponseReceived;
+            }
+
+            return $"[Managed Identity] Error Code: {managedIdentityErrorResponse.Error} " +
+                $"Error Message: {managedIdentityErrorResponse.ErrorDescription} " +
+                $"Additional Error Info: {additionalErrorInfo}";
         }
     }
 }

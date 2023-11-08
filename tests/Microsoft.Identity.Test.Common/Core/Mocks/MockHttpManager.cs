@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -108,6 +109,16 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public async Task<HttpResponse> SendGetForceResponseAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
         {
             return await _httpManager.SendGetForceResponseAsync(endpoint, headers, logger, retry, cancellationToken).ConfigureAwait(false); 
+        }
+
+        public Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, StringContent body, X509Certificate2 bindingCertificate, ILoggerAdapter logger, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, X509Certificate2 bindingCertificate, ILoggerAdapter logger, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
     }
 

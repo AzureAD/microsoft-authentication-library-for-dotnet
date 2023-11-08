@@ -100,6 +100,27 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Microsoft Identity specific OIDC extension that allows resource challenges to be resolved without interaction. 
+        /// Allows configuration of one or more client capabilities, e.g. "llt"
+        /// </summary>
+        /// <remarks>
+        /// MSAL will transform these into special claims request. See https://openid.net/specs/openid-connect-core-1_0-final.html#ClaimsParameter for
+        /// details on claim requests. This is an experimental API. The method signature may change in the future without involving a major version upgrade.
+        /// For more details see https://aka.ms/msal-net-claims-request
+        /// </remarks>
+        public ManagedIdentityApplicationBuilder WithClientCapabilities(IEnumerable<string> clientCapabilities)
+        {
+            ValidateUseOfExperimentalFeature("WithClientCapabilities");
+
+            if (clientCapabilities != null && clientCapabilities.Any())
+            {
+                Config.ClientCapabilities = clientCapabilities;
+            }
+
+            return this;
+        }
+
         private void TelemetryClientLogMsalVersion()
         {
             if (Config.TelemetryClients.HasEnabledClients(TelemetryConstants.ConfigurationUpdateEventName))
@@ -137,6 +158,9 @@ namespace Microsoft.Identity.Client
         private void DefaultConfiguration()
         {
             ComputeClientIdForCaching();
+#if NET6_0 || NET6_WIN
+            EvaluatePopAndClaimsSupportForManagedIdentity();
+#endif
 
             Config.TenantId = Constants.ManagedIdentityDefaultTenant;
             Config.RedirectUri = Constants.DefaultConfidentialClientRedirectUri;
@@ -154,5 +178,12 @@ namespace Microsoft.Identity.Client
                 Config.ClientId = Config.ManagedIdentityId.UserAssignedId;
             }
         }
+
+#if NET6_0 || NET6_WIN
+        private void EvaluatePopAndClaimsSupportForManagedIdentity()
+        {
+            Config.KeyMaterialInfo = new KeyMaterialInfo(Config.ClientCapabilities != null && Config.ClientCapabilities.Any());
+        }
+#endif
     }
 }

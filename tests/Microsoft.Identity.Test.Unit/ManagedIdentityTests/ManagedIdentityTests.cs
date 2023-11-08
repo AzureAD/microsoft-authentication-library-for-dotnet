@@ -32,6 +32,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         internal const string AzureArcEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
         internal const string CloudShellEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
         internal const string ServiceFabricEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
+        internal const string CredentialEndpoint = "http://169.254.169.254/metadata/identity/credential";
 
         [DataTestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", Resource, ManagedIdentitySource.AppService)]

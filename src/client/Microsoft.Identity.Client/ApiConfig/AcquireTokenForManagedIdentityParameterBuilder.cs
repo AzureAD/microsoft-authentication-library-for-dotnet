@@ -59,6 +59,25 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Sets claims in the query. Use when the AAD admin has enabled conditional access evaluation. Acquiring the token normally will result in a
+        /// <see cref="MsalUiRequiredException"/> with the <see cref="MsalServiceException.Claims"/> property set. Retry the 
+        /// token acquisition, and use this value in the <see cref="WithClaims(string)"/> method. See https://aka.ms/msal-exceptions for details
+        /// as well as https://aka.ms/msal-net-claim-challenge.
+        /// </summary>
+        /// <param name="claims">A string with one or multiple claims.</param>
+        /// <returns>The builder to chain .With methods.</returns>
+        public AcquireTokenForManagedIdentityParameterBuilder WithClaims(string claims)
+        {
+            if (string.IsNullOrEmpty(claims))
+            {
+                throw new ArgumentNullException(nameof(claims));
+            }
+
+            Parameters.Claims = claims;
+            return this;
+        }
+
         /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
