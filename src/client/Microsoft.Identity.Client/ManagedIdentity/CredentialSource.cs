@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         private CredentialResponse GetCredentialResponse(HttpResponse response)
         {
-            CredentialResponse credentialResponse2 = JsonHelper.DeserializeFromJson<CredentialResponse>(response?.Body);
+            CredentialResponse credentialResponse = JsonHelper.DeserializeFromJson<CredentialResponse>(response?.Body);
 
             if (credentialResponse == null || credentialResponse.Credential.IsNullOrEmpty())
             {
