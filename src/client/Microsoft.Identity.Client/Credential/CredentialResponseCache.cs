@@ -9,10 +9,9 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Core;
 using System.Collections.Concurrent;
 using Microsoft.Identity.Client.Utils;
-using System.Text.Json;
-using Microsoft.Identity.Client.Credential;
+using Microsoft.Identity.Client.ManagedIdentity;
 
-namespace Microsoft.Identity.Client.ManagedIdentity
+namespace Microsoft.Identity.Client.Credential
 {
     internal class CredentialResponseCache : ICredentialResponseCache
     {

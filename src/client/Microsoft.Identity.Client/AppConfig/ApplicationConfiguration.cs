@@ -124,14 +124,14 @@ namespace Microsoft.Identity.Client
         public ManagedIdentityId ManagedIdentityId { get; internal set; }
         public bool IsManagedIdentity { get; }
 #if NET6_0 || NET6_WIN
-        public KeyMaterialInfo KeyMaterialInfo { get; internal set; }
+        public Credential.KeyMaterialInfo KeyMaterialInfo { get; internal set; }
 
         public bool ManagedIdentityLatchSupported
         {
             get
             {
                 // Calculate the value based on Managed Identity Pop Support 
-                if (KeyMaterialInfo.IsPoPSupported)
+                if (Credential.KeyMaterialInfo.IsPoPSupported)
                 {
                     return true;
                 }

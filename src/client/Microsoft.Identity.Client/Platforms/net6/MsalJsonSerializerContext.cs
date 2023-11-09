@@ -16,6 +16,9 @@ using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Region;
 using Microsoft.Identity.Client.WsTrust;
+#if NET6_0 || NET6_WIN
+using Microsoft.Identity.Client.Credential;
+#endif
 
 namespace Microsoft.Identity.Client.Platforms.net6
 {
@@ -42,7 +45,9 @@ namespace Microsoft.Identity.Client.Platforms.net6
     [JsonSerializable(typeof(ManagedIdentityResponse))]
     [JsonSerializable(typeof(ManagedIdentityErrorResponse))]
     [JsonSerializable(typeof(OidcMetadata))]
+#if NET6_0 || NET6_WIN
     [JsonSerializable(typeof(CredentialResponse))]
+#endif
     [JsonSourceGenerationOptions]
     internal partial class MsalJsonSerializerContext : JsonSerializerContext
     {

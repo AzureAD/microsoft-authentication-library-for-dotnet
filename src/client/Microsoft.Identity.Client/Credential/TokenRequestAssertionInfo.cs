@@ -10,7 +10,7 @@ using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client.Credential
 {
     /// <summary>
     /// Class to store crypto key information for a Managed Identity supported Azure resource.

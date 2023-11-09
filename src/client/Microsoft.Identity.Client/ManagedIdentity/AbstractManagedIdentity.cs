@@ -14,6 +14,9 @@ using Microsoft.Identity.Client.Core;
 using System.Net;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using System.Net.Sockets;
+#if NET6_0 || NET6_WIN
+using Microsoft.Identity.Client.Credential;
+#endif
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {

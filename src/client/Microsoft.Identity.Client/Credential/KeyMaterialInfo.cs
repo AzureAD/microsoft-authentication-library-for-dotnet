@@ -7,9 +7,8 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using Microsoft.Identity.Client.Credential;
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client.Credential
 {
     /// <summary>
     /// Class to store crypto key information for a Managed Identity supported Azure resource.
@@ -18,7 +17,7 @@ namespace Microsoft.Identity.Client.AppConfig
     internal class KeyMaterialInfo
     {
         private const string IsKeyGuardEnabledProperty = "Virtual Iso";
-        private bool _isPopSupported = false;
+        private static bool _isPopSupported = false;
         internal static readonly string s_credentialEndpoint = "http://169.254.169.254/metadata/identity/credential?cred-api-version=1.0";
         private static CryptoKeyType s_cryptoKeyType = CryptoKeyType.None;
         internal const string KeyProviderName = "Microsoft Software Key Storage Provider";
@@ -36,7 +35,7 @@ namespace Microsoft.Identity.Client.AppConfig
             }
         }
 
-        public bool IsPoPSupported => _isPopSupported;
+        public static bool IsPoPSupported => _isPopSupported;
 
         public bool IsClaimsSupported => s_cryptoKeyType != CryptoKeyType.None;
 

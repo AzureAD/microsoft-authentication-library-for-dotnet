@@ -14,6 +14,9 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
+#if NET6_0 || NET6_WIN
+using Microsoft.Identity.Client.Credential;
+#endif
 
 namespace Microsoft.Identity.Client
 {
@@ -179,7 +182,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-#if NET6_0
+#if NET6_0 || NET6_WIN
         private void EvaluatePopAndClaimsSupportForManagedIdentity()
         {
             Config.KeyMaterialInfo = new KeyMaterialInfo(Config.ClientCapabilities != null && Config.ClientCapabilities.Any());

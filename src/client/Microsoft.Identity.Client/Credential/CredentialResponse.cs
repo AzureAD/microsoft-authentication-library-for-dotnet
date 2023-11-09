@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 using Microsoft.Identity.Client.Platforms.net6;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 
-namespace Microsoft.Identity.Client.ManagedIdentity
+namespace Microsoft.Identity.Client.Credential
 {
     [JsonObject]
     [Preserve(AllMembers = true)]

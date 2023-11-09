@@ -8,7 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client.Credential
 {
     internal class CertificateCache
     {
