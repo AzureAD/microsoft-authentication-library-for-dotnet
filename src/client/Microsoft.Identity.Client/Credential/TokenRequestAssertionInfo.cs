@@ -19,11 +19,11 @@ namespace Microsoft.Identity.Client.Credential
     internal class TokenRequestAssertionInfo
     {
         private static TokenRequestAssertionInfo s_instance;
-        private X509Certificate2 _bindingCertificate;
+        private readonly X509Certificate2 _bindingCertificate;
         private readonly CertificateCache _certificateCache;
         private static readonly object s_keyInfoLock = new (); // Lock object
         private readonly KeyMaterialInfo _keyMaterialInfo;
-        private ILoggerAdapter _logger;
+        private readonly ILoggerAdapter _logger;
 
         private TokenRequestAssertionInfo(RequestContext requestContext)
         {

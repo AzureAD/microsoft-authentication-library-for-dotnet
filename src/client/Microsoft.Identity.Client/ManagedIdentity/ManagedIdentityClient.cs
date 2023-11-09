@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private static AbstractManagedIdentity SelectManagedIdentitySource(RequestContext requestContext)
         {
             return
-#if NET6_0 || NET6_WIN
+#if TRA
                 CredentialSource.TryCreate(requestContext) ??
 #endif
                 ServiceFabricManagedIdentitySource.TryCreate(requestContext) ??

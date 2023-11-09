@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client
         #region ManagedIdentity
         public ManagedIdentityId ManagedIdentityId { get; internal set; }
         public bool IsManagedIdentity { get; }
-#if NET6_0 || NET6_WIN
+#if TRA
         public Credential.KeyMaterialInfo KeyMaterialInfo { get; internal set; }
 
         public bool ManagedIdentityLatchSupported

@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return uriBuilder.Uri;
         }
 
-#if NET6_0 || NET6_WIN
+#if TRA
         public string GetCredentialCacheKey()
         {
             Uri uri = _baseEndpoint;

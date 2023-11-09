@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             //Create an HttpClientHandler and configure it to use the client certificate
             HttpClientHandler handler = new HttpClientHandler();
-#if NET6_0 || NET6_WIN
+#if TRA
             handler.ClientCertificates.Add(bindingCertificate);
 #endif
             var httpClient = new HttpClient(handler);

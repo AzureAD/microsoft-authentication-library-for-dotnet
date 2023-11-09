@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if NET6_0 || NET6_WIN
+#if TRA
 using System;
 using System.Collections.Generic;
 using System.Globalization;

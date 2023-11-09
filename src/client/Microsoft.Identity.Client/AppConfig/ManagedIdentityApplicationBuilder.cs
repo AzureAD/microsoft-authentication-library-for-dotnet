@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
@@ -14,7 +13,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
-#if NET6_0 || NET6_WIN
+#if TRA
 using Microsoft.Identity.Client.Credential;
 #endif
 
@@ -161,7 +160,7 @@ namespace Microsoft.Identity.Client
         private void DefaultConfiguration()
         {
             ComputeClientIdForCaching();
-#if NET6_0 || NET6_WIN
+#if TRA
             EvaluatePopAndClaimsSupportForManagedIdentity();
 #endif
 
@@ -182,7 +181,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-#if NET6_0 || NET6_WIN
+#if TRA
         private void EvaluatePopAndClaimsSupportForManagedIdentity()
         {
             Config.KeyMaterialInfo = new KeyMaterialInfo(Config.ClientCapabilities != null && Config.ClientCapabilities.Any());
