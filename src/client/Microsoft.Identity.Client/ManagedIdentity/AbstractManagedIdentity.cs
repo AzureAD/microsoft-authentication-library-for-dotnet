@@ -25,14 +25,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         protected readonly RequestContext _requestContext;
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
         internal readonly ManagedIdentitySource _sourceType;
-#if NET6_0 || NET6_WIN
+#if NET6_0
         private readonly CredentialResponseCache _credentialResponseCache;
 #endif
         protected AbstractManagedIdentity(RequestContext requestContext, ManagedIdentitySource sourceType)
         {
             _requestContext = requestContext;
             _sourceType = sourceType;
-#if NET6_0 || NET6_WIN
+#if NET6_0
             _credentialResponseCache = CredentialResponseCache.GetCredentialInstance(_requestContext);
 #endif
         }
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
                 else
                 {
-#if NET6_0 || NET6_WIN
+#if NET6_0
                     if (_sourceType == ManagedIdentitySource.Credential)
                     {
                         string credentialCacheKey = request.GetCredentialCacheKey();

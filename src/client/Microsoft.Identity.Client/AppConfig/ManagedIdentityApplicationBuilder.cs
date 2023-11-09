@@ -179,7 +179,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-#if NET6_0 || NET6_WIN
+#if NET6_0
         private void EvaluatePopAndClaimsSupportForManagedIdentity()
         {
             Config.KeyMaterialInfo = new KeyMaterialInfo(Config.ClientCapabilities != null && Config.ClientCapabilities.Any());

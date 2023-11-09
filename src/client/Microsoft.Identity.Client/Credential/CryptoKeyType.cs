@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client.Credential
 {
     /// <summary>
     /// Enumerates various types of crypto keys used in the application.

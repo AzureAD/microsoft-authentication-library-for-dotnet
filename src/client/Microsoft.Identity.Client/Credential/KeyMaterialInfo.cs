@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if NET6_0 || NET6_WIN
+
 using System;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Microsoft.Identity.Client.Credential;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -119,4 +120,3 @@ namespace Microsoft.Identity.Client.AppConfig
         }
     }
 }
-#endif

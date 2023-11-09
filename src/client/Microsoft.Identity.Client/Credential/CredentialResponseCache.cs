@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if NET6_0 || NET6_WIN
+
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.Core;
 using System.Collections.Concurrent;
 using Microsoft.Identity.Client.Utils;
 using System.Text.Json;
+using Microsoft.Identity.Client.Credential;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -105,9 +106,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private long GetExpiresOnFromJson(string jsonContent)
         {
             // Parse the JSON content to extract ExpiresOn
-            CredentialResponse credentialResponse = JsonSerializer.Deserialize<CredentialResponse>(jsonContent);
-            //CredentialResponse credentialResponse = JsonHelper.DeserializeFromJson<CredentialResponse>(jsonContent);
-
+            CredentialResponse credentialResponse = JsonHelper.DeserializeFromJson<CredentialResponse>(jsonContent);
 
             if (credentialResponse != null)
             {
@@ -118,4 +117,3 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
     }
 }
-#endif

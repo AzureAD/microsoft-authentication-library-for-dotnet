@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if NET6_0
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,4 +71,3 @@ namespace Microsoft.Identity.Client.AppConfig
         }
     }
 }
-#endif
