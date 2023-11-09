@@ -19,16 +19,16 @@ namespace Microsoft.Identity.Client.AppConfig
     {
         private const string IsKeyGuardEnabledProperty = "Virtual Iso";
         private bool _isPopSupported = false;
-        internal static readonly string _credentialEndpoint = "http://169.254.169.254/metadata/identity/credential?cred-api-version=1.0";
+        internal static readonly string s_credentialEndpoint = "http://169.254.169.254/metadata/identity/credential?cred-api-version=1.0";
         private static CryptoKeyType s_cryptoKeyType = CryptoKeyType.None;
-        internal const string keyProviderName = "Microsoft Software Key Storage Provider";
+        internal const string KeyProviderName = "Microsoft Software Key Storage Provider";
         internal const string KeyName = "ManagedIdentityCredentialKey";
         private readonly ECDsaCng _eCDsaCngKey;
         private readonly RSA _rsaKey;
 
         public KeyMaterialInfo(bool clientCapabilitiesRequested)
         {
-            _eCDsaCngKey = GetMachineKey(keyProviderName, KeyName);
+            _eCDsaCngKey = GetMachineKey(KeyProviderName, KeyName);
             
             if (clientCapabilitiesRequested && _eCDsaCngKey == null)
             {
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
         public ECDsaCng ECDsaCngKey => _eCDsaCngKey;
 
-        public string CredentialEndpoint = _credentialEndpoint;
+        public string CredentialEndpoint = s_credentialEndpoint;
 
         private ECDsaCng GetMachineKey(string keyProviderName, string keyName)
         {
