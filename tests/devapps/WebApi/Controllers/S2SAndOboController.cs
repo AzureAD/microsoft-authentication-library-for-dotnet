@@ -82,7 +82,7 @@ namespace WebApi.Controllers
             if (flow == Flow.S2S)
             {
                 res = await cca.AcquireTokenForClient(new[] { scope.ToString() })
-                     .WithAuthority($"https://login.microsoftonline.com/{tid}")
+                     .WithTenantId(tid)
                      .ExecuteAsync().ConfigureAwait(false);
             }
             else
@@ -93,8 +93,8 @@ namespace WebApi.Controllers
                 // must be in this format. MSAL will use {user} as the object id 
                 string fakeUpstreamToken = $"upstream_token_{user}";
                 
-                res = await cca.AcquireTokenOnBehalfOf(new[] { scope.ToString() }, new UserAssertion(fakeUpstreamToken))                    
-                    .WithAuthority($"https://login.microsoftonline.com/{tid}")
+                res = await cca.AcquireTokenOnBehalfOf(new[] { scope.ToString() }, new UserAssertion(fakeUpstreamToken))
+                    .WithTenantId(tid)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
             }

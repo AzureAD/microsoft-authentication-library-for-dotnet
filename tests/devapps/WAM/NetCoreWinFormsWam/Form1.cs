@@ -17,7 +17,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.ApiConfig;
 
-
 namespace NetDesktopWinForms
 {
     public partial class Form1 : Form
@@ -136,7 +135,6 @@ namespace NetDesktopWinForms
                     throw new NotImplementedException();
             }
 
-
             builder.WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true, true);
 
             var pca = builder.Build();
@@ -230,6 +228,7 @@ namespace NetDesktopWinForms
                     {
                         var msaAuthority = $"{publicCloudEnv}{msaTenantIdPublicCloud}";
 
+#pragma warning disable CS0618 // Type or member is obsolete
                         builder = builder.WithAuthority(msaAuthority);
                     }
                 }
@@ -237,6 +236,7 @@ namespace NetDesktopWinForms
                 {
                     builder = builder.WithAuthority(reqAuthority);
                 }
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 if (cbxPOP.Checked)
                 {
