@@ -526,7 +526,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 }
                 catch (MsalUiRequiredException e)
                 {
-                    Assert.AreEqual("failed_to_acquire_token_silently_from_broker", e.ErrorCode);
+                    Assert.AreEqual("no_tokens_found", e.ErrorCode);
 
                     harness.HttpManager.AddInstanceDiscoveryMockHandler();
                     harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
