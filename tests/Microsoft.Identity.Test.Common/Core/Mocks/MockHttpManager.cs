@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
     }
 
-    internal class MockHttpClientFactory : IMsalMtlsHttpClientFactory
+    internal class MockHttpClientFactory : IMsalHttpClientFactory
     {
         Func<MockHttpMessageHandler> MessageHandlerFunc;
         ConcurrentQueue<HttpMessageHandler> HttpMessageHandlerQueue;

@@ -81,29 +81,26 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
                 else
                 {
-#if TRA
-                    if (_sourceType == ManagedIdentitySource.Credential)
+                    if (_sourceType != ManagedIdentitySource.Credential)
                     {
+                        response = await _requestContext.ServiceBundle.HttpManager
+                            .SendPostForceResponseAsync(
+                                request.ComputeUri(),
+                                request.Headers,
+                                request.BodyParameters,
+                                _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+#if TRA
                         string credentialCacheKey = request.GetCredentialCacheKey();
 
                         response = await _credentialResponseCache.GetOrFetchCredentialAsync(
                                                         request,
                                                         credentialCacheKey,
                                                         CancellationToken.None).ConfigureAwait(false);
-                    }
-                    else
-                    {
-#else
-                    response = await _requestContext.ServiceBundle.HttpManager
-                            .SendPostForceResponseAsync(
-                                request.ComputeUri(),
-                                request.Headers,
-                                request.BodyParameters,
-                                _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
 #endif
-#if TRA
                     }
-#endif
                 }
 
                 return response;

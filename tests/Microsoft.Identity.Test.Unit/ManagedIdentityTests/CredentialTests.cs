@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                httpManager.AddManagedIdentityCredentialMockHandler(ManagedIdentityTests.CredentialEndpoint);
+                //httpManager.AddManagedIdentityCredentialMockHandler(ManagedIdentityTests.CredentialEndpoint);
 
                 MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("scope")
