@@ -137,7 +137,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             s_durationTotal.Record(authResultMetadata.DurationTotalInMs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
-                new(TelemetryConstants.ApiId, apiId));
+                new(TelemetryConstants.ApiId, apiId), 
+                new (TelemetryConstants.TokenSource, authResultMetadata.TokenSource), 
+                new (TelemetryConstants.CacheLevel, cacheLevel));
 
             // Only log cache duration if L2 cache was used.
             if (cacheLevel.Equals(CacheLevel.L2Cache))
