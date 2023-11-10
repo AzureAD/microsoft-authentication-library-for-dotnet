@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Http
                 return msalMtlsHttpClientFactory.GetHttpClient(x509Certificate2);
             }
 
-            throw new MsalClientException("http_client_factory", "You customized HttpClient factory but you are using APIs which require provisioning of a client certificate in HttpClient. Implement IMsalMtlsHttpClientFactory");
+            throw new MsalClientException("http_client_factory", "You customized HttpClient factory but you are using APIs which require provisioning of a client certificate in HttpClient. Implement IMsalMtlsHttpClientFactory. For details see https://aka.ms/msal-net-msi-claims");
         }
 
         public async Task<HttpResponse> SendPostAsync(
@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Client.Http
                     clonedBody = await CloneHttpContentAsync(body).ConfigureAwait(false);
                 }
 
-                using (logger.LogBlockDuration("[HttpManager] ExecuteAsync"))
+                using (logger.LogBlockDuration($"[HttpManager] ExecuteAsync (MTLS: {bindingCertificate!=null})"))
                 {
                     response = await ExecuteAsync(endpoint, headers, clonedBody, method, bindingCertificate, logger, cancellationToken).ConfigureAwait(false);
                 }
