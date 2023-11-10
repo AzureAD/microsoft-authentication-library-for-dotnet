@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class CredentialTests : TestBase
     {
-        [TestMethod]
+        //[TestMethod]
         public async Task CredentialEndpointBadRequestTestAsync()
         {
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))

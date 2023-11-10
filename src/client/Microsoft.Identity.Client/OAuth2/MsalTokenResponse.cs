@@ -284,10 +284,18 @@ namespace Microsoft.Identity.Client.OAuth2
                 HandleInvalidExternalValueError(nameof(response.AccessToken));
             }
 
-            long expiresOn = DateTimeHelpers.GetDurationFromNowInSeconds(response.ExpiresOn);
-            long expiresIn = long.Parse(response.ExpiresIn, CultureInfo.InvariantCulture);
+            long expiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(response.ExpiresOn);
 
-            if (expiresOn <= 0 && expiresIn <= 0)
+            long? expiresOn = response.ExpiresIn != null
+                ? long.Parse(response.ExpiresIn, CultureInfo.InvariantCulture): null;
+
+
+            if (expiresIn <= 0)
+            {
+                HandleInvalidExternalValueError(nameof(response.ExpiresOn));
+            }
+
+            if (expiresOn != null && expiresOn <= 0)
             {
                 HandleInvalidExternalValueError(nameof(response.ExpiresOn));
             }

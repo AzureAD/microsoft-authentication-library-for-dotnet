@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
     }
 
-    internal class MockHttpClientFactory : IMsalHttpClientFactory
+    internal class MockHttpClientFactory : IMsalMtlsHttpClientFactory
     {
         Func<MockHttpMessageHandler> MessageHandlerFunc;
         ConcurrentQueue<HttpMessageHandler> HttpMessageHandlerQueue;
@@ -163,6 +163,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             return httpClient;
+        }
+
+        public HttpClient GetHttpClient(X509Certificate2 x509Certificate2)
+        {
+            throw new NotImplementedException();
         }
 
         private string GetExpectedUrlFromHandler(HttpMessageHandler handler)
