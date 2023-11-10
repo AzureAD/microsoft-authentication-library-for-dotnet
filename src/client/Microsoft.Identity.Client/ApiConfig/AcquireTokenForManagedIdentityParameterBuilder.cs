@@ -60,10 +60,12 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets claims in the query. Use when the AAD admin has enabled conditional access evaluation. Acquiring the token normally will result in a
-        /// <see cref="MsalUiRequiredException"/> with the <see cref="MsalServiceException.Claims"/> property set. Retry the 
-        /// token acquisition, and use this value in the <see cref="WithClaims(string)"/> method. See https://aka.ms/msal-exceptions for details
-        /// as well as https://aka.ms/msal-net-claim-challenge.
+        /// Adds a claims challenge to the token request. The SDK will bypass the token cache when a claims challenge is specified.. Retry the 
+        /// token acquisition, and use this value in the <see cref="WithClaims(string)"/> method. A claims challenge typically arises when 
+        /// calling the protected downstream API, for example when the tenant administrator wants to revokes credentials. Apps are required 
+        /// to look for a 401 Unauthorized response from the protected api and to parse the WWW-Authenticate response header in order to 
+        /// extract the claims.See https://aka.ms/msal-net-claim-challenge for details. This API is not always available, depending on the 
+        /// client and that apps can monitor this by using <see cref="ManagedIdentityApplication.IsClaimsSupportedByClient"/> method
         /// </summary>
         /// <param name="claims">A string with one or multiple claims.</param>
         /// <returns>The builder to chain .With methods.</returns>

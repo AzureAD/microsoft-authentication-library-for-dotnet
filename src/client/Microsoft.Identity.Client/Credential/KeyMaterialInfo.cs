@@ -17,25 +17,19 @@ namespace Microsoft.Identity.Client.Credential
     internal class KeyMaterialInfo
     {
         private const string IsKeyGuardEnabledProperty = "Virtual Iso";
-        private static bool _isPopSupported = false;
+        private bool _isPopSupported = false;
         internal static readonly string s_credentialEndpoint = "http://169.254.169.254/metadata/identity/credential?cred-api-version=1.0";
         private static CryptoKeyType s_cryptoKeyType = CryptoKeyType.None;
         internal const string KeyProviderName = "Microsoft Software Key Storage Provider";
         internal const string KeyName = "ManagedIdentityCredentialKey";
         private readonly ECDsaCng _eCDsaCngKey;
-        private readonly RSA _rsaKey;
 
-        public KeyMaterialInfo(bool clientCapabilitiesRequested)
+        public KeyMaterialInfo()
         {
             _eCDsaCngKey = GetMachineKey(KeyProviderName, KeyName);
-            
-            if (clientCapabilitiesRequested && _eCDsaCngKey == null)
-            {
-                _rsaKey = CreateRsaKey();
-            }
         }
 
-        public static bool IsPoPSupported => _isPopSupported;
+        public bool IsPoPSupported => _isPopSupported;
 
         public bool IsClaimsSupported => s_cryptoKeyType != CryptoKeyType.None;
 
@@ -67,27 +61,6 @@ namespace Microsoft.Identity.Client.Credential
             catch (CryptographicException ex)
             {
 
-            }
-
-            return null;
-        }
-
-        private RSA CreateRsaKey()
-        {
-            try
-            {
-                using (RSA rsa = RSA.Create())
-                {
-                    if (_eCDsaCngKey == null)
-                    {
-                        s_cryptoKeyType = CryptoKeyType.Ephemeral;
-                    }
-                    return rsa;
-                }
-            }
-            catch (CryptographicException e)
-            {
-                
             }
 
             return null;

@@ -28,8 +28,7 @@ namespace Microsoft.Identity.Client.Credential
         private TokenRequestAssertionInfo(RequestContext requestContext)
         {
             _logger = requestContext.Logger;
-            _keyMaterialInfo = new KeyMaterialInfo(requestContext.ServiceBundle.Config.ClientCapabilities != null 
-                && requestContext.ServiceBundle.Config.ClientCapabilities.Any());
+            _keyMaterialInfo = new KeyMaterialInfo();
 
             _certificateCache = CertificateCache.Instance();
             _bindingCertificate = _certificateCache.GetOrAddCertificate(() => CreateCertificateFromCryptoKeyInfo(_keyMaterialInfo));
@@ -58,7 +57,7 @@ namespace Microsoft.Identity.Client.Credential
                 return CreateCngCertificate(keyMaterialInfo);
             }
 
-            return CreateRsaCertificate(keyMaterialInfo);
+            return null;
         }
 
         private X509Certificate2 CreateCngCertificate(KeyMaterialInfo keyMaterialInfo)
@@ -103,70 +102,17 @@ namespace Microsoft.Identity.Client.Credential
             }
         }
 
-        private X509Certificate2 CreateRsaCertificate(KeyMaterialInfo keyMaterialInfo)
-        {
-            string certSubjectname = "MsalinMemoryCertificate";
 
-            try
-            {
-                lock (s_keyInfoLock) // Lock to ensure thread safety
-                {
-                    // Create an RSA key
-                    using (RSA rsaKey = RSA.Create())
-                    {
-                        _logger.Verbose(() => "[Managed Identity] Creating binding certificate with CNG key for credential endpoint.");
-
-                        // Create a certificate request
-                        CertificateRequest request = CreateCertificateRequest(certSubjectname, rsaKey);
-
-                        // Create a self-signed X.509 certificate
-                        DateTimeOffset startDate = DateTimeOffset.UtcNow;
-                        DateTimeOffset endDate = startDate.AddYears(2); //expiry 
-
-                        //Create the self signed cert
-                        X509Certificate2 selfSigned = request.CreateSelfSigned(startDate, endDate);
-
-                        //export the pfx format cert
-                        X509Certificate2 authCertificate = new X509Certificate2(selfSigned.Export(X509ContentType.Pkcs12));
-
-                        _logger.Verbose(() => "[Managed Identity] Binding certificate (with rsa key) created successfully.");
-
-                        return authCertificate;
-                    }
-                }
-            }
-            catch (CryptographicException ex)
-            {
-                // Handle or log the exception
-                _logger.Error($"Error generating binding certificate: {ex.Message}");
-                throw;
-            }
-        }
-
-        private CertificateRequest CreateCertificateRequest(string subjectName, AsymmetricAlgorithm key)
+        private CertificateRequest CreateCertificateRequest(string subjectName, ECDsaCng ecdsaKey)
         {
             CertificateRequest certificateRequest = null;
 
             _logger.Verbose(() => "[Managed Identity] Creating certificate request for the binding certificate.");
 
-            if (key is ECDsaCng ecdsaKey)
-            {
-                certificateRequest = new(
+            return certificateRequest = new(
                     $"CN={subjectName}", // Common Name 
                     ecdsaKey, // ECDsa key
                     HashAlgorithmName.SHA256); // Hash algorithm for the certificate
-            }
-
-            else if (key is RSA rsaKey)
-            {
-                certificateRequest = new(
-                    $"CN={subjectName}", // Common Name 
-                    rsaKey, // ECDsa key
-                    HashAlgorithmName.SHA256, // Hash algorithm for the certificate
-                    RSASignaturePadding.Pkcs1); //Signature padding
-            }
-
-            return certificateRequest;
         }
 
         private X509Certificate2 AssociatePrivateKeyInfo(X509Certificate2 publicKeyOnlyCertificate, ECDsaCng eCDsaCngKey)

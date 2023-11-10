@@ -19,6 +19,9 @@ using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 using Microsoft.IdentityModel.Abstractions;
+#if TRA
+using Microsoft.Identity.Client.Credential;
+#endif
 
 namespace Microsoft.Identity.Client
 {
@@ -124,14 +127,14 @@ namespace Microsoft.Identity.Client
         public ManagedIdentityId ManagedIdentityId { get; internal set; }
         public bool IsManagedIdentity { get; }
 #if TRA
-        public Credential.KeyMaterialInfo KeyMaterialInfo { get; internal set; }
+        public KeyMaterialInfo KeyMaterialInfo { get; internal set; }
 
         public bool ManagedIdentityLatchSupported
         {
             get
             {
                 // Calculate the value based on Managed Identity Pop Support 
-                if (Credential.KeyMaterialInfo.IsPoPSupported)
+                if (KeyMaterialInfo.IsPoPSupported)
                 {
                     return true;
                 }

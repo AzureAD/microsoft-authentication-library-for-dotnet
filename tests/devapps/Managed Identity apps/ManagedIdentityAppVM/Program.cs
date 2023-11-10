@@ -16,6 +16,10 @@ IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(Manage
                 .WithClientCapabilities(new[] { "cp1" })
                 .Build();
 
+Console.WriteLine(mi.IsProofOfPossessionSupportedByClient());
+
+Console.WriteLine(mi.IsClaimsSupportedByClient());
+
 string? scope = "https://management.azure.com";
 
 do

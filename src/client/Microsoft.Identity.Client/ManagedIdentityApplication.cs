@@ -13,6 +13,9 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ManagedIdentity;
+#if TRA
+using Microsoft.Identity.Client.Credential;
+#endif
 
 namespace Microsoft.Identity.Client
 {
@@ -55,5 +58,33 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreateManagedIdentityExecutor(this),
                 resource);
         }
+#if TRA
+        /// <summary>
+        /// Used to determine if managed identity is able to perform Proof-of-Possession.
+        /// </summary>
+        /// <returns>Boolean indicating if Proof-of-Possession is supported</returns>
+        public bool IsProofOfPossessionSupportedByClient()
+        {
+            return ServiceBundle.Config.KeyMaterialInfo.IsPoPSupported;
+        }
+
+        /// <summary>
+        /// Used to determine if managed identity is able to handle claims.
+        /// </summary>
+        /// <returns>Boolean indicating if Claims is supported</returns>
+        public bool IsClaimsSupportedByClient()
+        {
+            return ServiceBundle.Config.KeyMaterialInfo.IsClaimsSupported;
+        }
+
+        /// <summary>
+        /// Retrives the binding certificate for advanced managed identity scenarios.
+        /// </summary>
+        /// <returns>Binding certificate used for advanced scenarios</returns>
+        public X509Certificate2 GetBindingCertificate()
+        {
+            return null; //return the binding cert
+        }
+#endif
     }
 }

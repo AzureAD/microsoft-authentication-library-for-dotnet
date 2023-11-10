@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client
 #if TRA
         private void EvaluatePopAndClaimsSupportForManagedIdentity()
         {
-            Config.KeyMaterialInfo = new KeyMaterialInfo(Config.ClientCapabilities != null && Config.ClientCapabilities.Any());
+            Config.KeyMaterialInfo = new KeyMaterialInfo();
         }
 #endif
     }
