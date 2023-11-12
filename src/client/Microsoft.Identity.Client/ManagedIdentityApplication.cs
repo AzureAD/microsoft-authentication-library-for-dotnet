@@ -13,6 +13,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ManagedIdentity;
+using System.Diagnostics;
 #if TRA
 using Microsoft.Identity.Client.Credential;
 #endif
@@ -39,13 +40,17 @@ namespace Microsoft.Identity.Client
             GuardMobileFrameworks();
 
             AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
-
-            this.ServiceBundle.ApplicationLogger.Verbose(()=>$"ManagedIdentityApplication {configuration.GetHashCode()} created");
+#if TRA
+            TokenRequestAssertionInfo = TokenRequestAssertionInfo.GetCredentialInfo(ServiceBundle);
+#endif
+            ServiceBundle.ApplicationLogger.Verbose(() => $"ManagedIdentityApplication {configuration.GetHashCode()} created");
         }
 
         // Stores all app tokens
         internal ITokenCacheInternal AppTokenCacheInternal { get; }
-
+#if TRA
+        internal TokenRequestAssertionInfo TokenRequestAssertionInfo { get; }
+#endif
         /// <inheritdoc/>
         public AcquireTokenForManagedIdentityParameterBuilder AcquireTokenForManagedIdentity(string resource)
         {
@@ -65,7 +70,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Boolean indicating if Proof-of-Possession is supported</returns>
         public bool IsProofOfPossessionSupportedByClient()
         {
-            return ServiceBundle.Config.KeyMaterialInfo.IsPoPSupported;
+            return ServiceBundle.Config.IsManagedIdentityPopSupported;
         }
 
         /// <summary>
@@ -74,7 +79,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Boolean indicating if Claims is supported</returns>
         public bool IsClaimsSupportedByClient()
         {
-            return ServiceBundle.Config.KeyMaterialInfo.IsClaimsSupported;
+            return ServiceBundle.Config.IsManagedIdentityClaimsSupported;
         }
 
         /// <summary>
@@ -83,7 +88,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Binding certificate used for advanced scenarios</returns>
         public X509Certificate2 GetBindingCertificate()
         {
-            return null; //return the binding cert
+            return TokenRequestAssertionInfo.BindingCertificate; //return the binding cert
         }
 #endif
     }

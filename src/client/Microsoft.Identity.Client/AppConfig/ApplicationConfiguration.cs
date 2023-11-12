@@ -27,11 +27,11 @@ namespace Microsoft.Identity.Client
 {
     internal sealed class ApplicationConfiguration : IAppConfig
     {
-        public ApplicationConfiguration(MsalClientType applicationType) 
+        public ApplicationConfiguration(MsalClientType applicationType)
         {
             switch (applicationType)
             {
-                case MsalClientType.ConfidentialClient: 
+                case MsalClientType.ConfidentialClient:
                     IsConfidentialClient = true;
                     break;
 
@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
                     break;
             }
         }
-        
+
         public const string DefaultClientName = "UnknownClient";
         public const string DefaultClientVersion = "0.0.0.0";
 
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client
         public bool IsBrokerEnabled { get; internal set; }
 
         // Legacy options for UWP. .NET broker options are in BrokerOptions
-        public WindowsBrokerOptions UwpBrokerOptions { get; set; } 
+        public WindowsBrokerOptions UwpBrokerOptions { get; set; }
 
         public BrokerOptions BrokerOptions { get; set; }
 
@@ -128,24 +128,12 @@ namespace Microsoft.Identity.Client
         public bool IsManagedIdentity { get; }
 #if TRA
         public KeyMaterialInfo KeyMaterialInfo { get; internal set; }
-
-        public bool ManagedIdentityLatchSupported
-        {
-            get
-            {
-                // Calculate the value based on Managed Identity Pop Support 
-                if (KeyMaterialInfo.IsPoPSupported)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
+        public bool IsManagedIdentityCredentialsSupported { get; internal set; }
+        public bool IsManagedIdentityClaimsSupported { get; internal set; }
+        public bool IsManagedIdentityLatchSupported { get; internal set; }
+        public bool IsManagedIdentityPopSupported { get; internal set; }
 #endif
-#endregion
+        #endregion
 
         #region ClientCredentials
 
@@ -178,17 +166,17 @@ namespace Microsoft.Identity.Client
                 {
                     return cred.Certificate;
                 }
-               
+
                 return null;
             }
         }
-#endregion
+        #endregion
 
-#region Region
+        #region Region
         public string AzureRegion { get; set; }
-#endregion
+        #endregion
 
-#region Authority
+        #region Authority
         // These are all used to create the Authority when the app is built.
 
         public string TenantId { get; internal set; }
@@ -216,9 +204,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool ValidateAuthority { get; set; }
 
-#endregion
+        #endregion
 
-#region Test Hooks
+        #region Test Hooks
         public ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
 
         public ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }

@@ -21,22 +21,22 @@ namespace Microsoft.Identity.Client.Credential
         private static TokenRequestAssertionInfo s_instance;
         private readonly X509Certificate2 _bindingCertificate;
         private readonly CertificateCache _certificateCache;
-        private static readonly object s_keyInfoLock = new (); // Lock object
+        private static readonly object s_keyInfoLock = new(); // Lock object
         private readonly KeyMaterialInfo _keyMaterialInfo;
         private readonly ILoggerAdapter _logger;
 
-        private TokenRequestAssertionInfo(RequestContext requestContext)
+        private TokenRequestAssertionInfo(IServiceBundle serviceBundle)
         {
-            _logger = requestContext.Logger;
+            _logger = serviceBundle.ApplicationLogger;
             _keyMaterialInfo = new KeyMaterialInfo();
 
             _certificateCache = CertificateCache.Instance();
             _bindingCertificate = _certificateCache.GetOrAddCertificate(() => CreateCertificateFromCryptoKeyInfo(_keyMaterialInfo));
         }
 
-        public static TokenRequestAssertionInfo GetCredentialInfo(RequestContext requestContext)
+        public static TokenRequestAssertionInfo GetCredentialInfo(IServiceBundle serviceBundle)
         {
-            return s_instance ??= new TokenRequestAssertionInfo(requestContext);
+            return s_instance ??= new TokenRequestAssertionInfo(serviceBundle);
         }
 
         public X509Certificate2 BindingCertificate => _bindingCertificate;
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Credential
 
         private X509Certificate2 CreateCngCertificate(KeyMaterialInfo keyMaterialInfo)
         {
-            string certSubjectname = keyMaterialInfo.ECDsaCngKey.Key.UniqueName;
+            string certSubjectname = keyMaterialInfo.ECDsaCngKey.Key.KeyName;
 
             try
             {

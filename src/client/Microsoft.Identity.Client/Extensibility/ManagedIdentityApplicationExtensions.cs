@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Boolean indicating if Proof-of-Possession is supported</returns>
         public static bool IsProofOfPossessionSupportedByClient(this IManagedIdentityApplication app)
         {
-            if (app is IManagedIdentityApplication mia)
+            if (app is ManagedIdentityApplication mia)
             {
                 return mia.IsProofOfPossessionSupportedByClient();
             }
@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Boolean indicating if Claims is supported</returns>
         public static bool IsClaimsSupportedByClient(this IManagedIdentityApplication app)
         {
-            if (app is IManagedIdentityApplication mia)
+            if (app is ManagedIdentityApplication mia)
             {
                 return mia.IsClaimsSupportedByClient();
             }
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Binding certificate used for advanced scenarios</returns>
         public static X509Certificate2 GetBindingCertificate(this IManagedIdentityApplication app)
         {
-            if (app is IManagedIdentityApplication mia)
+            if (app is ManagedIdentityApplication mia)
             {
                 return mia.GetBindingCertificate();
             }

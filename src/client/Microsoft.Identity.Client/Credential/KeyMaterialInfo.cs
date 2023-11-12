@@ -14,10 +14,9 @@ namespace Microsoft.Identity.Client.Credential
     /// Class to store crypto key information for a Managed Identity supported Azure resource.
     /// For more details see https://aka.ms/msal-net-managed-identity
     /// </summary>
-    internal class KeyMaterialInfo
+    internal class KeyMaterialInfo : IKeyMaterialInfo
     {
         private const string IsKeyGuardEnabledProperty = "Virtual Iso";
-        private bool _isPopSupported = false;
         internal static readonly string s_credentialEndpoint = "http://169.254.169.254/metadata/identity/credential?cred-api-version=1.0";
         private static CryptoKeyType s_cryptoKeyType = CryptoKeyType.None;
         internal const string KeyProviderName = "Microsoft Software Key Storage Provider";
@@ -29,17 +28,13 @@ namespace Microsoft.Identity.Client.Credential
             _eCDsaCngKey = GetMachineKey(KeyProviderName, KeyName);
         }
 
-        public bool IsPoPSupported => _isPopSupported;
-
-        public bool IsClaimsSupported => s_cryptoKeyType != CryptoKeyType.None;
-
         public CryptoKeyType CryptoKeyType => s_cryptoKeyType;
 
         public ECDsaCng ECDsaCngKey => _eCDsaCngKey;
 
         public string CredentialEndpoint = s_credentialEndpoint;
 
-        private ECDsaCng GetMachineKey(string keyProviderName, string keyName)
+        public ECDsaCng GetMachineKey(string keyProviderName, string keyName)
         {
             try
             {
@@ -53,7 +48,7 @@ namespace Microsoft.Identity.Client.Credential
                     s_cryptoKeyType = CryptoKeyType.Machine;
 
                     // Determine whether the key is KeyGuard protected
-                    _isPopSupported = IsKeyGuardProtected(cngKey);
+                    _ = IsKeyGuardProtected(cngKey);
 
                     return new ECDsaCng(cngKey);
                 }
@@ -66,7 +61,7 @@ namespace Microsoft.Identity.Client.Credential
             return null;
         }
 
-        private static bool IsKeyGuardProtected(CngKey cngKey)
+        public bool IsKeyGuardProtected(CngKey cngKey)
         {
             //Check to see if the KeyGuard Isolation flag was set in the key
             if (!cngKey.HasProperty(IsKeyGuardEnabledProperty, CngPropertyOptions.None))

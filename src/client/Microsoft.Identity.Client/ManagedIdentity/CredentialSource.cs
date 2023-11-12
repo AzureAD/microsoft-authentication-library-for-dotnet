@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             : base(requestContext, ManagedIdentitySource.Credential)
         {
             _credentialEndpoint = credentialEndpoint;
-            _requestAssertionInfo = TokenRequestAssertionInfo.GetCredentialInfo(requestContext);
+            _requestAssertionInfo = TokenRequestAssertionInfo.GetCredentialInfo(requestContext.ServiceBundle);
         }
 
         protected override ManagedIdentityRequest CreateRequest(string resource)
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             credentialEndpointUri = null;
 
-            if (requestContext.ServiceBundle.Config.KeyMaterialInfo.CryptoKeyType == CryptoKeyType.None)
+            if (!requestContext.ServiceBundle.Config.IsManagedIdentityCredentialsSupported)
             {
                 logger.Verbose(() => "[Managed Identity] Credential based managed identity is unavailable.");
                 return false;
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string baseUrl = "https://mtlsauth.microsoft.com/";
             string tenantId = credentialResponse.TenantId;
             string tokenEndpoint = "/oauth2/v2.0/token?dc=ESTS-PUB-WUS2-AZ1-FD000-TEST1";
-            Uri url = new (string.Join("", baseUrl, tenantId, tokenEndpoint));
+            Uri url = new(string.Join("", baseUrl, tenantId, tokenEndpoint));
 
             ManagedIdentityRequest request = new(HttpMethod.Post, url);
             var scope = parameters.Resource + "/.default";

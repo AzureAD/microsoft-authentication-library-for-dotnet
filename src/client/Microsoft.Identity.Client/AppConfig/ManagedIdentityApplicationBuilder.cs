@@ -181,11 +181,27 @@ namespace Microsoft.Identity.Client
             }
         }
 
-#if TRA
         private void EvaluatePopAndClaimsSupportForManagedIdentity()
         {
+#if TRA
             Config.KeyMaterialInfo = new KeyMaterialInfo();
-        }
+
+            if (Config.KeyMaterialInfo.CryptoKeyType != CryptoKeyType.None)
+            {
+                Config.IsManagedIdentityCredentialsSupported = true;
+                Config.IsManagedIdentityClaimsSupported = true;
+            }
+
+            if (Config.KeyMaterialInfo.CryptoKeyType == CryptoKeyType.KeyGuard)
+            {
+                Config.IsManagedIdentityLatchSupported = true;
+            }
+
+            if (Config.KeyMaterialInfo.CryptoKeyType == CryptoKeyType.Machine)
+            {
+                Config.IsManagedIdentityPopSupported = true;
+            }
 #endif
+        }
     }
 }
