@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
@@ -21,7 +22,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
         private static KeyMaterialManager s_keyMaterialManager;
         private static readonly object s_lock = new();
 
-        public static KeyMaterialManager GetKeyMaterial()
+        public static KeyMaterialManager GetKeyMaterial(ILoggerAdapter logger)
         {
             lock (s_lock)
             {
@@ -30,7 +31,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
                     return s_keyMaterialManager;
                 }
 
-                s_keyMaterialManager = new KeyMaterialManager();
+                s_keyMaterialManager = new KeyMaterialManager(logger);
                 return s_keyMaterialManager;
             }
         }

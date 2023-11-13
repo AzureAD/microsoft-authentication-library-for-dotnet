@@ -7,11 +7,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
 {
     internal interface IKeyMaterialManager
     {
-        ECDsaCng GetCngKey(string keyProviderName, string keyName);
-
-        ECDsaCng ECDsaCngKey { get; }
-
+        ECDsaCng CredentialKey { get; }
         CryptoKeyType CryptoKeyType { get; }
-        
+        ECDsaCng GetCngKey();
+
+        bool IsKeyGuardProtected(CngKey cngKey);
+
+        void DetermineKeyType(CngKey cngKey);
+
     }
 }

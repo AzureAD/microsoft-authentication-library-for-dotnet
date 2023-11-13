@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Boolean indicating if Proof-of-Possession is supported</returns>
         public bool IsProofOfPossessionSupportedByClient()
         {
-            return _keyMaterialManager.CryptoKeyType == Platforms.Features.KeyMaterial.CryptoKeyType.KeyGuard;
+            return _keyMaterialManager.CryptoKeyType == CryptoKeyType.KeyGuard;
         }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Boolean indicating if Claims is supported</returns>
         public bool IsClaimsSupportedByClient()
         {
-            return _keyMaterialManager.CryptoKeyType != Platforms.Features.KeyMaterial.CryptoKeyType.None;
+            return _keyMaterialManager.CryptoKeyType != CryptoKeyType.None;
         }
 
         /// <summary>

@@ -53,9 +53,9 @@ namespace Microsoft.Identity.Client.Credential
                 }
             }
 
-            if (keyMaterialManager.ECDsaCngKey != null)
+            if (keyMaterialManager.CredentialKey != null)
             {
-                return CreateCngCertificate(keyMaterialManager.ECDsaCngKey);
+                return CreateCngCertificate(keyMaterialManager.CredentialKey);
             }
 
             return null;
