@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
         private static CryptoKeyType s_cryptoKeyType = CryptoKeyType.None;
         private const string KeyProviderName = "Microsoft Software Key Storage Provider";
         private const string MachineKeyName = "ManagedIdentityCredentialKey";
-        private const string SoftwareKeyName = "ManagedIdentityCredentialKey";
+        private const string SoftwareKeyName = "ResourceBindingKey";
         private readonly ECDsaCng _eCDsaCngKey;
         private readonly ILoggerAdapter _logger;
 
@@ -60,8 +60,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
         }
 
         private bool TryGetKeyMaterial(
-            string keyProviderName, string keyName, 
-            CngKeyOpenOptions cngKeyOpenOptions, out ECDsaCng eCDsaCng)
+            string keyProviderName, 
+            string keyName, 
+            CngKeyOpenOptions cngKeyOpenOptions, 
+            out ECDsaCng eCDsaCng)
         {
             try
             {
@@ -81,7 +83,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
             }
             catch (CryptographicException ex)
             {
-                _logger.Verbose(() => $"[Managed Identity] Exception caught during key operations. Error Mesage : { ex.Message }.");
+                _logger.Verbose(() => $"[Managed Identity] Exception caught during key operations. " +
+                $"Error Mesage : { ex.Message }.");
             }
 
             eCDsaCng = null;

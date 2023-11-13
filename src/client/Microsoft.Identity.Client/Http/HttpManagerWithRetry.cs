@@ -74,18 +74,6 @@ namespace Microsoft.Identity.Client.Http
             return await SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, retry: true, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
-        public override async Task<HttpResponse> SendPostForceResponseAsync(
-            Uri uri,
-            IDictionary<string, string> headers,
-            IDictionary<string, string> bodyParameters,
-            X509Certificate2 bindingCertificate,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken = default)
-        {
-            HttpContent body = bodyParameters == null ? null : new FormUrlEncodedContent(bodyParameters);
-            return await SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, bindingCertificate, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
-        }
-
         /// <inheritdoc/>
         public override async Task<HttpResponse> SendPostForceResponseAsync(
             Uri uri,
@@ -95,32 +83,6 @@ namespace Microsoft.Identity.Client.Http
             CancellationToken cancellationToken = default)
         {
             return await SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, retry: true, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
-        }
-
-        public override async Task<HttpResponse> SendPostForceResponseAsync(
-            Uri uri,
-            IDictionary<string, string> headers,
-            StringContent body,
-            X509Certificate2 bindingCert,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken = default)
-        {
-            return await SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, bindingCert, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
-        }
-
-        protected override HttpClient GetHttpClient(X509Certificate2 x509Certificate2)
-        {
-            if (x509Certificate2 is null)
-            {
-                return _httpClientFactory.GetHttpClient();
-            }
-
-            if (_httpClientFactory is IMsalMtlsHttpClientFactory msalMtlsHttpClientFactory)
-            {
-                return msalMtlsHttpClientFactory.GetHttpClient(x509Certificate2);
-            }
-
-            throw new MsalClientException("http_client_factory", "You customized HttpClient factory but you are using APIs which require provisioning of a client certificate in HttpClient. Implement IMsalMtlsHttpClientFactory");
         }
 
         protected override async Task<HttpResponse> SendRequestAsync(
