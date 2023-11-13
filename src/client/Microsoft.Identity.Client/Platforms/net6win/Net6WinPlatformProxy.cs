@@ -4,6 +4,7 @@
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Platforms.Features.KeyMaterial;
 using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
 using Microsoft.Identity.Client.Platforms.netcore;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;

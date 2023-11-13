@@ -9,6 +9,9 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
+#if TRA
+using Microsoft.Identity.Client.Platforms.Features.KeyMaterial;
+#endif
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 
@@ -205,7 +208,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return new SimpleHttpClientFactory();
         }
-
+#if TRA
+        public virtual IKeyMaterialManager GetKeyMaterial()
+        {
+            return KeyMaterialProviderFactory.GetKeyMaterial();
+        }
+#endif
         /// <summary>
         /// On Android, iOS and UWP, MSAL will save the legacy ADAL cache in a known location.
         /// On other platforms, the app developer must use the serialization callbacks

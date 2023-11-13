@@ -9,6 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.Features.KeyMaterial;
 
 namespace Microsoft.Identity.Client.Credential
 {
@@ -22,16 +23,16 @@ namespace Microsoft.Identity.Client.Credential
         private readonly X509Certificate2 _bindingCertificate;
         private readonly CertificateCache _certificateCache;
         private static readonly object s_keyInfoLock = new(); // Lock object
-        private readonly KeyMaterialInfo _keyMaterialInfo;
+        private readonly IKeyMaterialManager _keyMaterialManager;
         private readonly ILoggerAdapter _logger;
 
         private TokenRequestAssertionInfo(IServiceBundle serviceBundle)
         {
             _logger = serviceBundle.ApplicationLogger;
-            _keyMaterialInfo = new KeyMaterialInfo();
+            _keyMaterialManager = serviceBundle.PlatformProxy.GetKeyMaterial();
 
             _certificateCache = CertificateCache.Instance();
-            _bindingCertificate = _certificateCache.GetOrAddCertificate(() => CreateCertificateFromCryptoKeyInfo(_keyMaterialInfo));
+            _bindingCertificate = _certificateCache.GetOrAddCertificate(() => CreateCertificateFromCryptoKeyInfo(_keyMaterialManager));
         }
 
         public static TokenRequestAssertionInfo GetCredentialInfo(IServiceBundle serviceBundle)
@@ -41,7 +42,7 @@ namespace Microsoft.Identity.Client.Credential
 
         public X509Certificate2 BindingCertificate => _bindingCertificate;
 
-        private X509Certificate2 CreateCertificateFromCryptoKeyInfo(KeyMaterialInfo keyMaterialInfo)
+        private X509Certificate2 CreateCertificateFromCryptoKeyInfo(IKeyMaterialManager keyMaterialManager)
         {
             lock (s_keyInfoLock) // Lock to ensure thread safety
             {
@@ -52,24 +53,22 @@ namespace Microsoft.Identity.Client.Credential
                 }
             }
 
-            if (keyMaterialInfo.ECDsaCngKey != null)
+            if (keyMaterialManager.ECDsaCngKey != null)
             {
-                return CreateCngCertificate(keyMaterialInfo);
+                return CreateCngCertificate(keyMaterialManager.ECDsaCngKey);
             }
 
             return null;
         }
 
-        private X509Certificate2 CreateCngCertificate(KeyMaterialInfo keyMaterialInfo)
+        private X509Certificate2 CreateCngCertificate(ECDsaCng eCDsaCngKey)
         {
-            string certSubjectname = keyMaterialInfo.ECDsaCngKey.Key.KeyName;
+            string certSubjectname = eCDsaCngKey.Key.KeyName;
 
             try
             {
                 lock (s_keyInfoLock) // Lock to ensure thread safety
                 {
-                    ECDsaCng eCDsaCngKey = keyMaterialInfo.ECDsaCngKey;
-
                     _logger.Verbose(() => "[Managed Identity] Creating binding certificate with CNG key for credential endpoint.");
 
                     // Create a certificate request

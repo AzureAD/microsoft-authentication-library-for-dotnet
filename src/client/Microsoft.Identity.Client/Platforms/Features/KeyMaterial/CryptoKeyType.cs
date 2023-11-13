@@ -7,16 +7,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Credential
+namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
 {
     /// <summary>
     /// Enumerates various types of crypto keys used in the application.
     /// </summary>
-    internal enum CryptoKeyType
+    public enum CryptoKeyType
     {
         None,         // No specific crypto key type.
         KeyGuard,     // KeyGuard-protected key.
         Machine,      // Machine key.
+        User,         // User Key.
         Ephemeral,    // Ephemeral (short-lived) key.
         InMemory      // In-memory key.
     }

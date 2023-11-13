@@ -126,13 +126,7 @@ namespace Microsoft.Identity.Client
         #region ManagedIdentity
         public ManagedIdentityId ManagedIdentityId { get; internal set; }
         public bool IsManagedIdentity { get; }
-#if TRA
-        public KeyMaterialInfo KeyMaterialInfo { get; internal set; }
-        public bool IsManagedIdentityCredentialsSupported { get; internal set; }
-        public bool IsManagedIdentityClaimsSupported { get; internal set; }
-        public bool IsManagedIdentityLatchSupported { get; internal set; }
-        public bool IsManagedIdentityPopSupported { get; internal set; }
-#endif
+
         #endregion
 
         #region ClientCredentials

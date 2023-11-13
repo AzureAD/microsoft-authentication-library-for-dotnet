@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ManagedIdentity;
 using System.Diagnostics;
 #if TRA
+using Microsoft.Identity.Client.Platforms.Features.KeyMaterial;
 using Microsoft.Identity.Client.Credential;
 #endif
 
@@ -33,6 +34,10 @@ namespace Microsoft.Identity.Client
         : ApplicationBase,
             IManagedIdentityApplication
     {
+#if TRA
+        private readonly IKeyMaterialManager _keyMaterialManager;
+        private readonly TokenRequestAssertionInfo _tokenRequestAssertionInfo;
+#endif
         internal ManagedIdentityApplication(
             ApplicationConfiguration configuration)
             : base(configuration)
@@ -41,16 +46,15 @@ namespace Microsoft.Identity.Client
 
             AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
 #if TRA
-            TokenRequestAssertionInfo = TokenRequestAssertionInfo.GetCredentialInfo(ServiceBundle);
+            _keyMaterialManager = ServiceBundle.PlatformProxy.GetKeyMaterial();
+            _tokenRequestAssertionInfo = TokenRequestAssertionInfo.GetCredentialInfo(ServiceBundle);
 #endif
             ServiceBundle.ApplicationLogger.Verbose(() => $"ManagedIdentityApplication {configuration.GetHashCode()} created");
         }
 
         // Stores all app tokens
         internal ITokenCacheInternal AppTokenCacheInternal { get; }
-#if TRA
-        internal TokenRequestAssertionInfo TokenRequestAssertionInfo { get; }
-#endif
+
         /// <inheritdoc/>
         public AcquireTokenForManagedIdentityParameterBuilder AcquireTokenForManagedIdentity(string resource)
         {
@@ -70,7 +74,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Boolean indicating if Proof-of-Possession is supported</returns>
         public bool IsProofOfPossessionSupportedByClient()
         {
-            return ServiceBundle.Config.IsManagedIdentityPopSupported;
+            return _keyMaterialManager.CryptoKeyType == Platforms.Features.KeyMaterial.CryptoKeyType.KeyGuard;
         }
 
         /// <summary>
@@ -79,7 +83,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Boolean indicating if Claims is supported</returns>
         public bool IsClaimsSupportedByClient()
         {
-            return ServiceBundle.Config.IsManagedIdentityClaimsSupported;
+            return _keyMaterialManager.CryptoKeyType != Platforms.Features.KeyMaterial.CryptoKeyType.None;
         }
 
         /// <summary>
@@ -88,7 +92,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Binding certificate used for advanced scenarios</returns>
         public X509Certificate2 GetBindingCertificate()
         {
-            return TokenRequestAssertionInfo.BindingCertificate; //return the binding cert
+            return _tokenRequestAssertionInfo.BindingCertificate; //return the binding cert
         }
 #endif
     }

@@ -13,9 +13,6 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
-#if TRA
-using Microsoft.Identity.Client.Credential;
-#endif
 
 namespace Microsoft.Identity.Client
 {
@@ -160,9 +157,9 @@ namespace Microsoft.Identity.Client
         private void DefaultConfiguration()
         {
             ComputeClientIdForCaching();
-#if TRA
-            EvaluatePopAndClaimsSupportForManagedIdentity();
-#endif
+//#if TRA
+//            EvaluatePopAndClaimsSupportForManagedIdentity();
+//#endif
 
             Config.TenantId = Constants.ManagedIdentityDefaultTenant;
             Config.RedirectUri = Constants.DefaultConfidentialClientRedirectUri;
@@ -181,27 +178,27 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private void EvaluatePopAndClaimsSupportForManagedIdentity()
-        {
-#if TRA
-            Config.KeyMaterialInfo = new KeyMaterialInfo();
+//        private void EvaluatePopAndClaimsSupportForManagedIdentity()
+//        {
+//#if TRA
+//            Config.KeyMaterialInfo = new KeyMaterialInfo();
 
-            if (Config.KeyMaterialInfo.CryptoKeyType != CryptoKeyType.None)
-            {
-                Config.IsManagedIdentityCredentialsSupported = true;
-                Config.IsManagedIdentityClaimsSupported = true;
-            }
+//            if (Config.KeyMaterialInfo.CryptoKeyType != CryptoKeyType.None)
+//            {
+//                Config.IsManagedIdentityCredentialsSupported = true;
+//                Config.IsManagedIdentityClaimsSupported = true;
+//            }
 
-            if (Config.KeyMaterialInfo.CryptoKeyType == CryptoKeyType.KeyGuard)
-            {
-                Config.IsManagedIdentityLatchSupported = true;
-            }
+//            if (Config.KeyMaterialInfo.CryptoKeyType == CryptoKeyType.KeyGuard)
+//            {
+//                Config.IsManagedIdentityLatchSupported = true;
+//            }
 
-            if (Config.KeyMaterialInfo.CryptoKeyType == CryptoKeyType.Machine)
-            {
-                Config.IsManagedIdentityPopSupported = true;
-            }
-#endif
-        }
+//            if (Config.KeyMaterialInfo.CryptoKeyType == CryptoKeyType.Machine)
+//            {
+//                Config.IsManagedIdentityPopSupported = true;
+//            }
+//#endif
+        //}
     }
 }

@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Credential;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Platforms.Features.KeyMaterial;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
@@ -24,9 +25,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     {
         private readonly Uri _credentialEndpoint;
         private readonly TokenRequestAssertionInfo _requestAssertionInfo;
+        private static IKeyMaterialManager s_keyMaterialManager;
 
         public static AbstractManagedIdentity TryCreate(RequestContext requestContext)
         {
+            s_keyMaterialManager = requestContext.ServiceBundle.PlatformProxy.GetKeyMaterial();
+
             return IsCredentialKeyAvailable(requestContext, requestContext.Logger, out Uri credentialEndpointUri) ?
                 new CredentialSource(requestContext, credentialEndpointUri) :
                 null;
@@ -36,6 +40,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             : base(requestContext, ManagedIdentitySource.Credential)
         {
             _credentialEndpoint = credentialEndpoint;
+            s_keyMaterialManager ??= requestContext.ServiceBundle.PlatformProxy.GetKeyMaterial();
             _requestAssertionInfo = TokenRequestAssertionInfo.GetCredentialInfo(requestContext.ServiceBundle);
         }
 
@@ -55,13 +60,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             credentialEndpointUri = null;
 
-            if (!requestContext.ServiceBundle.Config.IsManagedIdentityCredentialsSupported)
+            if (s_keyMaterialManager.CryptoKeyType == Platforms.Features.KeyMaterial.CryptoKeyType.None)
             {
                 logger.Verbose(() => "[Managed Identity] Credential based managed identity is unavailable.");
                 return false;
             }
 
-            string credentialUri = requestContext.ServiceBundle.Config.KeyMaterialInfo.CredentialEndpoint;
+            string credentialUri = Constants.CredentialEndpoint;
 
             switch (requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
             {
