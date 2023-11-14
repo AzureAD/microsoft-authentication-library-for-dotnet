@@ -7,8 +7,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     {
         Unknown,
         None,
-        AdfsV2,
-        AdfsV3,
         AdfsV4,
         PingFederateV83,
         Shibboleth,

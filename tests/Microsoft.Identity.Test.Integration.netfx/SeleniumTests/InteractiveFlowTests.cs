@@ -72,20 +72,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
-        public async Task Interactive_AdfsV3_FederatedAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, true).ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [RunOn(TargetFrameworks.NetCore)]
-        public async Task Interactive_AdfsV2_FederatedAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV2, true).ConfigureAwait(false);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [RunOn(TargetFrameworks.NetCore)]
         public async Task Interactive_AdfsV4_FederatedAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);

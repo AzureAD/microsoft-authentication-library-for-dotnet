@@ -224,7 +224,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task WithMultipleUsers_TestAsync()
         {
             var aadUser1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
-            var aadUser2 = (await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV2, true).ConfigureAwait(false)).User;
+            var aadUser2 = (await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false)).User;
             var adfsUser = (await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019).ConfigureAwait(false)).User;
 
             await RunOnBehalfOfTestAsync(adfsUser, false).ConfigureAwait(false);
