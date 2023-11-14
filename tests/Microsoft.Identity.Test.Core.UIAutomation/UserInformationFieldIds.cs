@@ -66,14 +66,6 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         {
             if (_user.UserType == UserType.Federated)
             {
-                if (_user.FederationProvider == FederationProvider.AdfsV2)
-                {
-                    _passwordInputId = CoreUiTestConstants.AdfsV2WebPasswordInputId;
-                    _passwordSignInButtonId = CoreUiTestConstants.AdfsV2WebSubmitButtonId;
-                    return;
-                }
-
-                // We use the same IDs for ADFSv3 and ADFSv4
                 _passwordInputId = CoreUiTestConstants.AdfsV4WebPasswordId;
                 _passwordSignInButtonId = CoreUiTestConstants.AdfsV4WebSubmitId;
                 return;
