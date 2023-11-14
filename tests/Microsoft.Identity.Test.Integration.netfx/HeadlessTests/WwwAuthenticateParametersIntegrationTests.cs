@@ -26,9 +26,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task CreateWwwAuthenticateResponseFromKeyVaultUrlAsync()
         {
-            WwwAuthenticateParameters authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(
-                "Bearer",
-                "https://buildautomation.vault.azure.net/secrets/CertName/CertVersion")
+            WwwAuthenticateParameters authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(                
+                "https://buildautomation.vault.azure.net/secrets/CertName/CertVersion",
+                "Bearer")
                 .ConfigureAwait(false);
 
             Assert.AreEqual("login.microsoftonline.com", new Uri(authParams.Authority).Host);
@@ -42,8 +42,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task CreateWwwAuthenticateResponseFromGraphUrlAsync()
         {
             WwwAuthenticateParameters authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(
-                "Bearer",
-                "https://graph.microsoft.com/v1.0/me").ConfigureAwait(false);
+                "https://graph.microsoft.com/v1.0/me", "Bearer").ConfigureAwait(false);
 
             Assert.AreEqual("https://login.microsoftonline.com/common", authParams.Authority);
             Assert.AreEqual("common", authParams.GetTenantId());
@@ -68,7 +67,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             const string apiVersion = "2020-08-01"; // current latest API version for /subscriptions/get
             var url = $"https://{hostName}/subscriptions/{subscriptionId}?api-version={apiVersion}";
 
-            WwwAuthenticateParameters authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync("Bearer", url).ConfigureAwait(false);
+            WwwAuthenticateParameters authParams = await WwwAuthenticateParameters
+                .CreateFromAuthenticationResponseAsync(url, "Bearer")
+                .ConfigureAwait(false);
 
             Assert.AreEqual($"https://{authority}/{tenantId}", authParams.Authority); // authority URI consists of AAD endpoint and tenant ID
             Assert.AreEqual(tenantId, authParams.GetTenantId()); // tenant ID is extracted out of authority URI
@@ -85,7 +86,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Test for nonce in WWW-Authenticate header
             string popNonce = string.Empty;
             var parameterList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(
-                                                         "https://testingsts.azurewebsites.net/servernonce/invalidsignature").ConfigureAwait(false);
+                                                         "https://testingsts.azurewebsites.net/servernonce/invalidsignature")
+                .ConfigureAwait(false);
 
             var parameters = parameterList.FirstOrDefault();
 
