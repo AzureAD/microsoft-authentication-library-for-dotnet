@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         #endregion MSTest Hooks
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetFx)]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         public async Task DeviceCodeFlowTestAsync()
         {
@@ -76,7 +76,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [RunOn(TargetFrameworks.NetCore)]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.MSA)]
-        [Ignore] // Failing sporadically https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1045664 
         public async Task DeviceCodeFlowMsaTestAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
