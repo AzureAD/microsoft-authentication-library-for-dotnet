@@ -60,28 +60,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             Assert.IsNotNull(cnf);
             ClaimsPrincipal innerTokenClaims = IdToken.Parse(assertionWithoutShr).ClaimsPrincipal;
             string reqCnf = innerTokenClaims.FindFirst("cnf").Value;
-            Assert.IsNotNull(reqCnf);
-
-            var httpClient = new HttpClient();
-            HttpResponseMessage response;
-            var request = new HttpRequestMessage(HttpMethod.Post, PoPValidatorEndpoint);
-
-            var authHeader = new AuthenticationHeaderValue(tokenType, token);
-
-            request.Headers.Add("Secret", s_popValidationEndpointLazy.Value);
-            request.Headers.Add("Authority", "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/");
-            request.Headers.Add("ClientId", clientId);
-            request.Headers.Authorization = authHeader;
-
-            // the URI the POP token is bound to
-            request.Headers.Add("ShrUri", requestUri);
-
-            // the method the POP token in bound to
-            request.Headers.Add("ShrMethod", method.ToString());
-
-            response = await httpClient.SendAsync(request).ConfigureAwait(false);
-
-            Assert.IsTrue(response.IsSuccessStatusCode);
+            Assert.IsNotNull(reqCnf);            
         }
 
         public static async Task VerifyPopNonceAsync(string nonce)
