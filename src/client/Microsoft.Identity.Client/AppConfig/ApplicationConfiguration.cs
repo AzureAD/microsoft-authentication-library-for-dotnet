@@ -110,15 +110,12 @@ namespace Microsoft.Identity.Client
         public string Component { get; internal set; }
         public IDictionary<string, string> ExtraQueryParameters { get; internal set; } = new Dictionary<string, string>();
         public bool UseRecommendedDefaultRedirectUri { get; internal set; }
-
         public bool ExperimentalFeaturesEnabled { get; set; } = false;
-
         public IEnumerable<string> ClientCapabilities { get; set; }
         public bool SendX5C { get; internal set; } = false;
         public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
         public bool CacheSynchronizationEnabled { get; internal set; } = true;
         public bool MultiCloudSupportEnabled { get; set; } = false;
-
         public bool RetryOnServerErrors { get; set; } = true;
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
@@ -126,6 +123,9 @@ namespace Microsoft.Identity.Client
         #region ManagedIdentity
         public ManagedIdentityId ManagedIdentityId { get; internal set; }
         public bool IsManagedIdentity { get; }
+        public bool IsManagedIdentityTokenRequestInfoAvailabe { get; internal set; }
+
+        public X509Certificate2 ManagedIdentityBindingCertificate { get; internal set;  }
 
         #endregion
 

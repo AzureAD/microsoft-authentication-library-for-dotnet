@@ -29,9 +29,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         public static AbstractManagedIdentity TryCreate(RequestContext requestContext)
         {
-            s_keyMaterialManager = requestContext.ServiceBundle.PlatformProxy.GetKeyMaterial();
-
-            return IsCredentialKeyAvailable(requestContext, requestContext.Logger, out Uri credentialEndpointUri) ?
+            return IsCredentialKeyAvailable(requestContext, out Uri credentialEndpointUri) ?
                 new CredentialSource(requestContext, credentialEndpointUri) :
                 null;
         }
@@ -40,8 +38,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             : base(requestContext, ManagedIdentitySource.Credential)
         {
             _credentialEndpoint = credentialEndpoint;
-            s_keyMaterialManager ??= requestContext.ServiceBundle.PlatformProxy.GetKeyMaterial();
-            _requestAssertionInfo = TokenRequestAssertionInfo.GetCredentialInfo(requestContext.ServiceBundle);
+            s_keyMaterialManager = requestContext.ServiceBundle.PlatformProxy.GetKeyMaterial();
+            _requestAssertionInfo = TokenRequestAssertionInfo.GetCredentialInfo(s_keyMaterialManager, requestContext.ServiceBundle);
         }
 
         protected override ManagedIdentityRequest CreateRequest(string resource)
@@ -56,13 +54,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         private static bool IsCredentialKeyAvailable(
-            RequestContext requestContext, ILoggerAdapter logger, out Uri credentialEndpointUri)
+            RequestContext requestContext, out Uri credentialEndpointUri)
         {
             credentialEndpointUri = null;
 
-            if (s_keyMaterialManager.CryptoKeyType == Platforms.Features.KeyMaterial.CryptoKeyType.None)
+            if (!requestContext.ServiceBundle.Config.IsManagedIdentityTokenRequestInfoAvailabe)
             {
-                logger.Verbose(() => "[Managed Identity] Credential based managed identity is unavailable.");
+                requestContext.Logger.Verbose(() => "[Managed Identity] Credential based managed identity is unavailable.");
                 return false;
             }
 
@@ -88,7 +86,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             credentialEndpointUri = new(credentialUri);
 
-            logger.Info($"[Managed Identity] Creating Credential based managed identity.");
+            requestContext.Logger.Info($"[Managed Identity] Creating Credential based managed identity.");
             return true;
         }
 
@@ -112,9 +110,29 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 CredentialResponse credentialResponse = GetCredentialResponse(response);
 
                 //Create the second leg request
-                ManagedIdentityRequest request = CreateRequest(parameters, credentialResponse);
+                //temporarily form the authority sine IMDS does not return this yet 
+                string baseUrl = "https://mtlsauth.microsoft.com/";
+                string tenantId = credentialResponse.TenantId;
+                string tokenEndpoint = "/oauth2/v2.0/token?dc=ESTS-PUB-WUS2-AZ1-FD000-TEST1";
+                Uri url = new(string.Join("", baseUrl, tenantId, tokenEndpoint));
 
-                _requestContext.Logger.Verbose(() => "[Managed Identity] Sending request to mtls endpoint.");
+                ManagedIdentityRequest request = new(HttpMethod.Post, url);
+                var scope = parameters.Resource + "/.default";
+                request.Headers.Add("x-ms-client-request-id", _requestContext.CorrelationId.ToString("D"));
+                request.BodyParameters.Add("grant_type", "client_credentials");
+                request.BodyParameters.Add("client_id", credentialResponse.ClientId);
+                request.BodyParameters.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
+                request.BodyParameters.Add("client_assertion", credentialResponse.Credential);
+                request.BodyParameters.Add("scope", scope);
+                request.BindingCertificate = _requestAssertionInfo.BindingCertificate;
+
+                var mergedclaims = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
+                    parameters.Claims, _requestContext.ServiceBundle.Config.ClientCapabilities);
+
+                request.BodyParameters.Add("claims", mergedclaims);
+
+                _requestContext.Logger.Verbose(() => $"[Managed Identity] Sending token request to mtls " +
+                $"endpoint : {credentialResponse.RegionalTokenUrl}.");
 
                 response = await _requestContext.ServiceBundle.HttpManager
                         .SendPostForceResponseAsync(
@@ -142,33 +160,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             return credentialResponse;
-        }
-
-        protected ManagedIdentityRequest CreateRequest(
-            AcquireTokenForManagedIdentityParameters parameters, CredentialResponse credentialResponse)
-        {
-            //temporarily form the authority sine IMDS does not return this yet 
-            string baseUrl = "https://mtlsauth.microsoft.com/";
-            string tenantId = credentialResponse.TenantId;
-            string tokenEndpoint = "/oauth2/v2.0/token?dc=ESTS-PUB-WUS2-AZ1-FD000-TEST1";
-            Uri url = new(string.Join("", baseUrl, tenantId, tokenEndpoint));
-
-            ManagedIdentityRequest request = new(HttpMethod.Post, url);
-            var scope = parameters.Resource + "/.default";
-            request.Headers.Add("x-ms-client-request-id", _requestContext.CorrelationId.ToString("D"));
-            request.BodyParameters.Add("grant_type", "client_credentials");
-            request.BodyParameters.Add("client_id", credentialResponse.ClientId);
-            request.BodyParameters.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
-            request.BodyParameters.Add("client_assertion", credentialResponse.Credential);
-            request.BodyParameters.Add("scope", scope);
-            request.BindingCertificate = _requestAssertionInfo.BindingCertificate;
-
-            var mergedclaims = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
-                parameters.Claims, _requestContext.ServiceBundle.Config.ClientCapabilities);
-
-            request.BodyParameters.Add("claims", mergedclaims);
-
-            return request;
         }
     }
 }

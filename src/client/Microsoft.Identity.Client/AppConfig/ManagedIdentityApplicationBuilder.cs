@@ -157,9 +157,6 @@ namespace Microsoft.Identity.Client
         private void DefaultConfiguration()
         {
             ComputeClientIdForCaching();
-//#if TRA
-//            EvaluatePopAndClaimsSupportForManagedIdentity();
-//#endif
 
             Config.TenantId = Constants.ManagedIdentityDefaultTenant;
             Config.RedirectUri = Constants.DefaultConfidentialClientRedirectUri;
@@ -177,28 +174,5 @@ namespace Microsoft.Identity.Client
                 Config.ClientId = Config.ManagedIdentityId.UserAssignedId;
             }
         }
-
-//        private void EvaluatePopAndClaimsSupportForManagedIdentity()
-//        {
-//#if TRA
-//            Config.KeyMaterialInfo = new KeyMaterialInfo();
-
-//            if (Config.KeyMaterialInfo.CryptoKeyType != CryptoKeyType.None)
-//            {
-//                Config.IsManagedIdentityCredentialsSupported = true;
-//                Config.IsManagedIdentityClaimsSupported = true;
-//            }
-
-//            if (Config.KeyMaterialInfo.CryptoKeyType == CryptoKeyType.KeyGuard)
-//            {
-//                Config.IsManagedIdentityLatchSupported = true;
-//            }
-
-//            if (Config.KeyMaterialInfo.CryptoKeyType == CryptoKeyType.Machine)
-//            {
-//                Config.IsManagedIdentityPopSupported = true;
-//            }
-//#endif
-        //}
     }
 }

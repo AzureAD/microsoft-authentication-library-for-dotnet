@@ -20,6 +20,8 @@ Console.WriteLine(mi.IsProofOfPossessionSupportedByClient());
 
 Console.WriteLine(mi.IsClaimsSupportedByClient());
 
+Console.WriteLine(mi.GetBindingCertificate());
+
 string? scope = "https://management.azure.com";
 
 do

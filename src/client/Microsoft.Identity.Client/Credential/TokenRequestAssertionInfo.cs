@@ -23,21 +23,23 @@ namespace Microsoft.Identity.Client.Credential
         private readonly X509Certificate2 _bindingCertificate;
         private readonly CertificateCache _certificateCache;
         private static readonly object s_keyInfoLock = new(); // Lock object
-        private readonly IKeyMaterialManager _keyMaterialManager;
         private readonly ILoggerAdapter _logger;
 
-        private TokenRequestAssertionInfo(IServiceBundle serviceBundle)
+        private TokenRequestAssertionInfo(IKeyMaterialManager keyMaterialManager, 
+            IServiceBundle serviceBundle)
         {
             _logger = serviceBundle.ApplicationLogger;
-            _keyMaterialManager = serviceBundle.PlatformProxy.GetKeyMaterial();
 
             _certificateCache = CertificateCache.Instance();
-            _bindingCertificate = _certificateCache.GetOrAddCertificate(() => CreateCertificateFromCryptoKeyInfo(_keyMaterialManager));
+
+            _bindingCertificate = _certificateCache.GetOrAddCertificate(
+                () => CreateCertificateFromCryptoKeyInfo(keyMaterialManager));
         }
 
-        public static TokenRequestAssertionInfo GetCredentialInfo(IServiceBundle serviceBundle)
+        public static TokenRequestAssertionInfo GetCredentialInfo(
+            IKeyMaterialManager keyMaterialManager, IServiceBundle serviceBundle)
         {
-            return s_instance ??= new TokenRequestAssertionInfo(serviceBundle);
+            return s_instance ??= new TokenRequestAssertionInfo(keyMaterialManager, serviceBundle);
         }
 
         public X509Certificate2 BindingCertificate => _bindingCertificate;
@@ -100,7 +102,6 @@ namespace Microsoft.Identity.Client.Credential
                 throw;
             }
         }
-
 
         private CertificateRequest CreateCertificateRequest(string subjectName, ECDsaCng ecdsaKey)
         {

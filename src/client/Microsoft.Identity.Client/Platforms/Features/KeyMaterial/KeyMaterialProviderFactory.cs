@@ -14,7 +14,7 @@ using Microsoft.Identity.Client.Utils;
 namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
 {
     /// <summary>
-    /// Class to store crypto key information for a Managed Identity supported Azure resource.
+    /// Factory clas for creating and managing instances of KeyMaterialManager
     /// For more details see https://aka.ms/msal-net-managed-identity
     /// </summary>
     internal static class KeyMaterialProviderFactory
