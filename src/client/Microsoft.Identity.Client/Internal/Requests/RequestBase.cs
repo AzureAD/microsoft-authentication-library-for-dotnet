@@ -109,7 +109,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         authenticationResult.AuthenticationResultMetadata, 
                         apiEvent.ApiId.ToString(),
                         GetCacheLevel(authenticationResult).ToString(), 
-                        AuthenticationRequestParameters.RequestContext.Logger);
+                        AuthenticationRequestParameters.RequestContext.Logger, 
+                        sw.ElapsedTicks / (TimeSpan.TicksPerMillisecond / 1000));
 
                     LogMsalSuccessTelemetryToOTel(authenticationResult);
 
@@ -355,6 +356,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void UpdateTelemetry(Stopwatch sw, ApiEvent apiEvent, AuthenticationResult authenticationResult)
         {
+            sw.Stop();
             authenticationResult.AuthenticationResultMetadata.DurationTotalInMs = sw.ElapsedMilliseconds;
             authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs = apiEvent.DurationInHttpInMs;
             authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;

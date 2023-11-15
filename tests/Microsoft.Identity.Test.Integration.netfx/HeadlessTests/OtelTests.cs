@@ -64,7 +64,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             runOn.AssertFramework();
             await RunClientCredsAsync().ConfigureAwait(false);
 
-            VerifyMetrics(4);
+            s_meterProvider.ForceFlush();
+            OTelInstrumentationUtil.VerifyMetrics(5, _exportedMetrics);
             VerifyActivity(15);
         }
 
@@ -76,6 +77,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             IConfidentialClientApplication confidentialApp = CreateApp(settings);
 
+            // Acquire token from IDDP
             authResult = await confidentialApp
                 .AcquireTokenForClient(settings.AppScopes)
                 .ExecuteAsync(CancellationToken.None)
@@ -83,6 +85,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             MsalAssert.AssertAuthResult(authResult);
 
+            // Acquire token from cache
             authResult = await confidentialApp
                 .AcquireTokenForClient(settings.AppScopes)
                 .ExecuteAsync(CancellationToken.None)
@@ -90,6 +93,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             MsalAssert.AssertAuthResult(authResult);
 
+            // Get back a service exception.
             try
             {
                 authResult = await confidentialApp
@@ -115,101 +119,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
-        private void VerifyMetrics(int expectedMetricCount)
-        {
-            
-            s_meterProvider.ForceFlush();
-
-            Assert.AreEqual(expectedMetricCount, _exportedMetrics.Count);
-
-            foreach (Metric exportedItem in _exportedMetrics)
-            {
-                int expectedTagCount = 0;
-                List<string> expectedTags = new();
-
-                Assert.AreEqual(OtelInstrumentation.MeterName, exportedItem.MeterName);
-
-                switch (exportedItem.Name)
-                {
-                    case "MsalSuccess":
-                        Assert.AreEqual(MetricType.LongSum, exportedItem.MetricType);
-
-                        expectedTagCount = 6;
-                        expectedTags.Add(TelemetryConstants.MsalVersion);
-                        expectedTags.Add(TelemetryConstants.Platform);
-                        expectedTags.Add(TelemetryConstants.ApiId);
-                        expectedTags.Add(TelemetryConstants.TokenSource);
-                        expectedTags.Add(TelemetryConstants.CacheInfoTelemetry);
-                        expectedTags.Add(TelemetryConstants.CacheLevel);
-
-                        break;
-                    case "MsalFailed":
-                        Assert.AreEqual(MetricType.LongSum, exportedItem.MetricType);
-
-                        expectedTagCount = 3;
-                        expectedTags.Add(TelemetryConstants.MsalVersion);
-                        expectedTags.Add(TelemetryConstants.Platform);
-                        expectedTags.Add(TelemetryConstants.ErrorCode);
-
-                        break;
-
-                    case "MsalTotalDuration.1A":
-                        Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
-
-                        expectedTagCount = 5;
-                        expectedTags.Add(TelemetryConstants.MsalVersion);
-                        expectedTags.Add(TelemetryConstants.Platform);
-                        expectedTags.Add(TelemetryConstants.ApiId);
-                        expectedTags.Add(TelemetryConstants.TokenSource);
-                        expectedTags.Add(TelemetryConstants.CacheLevel);
-
-                        break;
-                    case "MsalDurationInCache.1A":
-                        Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
-
-                        expectedTagCount = 3;
-                        expectedTags.Add(TelemetryConstants.MsalVersion);
-                        expectedTags.Add(TelemetryConstants.Platform);
-                        expectedTags.Add(TelemetryConstants.ApiId);
-
-                        break;
-                    case "MsalDurationInHttp.1A":
-                        Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
-
-                        expectedTagCount = 3;
-                        expectedTags.Add(TelemetryConstants.MsalVersion);
-                        expectedTags.Add(TelemetryConstants.Platform);
-                        expectedTags.Add(TelemetryConstants.ApiId);
-
-                        break;
-
-                    default:
-                        Assert.Fail("Unexpected metrics logged.");
-                        break;
-                }
-
-                foreach (var metricPoint in exportedItem.GetMetricPoints())
-                {
-                    AssertTags(metricPoint.Tags, expectedTagCount, expectedTags);
-                }
-            }
-        }
-
-        private void AssertTags(ReadOnlyTagCollection tags, int expectedTagCount, List<string> expectedTags)
-        {
-            Assert.AreEqual(expectedTagCount, tags.Count);
-            IDictionary<string, object> tagDictionary = new Dictionary<string, object>();
-
-            foreach (var tag in tags)
-            {
-                tagDictionary[tag.Key] = tag.Value;
-            }
-
-            foreach (var expectedTag in expectedTags)
-            {
-                Assert.IsNotNull(tagDictionary[expectedTag], $"Tag {expectedTag} is missing.");
-            }
-        }
+        
 
         private static IConfidentialClientApplication CreateApp(IConfidentialAppSettings settings)
         {

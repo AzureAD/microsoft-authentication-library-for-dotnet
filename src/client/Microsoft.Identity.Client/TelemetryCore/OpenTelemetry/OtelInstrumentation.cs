@@ -30,6 +30,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         private const string SuccessCounterName = "MsalSuccess";
         private const string FailedCounterName = "MsalFailed";
         private const string TotalDurationHistogramName = "MsalTotalDuration.1A";
+        private const string TotalDurationInUsHistogramName = "MsalTotalDurationInUs.1A";
         private const string DurationInCacheHistogramName = "MsalDurationInCache.1A";
         private const string DurationInHttpHistogramName = "MsalDurationInHttp.1A";
 
@@ -65,6 +66,15 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             TotalDurationHistogramName,
             unit: "ms",
             description: "Performance of token acquisition calls total latency");
+
+        /// <summary>
+        /// Histogram to record total duration of token acquisition calls in microseconds(us) when total duration in ms is less than 5.
+        /// This will capture the duration in us when the L1 cache is used to get the token.
+        /// </summary>
+        internal static readonly Histogram<long> s_durationTotalInUs = Meter.CreateHistogram<long>(
+            TotalDurationInUsHistogramName,
+            unit: "us",
+            description: "Performance of token acquisition calls total latency in micro seconds when L1 cache is used.");
 
         /// <summary>
         /// Histogram to record duration in cache of token acquisition calls.
@@ -122,7 +132,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             AuthenticationResultMetadata authResultMetadata,
             string apiId,
             string cacheLevel, 
-            ILoggerAdapter logger)
+            ILoggerAdapter logger, 
+            long totalDurationInUs)
         {
 #if SUPPORTS_OTEL
             s_successCounter.Value.Add(1,
@@ -156,6 +167,16 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
                 new(TelemetryConstants.ApiId, apiId));
+            }
+
+            if (authResultMetadata.TokenSource.Equals(TokenSource.Cache) && !authResultMetadata.CacheLevel.Equals(CacheLevel.L2Cache))
+            {
+                s_durationTotalInUs.Record(totalDurationInUs,
+                new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
+                new(TelemetryConstants.Platform, platform),
+                new(TelemetryConstants.ApiId, apiId),
+                new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
+                new(TelemetryConstants.CacheLevel, cacheLevel));
             }
 #endif
         }

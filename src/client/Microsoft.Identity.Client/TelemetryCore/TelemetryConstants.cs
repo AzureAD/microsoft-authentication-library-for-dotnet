@@ -29,6 +29,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string StsErrorCode = "StsErrorCode";
         public const string ErrorMessage = "ErrorMessage";
         public const string Duration = "Duration";
+        public const string DurationInUs = "DurationInUs";
         public const string Succeeded = "Succeeded";
         public const string DurationInCache = "DurationInCache";
         public const string DurationInHttp = "DurationInHttp";
