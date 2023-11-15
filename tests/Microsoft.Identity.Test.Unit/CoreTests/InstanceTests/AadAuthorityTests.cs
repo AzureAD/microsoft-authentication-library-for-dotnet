@@ -334,7 +334,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        public async Task CreateAuthorityForRequestAsync_MSAPassthrough()
+        public async Task CreateAuthorityForRequestAsync_MSAPassthroughAsync()
         {
             var testAccount = new Account("TEST_ID.9188040d-6c67-4c5b-b112-36a304b66dad", "username", Authority.CreateAuthority("https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad").AuthorityInfo.Host);
 
