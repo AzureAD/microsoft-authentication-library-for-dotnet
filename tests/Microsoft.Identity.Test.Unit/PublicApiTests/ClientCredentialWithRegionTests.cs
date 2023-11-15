@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Unit
             var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() =>
                 app
                 .AcquireTokenForClient(TestConstants.s_scope)
-                .WithAuthority($"https://login.microsoft.com/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                .WithAuthority("https://login.microsoft.com/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
 #pragma warning restore CS0618 // Type or member is obsolete
                     .ExecuteAsync())
                 .ConfigureAwait(false);
@@ -359,7 +359,7 @@ namespace Microsoft.Identity.Test.Unit
 #pragma warning disable CS0618 // Type or member is obsolete
                 AuthenticationResult result = await app
                     .AcquireTokenForClient(TestConstants.s_scope)
-                    .WithAuthority("https://" + TestConstants.PpeOrgEnvironment + "/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                    .WithTenantId("17b189bc-2b81-4ec5-aa51-3e628cbc931b")
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -375,7 +375,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 result = await app
                    .AcquireTokenForClient(TestConstants.s_scope)
-                   .WithAuthority("https://" + TestConstants.PpeOrgEnvironment + "/17b189bc-2b81-4ec5-aa51-3e628cbc931b")
+                   .WithTenantId("17b189bc-2b81-4ec5-aa51-3e628cbc931b")
                    .ExecuteAsync()
                    .ConfigureAwait(false);
 #pragma warning restore CS0618 // Type or member is obsolete

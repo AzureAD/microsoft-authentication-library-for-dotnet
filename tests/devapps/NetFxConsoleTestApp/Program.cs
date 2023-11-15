@@ -337,9 +337,7 @@ namespace NetFx
 
                             if (account != null && account.HomeAccountId.TenantId == PersonalTenantIdV2AAD)
                             {
-                                var msaAuthority = $"{publicCloudEnv}{msaTenantIdPublicCloud}";
-
-                                silentBuilder = silentBuilder.WithAuthority(msaAuthority);
+                                silentBuilder = silentBuilder.WithTenantId(msaTenantIdPublicCloud);
                             }
 
                             result = await silentBuilder.ExecuteAsync().ConfigureAwait(false);
