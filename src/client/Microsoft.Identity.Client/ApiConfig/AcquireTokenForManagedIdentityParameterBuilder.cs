@@ -59,7 +59,6 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-#if TRA
         /// <summary>
         /// Adds a claims challenge to the token request. The SDK will bypass the token cache when a claims challenge is specified.. Retry the 
         /// token acquisition, and use this value in the <see cref="WithClaims(string)"/> method. A claims challenge typically arises when 
@@ -70,8 +69,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="claims">A string with one or multiple claims.</param>
         /// <returns>The builder to chain .With methods.</returns>
+#if SUPPORTS_SYSTEM_TEXT_JSON
         public AcquireTokenForManagedIdentityParameterBuilder WithClaims(string claims)
         {
+
             if (string.IsNullOrEmpty(claims))
             {
                 throw new ArgumentNullException(nameof(claims));
@@ -79,7 +80,7 @@ namespace Microsoft.Identity.Client
 
             Parameters.Claims = claims;
             return this;
-        }
+    }
 #endif
 
         /// <inheritdoc/>

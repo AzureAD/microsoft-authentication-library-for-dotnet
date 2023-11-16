@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Instance;
@@ -411,6 +412,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     expectedQueryParams.Add("api-version", "2019-07-01-preview");
                     expectedQueryParams.Add("resource", resource);
                     break;
+                case ManagedIdentitySource.Credential:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Post;
+                    expectedRequestHeaders.Add("Server", "IMDS");
+                    expectedQueryParams.Add("cred-api-version", "1.0");
+                    break;
             }
 
             if (managedIdentitySourceType != ManagedIdentitySource.CloudShell)
@@ -443,25 +449,32 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     });
         }
 
-        //public static void AddManagedIdentityCredentialMockHandler(
-        //    this MockHttpManager httpManager,
-        //    string expectedUrl,
-        //    bool sendHeaders = false)
-        //{
-        //    HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
-        //    if (sendHeaders)
-        //    {
-        //        responseMessage.Headers.Add("Server", "IMDS");
-        //    }
+        public static void AddManagedIdentityCredentialMockHandler(
+            this MockHttpManager httpManager,
+            string expectedUrl,
+            bool sendHeaders = false,
+            string content = null)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
 
-        //    httpManager.AddMockHandler(
-        //            new MockHttpMessageHandler
-        //            {
-        //                ExpectedMethod = HttpMethod.Post,
-        //                ExpectedUrl = expectedUrl,
-        //                ResponseMessage = responseMessage
-        //            });
-        //}
+            if (sendHeaders)
+            {
+                responseMessage.Headers.Add("Server", "IMDS");
+            }
+
+            if (!string.IsNullOrEmpty(content))
+            {
+                responseMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
+            }
+
+            httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Post,
+                        ExpectedUrl = expectedUrl,
+                        ResponseMessage = responseMessage
+                    });
+        }
 
         public static void AddRegionDiscoveryMockHandlerNotFound(
             this MockHttpManager httpManager)

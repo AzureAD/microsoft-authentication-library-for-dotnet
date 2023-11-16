@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Credential
             {
                 if (_bindingCertificate != null)
                 {
-                    _logger.Verbose(() => "[Managed Identity] A cached binding certificate was available.");
+                    _logger.Verbose(() => "[Managed Identity] A cached binding certificate is available.");
                     return _bindingCertificate;
                 }
             }
@@ -97,9 +97,11 @@ namespace Microsoft.Identity.Client.Credential
             }
             catch (CryptographicException ex)
             {
-                // Handle or log the exception
+                // log the exception
                 _logger.Error($"Error generating binding certificate: {ex.Message}");
-                throw;
+                
+                throw new MsalClientException(MsalError.CertificateCreationFailed, 
+                    $"Failed to create Managed Identity binding certificate. Error : {ex.Message}");
             }
         }
 
@@ -129,7 +131,7 @@ namespace Microsoft.Identity.Client.Credential
                     {
                         ""cnf"": {
                             ""jwk"": {
-                                ""kty"": ""RSA"",
+                                ""kty"": ""RSA"", 
                                 ""use"": ""sig"",
                                 ""alg"": ""RS256"",
                                 ""kid"": """ + x509Certificate2.Thumbprint + @""",

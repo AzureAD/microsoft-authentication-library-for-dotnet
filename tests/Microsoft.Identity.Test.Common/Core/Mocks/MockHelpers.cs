@@ -134,6 +134,18 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return "{\"statusCode\":\"500\",\"message\":\"An unexpected error occured while fetching the AAD Token.\",\"correlationId\":\"7d0c9763-ff1d-4842-a3f3-6d49e64f4513\"}";
         }
 
+        public static string GetSuccessfulCredentialResponse()
+        {
+            return "{\"client_id\":\"2d0d13ad-3a4d-4cfd-98f8-f20621d55ded\",\"credential\":\"access_token\",\"expires_on\":1700087787,\"identity_type\":\"SystemAssigned\",\"refresh_in\":1700085987,\"regional_token_url\":\"https://centraluseuap.login.microsoft.com\",\"tenant_id\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"}";
+        }
+
+        public static string GetSuccessfulMtlsResponse()
+        {
+            return "{\"token_type\":\"Bearer\",\"expires_in\":86399,\"ext_expires_in\":86399,\"access_token\":\"some-token\"}";
+        }
+
+        
+
         public static string GetMsiImdsErrorResponse()
         {
             return "{\"error\":\"invalid_resource\"," +

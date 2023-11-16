@@ -19,32 +19,51 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class CredentialTests : TestBase
     {
-        //[TestMethod]
-        public async Task CredentialEndpointBadRequestTestAsync()
+        internal const string CredentialEndpoint = "http://169.254.169.254/metadata/identity/credential";
+        internal const string MtlsEndpoint = "https://centraluseuap.mtlsauth.microsoft.com/72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/v2.0/token";
+        internal const string AzureResource = "http://vault.azure.net";
+        
+        [TestMethod]
+        public async Task CredentialHappyPathAsync()
         {
+            using (new EnvVariableContext())
+            using (new SoftwareKeyProvider())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, "");
+
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures()
-                    .WithClientCapabilities(new[] { "cp1" }) //calling this api in MI will trigger the cred flow
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
                 miBuilder.Config.AccessorOptions = null;
 
-                var mi = miBuilder.Build();
+                IManagedIdentityApplication mi = miBuilder.Build();
 
-                //httpManager.AddManagedIdentityCredentialMockHandler(ManagedIdentityTests.CredentialEndpoint);
+                httpManager.AddManagedIdentityCredentialMockHandler(
+                    CredentialEndpoint,
+                    sendHeaders: true,
+                    MockHelpers.GetSuccessfulCredentialResponse());
 
-                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity("scope")
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+                httpManager.AddManagedIdentityCredentialMockHandler(
+                    MtlsEndpoint,
+                    sendHeaders: false,
+                    MockHelpers.GetSuccessfulMtlsResponse());
 
-                Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySource.Credential, ex.ManagedIdentitySource);
-                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.ManagedIdentityNoResponseReceived, ex.Message);
+                var result = await mi.AcquireTokenForManagedIdentity(AzureResource).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                result = await mi.AcquireTokenForManagedIdentity(AzureResource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
         }
+
     }
 }

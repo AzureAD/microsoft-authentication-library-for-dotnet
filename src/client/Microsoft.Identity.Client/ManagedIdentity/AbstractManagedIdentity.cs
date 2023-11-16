@@ -182,14 +182,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     $"Use this Correlation ID for further investigation.";
             }
 
-            if (_sourceType == ManagedIdentitySource.Credential)
-            {
-                additionalErrorInfo = MsalErrorMessage.CredentialEndpointNoResponseReceived;
-            }
-
             return $"[Managed Identity] Error Code: {managedIdentityErrorResponse.Error} " +
-                $"Error Message: {managedIdentityErrorResponse.ErrorDescription} " +
-                $"Additional Error Info: {additionalErrorInfo}";
+                $"Error Message: {managedIdentityErrorResponse.ErrorDescription} ";
         }
     }
 }

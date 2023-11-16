@@ -35,7 +35,6 @@ namespace Microsoft.Identity.Client.Credential
             lock (s_lock)
             {
                 return s_instance ??= new CredentialResponseCache(requestContext);
-
             }
         }
 

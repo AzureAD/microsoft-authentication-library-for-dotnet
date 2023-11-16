@@ -1,13 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if TRA
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -95,7 +93,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             HttpResponse response,
             CancellationToken cancellationToken)
         {
-            _requestContext.Logger.Verbose(() => $"[Managed Identity] Response received. Status code: {response.StatusCode}");
 
             if (response.StatusCode == HttpStatusCode.OK)
             {
@@ -103,17 +100,20 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 {
                     _requestContext.Logger.Error("[Managed Identity] Credential endpoint response failed.");
                     throw new MsalManagedIdentityException(MsalError.ManagedIdentityRequestFailed,
-                        MsalErrorMessage.CredentialEndpointNoResponseReceived,
+                        MsalErrorMessage.CredentialResponseMissingHeader,
                         _sourceType);
                 }
+                
+                _requestContext.Logger.Verbose(() => $"[Managed Identity] Response received from credential endpoint. " +
+                $"Status code: {response.StatusCode}");
 
                 CredentialResponse credentialResponse = GetCredentialResponse(response);
 
                 //Create the second leg request
                 //temporarily form the authority sine IMDS does not return this yet 
-                string baseUrl = "https://mtlsauth.microsoft.com/";
+                string baseUrl = "https://centraluseuap.mtlsauth.microsoft.com/";
                 string tenantId = credentialResponse.TenantId;
-                string tokenEndpoint = "/oauth2/v2.0/token?dc=ESTS-PUB-WUS2-AZ1-FD000-TEST1";
+                string tokenEndpoint = "/oauth2/v2.0/token?slice=testslice";
                 Uri url = new(string.Join("", baseUrl, tenantId, tokenEndpoint));
 
                 ManagedIdentityRequest request = new(HttpMethod.Post, url);
@@ -163,4 +163,3 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
     }
 }
-#endif

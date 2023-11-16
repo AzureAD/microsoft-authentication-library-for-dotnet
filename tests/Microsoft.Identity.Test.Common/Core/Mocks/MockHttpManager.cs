@@ -116,9 +116,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             throw new NotImplementedException();
         }
 
-        public Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, X509Certificate2 bindingCertificate, ILoggerAdapter logger, CancellationToken cancellationToken = default)
+        public async Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, X509Certificate2 bindingCertificate, ILoggerAdapter logger, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return await _httpManager.SendPostForceResponseAsync(uri, headers, bodyParameters, logger, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public HttpClient GetHttpClient(X509Certificate2 x509Certificate2)
         {
-            throw new NotImplementedException();
+            return GetHttpClient();
         }
 
         private string GetExpectedUrlFromHandler(HttpMessageHandler handler)
