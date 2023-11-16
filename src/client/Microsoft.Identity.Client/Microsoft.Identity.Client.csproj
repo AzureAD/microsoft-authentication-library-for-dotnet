@@ -125,6 +125,8 @@
     <Compile Include="$(PathToMsalSources)\Platforms\netstandard\**\*.cs" LinkBase="Platforms\netstandard" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
+
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.2" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)'">
@@ -135,6 +137,8 @@
 
     <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
+
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.2" />
   </ItemGroup>
   
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
@@ -155,6 +159,8 @@
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.864.35" />
     <PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="$(MSALRuntimeNativeInteropVersion)" IncludeAssets="all" />
 
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.2" />
+
     <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
   </ItemGroup>
@@ -170,6 +176,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' ">
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.2" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' ">
@@ -269,8 +276,5 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.22.0" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNet6)' Or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)' Or '$(TargetFramework)' == '$(TargetFrameworkNetStandard)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' ">
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.2" />
   </ItemGroup>
 </Project>
