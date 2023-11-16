@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         private const string SuccessCounterName = "MsalSuccess";
         private const string FailedCounterName = "MsalFailed";
         private const string TotalDurationHistogramName = "MsalTotalDuration.1A";
-        private const string TotalDurationInUsHistogramName = "MsalTotalDurationInUs.1A";
+        private const string TotalDurationInUsHistogramName = "MsalTotalDurationInUs.1B";
         private const string DurationInCacheHistogramName = "MsalDurationInCache.1A";
         private const string DurationInHttpHistogramName = "MsalDurationInHttp.1A";
 

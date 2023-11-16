@@ -13,13 +13,10 @@ using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry;
 using OpenTelemetry.Trace;
-using System.Linq;
 using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
-using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -65,8 +62,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunClientCredsAsync().ConfigureAwait(false);
 
             s_meterProvider.ForceFlush();
+            s_activityProvider.ForceFlush();
             OTelInstrumentationUtil.VerifyMetrics(5, _exportedMetrics);
-            VerifyActivity(15);
+            OTelInstrumentationUtil.VerifyActivity(15, _exportedActivities);
         }
 
         private async Task RunClientCredsAsync()
@@ -106,20 +104,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
             
         }
-
-        private void VerifyActivity(int expectedTagCount)
-        {
-            s_activityProvider.ForceFlush();
-
-            Assert.AreEqual(1, _exportedActivities.Count);
-            foreach (var activity in _exportedActivities)
-            {
-                Assert.AreEqual(OtelInstrumentation.ActivitySourceName, activity.Source.Name);
-                Assert.AreEqual(expectedTagCount, activity.Tags.Count());
-            }
-        }
-
-        
 
         private static IConfidentialClientApplication CreateApp(IConfidentialAppSettings settings)
         {

@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
@@ -14,6 +16,16 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     public class OTelInstrumentationUtil
     {
+        public static void VerifyActivity(int expectedTagCount, List<Activity> _exportedActivities)
+        {
+            Assert.AreEqual(1, _exportedActivities.Count);
+            foreach (var activity in _exportedActivities)
+            {
+                Assert.AreEqual(OtelInstrumentation.ActivitySourceName, activity.Source.Name);
+                Assert.AreEqual(expectedTagCount, activity.Tags.Count());
+            }
+        }
+
         public static void VerifyMetrics(int expectedMetricCount, List<Metric> exportedMetrics)
         {
             Assert.AreEqual(expectedMetricCount, exportedMetrics.Count);
@@ -61,7 +73,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
                         break;
 
-                    case "MsalTotalDurationInUs.1A":
+                    case "MsalTotalDurationInUs.1B":
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
                         expectedTagCount = 5;
