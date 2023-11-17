@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1699637976269,
+  "lastUpdate": 1700240977217,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -2190,6 +2190,42 @@ window.BENCHMARK_DATA = {
             "value": 411215.5,
             "unit": "ns",
             "range": "± 6589.142453250709"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "43250667+iulico-1@users.noreply.github.com",
+            "name": "Iulian C",
+            "username": "iulico-1"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "da67f067f14b26fdfb928178ad8b21bcdcde91a9",
+          "message": "Add support for MSA passthrough for silent token acquisition calls through the boker (#4419)\n\nAdd support for MSA passthrough for silent token acquisition calls through the boker (#4419)",
+          "timestamp": "2023-11-17T09:02:38-08:00",
+          "tree_id": "15e73a063233ee0b0f3923f0dadd48a269fc59d3",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/da67f067f14b26fdfb928178ad8b21bcdcde91a9"
+        },
+        "date": 1700240974051,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 302004.6288659794,
+            "unit": "ns",
+            "range": "± 17105.940701941086"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 424623.8,
+            "unit": "ns",
+            "range": "± 7511.270723766671"
           }
         ]
       }
