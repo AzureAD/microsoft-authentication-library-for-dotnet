@@ -62,6 +62,12 @@ namespace Microsoft.Identity.Client.Instance
                 (IsCommonOrOrganizationsTenant(tenantId) || IsConsumers(tenantId));
         }
 
+        internal bool IsOrganizationsTenantWithMsaPassthroughEnabled(bool isMsaPassthrough, string accountTenantId)
+        {
+            return accountTenantId!= null && isMsaPassthrough && TenantId.Equals(Constants.OrganizationsTenant, StringComparison.OrdinalIgnoreCase) &&
+                IsConsumers(accountTenantId);
+        }
+
         internal bool IsCommonOrOrganizationsTenant()
         {
             return IsCommonOrOrganizationsTenant(TenantId);
