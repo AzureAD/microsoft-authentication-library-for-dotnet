@@ -16,7 +16,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenTelemetry.Metrics;
 using OpenTelemetry;
 using OpenTelemetry.Trace;
-using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
+using Microsoft.Identity.Client.Platforms.Features.OpenTelemetry;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {

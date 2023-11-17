@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Cache;
-#if SUPPORTS_OTEL
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 using System.Diagnostics.Metrics;
-#endif
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
+namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 {
     /// <summary>
     /// Class to hold the OpenTelemetry objects used by MSAL.
@@ -34,7 +34,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         private const string DurationInCacheHistogramName = "MsalDurationInCache.1A";
         private const string DurationInHttpHistogramName = "MsalDurationInHttp.1A";
 
-#if SUPPORTS_OTEL
         /// <summary>
         /// Meter to hold the MSAL metrics.
         /// </summary>
@@ -93,21 +92,17 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             description: "Performance of token acquisition calls network latency");
 
         internal static readonly Lazy<Activity> s_activity = new Lazy<Activity>(() => s_acquireTokenActivity.StartActivity("Token Acquisition", ActivityKind.Internal));
-#endif
 
         void IOtelInstrumentation.LogActivity(Dictionary<string, object> tags)
         {
-#if SUPPORTS_OTEL
             foreach (KeyValuePair<string, object> tag in tags)
             {
                 s_activity.Value?.AddTag(tag.Key, tag.Value);
             }
-#endif
         }
 
         void IOtelInstrumentation.LogActivityStatus(bool success)
         {
-#if SUPPORTS_OTEL
             if (success)
             {
                 s_activity.Value?.SetStatus(ActivityStatusCode.Ok, "Success");
@@ -116,26 +111,22 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             {
                 s_activity.Value?.SetStatus(ActivityStatusCode.Error, "Request failed");
             }
-#endif
         }
 
         void IOtelInstrumentation.StopActivity()
         {
-#if SUPPORTS_OTEL
             s_activity.Value?.Stop();
-#endif
         }
 
         // Aggregates the successful requests based on token source and cache refresh reason.
         void IOtelInstrumentation.LogSuccessMetrics(
-            string platform, 
+            string platform,
             AuthenticationResultMetadata authResultMetadata,
             string apiId,
-            string cacheLevel, 
-            ILoggerAdapter logger, 
+            string cacheLevel,
+            ILoggerAdapter logger,
             long totalDurationInUs)
         {
-#if SUPPORTS_OTEL
             s_successCounter.Value.Add(1,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
@@ -148,9 +139,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             s_durationTotal.Record(authResultMetadata.DurationTotalInMs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
-                new(TelemetryConstants.ApiId, apiId), 
-                new (TelemetryConstants.TokenSource, authResultMetadata.TokenSource), 
-                new (TelemetryConstants.CacheLevel, cacheLevel));
+                new(TelemetryConstants.ApiId, apiId),
+                new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
+                new(TelemetryConstants.CacheLevel, cacheLevel));
 
             // Only log cache duration if L2 cache was used.
             if (cacheLevel.Equals(CacheLevel.L2Cache))
@@ -160,7 +151,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
                 new(TelemetryConstants.Platform, platform),
                 new(TelemetryConstants.ApiId, apiId));
             }
-            
+
             if (!authResultMetadata.TokenSource.Equals(TokenSource.Cache))
             {
                 s_durationInHttp.Record(authResultMetadata.DurationInHttpInMs,
@@ -178,17 +169,14 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
                 new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
                 new(TelemetryConstants.CacheLevel, cacheLevel));
             }
-#endif
         }
 
         void IOtelInstrumentation.LogFailedMetrics(string platform, string errorCode)
         {
-#if SUPPORTS_OTEL
             s_failureCounter.Value.Add(1,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
                 new(TelemetryConstants.ErrorCode, errorCode));
-#endif
         }
     }
 }
