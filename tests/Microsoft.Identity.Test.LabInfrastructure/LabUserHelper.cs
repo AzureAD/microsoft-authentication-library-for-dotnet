@@ -44,11 +44,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return response;
         }
 
-        
+
         [Obsolete("Use GetSpecificUserAsync instead", true)]
         public static Task<LabResponse> GetLabUserDataForSpecificUserAsync(string upn)
         {
-            throw new NotSupportedException();        
+            throw new NotSupportedException();
         }
 
         public static async Task<string> GetMSIEnvironmentVariablesAsync(string uri)
@@ -112,8 +112,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         }
 
         public static Task<LabResponse> GetSpecificUserAsync(string upn)
-        {            
-            return GetLabUserDataAsync(new UserQuery() {  Upn = upn});
+        {
+            return GetLabUserDataAsync(new UserQuery() { Upn = upn });
         }
 
         public static Task<LabResponse> GetArlingtonUserAsync()
@@ -135,9 +135,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static Task<LabResponse> GetAdfsUserAsync(FederationProvider federationProvider, bool federated = true)
         {
-            var query = UserQuery.PublicAadUserQuery;
-            query.FederationProvider = federationProvider;
-            query.UserType = federated ? UserType.Federated : UserType.Cloud;
+            var query = new UserQuery()
+            {
+                AzureEnvironment = LabInfrastructure.AzureEnvironment.azurecloud,
+                FederationProvider = federationProvider,
+                UserType = federated ? UserType.Federated : UserType.Cloud
+            };
 
             if (!federated &&
                 federationProvider != FederationProvider.ADFSv2019)
