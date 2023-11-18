@@ -219,17 +219,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected override Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             // TODO: don't rely on AbstractManagedIdentity for SLC, we need to use ConfidentialClientApplication
-            
+
             // 1. 
             // slc.AuthenticateAsync(); // - call SLC endpoint to figure out the authority and the assertion.
-            
+
             // 2. Create ConfidentialClientApplication cca 
 
             // 3. Call AcquireTokenSilent
             // We will need a new API on ConfidentialClientApplication called WithMtls(X509Certificate2) - internal
             // CCA will take care of caching, but in a different way than MSI and that's ok
-           
-            
+
+            return Task.FromResult<AuthenticationResult>(null);
         }
     }
 }
