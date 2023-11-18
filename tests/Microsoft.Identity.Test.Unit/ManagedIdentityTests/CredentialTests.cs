@@ -32,6 +32,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures(true)
+                    .WithClientCapabilities(new string[] { "CP1" })
                     .WithHttpManager(httpManager);
 
                 // Disabling shared cache options to avoid cross test pollution.
