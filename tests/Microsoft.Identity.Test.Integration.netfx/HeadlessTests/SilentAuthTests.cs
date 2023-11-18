@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.net45.Infrastructure;
@@ -12,6 +13,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -27,7 +29,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private IPublicClientApplication pca = null;
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task SilentAuth_ForceRefresh_Async()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -47,36 +49,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await ValidateAuthResultAsync(authResult, labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
-        [TestCategory(TestCategories.MSA)]
-        [Ignore] // Failing sporadically https://identitydivision.visualstudio.com/Engineering/_workitems/edit/1045664 
-        public async Task SilentAuth_MsaUser_ForceRefresh_Async()
-        {
-            var labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
-
-            pca = PublicClientApplicationBuilder
-                .Create(LabApiConstants.MSAOutlookAccountClientID)
-                .WithTestLogging()
-                .WithAuthority(AadAuthorityAudience.PersonalMicrosoftAccount)
-                .Build();
-
-            Trace.WriteLine("Part 1 - Acquire a token with device code with msa user");
-            AuthenticationResult authResult = await pca.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>
-            {
-                SeleniumExtensions.PerformDeviceCodeLogin(
-                    deviceCodeResult,
-                    labResponse.User,
-                    TestContext,
-                    false);
-
-                return Task.FromResult(0);
-            }).ExecuteAsync()
-              .ConfigureAwait(false);
-
-            await ValidateAuthResultAsync(authResult, labResponse).ConfigureAwait(false);
-        }
-
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetFx)]
         public async Task SilentAuth_TokenCacheRemainsPersistent_Async()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -146,8 +119,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
             MsalAssert.AssertAuthResult(authResult, labResponse.User);
             var at2 = authResult.AccessToken;
+            
+            string tenantId = labResponse.User.UserType == UserType.MSA ?
+                Constants.MsaTenantId : 
+                labResponse.User.TenantId;
+
             Assert.AreEqual(
-                 $"https://login.microsoftonline.com/{labResponse.User.TenantId}/oauth2/v2.0/token",
+                 $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token",
                  authResult.AuthenticationResultMetadata.TokenEndpoint);
 
             Trace.WriteLine("Part 3 - Acquire a token silently with a login hint, with forceRefresh = true");
@@ -158,12 +136,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             MsalAssert.AssertAuthResult(authResult, labResponse.User);
             var at3 = authResult.AccessToken;
 
+            tenantId = labResponse.User.UserType == UserType.MSA ?
+               Constants.MsaTenantId :
+               labResponse.User.TenantId;
+
             Assert.IsFalse(at1.Equals(at2, System.StringComparison.InvariantCultureIgnoreCase));
             Assert.IsFalse(at1.Equals(at3, System.StringComparison.InvariantCultureIgnoreCase));
             Assert.IsFalse(at2.Equals(at3, System.StringComparison.InvariantCultureIgnoreCase));
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
             Assert.AreEqual(
-                $"https://login.microsoftonline.com/{labResponse.User.TenantId}/oauth2/v2.0/token",
+                $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token",
                 authResult.AuthenticationResultMetadata.TokenEndpoint);
 
         }

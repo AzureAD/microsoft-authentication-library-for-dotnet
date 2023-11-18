@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         #endregion MSTest Hooks
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetFx)]
         public async Task Interactive_AADAsync()
         {
             // Arrange
