@@ -41,9 +41,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private static AbstractManagedIdentity SelectManagedIdentitySource(RequestContext requestContext)
         {
             return
-#if TRA
-                CredentialSource.TryCreate(requestContext) ??
-#endif
                 ServiceFabricManagedIdentitySource.TryCreate(requestContext) ??
                 AppServiceManagedIdentitySource.TryCreate(requestContext) ?? 
                 CloudShellManagedIdentitySource.TryCreate(requestContext) ??
