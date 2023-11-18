@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -23,7 +24,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     {
         private readonly Uri _credentialEndpoint;
         private readonly TokenRequestAssertionInfo _requestAssertionInfo;
-        private static IKeyMaterialManager s_keyMaterialManager;
+        private readonly IKeyMaterialManager _keyMaterialManager;
 
         public static AbstractManagedIdentity TryCreate(RequestContext requestContext)
         {
@@ -36,8 +37,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             : base(requestContext, ManagedIdentitySource.Credential)
         {
             _credentialEndpoint = credentialEndpoint;
-            s_keyMaterialManager = requestContext.ServiceBundle.PlatformProxy.GetKeyMaterial();
-            _requestAssertionInfo = TokenRequestAssertionInfo.GetCredentialInfo(s_keyMaterialManager, requestContext.ServiceBundle);
+            _keyMaterialManager = requestContext.ServiceBundle.PlatformProxy.GetKeyMaterial();
+            _requestAssertionInfo = new TokenRequestAssertionInfo(_keyMaterialManager, requestContext.ServiceBundle);
         }
 
         protected override ManagedIdentityRequest CreateRequest(string resource)
@@ -46,7 +47,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             request.Headers.Add("Metadata", "true");
             request.Headers.Add("x-ms-client-request-id", _requestContext.CorrelationId.ToString("D"));
 
-            string jsonPayload = TokenRequestAssertionInfo.CreateCredentialPayload(_requestAssertionInfo.BindingCertificate);
+            string jsonPayload = CreateCredentialPayload(_requestAssertionInfo.BindingCertificate);
             request.Content = new StringContent(jsonPayload, System.Text.Encoding.UTF8, "application/json");
             return request;
         }
@@ -56,7 +57,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             credentialEndpointUri = null;
 
-            if (!requestContext.ServiceBundle.Config.IsManagedIdentityTokenRequestInfoAvailabe)
+            if (!requestContext.ServiceBundle.Config.IsManagedIdentityTokenRequestInfoAvailable)
             {
                 requestContext.Logger.Verbose(() => "[Managed Identity] Credential based managed identity is unavailable.");
                 return false;
@@ -160,6 +161,25 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             return credentialResponse;
+        }
+
+        private static string CreateCredentialPayload(X509Certificate2 x509Certificate2)
+        {
+            string certificateBase64 = Convert.ToBase64String(x509Certificate2.Export(X509ContentType.Cert));
+
+            return @"
+                    {
+                        ""cnf"": {
+                            ""jwk"": {
+                                ""kty"": ""RSA"", 
+                                ""use"": ""sig"",
+                                ""alg"": ""RS256"",
+                                ""kid"": """ + x509Certificate2.Thumbprint + @""",
+                                ""x5c"": [""" + certificateBase64 + @"""]
+                            }
+                        },
+                        ""latch_key"": false    
+                    }";
         }
     }
 }

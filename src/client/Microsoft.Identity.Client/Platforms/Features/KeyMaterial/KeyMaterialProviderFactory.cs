@@ -26,11 +26,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
         {
             lock (s_lock)
             {
-                if (s_keyMaterialManager != null)
-                {
-                    return s_keyMaterialManager;
-                }
-
                 s_keyMaterialManager = new KeyMaterialManager(logger);
                 return s_keyMaterialManager;
             }

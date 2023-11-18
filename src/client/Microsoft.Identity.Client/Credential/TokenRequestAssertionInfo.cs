@@ -19,13 +19,12 @@ namespace Microsoft.Identity.Client.Credential
     /// </summary>
     internal class TokenRequestAssertionInfo
     {
-        private static TokenRequestAssertionInfo s_instance;
         private readonly X509Certificate2 _bindingCertificate;
         private readonly CertificateCache _certificateCache;
-        private static readonly object s_keyInfoLock = new(); // Lock object
+        private readonly object _keyInfoLock = new(); // Lock object
         private readonly ILoggerAdapter _logger;
 
-        private TokenRequestAssertionInfo(IKeyMaterialManager keyMaterialManager, 
+        public TokenRequestAssertionInfo(IKeyMaterialManager keyMaterialManager,
             IServiceBundle serviceBundle)
         {
             _logger = serviceBundle.ApplicationLogger;
@@ -36,17 +35,11 @@ namespace Microsoft.Identity.Client.Credential
                 () => CreateCertificateFromCryptoKeyInfo(keyMaterialManager));
         }
 
-        public static TokenRequestAssertionInfo GetCredentialInfo(
-            IKeyMaterialManager keyMaterialManager, IServiceBundle serviceBundle)
-        {
-            return s_instance ??= new TokenRequestAssertionInfo(keyMaterialManager, serviceBundle);
-        }
-
         public X509Certificate2 BindingCertificate => _bindingCertificate;
 
         private X509Certificate2 CreateCertificateFromCryptoKeyInfo(IKeyMaterialManager keyMaterialManager)
         {
-            lock (s_keyInfoLock) // Lock to ensure thread safety
+            lock (_keyInfoLock) // Lock to ensure thread safety
             {
                 if (_bindingCertificate != null)
                 {
@@ -69,7 +62,7 @@ namespace Microsoft.Identity.Client.Credential
 
             try
             {
-                lock (s_keyInfoLock) // Lock to ensure thread safety
+                lock (_keyInfoLock) // Lock to ensure thread safety
                 {
                     _logger.Verbose(() => "[Managed Identity] Creating binding certificate with CNG key for credential endpoint.");
 
@@ -99,8 +92,8 @@ namespace Microsoft.Identity.Client.Credential
             {
                 // log the exception
                 _logger.Error($"Error generating binding certificate: {ex.Message}");
-                
-                throw new MsalClientException(MsalError.CertificateCreationFailed, 
+
+                throw new MsalClientException(MsalError.CertificateCreationFailed,
                     $"Failed to create Managed Identity binding certificate. Error : {ex.Message}");
             }
         }
@@ -121,25 +114,6 @@ namespace Microsoft.Identity.Client.Credential
         {
             _logger.Verbose(() => "[Managed Identity] Associating private key with the binding certificate.");
             return publicKeyOnlyCertificate.CopyWithPrivateKey(eCDsaCngKey);
-        }
-
-        public static string CreateCredentialPayload(X509Certificate2 x509Certificate2)
-        {
-            string certificateBase64 = Convert.ToBase64String(x509Certificate2.Export(X509ContentType.Cert));
-
-            return @"
-                    {
-                        ""cnf"": {
-                            ""jwk"": {
-                                ""kty"": ""RSA"", 
-                                ""use"": ""sig"",
-                                ""alg"": ""RS256"",
-                                ""kid"": """ + x509Certificate2.Thumbprint + @""",
-                                ""x5c"": [""" + certificateBase64 + @"""]
-                            }
-                        },
-                        ""latch_key"": false    
-                    }";
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
     internal class KeyMaterialManager : IKeyMaterialManager
     {
         private const string IsKeyGuardEnabledProperty = "Virtual Iso";
-        private static CryptoKeyType s_cryptoKeyType = CryptoKeyType.None;
+        private CryptoKeyType _cryptoKeyType = CryptoKeyType.None;
         private const string KeyProviderName = "Microsoft Software Key Storage Provider";
         private const string MachineKeyName = "ManagedIdentityCredentialKey";
         private const string SoftwareKeyName = "ResourceBindingKey";
@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
             _eCDsaCngKey = GetCngKey();
         }
 
-        public CryptoKeyType CryptoKeyType => s_cryptoKeyType;
+        public CryptoKeyType CryptoKeyType => _cryptoKeyType;
 
         public ECDsaCng CredentialKey => _eCDsaCngKey;
 
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
                 if (keyGuardProperty[0] != 0)
                 {
                     _logger.Info("[Managed Identity] KeyGuard key is available. ");
-                    s_cryptoKeyType = CryptoKeyType.KeyGuard;
+                    _cryptoKeyType = CryptoKeyType.KeyGuard;
                     return true;
                 }
             }
@@ -122,22 +122,22 @@ namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
             switch (true)
             {
                 case var _ when cngKey.IsMachineKey:
-                    s_cryptoKeyType = CryptoKeyType.Machine;
+                    _cryptoKeyType = CryptoKeyType.Machine;
                     // Determine whether the key is KeyGuard protected
                     _ = IsKeyGuardProtected(cngKey);
                     break;
 
                 case var _ when !cngKey.IsEphemeral && !cngKey.IsMachineKey:
-                    s_cryptoKeyType = CryptoKeyType.User;
+                    _cryptoKeyType = CryptoKeyType.User;
                     break;
 
                 case var _ when cngKey.IsEphemeral:
-                    s_cryptoKeyType = CryptoKeyType.Ephemeral;
+                    _cryptoKeyType = CryptoKeyType.Ephemeral;
                     break;
 
                 default:
                     // Handle other cases if needed
-                    s_cryptoKeyType = CryptoKeyType.InMemory;
+                    _cryptoKeyType = CryptoKeyType.InMemory;
                     break;
             }
         }

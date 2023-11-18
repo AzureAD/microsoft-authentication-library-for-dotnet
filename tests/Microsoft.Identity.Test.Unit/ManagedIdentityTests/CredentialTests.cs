@@ -16,7 +16,9 @@ using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
+#if !DESKTOP
     [TestClass]
+#endif
     public class CredentialTests : TestBase
     {
         internal const string CredentialEndpoint = "http://169.254.169.254/metadata/identity/credential";
@@ -26,12 +28,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task CredentialHappyPathAsync()
         {
-            using (new EnvVariableContext())
             using (new SoftwareKeyProvider())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, "");
-
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
@@ -43,7 +42,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
                     sendHeaders: true,
-                    MockHelpers.GetSuccessfulCredentialResponse());
+                    MockHelpers.GetSuccessfulCredentialResponse());          
 
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     MtlsEndpoint,

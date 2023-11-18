@@ -11,6 +11,7 @@ namespace Microsoft.Identity.Client.Credential
     internal interface ICredentialResponseCache
     {
         Task<HttpResponse> GetOrFetchCredentialAsync(
+            IHttpManager httpManager,
             ManagedIdentityRequest request,
             string key,
             CancellationToken cancellationToken);

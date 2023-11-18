@@ -1,9 +1,7 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
@@ -12,36 +10,65 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
     /// </summary>
     public class SoftwareKeyProvider : IDisposable
     {
+        private readonly object _lockObject = new object();
         private readonly CngKey _createdKey;
 
         public SoftwareKeyProvider()
         {
             try
             {
-                // Specify the key parameters
-                CngKeyCreationParameters keyParams = new CngKeyCreationParameters
+                // Use a lock to ensure thread safety during key creation
+                lock (_lockObject)
                 {
-                    KeyUsage = CngKeyUsages.AllUsages,
-                    Provider = new CngProvider("Microsoft Software Key Storage Provider"), // Specify the Microsoft KSP
-                    ExportPolicy = CngExportPolicies.AllowPlaintextExport,
-                    KeyCreationOptions = CngKeyCreationOptions.None | CngKeyCreationOptions.OverwriteExistingKey, // Optional: Specify MachineKey or None
-                };
+                    // Specify the key parameters
+                    string keyName = "ResourceBindingKey";
+                    string providerName = "Microsoft Software Key Storage Provider";
 
-                // Create the key
-                _createdKey = CngKey.Create(CngAlgorithm.ECDsaP256, "ResourceBindingKey", keyParams);
+                    // Check if the key already exists
+                    if (CngKey.Exists(keyName, new CngProvider(providerName)))
+                    {
+                        Debug.WriteLine($"Key with name '{keyName}' already exists. Reusing existing key.");
+                        return; // Return early if the key already exists
+                    }
 
-                Debug.WriteLine("Key created successfully!");
+                    CngKeyCreationParameters keyParams = new CngKeyCreationParameters
+                    {
+                        KeyUsage = CngKeyUsages.AllUsages,
+                        Provider = new CngProvider(providerName),
+                        ExportPolicy = CngExportPolicies.AllowPlaintextExport,
+                        KeyCreationOptions = CngKeyCreationOptions.None | CngKeyCreationOptions.OverwriteExistingKey,
+                    };
+
+                    // Create the key
+                    _createdKey = CngKey.Create(CngAlgorithm.ECDsaP256, keyName, keyParams);
+
+                    // Add a 10-second delay
+                    Task.Delay(10000).Wait();
+
+                    Debug.WriteLine("Key created successfully!");
+                }
+            }
+            catch (CryptographicException ex)
+            {
+                Debug.WriteLine($"Error creating key: {ex.Message}");
+                // Handle the exception as needed
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error creating key: {ex.Message}");
+                // Handle the exception as needed
             }
         }
 
         public void Dispose()
         {
-            // Delete the key in the dispose method
-            _createdKey?.Delete();
+            // Use a lock to ensure thread safety during key deletion
+            lock (_lockObject)
+            {
+                // Delete the key in the dispose method
+                _createdKey?.Delete();
+                Debug.WriteLine($"Deleted the key.");
+            }
         }
     }
 }

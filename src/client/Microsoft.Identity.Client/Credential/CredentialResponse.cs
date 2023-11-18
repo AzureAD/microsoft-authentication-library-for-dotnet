@@ -1,9 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Text.Json.Serialization;
+using System;
+#if SUPPORTS_SYSTEM_TEXT_JSON
 using Microsoft.Identity.Client.Platforms.net6;
 using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+#else
+using Microsoft.Identity.Json;
+#endif
 
 namespace Microsoft.Identity.Client.Credential
 {
@@ -17,14 +21,12 @@ namespace Microsoft.Identity.Client.Credential
         [JsonProperty("credential")]
         public string Credential { get; set; }
 
-        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         [JsonProperty("expires_on")]
         public long ExpiresOn { get; set; }
 
         [JsonProperty("identity_type")]
         public string IdentityType { get; set; }
 
-        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         [JsonProperty("refresh_in")]
         public long RefreshIn { get; set; }
 

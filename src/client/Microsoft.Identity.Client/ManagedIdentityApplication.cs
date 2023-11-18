@@ -43,9 +43,11 @@ namespace Microsoft.Identity.Client
             AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
 #if TRA
             KeyMaterialManager = ServiceBundle.PlatformProxy.GetKeyMaterial();
-            TokenRequestAssertionInfo = TokenRequestAssertionInfo.GetCredentialInfo(KeyMaterialManager, ServiceBundle);
+            Debug.WriteLine("ServiceBundle.PlatformProxy.GetKeyMaterial() - CryptoKeyType" + KeyMaterialManager.CryptoKeyType);
+            TokenRequestAssertionInfo = new TokenRequestAssertionInfo(KeyMaterialManager, ServiceBundle);
+            Debug.WriteLine("TokenRequestAssertionInfo" + TokenRequestAssertionInfo.BindingCertificate);
             configuration.ManagedIdentityBindingCertificate = TokenRequestAssertionInfo.BindingCertificate;
-            configuration.IsManagedIdentityTokenRequestInfoAvailabe = KeyMaterialManager.CryptoKeyType != CryptoKeyType.None;
+            configuration.IsManagedIdentityTokenRequestInfoAvailable = KeyMaterialManager.CryptoKeyType != CryptoKeyType.None;
 #endif
             ServiceBundle.ApplicationLogger.Verbose(() => $"ManagedIdentityApplication {configuration.GetHashCode()} created");
         }

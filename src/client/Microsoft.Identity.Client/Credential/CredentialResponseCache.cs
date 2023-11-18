@@ -39,6 +39,7 @@ namespace Microsoft.Identity.Client.Credential
         }
 
         public async Task<HttpResponse> GetOrFetchCredentialAsync(
+            IHttpManager httpManager,
             ManagedIdentityRequest request, 
             string key,
             CancellationToken cancellationToken)
@@ -66,7 +67,7 @@ namespace Microsoft.Identity.Client.Credential
                     }
                 }
 
-                HttpResponse httpResponse = await FetchFromServiceAsync(request, cancellationToken).ConfigureAwait(false);
+                HttpResponse httpResponse = await FetchFromServiceAsync(httpManager, request, cancellationToken).ConfigureAwait(false);
                 AddCredential(key, httpResponse);
                 return httpResponse;
             }
@@ -87,12 +88,13 @@ namespace Microsoft.Identity.Client.Credential
         }
 
         private async Task<HttpResponse> FetchFromServiceAsync(
+            IHttpManager httpManager,
             ManagedIdentityRequest request,
             CancellationToken cancellationToken)
         {
             _requestContext.Logger.Info("[Managed Identity] Fetching credential from IMDS endpoint.");
 
-            return await _requestContext.ServiceBundle.HttpManager
+            return await httpManager
                             .SendPostForceResponseAsync(
                                 request.ComputeUri(),
                                 request.Headers,

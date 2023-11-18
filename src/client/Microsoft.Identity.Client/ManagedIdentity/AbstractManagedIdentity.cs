@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Core;
 using System.Net;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using System.Net.Sockets;
+using System.Diagnostics;
 #if TRA
 using Microsoft.Identity.Client.Credential;
 #endif
@@ -49,27 +50,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 _requestContext.Logger.Error(TimeoutError);
                 cancellationToken.ThrowIfCancellationRequested();
             }
+            
+            HttpResponse response = null;
 
             // Convert the scopes to a resource string.
             string resource = parameters.Resource;
 
             ManagedIdentityRequest request = CreateRequest(resource);
 
-            HttpResponse response = await PerformHttpRequestAsync(request, cancellationToken).ConfigureAwait(false);
-
-            return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
-        }
-
-        private async Task<HttpResponse> PerformHttpRequestAsync(
-            ManagedIdentityRequest request, 
-            CancellationToken cancellationToken)
-        {
-            _requestContext.Logger.Info("[Managed Identity] sending request to managed identity endpoints."); 
+            _requestContext.Logger.Info("[Managed Identity] sending request to managed identity endpoints.");
 
             try
             {
-                HttpResponse response = null;
-
                 if (request.Method == HttpMethod.Get)
                 {
                     response = await _requestContext.ServiceBundle.HttpManager
@@ -83,6 +75,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 {
                     if (_sourceType != ManagedIdentitySource.Credential)
                     {
+                        Debug.WriteLine("_sourceType in AuthenticateAsync" + _sourceType);
+                        
                         response = await _requestContext.ServiceBundle.HttpManager
                             .SendPostForceResponseAsync(
                                 request.ComputeUri(),
@@ -96,6 +90,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         string credentialCacheKey = request.GetCredentialCacheKey();
 
                         response = await _credentialResponseCache.GetOrFetchCredentialAsync(
+                                                        _requestContext.ServiceBundle.HttpManager,
                                                         request,
                                                         credentialCacheKey,
                                                         CancellationToken.None).ConfigureAwait(false);
@@ -103,7 +98,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     }
                 }
 
-                return response;
             }
             catch (HttpRequestException ex)
             {
@@ -115,6 +109,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 _requestContext.Logger.Error(TimeoutError);
                 throw;
             }
+
+            return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
         }
 
         protected virtual Task<ManagedIdentityResponse> HandleResponseAsync(
