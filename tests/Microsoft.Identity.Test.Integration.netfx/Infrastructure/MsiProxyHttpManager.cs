@@ -40,15 +40,15 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
         public long LastRequestDurationInMs { get; private set; }
 
         public async Task<HttpResponse> SendRequestAsync(
-            Uri endpoint, 
-            Dictionary<string, string> headers, 
-            Dictionary<string, string> bodyParameters, 
-            HttpMethod method, 
-            ILoggerAdapter logger, 
-            bool doNotThrow, 
-            bool retry, 
-            X509Certificate2 mtlsCertificate, 
-            CancellationToken cancellationToken = default)
+            Uri endpoint,
+            Dictionary<string, string> headers,
+            HttpContent body,
+            HttpMethod method,
+            ILoggerAdapter logger,
+            bool doNotThrow,
+            bool retry,
+            X509Certificate2 mtlsCertificate,
+            CancellationToken cancellationToken)
         {
             //Get token for the MSIHelperService
             var labApi = new LabServiceApi();
