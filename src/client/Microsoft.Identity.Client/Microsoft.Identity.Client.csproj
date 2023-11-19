@@ -120,7 +120,7 @@
    
     <Compile Remove="$(PathToMsalSources)\Credential\**\*.cs" />
     <Compile Remove="$(PathToMsalSources)\Credential\**\*.cs" />
-    <Compile Remove="$(PathToMsalSources)\Internal\Requests\CredentialBasedMsiAuthRequest.cs" />
+    <Compile Remove="$(PathToMsalSources)\Internal\Requests\CredentialBasedMsiAuthRequest.cs" />    
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>
 
