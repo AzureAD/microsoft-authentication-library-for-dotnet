@@ -10,6 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -17,6 +18,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute.Core;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -288,14 +290,16 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             if (HttpMethod.Post == method && 
                 endpoint.AbsoluteUri.Equals("https://login.microsoftonline.com/my-utid/oauth2/v2.0/token"))
             {
-                throw new NotImplementedException();
-                //bodyParameters.TryGetValue(OAuth2Parameter.RefreshToken, out string rtSecret);
+                var bodyString = (body as FormUrlEncodedContent).ReadAsStringAsync().GetAwaiter().GetResult();
+                var bodyDict = bodyString.Replace("?", "").Split('&').ToDictionary(x => x.Split('=')[0], x => x.Split('=')[1]);
 
-                //return new HttpResponse()
-                //{
-                //    Body = GetTokenResponseForRt(rtSecret),
-                //    StatusCode = System.Net.HttpStatusCode.OK
-                //};
+                bodyDict.TryGetValue(OAuth2Parameter.RefreshToken, out string rtSecret);
+
+                return new HttpResponse()
+                {
+                    Body = GetTokenResponseForRt(rtSecret),
+                    StatusCode = System.Net.HttpStatusCode.OK
+                };
             }
 
             Assert.Fail("Test issue - this HttpRequest is not mocked");
