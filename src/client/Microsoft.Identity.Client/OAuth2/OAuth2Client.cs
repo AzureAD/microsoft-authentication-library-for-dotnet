@@ -15,6 +15,8 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
+using System.Security.Cryptography.X509Certificates;
+
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -37,11 +39,13 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly Dictionary<string, string> _queryParameters = new Dictionary<string, string>();
         private readonly IDictionary<string, string> _bodyParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
+        private readonly X509Certificate2 _mtlsCertificate;
 
-        public OAuth2Client(ILoggerAdapter logger, IHttpManager httpManager)
+        public OAuth2Client(ILoggerAdapter logger, IHttpManager httpManager, X509Certificate2 mtlsCertificate)
         {
             _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
+            _mtlsCertificate = mtlsCertificate;
         }
 
         public void AddQueryParameter(string key, string value)
@@ -125,22 +129,31 @@ namespace Microsoft.Identity.Client.OAuth2
                             await onBeforePostRequestData(requestData).ConfigureAwait(false);
                         }
 
-                        response = await _httpManager.SendPostAsync(
-                            endpointUri,
-                            _headers,
-                            _bodyParameters,
-                            requestContext.Logger,
-                            cancellationToken: requestContext.UserCancellationToken)
-                                 .ConfigureAwait(false);
+                        response = await _httpManager.SendRequestAsync(
+                                endpointUri,
+                                _headers,
+                                body: new FormUrlEncodedContent(_bodyParameters),
+                                HttpMethod.Post,
+                                logger: requestContext.Logger,
+                                doNotThrow: false,
+                                retry: true,
+                                mtlsCertificate: _mtlsCertificate,
+                                requestContext.UserCancellationToken)
+                                   .ConfigureAwait(false);
                     }
                     else
                     {
-                        response = await _httpManager.SendGetAsync(
-                            endpointUri,
-                            _headers,
-                            requestContext.Logger,
-                            cancellationToken: requestContext.UserCancellationToken)
-                                .ConfigureAwait(false);
+                        response = await _httpManager.SendRequestAsync(
+                                endpointUri,
+                                _headers,
+                                body: null,
+                                HttpMethod.Get,
+                                logger: requestContext.Logger,
+                                doNotThrow: false,
+                                retry: true,
+                                mtlsCertificate: null,
+                                requestContext.UserCancellationToken)
+                                   .ConfigureAwait(false);                       
                     }
                 }
                 catch (Exception ex)

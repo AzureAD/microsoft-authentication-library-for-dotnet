@@ -137,13 +137,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     _requestContext.Logger.Verbose(() => $"[Managed Identity] Sending token request to mtls " +
                     $"endpoint : {credentialResponse.RegionalTokenUrl}.");
 
-                    response = await _requestContext.ServiceBundle.HttpManager
-                            .SendPostForceResponseAsync(
-                                request.ComputeUri(),
-                                request.Headers,
-                                request.BodyParameters,
-                                request.BindingCertificate,
-                                _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
+                    response = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
+                       request.ComputeUri(),
+                       request.Headers,
+                       body: new FormUrlEncodedContent(request.BodyParameters),
+                       HttpMethod.Get,
+                       logger: _requestContext.Logger,
+                       doNotThrow: true,
+                       retry: true,
+                       mtlsCertificate: request.BindingCertificate,
+                       cancellationToken: cancellationToken)
+                          .ConfigureAwait(false);
                 }
 
                 return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);

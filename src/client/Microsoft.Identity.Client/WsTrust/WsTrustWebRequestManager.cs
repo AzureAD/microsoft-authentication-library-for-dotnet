@@ -39,14 +39,23 @@ namespace Microsoft.Identity.Client.WsTrust
                 return mexDoc;
             }
 
-            IDictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(requestContext.Logger);
+            Dictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(requestContext.Logger);
 
             var uri = new UriBuilder(federationMetadataUrl);
-            HttpResponse httpResponse = await _httpManager.SendGetAsync(
-                uri.Uri, 
-                msalIdParams, 
-                requestContext.Logger,
-                cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
+            
+
+            HttpResponse httpResponse = await _httpManager.SendRequestAsync(
+                    uri.Uri,
+                    msalIdParams,
+                    body: null,
+                    HttpMethod.Get,
+                    logger: requestContext.Logger,
+                    doNotThrow: false,
+                    retry: true,
+                    mtlsCertificate: null,
+                    requestContext.UserCancellationToken)
+                .ConfigureAwait(false);
+
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 string message = string.Format(CultureInfo.CurrentCulture,
@@ -91,11 +100,16 @@ namespace Microsoft.Identity.Client.WsTrust
                 wsTrustRequest,
                 Encoding.UTF8, "application/soap+xml");
 
-            HttpResponse resp = await _httpManager.SendPostForceResponseAsync(wsTrustEndpoint.Uri, 
-                headers, 
-                body, 
-                requestContext.Logger, 
-                cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
+            HttpResponse resp = await _httpManager.SendRequestAsync(
+                    wsTrustEndpoint.Uri,
+                    headers,
+                    body: body,
+                    HttpMethod.Post,
+                    logger: requestContext.Logger,
+                    doNotThrow: true,
+                    retry: true,
+                    mtlsCertificate: null,
+                    requestContext.UserCancellationToken).ConfigureAwait(false);
 
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
             {
@@ -156,15 +170,21 @@ namespace Microsoft.Identity.Client.WsTrust
         {
             requestContext.Logger.Info("Sending request to userrealm endpoint. ");
 
-            IDictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(requestContext.Logger);
+            Dictionary<string, string> msalIdParams = MsalIdHelper.GetMsalIdParameters(requestContext.Logger);
 
             var uri = new UriBuilder(userRealmUriPrefix + userName + "?api-version=1.0").Uri;
             
-            var httpResponse = await _httpManager.SendGetAsync(
-                uri,
-                msalIdParams,
-                requestContext.Logger,
-                cancellationToken: requestContext.UserCancellationToken).ConfigureAwait(false);
+            var httpResponse = await _httpManager.SendRequestAsync(
+               uri,
+               msalIdParams,
+               body: null,
+               HttpMethod.Get,
+               logger: requestContext.Logger,
+               doNotThrow: false,
+               retry: true,
+               mtlsCertificate: null,
+               requestContext.UserCancellationToken)
+                  .ConfigureAwait(false);
 
             if (httpResponse.StatusCode == System.Net.HttpStatusCode.OK)
             {

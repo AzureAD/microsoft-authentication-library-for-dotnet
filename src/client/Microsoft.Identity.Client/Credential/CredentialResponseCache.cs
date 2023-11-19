@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.Core;
 using System.Collections.Concurrent;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.ManagedIdentity;
+using System.Drawing;
 
 namespace Microsoft.Identity.Client.Credential
 {
@@ -94,13 +95,17 @@ namespace Microsoft.Identity.Client.Credential
         {
             _requestContext.Logger.Info("[Managed Identity] Fetching credential from IMDS endpoint.");
 
-            return await httpManager
-                            .SendPostForceResponseAsync(
-                                request.ComputeUri(),
-                                request.Headers,
-                                request.Content,
-                                _requestContext.Logger, cancellationToken: cancellationToken)
-                            .ConfigureAwait(false);
+            return await httpManager.SendRequestAsync(
+                endpoint: request.ComputeUri(),
+                headers: request.Headers,
+                body: request.Content,
+                System.Net.Http.HttpMethod.Post,
+                _requestContext.Logger,
+                doNotThrow: true,
+                retry: true,
+                mtlsCertificate: null,
+                cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
         }
 
         private long GetExpiresOnFromJson(string jsonContent)

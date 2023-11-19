@@ -26,15 +26,134 @@ namespace Microsoft.Identity.Client.Http
     internal class HttpManager : IHttpManager
     {
         protected readonly IMsalHttpClientFactory _httpClientFactory;
+        private readonly Func<HttpResponse, bool> _retryCondition;
+
         public long LastRequestDurationInMs { get; private set; }
 
-        public HttpManager(IMsalHttpClientFactory httpClientFactory)
+        /// <summary>
+        /// A new instance of the HTTP manager with a retry *condition*. The retry policy hardcodes: 
+        /// - the number of retries (1)
+        /// - the delay between retries (1 second)
+        /// </summary>
+        public HttpManager(
+            IMsalHttpClientFactory httpClientFactory, 
+            Func<HttpResponse, bool> retryCondition)
         {
             _httpClientFactory = httpClientFactory ??
                 throw new ArgumentNullException(nameof(httpClientFactory));
+            _retryCondition = retryCondition;
         }
 
-        protected virtual HttpClient GetHttpClient(X509Certificate2 x509Certificate2)
+      
+
+        public async Task<HttpResponse> SendRequestAsync(
+            Uri endpoint,
+            Dictionary<string, string> headers,
+            HttpContent body,
+            HttpMethod method,
+            ILoggerAdapter logger,
+            bool doNotThrow,
+            bool retry,
+            X509Certificate2 bindingCertificate,
+            CancellationToken cancellationToken)
+        {
+            Exception timeoutException = null;
+            bool isRetriableStatusCode = false;
+            HttpResponse response = null;
+            bool isRetriable = false;
+
+            try
+            {
+                //HttpContent body = bodyParameters == null ? null : new FormUrlEncodedContent(bodyParameters);
+
+                HttpContent clonedBody = body;
+                if (body != null)
+                {
+                    // Since HttpContent would be disposed by underlying client.SendAsync(),
+                    // we duplicate it so that we will have a copy in case we would need to retry
+                    clonedBody = await CloneHttpContentAsync(body).ConfigureAwait(false);
+                }
+
+                using (logger.LogBlockDuration("[HttpManager] ExecuteAsync"))
+                {
+                    response = await ExecuteAsync(
+                        endpoint, 
+                        headers, 
+                        clonedBody, 
+                        method, 
+                        bindingCertificate, 
+                        logger, 
+                        cancellationToken).ConfigureAwait(false);
+                }
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    return response;
+                }
+
+                logger.Info(() => string.Format(CultureInfo.InvariantCulture,
+                    MsalErrorMessage.HttpRequestUnsuccessful,
+                    (int)response.StatusCode, response.StatusCode));
+
+
+                isRetriable = _retryCondition(response);
+            }
+            catch (TaskCanceledException exception)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    logger.Info("The HTTP request was cancelled. ");
+                    throw;
+                }
+
+                logger.Error("The HTTP request failed. " + exception.Message);
+                //isRetriable = true;
+                timeoutException = exception;
+            }
+
+            if (isRetriable && retry)
+            {
+                logger.Warning("Retry condition met. Retrying 1 time after waiting 1 second.");
+                await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+                return await SendRequestAsync(
+                    endpoint,
+                    headers,
+                    body,
+                    method,
+                    logger,
+                    doNotThrow,
+                    retry: false,  // retry just once
+                    bindingCertificate,
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
+            }
+
+            logger.Warning("Request retry failed.");
+            if (timeoutException != null)
+            {
+                throw new MsalServiceException(
+                    MsalError.RequestTimeout,
+                    "Request to the endpoint timed out.",
+                    timeoutException);
+            }
+
+            if (doNotThrow)
+            {
+                return response;
+            }
+
+            // package 500 errors in a "service not available" exception
+            if ((int)response.StatusCode >= 500 && (int)response.StatusCode < 600)
+            {
+                throw MsalServiceExceptionFactory.FromHttpResponse(
+                    MsalError.ServiceNotAvailable,
+                    "Service is unavailable to process the request",
+                    response);
+            }
+
+            return response;
+        }
+
+        private HttpClient GetHttpClient(X509Certificate2 x509Certificate2)
         {
             if (x509Certificate2 is null)
             {
@@ -46,112 +165,9 @@ namespace Microsoft.Identity.Client.Http
                 return msalMtlsHttpClientFactory.GetHttpClient(x509Certificate2);
             }
 
-            throw new MsalClientException("http_client_factory", "You customized HttpClient factory but you are using APIs which require provisioning of a client certificate in HttpClient. Implement IMsalMtlsHttpClientFactory. For details see https://aka.ms/msal-net-msi-claims");
-        }
-
-        public async Task<HttpResponse> SendPostAsync(
-            Uri endpoint,
-            IDictionary<string, string> headers,
-            IDictionary<string, string> bodyParameters,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken = default)
-        {
-            HttpContent body = bodyParameters == null ? null : new FormUrlEncodedContent(bodyParameters);
-            return await SendPostAsync(endpoint, headers, body, logger, cancellationToken).ConfigureAwait(false);
-        }
-
-        public virtual async Task<HttpResponse> SendPostAsync(
-            Uri endpoint,
-            IDictionary<string, string> headers,
-            HttpContent body,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken = default)
-        {
-            return await SendRequestAsync(endpoint, headers, body, HttpMethod.Post, logger, cancellationToken: cancellationToken).ConfigureAwait(false);
-        }
-
-        public virtual async Task<HttpResponse> SendGetAsync(
-            Uri endpoint,
-            IDictionary<string, string> headers,
-            ILoggerAdapter logger,
-            bool retry = true,
-            CancellationToken cancellationToken = default)
-        {
-            return await SendRequestAsync(endpoint, headers, null, HttpMethod.Get, logger, cancellationToken: cancellationToken).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Performs the GET request just like <see cref="SendGetAsync(Uri, IDictionary{string, string}, ILoggerAdapter, bool, CancellationToken)"/>
-        /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="HttpResponse"/> associated
-        /// with the request.
-        /// </summary>
-        public virtual async Task<HttpResponse> SendGetForceResponseAsync(
-            Uri endpoint,
-            IDictionary<string, string> headers,
-            ILoggerAdapter logger,
-            bool retry = true,
-            CancellationToken cancellationToken = default)
-        {
-            return await SendRequestAsync(endpoint, headers, null, HttpMethod.Get, logger, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Performs the POST request just like <see cref="SendPostAsync(Uri, IDictionary{string, string}, IDictionary{String, String}, ILoggerAdapter, CancellationToken)"/>
-        /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="HttpResponse"/> associated
-        /// with the request.
-        /// </summary>
-        public virtual async Task<HttpResponse> SendPostForceResponseAsync(
-            Uri uri,
-            IDictionary<string, string> headers,
-            IDictionary<string, string> bodyParameters,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken = default)
-        {
-            HttpContent body = bodyParameters == null ? null : new FormUrlEncodedContent(bodyParameters);
-            return await SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Performs the POST request just like <see cref="SendPostAsync(Uri, IDictionary{string, string}, HttpContent, ILoggerAdapter, CancellationToken)"/>
-        /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="HttpResponse"/> associated
-        /// with the request.
-        /// </summary>
-        public virtual async Task<HttpResponse> SendPostForceResponseAsync(
-            Uri uri,
-            IDictionary<string, string> headers,
-            StringContent body,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken = default)
-        {
-            return await SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
-        }
-
-        public virtual async Task<HttpResponse> SendPostForceResponseAsync(
-            Uri uri,
-            IDictionary<string, string> headers,
-            IDictionary<string, string> bodyParameters,
-            X509Certificate2 bindingCertificate,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken = default)
-        {
-            HttpContent body = bodyParameters == null ? null : new FormUrlEncodedContent(bodyParameters);
-            return await SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, bindingCertificate, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Performs the POST request just like <see cref="SendPostAsync(Uri, IDictionary{string, string}, HttpContent, ILoggerAdapter, CancellationToken)"/>
-        /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="HttpResponse"/> associated
-        /// with the request.
-        /// </summary>
-        public virtual async Task<HttpResponse> SendPostForceResponseAsync(
-            Uri uri,
-            IDictionary<string, string> headers,
-            StringContent body,
-            X509Certificate2 bindingCert,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken = default)
-        {
-            return await SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, bindingCert, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+            throw new MsalClientException(
+                "http_client_factory",
+                "You customized HttpClient factory but you are using APIs which require provisioning of a client certificate in HttpClient. Implement IMsalMtlsHttpClientFactory. For details see https://aka.ms/msal-net-msi-claims");
         }
 
         private HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
@@ -169,76 +185,7 @@ namespace Microsoft.Identity.Client.Http
             return requestMessage;
         }
 
-        protected virtual async Task<HttpResponse> SendRequestAsync(
-            Uri endpoint,
-            IDictionary<string, string> headers,
-            HttpContent body,
-            HttpMethod method,
-            ILoggerAdapter logger,
-            X509Certificate2 bindingCertificate = null,
-            bool doNotThrow = false,
-            bool retry = false,
-            CancellationToken cancellationToken = default)
-        {
-            HttpResponse response = null;
-
-            try
-            {
-                HttpContent clonedBody = body;
-                if (body != null)
-                {
-                    // Since HttpContent would be disposed by underlying client.SendAsync(),
-                    // we duplicate it so that we will have a copy in case we would need to retry
-                    clonedBody = await CloneHttpContentAsync(body).ConfigureAwait(false);
-                }
-
-                using (logger.LogBlockDuration($"[HttpManager] ExecuteAsync (MTLS: {bindingCertificate!=null})"))
-                {
-                    response = await ExecuteAsync(endpoint, headers, clonedBody, method, bindingCertificate, logger, cancellationToken).ConfigureAwait(false);
-                }
-
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    return response;
-                }
-
-                logger.Info(() => string.Format(CultureInfo.InvariantCulture,
-                    MsalErrorMessage.HttpRequestUnsuccessful,
-                    (int)response.StatusCode, response.StatusCode));
-            }
-            catch (TaskCanceledException exception)
-            {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    logger.Info("The HTTP request was cancelled. ");
-                    throw;
-                }
-
-                logger.Error("The HTTP request failed. " + exception.Message);
-                throw new MsalServiceException(
-                    MsalError.RequestTimeout,
-                    "Request to the endpoint timed out.",
-                    exception);
-            }
-
-            if (doNotThrow)
-            {
-                return response;
-            }
-
-            // package 500 errors in a "service not available" exception
-            if (IsRetryableStatusCode((int)response.StatusCode))
-            {
-                throw MsalServiceExceptionFactory.FromHttpResponse(
-                    MsalError.ServiceNotAvailable,
-                    "Service is unavailable to process the request",
-                    response);
-            }
-
-            return response;
-        }
-
-        protected async Task<HttpResponse> ExecuteAsync(
+        private async Task<HttpResponse> ExecuteAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
             HttpContent body,
@@ -272,20 +219,7 @@ namespace Microsoft.Identity.Client.Http
                 }
             }
         }
-
-        internal /* internal for test only */ static async Task<HttpResponse> CreateResponseAsync(HttpResponseMessage response)
-        {
-            var body = response.Content == null
-                           ? null
-                           : await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            return new HttpResponse
-            {
-                Headers = response.Headers,
-                Body = body,
-                StatusCode = response.StatusCode
-            };
-        }
-
+      
         protected async Task<HttpContent> CloneHttpContentAsync(HttpContent httpContent)
         {
             var temp = new MemoryStream();
@@ -314,13 +248,27 @@ namespace Microsoft.Identity.Client.Http
             return clone;
         }
 
-        /// <summary>
-        /// In HttpManager, the retry policy is based on this simple condition.
-        /// Avoid changing this, as it's breaking change.
-        /// </summary>
-        protected virtual bool IsRetryableStatusCode(int statusCode)
+        
+        
+
+        #region Helpers
+        internal /* internal for test only */ static async Task<HttpResponse> CreateResponseAsync(HttpResponseMessage response)
         {
-            return statusCode >= 500 && statusCode < 600;
+            var body = response.Content == null
+                           ? null
+                           : await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            return new HttpResponse
+            {
+                Headers = response.Headers,
+                Body = body,
+                StatusCode = response.StatusCode
+            };
         }
+
+     
+
+
+
+        #endregion
     }
 }

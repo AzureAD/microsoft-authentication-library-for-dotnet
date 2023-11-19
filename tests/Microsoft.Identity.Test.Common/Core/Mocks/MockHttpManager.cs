@@ -74,51 +74,32 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public long LastRequestDurationInMs => 3000;
 
-        
-
         private string GetExpectedUrlFromHandler(HttpMessageHandler handler)
         {
             return (handler as MockHttpMessageHandler)?.ExpectedUrl ?? "";
         }
 
-        public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ILoggerAdapter logger, CancellationToken cancellationToken = default)
+        public Task<HttpResponse> SendRequestAsync(
+            Uri endpoint, 
+            Dictionary<string, string> headers, 
+            HttpContent body, 
+            HttpMethod method, 
+            ILoggerAdapter logger, 
+            bool doNotThrow, 
+            bool retry, 
+            X509Certificate2 mtlsCertificate, 
+            CancellationToken cancellationToken)
         {
-            return await _httpManager.SendPostAsync(endpoint, headers, bodyParameters, logger, cancellationToken).ConfigureAwait(false);
-        }
-
-        public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, HttpContent body, ILoggerAdapter logger, CancellationToken cancellationToken = default)
-        {
-            return await _httpManager.SendPostAsync(endpoint, headers, body, logger, cancellationToken).ConfigureAwait(false);
-        }
-
-        public Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
-        {
-            return _httpManager.SendGetAsync(endpoint, headers, logger, retry, cancellationToken);
-        }
-
-        public async Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, StringContent body, ILoggerAdapter logger, CancellationToken cancellationToken = default)
-        {
-            return await _httpManager.SendPostForceResponseAsync(uri, headers, body, logger, cancellationToken).ConfigureAwait(false);
-        }
-
-        public async Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ILoggerAdapter logger, CancellationToken cancellationToken = default)
-        {
-            return await _httpManager.SendPostForceResponseAsync(uri, headers, bodyParameters, logger, cancellationToken).ConfigureAwait(false);
-        }
-
-        public async Task<HttpResponse> SendGetForceResponseAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
-        {
-            return await _httpManager.SendGetForceResponseAsync(endpoint, headers, logger, retry, cancellationToken).ConfigureAwait(false); 
-        }
-
-        public Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, StringContent body, X509Certificate2 bindingCertificate, ILoggerAdapter logger, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, X509Certificate2 bindingCertificate, ILoggerAdapter logger, CancellationToken cancellationToken = default)
-        {
-            return await _httpManager.SendPostForceResponseAsync(uri, headers, bodyParameters, logger, cancellationToken).ConfigureAwait(false);
+            return _httpManager.SendRequestAsync(
+                endpoint, 
+                headers, 
+                body, 
+                method, 
+                logger, 
+                doNotThrow, 
+                retry, 
+                mtlsCertificate, 
+                cancellationToken);
         }
     }
 

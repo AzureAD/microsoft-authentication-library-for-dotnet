@@ -238,18 +238,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         public async Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
         {
-            // simulate delay and also add complexity due to thread context switch
-            await Task.Delay(ParallelRequestsTests.NetworkAccessPenaltyMs).ConfigureAwait(false);
-
-            if (endpoint.AbsoluteUri.StartsWith("https://login.microsoftonline.com/common/discovery/instance?api-version=1.1"))
-            {
-                return new HttpResponse()
-                {
-                    Body = TestConstants.DiscoveryJsonResponse,
-                    StatusCode = System.Net.HttpStatusCode.OK
-                };
-            }
-
             Assert.Fail("Only instance discovery is supported");
             return null;
         }
@@ -273,6 +261,47 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             return null;
         }
 
+        public async Task<HttpResponse> SendRequestAsync(
+            Uri endpoint,
+            Dictionary<string, string> headers,
+            HttpContent body,
+            HttpMethod method,
+            ILoggerAdapter logger,
+            bool doNotThrow,
+            bool retry, 
+            X509Certificate2 mtlsCertificate,
+            CancellationToken cancellationToken)
+        {
+            // simulate delay and also add complexity due to thread context switch
+            await Task.Delay(ParallelRequestsTests.NetworkAccessPenaltyMs).ConfigureAwait(false);
+
+            if (HttpMethod.Get == method &&
+                endpoint.AbsoluteUri.StartsWith("https://login.microsoftonline.com/common/discovery/instance?api-version=1.1"))
+            {
+                return new HttpResponse()
+                {
+                    Body = TestConstants.DiscoveryJsonResponse,
+                    StatusCode = System.Net.HttpStatusCode.OK
+                };
+            }
+
+            if (HttpMethod.Post == method && 
+                endpoint.AbsoluteUri.Equals("https://login.microsoftonline.com/my-utid/oauth2/v2.0/token"))
+            {
+                throw new NotImplementedException();
+                //bodyParameters.TryGetValue(OAuth2Parameter.RefreshToken, out string rtSecret);
+
+                //return new HttpResponse()
+                //{
+                //    Body = GetTokenResponseForRt(rtSecret),
+                //    StatusCode = System.Net.HttpStatusCode.OK
+                //};
+            }
+
+            Assert.Fail("Test issue - this HttpRequest is not mocked");
+            return null;
+        }
+
         private string GetTokenResponseForRt(string rtSecret)
         {
             if (int.TryParse(rtSecret, out int i))
@@ -285,36 +314,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             Assert.Fail("Expecting the rt secret to be a number, to be able to craft a response");
             return null;
-        }
-
-        public Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, HttpContent body, ILoggerAdapter logger, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, StringContent body, ILoggerAdapter logger, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ILoggerAdapter logger, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<HttpResponse> SendGetForceResponseAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, StringContent body, X509Certificate2 bindingCertificate, ILoggerAdapter logger, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, X509Certificate2 bindingCertificate, ILoggerAdapter logger, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
         }
     }
 }

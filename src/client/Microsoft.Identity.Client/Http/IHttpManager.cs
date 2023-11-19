@@ -15,62 +15,15 @@ namespace Microsoft.Identity.Client.Http
     {
         long LastRequestDurationInMs { get; }
 
-        Task<HttpResponse> SendPostAsync(
-            Uri endpoint,
-            IDictionary<string, string> headers,
-            IDictionary<string, string> bodyParameters,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken = default);
-
-        Task<HttpResponse> SendPostAsync(
-            Uri endpoint,
-            IDictionary<string, string> headers,
-            HttpContent body,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken = default);
-
-        Task<HttpResponse> SendGetAsync(
-            Uri endpoint,
-            IDictionary<string, string> headers,
-            ILoggerAdapter logger,
-            bool retry = true,
-            CancellationToken cancellationToken = default);
-
-        Task<HttpResponse> SendPostForceResponseAsync(
-            Uri uri,
-            IDictionary<string, string> headers,
-            StringContent body,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken = default);
-
-        Task<HttpResponse> SendPostForceResponseAsync(
-            Uri uri,
-            IDictionary<string, string> headers,
-            StringContent body,
-            X509Certificate2 bindingCertificate,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken = default);
-
-        Task<HttpResponse> SendPostForceResponseAsync(
-            Uri uri,
-            IDictionary<string, string> headers,
-            IDictionary<string, string> bodyParameters,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken = default);
-
-        Task<HttpResponse> SendPostForceResponseAsync(
-            Uri uri,
-            IDictionary<string, string> headers,
-            IDictionary<string, string> bodyParameters,
-            X509Certificate2 bindingCertificate,
-            ILoggerAdapter logger,
-            CancellationToken cancellationToken = default);
-
-        Task<HttpResponse> SendGetForceResponseAsync(
-            Uri endpoint,
-            IDictionary<string, string> headers,
-            ILoggerAdapter logger,
-            bool retry = true,
-            CancellationToken cancellationToken = default);
+        Task<HttpResponse> SendRequestAsync(
+           Uri endpoint,
+           Dictionary<string, string> headers,
+           HttpContent body,
+           HttpMethod method,
+           ILoggerAdapter logger,
+           bool doNotThrow,
+           bool retry,
+           X509Certificate2 mtlsCertificate,
+           CancellationToken cancellationToken);
     }
 }
