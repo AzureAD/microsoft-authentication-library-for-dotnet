@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.OAuth2;
@@ -16,7 +17,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
-    internal class MockHttpMessageHandler : HttpMessageHandler
+    internal class MockHttpMessageHandler : HttpClientHandler
     {
         public HttpResponseMessage ResponseMessage { get; set; }
         public string ExpectedUrl { get; set; }
@@ -38,10 +39,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public Dictionary<string, string> ActualRequestPostData { get; private set; }
         public HttpRequestHeaders ActualRequestHeaders { get; private set; }
 
+        public X509Certificate2 ExpectedMtlsBindingCertificate { get; set; }
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             ActualRequestMessage = request;
-
+            
             if (ExceptionToThrow != null)
             {
                 throw ExceptionToThrow;
@@ -53,6 +56,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 Assert.AreEqual(
                     ExpectedUrl,
                     uri.AbsoluteUri.Split('?')[0]);
+            }
+
+            if (ExpectedMtlsBindingCertificate != null )
+            {
+                Assert.AreEqual(1, base.ClientCertificates.Count);
+                Assert.AreEqual(ExpectedMtlsBindingCertificate, base.ClientCertificates[0]);
             }
 
             Assert.AreEqual(ExpectedMethod, request.Method);

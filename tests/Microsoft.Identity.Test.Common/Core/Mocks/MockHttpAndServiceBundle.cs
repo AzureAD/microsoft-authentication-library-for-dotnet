@@ -21,12 +21,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             LogCallback logCallback = null,
             bool isExtendedTokenLifetimeEnabled = false,
             string authority = ClientApplicationBase.DefaultAuthority,
-            TestContext testContext = null,
+            string testName = null,
             bool isMultiCloudSupportEnabled = false,
             bool isInstanceDiscoveryEnabled = true,
             IPlatformProxy platformProxy = null)
         {
-            HttpManager = new MockHttpManager(testContext);
+            HttpManager = new MockHttpManager(testName);
             ServiceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(
                 HttpManager,
                 logCallback: logCallback,

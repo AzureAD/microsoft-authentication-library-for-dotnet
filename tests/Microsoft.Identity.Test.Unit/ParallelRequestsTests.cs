@@ -238,10 +238,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     {
         public long LastRequestDurationInMs => 50;
 
-        public async Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
+        public Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
         {
             Assert.Fail("Only instance discovery is supported");
-            return null;
+            return Task.FromResult<HttpResponse>(null);
         }
 
         public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ILoggerAdapter logger, CancellationToken cancellationToken = default)

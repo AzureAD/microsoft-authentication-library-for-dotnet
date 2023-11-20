@@ -15,6 +15,7 @@ using NSubstitute;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using System.Threading;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {
@@ -25,6 +26,47 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();
+        }
+
+
+        [TestMethod]
+        public async Task MtlsCertAsync()
+        {
+            var bodyParameters = new Dictionary<string, string>
+            {
+                ["key1"] = "some value1",
+                ["key2"] = "some value2"
+            };
+            var headers = new Dictionary<string, string>
+            {
+                ["key1"] = "qp1",
+                ["key2"] = "qp2"
+            };
+
+            X509Certificate2 cert = CertHelper.GetOrCreateTestCert();
+
+            using (var httpManager = new MockHttpManager())
+            {
+                HttpResponseMessage mock = MockHelpers.CreateSuccessTokenResponseMessage();
+                MockHttpMessageHandler handler = httpManager.AddResponseMockHandlerForPost(mock, bodyParameters, headers);
+                handler.ExpectedMtlsBindingCertificate = cert;
+                string expectedContent = mock.Content.ReadAsStringAsync().Result;
+                var response = await httpManager.SendRequestAsync(
+                            new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
+                            headers: null,
+                            body: new FormUrlEncodedContent(bodyParameters),
+                            HttpMethod.Post,
+                            logger: Substitute.For<ILoggerAdapter>(),
+                            doNotThrow: false,
+                            retry: true,
+                            mtlsCertificate: cert,
+                            default)
+                               .ConfigureAwait(false);
+
+                Assert.IsNotNull(response);
+                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+                Assert.AreEqual(expectedContent, response.Body);
+            }
         }
 
         [TestMethod]
