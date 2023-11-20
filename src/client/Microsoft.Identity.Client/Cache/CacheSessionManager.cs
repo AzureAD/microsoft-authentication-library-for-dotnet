@@ -177,6 +177,9 @@ namespace Microsoft.Identity.Client.Cache
                         RequestContext.ApiEvent.CacheLevel = telemetryData.CacheLevel;
                     }
                 }
+            } else
+            {
+                RequestContext.ApiEvent.CacheLevel = CacheLevel.L1Cache;
             }
         }
     }
