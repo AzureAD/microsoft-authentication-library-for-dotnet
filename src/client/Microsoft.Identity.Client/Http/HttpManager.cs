@@ -58,7 +58,6 @@ namespace Microsoft.Identity.Client.Http
             CancellationToken cancellationToken)
         {
             Exception timeoutException = null;
-            bool isRetriableStatusCode = false;
             HttpResponse response = null;
             bool isRetriable = false;
 
@@ -107,7 +106,7 @@ namespace Microsoft.Identity.Client.Http
                 }
 
                 logger.Error("The HTTP request failed. " + exception.Message);
-                //isRetriable = true;
+                isRetriable = true;
                 timeoutException = exception;
             }
 
