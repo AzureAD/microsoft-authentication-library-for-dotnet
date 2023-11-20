@@ -55,10 +55,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        [DataRow( TargetFrameworks.NetFx | TargetFrameworks.NetCore | TargetFrameworks.NetStandard )]
-        public async Task OTelAcquireToken_TestAsync(TargetFrameworks runOn)
+        public async Task OTelAcquireToken_TestAsync()
         {
-            runOn.AssertFramework();
             await RunClientCredsAsync().ConfigureAwait(false);
 
             s_meterProvider.ForceFlush();
