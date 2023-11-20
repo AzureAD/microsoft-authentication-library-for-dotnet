@@ -15,8 +15,10 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
+#if SUPPORTS_MANAGED_IDENTITY_V2
+using Microsoft.Identity.Client.Credential;
+#endif
 using System.Security.Cryptography.X509Certificates;
-
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -38,6 +40,7 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly Dictionary<string, string> _headers;
         private readonly Dictionary<string, string> _queryParameters = new Dictionary<string, string>();
         private readonly IDictionary<string, string> _bodyParameters = new Dictionary<string, string>();
+        private StringContent _stringContent;
         private readonly IHttpManager _httpManager;
         private readonly X509Certificate2 _mtlsCertificate;
 
@@ -64,6 +67,14 @@ namespace Microsoft.Identity.Client.OAuth2
             }
         }
 
+        public void AddBodyContent(StringContent content)
+        {
+            if (content != null)
+            {
+                _stringContent = content;
+            }
+        }
+
         internal void AddHeader(string key, string value)
         {
             _headers[key] = value;
@@ -84,6 +95,14 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             return await ExecuteRequestAsync<OidcMetadata>(endpoint, HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
+
+#if SUPPORTS_MANAGED_IDENTITY_V2
+        public async Task<CredentialResponse> GetCredentialResponseAsync(Uri endpoint, RequestContext requestContext)
+        {
+            return await ExecuteRequestAsync<CredentialResponse>(endpoint, HttpMethod.Post, requestContext)
+                       .ConfigureAwait(false);
+        }
+#endif
 
         internal async Task<MsalTokenResponse> GetTokenAsync(
             Uri endPoint,
@@ -130,30 +149,30 @@ namespace Microsoft.Identity.Client.OAuth2
                         }
 
                         response = await _httpManager.SendRequestAsync(
-                                endpointUri,
-                                _headers,
-                                body: new FormUrlEncodedContent(_bodyParameters),
-                                HttpMethod.Post,
-                                logger: requestContext.Logger,
-                                doNotThrow: false,
-                                retry: true,
-                                mtlsCertificate: _mtlsCertificate,
-                                requestContext.UserCancellationToken)
-                                   .ConfigureAwait(false);
+                            endpointUri,
+                            _headers,
+                            body: _stringContent == null ? new FormUrlEncodedContent(_bodyParameters) : null,
+                            HttpMethod.Post,
+                            logger: requestContext.Logger,
+                            doNotThrow: false,
+                            retry: true,
+                            mtlsCertificate: _mtlsCertificate,
+                            requestContext.UserCancellationToken)
+                        .ConfigureAwait(false);
                     }
                     else
                     {
                         response = await _httpManager.SendRequestAsync(
-                                endpointUri,
-                                _headers,
-                                body: null,
-                                HttpMethod.Get,
-                                logger: requestContext.Logger,
-                                doNotThrow: false,
-                                retry: true,
-                                mtlsCertificate: null,
-                                requestContext.UserCancellationToken)
-                                   .ConfigureAwait(false);                       
+                            endpointUri,
+                            _headers,
+                            body: null,
+                            HttpMethod.Get,
+                            logger: requestContext.Logger,
+                            doNotThrow: false,
+                            retry: true,
+                            mtlsCertificate: null,
+                            requestContext.UserCancellationToken)
+                        .ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)

@@ -16,10 +16,6 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using System.Net.Sockets;
 using System.Diagnostics;
 
-#if TRA
-using Microsoft.Identity.Client.Credential;
-#endif
-
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
     /// <summary>
@@ -30,16 +26,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         protected readonly RequestContext _requestContext;
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
         internal readonly ManagedIdentitySource _sourceType;
-#if TRA
-        private readonly CredentialResponseCache _credentialResponseCache;
-#endif
         protected AbstractManagedIdentity(RequestContext requestContext, ManagedIdentitySource sourceType)
         {
             _requestContext = requestContext;
             _sourceType = sourceType;
-#if TRA
-            _credentialResponseCache = CredentialResponseCache.GetCredentialInstance(_requestContext);
-#endif
         }
 
         public virtual async Task<ManagedIdentityResponse> AuthenticateAsync(
@@ -79,35 +69,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
                 else
                 {
-                    if (_sourceType != ManagedIdentitySource.Credential)
-                    {
-                        Debug.WriteLine("_sourceType in AuthenticateAsync" + _sourceType);
+                    
+                    Debug.WriteLine("_sourceType in AuthenticateAsync" + _sourceType);
 
-                        response = await _requestContext.ServiceBundle.HttpManager
-                            .SendRequestAsync(
-                                request.ComputeUri(),
-                                request.Headers,
-                                body: new FormUrlEncodedContent(request.BodyParameters),
-                                HttpMethod.Post,
-                                logger: _requestContext.Logger,
-                                doNotThrow: true,
-                                retry: true,
-                                mtlsCertificate: null,
-                                cancellationToken)
-                            .ConfigureAwait(false);
-                    }
-                    else
-                    {
-#if TRA
-                        string credentialCacheKey = request.GetCredentialCacheKey();
-
-                        response = await _credentialResponseCache.GetOrFetchCredentialAsync(
-                                                        _requestContext.ServiceBundle.HttpManager,
-                                                        request,
-                                                        credentialCacheKey,
-                                                        CancellationToken.None).ConfigureAwait(false);
-#endif                    
-                    }
+                    response = await _requestContext.ServiceBundle.HttpManager
+                        .SendRequestAsync(
+                            request.ComputeUri(),
+                            request.Headers,
+                            body: new FormUrlEncodedContent(request.BodyParameters),
+                            HttpMethod.Post,
+                            logger: _requestContext.Logger,
+                            doNotThrow: true,
+                            retry: true,
+                            mtlsCertificate: null,
+                            cancellationToken)
+                        .ConfigureAwait(false);
+                    
                 }
             }
             catch (HttpRequestException ex)
@@ -175,7 +152,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal string GetMessageFromErrorResponse(HttpResponse response)
         {
             var managedIdentityErrorResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
-            string additionalErrorInfo = string.Empty;
 
             if (managedIdentityErrorResponse == null)
             {

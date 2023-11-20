@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client
     public static class ManagedIdentityApplicationExtensions
     {
         /// <summary>
-        /// Used to determine if the currently available broker is able to perform Proof-of-Possession.
+        /// Used to determine if the currently available azure resource is able to perform Proof-of-Possession.
         /// </summary>
         /// <returns>Boolean indicating if Proof-of-Possession is supported</returns>
         public static bool IsProofOfPossessionSupportedByClient(this IManagedIdentityApplication app)

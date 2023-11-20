@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static string GetSuccessfulCredentialResponse()
         {
-            return "{\"client_id\":\"2d0d13ad-3a4d-4cfd-98f8-f20621d55ded\",\"credential\":\"access_token\",\"expires_on\":1700087787,\"identity_type\":\"SystemAssigned\",\"refresh_in\":1700085987,\"regional_token_url\":\"https://centraluseuap.login.microsoft.com\",\"tenant_id\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"}";
+            return "{\"client_id\":\"2d0d13ad-3a4d-4cfd-98f8-f20621d55ded\",\"credential\":\"access_token\",\"expires_on\":1700087787,\"identity_type\":\"SystemAssigned\",\"refresh_in\":1700085987,\"regional_token_url\":\"https://centraluseuap.mtlsauth.microsoft.com\",\"tenant_id\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"}";
         }
 
         public static string GetSuccessfulMtlsResponse()

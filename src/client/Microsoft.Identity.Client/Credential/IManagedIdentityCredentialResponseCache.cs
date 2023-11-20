@@ -8,15 +8,11 @@ using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Client.Credential
 {
-    internal interface ICredentialResponseCache
+    internal interface IManagedIdentityCredentialResponseCache
     {
-        Task<HttpResponse> GetOrFetchCredentialAsync(
-            IHttpManager httpManager,
-            ManagedIdentityRequest request,
-            string key,
-            CancellationToken cancellationToken);
+        Task<CredentialResponse> GetOrFetchCredentialAsync();
 
-        void AddCredential(string key, HttpResponse response);
+        void AddCredential(string key, CredentialResponse response);
         void RemoveCredential(string key);
     }
 }
