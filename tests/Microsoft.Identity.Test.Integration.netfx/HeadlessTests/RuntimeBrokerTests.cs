@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -70,6 +71,47 @@ namespace Microsoft.Identity.Test.Integration.Broker
             {
                 Assert.Fail(ex.Message);
             }
+        }
+        
+        [RunOn(TargetFrameworks.NetCore)]
+        public async Task ExtractNonceWithAuthParserAndValidateShrAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
+
+            //Arrange & Act
+            //Test for nonce in WWW-Authenticate header
+            var parsedHeaders = await AuthenticationHeaderParser.ParseAuthenticationHeadersAsync("https://testingsts.azurewebsites.net/servernonce/invalidsignature").ConfigureAwait(false);
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .Build();
+
+            Assert.IsTrue(pca.IsProofOfPossessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");
+
+            Uri requestUri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
+
+            var result = await pca
+                .AcquireTokenByUsernamePassword(
+                    scopes,
+                    labResponse.User.Upn,
+                    labResponse.User.GetOrFetchPassword())
+                .WithProofOfPossession(
+                    parsedHeaders.PopNonce, 
+                    HttpMethod.Get,
+                    requestUri)
+                .ExecuteAsync().ConfigureAwait(false);
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes, true);
+
+            await PoPValidator.VerifyPoPTokenAsync(
+                labResponse.App.AppId,
+                requestUri.AbsoluteUri,
+                HttpMethod.Get,
+                result).ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetCore)]

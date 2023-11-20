@@ -7,9 +7,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-#if NET_CORE
-using Microsoft.Identity.Client.Broker;
-#endif
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
@@ -18,7 +15,7 @@ using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-#pragma warning disable CS0618 // Type or member is obsolete
+
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     [TestClass]
@@ -29,7 +26,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task CreateWwwAuthenticateResponseFromKeyVaultUrlAsync()
         {
-            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync("https://buildautomation.vault.azure.net/secrets/CertName/CertVersion").ConfigureAwait(false);
+            WwwAuthenticateParameters authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(                
+                "https://buildautomation.vault.azure.net/secrets/CertName/CertVersion",
+                "Bearer")
+                .ConfigureAwait(false);
 
             Assert.AreEqual("login.microsoftonline.com", new Uri(authParams.Authority).Host);
             Assert.AreEqual("72f988bf-86f1-41af-91ab-2d7cd011db47", authParams.GetTenantId()); // because the Key Vault resource belong to Microsoft Corp tenant
@@ -41,7 +41,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task CreateWwwAuthenticateResponseFromGraphUrlAsync()
         {
-            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync("https://graph.microsoft.com/v1.0/me").ConfigureAwait(false);
+            WwwAuthenticateParameters authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(
+                "https://graph.microsoft.com/v1.0/me", "Bearer").ConfigureAwait(false);
 
             Assert.AreEqual("https://login.microsoftonline.com/common", authParams.Authority);
             Assert.AreEqual("common", authParams.GetTenantId());
@@ -66,7 +67,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             const string apiVersion = "2020-08-01"; // current latest API version for /subscriptions/get
             var url = $"https://{hostName}/subscriptions/{subscriptionId}?api-version={apiVersion}";
 
-            var authParams = await WwwAuthenticateParameters.CreateFromResourceResponseAsync(url).ConfigureAwait(false);
+            WwwAuthenticateParameters authParams = await WwwAuthenticateParameters
+                .CreateFromAuthenticationResponseAsync(url, "Bearer")
+                .ConfigureAwait(false);
 
             Assert.AreEqual($"https://{authority}/{tenantId}", authParams.Authority); // authority URI consists of AAD endpoint and tenant ID
             Assert.AreEqual(tenantId, authParams.GetTenantId()); // tenant ID is extracted out of authority URI
@@ -83,7 +86,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Test for nonce in WWW-Authenticate header
             string popNonce = string.Empty;
             var parameterList = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(
-                                                         "https://testingsts.azurewebsites.net/servernonce/invalidsignature").ConfigureAwait(false);
+                                                         "https://testingsts.azurewebsites.net/servernonce/invalidsignature")
+                .ConfigureAwait(false);
 
             var parameters = parameterList.FirstOrDefault();
 
@@ -96,7 +100,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(parameterList.Any(param => param.AuthenticationScheme == Constants.PoPAuthHeaderPrefix));
             Assert.IsNotNull(parameterList.Single(param => param.AuthenticationScheme == Constants.PoPAuthHeaderPrefix).Nonce);
             Assert.IsTrue(!popNonce.IsNullOrEmpty());
-            await TestCommon.ValidatePopNonceAsync(popNonce).ConfigureAwait(false);
+            await PoPValidator.VerifyPopNonceAsync(popNonce).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -112,7 +116,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var authInfoParameters = AuthenticationInfoParameters.CreateFromResponseHeaders(httpResponseMessage.Headers);
             Assert.IsNotNull(authInfoParameters);
             Assert.IsNotNull(authInfoParameters.NextNonce);
-            await TestCommon.ValidatePopNonceAsync(authInfoParameters.NextNonce).ConfigureAwait(false);
+            await PoPValidator.VerifyPopNonceAsync(authInfoParameters.NextNonce).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -138,42 +142,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(parsedHeaders.PopNonce, parsedHeaders.AuthenticationInfoParameters.NextNonce);
 
             Assert.IsFalse(parsedHeaders.WwwAuthenticateParameters.Any(param => param.AuthenticationScheme == Constants.PoPAuthHeaderPrefix));
-            await TestCommon.ValidatePopNonceAsync(parsedHeaders.PopNonce).ConfigureAwait(false);
+            await PoPValidator.VerifyPopNonceAsync(parsedHeaders.PopNonce).ConfigureAwait(false);
         }
-
-#if NET_CORE
-        [TestMethod]
-        [Ignore("Pop SHR validation endpoint is currently not functioning")]
-        public async Task ExtractNonceWithAuthParserAndValidateShrAsync()
-        {
-            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
-            string[] scopes = { "User.Read" };
-            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
-
-            //Arrange & Act
-            //Test for nonce in WWW-Authenticate header
-            var parsedHeaders = await AuthenticationHeaderParser.ParseAuthenticationHeadersAsync("https://testingsts.azurewebsites.net/servernonce/invalidsignature").ConfigureAwait(false);
-
-            IPublicClientApplication pca = PublicClientApplicationBuilder
-               .Create(labResponse.App.AppId)
-               .WithAuthority(labResponse.Lab.Authority, "organizations")
-               .WithBroker().Build();
-
-            Assert.IsTrue(pca.IsProofOfPossessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");
-
-            var result = await pca
-                .AcquireTokenByUsernamePassword(
-                    scopes,
-                    labResponse.User.Upn,
-                    labResponse.User.GetOrFetchPassword())
-                .WithProofOfPossession(parsedHeaders.PopNonce, HttpMethod.Get, new Uri(ProtectedUrl))
-                .ExecuteAsync().ConfigureAwait(false);
-
-            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes, true);
-
-            //await TestCommon.ValidatePopShrAsync(result.AccessToken).ConfigureAwait(false);
-        }
-#endif
     }
-#pragma warning restore CS0618 // Type or member is obsolete
 }
