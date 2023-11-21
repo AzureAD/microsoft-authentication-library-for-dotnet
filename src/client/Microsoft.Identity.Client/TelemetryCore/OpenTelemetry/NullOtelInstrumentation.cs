@@ -29,11 +29,11 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 
         public void LogSuccessMetrics(
             string platform,
-            AuthenticationResultMetadata authResultMetadata,
             string apiId,
             string cacheLevel,
-            ILoggerAdapter logger, 
-            long totalDurationInUs)
+            long totalDurationInUs,
+            AuthenticationResultMetadata authResultMetadata,
+            ILoggerAdapter logger)
         {
             // No op
         }

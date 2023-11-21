@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                         expectedTags.Add(TelemetryConstants.CacheLevel);
 
                         break;
-                    case "MsalFailed":
+                    case "MsalFailure":
                         Assert.AreEqual(MetricType.LongSum, exportedItem.MetricType);
 
                         expectedTagCount = 3;
