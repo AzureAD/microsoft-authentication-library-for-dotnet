@@ -11,6 +11,13 @@ steps:
   inputs:
     version: 6.x
 
+- task: JavaToolInstaller@0
+  displayName: 'Use Java 11'
+  inputs:
+    versionSpec: 11
+    jdkArchitectureOption: x64
+    jdkSourceOption: PreInstalled
+
 #Prep Xamarin UI test file
 - task: DownloadSecureFile@1
   displayName: 'Download Xamarin Ui Test Tools'
