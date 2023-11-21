@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
     /// <summary>
     /// Enumerates various types of crypto keys used in the application.
     /// </summary>
-    public enum CryptoKeyType
+    internal enum CryptoKeyType
     {
         None,         // No specific crypto key type.
         KeyGuard,     // KeyGuard-protected key.
