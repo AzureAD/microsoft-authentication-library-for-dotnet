@@ -43,10 +43,8 @@ namespace Microsoft.Identity.Client
             AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
 #if TRA
             KeyMaterialManager = ServiceBundle.PlatformProxy.GetKeyMaterial();
-            Debug.WriteLine("ServiceBundle.PlatformProxy.GetKeyMaterial() - CryptoKeyType" + KeyMaterialManager.CryptoKeyType);
-            TokenRequestAssertionInfo = new TokenRequestAssertionInfo(KeyMaterialManager, ServiceBundle);
-            Debug.WriteLine("TokenRequestAssertionInfo" + TokenRequestAssertionInfo.BindingCertificate);
-            configuration.ManagedIdentityBindingCertificate = TokenRequestAssertionInfo.BindingCertificate;
+            
+            configuration.ManagedIdentityBindingCertificate = KeyMaterialManager.BindingCertificate;
             configuration.IsManagedIdentityTokenRequestInfoAvailable = KeyMaterialManager.CryptoKeyType != CryptoKeyType.None;
 #endif
             ServiceBundle.ApplicationLogger.Verbose(() => $"ManagedIdentityApplication {configuration.GetHashCode()} created");
@@ -55,7 +53,6 @@ namespace Microsoft.Identity.Client
         // Stores all app tokens
         internal ITokenCacheInternal AppTokenCacheInternal { get; }
 #if TRA
-        internal TokenRequestAssertionInfo TokenRequestAssertionInfo { get; }
 
         internal IKeyMaterialManager KeyMaterialManager { get; }
 #endif  
@@ -96,7 +93,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Binding certificate used for advanced scenarios</returns>
         public X509Certificate2 GetBindingCertificate()
         {
-            return TokenRequestAssertionInfo.BindingCertificate; //return the binding cert
+            return KeyMaterialManager.BindingCertificate; //return the binding cert
         }
 #endif
     }

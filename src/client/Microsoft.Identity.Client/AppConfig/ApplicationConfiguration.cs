@@ -20,6 +20,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
 using Microsoft.IdentityModel.Abstractions;
 #if TRA
+using Microsoft.Identity.Client.Platforms.Features.KeyMaterial;
 using Microsoft.Identity.Client.Credential;
 #endif
 
@@ -207,9 +208,12 @@ namespace Microsoft.Identity.Client
         public ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
+#if SUPPORTS_MANAGED_IDENTITY_V2
+        public IKeyMaterialManager KeyMaterialManagerForTest { get; set; }
+#endif
         public bool IsConfidentialClient { get; }
         public bool IsInstanceDiscoveryEnabled { get; internal set; } = true;
-        #endregion
+#endregion
 
     }
 }

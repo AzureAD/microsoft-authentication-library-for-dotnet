@@ -211,7 +211,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #if TRA
         public virtual IKeyMaterialManager GetKeyMaterial()
         {
-            return KeyMaterialProviderFactory.GetKeyMaterial(Logger);
+            //TO DO : Add Lazy Init
+            return new KeyMaterialManager(Logger);
         }
 #endif
         /// <summary>

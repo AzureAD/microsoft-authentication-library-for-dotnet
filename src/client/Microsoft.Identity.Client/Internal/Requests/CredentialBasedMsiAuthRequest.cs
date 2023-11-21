@@ -30,7 +30,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
         private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
         private readonly Uri _credentialEndpoint;
-        private readonly TokenRequestAssertionInfo _requestAssertionInfo;
         private readonly IKeyMaterialManager _keyMaterialManager;
 
         private CredentialBasedMsiAuthRequest(
@@ -43,7 +42,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _managedIdentityParameters = managedIdentityParameters;
             _credentialEndpoint = credentialEndpoint;
             _keyMaterialManager = serviceBundle.PlatformProxy.GetKeyMaterial();
-            _requestAssertionInfo = new TokenRequestAssertionInfo(_keyMaterialManager, serviceBundle);
         }
 
         public static CredentialBasedMsiAuthRequest TryCreate(
@@ -210,7 +208,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var credentialResponseCache = new ManagedIdentityCredentialResponseCache(
                 _credentialEndpoint,
-                _requestAssertionInfo.BindingCertificate,
+                _keyMaterialManager.BindingCertificate,
                 _managedIdentityParameters,
                 AuthenticationRequestParameters.RequestContext,
                 cancellationToken);
@@ -219,7 +217,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             return credentialResponse;
         }
-
 
         private async Task<MsalAccessTokenCacheItem> GetCachedAccessTokenAsync()
         {

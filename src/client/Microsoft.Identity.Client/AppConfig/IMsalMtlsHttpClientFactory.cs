@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client
         /// communicate with Azure AD over MTLS. This enables advanced scenarios.
         /// See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <returns>An HTTP client with an ceritificate collection on the handler.</returns>
+        /// <returns>An HTTP client with an certificate collection on the handler.</returns>
         HttpClient GetHttpClient(X509Certificate2 x509Certificate2);
 
     }

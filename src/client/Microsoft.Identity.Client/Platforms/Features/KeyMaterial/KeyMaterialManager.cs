@@ -1,8 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Credential;
 
 namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
 {
@@ -17,26 +21,85 @@ namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
         private const string KeyProviderName = "Microsoft Software Key Storage Provider";
         private const string MachineKeyName = "ManagedIdentityCredentialKey";
         private const string SoftwareKeyName = "ResourceBindingKey";
-        private readonly ECDsaCng _eCDsaCngKey;
+        private readonly X509Certificate2 _bindingCertificate;
+        private readonly CertificateCache _certificateCache;
+        private readonly object _keyInfoLock = new(); // Lock object
         private readonly ILoggerAdapter _logger;
 
         public KeyMaterialManager(ILoggerAdapter logger)
         {
             _logger = logger;
-            _eCDsaCngKey = GetCngKey();
+
+            _certificateCache = CertificateCache.Instance();
+            
+            _bindingCertificate = _certificateCache.GetOrAddCertificate(
+                () => CreateCertificateFromCryptoKeyInfo());
         }
 
         public CryptoKeyType CryptoKeyType => _cryptoKeyType;
 
-        public ECDsaCng CredentialKey => _eCDsaCngKey;
+        public X509Certificate2 BindingCertificate => _bindingCertificate;
 
-        public ECDsaCng GetCngKey()
+        public bool IsBindingCertificateExpired()
         {
-            _logger.Info("[Managed Identity] Trying to get a key from the key providers. ");
-            return InitializeCngKey();
+            if (_bindingCertificate == null)
+            {
+                _logger.Info("[Managed Identity] Binding certificate is null.");
+                return true; // Assuming null certificates are considered expired
+            }
+
+            DateTime now = DateTime.UtcNow;
+            return now > _bindingCertificate.NotAfter;
         }
 
-        private ECDsaCng InitializeCngKey()
+        public TimeSpan GetTimeUntilCertificateExpiration()
+        {
+            if (_bindingCertificate == null)
+            {
+                _logger.Info("[Managed Identity] Binding certificate is null.");
+                return TimeSpan.Zero; // Return zero if the certificate is null
+            }
+
+            DateTime now = DateTime.UtcNow;
+            return _bindingCertificate.NotAfter - now;
+        }
+
+        public bool IsKeyGuardProtected()
+        {
+            // Implement logic to check if the key is KeyGuard protected
+            // This could use the existing IsKeyGuardProtected method or additional logic
+            ECDsaCng cngkey = GetCngKey();
+            return cngkey != null && IsKeyGuardProtected(cngkey.Key);
+        }
+
+        public bool CertificateHasPrivateKey()
+        {
+            // Implement logic to check if the binding certificate has a private key
+            return _bindingCertificate?.HasPrivateKey ?? false;
+        }
+
+        private X509Certificate2 CreateCertificateFromCryptoKeyInfo(bool forceCreate = false)
+        {
+            lock (_keyInfoLock) // Lock to ensure thread safety
+            {
+                if (!forceCreate && _bindingCertificate != null)
+                {
+                    _logger.Verbose(() => "[Managed Identity] A cached binding certificate is available.");
+                    return _bindingCertificate;
+                }
+            }
+
+            ECDsaCng cngkey = GetCngKey();
+
+            if (cngkey != null)
+            {
+                return CreateCngCertificate(cngkey);
+            }
+
+            return null;
+        }
+
+        private ECDsaCng GetCngKey()
         {
             _logger.Verbose(() => "[Managed Identity] Initializing Cng Key.");
 
@@ -91,7 +154,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
             return false;
         }
 
-        public bool IsKeyGuardProtected(CngKey cngKey)
+        private bool IsKeyGuardProtected(CngKey cngKey)
         {
             //Check to see if the KeyGuard Isolation flag was set in the key
             if (!cngKey.HasProperty(IsKeyGuardEnabledProperty, CngPropertyOptions.None))
@@ -117,7 +180,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
             return false;
         }
 
-        public void DetermineKeyType(CngKey cngKey)
+        private void DetermineKeyType(CngKey cngKey)
         {
             switch (true)
             {
@@ -140,6 +203,66 @@ namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
                     _cryptoKeyType = CryptoKeyType.InMemory;
                     break;
             }
+        }
+
+        private X509Certificate2 CreateCngCertificate(ECDsaCng eCDsaCngKey)
+        {
+            string certSubjectname = eCDsaCngKey.Key.KeyName;
+
+            try
+            {
+                lock (_keyInfoLock) // Lock to ensure thread safety
+                {
+                    _logger.Verbose(() => "[Managed Identity] Creating binding certificate with CNG key for credential endpoint.");
+
+                    // Create a certificate request
+                    CertificateRequest request = CreateCertificateRequest(certSubjectname, eCDsaCngKey);
+
+                    // Create a self-signed X.509 certificate
+                    DateTimeOffset startDate = DateTimeOffset.UtcNow;
+                    DateTimeOffset endDate = startDate.AddYears(2); //expiry 
+
+                    //Create the self signed cert
+                    X509Certificate2 selfSigned = request.CreateSelfSigned(startDate, endDate);
+
+                    //create the cert with just the public key
+                    X509Certificate2 publicKeyOnlyCertificate = new X509Certificate2(selfSigned.Export(X509ContentType.Cert));
+
+                    //now copy the private key to the cert
+                    //this is needed for mtls schannel to work with in-memory certificates
+                    X509Certificate2 authCertificate = AssociatePrivateKeyInfo(publicKeyOnlyCertificate, eCDsaCngKey);
+
+                    _logger.Verbose(() => "[Managed Identity] Binding certificate (with cng key) created successfully.");
+
+                    return authCertificate;
+                }
+            }
+            catch (CryptographicException ex)
+            {
+                // log the exception
+                _logger.Error($"Error generating binding certificate: {ex.Message}");
+
+                throw new MsalClientException(MsalError.CertificateCreationFailed,
+                    $"Failed to create Managed Identity binding certificate. Error : {ex.Message}");
+            }
+        }
+
+        private CertificateRequest CreateCertificateRequest(string subjectName, ECDsaCng ecdsaKey)
+        {
+            CertificateRequest certificateRequest = null;
+
+            _logger.Verbose(() => "[Managed Identity] Creating certificate request for the binding certificate.");
+
+            return certificateRequest = new(
+                    $"CN={subjectName}", // Common Name 
+                    ecdsaKey, // ECDsa key
+                    HashAlgorithmName.SHA256); // Hash algorithm for the certificate
+        }
+
+        private X509Certificate2 AssociatePrivateKeyInfo(X509Certificate2 publicKeyOnlyCertificate, ECDsaCng eCDsaCngKey)
+        {
+            _logger.Verbose(() => "[Managed Identity] Associating private key with the binding certificate.");
+            return publicKeyOnlyCertificate.CopyWithPrivateKey(eCDsaCngKey);
         }
     }
 }

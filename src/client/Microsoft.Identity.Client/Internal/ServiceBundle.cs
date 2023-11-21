@@ -9,6 +9,9 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.OAuth2.Throttling;
+#if SUPPORTS_MANAGED_IDENTITY_V2
+using Microsoft.Identity.Client.Platforms.Features.KeyMaterial;
+#endif
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -46,6 +49,10 @@ namespace Microsoft.Identity.Client.Internal
             ThrottlingManager = SingletonThrottlingManager.GetInstance();
             DeviceAuthManager = config.DeviceAuthManagerForTest ?? PlatformProxy.CreateDeviceAuthManager();
 
+#if SUPPORTS_MANAGED_IDENTITY_V2
+            KeyMaterialManager = config.KeyMaterialManagerForTest ?? PlatformProxy.GetKeyMaterial();
+#endif
+
             if (shouldClearCaches) // for test
             {
                 AuthorityManager.ClearValidationCache();
@@ -74,7 +81,9 @@ namespace Microsoft.Identity.Client.Internal
         public ApplicationConfiguration Config { get; }
 
         public IDeviceAuthManager DeviceAuthManager { get; }
-
+#if SUPPORTS_MANAGED_IDENTITY_V2
+        public IKeyMaterialManager KeyMaterialManager { get; }
+#endif
         public IHttpTelemetryManager HttpTelemetryManager { get; }
 
         public IThrottlingProvider ThrottlingManager { get; }
