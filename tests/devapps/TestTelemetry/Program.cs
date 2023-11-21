@@ -1,9 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Diagnostics.Metrics;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
@@ -15,13 +13,15 @@ internal class Program
     {
         Console.WriteLine("Hello World!");
 
+        // Add a console exporter for metrics to display on the console.
         using var meterProvider = Sdk.CreateMeterProviderBuilder()
-            .AddMeter("MSAL.Net.Meter")
+            .AddMeter("MicrosoftIdentityClient_Common_Meter")
             .AddConsoleExporter()
             .Build();
 
+        // Add a console exporter for activity to display on the console.
         using var traceProvider = Sdk.CreateTracerProviderBuilder()
-            .AddSource("MSAL.Net")
+            .AddSource("MicrosoftIdentityClient_Activity")
             .AddConsoleExporter()
             .Build();
 
@@ -42,6 +42,8 @@ internal class Program
             result = await cca.AcquireTokenForClient(scopes)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
+
+            _ = Task.Delay(100);
         }
 
         // Failed requests
@@ -65,6 +67,10 @@ internal class Program
                 // Ignore
             }
         }
+
+        //Add delay to let the exporter collect metrics and activity.
+        await Task.Delay(60000).ConfigureAwait(false);
+
     }
 
     private static void Log(LogLevel level, string message, bool containsPii)
