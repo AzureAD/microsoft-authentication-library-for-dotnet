@@ -457,7 +457,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result2.AuthenticationResultMetadata.TokenSource);
         }
 
-#if NET_CORE
+#if NET_CORE && !ONEBRANCH_BUILD
         [TestMethod]
         public async Task WamUsernamePasswordRequestWithPOPAsync()
         {
