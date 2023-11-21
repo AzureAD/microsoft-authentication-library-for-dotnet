@@ -6,9 +6,6 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Internal.Broker;
-#if TRA
-using Microsoft.Identity.Client.Platforms.Features.KeyMaterial;
-#endif
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
@@ -113,8 +110,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         bool BrokerSupportsWamAccounts { get; }
 
         IMsalHttpClientFactory CreateDefaultHttpClientFactory();
-#if TRA
-        IKeyMaterialManager GetKeyMaterial();
-#endif
+
+        IKeyMaterialManager GetKeyMaterialManager();
     }
 }

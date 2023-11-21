@@ -9,11 +9,18 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
-#if TRA
-using Microsoft.Identity.Client.Platforms.Features.KeyMaterial;
-#endif
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
+#if NETSTANDARD
+using Microsoft.Identity.Client.Platforms.netstandard;
+#endif
+#if NET451_OR_GREATER
+using Microsoft.Identity.Client.Platforms.net45;
+#endif
+#if NET6_0 || NET6_WIN
+using Microsoft.Identity.Client.Platforms.netcore;
+#endif
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
@@ -29,6 +36,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private readonly Lazy<string> _processorArchitecture;
         private readonly Lazy<string> _productName;
         private readonly Lazy<string> _runtimeVersion;
+        private readonly Lazy<IKeyMaterialManager> _keyMaterialManager;
 
         protected AbstractPlatformProxy(ILoggerAdapter logger)
         {
@@ -43,6 +51,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             _cryptographyManager = new Lazy<ICryptographyManager>(InternalGetCryptographyManager);
             _platformLogger = new Lazy<IPlatformLogger>(InternalGetPlatformLogger);
             _runtimeVersion = new Lazy<string>(InternalGetRuntimeVersion);
+            _keyMaterialManager = new Lazy<IKeyMaterialManager>(InternalGetKeyMaterialManager);
         }
 
         protected IFeatureFlags OverloadFeatureFlags { get; set; }
@@ -111,6 +120,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return _runtimeVersion.Value;
         }
 
+        public IKeyMaterialManager GetKeyMaterialManager()
+        {
+            return _keyMaterialManager.Value;
+        }
+
         /// <inheritdoc/>
         public abstract ILegacyCachePersistence CreateLegacyCachePersistence();
 
@@ -148,6 +162,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         protected abstract string InternalGetDeviceId();
         protected abstract string InternalGetProductName();
         protected abstract ICryptographyManager InternalGetCryptographyManager();
+        protected abstract IKeyMaterialManager InternalGetKeyMaterialManager();
         protected abstract IPlatformLogger InternalGetPlatformLogger();
 
         // RuntimeInformation.FrameworkDescription is available on all platforms except .NET Framework 4.7 and lower.
@@ -208,13 +223,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return new SimpleHttpClientFactory();
         }
-#if TRA
-        public virtual IKeyMaterialManager GetKeyMaterial()
-        {
-            //TO DO : Add Lazy Init
-            return new KeyMaterialManager(Logger);
-        }
-#endif
+
         /// <summary>
         /// On Android, iOS and UWP, MSAL will save the legacy ADAL cache in a known location.
         /// On other platforms, the app developer must use the serialization callbacks

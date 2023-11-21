@@ -69,7 +69,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="claims">A string with one or multiple claims.</param>
         /// <returns>The builder to chain .With methods.</returns>
-#if SUPPORTS_SYSTEM_TEXT_JSON
         public AcquireTokenForManagedIdentityParameterBuilder WithClaims(string claims)
         {
 
@@ -80,8 +79,7 @@ namespace Microsoft.Identity.Client
 
             Parameters.Claims = claims;
             return this;
-    }
-#endif
+        }
 
         /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)

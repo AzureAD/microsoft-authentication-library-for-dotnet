@@ -118,8 +118,6 @@
     <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
     <Compile Remove="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
    
-    <Compile Remove="$(PathToMsalSources)\Credential\**\*.cs" />
-    <Compile Remove="$(PathToMsalSources)\Credential\**\*.cs" />
     <Compile Remove="$(PathToMsalSources)\Internal\Requests\CredentialBasedMsiAuthRequest.cs" />    
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>
@@ -136,8 +134,6 @@
     <Compile Include="$(PathToMsalSources)\Platforms\net6\**\*.cs" LinkBase="Platforms\net6" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\KeyMaterial\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Credential\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Internal\Requests\CredentialBasedMsiAuthRequest.cs" />
     <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
@@ -158,8 +154,6 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WebView2WebUi\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Credential\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\KeyMaterial\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Internal\Requests\CredentialBasedMsiAuthRequest.cs" />
 
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.864.35" />
@@ -279,5 +273,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="6.22.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Web">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.2\System.Web.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

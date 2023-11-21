@@ -244,6 +244,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
             return new NetDesktopDeviceAuthManager();
         }
 
+        protected override IKeyMaterialManager InternalGetKeyMaterialManager()
+        {
+            throw new NotImplementedException();
+        }
+
         public override bool BrokerSupportsWamAccounts => true;
 
     }

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Platforms.Features.KeyMaterial
+namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
     /// <summary>
     /// Enumerates various types of crypto keys used in the application.

@@ -5,9 +5,6 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.OAuth2.Throttling;
-#if SUPPORTS_MANAGED_IDENTITY_V2
-using Microsoft.Identity.Client.Platforms.Features.KeyMaterial;
-#endif
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.WsTrust;
@@ -31,9 +28,8 @@ namespace Microsoft.Identity.Client.Internal
         IThrottlingProvider ThrottlingManager { get; }
 
         IHttpTelemetryManager HttpTelemetryManager { get; }
-#if SUPPORTS_MANAGED_IDENTITY_V2
+
         IKeyMaterialManager KeyMaterialManager { get; }
-#endif
 
         #region Testing
         void SetPlatformProxyForTest(IPlatformProxy platformProxy);

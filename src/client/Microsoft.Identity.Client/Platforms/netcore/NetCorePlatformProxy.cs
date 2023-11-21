@@ -270,5 +270,10 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         }
 
         public override IDeviceAuthManager CreateDeviceAuthManager() => new NetCoreDeviceAuthManager();
+
+        protected override IKeyMaterialManager InternalGetKeyMaterialManager()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
