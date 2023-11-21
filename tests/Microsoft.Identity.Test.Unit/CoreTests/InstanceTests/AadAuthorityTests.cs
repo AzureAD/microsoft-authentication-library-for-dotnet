@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -304,5 +305,78 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             //Ensure that acquiring a token does not remove the port from the authority
             Assert.AreEqual(customPortAuthority, app.Authority);
         }
+
+        [TestMethod]
+        public void IsOrganizationsTenantWithMsaPassthroughEnabled()
+        {
+            AadAuthority aadAuthorityInstance = new AadAuthority(Authority.CreateAuthority("https://login.microsoftonline.com/common").AuthorityInfo);
+
+            Assert.IsNotNull(aadAuthorityInstance);
+            Assert.AreEqual(aadAuthorityInstance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+
+            Assert.IsFalse(aadAuthorityInstance.IsOrganizationsTenantWithMsaPassthroughEnabled(true, ""));
+            Assert.IsFalse(aadAuthorityInstance.IsOrganizationsTenantWithMsaPassthroughEnabled(true, "9188040d-6c67-4c5b-b112-36a304b66dad"));
+            Assert.IsFalse(aadAuthorityInstance.IsOrganizationsTenantWithMsaPassthroughEnabled(false, "9188040d-6c67-4c5b-b112-36a304b66dad"));
+
+            aadAuthorityInstance = new AadAuthority(Authority.CreateAuthority("https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad").AuthorityInfo);
+
+            Assert.IsFalse(aadAuthorityInstance.IsOrganizationsTenantWithMsaPassthroughEnabled(false, "9188040d-6c67-4c5b-b112-36a304b66dad"));
+            Assert.IsFalse(aadAuthorityInstance.IsOrganizationsTenantWithMsaPassthroughEnabled(true, ""));
+            Assert.IsFalse(aadAuthorityInstance.IsOrganizationsTenantWithMsaPassthroughEnabled(true, "9188040d-6c67-4c5b-b112-36a304b66dad"));
+
+            aadAuthorityInstance = new AadAuthority(Authority.CreateAuthority("https://login.microsoftonline.com/organizations").AuthorityInfo);
+
+            Assert.IsFalse(aadAuthorityInstance.IsOrganizationsTenantWithMsaPassthroughEnabled(true, ""));
+            Assert.IsFalse(aadAuthorityInstance.IsOrganizationsTenantWithMsaPassthroughEnabled(false, "9188040d-6c67-4c5b-b112-36a304b66dad"));
+            Assert.IsFalse(aadAuthorityInstance.IsOrganizationsTenantWithMsaPassthroughEnabled(false, "FFF8040d-6c67-4c5b-b112-36a304b66FFF"));
+
+            Assert.IsTrue(aadAuthorityInstance.IsOrganizationsTenantWithMsaPassthroughEnabled(true, "9188040d-6c67-4c5b-b112-36a304b66dad"));
+        }
+
+        [TestMethod]
+        public async Task CreateAuthorityForRequestAsync_MSAPassthroughAsync()
+        {
+            var testAccount = new Account("TEST_ID.9188040d-6c67-4c5b-b112-36a304b66dad", "username", Authority.CreateAuthority("https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad").AuthorityInfo.Host);
+
+            using var harness = CreateTestHarness();
+            RequestContext requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid());
+            requestContext.ServiceBundle.Config.IsBrokerEnabled = true;
+            requestContext.ServiceBundle.Config.BrokerOptions = new BrokerOptions(BrokerOptions.OperatingSystems.Windows);
+            requestContext.ServiceBundle.Config.BrokerOptions.MsaPassthrough = true;
+            requestContext.ServiceBundle.Config.Authority = new AadAuthority(Authority.CreateAuthority("https://login.microsoftonline.com/common").AuthorityInfo);
+
+            var authorityLocal = await Authority.CreateAuthorityForRequestAsync(requestContext, Authority.CreateAuthority("https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad").AuthorityInfo, testAccount).ConfigureAwait(false);
+            Assert.AreEqual("9188040d-6c67-4c5b-b112-36a304b66dad", authorityLocal.TenantId);
+
+            requestContext.ServiceBundle.Config.Authority = new AadAuthority(Authority.CreateAuthority("https://login.microsoftonline.com/organizations").AuthorityInfo);
+            requestContext.ServiceBundle.Config.BrokerOptions.MsaPassthrough = false;
+            authorityLocal = await Authority.CreateAuthorityForRequestAsync(requestContext, Authority.CreateAuthority("https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad").AuthorityInfo, testAccount).ConfigureAwait(false);
+            Assert.AreEqual("9188040d-6c67-4c5b-b112-36a304b66dad", authorityLocal.TenantId);
+
+            requestContext.ServiceBundle.Config.BrokerOptions.MsaPassthrough = true;
+            authorityLocal = await Authority.CreateAuthorityForRequestAsync(requestContext, Authority.CreateAuthority("https://login.microsoftonline.com/organizations").AuthorityInfo, testAccount).ConfigureAwait(false);
+            Assert.AreEqual("organizations", authorityLocal.TenantId);
+
+            requestContext.ServiceBundle.Config.BrokerOptions.MsaPassthrough = false;
+            authorityLocal = await Authority.CreateAuthorityForRequestAsync(requestContext, Authority.CreateAuthority("https://login.microsoftonline.com/organizations").AuthorityInfo, testAccount).ConfigureAwait(false);
+            Assert.AreNotEqual("organizations", authorityLocal.TenantId);
+
+            requestContext.ServiceBundle.Config.BrokerOptions.MsaPassthrough = true;
+            requestContext.ServiceBundle.Config.IsBrokerEnabled = false;
+            authorityLocal = await Authority.CreateAuthorityForRequestAsync(requestContext, Authority.CreateAuthority("https://login.microsoftonline.com/organizations").AuthorityInfo, testAccount).ConfigureAwait(false);
+            Assert.AreNotEqual("organizations", authorityLocal.TenantId);
+
+            requestContext.ServiceBundle.Config.BrokerOptions = null;
+            requestContext.ServiceBundle.Config.IsBrokerEnabled = true;
+            authorityLocal = await Authority.CreateAuthorityForRequestAsync(requestContext, Authority.CreateAuthority("https://login.microsoftonline.com/organizations").AuthorityInfo, testAccount).ConfigureAwait(false);
+            Assert.AreNotEqual("organizations", authorityLocal.TenantId);
+
+            requestContext.ServiceBundle.Config.BrokerOptions = null;
+            requestContext.ServiceBundle.Config.IsBrokerEnabled = false;
+            authorityLocal = await Authority.CreateAuthorityForRequestAsync(requestContext, Authority.CreateAuthority("https://login.microsoftonline.com/organizations").AuthorityInfo, testAccount).ConfigureAwait(false);
+            Assert.AreNotEqual("organizations", authorityLocal.TenantId);
+
+        }
+
     }
 }
