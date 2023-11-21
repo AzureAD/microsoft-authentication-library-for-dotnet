@@ -23,15 +23,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         public const string MeterName = "MicrosoftIdentityClient_Common_Meter";
 
         /// <summary>
-        /// Constant to holt the name of the ActivitySource.
+        /// Constant to hold the name of the ActivitySource.
         /// </summary>
         public const string ActivitySourceName = "MicrosoftIdentityClient_Activity";
 
         private const string SuccessCounterName = "MsalSuccess";
         private const string FailedCounterName = "MsalFailed";
         private const string TotalDurationHistogramName = "MsalTotalDuration.1A";
-        private const string TotalDurationInUsHistogramName = "MsalTotalDurationInUs.1B";
-        private const string DurationInCacheHistogramName = "MsalDurationInCache.1A";
+        private const string DurationInL1CacheHistogramName = "MsalDurationInL1CacheInUs.1B";
+        private const string DurationInCacheHistogramName = "MsalDurationInL2Cache.1A";
         private const string DurationInHttpHistogramName = "MsalDurationInHttp.1A";
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// This will capture the duration in us when the L1 cache is used to get the token.
         /// </summary>
         internal static readonly Histogram<long> s_durationTotalInUs = Meter.CreateHistogram<long>(
-            TotalDurationInUsHistogramName,
+            DurationInL1CacheHistogramName,
             unit: "us",
             description: "Performance of token acquisition calls total latency in micro seconds when L1 cache is used.");
 
@@ -152,6 +152,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 new(TelemetryConstants.ApiId, apiId));
             }
 
+            // Only log duration in HTTP when token is fetched from IDP
             if (!authResultMetadata.TokenSource.Equals(TokenSource.Cache))
             {
                 s_durationInHttp.Record(authResultMetadata.DurationInHttpInMs,
@@ -160,7 +161,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 new(TelemetryConstants.ApiId, apiId));
             }
 
-            if (authResultMetadata.TokenSource.Equals(TokenSource.Cache) && !authResultMetadata.CacheLevel.Equals(CacheLevel.L2Cache))
+            // Only log duration in microseconds when the cache level is L1.
+            if (authResultMetadata.TokenSource.Equals(TokenSource.Cache) && authResultMetadata.CacheLevel.Equals(CacheLevel.L1Cache))
             {
                 s_durationTotalInUs.Record(totalDurationInUs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),

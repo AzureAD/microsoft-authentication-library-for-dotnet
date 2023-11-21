@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
                         break;
 
-                    case "MsalTotalDurationInUs.1B":
+                    case "MsalDurationInL1CacheInUs.1B":
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
                         expectedTagCount = 5;
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
                         break;
 
-                    case "MsalDurationInCache.1A":
+                    case "MsalDurationInL2Cache.1A":
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
                         expectedTagCount = 3;
