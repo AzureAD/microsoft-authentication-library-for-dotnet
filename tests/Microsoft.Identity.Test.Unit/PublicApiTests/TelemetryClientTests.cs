@@ -135,13 +135,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     AssertionType.Secret,
                     TestConstants.AuthorityUtidTenant,
                     TokenType.Bearer,
-                    CacheLevel.Unknown,
+                    CacheLevel.L1Cache,
                     TestConstants.s_scope.AsSingleString(),
                     null);
 
                 _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
-                // Acquire token forclient with resource
+                // Acquire token for client with resource
                 result = await _cca.AcquireTokenForClient(new[] { TestConstants.DefaultGraphScope })
                     .WithTenantId(TestConstants.Utid)
                     .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
