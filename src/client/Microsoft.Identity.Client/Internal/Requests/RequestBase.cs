@@ -79,12 +79,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             Stopwatch sw = Stopwatch.StartNew();
 
-            ServiceBundle.PlatformProxy.OtelInstrumentation?.LogActivity(new Dictionary<string, object> { 
+            if (ServiceBundle.PlatformProxy.OtelInstrumentation.IsTracingEnabled)
+            {
+                ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivity(new Dictionary<string, object> {
                 { TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion() },
                 { TelemetryConstants.Platform, ServiceBundle.PlatformProxy.GetProductName() },
                 { TelemetryConstants.ClientId, AuthenticationRequestParameters.AppConfig.ClientId },
                 { TelemetryConstants.ActivityId, AuthenticationRequestParameters.RequestContext.CorrelationId }
-            });
+            }); 
+            }
 
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
             AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
@@ -103,16 +106,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     UpdateTelemetry(sw, apiEvent, authenticationResult);
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
                     LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails, telemetryClients);
-
-                    ServiceBundle.PlatformProxy.OtelInstrumentation?.LogSuccessMetrics(
-                        ServiceBundle.PlatformProxy.GetProductName(),
-                        apiEvent.ApiId.ToString(),
-                        GetCacheLevel(authenticationResult).ToString(),
-                        sw.ElapsedTicks / (TimeSpan.TicksPerMillisecond / 1000),
-                        authenticationResult.AuthenticationResultMetadata, 
-                        AuthenticationRequestParameters.RequestContext.Logger);
-
-                    LogMsalSuccessTelemetryToOTel(authenticationResult);
+                    LogMsalSuccessTelemetryToOtel(authenticationResult, apiEvent.ApiId.ToString(), sw.ElapsedTicks / (TimeSpan.TicksPerMillisecond / 1000));
 
                     return authenticationResult;
                 }
@@ -122,10 +116,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
 
-                        ServiceBundle.PlatformProxy.OtelInstrumentation?.LogFailedMetrics(
-                        ServiceBundle.PlatformProxy.GetProductName(), 
-                        ex.ErrorCode);
-                    LogMsalFailedTelemetryToOTel(ex);
+                    LogMsalFailedTelemetryToOtel(ex, ex.ErrorCode);
                     throw;
                 }
                 catch (Exception ex)
@@ -133,94 +124,95 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     apiEvent.ApiErrorCode = ex.GetType().Name;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
-                    ServiceBundle.PlatformProxy.OtelInstrumentation?.LogFailedMetrics(
-                        ServiceBundle.PlatformProxy.GetProductName(), 
-                        ex.GetType().Name);
-                    LogMsalFailedTelemetryToOTel(ex);
+                    
+                    LogMsalFailedTelemetryToOtel(ex, ex.GetType().Name);
                     throw;
                 }
                 finally
                 {
-                    ServiceBundle.PlatformProxy.OtelInstrumentation?.StopActivity();
+                    ServiceBundle.PlatformProxy.OtelInstrumentation.StopActivity();
                     telemetryClients.TrackEvent(telemetryEventDetails);
                 }
             }
         }
 
-        private void LogMsalSuccessTelemetryToOTel(AuthenticationResult authenticationResult)
+        private void LogMsalSuccessTelemetryToOtel(AuthenticationResult authenticationResult, string apiId, long durationInUs)
         {
-            if (ServiceBundle.PlatformProxy.OtelInstrumentation is NullOtelInstrumentation)
+            // Log metrics
+            ServiceBundle.PlatformProxy.OtelInstrumentation.LogSuccessMetrics(
+                        ServiceBundle.PlatformProxy.GetProductName(),
+                        apiId,
+                        GetCacheLevel(authenticationResult).ToString(),
+                        durationInUs,
+                        authenticationResult.AuthenticationResultMetadata,
+                        AuthenticationRequestParameters.RequestContext.Logger);
+
+            // Log tracing
+            if (ServiceBundle.PlatformProxy.OtelInstrumentation.IsTracingEnabled)
             {
-                return;
-            }
+                ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivityStatus(true);
 
-            ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivityStatus(true);
-
-            Dictionary<string, object> tags = new Dictionary<string, object> { 
+                Dictionary<string, object> tags = new Dictionary<string, object> {
                 { TelemetryConstants.CacheInfoTelemetry, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason) },
                 { TelemetryConstants.TokenSource, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.TokenSource) },
                 { TelemetryConstants.Duration, authenticationResult.AuthenticationResultMetadata.DurationTotalInMs },
                 { TelemetryConstants.DurationInCache, authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs },
                 { TelemetryConstants.DurationInHttp, authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs },
                 { TelemetryConstants.TokenType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.TokenType },
-                { TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds } 
+                { TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds }
             };
 
-            if (authenticationResult.AuthenticationResultMetadata.RefreshOn.HasValue)
-            {
-                tags.Add(TelemetryConstants.RefreshOn, DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value));
-            }
-            tags.Add(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
-            tags.Add(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
-            tags.Add(TelemetryConstants.CacheLevel, (int)authenticationResult.AuthenticationResultMetadata.CacheLevel);
+                if (authenticationResult.AuthenticationResultMetadata.RefreshOn.HasValue)
+                {
+                    tags.Add(TelemetryConstants.RefreshOn, DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value));
+                }
+                tags.Add(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
+                tags.Add(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
+                tags.Add(TelemetryConstants.CacheLevel, (int)authenticationResult.AuthenticationResultMetadata.CacheLevel);
 
-            var resourceAndScopes = ParseScopesForTelemetry();
+                var resourceAndScopes = ParseScopesForTelemetry();
 
-            if (resourceAndScopes.Item1 != null)
-            {
-                tags.Add(TelemetryConstants.Resource, resourceAndScopes.Item1);
-            }
-            if (resourceAndScopes.Item2 != null)
-            {
-                tags.Add(TelemetryConstants.Scopes, resourceAndScopes.Item2);
-            }
+                if (resourceAndScopes.Item1 != null)
+                {
+                    tags.Add(TelemetryConstants.Resource, resourceAndScopes.Item1);
+                }
+                if (resourceAndScopes.Item2 != null)
+                {
+                    tags.Add(TelemetryConstants.Scopes, resourceAndScopes.Item2);
+                }
 
-            ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivity(tags);
+                ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivity(tags); 
+            }
         }
 
-        private void LogMsalFailedTelemetryToOTel(Exception exception)
+        private void LogMsalFailedTelemetryToOtel(Exception exception, string errorCodeToLog)
         {
-            if (ServiceBundle.PlatformProxy.OtelInstrumentation is NullOtelInstrumentation)
+            // Log metrics
+            ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailedMetrics(
+                        ServiceBundle.PlatformProxy.GetProductName(),
+                        errorCodeToLog);
+
+            // Log tracing
+            if (ServiceBundle.PlatformProxy.OtelInstrumentation.IsTracingEnabled)
             {
-                return;
-            }   
+                ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivityStatus(false);
 
-            ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivityStatus(false);
+                Dictionary<string, object> tags = new Dictionary<string, object>
+                {
+                    { TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType },
+                    { TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString() },
+                    { TelemetryConstants.ErrorMessage, exception.Message }
+                };
 
-            Dictionary<string, object> tags = new Dictionary<string, object>
-            {
-                { TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType },
-                { TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString() },
+                if (exception is MsalServiceException serviceException)
+                {
+                    tags.Add(TelemetryConstants.StsErrorCode, serviceException.ErrorCodes?.FirstOrDefault());
+                }
 
-                { TelemetryConstants.ErrorMessage, exception.Message }
-            };
+                tags.Add(TelemetryConstants.ErrorCode, errorCodeToLog);
 
-            if (exception is MsalClientException clientException)
-            {
-                tags.Add(TelemetryConstants.ErrorCode, clientException.ErrorCode);
-                return;
+                ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivity(tags); 
             }
-
-            if (exception is MsalServiceException serviceException)
-            {
-                tags.Add(TelemetryConstants.ErrorCode, serviceException.ErrorCode);
-                tags.Add(TelemetryConstants.StsErrorCode, serviceException.ErrorCodes?.FirstOrDefault());
-                return;
-            }
-
-            tags.Add(TelemetryConstants.ErrorCode, exception.GetType().ToString());
-
-            ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivity(tags);
         }
 
         private void LogMsalErrorTelemetryToClient(Exception ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)

@@ -21,8 +21,6 @@ using OpenTelemetry.Trace;
 namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
-    [DeploymentItem(@"Resources\testCert.crtfile")]
-    [DeploymentItem(@"Resources\RSATestCertDotNet.pfx")]
     public class OTelInstrumentationTests : TestBase
     {
         private MockHttpAndServiceBundle _harness;

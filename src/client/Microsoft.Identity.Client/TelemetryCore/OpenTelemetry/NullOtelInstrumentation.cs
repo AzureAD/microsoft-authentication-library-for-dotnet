@@ -12,6 +12,10 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 {
     internal class NullOtelInstrumentation : IOtelInstrumentation
     {
+        bool IOtelInstrumentation.IsTracingEnabled => false;
+
+        bool IOtelInstrumentation.IsMetricsEnabled => false;
+
         public void LogActivity(Dictionary<string, object> tags)
         {
             // No op
