@@ -27,7 +27,6 @@ namespace Microsoft.Identity.Client.Credential
         private readonly RequestContext _requestContext;
         private readonly CancellationToken _cancellationToken;
 
-
         public ManagedIdentityCredentialResponseCache(
             Uri uri,
             X509Certificate2 bindingCertificate,
