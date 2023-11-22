@@ -3,8 +3,6 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
   
   <!-- Properties of packages that get published -->
-
-
   <PropertyGroup Label="Package common properties">
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <Company>Microsoft Corporation</Company>
@@ -33,6 +31,6 @@
   </PropertyGroup>
   
   <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
   </ItemGroup>
 </Project> 

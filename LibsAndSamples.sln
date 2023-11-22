@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "devapps", "devapps", "{34BE693E-3496-45A4-B1D2-D3A0E068EEDB}"
 	ProjectSection(SolutionItems) = preProject
 		tests\devapps\.editorconfig = tests\devapps\.editorconfig
+		tests\devapps\Directory.Packages.props = tests\devapps\Directory.Packages.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xamarin forms", "xamarin forms", "{3761DEF3-458C-4CE2-BE94-4FC9D12217CC}"
@@ -43,6 +44,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.iOS.UIAutomation", "tests\Microsoft.Identity.Test.iOS.UIAutomation\Microsoft.Identity.Test.iOS.UIAutomation.csproj", "{3E6F5330-9FC1-44E9-9410-9C4A06DA74F5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CacheCompat", "CacheCompat", "{58B95AA7-BE17-40F2-9C9A-FA27C282A10A}"
+	ProjectSection(SolutionItems) = preProject
+		tests\CacheCompat\Directory.Packages.props = tests\CacheCompat\Directory.Packages.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.AdalV3", "tests\CacheCompat\CommonCache.Test.AdalV3\CommonCache.Test.AdalV3.csproj", "{A8C2D397-BA21-4BD2-93AA-801B0E0804BC}"
 EndProject
@@ -80,6 +84,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "all", "all", "{C44AADC0-1E9
 		build\CodeCoverage.runsettings = build\CodeCoverage.runsettings
 		build\credscan-exclusion.json = build\credscan-exclusion.json
 		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
 		global.json = global.json
 		build\MSAL.CodeCoverage.runsettings = build\MSAL.CodeCoverage.runsettings
 		NuGet.Config = NuGet.Config
