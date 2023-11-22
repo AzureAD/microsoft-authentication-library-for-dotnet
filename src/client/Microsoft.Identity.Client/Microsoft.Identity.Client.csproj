@@ -182,6 +182,7 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' ">
     <Compile Remove="$(PathToMsalSources)\PlatformsCommon\Shared\CommonCryptographyManager.cs" />
+    <Compile Remove="$(PathToMsalSources)\Credential\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' Or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' ">
