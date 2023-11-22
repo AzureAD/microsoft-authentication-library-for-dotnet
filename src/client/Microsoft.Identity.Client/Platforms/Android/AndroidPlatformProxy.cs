@@ -142,6 +142,11 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return new AndroidHttpClientFactory();
         }
 
+        protected override IKeyMaterialManager InternalGetKeyMaterialManager()
+        {
+            return new NullKeyMaterialManager(Logger);
+        }
+
         public override bool LegacyCacheRequiresSerialization => false;
     }
 }

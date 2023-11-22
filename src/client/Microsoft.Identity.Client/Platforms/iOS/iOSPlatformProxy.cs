@@ -122,6 +122,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return new IosHttpClientFactory();
         }
 
+        protected override IKeyMaterialManager InternalGetKeyMaterialManager()
+        {
+            return new NullKeyMaterialManager(Logger);
+        }
+
         public override bool LegacyCacheRequiresSerialization => false;
 
     }
