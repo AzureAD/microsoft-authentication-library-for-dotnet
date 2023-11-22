@@ -11,42 +11,47 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 namespace Microsoft.Identity.Client.Platforms.netcore
 {
     /// <summary>
-    /// Class to store crypto key information for a Managed Identity supported Azure resource.
-    /// For more details see https://aka.ms/msal-net-managed-identity
+    /// Provides X509_2 certificates and cryptographic key information for a Credential based 
+    /// Managed Identity-supported Azure resource. 
+    /// This class handles the retrieval or creation of X.509_2 certificates for authentication purposes,
+    /// including the determination of the cryptographic key type.
+    /// For more details, see https://aka.ms/msal-net-managed-identity.
     /// </summary>
-    internal class KeyMaterialManager(ILoggerAdapter logger) : IKeyMaterialManager
+    internal class ManagedIdentityCertificateProvider(ILoggerAdapter logger) : IKeyMaterialManager
     {
+        // Property to hold the name of the key guard isolation property
         private const string IsKeyGuardEnabledProperty = "Virtual Iso";
+
+        // Field to store the current crypto key type
         private CryptoKeyType _cryptoKeyType = CryptoKeyType.None;
+
+        // Constants specifying the names for the key storage provider and key names
         private const string KeyProviderName = "Microsoft Software Key Storage Provider";
         private const string MachineKeyName = "ManagedIdentityCredentialKey";
         private const string SoftwareKeyName = "ResourceBindingKey";
+
+        // Static field to cache the binding certificate across instances
         private static X509Certificate2 s_bindingCertificate;
-        private readonly object _keyInfoLock = new(); // Lock object
+
+        // Lock object for ensuring thread safety when accessing key information
+        private readonly object _keyInfoLock = new();
+
+        // Logger instance for capturing log information
         private readonly ILoggerAdapter _logger = logger;
 
+        // Property to expose the current crypto key type
         public CryptoKeyType CryptoKeyType => _cryptoKeyType;
 
-        public X509Certificate2 BindingCertificate => CreateCertificateFromCryptoKeyInfo();
+        // Property to get or create the binding certificate from crypto key information
+        public X509Certificate2 BindingCertificate => GetOrCreateCertificateFromCryptoKeyInfo();
 
-        private static bool CertificateNeedsRotation(X509Certificate2 certificate, double rotationPercentageThreshold = 70)
-        {
-            DateTime now = DateTime.UtcNow;
-
-            // Calculate the total duration of the certificate's validity
-            TimeSpan certificateLifetime = certificate.NotAfter - certificate.NotBefore;
-
-            // Calculate how much time has passed since the certificate's issuance
-            TimeSpan elapsedTime = now - certificate.NotBefore;
-
-            // Calculate the current percentage of the certificate's lifetime that has passed
-            double percentageElapsed = (elapsedTime.TotalMilliseconds / certificateLifetime.TotalMilliseconds) * 100.0;
-
-            // Check if the percentage elapsed exceeds the rotation threshold
-            return percentageElapsed >= rotationPercentageThreshold;
-        }
-
-        private X509Certificate2 CreateCertificateFromCryptoKeyInfo()
+        /// <summary>
+        /// Retrieves or creates an X.509 certificate from crypto key information.
+        /// </summary>
+        /// <returns>
+        /// The X.509 certificate if available and still valid in the cache; otherwise, a new certificate is created.
+        /// </returns>
+        private X509Certificate2 GetOrCreateCertificateFromCryptoKeyInfo()
         {
             lock (_keyInfoLock) // Lock to ensure thread safety
             {
@@ -76,6 +81,37 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return null;
         }
 
+        /// <summary>
+        /// Determines if a given X.509 certificate needs rotation based on a percentage threshold.
+        /// </summary>
+        /// <param name="certificate">The X.509 certificate to evaluate.</param>
+        /// <param name="rotationPercentageThreshold">The threshold percentage for considering rotation (default is 70%).</param>
+        /// <returns>
+        /// True if the certificate needs rotation, false otherwise.
+        /// </returns>
+        private static bool CertificateNeedsRotation(X509Certificate2 certificate, double rotationPercentageThreshold = 70)
+        {
+            DateTime now = DateTime.UtcNow;
+
+            // Calculate the total duration of the certificate's validity
+            TimeSpan certificateLifetime = certificate.NotAfter - certificate.NotBefore;
+
+            // Calculate how much time has passed since the certificate's issuance
+            TimeSpan elapsedTime = now - certificate.NotBefore;
+
+            // Calculate the current percentage of the certificate's lifetime that has passed
+            double percentageElapsed = (elapsedTime.TotalMilliseconds / certificateLifetime.TotalMilliseconds) * 100.0;
+
+            // Check if the percentage elapsed exceeds the rotation threshold
+            return percentageElapsed >= rotationPercentageThreshold;
+        }
+
+        /// <summary>
+        /// Initializes and retrieves the ECDsaCng key for Managed Identity.
+        /// </summary>
+        /// <returns>
+        /// The initialized ECDsaCng key if successful, otherwise null.
+        /// </returns>
         private ECDsaCng GetCngKey()
         {
             _logger.Verbose(() => "[Managed Identity] Initializing Cng Key.");
@@ -95,10 +131,21 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             }
 
             // Both attempts failed, return null
-            _logger.Info("[Managed Identity] Machine / Software keys are not setup. ");
+            // Now we should follow the legacy managed identity flow
+            _logger.Info("[Managed Identity] Machine / Software keys are not setup. Proceed to check for legacy managed identity sources.");
             return null;
         }
 
+        /// <summary>
+        /// Attempts to retrieve cryptographic key material for a specified key name and provider.
+        /// </summary>
+        /// <param name="keyProviderName">The name of the key provider.</param>
+        /// <param name="keyName">The name of the key.</param>
+        /// <param name="cngKeyOpenOptions">The options for opening the CNG key.</param>
+        /// <param name="eCDsaCng">The resulting ECDsaCng instance containing the key material.</param>
+        /// <returns>
+        ///   <c>true</c> if the key material is successfully retrieved; otherwise, <c>false</c>.
+        /// </returns>
         private bool TryGetKeyMaterial(
             string keyProviderName, 
             string keyName, 
@@ -131,6 +178,13 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return false;
         }
 
+        /// <summary>
+        /// Checks if the specified CNG key is protected by KeyGuard.
+        /// </summary>
+        /// <param name="cngKey">The CNG key to check for KeyGuard protection.</param>
+        /// <returns>
+        ///   <c>true</c> if the key is protected by KeyGuard; otherwise, <c>false</c>.
+        /// </returns>
         private bool IsKeyGuardProtected(CngKey cngKey)
         {
             //Check to see if the KeyGuard Isolation flag was set in the key
@@ -142,21 +196,29 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             //if key guard isolation flag exist, check for the key guard property value existence
             CngProperty property = cngKey.GetProperty(IsKeyGuardEnabledProperty, CngPropertyOptions.None);
 
+            // Retrieve the key guard property value
             var keyGuardProperty = property.GetValue();
 
+            // Check if the key guard property exists and has a non-zero value
             if (keyGuardProperty != null && keyGuardProperty.Length > 0)
             {
                 if (keyGuardProperty[0] != 0)
                 {
+                    // KeyGuard key is available; set the cryptographic key type accordingly
                     _logger.Info("[Managed Identity] KeyGuard key is available. ");
                     _cryptoKeyType = CryptoKeyType.KeyGuard;
                     return true;
                 }
             }
 
+            // KeyGuard key is not available
             return false;
         }
 
+        /// <summary>
+        /// Determines the cryptographic key type based on the characteristics of the specified CNG key.
+        /// </summary>
+        /// <param name="cngKey">The CNG key for which to determine the cryptographic key type.</param>
         private void DetermineKeyType(CngKey cngKey)
         {
             switch (true)
@@ -182,6 +244,11 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             }
         }
 
+        /// <summary>
+        /// Creates a binding certificate with a CNG key for use in Managed Identity scenarios.
+        /// </summary>
+        /// <param name="eCDsaCngKey">The CNG key used for creating the certificate.</param>
+        /// <returns>The created binding certificate.</returns>
         private X509Certificate2 CreateCngCertificate(ECDsaCng eCDsaCngKey)
         {
             string certSubjectname = eCDsaCngKey.Key.KeyName;
@@ -224,6 +291,12 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             }
         }
 
+        /// <summary>
+        /// Creates a certificate request for the binding certificate using the specified subject name and ECDsa key.
+        /// </summary>
+        /// <param name="subjectName">The subject name for the certificate (e.g., Common Name).</param>
+        /// <param name="ecdsaKey">The ECDsa key to be associated with the certificate request.</param>
+        /// <returns>The certificate request for the binding certificate.</returns>
         private CertificateRequest CreateCertificateRequest(string subjectName, ECDsaCng ecdsaKey)
         {
             CertificateRequest certificateRequest = null;
@@ -236,9 +309,17 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                     HashAlgorithmName.SHA256); // Hash algorithm for the certificate
         }
 
+        /// <summary>
+        /// Associates the private key information with the provided public key-only certificate.
+        /// </summary>
+        /// <param name="publicKeyOnlyCertificate">The public key-only certificate.</param>
+        /// <param name="eCDsaCngKey">The ECDsa key used for associating the private key.</param>
+        /// <returns>The certificate with the private key information associated.</returns>
         private X509Certificate2 AssociatePrivateKeyInfo(X509Certificate2 publicKeyOnlyCertificate, ECDsaCng eCDsaCngKey)
         {
             _logger.Verbose(() => "[Managed Identity] Associating private key with the binding certificate.");
+
+            // Copy the private key information to the public key-only certificate
             return publicKeyOnlyCertificate.CopyWithPrivateKey(eCDsaCngKey);
         }
     }

@@ -279,9 +279,9 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         protected override IKeyMaterialManager InternalGetKeyMaterialManager()
         {
 #if NETSTANDARD
-            return new NetStandardKeyMaterialManager(Logger);
+            return new NullKeyMaterialManager(Logger);
 #else
-            return new KeyMaterialManager(Logger);
+            return new ManagedIdentityCertificateProvider(Logger);
 #endif
         }
     }
