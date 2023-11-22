@@ -34,9 +34,9 @@
     <PackageVersion Include="Xamarin.AndroidX.Browser" Version="1.4.0" PrivateAssets="All" />
     
     <!-- Analyzers and dev packages -->
-    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.7.30" PrivateAssets="All" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.4" PrivateAssets="All" />
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.8.14" PrivateAssets="All" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0" PrivateAssets="All" />
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 
     <!-- Packages for the tests -->
     <PackageVersion Include="Azure.Security.KeyVault.Certificates" Version="4.3.0" />

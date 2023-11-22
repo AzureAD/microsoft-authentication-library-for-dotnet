@@ -1,5 +1,4 @@
 <Project>
-  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Packages.props', '$(MSBuildThisFileDirectory)..\'))" />
   <PropertyGroup>
     <!-- Disable central package management for cache compat tests -->
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
