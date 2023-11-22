@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Unit
                 s_meterProvider.ForceFlush();
                 s_activityProvider.ForceFlush();
                 OTelInstrumentationUtil.VerifyMetrics(5, _exportedMetrics);
-                OTelInstrumentationUtil.VerifyActivity(19, _exportedActivities);
+                OTelInstrumentationUtil.VerifyActivity(5, _exportedActivities);
             }
         }
 

@@ -14,14 +14,17 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
     {
         bool IOtelInstrumentation.IsTracingEnabled => false;
 
-        bool IOtelInstrumentation.IsMetricsEnabled => false;
-
         public void LogActivity(Dictionary<string, object> tags)
         {
             // No op
         }
 
         public void LogActivityStatus(bool success)
+        {
+            // No op
+        }
+
+        public void StartActivity()
         {
             // No op
         }

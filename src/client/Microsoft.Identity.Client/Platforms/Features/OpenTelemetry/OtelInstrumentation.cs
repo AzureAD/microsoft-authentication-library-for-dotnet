@@ -90,17 +90,15 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             unit: "ms",
             description: "Performance of token acquisition calls network latency"));
 
-        internal readonly Lazy<Activity> s_activity = new Lazy<Activity>(() => s_acquireTokenActivity.StartActivity("Token acquisition", ActivityKind.Internal));
+        internal Activity _activity;
 
-        bool IOtelInstrumentation.IsTracingEnabled => s_activity.Value != null;
-
-        bool IOtelInstrumentation.IsMetricsEnabled => s_successCounter.Value.Enabled;
+        bool IOtelInstrumentation.IsTracingEnabled => _activity != null;
 
         void IOtelInstrumentation.LogActivity(Dictionary<string, object> tags)
         {
             foreach (KeyValuePair<string, object> tag in tags)
             {
-                s_activity.Value?.AddTag(tag.Key, tag.Value);
+                _activity.SetTag(tag.Key, tag.Value);
             }
         }
 
@@ -108,17 +106,22 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         {
             if (success)
             {
-                s_activity.Value?.SetStatus(ActivityStatusCode.Ok, "Success");
+                _activity?.SetStatus(ActivityStatusCode.Ok, "Success");
             }
             else
             {
-                s_activity.Value?.SetStatus(ActivityStatusCode.Error, "Request failed");
+                _activity?.SetStatus(ActivityStatusCode.Error, "Request failed");
             }
+        }
+
+        void IOtelInstrumentation.StartActivity()
+        {
+            _activity = s_acquireTokenActivity.StartActivity("Token acquisition", ActivityKind.Internal);
         }
 
         void IOtelInstrumentation.StopActivity()
         {
-            s_activity.Value?.Stop();
+            _activity?.Stop();
         }
 
         // Aggregates the successful requests based on token source and cache refresh reason.

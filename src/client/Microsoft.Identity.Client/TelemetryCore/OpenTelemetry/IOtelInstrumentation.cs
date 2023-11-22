@@ -11,6 +11,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
     {
         internal void LogActivity(Dictionary<string, object> tags);
         internal void LogActivityStatus(bool success);
+        internal void StartActivity();
         internal void StopActivity();
         internal void LogSuccessMetrics(
             string platform,
@@ -21,7 +22,5 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             ILoggerAdapter logger);
         internal void LogFailedMetrics(string platform, string errorCode);
         internal bool IsTracingEnabled { get; }
-        internal bool IsMetricsEnabled { get; }
-
     }
 }

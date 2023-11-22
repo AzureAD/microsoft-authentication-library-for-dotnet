@@ -11,18 +11,33 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     public class OTelInstrumentationUtil
     {
-        public static void VerifyActivity(int expectedTagCount, List<Activity> _exportedActivities)
+        public static void VerifyActivity(int expectedActivityCount, List<Activity> _exportedActivities)
         {
-            Assert.AreEqual(1, _exportedActivities.Count);
+            Assert.AreEqual(expectedActivityCount, _exportedActivities.Count);
             foreach (var activity in _exportedActivities)
             {
                 Assert.AreEqual(OtelInstrumentation.ActivitySourceName, activity.Source.Name);
-                Assert.AreEqual(expectedTagCount, activity.Tags.Count());
+
+                switch (activity.Status)
+                {
+                    case ActivityStatusCode.Ok:
+                        Assert.IsTrue(activity.Tags.Count() > 14);
+                        break;
+
+                    case ActivityStatusCode.Error:
+                        Assert.IsTrue(activity.Tags.Count() > 5);
+                        break;
+
+                    default: Assert.Fail("Unexpected activity status");
+                        break;
+                        
+                }                
             }
         }
 

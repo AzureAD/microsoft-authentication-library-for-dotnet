@@ -78,15 +78,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken = default)
         {
             Stopwatch sw = Stopwatch.StartNew();
+            ServiceBundle.PlatformProxy.OtelInstrumentation.StartActivity();
 
             if (ServiceBundle.PlatformProxy.OtelInstrumentation.IsTracingEnabled)
             {
                 ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivity(new Dictionary<string, object> {
-                { TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion() },
-                { TelemetryConstants.Platform, ServiceBundle.PlatformProxy.GetProductName() },
-                { TelemetryConstants.ClientId, AuthenticationRequestParameters.AppConfig.ClientId },
-                { TelemetryConstants.ActivityId, AuthenticationRequestParameters.RequestContext.CorrelationId }
-            }); 
+                    { TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion() },
+                    { TelemetryConstants.Platform, ServiceBundle.PlatformProxy.GetProductName() },
+                    { TelemetryConstants.ClientId, AuthenticationRequestParameters.AppConfig.ClientId },
+                    { TelemetryConstants.ActivityId, AuthenticationRequestParameters.RequestContext.CorrelationId.ToString() }
+                }); 
             }
 
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
@@ -153,14 +154,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivityStatus(true);
 
                 Dictionary<string, object> tags = new Dictionary<string, object> {
-                { TelemetryConstants.CacheInfoTelemetry, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason) },
-                { TelemetryConstants.TokenSource, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.TokenSource) },
-                { TelemetryConstants.Duration, authenticationResult.AuthenticationResultMetadata.DurationTotalInMs },
-                { TelemetryConstants.DurationInCache, authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs },
-                { TelemetryConstants.DurationInHttp, authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs },
-                { TelemetryConstants.TokenType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.TokenType },
-                { TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds }
-            };
+                    { TelemetryConstants.CacheInfoTelemetry, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason) },
+                    { TelemetryConstants.TokenSource, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.TokenSource) },
+                    { TelemetryConstants.Duration, authenticationResult.AuthenticationResultMetadata.DurationTotalInMs },
+                    { TelemetryConstants.DurationInCache, authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs },
+                    { TelemetryConstants.DurationInHttp, authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs },
+                    { TelemetryConstants.TokenType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.TokenType },
+                    { TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds }
+                };
 
                 if (authenticationResult.AuthenticationResultMetadata.RefreshOn.HasValue)
                 {
