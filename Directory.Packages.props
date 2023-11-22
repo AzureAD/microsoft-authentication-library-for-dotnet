@@ -69,7 +69,6 @@
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Reflection.TypeExtensions" Version="4.7.0" />
     <PackageVersion Include="System.Security.Cryptography.Cng" Version="5.0.0" />
-    <PackageVersion Update="System.Security.Cryptography.ProtectedData" Version="7.0.1" />
     <PackageVersion Include="System.Text.Json" Version="6.0.5" />
     <PackageVersion Include="System.Threading" Version="4.3.0" />
     <PackageVersion Include="System.Threading.Tasks" Version="4.3.0" />
