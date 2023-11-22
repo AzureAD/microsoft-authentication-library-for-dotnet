@@ -6,7 +6,6 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Credential;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
@@ -30,7 +29,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard
 
         public X509Certificate2 BindingCertificate => _bindingCertificate;
 
-        CryptoKeyType IKeyMaterialManager.CryptoKeyType => throw new NotImplementedException();
+        CryptoKeyType IKeyMaterialManager.CryptoKeyType => CryptoKeyType.None;
 
         public bool IsBindingCertificateExpired()
         {

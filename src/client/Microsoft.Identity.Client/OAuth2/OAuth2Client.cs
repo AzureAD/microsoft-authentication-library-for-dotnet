@@ -16,7 +16,9 @@ using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using System.Security.Cryptography.X509Certificates;
+#if SUPPORTS_MANAGED_IDENTITY_V2
 using Microsoft.Identity.Client.Credential;
+#endif
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -93,13 +95,13 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             return await ExecuteRequestAsync<OidcMetadata>(endpoint, HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
-
+#if SUPPORTS_MANAGED_IDENTITY_V2
         public async Task<CredentialResponse> GetCredentialResponseAsync(Uri endpoint, RequestContext requestContext)
         {
             return await ExecuteRequestAsync<CredentialResponse>(endpoint, HttpMethod.Post, requestContext)
                        .ConfigureAwait(false);
         }
-
+#endif
         internal async Task<MsalTokenResponse> GetTokenAsync(
             Uri endPoint,
             RequestContext requestContext,

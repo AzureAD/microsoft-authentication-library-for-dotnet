@@ -26,7 +26,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);NETSTANDARD;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_BROKER;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32;</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);SUPPORTS_MANAGED_IDENTITY_V2;</DefineConstants>
   </PropertyGroup>
 </Project>

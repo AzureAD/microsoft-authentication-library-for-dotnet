@@ -246,7 +246,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         protected override IKeyMaterialManager InternalGetKeyMaterialManager()
         {
-            throw new NotImplementedException();
+            return new NullKeyMaterialManager(Logger);
         }
 
         public override bool BrokerSupportsWamAccounts => true;

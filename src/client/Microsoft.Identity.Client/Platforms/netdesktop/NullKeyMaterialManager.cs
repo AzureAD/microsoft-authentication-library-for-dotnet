@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         public X509Certificate2 BindingCertificate => _bindingCertificate;
 
-        CryptoKeyType IKeyMaterialManager.CryptoKeyType => throw new NotImplementedException();
+        CryptoKeyType IKeyMaterialManager.CryptoKeyType => CryptoKeyType.None;
 
         public bool IsBindingCertificateExpired()
         {
