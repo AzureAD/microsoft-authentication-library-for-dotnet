@@ -48,7 +48,13 @@ namespace Microsoft.Identity.Client.Credential
             if (_cache.TryGetValue(cacheKey, out CredentialResponse response))
             {
                 long expiresOnSeconds = response.ExpiresOn;
+#if NET45
+                DateTimeOffset expiresOnDateTime = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero)
+                                                            .AddSeconds(expiresOnSeconds)
+                                                            .ToLocalTime();
+#else
                 DateTimeOffset expiresOnDateTime = DateTimeOffset.FromUnixTimeSeconds(expiresOnSeconds);
+#endif
 
                 if (expiresOnDateTime > DateTimeOffset.UtcNow && !_managedIdentityParameters.ForceRefresh)
                 {

@@ -4,9 +4,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Credential;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
@@ -16,78 +14,55 @@ namespace Microsoft.Identity.Client.Platforms.netcore
     /// Class to store crypto key information for a Managed Identity supported Azure resource.
     /// For more details see https://aka.ms/msal-net-managed-identity
     /// </summary>
-    internal class KeyMaterialManager : IKeyMaterialManager
+    internal class KeyMaterialManager(ILoggerAdapter logger) : IKeyMaterialManager
     {
         private const string IsKeyGuardEnabledProperty = "Virtual Iso";
         private CryptoKeyType _cryptoKeyType = CryptoKeyType.None;
         private const string KeyProviderName = "Microsoft Software Key Storage Provider";
         private const string MachineKeyName = "ManagedIdentityCredentialKey";
         private const string SoftwareKeyName = "ResourceBindingKey";
-        private readonly X509Certificate2 _bindingCertificate;
-        private readonly CertificateCache _certificateCache;
+        private static X509Certificate2 s_bindingCertificate;
         private readonly object _keyInfoLock = new(); // Lock object
-        private readonly ILoggerAdapter _logger;
-
-        public KeyMaterialManager(ILoggerAdapter logger)
-        {
-            _logger = logger;
-
-            _certificateCache = CertificateCache.Instance();
-            
-            _bindingCertificate = _certificateCache.GetOrAddCertificate(
-                () => CreateCertificateFromCryptoKeyInfo());
-        }
+        private readonly ILoggerAdapter _logger = logger;
 
         public CryptoKeyType CryptoKeyType => _cryptoKeyType;
 
-        public X509Certificate2 BindingCertificate => _bindingCertificate;
+        public X509Certificate2 BindingCertificate => CreateCertificateFromCryptoKeyInfo();
 
-        public bool IsBindingCertificateExpired()
+        private static bool CertificateNeedsRotation(X509Certificate2 certificate, double rotationPercentageThreshold = 70)
         {
-            if (_bindingCertificate == null)
-            {
-                _logger.Info("[Managed Identity] Binding certificate is null.");
-                return true; // Assuming null certificates are considered expired
-            }
-
             DateTime now = DateTime.UtcNow;
-            return now > _bindingCertificate.NotAfter;
+
+            // Calculate the total duration of the certificate's validity
+            TimeSpan certificateLifetime = certificate.NotAfter - certificate.NotBefore;
+
+            // Calculate how much time has passed since the certificate's issuance
+            TimeSpan elapsedTime = now - certificate.NotBefore;
+
+            // Calculate the current percentage of the certificate's lifetime that has passed
+            double percentageElapsed = (elapsedTime.TotalMilliseconds / certificateLifetime.TotalMilliseconds) * 100.0;
+
+            // Check if the percentage elapsed exceeds the rotation threshold
+            return percentageElapsed >= rotationPercentageThreshold;
         }
 
-        public TimeSpan GetTimeUntilCertificateExpiration()
-        {
-            if (_bindingCertificate == null)
-            {
-                _logger.Info("[Managed Identity] Binding certificate is null.");
-                return TimeSpan.Zero; // Return zero if the certificate is null
-            }
-
-            DateTime now = DateTime.UtcNow;
-            return _bindingCertificate.NotAfter - now;
-        }
-
-        public bool IsKeyGuardProtected()
-        {
-            // Implement logic to check if the key is KeyGuard protected
-            // This could use the existing IsKeyGuardProtected method or additional logic
-            ECDsaCng cngkey = GetCngKey();
-            return cngkey != null && IsKeyGuardProtected(cngkey.Key);
-        }
-
-        public bool CertificateHasPrivateKey()
-        {
-            // Implement logic to check if the binding certificate has a private key
-            return _bindingCertificate?.HasPrivateKey ?? false;
-        }
-
-        private X509Certificate2 CreateCertificateFromCryptoKeyInfo(bool forceCreate = false)
+        private X509Certificate2 CreateCertificateFromCryptoKeyInfo()
         {
             lock (_keyInfoLock) // Lock to ensure thread safety
             {
-                if (!forceCreate && _bindingCertificate != null)
+                //if cached cert exist and still valid return it
+                if (s_bindingCertificate != null && !CertificateNeedsRotation(s_bindingCertificate))
                 {
                     _logger.Verbose(() => "[Managed Identity] A cached binding certificate is available.");
-                    return _bindingCertificate;
+                    return s_bindingCertificate;
+                }
+
+                //delete the cached cert if it needs to be rotated
+                if (s_bindingCertificate != null && CertificateNeedsRotation(s_bindingCertificate))
+                {
+                    // Delete the cached certificate if it is expired
+                    s_bindingCertificate.Dispose();
+                    s_bindingCertificate = null;
                 }
             }
 

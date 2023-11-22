@@ -53,7 +53,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return uriBuilder.Uri;
         }
 
-#if TRA
         public string GetCredentialCacheKey()
         {
             Uri uri = _baseEndpoint;
@@ -81,6 +80,5 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return Constants.ManagedIdentityDefaultClientId; 
             }
         }
-#endif
     }
 }

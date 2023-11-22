@@ -12,11 +12,5 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         CryptoKeyType CryptoKeyType { get; }
 
         X509Certificate2 BindingCertificate { get; }
-
-        bool IsBindingCertificateExpired();
-        TimeSpan GetTimeUntilCertificateExpiration();
-
-        bool IsKeyGuardProtected(); // Check if the key is KeyGuard protected
-        bool CertificateHasPrivateKey(); // Check if the binding certificate has a private key
     }
 }

@@ -42,13 +42,13 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             // MSI factory logic - decide if we need to use the legacy or the new MSI flow
 
             RequestBase handler = null;
-#if TRA
+
             // May or may not be initialized, depending on the state of the machine
             handler = CredentialBasedMsiAuthRequest.TryCreate(
                 ServiceBundle, 
                 requestParams, 
                 managedIdentityParameters);
-#endif
+
             handler ??= new LegacyMsiAuthRequest(
                     ServiceBundle,
                     requestParams,

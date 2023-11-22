@@ -42,9 +42,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                     // Create the key
                     _createdKey = CngKey.Create(CngAlgorithm.ECDsaP256, keyName, keyParams);
 
-                    // Add a 10-second delay
-                    Task.Delay(10000).Wait();
-
                     Debug.WriteLine("Key created successfully!");
                 }
             }

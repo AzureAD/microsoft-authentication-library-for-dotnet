@@ -39,8 +39,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 s_httpClient.Clear();
 
             //Create an HttpClientHandler and configure it to use the client certificate
-            HttpClientHandler handler = new HttpClientHandler();
-#if TRA
+            HttpClientHandler handler = new();
+#if NETSTANDARD2_0_OR_GREATER
             handler.ClientCertificates.Add(bindingCertificate);
 #endif
             var httpClient = new HttpClient(handler);
