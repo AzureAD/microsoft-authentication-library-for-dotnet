@@ -6,7 +6,9 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Microsoft.Identity.Client.Core;
+#if NETSTANDARD
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+#endif
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.Platforms.netstandard
