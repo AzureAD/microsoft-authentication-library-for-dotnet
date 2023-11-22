@@ -18,6 +18,7 @@
     <PackageVersion Include="Microsoft.IdentityModel.Abstractions" Version="6.22.0" />
     <PackageVersion Include="Microsoft.Web.WebView2" Version="1.0.864.35" />
     <PackageVersion Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
+    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="7.0.2" />
     <PackageVersion Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
     <PackageVersion Include="System.Net.NameResolution" Version="4.3.0" />
     <PackageVersion Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
@@ -60,6 +61,7 @@
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.15" />
     <PackageVersion Include="NUnit" Version="3.13.3" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.InMemory" Version="1.6.0" />
     <PackageVersion Include="Polly" Version="7.2.3" />
     <PackageVersion Include="Selenium.Support" Version="4.4.0" />
     <PackageVersion Include="Selenium.WebDriver" Version="4.4.0" />

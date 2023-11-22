@@ -102,9 +102,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             }
         }
 
-        void IOtelInstrumentation.LogActivityStatus(bool success)
+        void IOtelInstrumentation.LogActivityStatus(bool isSuccessful)
         {
-            if (success)
+            if (isSuccessful)
             {
                 _activity?.SetStatus(ActivityStatusCode.Ok, "Success");
             }
@@ -140,9 +140,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
                         new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
-                        new(TelemetryConstants.CacheInfoTelemetry, authResultMetadata.CacheRefreshReason),
+                        new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason),
                         new(TelemetryConstants.CacheLevel, cacheLevel));
-                logger.Info("[OpenTelemetry] Completed incrementing to success counter."); 
+                logger.Info("[OpenTelemetry] Completed incrementing to isSuccessful counter."); 
             }
 
             if (s_durationTotal.Value.Enabled)

@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivityStatus(true);
 
                 Dictionary<string, object> tags = new Dictionary<string, object> {
-                    { TelemetryConstants.CacheInfoTelemetry, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason) },
+                    { TelemetryConstants.CacheRefreshReason, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason) },
                     { TelemetryConstants.TokenSource, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.TokenSource) },
                     { TelemetryConstants.Duration, authenticationResult.AuthenticationResultMetadata.DurationTotalInMs },
                     { TelemetryConstants.DurationInCache, authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs },
@@ -171,15 +171,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 tags.Add(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
                 tags.Add(TelemetryConstants.CacheLevel, (int)authenticationResult.AuthenticationResultMetadata.CacheLevel);
 
-                var resourceAndScopes = ParseScopesForTelemetry();
+                (string resource, string scopes) = ParseScopesForTelemetry();
 
-                if (resourceAndScopes.Item1 != null)
+                if (resource != null)
                 {
-                    tags.Add(TelemetryConstants.Resource, resourceAndScopes.Item1);
+                    tags.Add(TelemetryConstants.Resource, resource);
                 }
-                if (resourceAndScopes.Item2 != null)
+                if (scopes != null)
                 {
-                    tags.Add(TelemetryConstants.Scopes, resourceAndScopes.Item2);
+                    tags.Add(TelemetryConstants.Scopes, scopes);
                 }
 
                 ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivity(tags); 
@@ -263,15 +263,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 telemetryEventDetails.SetProperty(TelemetryConstants.CacheLevel, (int)authenticationResult.AuthenticationResultMetadata.CacheLevel);
               
-                Tuple<string, string> resourceAndScopes = ParseScopesForTelemetry();
-                if (resourceAndScopes.Item1 != null)
+                (string resource, string scopes) = ParseScopesForTelemetry();
+                if (resource != null)
                 {
-                    telemetryEventDetails.SetProperty(TelemetryConstants.Resource, resourceAndScopes.Item1);
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Resource, resource);
                 }
 
-                if (resourceAndScopes.Item2 != null)
+                if (scopes != null)
                 {
-                    telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, resourceAndScopes.Item2);
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, scopes);
                 }
 
                 

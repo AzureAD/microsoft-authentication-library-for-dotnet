@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             // No op
         }
 
-        public void LogActivityStatus(bool success)
+        public void LogActivityStatus(bool isSuccessful)
         {
             // No op
         }

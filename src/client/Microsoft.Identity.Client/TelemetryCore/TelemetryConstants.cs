@@ -25,6 +25,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string TokenType = "TokenType";
         public const string TokenSource = "TokenSource";
         public const string CacheInfoTelemetry = "CacheInfoTelemetry";
+        public const string CacheRefreshReason = "CacheRefreshReason";
         public const string ErrorCode = "ErrorCode";
         public const string StsErrorCode = "StsErrorCode";
         public const string ErrorMessage = "ErrorMessage";

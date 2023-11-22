@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.TokenSource);
-                        expectedTags.Add(TelemetryConstants.CacheInfoTelemetry);
+                        expectedTags.Add(TelemetryConstants.CacheRefreshReason);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
 
                         break;
