@@ -15,6 +15,7 @@ using System.Web;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client.Credential
 {
@@ -22,6 +23,7 @@ namespace Microsoft.Identity.Client.Credential
     {
         private readonly ConcurrentDictionary<string, CredentialResponse> _cache = new();
         private readonly Uri _uri;
+        private readonly ManagedIdentityId _managedIdentityId;
         private readonly X509Certificate2 _bindingCertificate;
         private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
         private readonly RequestContext _requestContext;
@@ -29,12 +31,14 @@ namespace Microsoft.Identity.Client.Credential
 
         public ManagedIdentityCredentialResponseCache(
             Uri uri,
+            ManagedIdentityId managedIdentityId,
             X509Certificate2 bindingCertificate,
             AcquireTokenForManagedIdentityParameters managedIdentityParameters,
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
             _uri = uri;
+            _managedIdentityId = managedIdentityId;
             _bindingCertificate = bindingCertificate;
             _managedIdentityParameters = managedIdentityParameters;
             _requestContext = requestContext;
@@ -43,7 +47,7 @@ namespace Microsoft.Identity.Client.Credential
 
         public async Task<CredentialResponse> GetOrFetchCredentialAsync() 
         {
-            string cacheKey = GetCredentialCacheKey(_uri);
+            string cacheKey = _managedIdentityId.ToString();
 
             if (_cache.TryGetValue(cacheKey, out CredentialResponse response))
             {
@@ -107,7 +111,7 @@ namespace Microsoft.Identity.Client.Credential
             {
                 _requestContext.Logger.Info("[Managed Identity] Fetching new managed identity credential from IMDS endpoint.");
 
-                var client = CreateClientRequest(httpManager);
+                OAuth2Client client = CreateClientRequest(httpManager);
 
                 CredentialResponse credentialResponse = await client
                     .GetCredentialResponseAsync(_uri, _requestContext)
@@ -154,33 +158,6 @@ namespace Microsoft.Identity.Client.Credential
             client.AddBodyContent(new StringContent(jsonPayload, System.Text.Encoding.UTF8, "application/json"));
 
             return client;
-        }
-
-        private string GetCredentialCacheKey(Uri credentialEndpoint)
-        {
-            string queryString = credentialEndpoint.Query;
-
-            // Use HttpUtility to parse the query string and get the managed identity id parameters
-            string clientId = HttpUtility.ParseQueryString(queryString).Get("client_id");
-            string resourceId = HttpUtility.ParseQueryString(queryString).Get("mi_res_id");
-            string objectId = HttpUtility.ParseQueryString(queryString).Get("object_id");
-
-            if (!string.IsNullOrEmpty(clientId))
-            {
-                return clientId;
-            }
-            else if (!string.IsNullOrEmpty(resourceId))
-            {
-                return resourceId;
-            }
-            else if (!string.IsNullOrEmpty(objectId))
-            {
-                return objectId;
-            }
-            else
-            {
-                return Constants.ManagedIdentityDefaultClientId;
-            }
         }
 
         private static string CreateCredentialPayload(X509Certificate2 x509Certificate2)

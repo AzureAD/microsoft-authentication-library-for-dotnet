@@ -196,6 +196,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var credentialResponseCache = new ManagedIdentityCredentialResponseCache(
                 _credentialEndpoint,
+                AuthenticationRequestParameters.AppConfig.ManagedIdentityId,
                 _keyMaterialManager.BindingCertificate,
                 _managedIdentityParameters,
                 AuthenticationRequestParameters.RequestContext,

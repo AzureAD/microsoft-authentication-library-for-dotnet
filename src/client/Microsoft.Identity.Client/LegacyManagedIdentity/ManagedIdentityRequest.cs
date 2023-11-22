@@ -52,33 +52,5 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             return uriBuilder.Uri;
         }
-
-        public string GetCredentialCacheKey()
-        {
-            Uri uri = _baseEndpoint;
-            string queryString = uri.Query; 
-
-            // Use HttpUtility to parse the query string and get the managed identity id parameters
-            string clientId = HttpUtility.ParseQueryString(queryString).Get("client_id");
-            string resourceId = HttpUtility.ParseQueryString(queryString).Get("mi_res_id");
-            string objectId = HttpUtility.ParseQueryString(queryString).Get("object_id");
-
-            if (!string.IsNullOrEmpty(clientId))
-            {
-                return clientId;
-            }
-            else if (!string.IsNullOrEmpty(resourceId))
-            {
-                return resourceId;
-            }
-            else if (!string.IsNullOrEmpty(objectId))
-            {
-                return objectId;
-            }
-            else
-            {
-                return Constants.ManagedIdentityDefaultClientId; 
-            }
-        }
     }
 }
