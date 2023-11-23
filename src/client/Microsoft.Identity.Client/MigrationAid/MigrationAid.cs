@@ -1391,10 +1391,7 @@ namespace Microsoft.Identity.Client
     }
 
 #if SUPPORTS_CONFIDENTIAL_CLIENT
-    /// <summary>
-    /// Component to be used with confidential client applications like web apps/APIs.
-    /// </summary>
-    public partial interface IConfidentialClientApplication
+     public partial interface IConfidentialClientApplication
     {
     #region MSAL3X deprecations
 

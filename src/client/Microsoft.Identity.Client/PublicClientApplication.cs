@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// A special account value that indicates that the current operating system account should be used 
         /// to log the user in. Not all operating systems and authentication flows support this concept, in which 
-        /// case calling `AcquireTokenSilent` will throw an <see cref="MsalUiRequiredException"/>. 
+        /// case calling <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/> will throw an <see cref="MsalUiRequiredException"/>. 
         /// </summary>
         /// <remarks>
         /// Currently only the Windows broker is able to login with the current operating system user. For additional details, see <see href="https://aka.ms/msal-net-wam">the documentation on the Windows broker</see>.
