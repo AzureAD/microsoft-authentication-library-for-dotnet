@@ -171,15 +171,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 tags.Add(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
                 tags.Add(TelemetryConstants.CacheLevel, (int)authenticationResult.AuthenticationResultMetadata.CacheLevel);
 
-                (string resource, string scopes) = ParseScopesForTelemetry();
+                Tuple<string, string> resourceAndScopes = ParseScopesForTelemetry();
 
-                if (resource != null)
+                if (resourceAndScopes.Item1 != null)
                 {
-                    tags.Add(TelemetryConstants.Resource, resource);
+                    tags.Add(TelemetryConstants.Resource, resourceAndScopes.Item1);
                 }
-                if (scopes != null)
+                if (resourceAndScopes.Item2 != null)
                 {
-                    tags.Add(TelemetryConstants.Scopes, scopes);
+                    tags.Add(TelemetryConstants.Scopes, resourceAndScopes.Item2);
                 }
 
                 ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivity(tags); 
@@ -263,15 +263,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 telemetryEventDetails.SetProperty(TelemetryConstants.CacheLevel, (int)authenticationResult.AuthenticationResultMetadata.CacheLevel);
               
-                (string resource, string scopes) = ParseScopesForTelemetry();
-                if (resource != null)
+                Tuple<string, string> resourceAndScopes  = ParseScopesForTelemetry();
+                if (resourceAndScopes.Item1 != null)
                 {
-                    telemetryEventDetails.SetProperty(TelemetryConstants.Resource, resource);
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Resource, resourceAndScopes.Item1);
                 }
 
-                if (scopes != null)
+                if (resourceAndScopes.Item2 != null)
                 {
-                    telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, scopes);
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, resourceAndScopes.Item2);
                 }
 
                 
