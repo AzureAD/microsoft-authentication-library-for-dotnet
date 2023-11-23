@@ -53,21 +53,24 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// </returns>
         private X509Certificate2 GetOrCreateCertificateFromCryptoKeyInfo()
         {
-            lock (_keyInfoLock) // Lock to ensure thread safety
+            if (s_bindingCertificate != null)
             {
-                //if cached cert exist and still valid return it
-                if (s_bindingCertificate != null && !CertificateNeedsRotation(s_bindingCertificate))
+                lock (_keyInfoLock) // Lock to ensure thread safety
                 {
-                    _logger.Verbose(() => "[Managed Identity] A cached binding certificate is available.");
-                    return s_bindingCertificate;
-                }
+                    //if cached cert exist and still valid return it
+                    if (!CertificateNeedsRotation(s_bindingCertificate))
+                    {
+                        _logger.Verbose(() => "[Managed Identity] A cached binding certificate is available.");
+                        return s_bindingCertificate;
+                    }
 
-                //delete the cached cert if it needs to be rotated
-                if (s_bindingCertificate != null && CertificateNeedsRotation(s_bindingCertificate))
-                {
-                    // Delete the cached certificate if it is expired
-                    s_bindingCertificate.Dispose();
-                    s_bindingCertificate = null;
+                    //delete the cached cert if it needs to be rotated
+                    if (CertificateNeedsRotation(s_bindingCertificate))
+                    {
+                        // Delete the cached certificate if it is expired
+                        s_bindingCertificate.Dispose();
+                        s_bindingCertificate = null;
+                    }
                 }
             }
 

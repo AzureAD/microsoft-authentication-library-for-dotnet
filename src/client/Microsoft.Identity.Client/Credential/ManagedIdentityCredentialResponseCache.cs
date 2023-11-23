@@ -151,7 +151,11 @@ namespace Microsoft.Identity.Client.Credential
             catch (Exception ex)
             {
                 _requestContext.Logger.Error("[Managed Identity] Error fetching credential from IMDS endpoint: " + ex.Message);
-                throw new MsalServiceException(MsalError.CredentialRequestFailed, MsalErrorMessage.CredentialEndpointNoResponseReceived);
+
+                throw new MsalManagedIdentityException(
+                    MsalError.CredentialRequestFailed, 
+                    MsalErrorMessage.CredentialEndpointNoResponseReceived, 
+                    ManagedIdentitySource.Credential);
                 ; 
             }
         }

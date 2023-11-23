@@ -155,10 +155,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 return authResult;
             }
-            catch (MsalServiceException ex)
+            catch (MsalManagedIdentityException ex)
             {
                 logger.Verbose(() => $"[CredentialBasedMsiAuthRequest] Caught an exception. {ex.Message}");
-                throw new MsalServiceException(ex.Source, ex.Message, ex.InnerException);
+                throw new MsalManagedIdentityException(ex.Source, ex.Message, ManagedIdentity.ManagedIdentitySource.Credential);
             }
             finally
             {
