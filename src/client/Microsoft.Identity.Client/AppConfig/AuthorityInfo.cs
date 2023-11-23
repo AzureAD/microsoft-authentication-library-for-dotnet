@@ -581,7 +581,8 @@ namespace Microsoft.Identity.Client
                         var requestAuthority = updateEnvironment ?
                             new AadAuthority(CreateAuthorityWithEnvironment(requestAuthorityInfo, account?.Environment).AuthorityInfo) :
                             new AadAuthority(requestAuthorityInfo);
-                        if (!requestAuthority.IsCommonOrganizationsOrConsumersTenant())
+                        if (!requestAuthority.IsCommonOrganizationsOrConsumersTenant() || 
+                            requestAuthority.IsOrganizationsTenantWithMsaPassthroughEnabled(requestContext.ServiceBundle.Config.IsBrokerEnabled && requestContext.ServiceBundle.Config.BrokerOptions != null && requestContext.ServiceBundle.Config.BrokerOptions.MsaPassthrough, account?.HomeAccountId?.TenantId))
                         {
                             return requestAuthority;
                         }
