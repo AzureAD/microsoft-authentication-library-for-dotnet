@@ -2,25 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
-#if NETSTANDARD
-using Microsoft.Identity.Client.Platforms.netstandard;
-#endif
-#if NET451_OR_GREATER
-using Microsoft.Identity.Client.Platforms.net45;
-#endif
-#if NET6_0 || NET6_WIN
-using Microsoft.Identity.Client.Platforms.netcore;
-#endif
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {

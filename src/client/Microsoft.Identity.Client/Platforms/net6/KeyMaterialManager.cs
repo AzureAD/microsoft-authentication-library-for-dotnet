@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         private const string SoftwareKeyName = "ResourceBindingKey";
 
         // Static field to cache the binding certificate across instances
-        private static X509Certificate2 s_bindingCertificate;
+        private static X509Certificate2 s_bindingCertificate = null;
 
         // Lock object for ensuring thread safety when accessing key information
         private readonly object _keyInfoLock = new();
@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                 return eCDsaCng;
             }
 
-            // Both attempts failed, return null
+            // Both attempts failed, return null and do not alter the crypto key so it remains as none
             // Now we should follow the legacy managed identity flow
             _logger.Info("[Managed Identity] Machine / Software keys are not setup. Proceed to check for legacy managed identity sources.");
             return null;
