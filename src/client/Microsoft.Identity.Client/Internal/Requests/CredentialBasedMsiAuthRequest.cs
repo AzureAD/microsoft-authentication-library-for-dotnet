@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             _managedIdentityParameters = managedIdentityParameters;
             _credentialEndpoint = credentialEndpoint;
-            _keyMaterialManager = serviceBundle.PlatformProxy.GetKeyMaterialManager();
+            _keyMaterialManager = serviceBundle.Config.KeyMaterialManagerForTest ?? serviceBundle.PlatformProxy.GetKeyMaterialManager();
         }
 
         public static CredentialBasedMsiAuthRequest TryCreate(

@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client
             GuardMobileFrameworks();
 
             AppTokenCacheInternal = configuration.AppTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, true);
-            keyMaterialManager = ServiceBundle.PlatformProxy.GetKeyMaterialManager();
+            keyMaterialManager = configuration.KeyMaterialManagerForTest ?? ServiceBundle.PlatformProxy.GetKeyMaterialManager();
             configuration.ManagedIdentityBindingCertificate = keyMaterialManager.BindingCertificate;
             configuration.IsManagedIdentityTokenRequestInfoAvailable = keyMaterialManager.CryptoKeyType != CryptoKeyType.None;
 

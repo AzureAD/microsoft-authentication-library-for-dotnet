@@ -142,7 +142,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         protected abstract IWebUIFactory CreateWebUiFactory();
         protected abstract IFeatureFlags CreateFeatureFlags();
-
         protected abstract string InternalGetDeviceModel();
         protected abstract string InternalGetOperatingSystem();
         protected abstract string InternalGetProcessorArchitecture();

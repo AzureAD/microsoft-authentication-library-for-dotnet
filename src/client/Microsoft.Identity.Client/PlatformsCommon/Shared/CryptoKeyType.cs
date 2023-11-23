@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     /// <summary>
     /// Enumerates various types of crypto keys used in the application.
     /// </summary>
-    internal enum CryptoKeyType
+    public enum CryptoKeyType
     {
         None,         // No specific crypto key type.
         KeyGuard,     // KeyGuard-protected key.
