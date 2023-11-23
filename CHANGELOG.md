@@ -1,3 +1,17 @@
+4.58.0
+==========
+### New Features
+- Removed support for deprecated .NET 4.6.1 framework and added .NET 4.6.2 support. MSAL.NET packages will no longer include `net461` binary. Existing .NET 4.6.1 apps will now reference .NET Standard 2.0 MSAL binary. See [4315](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4315).
+- MSAL.NET repository now supports Central Package Management. See [3434](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3434).
+- 
+
+### Bug Fixes
+- Fixed support for dual headed accounts that share the same UPN for both, an MSA and an AAD accounts. See [4425](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4425).
+- MSAL now correctly falls back to use local cache if broker fails to return a result for `AcquireTokenSilent` calls. See [4395](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/4395).
+- Fixed a bug when the cache level in the telemetry was not correctly set to L1 Cache when in-memory cache was used. See [4414](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/4414).
+- Deprecated `WithAuthority` on the request builders. Set the authority on the application builders. Use `WithTenantId` or `WithTenantIdFromAuthority` on the request builder to update the tenant ID. See [4406](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/4406).
+- Fixed an issue with the Windows broker dependencies when the app was targetting NativeAOT on Windows. See [4424](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4424).
+
 4.57.0
 ==========
 ### New Features
