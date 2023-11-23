@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationResult authResult = null;
 
             //skip checking cache for force refresh or when claims are present
-            if (_managedIdentityParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
+            if (_managedIdentityParameters.ForceRefresh || !string.IsNullOrEmpty(_managedIdentityParameters.Claims))
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
                 logger.Info("[CredentialBasedMsiAuthRequest] Skipped looking for an Access Token in the cache because ForceRefresh was set.");
@@ -132,9 +132,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // 1. Force refresh is requested, or
                 // 2. Claims are passed, or 
                 // 3. If the AT needs to be refreshed pro-actively 
-                if (_managedIdentityParameters.ForceRefresh ||
-                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
-                    !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
+                if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ForceRefreshOrClaims)
                 {
                     authResult = await GetAccessTokenFromTokenEndpointAsync(cancellationToken, logger).ConfigureAwait(false);
                 }
@@ -194,7 +193,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var credentialResponseCache = new ManagedIdentityCredentialResponseCache(
                 _credentialEndpoint,
-                AuthenticationRequestParameters.AppConfig.ManagedIdentityId,
+                AuthenticationRequestParameters.AppConfig.ClientId,
                 _keyMaterialManager.BindingCertificate,
                 _managedIdentityParameters,
                 AuthenticationRequestParameters.RequestContext,

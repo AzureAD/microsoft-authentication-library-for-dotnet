@@ -16,6 +16,7 @@ using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Internal.Requests;
 
 namespace Microsoft.Identity.Client.Credential
 {
@@ -26,7 +27,7 @@ namespace Microsoft.Identity.Client.Credential
     {
         private readonly ConcurrentDictionary<string, CredentialResponse> _cache = new();
         private readonly Uri _uri;
-        private readonly ManagedIdentityId _managedIdentityId;
+        private readonly string _clientId;
         private readonly X509Certificate2 _bindingCertificate;
         private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
         private readonly RequestContext _requestContext;
@@ -34,14 +35,14 @@ namespace Microsoft.Identity.Client.Credential
 
         public ManagedIdentityCredentialResponseCache(
             Uri uri,
-            ManagedIdentityId managedIdentityId,
+            string clientId,
             X509Certificate2 bindingCertificate,
             AcquireTokenForManagedIdentityParameters managedIdentityParameters,
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
             _uri = uri;
-            _managedIdentityId = managedIdentityId;
+            _clientId = clientId;
             _bindingCertificate = bindingCertificate;
             _managedIdentityParameters = managedIdentityParameters;
             _requestContext = requestContext;
@@ -55,7 +56,7 @@ namespace Microsoft.Identity.Client.Credential
         /// <exception cref="MsalManagedIdentityException"></exception>
         public async Task<CredentialResponse> GetOrFetchCredentialAsync() 
         {
-            string cacheKey = _managedIdentityId.ToString();
+            string cacheKey = _clientId;
 
             if (_cache.TryGetValue(cacheKey, out CredentialResponse response))
             {
@@ -70,11 +71,14 @@ namespace Microsoft.Identity.Client.Credential
                 //Credential expires in 15 minutes, having a 60 second buffer before we request a new credential
                 const int expirationBufferSeconds = 60; 
 
-                if (expiresOnDateTime > DateTimeOffset.UtcNow.AddSeconds(-expirationBufferSeconds) 
-                    && !_managedIdentityParameters.ForceRefresh)
+                if (expiresOnDateTime > DateTimeOffset.UtcNow.AddSeconds(-expirationBufferSeconds) || 
+                    !_managedIdentityParameters.ForceRefresh ||
+                    !string.IsNullOrEmpty(_managedIdentityParameters.Claims)
+                    )
                 {
                     // Cache hit and not expired
                     _requestContext.Logger.Info("[Managed Identity] Returned cached credential response.");
+                    _requestContext.ApiEvent.CredentialSource = TokenSource.Cache;
                     return response;
                 }
                 else
@@ -102,6 +106,7 @@ namespace Microsoft.Identity.Client.Credential
             }
 
             AddCredential(cacheKey, credentialResponse);
+            _requestContext.ApiEvent.CredentialSource = TokenSource.IdentityProvider;
             return credentialResponse;
         }
 

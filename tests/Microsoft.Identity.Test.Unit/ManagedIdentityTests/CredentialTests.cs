@@ -7,6 +7,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -84,14 +85,169 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
+        /// <summary>
+        /// Tests the Force Refresh on MI.
+        /// </summary>
         [TestMethod]
-        public async Task InvalidCredentialEndpointAsync()
+        public async Task CredentialForceRefreshAsync()
         {
-            string invalidCredentialEndpoint = "http://169.254.169.254/metadata/identify/credential";
-
+            // Arrange
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.Machine);
+                miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                IManagedIdentityApplication mi = miBuilder.Build();
+
+                httpManager.AddManagedIdentityCredentialMockHandler(
+                    CredentialEndpoint,
+                    sendHeaders: true,
+                    MockHelpers.GetSuccessfulCredentialResponse());
+
+                httpManager.AddManagedIdentityCredentialMockHandler(
+                    MtlsEndpoint,
+                    sendHeaders: false,
+                    MockHelpers.GetSuccessfulMtlsResponse());
+
+                // Act
+                // We should get the auth result from the token provider
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // Act
+                // We should get the auth result from the cache
+                result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+
+                httpManager.AddManagedIdentityCredentialMockHandler(
+                    CredentialEndpoint,
+                    sendHeaders: true,
+                    MockHelpers.GetSuccessfulCredentialResponse());
+
+                httpManager.AddManagedIdentityCredentialMockHandler(
+                    MtlsEndpoint,
+                    sendHeaders: false,
+                    MockHelpers.GetSuccessfulMtlsResponse());
+
+                // We should get the auth result from the token provider when force refreshed
+                result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithForceRefresh(true)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        /// <summary>
+        /// Tests the Claims on MI.
+        /// </summary>
+        [TestMethod]
+        public async Task CredentialWithClaimsAsync()
+        {
+            // Arrange
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures(true)
+                    .WithClientCapabilities(new[] { "CP1" })
+                    .WithHttpManager(httpManager);
+
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.User);
+                miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                IManagedIdentityApplication mi = miBuilder.Build();
+
+                httpManager.AddManagedIdentityCredentialMockHandler(
+                    CredentialEndpoint,
+                    sendHeaders: true,
+                    MockHelpers.GetSuccessfulCredentialResponse());
+
+                httpManager.AddManagedIdentityCredentialMockHandler(
+                    MtlsEndpoint,
+                    sendHeaders: false,
+                    MockHelpers.GetSuccessfulMtlsResponse());
+
+                // Act
+                // We should get the auth result from the token provider
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // Act
+                // We should get the auth result from the cache
+                result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+
+                // Arrange
+                httpManager.AddManagedIdentityCredentialMockHandler(
+                    CredentialEndpoint,
+                    sendHeaders: true,
+                    MockHelpers.GetSuccessfulCredentialResponse());
+
+                httpManager.AddManagedIdentityCredentialMockHandler(
+                    MtlsEndpoint,
+                    sendHeaders: false,
+                    MockHelpers.GetSuccessfulMtlsResponse());
+
+                // Act
+                // We should get the auth result from the token provider when claims are passed
+                var builder = mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
+                    .WithClaims(TestConstants.Claims);
+
+                result = await builder.ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                //Assert.AreEqual(ApiEvent.ApiIds, builder.CommonParameters.ApiId);
+            }
+        }
+
+        /// <summary>
+        /// Tests the Invalid Credential endpoint.
+        /// </summary>
+        [TestMethod]
+        public async Task InvalidCredentialEndpointAsync()
+        {
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                //Arrange
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
@@ -103,15 +259,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                //httpManager.AddManagedIdentityCredentialMockHandler(
-                //    invalidCredentialEndpoint,
-                //    sendHeaders: true,
-                //    MockHelpers.GetSuccessfulCredentialResponse());
-
                 MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
+                //Act
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(ManagedIdentitySource.Credential, ex.ManagedIdentitySource);
                 Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CredentialEndpointNoResponseReceived), ex.Message);
