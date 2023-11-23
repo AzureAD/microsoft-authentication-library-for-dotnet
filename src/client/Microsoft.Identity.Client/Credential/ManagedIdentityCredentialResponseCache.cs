@@ -19,6 +19,9 @@ using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client.Credential
 {
+    /// <summary>
+    /// Represents a cache for managing and storing Managed Identity credentials.
+    /// </summary>
     internal class ManagedIdentityCredentialResponseCache : IManagedIdentityCredentialResponseCache
     {
         private readonly ConcurrentDictionary<string, CredentialResponse> _cache = new();
@@ -45,6 +48,11 @@ namespace Microsoft.Identity.Client.Credential
             _cancellationToken = cancellationToken;
         }
 
+        /// <summary>
+        /// Gets or fetches the Managed Identity credential from the cache or the service.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="MsalManagedIdentityException"></exception>
         public async Task<CredentialResponse> GetOrFetchCredentialAsync() 
         {
             string cacheKey = _managedIdentityId.ToString();
@@ -59,8 +67,11 @@ namespace Microsoft.Identity.Client.Credential
 #else
                 DateTimeOffset expiresOnDateTime = DateTimeOffset.FromUnixTimeSeconds(expiresOnSeconds);
 #endif
+                //Credential expires in 15 minutes, having a 60 second buffer before we request a new credential
+                const int expirationBufferSeconds = 60; 
 
-                if (expiresOnDateTime > DateTimeOffset.UtcNow && !_managedIdentityParameters.ForceRefresh)
+                if (expiresOnDateTime > DateTimeOffset.UtcNow.AddSeconds(-expirationBufferSeconds) 
+                    && !_managedIdentityParameters.ForceRefresh)
                 {
                     // Cache hit and not expired
                     _requestContext.Logger.Info("[Managed Identity] Returned cached credential response.");
@@ -81,7 +92,9 @@ namespace Microsoft.Identity.Client.Credential
 
             if (credentialResponse == null || credentialResponse.Credential.IsNullOrEmpty())
             {
-                _requestContext.Logger.Error("[Managed Identity] Credential Response is null or insufficient for authentication.");
+                _requestContext.Logger.Error("[Managed Identity] Credential Response is null " +
+                    "or insufficient for authentication.");
+                
                 throw new MsalManagedIdentityException(
                     MsalError.ManagedIdentityRequestFailed,
                     MsalErrorMessage.ManagedIdentityInvalidResponse,
@@ -90,19 +103,34 @@ namespace Microsoft.Identity.Client.Credential
 
             AddCredential(cacheKey, credentialResponse);
             return credentialResponse;
-            
         }
 
+        /// <summary>
+        /// Adds a credential response to the cache.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="response"></param>
         public void AddCredential(string key, CredentialResponse response)
         {
             _cache[key] = response;
         }
 
+        /// <summary>
+        /// Removes a credential from the cache.
+        /// </summary>
+        /// <param name="key"></param>
         public void RemoveCredential(string key)
         {
             _cache.TryRemove(key, out _);
         }
 
+        /// <summary>
+        /// Fetches a new managed identity credential from the IMDS endpoint.
+        /// </summary>
+        /// <param name="httpManager"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="MsalServiceException"></exception>
         private async Task<CredentialResponse> FetchFromServiceAsync(
             IHttpManager httpManager,
             CancellationToken cancellationToken)
@@ -122,12 +150,17 @@ namespace Microsoft.Identity.Client.Credential
             }
             catch (Exception ex)
             {
-                // Handle the exception (log, rethrow, etc.)
                 _requestContext.Logger.Error("[Managed Identity] Error fetching credential from IMDS endpoint: " + ex.Message);
-                throw; // Rethrow the exception or handle as appropriate for your scenario
+                throw new MsalServiceException(MsalError.CredentialRequestFailed, MsalErrorMessage.CredentialEndpointNoResponseReceived);
+                ; 
             }
         }
 
+        /// <summary>
+        /// Creates an OAuth2 client request for fetching the managed identity credential.
+        /// </summary>
+        /// <param name="httpManager"></param>
+        /// <returns></returns>
         private OAuth2Client CreateClientRequest(IHttpManager httpManager)
         {
             var client = new OAuth2Client(_requestContext.Logger, httpManager, null);
@@ -138,29 +171,34 @@ namespace Microsoft.Identity.Client.Credential
 
             switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
             {
-                case AppConfig.ManagedIdentityIdType.ClientId:
+                case ManagedIdentityIdType.ClientId:
                     _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
                     client.AddQueryParameter(Constants.ManagedIdentityClientId, _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId);
                     break;
 
-                case AppConfig.ManagedIdentityIdType.ResourceId:
+                case ManagedIdentityIdType.ResourceId:
                     _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
                     client.AddQueryParameter(Constants.ManagedIdentityResourceId, _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId);
                     break;
 
-                case AppConfig.ManagedIdentityIdType.ObjectId:
+                case ManagedIdentityIdType.ObjectId:
                     _requestContext.Logger.Info("[Managed Identity] Adding user assigned object id to the request.");
                     client.AddQueryParameter(Constants.ManagedIdentityObjectId, _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId);
                     break;
             }
 
-            string jsonPayload = CreateCredentialPayload(_bindingCertificate);
+            string jsonPayload = GetCredentialPayload(_bindingCertificate);
             client.AddBodyContent(new StringContent(jsonPayload, System.Text.Encoding.UTF8, "application/json"));
 
             return client;
         }
 
-        private static string CreateCredentialPayload(X509Certificate2 x509Certificate2)
+        /// <summary>
+        /// Creates the payload for the managed identity credential request.
+        /// </summary>
+        /// <param name="x509Certificate2"></param>
+        /// <returns></returns>
+        private static string GetCredentialPayload(X509Certificate2 x509Certificate2)
         {
             string certificateBase64 = Convert.ToBase64String(x509Certificate2.Export(X509ContentType.Cert));
 

@@ -871,6 +871,11 @@ namespace Microsoft.Identity.Client
         public const string CertificateCreationFailed = "certificate_creation_failed";
 
         /// <summary>
+        /// Managed Identity certificate credential request failed.
+        /// </summary>
+        public const string CredentialRequestFailed = "credential_request_failed";
+
+        /// <summary>
         /// <para>What happens?</para>The ADAL cache is invalid as it contains multiple refresh token entries for one user.
         /// <para>Mitigation</para>Delete the ADAL cache. If you do not maintain an ADAL cache, this may be a bug in MSAL.
         /// </summary>

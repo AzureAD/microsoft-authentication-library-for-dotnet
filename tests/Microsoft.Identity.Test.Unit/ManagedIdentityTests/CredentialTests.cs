@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -18,10 +19,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     public class CredentialTests : TestBase
     {
         internal const string CredentialEndpoint = "http://169.254.169.254/metadata/identity/credential";
-        
         internal const string MtlsEndpoint = "https://centraluseuap.mtlsauth.microsoft.com/" +
             "72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/v2.0/token";
-
         internal const string AzureResource = "http://vault.azure.net";
 
         /// <summary>

@@ -3,24 +3,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Credential;
-using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -28,7 +19,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class CredentialBasedMsiAuthRequest : RequestBase
     {
         private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
-        private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim s_semaphoreSlim = new(1, 1);
         private readonly Uri _credentialEndpoint;
         private readonly IKeyMaterialManager _keyMaterialManager;
 
@@ -180,13 +171,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
             CancellationToken cancellationToken, 
             ILoggerAdapter logger)
         {
-            CredentialResponse credentialResponse = await GetCredentialAssertionAsync(logger, cancellationToken).ConfigureAwait(false);
-            var tenantAuthority = AuthorityInfo.FromAadAuthority(credentialResponse.RegionalTokenUrl, tenant: credentialResponse.TenantId, validateAuthority: false);
+            CredentialResponse credentialResponse = await GetCredentialAssertionAsync(logger, cancellationToken)
+                .ConfigureAwait(false);
+
+            var tenantAuthority = AuthorityInfo.FromAadAuthority(
+                credentialResponse.RegionalTokenUrl, 
+                tenant: credentialResponse.TenantId, 
+                validateAuthority: false);
             
-            MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(tenantAuthority.CanonicalAuthority.ToString() + "oauth2/v2.0/token", 
+            MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(
+                tenantAuthority.CanonicalAuthority.ToString() + "oauth2/v2.0/token", 
                 GetBodyParameters(credentialResponse), cancellationToken).ConfigureAwait(false);
             
-            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
+            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse)
+                .ConfigureAwait(false);
         }
 
         private async Task<CredentialResponse> GetCredentialAssertionAsync(
