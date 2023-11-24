@@ -132,6 +132,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\net6\**\*.cs" LinkBase="Platforms\net6" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\SLC\**\*.cs" />
     
     <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
@@ -151,7 +152,8 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WebView2WebUi\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
-
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\SLC\**\*.cs" />
+    
     <PackageReference Include="Microsoft.Web.WebView2" />
     <PackageReference Include="Microsoft.Identity.Client.NativeInterop" IncludeAssets="all" />
 

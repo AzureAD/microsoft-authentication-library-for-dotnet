@@ -276,10 +276,10 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         public override IDeviceAuthManager CreateDeviceAuthManager() => new NetCoreDeviceAuthManager();
 
-        protected override IKeyMaterialManager InternalGetKeyMaterialManager()
+        public override IKeyMaterialManager GetKeyMaterialManager()
         {
 #if NETSTANDARD
-            return new NullKeyMaterialManager(Logger);
+            return NullKeyMaterialManager.Instance;
 #else
             return new ManagedIdentityCertificateProvider(Logger);
 #endif

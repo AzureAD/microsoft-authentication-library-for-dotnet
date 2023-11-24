@@ -24,8 +24,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private readonly Lazy<IPlatformLogger> _platformLogger;
         private readonly Lazy<string> _processorArchitecture;
         private readonly Lazy<string> _productName;
-        private readonly Lazy<string> _runtimeVersion;
-        private readonly Lazy<IKeyMaterialManager> _keyMaterialManager;
+        private readonly Lazy<string> _runtimeVersion;        
 
         protected AbstractPlatformProxy(ILoggerAdapter logger)
         {
@@ -39,8 +38,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             _productName = new Lazy<string>(InternalGetProductName);
             _cryptographyManager = new Lazy<ICryptographyManager>(InternalGetCryptographyManager);
             _platformLogger = new Lazy<IPlatformLogger>(InternalGetPlatformLogger);
-            _runtimeVersion = new Lazy<string>(InternalGetRuntimeVersion);
-            _keyMaterialManager = new Lazy<IKeyMaterialManager>(InternalGetKeyMaterialManager);
+            _runtimeVersion = new Lazy<string>(InternalGetRuntimeVersion);            
         }
 
         protected IFeatureFlags OverloadFeatureFlags { get; set; }
@@ -109,9 +107,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return _runtimeVersion.Value;
         }
 
-        public IKeyMaterialManager GetKeyMaterialManager()
+        public virtual IKeyMaterialManager GetKeyMaterialManager()
         {
-            return _keyMaterialManager.Value;
+            return NullKeyMaterialManager.Instance;
         }
 
         /// <inheritdoc/>
@@ -150,7 +148,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         protected abstract string InternalGetDeviceId();
         protected abstract string InternalGetProductName();
         protected abstract ICryptographyManager InternalGetCryptographyManager();
-        protected abstract IKeyMaterialManager InternalGetKeyMaterialManager();
         protected abstract IPlatformLogger InternalGetPlatformLogger();
 
         // RuntimeInformation.FrameworkDescription is available on all platforms except .NET Framework 4.7 and lower.

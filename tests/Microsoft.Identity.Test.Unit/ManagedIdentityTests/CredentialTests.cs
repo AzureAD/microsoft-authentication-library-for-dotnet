@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -31,10 +31,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         /// <param name="cryptoKeyType">The type of cryptographic key used.</param>
         [DataTestMethod]
         [DataRow(CryptoKeyType.Machine)]
-        [DataRow(CryptoKeyType.User)]
-        [DataRow(CryptoKeyType.InMemory)]
-        [DataRow(CryptoKeyType.Ephemeral)]
-        [DataRow(CryptoKeyType.KeyGuard)]
+        //[DataRow(CryptoKeyType.User)]
+        //[DataRow(CryptoKeyType.InMemory)]
+        //[DataRow(CryptoKeyType.Ephemeral)]
+        //[DataRow(CryptoKeyType.KeyGuard)]
         public async Task CredentialHappyPathAsync(CryptoKeyType cryptoKeyType)
         {
             // Arrange

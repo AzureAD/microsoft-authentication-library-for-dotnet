@@ -180,11 +180,6 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return new NullDeviceAuthManager();
         }
 
-        protected override IKeyMaterialManager InternalGetKeyMaterialManager()
-        {
-            return new NullKeyMaterialManager(Logger);
-        }
-
         public override bool LegacyCacheRequiresSerialization => false;
     }
 }
