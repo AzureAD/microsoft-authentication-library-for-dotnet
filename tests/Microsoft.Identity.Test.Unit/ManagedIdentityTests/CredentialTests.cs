@@ -31,12 +31,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         /// <param name="cryptoKeyType">The type of cryptographic key used.</param>
         [DataTestMethod]
         [DataRow(CryptoKeyType.Machine)]
-        //[DataRow(CryptoKeyType.User)]
-        //[DataRow(CryptoKeyType.InMemory)]
-        //[DataRow(CryptoKeyType.Ephemeral)]
-        //[DataRow(CryptoKeyType.KeyGuard)]
-        public async Task CredentialHappyPathAsync(CryptoKeyType cryptoKeyType)
+        [DataRow(CryptoKeyType.User)]
+        [DataRow(CryptoKeyType.InMemory)]
+        [DataRow(CryptoKeyType.Ephemeral)]
+        [DataRow(CryptoKeyType.KeyGuard)]
+        public async Task CredentialHappyPathAsync(int keyType)
         {
+            CryptoKeyType cryptoKeyType = (CryptoKeyType)keyType;
+
             // Arrange
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))

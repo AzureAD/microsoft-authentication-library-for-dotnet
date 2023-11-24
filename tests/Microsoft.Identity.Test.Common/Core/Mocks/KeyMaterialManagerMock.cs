@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
     /// <summary>
     /// Mock implementation of the IKeyMaterialManager interface for testing purposes.
     /// </summary>
-    public class KeyMaterialManagerMock : IKeyMaterialManager
+    internal class KeyMaterialManagerMock : IKeyMaterialManager
     {
         /// <summary>
         /// Initializes a new instance of the KeyMaterialManagerMock class.
