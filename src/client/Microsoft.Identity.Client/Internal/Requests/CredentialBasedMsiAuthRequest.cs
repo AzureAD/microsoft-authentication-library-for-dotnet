@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
 
-            IKeyMaterialManager keyMaterial =
+            IKeyMaterialManager keyMaterial = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.KeyMaterialManagerForTest ??
                 AuthenticationRequestParameters.RequestContext.ServiceBundle.PlatformProxy.GetKeyMaterialManager();
 
             AuthenticationResult authResult = null;
@@ -307,10 +307,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             credentialEndpointUri = null;
 
-            IKeyMaterialManager keyMaterial = 
+            IKeyMaterialManager keyMaterial = requestContext.ServiceBundle.Config.KeyMaterialManagerForTest ??
                 requestContext.ServiceBundle.PlatformProxy.GetKeyMaterialManager();
 
-            if (keyMaterial.CryptoKeyType != CryptoKeyType.None)
+            if (keyMaterial.CryptoKeyType == CryptoKeyType.None)
             {
                 requestContext.Logger.Verbose(() => "[Managed Identity] Credential based managed identity is unavailable.");
                 return false;
