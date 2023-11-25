@@ -60,18 +60,24 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
 
-            IKeyMaterialManager keyMaterial = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.KeyMaterialManagerForTest ??
-                AuthenticationRequestParameters.RequestContext.ServiceBundle.PlatformProxy.GetKeyMaterialManager();
-
             AuthenticationResult authResult = null;
+            IKeyMaterialManager keyMaterial = base.ServiceBundle.Config.KeyMaterialManagerForTest ??
+                AuthenticationRequestParameters.RequestContext.ServiceBundle.PlatformProxy.GetKeyMaterialManager();
 
             //skip checking cache for force refresh or when claims are present
             if (_managedIdentityParameters.ForceRefresh || !string.IsNullOrEmpty(_managedIdentityParameters.Claims))
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
                 
-                logger.Info("[CredentialBasedMsiAuthRequest] Skipped looking for an Access Token in the cache because ForceRefresh " +
-                    "was set.");
+                logger.Info("[CredentialBasedMsiAuthRequest] Skipped looking for an Access Token in the cache because " +
+                    "ForceRefresh was set.");
+
+                if (ServiceBundle.Config.ManagedIdentityClientCertificate.Thumbprint
+                    != keyMaterial.BindingCertificate.Thumbprint)
+                {
+                    logger.Info("[CredentialBasedMsiAuthRequest] Managed Identity Client Certificate has been renewed. " +
+                        "If you had customized httpfactory with certificate then you need to get the new certificate. ");
+                }
 
                 authResult = await GetAccessTokenAsync(keyMaterial, cancellationToken, logger).ConfigureAwait(false);
                 return authResult;
@@ -307,10 +313,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             credentialEndpointUri = null;
 
-            IKeyMaterialManager keyMaterial = requestContext.ServiceBundle.Config.KeyMaterialManagerForTest ??
-                requestContext.ServiceBundle.PlatformProxy.GetKeyMaterialManager();
-
-            if (keyMaterial.CryptoKeyType == CryptoKeyType.None)
+            if (requestContext.ServiceBundle.Config.ManagedIdentityCredentialKeyType == CryptoKeyType.None)
             {
                 requestContext.Logger.Verbose(() => "[Managed Identity] Credential based managed identity is unavailable.");
                 return false;

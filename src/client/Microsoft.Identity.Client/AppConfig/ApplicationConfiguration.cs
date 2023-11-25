@@ -121,6 +121,10 @@ namespace Microsoft.Identity.Client
         public ManagedIdentityId ManagedIdentityId { get; internal set; }
         public bool IsManagedIdentity { get; }
 
+        public CryptoKeyType ManagedIdentityCredentialKeyType { get; internal set; }
+
+        public X509Certificate2 ManagedIdentityClientCertificate { get; internal set; }
+
         #endregion
 
         #region ClientCredentials
