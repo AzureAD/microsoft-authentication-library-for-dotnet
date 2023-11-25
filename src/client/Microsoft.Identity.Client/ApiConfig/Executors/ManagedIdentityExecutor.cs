@@ -2,12 +2,16 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
@@ -19,7 +23,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
     {
         private readonly ManagedIdentityApplication _managedIdentityApplication;
 
-        public ManagedIdentityExecutor(IServiceBundle serviceBundle, ManagedIdentityApplication managedIdentityApplication) 
+        public ManagedIdentityExecutor(IServiceBundle serviceBundle, ManagedIdentityApplication managedIdentityApplication)
             : base(serviceBundle)
         {
             ClientApplicationBase.GuardMobileFrameworks();
@@ -34,6 +38,20 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
+            if (_managedIdentityApplication.KeyMaterialManager.CryptoKeyType != CryptoKeyType.None)
+            {
+                //check resource format 
+                if (!managedIdentityParameters.Resource.EndsWith("/.default", StringComparison.OrdinalIgnoreCase))
+                {
+                    commonParameters.Scopes = new SortedSet<string>
+                    {
+                        managedIdentityParameters.Resource + "/.default"
+                    };
+                }
+
+                requestContext.Logger.Info(LogMessages.CredentialScopeUpdated);
+            }
+
             var requestParams = await _managedIdentityApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
@@ -45,8 +63,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             // May or may not be initialized, depending on the state of the machine
             handler = CredentialBasedMsiAuthRequest.TryCreate(
-                ServiceBundle, 
-                requestParams, 
+                ServiceBundle,
+                requestParams,
                 managedIdentityParameters);
 
             handler ??= new LegacyMsiAuthRequest(
@@ -56,7 +74,5 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
-
-     
     }
 }

@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Client.OAuth2
                         response = await _httpManager.SendRequestAsync(
                             endpointUri,
                             _headers,
-                            body: _stringContent == null ? new FormUrlEncodedContent(_bodyParameters) : null,
+                            body: _stringContent == null ? new FormUrlEncodedContent(_bodyParameters) : _stringContent,
                             HttpMethod.Post,
                             logger: requestContext.Logger,
                             doNotThrow: false,

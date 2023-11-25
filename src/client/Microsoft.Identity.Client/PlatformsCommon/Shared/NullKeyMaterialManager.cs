@@ -24,7 +24,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
         }
 
-
         public X509Certificate2 BindingCertificate => null;
         CryptoKeyType IKeyMaterialManager.CryptoKeyType => CryptoKeyType.None;
     }

@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -10,8 +12,8 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Credential;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -21,7 +23,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
         private static readonly SemaphoreSlim s_semaphoreSlim = new(1, 1);
         private readonly Uri _credentialEndpoint;
-        private readonly IKeyMaterialManager _keyMaterialManager;
 
         private CredentialBasedMsiAuthRequest(
             IServiceBundle serviceBundle,
@@ -32,7 +33,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             _managedIdentityParameters = managedIdentityParameters;
             _credentialEndpoint = credentialEndpoint;
-            _keyMaterialManager = serviceBundle.Config.KeyMaterialManagerForTest ?? serviceBundle.PlatformProxy.GetKeyMaterialManager();
         }
 
         public static CredentialBasedMsiAuthRequest TryCreate(
@@ -167,21 +167,34 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         private async Task<AuthenticationResult> GetAccessTokenFromTokenEndpointAsync(
-            CancellationToken cancellationToken, 
+            CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {
             CredentialResponse credentialResponse = await GetCredentialAssertionAsync(logger, cancellationToken)
                 .ConfigureAwait(false);
 
+            //To-Do : Remove this, bug in Credential endpoint where regional token URL is not returned at times
+
+            var credTokenURL = "https://mtlsauth.microsoft.com"; //credentialResponse.RegionalTokenUrl
+
             var tenantAuthority = AuthorityInfo.FromAadAuthority(
-                credentialResponse.RegionalTokenUrl, 
-                tenant: credentialResponse.TenantId, 
+                credTokenURL,
+                tenant: credentialResponse.TenantId,
                 validateAuthority: false);
-            
-            MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(
-                tenantAuthority.CanonicalAuthority.ToString() + "oauth2/v2.0/token", 
-                GetBodyParameters(credentialResponse), cancellationToken).ConfigureAwait(false);
-            
+
+            var mtlsAuthuri = new Uri(tenantAuthority.CanonicalAuthority.ToString() + "oauth2/v2.0/token");
+
+            OAuth2Client client = CreateClientRequest(AuthenticationRequestParameters.RequestContext.ServiceBundle.HttpManager,
+                credentialResponse);
+
+            MsalTokenResponse msalTokenResponse = await client
+                    .GetTokenAsync(mtlsAuthuri,
+                    AuthenticationRequestParameters.RequestContext,
+                    true,
+                    AuthenticationRequestParameters.OnBeforeTokenRequestHandler).ConfigureAwait(false);
+
+            msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
+
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse)
                 .ConfigureAwait(false);
         }
@@ -194,7 +207,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var credentialResponseCache = new ManagedIdentityCredentialResponseCache(
                 _credentialEndpoint,
                 AuthenticationRequestParameters.AppConfig.ClientId,
-                _keyMaterialManager.BindingCertificate,
+                AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.ManagedIdentityBindingCertificate,
                 _managedIdentityParameters,
                 AuthenticationRequestParameters.RequestContext,
                 cancellationToken);
@@ -235,24 +248,33 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)
         {
-            // Client credentials should not add the reserved scopes
-            // "openid", "profile" and "offline_access" 
-            // because AT is on behalf of an app (no profile, no IDToken, no RT)
             return new SortedSet<string>(inputScopes);
         }
 
-        private Dictionary<string, string> GetBodyParameters(CredentialResponse credentialResponse)
+        /// <summary>
+        /// Creates an OAuth2 client request for fetching the managed identity credential.
+        /// </summary>
+        /// <param name="httpManager"></param>
+        /// <param name="credentialResponse"></param>
+        /// <returns></returns>
+        private OAuth2Client CreateClientRequest(IHttpManager httpManager, CredentialResponse credentialResponse)
         {
-            var dict = new Dictionary<string, string>
-            {
-                [OAuth2Parameter.GrantType] = OAuth2GrantType.ClientCredentials,
-                [OAuth2Parameter.Scope] = AuthenticationRequestParameters.Scope.AsSingleString(),
-                [OAuth2Parameter.ClientId] = credentialResponse.ClientId,
-                [OAuth2Parameter.ClientAssertion] = credentialResponse.Credential,
-                [OAuth2Parameter.Claims] = AuthenticationRequestParameters.Claims,
-                [OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer,
-            };
-            return dict;
+            var client = new OAuth2Client(
+                AuthenticationRequestParameters.RequestContext.Logger,
+                httpManager,
+                AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.ManagedIdentityBindingCertificate);
+
+            string scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope).AsSingleString();
+
+            client.AddQueryParameter("dc", "ESTS-PUB-WUS2-AZ1-FD000-TEST1");
+            client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials);
+            client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
+            client.AddBodyParameter(OAuth2Parameter.ClientId, credentialResponse.ClientId);
+            client.AddBodyParameter(OAuth2Parameter.ClientAssertion, credentialResponse.Credential);
+            client.AddBodyParameter(OAuth2Parameter.Claims, AuthenticationRequestParameters.Claims);
+            client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
+
+            return client;
         }
 
         protected override KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
