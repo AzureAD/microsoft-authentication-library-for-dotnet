@@ -6,7 +6,7 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.IdentityModel.Abstractions;
 
 int lineWidth = 50; // Adjust the width as needed
-string line = new ('-', lineWidth);
+string line = new('-', lineWidth);
 
 IIdentityLogger identityLogger = new IdentityLogger();
 
@@ -30,29 +30,59 @@ do
 
     try
     {
-        for (int i = 1; i <= 3; i++)
-        {
-            AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(scope)
-                .WithForceRefresh(i == 3)
-                .WithClaims("{\"code\":\"red\", \"max\":30, \"min\":null}")
-                .ExecuteAsync().ConfigureAwait(false);
+        Console.WriteLine(line);
 
-            Console.WriteLine(line);
-            string tokenSource = result.AuthenticationResultMetadata.TokenSource.ToString();
-            if ((i == 1 || i == 3) && tokenSource == "IdentityProvider")
-            {
-                PrintSuccess(i, tokenSource);
-            }
-            else if (i == 2 && tokenSource == "Cache")
-            {
-                PrintSuccess(i, tokenSource);
-            }
-            else
-            {
-                PrintFailure(i, tokenSource);
-            }
-            Console.WriteLine(line);
-        }
+        //Basic Token Request 
+        AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(scope)
+            .ExecuteAsync().ConfigureAwait(false);
+
+        int testNumber = 1;
+        string tokenSource = result.AuthenticationResultMetadata.TokenSource.ToString();
+
+        PrintResult(testNumber, tokenSource, "IdentityProvider");
+        Console.WriteLine(line);
+
+        //Second Token Request  must be from Cache 
+        result = await mi.AcquireTokenForManagedIdentity(scope)
+            .ExecuteAsync().ConfigureAwait(false);
+
+        testNumber = 2;
+        tokenSource = result.AuthenticationResultMetadata.TokenSource.ToString();
+
+        PrintResult(testNumber, tokenSource, "Cache");
+        Console.WriteLine(line);
+
+        //Third Token Request must be from IDP (claims)
+        result = await mi.AcquireTokenForManagedIdentity(scope)
+            .WithClaims("{\"code\":\"red\", \"max\":30, \"min\":null}")
+            .ExecuteAsync().ConfigureAwait(false);
+
+        testNumber = 3;
+        tokenSource = result.AuthenticationResultMetadata.TokenSource.ToString();
+
+        PrintResult(testNumber, tokenSource, "IdentityProvider");
+        Console.WriteLine(line);
+
+        //Fourth Token Request must be from Cache
+        result = await mi.AcquireTokenForManagedIdentity(scope)
+            .ExecuteAsync().ConfigureAwait(false);
+
+        testNumber = 4;
+        tokenSource = result.AuthenticationResultMetadata.TokenSource.ToString();
+
+        PrintResult(testNumber, tokenSource, "Cache");
+        Console.WriteLine(line);
+
+        //Fifth Token Request must be from IdentityProvider (Force Refresh)
+        result = await mi.AcquireTokenForManagedIdentity(scope)
+            .WithForceRefresh(true)
+            .ExecuteAsync().ConfigureAwait(false);
+
+        testNumber = 5;
+        tokenSource = result.AuthenticationResultMetadata.TokenSource.ToString();
+
+        PrintResult(testNumber, tokenSource, "IdentityProvider");
+        Console.WriteLine(line);
 
         Console.ReadLine();
     }
@@ -76,6 +106,18 @@ static void PrintSuccess(int i, string tokenSource)
     Console.WriteLine($"result {i} - Token Source: {tokenSource}");
     Console.WriteLine($"result {i} Success");
     Console.ResetColor(); // Reset text color to the default
+}
+
+static void PrintResult(int testNumber, string tokenSource, string expectedTokenSource)
+{
+    if (tokenSource == expectedTokenSource)
+    {
+        PrintSuccess(testNumber, tokenSource);
+    }
+    else
+    {
+        PrintFailure(testNumber, tokenSource);
+    }
 }
 
 static void PrintFailure(int i, string tokenSource)

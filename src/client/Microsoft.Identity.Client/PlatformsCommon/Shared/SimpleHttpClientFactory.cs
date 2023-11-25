@@ -40,8 +40,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             //Create an HttpClientHandler and configure it to use the client certificate
             HttpClientHandler handler = new();
-#if NETSTANDARD2_0_OR_GREATER
-            handler.ClientCertificates.Add(bindingCertificate);
+            //To-Do need to refine this when Managed Identity V2 TFMs are defined
+#if NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
 #endif
             var httpClient = new HttpClient(handler);
             HttpClientConfig.ConfigureRequestHeadersAndSize(httpClient);

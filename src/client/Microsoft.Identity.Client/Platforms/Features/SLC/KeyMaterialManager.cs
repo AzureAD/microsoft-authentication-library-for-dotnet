@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
     /// including the determination of the cryptographic key type.
     /// For more details, see https://aka.ms/msal-net-managed-identity.
     /// </summary>
-    internal class ManagedIdentityCertificateProvider(ILoggerAdapter logger) : IKeyMaterialManager
+    internal class ManagedIdentityCertificateProvider : IKeyMaterialManager
     {
         // Property to hold the name of the key guard isolation property
         private const string IsKeyGuardEnabledProperty = "Virtual Iso";
@@ -36,13 +36,18 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         private readonly object _keyInfoLock = new();
 
         // Logger instance for capturing log information
-        private readonly ILoggerAdapter _logger = logger;
+        private readonly ILoggerAdapter _logger;
+
+        // Property to get or create the binding certificate from crypto key information
+        public X509Certificate2 BindingCertificate => GetOrCreateCertificateFromCryptoKeyInfo();
 
         // Property to expose the current crypto key type
         public CryptoKeyType CryptoKeyType => _cryptoKeyType;
 
-        // Property to get or create the binding certificate from crypto key information
-        public X509Certificate2 BindingCertificate => GetOrCreateCertificateFromCryptoKeyInfo();
+        public ManagedIdentityCertificateProvider(ILoggerAdapter logger)
+        {
+            _logger = logger;
+        }
 
         /// <summary>
         /// Retrieves or creates an X.509 certificate from crypto key information.
@@ -52,32 +57,28 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// </returns>
         private X509Certificate2 GetOrCreateCertificateFromCryptoKeyInfo()
         {
-            if (s_bindingCertificate != null)
+            if (s_bindingCertificate != null && !CertificateNeedsRotation(s_bindingCertificate))
             {
-                lock (_keyInfoLock) // Lock to ensure thread safety
-                {
-                    //if cached cert exist and still valid return it
-                    if (!CertificateNeedsRotation(s_bindingCertificate))
-                    {
-                        _logger.Verbose(() => "[Managed Identity] A cached binding certificate is available.");
-                        return s_bindingCertificate;
-                    }
-
-                    //delete the cached cert if it needs to be rotated
-                    if (CertificateNeedsRotation(s_bindingCertificate))
-                    {
-                        // Delete the cached certificate if it is expired
-                        s_bindingCertificate.Dispose();
-                        s_bindingCertificate = null;
-                    }
-                }
+                _logger.Verbose(() => "[Managed Identity] A cached binding certificate is available.");
+                return s_bindingCertificate;
             }
 
-            ECDsaCng cngkey = GetCngKey();
-
-            if (cngkey != null)
+            lock (_keyInfoLock) // Lock to ensure thread safety
             {
-                return CreateCngCertificate(cngkey);
+                if (s_bindingCertificate != null && !CertificateNeedsRotation(s_bindingCertificate))
+                {
+                    _logger.Verbose(() => "[Managed Identity] Another thread created the certificate while waiting for the lock.");
+                    return s_bindingCertificate;
+                }
+
+                // The cached certificate needs to be rotated or does not exist
+                ECDsaCng cngkey = GetCngKey();
+
+                if (cngkey != null)
+                {
+                    s_bindingCertificate = CreateCngCertificate(cngkey);
+                    return s_bindingCertificate;
+                }
             }
 
             return null;
@@ -149,9 +150,9 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         ///   <c>true</c> if the key material is successfully retrieved; otherwise, <c>false</c>.
         /// </returns>
         private bool TryGetKeyMaterial(
-            string keyProviderName, 
-            string keyName, 
-            CngKeyOpenOptions cngKeyOpenOptions, 
+            string keyProviderName,
+            string keyName,
+            CngKeyOpenOptions cngKeyOpenOptions,
             out ECDsaCng eCDsaCng)
         {
             try
@@ -173,7 +174,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             catch (CryptographicException ex)
             {
                 _logger.Verbose(() => $"[Managed Identity] Exception caught during key operations. " +
-                $"Error Mesage : { ex.Message }.");
+                $"Error Mesage : {ex.Message}.");
             }
 
             eCDsaCng = null;
