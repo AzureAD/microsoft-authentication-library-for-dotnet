@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         {
             if (s_bindingCertificate != null && !CertificateNeedsRotation(s_bindingCertificate))
             {
-                _logger.Verbose(() => "[Managed Identity] A cached binding certificate is available.");
+                _logger.Verbose(() => "[Managed Identity] A non-expired cached binding certificate is available.");
                 return s_bindingCertificate;
             }
 
@@ -135,7 +135,8 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
             // Both attempts failed, return null and do not alter the crypto key so it remains as none
             // Now we should follow the legacy managed identity flow
-            _logger.Info("[Managed Identity] Machine / Software keys are not setup. Proceed to check for legacy managed identity sources.");
+            _logger.Info("[Managed Identity] Machine / Software keys are not setup. " +
+                "Proceed to check for legacy managed identity sources.");
             return null;
         }
 
@@ -260,7 +261,8 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             {
                 lock (_keyInfoLock) // Lock to ensure thread safety
                 {
-                    _logger.Verbose(() => "[Managed Identity] Creating binding certificate with CNG key for credential endpoint.");
+                    _logger.Verbose(() => "[Managed Identity] Creating binding certificate " +
+                    "with CNG key for credential endpoint.");
 
                     // Create a certificate request
                     CertificateRequest request = CreateCertificateRequest(certSubjectname, eCDsaCngKey);

@@ -42,6 +42,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             HttpClientHandler handler = new();
             //To-Do need to refine this when Managed Identity V2 TFMs are defined
 #if NETSTANDARD2_0_OR_GREATER || NET6_0_OR_GREATER
+            handler.ClientCertificates.Add(bindingCertificate);
 #endif
             var httpClient = new HttpClient(handler);
             HttpClientConfig.ConfigureRequestHeadersAndSize(httpClient);

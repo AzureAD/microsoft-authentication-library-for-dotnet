@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Credential;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -59,14 +60,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
 
+            IKeyMaterialManager keyMaterial =
+                AuthenticationRequestParameters.RequestContext.ServiceBundle.PlatformProxy.GetKeyMaterialManager();
+
             AuthenticationResult authResult = null;
 
             //skip checking cache for force refresh or when claims are present
             if (_managedIdentityParameters.ForceRefresh || !string.IsNullOrEmpty(_managedIdentityParameters.Claims))
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
-                logger.Info("[CredentialBasedMsiAuthRequest] Skipped looking for an Access Token in the cache because ForceRefresh was set.");
-                authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
+                
+                logger.Info("[CredentialBasedMsiAuthRequest] Skipped looking for an Access Token in the cache because ForceRefresh " +
+                    "was set.");
+
+                authResult = await GetAccessTokenAsync(keyMaterial, cancellationToken, logger).ConfigureAwait(false);
                 return authResult;
             }
 
@@ -89,7 +96,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
-                        () => GetAccessTokenAsync(cancellationToken, logger), logger);
+                        () => GetAccessTokenAsync(keyMaterial, cancellationToken, logger), logger);
                     }
                 }
                 catch (MsalServiceException e)
@@ -105,13 +112,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
                 }
 
-                authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
+                authResult = await GetAccessTokenAsync(keyMaterial, cancellationToken, logger).ConfigureAwait(false);
             }
 
             return authResult;
         }
 
         private async Task<AuthenticationResult> GetAccessTokenAsync(
+            IKeyMaterialManager keyMaterial,
             CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {
@@ -135,7 +143,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
                     AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ForceRefreshOrClaims)
                 {
-                    authResult = await GetAccessTokenFromTokenEndpointAsync(cancellationToken, logger).ConfigureAwait(false);
+                    authResult = await GetAccessTokenFromTokenEndpointAsync(keyMaterial, cancellationToken, logger).ConfigureAwait(false);
                 }
                 else
                 {
@@ -143,7 +151,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                     if (cachedAccessTokenItem == null)
                     {
-                        authResult = await GetAccessTokenFromTokenEndpointAsync(cancellationToken, logger).ConfigureAwait(false);
+                        authResult = await GetAccessTokenFromTokenEndpointAsync(keyMaterial, cancellationToken, logger).ConfigureAwait(false);
                     }
                     else
                     {
@@ -167,11 +175,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         private async Task<AuthenticationResult> GetAccessTokenFromTokenEndpointAsync(
+            IKeyMaterialManager keyMaterial,
             CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {
-            CredentialResponse credentialResponse = await GetCredentialAssertionAsync(logger, cancellationToken)
-                .ConfigureAwait(false);
+            logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Getting token from the managed identity endpoint.");
+
+            CredentialResponse credentialResponse = 
+                await GetCredentialAssertionAsync(keyMaterial, logger, cancellationToken).ConfigureAwait(false);
 
             //To-Do : Remove this, bug in Credential endpoint where regional token URL is not returned at times
 
@@ -184,7 +195,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             var mtlsAuthuri = new Uri(tenantAuthority.CanonicalAuthority.ToString() + "oauth2/v2.0/token");
 
-            OAuth2Client client = CreateClientRequest(AuthenticationRequestParameters.RequestContext.ServiceBundle.HttpManager,
+            OAuth2Client client = CreateClientRequest(
+                keyMaterial,
+                AuthenticationRequestParameters.RequestContext.ServiceBundle.HttpManager,
                 credentialResponse);
 
             MsalTokenResponse msalTokenResponse = await client
@@ -200,6 +213,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         private async Task<CredentialResponse> GetCredentialAssertionAsync(
+            IKeyMaterialManager keyMaterial,
             ILoggerAdapter logger,
             CancellationToken cancellationToken
             )
@@ -207,12 +221,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var credentialResponseCache = new ManagedIdentityCredentialResponseCache(
                 _credentialEndpoint,
                 AuthenticationRequestParameters.AppConfig.ClientId,
-                AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.ManagedIdentityBindingCertificate,
+                keyMaterial.BindingCertificate,
                 _managedIdentityParameters,
                 AuthenticationRequestParameters.RequestContext,
                 cancellationToken);
 
             CredentialResponse credentialResponse = await credentialResponseCache.GetOrFetchCredentialAsync().ConfigureAwait(false);
+
+            logger.Verbose(() => "[CredentialBasedMsiAuthRequest] A credential was successfully fetched.");
 
             return credentialResponse;
         }
@@ -254,19 +270,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// <summary>
         /// Creates an OAuth2 client request for fetching the managed identity credential.
         /// </summary>
+        /// <param name="keyMaterial"></param>
         /// <param name="httpManager"></param>
         /// <param name="credentialResponse"></param>
         /// <returns></returns>
-        private OAuth2Client CreateClientRequest(IHttpManager httpManager, CredentialResponse credentialResponse)
+        private OAuth2Client CreateClientRequest(
+            IKeyMaterialManager keyMaterial,
+            IHttpManager httpManager, 
+            CredentialResponse credentialResponse)
         {
             var client = new OAuth2Client(
                 AuthenticationRequestParameters.RequestContext.Logger,
                 httpManager,
-                AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.ManagedIdentityBindingCertificate);
+                keyMaterial.BindingCertificate);
 
             string scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope).AsSingleString();
 
-            client.AddQueryParameter("dc", "ESTS-PUB-WUS2-AZ1-FD000-TEST1");
+            client.AddQueryParameter("dc", "ESTS-PUB-WUS2-AZ1-FD000-TEST1"); //feature in test slice
             client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials);
             client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
             client.AddBodyParameter(OAuth2Parameter.ClientId, credentialResponse.ClientId);
@@ -287,7 +307,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             credentialEndpointUri = null;
 
-            if (!requestContext.ServiceBundle.Config.IsManagedIdentityTokenRequestInfoAvailable)
+            IKeyMaterialManager keyMaterial = 
+                requestContext.ServiceBundle.PlatformProxy.GetKeyMaterialManager();
+
+            if (keyMaterial.CryptoKeyType != CryptoKeyType.None)
             {
                 requestContext.Logger.Verbose(() => "[Managed Identity] Credential based managed identity is unavailable.");
                 return false;

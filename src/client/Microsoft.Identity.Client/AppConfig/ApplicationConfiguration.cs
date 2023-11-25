@@ -120,9 +120,6 @@ namespace Microsoft.Identity.Client
         #region ManagedIdentity
         public ManagedIdentityId ManagedIdentityId { get; internal set; }
         public bool IsManagedIdentity { get; }
-        public bool IsManagedIdentityTokenRequestInfoAvailable { get; internal set; }
-
-        public X509Certificate2 ManagedIdentityBindingCertificate { get; internal set;  }
 
         #endregion
 
