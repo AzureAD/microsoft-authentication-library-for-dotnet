@@ -12,7 +12,6 @@ using Microsoft.Identity.Client.Platforms.Features.OpenTelemetry;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.IdentityModel.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
@@ -95,15 +94,6 @@ namespace Microsoft.Identity.Test.Unit
 
             Assert.IsNotNull(ex);
             Assert.IsNotNull(ex.ErrorCode);
-
-            //Test for MsalClientException
-            MsalClientException exClient = await AssertException.TaskThrowsAsync<MsalClientException>(
-                () => _cca.AcquireTokenForClient(null) // null scope -> client exception
-                .WithTenantId(TestConstants.Utid)
-                .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
-
-            Assert.IsNotNull(exClient);
-            Assert.IsNotNull(exClient.ErrorCode);
         }
 
         private async Task AcquireTokenMsalClientExceptionAsync()
