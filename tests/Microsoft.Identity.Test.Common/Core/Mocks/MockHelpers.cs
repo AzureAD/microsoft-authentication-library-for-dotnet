@@ -69,12 +69,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static string GetDefaultTokenResponse(string accessToken = TestConstants.ATSecret, string refreshToken = TestConstants.RTSecret)
         {
-              return
-            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
-            "\"r1/scope1 r1/scope2\",\"access_token\":\"" + accessToken + "\"" +
-            ",\"refresh_token\":\"" + refreshToken + "\",\"client_info\"" +
-            ":\"" + CreateClientInfo() + "\",\"id_token\"" +
-            ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) + "\"}";
+            return
+          "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
+          "\"r1/scope1 r1/scope2\",\"access_token\":\"" + accessToken + "\"" +
+          ",\"refresh_token\":\"" + refreshToken + "\",\"client_info\"" +
+          ":\"" + CreateClientInfo() + "\",\"id_token\"" +
+          ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) + "\"}";
         }
 
         public static string GetPopTokenResponse()
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static string GetSuccessfulCredentialResponse()
         {
-            return "{\"client_id\":\"2d0d13ad-3a4d-4cfd-98f8-f20621d55ded\",\"credential\":\"access_token\",\"expires_on\":1700087787,\"identity_type\":\"SystemAssigned\",\"refresh_in\":1700085987,\"regional_token_url\":\"https://mtlsauth.microsoft.com\",\"tenant_id\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"}";
+            return "{\"client_id\":\"2d0d13ad-3a4d-4cfd-98f8-f20621d55ded\",\"credential\":\"access_token\",\"expires_on\":1700087787,\"identity_type\":\"SystemAssigned\",\"refresh_in\":1700085987,\"regional_token_url\":\"https://centraluseuap.mtlsauth.microsoft.com\",\"tenant_id\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"}";
         }
 
         public static string GetSuccessfulMtlsResponse()
@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return "{\"token_type\":\"Bearer\",\"expires_in\":86399,\"ext_expires_in\":86399,\"access_token\":\"some-token\"}";
         }
 
-        
+
 
         public static string GetMsiImdsErrorResponse()
         {
@@ -370,7 +370,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                                   idToken +
                                   (foci ? "\",\"foci\":\"1" : "") +
                                   "\",\"id_token_expires_in\":\"3600\",\"client_info\":\"" + CreateClientInfo(uniqueId, utid) + "\"}";
-            
+
             return stringContent;
         }
 

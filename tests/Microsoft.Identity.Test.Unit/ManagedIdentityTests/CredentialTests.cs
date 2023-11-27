@@ -20,9 +20,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class CredentialTests : TestBase
     {
-        private const string AppService = "App Service";
         internal const string CredentialEndpoint = "http://169.254.169.254/metadata/identity/credential";
-        internal const string MtlsEndpoint = "https://mtlsauth.microsoft.com/" +
+        internal const string MtlsEndpoint = "https://centraluseuap.mtlsauth.microsoft.com/" +
             "72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/v2.0/token";
 
         /// <summary>
@@ -236,7 +235,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                //Assert.AreEqual(ApiEvent.ApiIds, builder.CommonParameters.ApiId);
             }
         }
 

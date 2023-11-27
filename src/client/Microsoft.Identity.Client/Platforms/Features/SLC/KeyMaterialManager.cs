@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         private const string IsKeyGuardEnabledProperty = "Virtual Iso";
 
         // Field to store the current crypto key type
-        private CryptoKeyType _cryptoKeyType = CryptoKeyType.None;
+        private CryptoKeyType _cryptoKeyType;
 
         // Constants specifying the names for the key storage provider and key names
         private const string KeyProviderName = "Microsoft Software Key Storage Provider";
@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         private const string SoftwareKeyName = "ResourceBindingKey";
 
         // Static field to cache the binding certificate across instances
-        private static X509Certificate2 s_bindingCertificate = null;
+        private static X509Certificate2 s_bindingCertificate;
 
         // Lock object for ensuring thread safety when accessing key information
         private readonly object _keyInfoLock = new();
@@ -122,16 +122,18 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             // Try to get the key material from machine key
             if (TryGetKeyMaterial(KeyProviderName, MachineKeyName, CngKeyOpenOptions.MachineKey, out ECDsaCng eCDsaCng))
             {
-                _logger.Verbose(() => "[Managed Identity] A machine key was found.");
+                _logger.Verbose(() => $"[Managed Identity] A machine key was found. Key Name : {MachineKeyName}. ");
                 return eCDsaCng;
             }
 
             // If machine key is not available, fall back to software key
             if (TryGetKeyMaterial(KeyProviderName, SoftwareKeyName, CngKeyOpenOptions.None, out eCDsaCng))
             {
-                _logger.Verbose(() => "[Managed Identity] A non-machine key was found.");
+                _logger.Verbose(() => $"[Managed Identity] A non-machine key was found. Key Name : {SoftwareKeyName}. ");
                 return eCDsaCng;
             }
+
+            _cryptoKeyType = CryptoKeyType.None;
 
             // Both attempts failed, return null and do not alter the crypto key so it remains as none
             // Now we should follow the legacy managed identity flow
@@ -174,8 +176,17 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             }
             catch (CryptographicException ex)
             {
-                _logger.Verbose(() => $"[Managed Identity] Exception caught during key operations. " +
-                $"Error Mesage : {ex.Message}.");
+                // Check if the error message contains "Keyset does not exist"
+                if (ex.Message.IndexOf("Keyset does not exist", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    _logger.Info($"[Managed Identity] Key with name : {keyName} does not exist.");
+                }
+                else
+                {
+                    // Handle other cryptographic errors
+                    _logger.Verbose(() => $"[Managed Identity] Exception caught during key operations. " +
+                    $"Error Mesage : {ex.Message}.");
+                }
             }
 
             eCDsaCng = null;

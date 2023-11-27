@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -68,7 +69,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (_managedIdentityParameters.ForceRefresh || !string.IsNullOrEmpty(_managedIdentityParameters.Claims))
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
-                
+
                 logger.Info("[CredentialBasedMsiAuthRequest] Skipped looking for an Access Token in the cache because " +
                     "ForceRefresh was set.");
 
@@ -187,19 +188,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Getting token from the managed identity endpoint.");
 
-            CredentialResponse credentialResponse = 
+            CredentialResponse credentialResponse =
                 await GetCredentialAssertionAsync(keyMaterial, logger, cancellationToken).ConfigureAwait(false);
 
-            //To-Do : Remove this, bug in Credential endpoint where regional token URL is not returned at times
-
-            var credTokenURL = "https://mtlsauth.microsoft.com"; //credentialResponse.RegionalTokenUrl
-
-            var tenantAuthority = AuthorityInfo.FromAadAuthority(
-                credTokenURL,
-                tenant: credentialResponse.TenantId,
-                validateAuthority: false);
-
-            var mtlsAuthuri = new Uri(tenantAuthority.CanonicalAuthority.ToString() + "oauth2/v2.0/token");
+            var baseUri = new Uri(credentialResponse.RegionalTokenUrl);
+            var tokenUrl = new Uri(baseUri, $"{credentialResponse.TenantId}/oauth2/v2.0/token");
 
             OAuth2Client client = CreateClientRequest(
                 keyMaterial,
@@ -207,7 +200,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 credentialResponse);
 
             MsalTokenResponse msalTokenResponse = await client
-                    .GetTokenAsync(mtlsAuthuri,
+                    .GetTokenAsync(tokenUrl,
                     AuthenticationRequestParameters.RequestContext,
                     true,
                     AuthenticationRequestParameters.OnBeforeTokenRequestHandler).ConfigureAwait(false);
@@ -282,7 +275,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         /// <returns></returns>
         private OAuth2Client CreateClientRequest(
             IKeyMaterialManager keyMaterial,
-            IHttpManager httpManager, 
+            IHttpManager httpManager,
             CredentialResponse credentialResponse)
         {
             var client = new OAuth2Client(

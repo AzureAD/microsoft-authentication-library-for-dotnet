@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Credential
         /// </summary>
         /// <returns></returns>
         /// <exception cref="MsalManagedIdentityException"></exception>
-        public async Task<CredentialResponse> GetOrFetchCredentialAsync() 
+        public async Task<CredentialResponse> GetOrFetchCredentialAsync()
         {
             string cacheKey = _clientId;
 
@@ -69,9 +69,9 @@ namespace Microsoft.Identity.Client.Credential
                 DateTimeOffset expiresOnDateTime = DateTimeOffset.FromUnixTimeSeconds(expiresOnSeconds);
 #endif
                 //Credential expires in 15 minutes, having a 60 second buffer before we request a new credential
-                const int expirationBufferSeconds = 60; 
+                const int expirationBufferSeconds = 60;
 
-                if (expiresOnDateTime > DateTimeOffset.UtcNow.AddSeconds(-expirationBufferSeconds) || 
+                if (expiresOnDateTime > DateTimeOffset.UtcNow.AddSeconds(-expirationBufferSeconds) ||
                     !_managedIdentityParameters.ForceRefresh ||
                     !string.IsNullOrEmpty(_managedIdentityParameters.Claims)
                     )
@@ -90,15 +90,18 @@ namespace Microsoft.Identity.Client.Credential
             }
 
             CredentialResponse credentialResponse = await FetchFromServiceAsync(
-                _requestContext.ServiceBundle.HttpManager, 
+                _requestContext.ServiceBundle.HttpManager,
                 _cancellationToken
                 ).ConfigureAwait(false);
 
-            if (credentialResponse == null || credentialResponse.Credential.IsNullOrEmpty())
+            if (credentialResponse == null ||
+                credentialResponse.Credential.IsNullOrEmpty() ||
+                credentialResponse.RegionalTokenUrl.IsNullOrEmpty() ||
+                credentialResponse.ClientId.IsNullOrEmpty())
             {
-                _requestContext.Logger.Error("[Managed Identity] Credential Response is null " +
-                    "or insufficient for authentication.");
-                
+                _requestContext.Logger.Error("[Managed Identity] Required Response fields are missing from the credential response " +
+                    "and/or insufficient for authentication.");
+
                 throw new MsalManagedIdentityException(
                     MsalError.ManagedIdentityRequestFailed,
                     MsalErrorMessage.ManagedIdentityInvalidResponse,
@@ -158,10 +161,10 @@ namespace Microsoft.Identity.Client.Credential
                 _requestContext.Logger.Error("[Managed Identity] Error fetching credential from IMDS endpoint: " + ex.Message);
 
                 throw new MsalManagedIdentityException(
-                    MsalError.CredentialRequestFailed, 
-                    MsalErrorMessage.CredentialEndpointNoResponseReceived, 
+                    MsalError.CredentialRequestFailed,
+                    MsalErrorMessage.CredentialEndpointNoResponseReceived,
                     ManagedIdentitySource.Credential);
-                ; 
+                ;
             }
         }
 
