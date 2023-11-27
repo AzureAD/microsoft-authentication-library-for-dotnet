@@ -25,10 +25,12 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string TokenType = "TokenType";
         public const string TokenSource = "TokenSource";
         public const string CacheInfoTelemetry = "CacheInfoTelemetry";
+        public const string CacheRefreshReason = "CacheRefreshReason";
         public const string ErrorCode = "ErrorCode";
         public const string StsErrorCode = "StsErrorCode";
         public const string ErrorMessage = "ErrorMessage";
         public const string Duration = "Duration";
+        public const string DurationInUs = "DurationInUs";
         public const string Succeeded = "Succeeded";
         public const string DurationInCache = "DurationInCache";
         public const string DurationInHttp = "DurationInHttp";
@@ -39,7 +41,10 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string AssertionType = "AssertionType";
         public const string Endpoint = "Endpoint";
         public const string Scopes = "Scopes";
+        public const string ClientId = "ClientId";
+        public const string Platform = "Platform";
+        public const string ApiId = "ApiId";
 
-        #endregion
+#endregion
     }
 }

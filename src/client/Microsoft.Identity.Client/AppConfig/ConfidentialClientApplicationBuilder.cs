@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client
         internal ConfidentialClientApplicationBuilder(ApplicationConfiguration configuration)
             : base(configuration)
         {
-            ClientApplicationBase.GuardMobileFrameworks();
+            ApplicationBase.GuardMobileFrameworks();
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client
         public static ConfidentialClientApplicationBuilder CreateWithApplicationOptions(
             ConfidentialClientApplicationOptions options)
         {
-            ClientApplicationBase.GuardMobileFrameworks();
+            ApplicationBase.GuardMobileFrameworks();
 
             var config = new ApplicationConfiguration(MsalClientType.ConfidentialClient);
             var builder = new ConfidentialClientApplicationBuilder(config).WithOptions(options);
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client
 #endif
         public static ConfidentialClientApplicationBuilder Create(string clientId)
         {
-            ClientApplicationBase.GuardMobileFrameworks();
+            ApplicationBase.GuardMobileFrameworks();
 
             var config = new ApplicationConfiguration(MsalClientType.ConfidentialClient);
             return new ConfidentialClientApplicationBuilder(config)
