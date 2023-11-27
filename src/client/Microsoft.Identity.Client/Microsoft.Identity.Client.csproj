@@ -125,6 +125,9 @@
     <Compile Include="$(PathToMsalSources)\Platforms\netstandard\**\*.cs" LinkBase="Platforms\netstandard" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
+
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)'">
@@ -133,9 +136,12 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\SLC\**\*.cs" />
-    
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
+
     <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
+
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
   
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
@@ -153,9 +159,12 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\SLC\**\*.cs" />
-    
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
+
     <PackageReference Include="Microsoft.Web.WebView2" />
     <PackageReference Include="Microsoft.Identity.Client.NativeInterop" IncludeAssets="all" />
+
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
 
     <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
@@ -172,6 +181,9 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' ">
+    <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
+    
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop45)' ">
