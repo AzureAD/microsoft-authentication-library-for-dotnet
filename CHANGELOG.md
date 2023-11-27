@@ -6,7 +6,7 @@
 - 
 
 ### Bug Fixes
-- Resolved the issue with dual-headed accounts that share the same UPN for both Microsoft (MSA) and Azure Active Directory (AAD) accounts. See [4425](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4425).
+- Resolved the issue with dual-headed accounts that share the same UPN for both, Microsoft (MSA) and Microsoft Entra ID (Azure AD) accounts. See [4425](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4425).
 - MSAL now correctly falls back to use local cache if broker fails to return a result for `AcquireTokenSilent` calls. See [4395](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/4395).
 - Fixed a bug when the cache level in the telemetry was not correctly set to L1 Cache when in-memory cache was used. See [4414](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/4414).
 - Deprecated `WithAuthority` on the request builders. Set the authority on the application builders. Use `WithTenantId` or `WithTenantIdFromAuthority` on the request builder to update the tenant ID. See [4406](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/4406).
