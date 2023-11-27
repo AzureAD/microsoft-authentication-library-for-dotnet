@@ -9,10 +9,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 {
     internal interface IOtelInstrumentation
     {
-        internal void LogActivity(Dictionary<string, object> tags);
-        internal void LogActivityStatus(bool IsSuccessful);
-        internal void StartActivity();
-        internal void StopActivity();
         internal void LogSuccessMetrics(
             string platform,
             string apiId,
@@ -21,6 +17,5 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger);
         internal void LogFailedMetrics(string platform, string errorCode);
-        internal bool IsTracingEnabled { get; }
     }
 }

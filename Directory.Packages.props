@@ -61,6 +61,7 @@
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.15" />
     <PackageVersion Include="NUnit" Version="3.13.3" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.6.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.InMemory" Version="1.6.0" />
     <PackageVersion Include="Polly" Version="7.2.3" />
     <PackageVersion Include="Selenium.Support" Version="4.4.0" />

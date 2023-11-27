@@ -5,7 +5,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
-using OpenTelemetry.Trace;
 
 internal class Program
 {
@@ -13,15 +12,9 @@ internal class Program
     {
         Console.WriteLine("Hello World!");
 
-        // Add a console exporter for metrics to display on the console.
+        //// Add a console exporter for metrics to display on the console.
         using var meterProvider = Sdk.CreateMeterProviderBuilder()
             .AddMeter("MicrosoftIdentityClient_Common_Meter")
-            .AddConsoleExporter()
-            .Build();
-
-        // Add a console exporter for activity to display on the console.
-        using var traceProvider = Sdk.CreateTracerProviderBuilder()
-            .AddSource("MicrosoftIdentityClient_Activity")
             .AddConsoleExporter()
             .Build();
 

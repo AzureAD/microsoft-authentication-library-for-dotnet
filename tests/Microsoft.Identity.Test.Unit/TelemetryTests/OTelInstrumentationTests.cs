@@ -26,18 +26,14 @@ namespace Microsoft.Identity.Test.Unit
         private MockHttpAndServiceBundle _harness;
         private ConfidentialClientApplication _cca;
         private static MeterProvider s_meterProvider;
-        private static TracerProvider s_activityProvider;
         private readonly List<Metric> _exportedMetrics = new();
-        private readonly List<Activity> _exportedActivities = new();
 
         [TestCleanup]
         public override void TestCleanup()
         {
             s_meterProvider?.Dispose();
-            s_activityProvider?.Dispose();
 
             _exportedMetrics.Clear();
-            _exportedActivities.Clear();
 
             base.TestCleanup();
         }
@@ -52,11 +48,6 @@ namespace Microsoft.Identity.Test.Unit
                 .AddMeter(OtelInstrumentation.MeterName)
                 .AddInMemoryExporter(_exportedMetrics)
                 .Build();
-
-            s_activityProvider = Sdk.CreateTracerProviderBuilder()
-                .AddSource(OtelInstrumentation.ActivitySourceName)
-                .AddInMemoryExporter(_exportedActivities)
-                .Build();
         }
 
         [TestMethod]
@@ -70,9 +61,7 @@ namespace Microsoft.Identity.Test.Unit
                 await AcquireTokenMsalClientExceptionAsync().ConfigureAwait(false);
 
                 s_meterProvider.ForceFlush();
-                s_activityProvider.ForceFlush();
-                OTelInstrumentationUtil.VerifyMetrics(5, _exportedMetrics);
-                OTelInstrumentationUtil.VerifyActivity(5, _exportedActivities);
+                VerifyMetrics(5, _exportedMetrics);
             }
         }
 
@@ -138,6 +127,113 @@ namespace Microsoft.Identity.Test.Unit
                         .WithHttpManager(_harness.HttpManager)
                         .BuildConcrete();
             TokenCacheHelper.PopulateCache(_cca.UserTokenCacheInternal.Accessor);
+        }
+
+        private void VerifyMetrics(int expectedMetricCount, List<Metric> exportedMetrics)
+        {
+            Assert.AreEqual(expectedMetricCount, exportedMetrics.Count);
+
+            foreach (Metric exportedItem in exportedMetrics)
+            {
+                int expectedTagCount = 0;
+                List<string> expectedTags = new List<string>();
+
+                Assert.AreEqual(OtelInstrumentation.MeterName, exportedItem.MeterName);
+
+                switch (exportedItem.Name)
+                {
+                    case "MsalSuccess":
+                        Assert.AreEqual(MetricType.LongSum, exportedItem.MetricType);
+
+                        expectedTagCount = 6;
+                        expectedTags.Add(TelemetryConstants.MsalVersion);
+                        expectedTags.Add(TelemetryConstants.Platform);
+                        expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.TokenSource);
+                        expectedTags.Add(TelemetryConstants.CacheRefreshReason);
+                        expectedTags.Add(TelemetryConstants.CacheLevel);
+
+                        break;
+                    case "MsalFailure":
+                        Assert.AreEqual(MetricType.LongSum, exportedItem.MetricType);
+
+                        expectedTagCount = 3;
+                        expectedTags.Add(TelemetryConstants.MsalVersion);
+                        expectedTags.Add(TelemetryConstants.Platform);
+                        expectedTags.Add(TelemetryConstants.ErrorCode);
+
+                        break;
+
+                    case "MsalTotalDuration.1A":
+                        Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
+
+                        expectedTagCount = 5;
+                        expectedTags.Add(TelemetryConstants.MsalVersion);
+                        expectedTags.Add(TelemetryConstants.Platform);
+                        expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.TokenSource);
+                        expectedTags.Add(TelemetryConstants.CacheLevel);
+
+                        break;
+
+                    case "MsalDurationInL1CacheInUs.1B":
+                        Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
+
+                        expectedTagCount = 5;
+                        expectedTags.Add(TelemetryConstants.MsalVersion);
+                        expectedTags.Add(TelemetryConstants.Platform);
+                        expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.TokenSource);
+                        expectedTags.Add(TelemetryConstants.CacheLevel);
+
+                        break;
+
+                    case "MsalDurationInL2Cache.1A":
+                        Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
+
+                        expectedTagCount = 3;
+                        expectedTags.Add(TelemetryConstants.MsalVersion);
+                        expectedTags.Add(TelemetryConstants.Platform);
+                        expectedTags.Add(TelemetryConstants.ApiId);
+
+                        break;
+
+                    case "MsalDurationInHttp.1A":
+                        Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
+
+                        expectedTagCount = 3;
+                        expectedTags.Add(TelemetryConstants.MsalVersion);
+                        expectedTags.Add(TelemetryConstants.Platform);
+                        expectedTags.Add(TelemetryConstants.ApiId);
+
+                        break;
+
+                    default:
+                        Assert.Fail("Unexpected metrics logged.");
+                        break;
+                }
+
+                foreach (var metricPoint in exportedItem.GetMetricPoints())
+                {
+                    AssertTags(metricPoint.Tags, expectedTagCount, expectedTags);
+                }
+            }
+        }
+
+        private void AssertTags(ReadOnlyTagCollection tags, int expectedTagCount, List<string> expectedTags)
+        {
+            Assert.AreEqual(expectedTagCount, tags.Count);
+            IDictionary<string, object> tagDictionary = new Dictionary<string, object>();
+
+            foreach (var tag in tags)
+            {
+                tagDictionary[tag.Key] = tag.Value;
+            }
+
+            foreach (var expectedTag in expectedTags)
+            {
+                Assert.IsNotNull(tagDictionary[expectedTag], $"Tag {expectedTag} is missing.");
+            }
         }
     }
 }

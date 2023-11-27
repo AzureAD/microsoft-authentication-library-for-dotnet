@@ -78,17 +78,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken = default)
         {
             Stopwatch sw = Stopwatch.StartNew();
-            ServiceBundle.PlatformProxy.OtelInstrumentation.StartActivity();
-
-            if (ServiceBundle.PlatformProxy.OtelInstrumentation.IsTracingEnabled)
-            {
-                ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivity(new Dictionary<string, object> {
-                    { TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion() },
-                    { TelemetryConstants.Platform, ServiceBundle.PlatformProxy.GetProductName() },
-                    { TelemetryConstants.ClientId, AuthenticationRequestParameters.AppConfig.ClientId },
-                    { TelemetryConstants.ActivityId, AuthenticationRequestParameters.RequestContext.CorrelationId.ToString() }
-                }); 
-            }
 
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
             AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
@@ -131,7 +120,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 finally
                 {
-                    ServiceBundle.PlatformProxy.OtelInstrumentation.StopActivity();
                     telemetryClients.TrackEvent(telemetryEventDetails);
                 }
             }
@@ -147,43 +135,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         durationInUs,
                         authenticationResult.AuthenticationResultMetadata,
                         AuthenticationRequestParameters.RequestContext.Logger);
-
-            // Log tracing
-            if (ServiceBundle.PlatformProxy.OtelInstrumentation.IsTracingEnabled)
-            {
-                ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivityStatus(true);
-
-                Dictionary<string, object> tags = new Dictionary<string, object> {
-                    { TelemetryConstants.CacheRefreshReason, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.CacheRefreshReason) },
-                    { TelemetryConstants.TokenSource, Convert.ToInt64(authenticationResult.AuthenticationResultMetadata.TokenSource) },
-                    { TelemetryConstants.Duration, authenticationResult.AuthenticationResultMetadata.DurationTotalInMs },
-                    { TelemetryConstants.DurationInCache, authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs },
-                    { TelemetryConstants.DurationInHttp, authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs },
-                    { TelemetryConstants.TokenType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.TokenType },
-                    { TelemetryConstants.RemainingLifetime, (authenticationResult.ExpiresOn - DateTime.Now).TotalMilliseconds }
-                };
-
-                if (authenticationResult.AuthenticationResultMetadata.RefreshOn.HasValue)
-                {
-                    tags.Add(TelemetryConstants.RefreshOn, DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value));
-                }
-                tags.Add(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
-                tags.Add(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
-                tags.Add(TelemetryConstants.CacheLevel, (int)authenticationResult.AuthenticationResultMetadata.CacheLevel);
-
-                Tuple<string, string> resourceAndScopes = ParseScopesForTelemetry();
-
-                if (resourceAndScopes.Item1 != null)
-                {
-                    tags.Add(TelemetryConstants.Resource, resourceAndScopes.Item1);
-                }
-                if (resourceAndScopes.Item2 != null)
-                {
-                    tags.Add(TelemetryConstants.Scopes, resourceAndScopes.Item2);
-                }
-
-                ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivity(tags); 
-            }
         }
 
         private void LogMsalFailedTelemetryToOtel(Exception exception, string errorCodeToLog)
@@ -192,28 +143,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailedMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
                         errorCodeToLog);
-
-            // Log tracing
-            if (ServiceBundle.PlatformProxy.OtelInstrumentation.IsTracingEnabled)
-            {
-                ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivityStatus(false);
-
-                Dictionary<string, object> tags = new Dictionary<string, object>
-                {
-                    { TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType },
-                    { TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString() },
-                    { TelemetryConstants.ErrorMessage, exception.Message }
-                };
-
-                if (exception is MsalServiceException serviceException)
-                {
-                    tags.Add(TelemetryConstants.StsErrorCode, serviceException.ErrorCodes?.FirstOrDefault());
-                }
-
-                tags.Add(TelemetryConstants.ErrorCode, errorCodeToLog);
-
-                ServiceBundle.PlatformProxy.OtelInstrumentation.LogActivity(tags); 
-            }
         }
 
         private void LogMsalErrorTelemetryToClient(Exception ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
@@ -273,8 +202,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, resourceAndScopes.Item2);
                 }
-
-                
             }
         }
 
