@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         /// Tests the Claims on MI.
         /// </summary>
         [TestMethod]
-        public async Task CredentialWithWrongHttpClientCutomizationAsync()
+        public async Task CredentialWithWrongHttpClientCustomizationAsync()
         {
             // Arrange
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
