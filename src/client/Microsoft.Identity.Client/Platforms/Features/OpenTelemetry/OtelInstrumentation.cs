@@ -22,6 +22,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// </summary>
         public const string MeterName = "MicrosoftIdentityClient_Common_Meter";
 
+        /// <summary>
+        /// Constant to hold the name of the ActivitySource.
+        /// </summary>
+        public const string ActivitySourceName = "MicrosoftIdentityClient_Activity";
+
         private const string SuccessCounterName = "MsalSuccess";
         private const string FailedCounterName = "MsalFailure";
         private const string TotalDurationHistogramName = "MsalTotalDuration.1A";
@@ -33,6 +38,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         /// Meter to hold the MSAL metrics.
         /// </summary>
         internal static readonly Meter Meter = new Meter(MeterName, "1.0.0");
+
+        /// <summary>
+        /// ActivitySource to hold the MSAL activities.
+        /// </summary>
+        internal static readonly ActivitySource s_acquireTokenActivity = new ActivitySource(ActivitySourceName, "1.0.0");
 
         /// <summary>
         /// Counter to hold the number of successful token acquisition calls.
@@ -151,6 +161,40 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ErrorCode, errorCode)); 
             }
+        }
+
+        internal Activity Activity;
+
+        bool IOtelInstrumentation.IsTracingEnabled => Activity != null;
+
+        void IOtelInstrumentation.LogActivity(Dictionary<string, object> tags)
+        {
+            foreach (KeyValuePair<string, object> tag in tags)
+            {
+                Activity.SetTag(tag.Key, tag.Value);
+            }
+        }
+
+        void IOtelInstrumentation.LogActivityStatus(bool isSuccessful)
+        {
+            if (isSuccessful)
+            {
+                Activity?.SetStatus(ActivityStatusCode.Ok, "Success");
+            }
+            else
+            {
+                Activity?.SetStatus(ActivityStatusCode.Error, "Request failed");
+            }
+        }
+
+        void IOtelInstrumentation.StartActivity()
+        {
+            Activity = s_acquireTokenActivity.StartActivity("Token acquisition", ActivityKind.Internal);
+        }
+
+        void IOtelInstrumentation.StopActivity()
+        {
+            Activity?.Stop();
         }
     }
 }

@@ -17,5 +17,11 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger);
         internal void LogFailedMetrics(string platform, string errorCode);
+
+        internal void LogActivity(Dictionary<string, object> tags);
+        internal void LogActivityStatus(bool IsSuccessful);
+        internal void StartActivity();
+        internal void StopActivity();
+        internal bool IsTracingEnabled { get; }
     }
 }

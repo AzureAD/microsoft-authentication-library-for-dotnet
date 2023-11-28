@@ -25,14 +25,18 @@ namespace Microsoft.Identity.Test.Unit
         private MockHttpAndServiceBundle _harness;
         private ConfidentialClientApplication _cca;
         private static MeterProvider s_meterProvider;
+        private static TracerProvider s_activityProvider;
         private readonly List<Metric> _exportedMetrics = new();
+        private readonly List<Activity> _exportedActivities = new();
 
         [TestCleanup]
         public override void TestCleanup()
         {
             s_meterProvider?.Dispose();
+            s_activityProvider?.Dispose();
 
             _exportedMetrics.Clear();
+            _exportedActivities.Clear();
 
             base.TestCleanup();
         }
@@ -47,6 +51,12 @@ namespace Microsoft.Identity.Test.Unit
                 .AddMeter(OtelInstrumentation.MeterName)
                 .AddInMemoryExporter(_exportedMetrics)
                 .Build();
+
+            s_activityProvider = Sdk.CreateTracerProviderBuilder()
+                .AddSource(OtelInstrumentation.ActivitySourceName)
+                .AddConsoleExporter()
+                .AddInMemoryExporter(_exportedActivities)
+                .Build();
         }
 
         [TestMethod]
@@ -60,7 +70,9 @@ namespace Microsoft.Identity.Test.Unit
                 await AcquireTokenMsalClientExceptionAsync().ConfigureAwait(false);
 
                 s_meterProvider.ForceFlush();
+                s_activityProvider.ForceFlush();
                 VerifyMetrics(5, _exportedMetrics);
+                VerifyActivity(5, _exportedActivities);
             }
         }
 
@@ -223,6 +235,31 @@ namespace Microsoft.Identity.Test.Unit
             foreach (var expectedTag in expectedTags)
             {
                 Assert.IsNotNull(tagDictionary[expectedTag], $"Tag {expectedTag} is missing.");
+            }
+        }
+
+        private void VerifyActivity(int expectedActivityCount, List<Activity> _exportedActivities)
+        {
+            Assert.AreEqual(expectedActivityCount, _exportedActivities.Count);
+            foreach (var activity in _exportedActivities)
+            {
+                Assert.AreEqual(OtelInstrumentation.ActivitySourceName, activity.Source.Name);
+
+                switch (activity.Status)
+                {
+                    case ActivityStatusCode.Ok:
+                        Assert.IsTrue(activity.Tags.Count() > 14, $"Found {activity.Tags.Count()} for a successful request.");
+                        break;
+
+                    case ActivityStatusCode.Error:
+                        Assert.IsTrue(activity.Tags.Count() > 5, $"Found {activity.Tags.Count()} for a failed request.");
+                        break;
+
+                    default:
+                        Assert.Fail("Unexpected activity status");
+                        break;
+
+                }
             }
         }
     }
