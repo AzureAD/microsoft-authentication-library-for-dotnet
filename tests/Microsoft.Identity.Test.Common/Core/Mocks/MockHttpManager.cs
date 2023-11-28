@@ -26,15 +26,28 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         private readonly IHttpManager _httpManager;
 
-        public MockHttpManager(string testName = null, bool isManagedIdentity = false, Func<MockHttpMessageHandler> messageHandlerFunc = null) :
-            this(true, testName, isManagedIdentity, messageHandlerFunc)
+        public MockHttpManager(string testName = null, 
+            bool isManagedIdentity = false, 
+            Func<MockHttpMessageHandler> messageHandlerFunc = null, 
+            bool invokeNonMtlsHttpManagerFactory = false) :
+            this(true, testName, isManagedIdentity, messageHandlerFunc, invokeNonMtlsHttpManagerFactory)
         { }
 
-        public MockHttpManager(bool retryOnce, string testName = null, bool isManagedIdentity = false, Func<MockHttpMessageHandler> messageHandlerFunc = null)
+        public MockHttpManager(
+            bool retryOnce, 
+            string testName = null, 
+            bool isManagedIdentity = false, 
+            Func<MockHttpMessageHandler> messageHandlerFunc = null,
+            bool invokeNonMtlsHttpManagerFactory = false)
         {
-            _httpManager = HttpManagerFactory.GetHttpManager(
-                new MockHttpClientFactory(messageHandlerFunc,_httpMessageHandlerQueue, testName), 
-                    retryOnce, 
+            _httpManager = invokeNonMtlsHttpManagerFactory
+                ? HttpManagerFactory.GetHttpManager(
+                    new MockNonMtlsHttpClientFactory(messageHandlerFunc, _httpMessageHandlerQueue, testName),
+                    retryOnce,
+                    isManagedIdentity)
+                : HttpManagerFactory.GetHttpManager(
+                    new MockHttpClientFactory(messageHandlerFunc, _httpMessageHandlerQueue, testName),
+                    retryOnce,
                     isManagedIdentity);
 
             _testName = testName;
@@ -104,26 +117,23 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
     }
 
-    internal class MockHttpClientFactory : IMsalMtlsHttpClientFactory
+    internal class MockHttpClientFactoryBase
     {
-         private Func<MockHttpMessageHandler> MessageHandlerFunc { get; set; }
-         ConcurrentQueue<HttpClientHandler> HttpMessageHandlerQueue { get; set; }
-         string _testName { get; set; }
+        protected Func<MockHttpMessageHandler> MessageHandlerFunc { get; set; }
+        protected ConcurrentQueue<HttpClientHandler> HttpMessageHandlerQueue { get; set; }
+        protected string _testName { get; set; }
 
-        public MockHttpClientFactory(Func<MockHttpMessageHandler> messageHandlerFunc,
-            ConcurrentQueue<HttpClientHandler> httpMessageHandlerQueue, string testName)
+        protected MockHttpClientFactoryBase(
+            Func<MockHttpMessageHandler> messageHandlerFunc,
+            ConcurrentQueue<HttpClientHandler> httpMessageHandlerQueue,
+            string testName)
         {
             MessageHandlerFunc = messageHandlerFunc;
             HttpMessageHandlerQueue = httpMessageHandlerQueue;
             _testName = testName;
         }
 
-        public HttpClient GetHttpClient()
-        {
-            return GetHttpClient(null);
-        }
-
-        public HttpClient GetHttpClient(X509Certificate2 mtlsBindingCert)
+        protected HttpClient GetHttpClientInternal(X509Certificate2 mtlsBindingCert)
         {
             HttpClientHandler messageHandler;
 
@@ -140,11 +150,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             }
 
             Trace.WriteLine($"Test {_testName} dequeued a mock handler for {GetExpectedUrlFromHandler(messageHandler)}");
-            
-            if (mtlsBindingCert!=null)
+
+            if (mtlsBindingCert != null)
             {
                 messageHandler.ClientCertificates.Add(mtlsBindingCert);
             }
+
             var httpClient = new HttpClient(messageHandler)
             {
                 MaxResponseContentBufferSize = HttpClientConfig.MaxResponseContentBufferSizeInBytes
@@ -161,4 +172,42 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return (handler as MockHttpMessageHandler)?.ExpectedUrl ?? "";
         }
     }
+
+    internal class MockHttpClientFactory : MockHttpClientFactoryBase, IMsalMtlsHttpClientFactory
+    {
+        public MockHttpClientFactory(
+            Func<MockHttpMessageHandler> messageHandlerFunc,
+            ConcurrentQueue<HttpClientHandler> httpMessageHandlerQueue,
+            string testName)
+            : base(messageHandlerFunc, httpMessageHandlerQueue, testName)
+        {
+        }
+
+        public HttpClient GetHttpClient()
+        {
+            return GetHttpClientInternal(null);
+        }
+
+        public HttpClient GetHttpClient(X509Certificate2 mtlsBindingCert)
+        {
+            return GetHttpClientInternal(mtlsBindingCert);
+        }
+    }
+
+    internal class MockNonMtlsHttpClientFactory : MockHttpClientFactoryBase, IMsalHttpClientFactory
+    {
+        public MockNonMtlsHttpClientFactory(
+            Func<MockHttpMessageHandler> messageHandlerFunc,
+            ConcurrentQueue<HttpClientHandler> httpMessageHandlerQueue,
+            string testName)
+            : base(messageHandlerFunc, httpMessageHandlerQueue, testName)
+        {
+        }
+
+        public HttpClient GetHttpClient()
+        {
+            return GetHttpClientInternal(null);
+        }
+    }
+
 }

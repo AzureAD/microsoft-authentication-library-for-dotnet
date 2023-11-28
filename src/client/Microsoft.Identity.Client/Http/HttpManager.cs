@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Client.Http
 
             throw new MsalClientException(
                 "http_client_factory",
-                "You customized HttpClient factory but you are using APIs which require provisioning of a client certificate in HttpClient. Implement IMsalMtlsHttpClientFactory. For details see https://aka.ms/msal-net-msi-claims");
+                MsalErrorMessage.CredentialHttpCustomizationError);
         }
 
         private HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)

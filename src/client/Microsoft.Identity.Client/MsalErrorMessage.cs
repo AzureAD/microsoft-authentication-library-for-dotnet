@@ -349,6 +349,8 @@ namespace Microsoft.Identity.Client
             "or use a different certificate type (non-CNG) or sign your own assertion " +
             "as described at https://aka.ms/msal-net-signed-assertion. ";
 
+        public const string CredentialHttpCustomizationError = "You customized HttpClient factory but you are using APIs which require provisioning of a client certificate in HttpClient. Implement IMsalMtlsHttpClientFactory. For details see https://aka.ms/msal-net-msi-claims";
+
         public static string ExperimentalFeature(string methodName)
         {
             return string.Format(
