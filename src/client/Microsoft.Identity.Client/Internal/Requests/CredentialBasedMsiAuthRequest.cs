@@ -290,8 +290,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
             client.AddBodyParameter(OAuth2Parameter.ClientId, credentialResponse.ClientId);
             client.AddBodyParameter(OAuth2Parameter.ClientAssertion, credentialResponse.Credential);
-            client.AddBodyParameter(OAuth2Parameter.Claims, AuthenticationRequestParameters.Claims);
             client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
+
+            if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.ClaimsAndClientCapabilities))
+            {
+                client.AddBodyParameter(OAuth2Parameter.Claims, AuthenticationRequestParameters.ClaimsAndClientCapabilities);
+            }
 
             return client;
         }

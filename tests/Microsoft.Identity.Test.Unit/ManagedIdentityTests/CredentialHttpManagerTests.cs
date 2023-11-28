@@ -18,7 +18,7 @@ using NSubstitute.Extensions;
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
     /// <summary>
-    /// Unit tests for the Credential component in the Managed Identity scenario specific to Http Client customizations.
+    /// Unit tests for the Credential component in the Managed Identity scenario specific to Http Clients.
     /// </summary>
     [TestClass]
     public class CredentialHttpManagerTests : TestBase
@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             "72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/v2.0/token";
 
         /// <summary>
-        /// Test the Public APIs for Credential endpoint support for Http Client Customizations.
+        /// Test the Public APIs for Credential endpoint support for http client customizations.
         /// </summary>
         [DataTestMethod]
         [DataRow(CryptoKeyType.Machine)]
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         /// <summary>
-        /// Tests the Claims on MI.
+        /// Tests for http client customization.
         /// </summary>
         [TestMethod]
         public async Task CredentialWithWrongHttpClientCustomizationAsync()

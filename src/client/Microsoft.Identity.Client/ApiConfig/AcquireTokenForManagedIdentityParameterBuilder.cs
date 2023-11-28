@@ -77,6 +77,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(claims));
             }
 
+            CommonParameters.Claims = claims;
             Parameters.Claims = claims;
             return this;
         }
