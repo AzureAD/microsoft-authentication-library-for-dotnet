@@ -285,7 +285,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             string scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope).AsSingleString();
 
-            client.AddQueryParameter("dc", "ESTS-PUB-WUS2-AZ1-FD000-TEST1"); //feature in test slice
             client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials);
             client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
             client.AddBodyParameter(OAuth2Parameter.ClientId, credentialResponse.ClientId);
