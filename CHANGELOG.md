@@ -3,7 +3,7 @@
 ### New Features
 - Removed support for deprecated .NET 4.6.1 framework and added .NET 4.6.2 support. MSAL.NET packages will no longer include `net461` binary. Existing .NET 4.6.1 apps will now reference .NET Standard 2.0 MSAL binary. See [4315](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4315).
 - MSAL.NET repository now supports Central Package Management. See [3434](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3434).
-- MSAL.NET now instrument metrics using open telemetry aggregating token acquisition success and failure calls along with histogram to measure latencies in cache, http and altogether for a request in MSAL. See [4229](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4229)
+- Added instrumentation to collect metrics with Open Telemetry. Aggregated metrics consist of successful and failed token acquisition calls, total request duration, duration in cache, and duration in a network call. See [4229](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4229)
 
 ### Bug Fixes
 - Resolved the issue with dual-headed accounts that share the same UPN for both, Microsoft (MSA) and Microsoft Entra ID (Azure AD) accounts. See [4425](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4425).
