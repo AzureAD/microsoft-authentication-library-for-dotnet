@@ -345,9 +345,9 @@ namespace Microsoft.Identity.Client
         public const string CryptoNet45 =
             "Could not use the certificate for signing. See inner exception for details. " +
             "Possible cause: this may be a known issue with apps build against .NET Desktop 4.6 or lower. " +
-            "Either target a higher version of .NET desktop - 4.6.1 and above, " +
+            "Either target a higher version of .NET desktop - 4.6.2 and above, " +
             "or use a different certificate type (non-CNG) or sign your own assertion " +
-            "as described at https://aka.ms/msal-net-signed-assertion. ";
+            "as described at https://aka.ms/msal-net-signed-assertion . ";
 
         public static string ExperimentalFeature(string methodName)
         {
@@ -400,6 +400,8 @@ namespace Microsoft.Identity.Client
                 "The certificate {0} does not have a private key. ",
                 certificateName);
         }
+
+        public const string CertMustBeRsa = "The provided certificate is not of type RSA. Please use a certificate of type RSA.";
 
         public const string LinuxOpenToolFailed = "Unable to open a web page using xdg-open, gnome-open, kfmclient or wslview tools. See inner exception for details. Possible causes for this error are: tools are not installed or they cannot open a URL. Make sure you can open a web page by invoking from a terminal: xdg-open https://www.bing.com ";
         public const string LinuxOpenAsSudoNotSupported = "Unable to open a web page using xdg-open, gnome-open, kfmclient or wslview tools in sudo mode. Please run the process as non-sudo user.";

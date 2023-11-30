@@ -46,6 +46,8 @@ namespace Microsoft.Identity.Client.Internal
         public const string ManagedIdentityDefaultTenant = "managed_identity";
         public const string CiamAuthorityHostSuffix = ".ciamlogin.com";
 
+        public const string RsaFriendlyName = "RSA";
+
         public static string FormatEnterpriseRegistrationOnPremiseUri(string domain)
         {
             return string.Format(
