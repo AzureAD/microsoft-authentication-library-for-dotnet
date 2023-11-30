@@ -10,6 +10,8 @@
   <ItemGroup>
 
     <Compile Include="../Microsoft.Identity.Test.Integration.NetFx/**/*.cs" Exclude="../Microsoft.Identity.Test.Integration.NetFx/obj/**/*" />
+
+    <Compile Remove="..\Microsoft.Identity.Test.Integration.NetFx\HeadlessTests\OtelTests.cs" />
     <None Include="../Microsoft.Identity.Test.Integration.NetFx/federationMetadata.xml" />
 
     <!-- Force pick the netstandard version of our assemblies -->
@@ -24,10 +26,10 @@
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
     <PackageReference Include="Microsoft.IdentityModel.Protocols.SignedHttpRequest" />
-    
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Selenium.Support" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+
     <!-- This reference is a workaround for a bug in .net46
     https://stackoverflow.com/questions/45563560/could-not-load-file-or-assembly-system-net-http-version-4-1-1-1-net-standard-->
     <PackageReference Include="System.Net.Http" />

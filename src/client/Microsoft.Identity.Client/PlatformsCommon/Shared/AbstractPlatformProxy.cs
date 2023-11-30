@@ -9,7 +9,11 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
+#if SUPPORTS_OTEL
+using Microsoft.Identity.Client.Platforms.Features.OpenTelemetry;
+#endif
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
@@ -26,6 +30,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private readonly Lazy<string> _processorArchitecture;
         private readonly Lazy<string> _productName;
         private readonly Lazy<string> _runtimeVersion;
+        private readonly Lazy<IOtelInstrumentation> _otelInstrumentation;
 
         protected AbstractPlatformProxy(ILoggerAdapter logger)
         {
@@ -40,6 +45,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             _cryptographyManager = new Lazy<ICryptographyManager>(InternalGetCryptographyManager);
             _platformLogger = new Lazy<IPlatformLogger>(InternalGetPlatformLogger);
             _runtimeVersion = new Lazy<string>(InternalGetRuntimeVersion);
+            _otelInstrumentation = new Lazy<IOtelInstrumentation>(InternalGetOtelInstrumentation);
+        }
+
+        private IOtelInstrumentation InternalGetOtelInstrumentation()
+        {
+#if SUPPORTS_OTEL
+            return new OtelInstrumentation();
+#else
+            return new NullOtelInstrumentation();
+#endif
         }
 
         protected IFeatureFlags OverloadFeatureFlags { get; set; }
@@ -133,6 +148,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         /// <inheritdoc/>
         public IPlatformLogger PlatformLogger => _platformLogger.Value;
+
+        public IOtelInstrumentation OtelInstrumentation => _otelInstrumentation.Value;
 
         protected abstract IWebUIFactory CreateWebUiFactory();
         protected abstract IFeatureFlags CreateFeatureFlags();
