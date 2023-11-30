@@ -3,8 +3,6 @@ $fileName = "edgedriver_win64.zip"
 $source = "C:\Downloads\$fileName"
 $destination = "C:\Program Files\dotnet\"
 
-#$ErrorActionPreference = "Stop"
-
 if (Test-Path "$PSScriptRoot\win-installer-helper.psm1") 
 {
     Import-Module "$PSScriptRoot\win-installer-helper.psm1" -DisableNameChecking
