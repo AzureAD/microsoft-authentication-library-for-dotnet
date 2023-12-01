@@ -181,24 +181,6 @@ namespace Microsoft.Identity.Client.Credential
             client.AddHeader("x-ms-client-request-id", _requestContext.CorrelationId.ToString("D"));
             // client.AddQueryParameter("cred-api-version", "1.0");
 
-            switch (_requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
-            {
-                case ManagedIdentityIdType.ClientId:
-                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
-                    client.AddQueryParameter(Constants.ManagedIdentityClientId, _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId);
-                    break;
-
-                case ManagedIdentityIdType.ResourceId:
-                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
-                    client.AddQueryParameter(Constants.ManagedIdentityResourceId, _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId);
-                    break;
-
-                case ManagedIdentityIdType.ObjectId:
-                    _requestContext.Logger.Info("[Managed Identity] Adding user assigned object id to the request.");
-                    client.AddQueryParameter(Constants.ManagedIdentityObjectId, _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId);
-                    break;
-            }
-
             string jsonPayload = GetCredentialPayload(_bindingCertificate);
             client.AddBodyContent(new StringContent(jsonPayload, System.Text.Encoding.UTF8, "application/json"));
 
