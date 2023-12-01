@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         }
 
         /// <summary>
-        /// Returns the AAD cloud user idlab2@msidlab4.onmicrosoft.com
+        /// Returns the AAD cloud user idlab@msidlab4.onmicrosoft.com
         /// </summary>
         /// <returns></returns>
         public static Task<LabResponse> GetDefaultUser2Async()
