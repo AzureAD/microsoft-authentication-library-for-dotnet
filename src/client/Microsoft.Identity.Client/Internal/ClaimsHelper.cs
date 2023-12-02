@@ -63,6 +63,12 @@ namespace Microsoft.Identity.Client.Internal
                     capabilitiesJson[claim.Key] = claim.Value != null ? JsonNode.Parse(claim.Value.ToJsonString()) : null;
                 }
 #else
+                if (claimsJson.ContainsKey("access_token"))
+                {
+                    JToken accessTokenClaim = claimsJson["access_token"];
+                    claimsJson = accessTokenClaim as JObject;
+                }
+
                 capabilitiesJson.Merge(claimsJson, new JsonMergeSettings
                 {
                     // union array values together to avoid duplicates
