@@ -52,6 +52,12 @@ namespace Microsoft.Identity.Client.Internal
                         ex);
                 }
 #if SUPPORTS_SYSTEM_TEXT_JSON
+                if (claimsJson is JsonObject jsonObject && jsonObject.ContainsKey("access_token"))
+                {
+                    JsonNode accessTokenClaim = jsonObject["access_token"];
+                    claimsJson = accessTokenClaim as JObject;
+                }
+
                 foreach (var claim in claimsJson)
                 {
                     capabilitiesJson[claim.Key] = claim.Value != null ? JsonNode.Parse(claim.Value.ToJsonString()) : null;

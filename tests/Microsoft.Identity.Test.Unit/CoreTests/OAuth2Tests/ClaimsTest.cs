@@ -252,6 +252,16 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
         }
 
         [TestMethod]
+        public void ClaimsMergeWithAccessTokenKey_Test()
+        {
+            var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
+                TestConstants.ClaimsWithAccessToken,
+                TestConstants.ClientCapabilities);
+
+            Assert.AreEqual(TestConstants.ClientCapabilitiesAndClaimsJsonWithAccessToken, mergedJson);
+        }
+
+        [TestMethod]
         public void ClaimsMerge_NoCapabilities_Test()
         {
             var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
