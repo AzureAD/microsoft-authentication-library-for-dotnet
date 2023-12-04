@@ -262,6 +262,46 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
         }
 
         [TestMethod]
+        public void EmptyClaimsJsonMerge_Test()
+        {
+            var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
+                TestConstants.EmptyClaimsJson,
+                TestConstants.ClientCapabilities);
+
+            Assert.AreEqual(TestConstants.ClientCapabilitiesJson, mergedJson);
+        }
+
+        [TestMethod]
+        public void ClaimsMergeWithAdditionalClaim_Test()
+        {
+            var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
+                TestConstants.ClaimsWithAdditionalClaim,
+                TestConstants.ClientCapabilities);
+
+            Assert.AreEqual(TestConstants.MergedJsonWithAdditionalClaim, mergedJson);
+        }
+
+        [TestMethod]
+        public void ClaimsMergeWithAdditionKey_Test()
+        {
+            var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
+                TestConstants.ClaimWithAdditionalKey,
+                TestConstants.ClientCapabilities);
+
+            Assert.AreEqual(TestConstants.MergedJsonWithAdditionalKey, mergedJson);
+        }
+
+        [TestMethod]
+        public void ClaimsMergeWithAdditionKeyNoCapability_Test()
+        {
+            var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
+                TestConstants.ClaimWithAdditionalKey,
+                new string[0]);
+
+            Assert.AreEqual(TestConstants.ClaimWithAdditionalKey, mergedJson);
+        }
+
+        [TestMethod]
         public void ClaimsMerge_NoCapabilities_Test()
         {
             var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
