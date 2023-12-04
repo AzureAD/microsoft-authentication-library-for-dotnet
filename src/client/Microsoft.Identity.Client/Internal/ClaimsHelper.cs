@@ -4,6 +4,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.Utils;
+using System.Buffers;
+using System.Diagnostics;
+using System.Text;
+
+using System;
+
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -52,10 +58,10 @@ namespace Microsoft.Identity.Client.Internal
                         ex);
                 }
 #if SUPPORTS_SYSTEM_TEXT_JSON
-                foreach (var claim in claimsJson)
-                {
-                    capabilitiesJson[claim.Key] = claim.Value != null ? JsonNode.Parse(claim.Value.ToJsonString()) : null;
-                }
+
+                var mergedJson = Merge(capabilitiesJson.ToJsonString(), claimsJson.ToJsonString());
+
+                capabilitiesJson = JsonNode.Parse(mergedJson) as JObject;
 #else
                 capabilitiesJson.Merge(claimsJson, new JsonMergeSettings
                 {
@@ -90,5 +96,98 @@ namespace Microsoft.Identity.Client.Internal
                 }
             };
         }
+
+#if SUPPORTS_SYSTEM_TEXT_JSON
+        public static string Merge(string originalJson, string newContent)
+        {
+            var outputBuffer = new ArrayBufferWriter<byte>();
+
+            using (JsonDocument jDoc1 = JsonDocument.Parse(originalJson))
+            using (JsonDocument jDoc2 = JsonDocument.Parse(newContent))
+            using (var jsonWriter = new Utf8JsonWriter(outputBuffer, new JsonWriterOptions { Indented = true }))
+            {
+                MergeElements(jsonWriter, jDoc1.RootElement, jDoc2.RootElement);
+            }
+
+            return Encoding.UTF8.GetString(outputBuffer.WrittenSpan);
+        }
+
+        private static void MergeElements(Utf8JsonWriter jsonWriter, JsonElement root1, JsonElement root2)
+        {
+            switch (root1.ValueKind)
+            {
+                case JsonValueKind.Object:
+                    MergeObjects(jsonWriter, root1, root2);
+                    break;
+                case JsonValueKind.Array:
+                    MergeArrays(jsonWriter, root1, root2);
+                    break;
+                default:
+                    root1.WriteTo(jsonWriter);
+                    break;
+            }
+        }
+
+        private static void MergeObjects(Utf8JsonWriter jsonWriter, JsonElement root1, JsonElement root2)
+        {
+            jsonWriter.WriteStartObject();
+
+            foreach (JsonProperty property in root1.EnumerateObject())
+            {
+                string propertyName = property.Name;
+
+                JsonValueKind newValueKind;
+
+                if (root2.TryGetProperty(propertyName, out JsonElement newValue) && (newValueKind = newValue.ValueKind) != JsonValueKind.Null)
+                {
+                    jsonWriter.WritePropertyName(propertyName);
+
+                    JsonElement originalValue = property.Value;
+                    JsonValueKind originalValueKind = originalValue.ValueKind;
+
+                    if ((newValueKind == JsonValueKind.Object && originalValueKind == JsonValueKind.Object) ||
+                        (newValueKind == JsonValueKind.Array && originalValueKind == JsonValueKind.Array))
+                    {
+                        MergeElements(jsonWriter, originalValue, newValue);
+                    }
+                    else
+                    {
+                        newValue.WriteTo(jsonWriter);
+                    }
+                }
+                else
+                {
+                    property.WriteTo(jsonWriter);
+                }
+            }
+
+            foreach (JsonProperty property in root2.EnumerateObject())
+            {
+                if (!root1.TryGetProperty(property.Name, out _))
+                {
+                    property.WriteTo(jsonWriter);
+                }
+            }
+
+            jsonWriter.WriteEndObject();
+        }
+
+        private static void MergeArrays(Utf8JsonWriter jsonWriter, JsonElement root1, JsonElement root2)
+        {
+            jsonWriter.WriteStartArray();
+
+            foreach (JsonElement element in root1.EnumerateArray())
+            {
+                element.WriteTo(jsonWriter);
+            }
+            foreach (JsonElement element in root2.EnumerateArray())
+            {
+                element.WriteTo(jsonWriter);
+            }
+
+            jsonWriter.WriteEndArray();
+        }
+
+#endif
     }
 }
