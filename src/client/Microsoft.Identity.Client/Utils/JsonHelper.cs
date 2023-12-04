@@ -164,6 +164,7 @@ namespace Microsoft.Identity.Client.Utils
         /// <param name="originalJson">The original JSON string to merge.</param>
         /// <param name="newContent">The additional JSON content to merge.</param>
         /// <returns>A UTF-8 encoded string representing the merged JSON.</returns>
+        /// Code reference : https://github.com/dotnet/runtime/issues/31433
         internal static string Merge(string originalJson, string newContent)
         {
             // Output buffer to store the merged JSON
