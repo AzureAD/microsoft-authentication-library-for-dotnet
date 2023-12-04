@@ -75,67 +75,85 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         private Task<string> RunQueryAsync(UserQuery query)
         {
-            IDictionary<string, string> queryDict = new Dictionary<string, string>();
-
-            //Building user query
-            //Required parameters will be set to default if not supplied by the test code
-            queryDict.Add(LabApiConstants.MultiFactorAuthentication, query.MFA != null ? query.MFA.ToString() : MFA.None.ToString());
-            queryDict.Add(LabApiConstants.ProtectionPolicy, query.ProtectionPolicy != null ? query.ProtectionPolicy.ToString() : ProtectionPolicy.None.ToString());
-
-            if (query.UserType != null)
+            Dictionary<string, string> queryDict = new Dictionary<string, string>();
+            if (string.IsNullOrEmpty(query.Upn))
             {
-                queryDict.Add(LabApiConstants.UserType, query.UserType.ToString());
-            }
+                //Building user query
+                //Required parameters will be set to default if not supplied by the test code
 
-            if (query.HomeDomain != null)
-            {
-                queryDict.Add(LabApiConstants.HomeDomain, query.HomeDomain.ToString());
-            }
+                queryDict.Add(
+                    LabApiConstants.MultiFactorAuthentication, 
+                    query.MFA != null ? 
+                        query.MFA.ToString() : 
+                        MFA.None.ToString());
 
-            if (query.HomeUPN != null)
-            {
-                queryDict.Add(LabApiConstants.HomeUPN, query.HomeUPN.ToString());
-            }
+                queryDict.Add(
+                    LabApiConstants.ProtectionPolicy, 
+                    query.ProtectionPolicy != null ? 
+                        query.ProtectionPolicy.ToString() : 
+                        ProtectionPolicy.None.ToString());
 
-            if (query.B2CIdentityProvider != null)
-            {
-                queryDict.Add(LabApiConstants.B2CProvider, query.B2CIdentityProvider.ToString());
-            }
+                if (query.UserType != null)
+                {
+                    queryDict.Add(LabApiConstants.UserType, query.UserType.ToString());
+                }
 
-            if (query.FederationProvider != null)
-            {
-                queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
-            }
+                if (query.HomeDomain != null)
+                {
+                    queryDict.Add(LabApiConstants.HomeDomain, query.HomeDomain.ToString());
+                }
 
-            if (query.AzureEnvironment != null)
-            {
-                queryDict.Add(LabApiConstants.AzureEnvironment, query.AzureEnvironment.ToString());
-            }
+                if (query.HomeUPN != null)
+                {
+                    queryDict.Add(LabApiConstants.HomeUPN, query.HomeUPN.ToString());
+                }
 
-            if (query.SignInAudience != null)
-            {
-                queryDict.Add(LabApiConstants.SignInAudience, query.SignInAudience.ToString());
-            }
+                if (query.B2CIdentityProvider != null)
+                {
+                    queryDict.Add(LabApiConstants.B2CProvider, query.B2CIdentityProvider.ToString());
+                }
 
-            if (query.AppPlatform != null)
-            {
-                queryDict.Add(LabApiConstants.AppPlatform, query.AppPlatform.ToString());
-            }
+                if (query.FederationProvider != null)
+                {
+                    queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
+                }
 
-            if (query.PublicClient != null)
-            {
-                queryDict.Add(LabApiConstants.PublicClient, query.PublicClient.ToString());
+                if (query.AzureEnvironment != null)
+                {
+                    queryDict.Add(LabApiConstants.AzureEnvironment, query.AzureEnvironment.ToString());
+                }
+
+                if (query.SignInAudience != null)
+                {
+                    queryDict.Add(LabApiConstants.SignInAudience, query.SignInAudience.ToString());
+                }
+
+                if (query.AppPlatform != null)
+                {
+                    queryDict.Add(LabApiConstants.AppPlatform, query.AppPlatform.ToString());
+                }
+
+                if (query.PublicClient != null)
+                {
+                    queryDict.Add(LabApiConstants.PublicClient, query.PublicClient.ToString());
+                }
+
+                return SendLabRequestAsync(LabApiConstants.LabEndPoint, queryDict);
             }
-                        
-            return SendLabRequestAsync(LabApiConstants.LabEndPoint, queryDict);
+            else
+            {
+                return SendLabRequestAsync(LabApiConstants.LabEndPoint + "/" + query.Upn, queryDict);
+            }
         }
 
-        private async Task<string> SendLabRequestAsync(string requestUrl, IDictionary<string, string> queryDict)
+        private async Task<string> SendLabRequestAsync(string requestUrl, Dictionary<string, string> queryDict)
         {
-            UriBuilder uriBuilder = new UriBuilder(requestUrl)
+            UriBuilder uriBuilder = new UriBuilder(requestUrl);
+
+            if (queryDict.Count > 0)
             {
 #pragma warning disable CA1305 // Specify IFormatProvider
-                Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()))
+                uriBuilder.Query = string.Join("&", queryDict?.Select(x => x.Key + "=" + x.Value.ToString()));
 #pragma warning restore CA1305 // Specify IFormatProvider
             };
 
@@ -156,7 +174,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public async Task<string> GetUserSecretAsync(string lab)
         {
-            IDictionary<string, string> queryDict = new Dictionary<string, string>
+            Dictionary<string, string> queryDict = new Dictionary<string, string>
             {
                 { "secret", lab }
             };
