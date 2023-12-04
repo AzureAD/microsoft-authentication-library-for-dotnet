@@ -282,7 +282,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
         }
 
         [TestMethod]
-        public void ClaimsMergeWithAdditionKey_Test()
+        public void ClaimsMergeWithAdditionalKey_Test()
         {
             var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
                 TestConstants.ClaimWithAdditionalKey,
@@ -292,7 +292,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
         }
 
         [TestMethod]
-        public void ClaimsMergeWithAdditionKeyNoCapability_Test()
+        public void ClaimsMergeWithAdditionalKeyNoCapability_Test()
         {
             var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
                 TestConstants.ClaimWithAdditionalKey,
