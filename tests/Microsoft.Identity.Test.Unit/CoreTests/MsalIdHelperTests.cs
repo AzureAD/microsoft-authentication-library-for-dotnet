@@ -19,11 +19,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             IDictionary<string, string> parameters = MsalIdHelper.GetMsalIdParameters(null);
 
             // Assert
-            Assert.IsTrue(parameters.ContainsKey("x-client-sku"));
-            Assert.IsTrue(parameters.ContainsKey("x-client-os"));
-            Assert.IsTrue(parameters.ContainsKey("x-client-Ver"));
+            Assert.IsTrue(parameters.ContainsKey(MsalIdParameter.OS));
+            Assert.IsTrue(parameters.ContainsKey(MsalIdParameter.Product)); // sku
+            Assert.IsTrue(parameters.ContainsKey(MsalIdParameter.Version)); // version
+            Assert.IsFalse(parameters.ContainsKey(MsalIdParameter.DeviceModel)); // device - we don't send this on .NET and .NET fwk
 
-            string os = parameters["x-client-os"];
+            string os = parameters[MsalIdParameter.OS];
 
 #if NET48_OR_GREATER
             Assert.AreEqual(AbstractPlatformProxy.WindowsOS, os);
