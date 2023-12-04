@@ -1,19 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-#if SUPPORTS_BROKER
-#endif
-
 namespace Microsoft.Identity.Test.Unit.CoreTests
 {
+
     [TestClass]
     public class PlatformProxyFactoryTests
     {
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 Constants.NativeClientRedirectUri,
                 proxy.GetDefaultRedirectUri("cid", true));
 
-#else            
+#else
              Assert.AreSame(
                 Constants.LocalHostRedirectUri,
                 proxy.GetDefaultRedirectUri("cid", true));

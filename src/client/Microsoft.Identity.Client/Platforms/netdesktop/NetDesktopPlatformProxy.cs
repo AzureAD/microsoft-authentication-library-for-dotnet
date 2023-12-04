@@ -120,7 +120,10 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <inheritdoc/>
         protected override string InternalGetOperatingSystem()
         {
-            return DesktopOsHelper.GetWindowsVersionString();
+            return IsWindows ?
+                AbstractPlatformProxy.WindowsOS                
+                : Environment.OSVersion.Platform.ToString(); // probably for Mono, which we don't support
+            ;
         }
 
         /// <inheritdoc/>

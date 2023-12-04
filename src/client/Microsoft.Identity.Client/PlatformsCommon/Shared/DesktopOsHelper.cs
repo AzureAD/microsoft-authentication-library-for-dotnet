@@ -16,8 +16,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     {
         private static Lazy<bool> s_wamSupportedOSLazy = new Lazy<bool>(
            () => IsWamSupportedOSInternal());
-        private static Lazy<string> s_winVersionLazy = new Lazy<string>(
-            () => GetWindowsVersionStringInternal());
 
         public static bool IsWindows()
         {
@@ -98,33 +96,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #else
             return false;
 #endif
-        }
-
-        private static string GetWindowsVersionStringInternal()
-        {
-            //Environment.OSVersion as it will return incorrect information on some operating systems
-            //For more information on how to acquire the current OS version from the registry
-            //See (https://stackoverflow.com/a/61914068)
-#if DESKTOP
-            var reg = Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
-
-            string OSInfo = (string)reg.GetValue("ProductName");
-
-            if (string.IsNullOrEmpty(OSInfo))
-            {
-                return Environment.OSVersion.ToString();
-            }
-
-            return OSInfo;
-#else
-            return RuntimeInformation.OSDescription;
-#endif
-        }
-
-        public static string GetWindowsVersionString()
-        {
-            return s_winVersionLazy.Value;
-        }
+        }      
 
         public static bool IsWin10OrServerEquivalent()
         {
