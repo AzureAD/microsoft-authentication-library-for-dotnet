@@ -312,13 +312,33 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
         }
 
         [TestMethod]
-        public void ClaimsMerge_NoClaims_Test()
+        public void ClaimsMerge_NullClaims_Test()
         {
             var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
                null,
                TestConstants.ClientCapabilities);
 
             Assert.AreEqual(TestConstants.ClientCapabilitiesJson, mergedJson);
+        }
+
+        [TestMethod]
+        public void ClaimsMerge_NullCapabilities_Test()
+        {
+            var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
+               TestConstants.Claims,
+               null);
+
+            Assert.AreEqual(TestConstants.Claims, mergedJson);
+        }
+
+        [TestMethod]
+        public void ClaimsMerge_AccessTokenDifferentLevel_Test()
+        {
+            var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
+               TestConstants.ClaimWithAdditionalKeyAndAccessKey,
+               TestConstants.ClientCapabilities);
+
+            Assert.AreEqual(TestConstants.MergedJsonClaimWithAdditionalKeyAndAccessKey, mergedJson);
         }
     }
 }

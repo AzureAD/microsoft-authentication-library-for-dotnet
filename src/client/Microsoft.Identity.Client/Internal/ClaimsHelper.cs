@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Internal
 
                 var mergedJson = JsonHelper.Merge(capabilitiesJson.ToJsonString(), claimsJson.ToJsonString());
 
-                capabilitiesJson = JsonNode.Parse(mergedJson) as JObject;
+                capabilitiesJson = JsonHelper.ParseIntoJsonObject(mergedJson);
 #else
                 capabilitiesJson.Merge(claimsJson, new JsonMergeSettings
                 {
