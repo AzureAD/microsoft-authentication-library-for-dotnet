@@ -33,10 +33,14 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Specifies the username.
         /// </summary>
+        /// <remarks>
+        /// Specifying the username explicitly is normally not needed, but some Windows administrators
+        /// set policies preventing applications from looking up the signed-in user and in that case the username needs to be passed.
+        /// </remarks>
         /// <param name="username">Identifier of the user account for which to acquire a token with 
-        /// Integrated Windows authentication. Generally in UserPrincipalName (UPN) format, 
+        /// Integrated Windows Authentication. Generally in UserPrincipalName (UPN) format, 
         /// e.g. <c>john.doe@contoso.com</c></param>
-        /// <returns>The builder to chain the .With methods</returns>
+        /// <returns>The builder to chain the .With methods.</returns>
         public AcquireTokenByIntegratedWindowsAuthParameterBuilder WithUsername(string username)
         {
             Parameters.Username = username;
