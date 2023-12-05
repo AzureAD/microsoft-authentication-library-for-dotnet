@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
-    public class UserQuery
+    public struct UserQuery
     {
         public UserType? UserType { get; set; }
         public MFA? MFA { get; set; }
@@ -20,10 +20,19 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public AppPlatform? AppPlatform { get; set; }
         public PublicClient? PublicClient { get; set; }
 
+        /// <summary>
+        /// Ask for a specific user from the lab. No other parameters will be considered.
+        /// </summary>
+        public string Upn { get; set; }
+
         public static UserQuery PublicAadUserQuery => new UserQuery()
-            {
-                UserType = LabInfrastructure.UserType.Cloud,
-                AzureEnvironment = LabInfrastructure.AzureEnvironment.azurecloud
+        {
+            Upn = "idlab1@msidlab4.onmicrosoft.com"            
+        };
+
+        public static UserQuery PublicAadUser2Query => new UserQuery()
+        {
+            Upn = "idlab@msidlab4.onmicrosoft.com"
         };
 
         public static UserQuery MsaUserQuery => new UserQuery
@@ -67,48 +76,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             AppPlatform = LabInfrastructure.AppPlatform.spa,
             PublicClient = LabInfrastructure.PublicClient.no,
             SignInAudience = LabInfrastructure.SignInAudience.AzureAdMyOrg
-            
+
         };
-
-        // generated code, re-generate or update manually if you change the members of this class !
-        #region Equals and GetHashCode
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as UserQuery);
-        }
-
-        public bool Equals(UserQuery other)
-        {
-            return other != null &&
-                EqualityComparer<UserType?>.Default.Equals(UserType, other.UserType) &&
-                EqualityComparer<MFA?>.Default.Equals(MFA, other.MFA) &&
-                EqualityComparer<ProtectionPolicy?>.Default.Equals(ProtectionPolicy, other.ProtectionPolicy) &&
-                EqualityComparer<HomeDomain?>.Default.Equals(HomeDomain, other.HomeDomain) &&
-                EqualityComparer<HomeUPN?>.Default.Equals(HomeUPN, other.HomeUPN) &&
-                EqualityComparer<B2CIdentityProvider?>.Default.Equals(B2CIdentityProvider, other.B2CIdentityProvider) &&
-                EqualityComparer<FederationProvider?>.Default.Equals(FederationProvider, other.FederationProvider) &&
-                EqualityComparer<AzureEnvironment?>.Default.Equals(AzureEnvironment, other.AzureEnvironment) &&
-                EqualityComparer<SignInAudience?>.Default.Equals(SignInAudience, other.SignInAudience) &&
-                EqualityComparer<AppPlatform?>.Default.Equals(AppPlatform, other.AppPlatform) &&
-                EqualityComparer<PublicClient?>.Default.Equals(PublicClient, other.PublicClient);
-        }
-
-        public override int GetHashCode()
-        {
-            var hashCode = 1863312741;
-            hashCode = hashCode * -1521134295 + EqualityComparer<UserType?>.Default.GetHashCode(UserType);
-            hashCode = hashCode * -1521134295 + EqualityComparer<MFA?>.Default.GetHashCode(MFA);
-            hashCode = hashCode * -1521134295 + EqualityComparer<ProtectionPolicy?>.Default.GetHashCode(ProtectionPolicy);
-            hashCode = hashCode * -1521134295 + EqualityComparer<HomeDomain?>.Default.GetHashCode(HomeDomain);
-            hashCode = hashCode * -1521134295 + EqualityComparer<HomeUPN?>.Default.GetHashCode(HomeUPN);
-            hashCode = hashCode * -1521134295 + EqualityComparer<B2CIdentityProvider?>.Default.GetHashCode(B2CIdentityProvider);
-            hashCode = hashCode * -1521134295 + EqualityComparer<FederationProvider?>.Default.GetHashCode(FederationProvider);
-            hashCode = hashCode * -1521134295 + EqualityComparer<AzureEnvironment?>.Default.GetHashCode(AzureEnvironment);
-            hashCode = hashCode * -1521134295 + EqualityComparer<SignInAudience?>.Default.GetHashCode(SignInAudience);
-            hashCode = hashCode * -1521134295 + EqualityComparer<AppPlatform?>.Default.GetHashCode(AppPlatform);
-            hashCode = hashCode * -1521134295 + EqualityComparer<PublicClient?>.Default.GetHashCode(PublicClient);
-            return hashCode;
-        }
-        #endregion
     }
 }

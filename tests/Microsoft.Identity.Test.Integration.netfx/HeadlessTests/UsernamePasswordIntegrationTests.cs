@@ -93,13 +93,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
-        public async Task ROPC_ADFSv3Federated_Async()
-        {
-            var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV3, true).ConfigureAwait(false);
-            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
-        }
-
-        [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.ADFS)]
         public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
         {

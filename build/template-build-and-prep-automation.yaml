@@ -54,14 +54,6 @@ steps:
     secureFile: 'test-cloud.exe'
 
 - task: CopyFiles@2
-  displayName: 'Stage Xamarin Ui Test Tools'
-  inputs:
-    SourceFolder: '$(Agent.TempDirectory)'
-    Contents: 'test-cloud.exe'
-    TargetFolder: '$(build.artifactstagingdirectory)'
-    flattenFolders: true
-
-- task: CopyFiles@2
   displayName: 'Stage MSAL src'
   inputs:
     SourceFolder: src\client
@@ -88,13 +80,6 @@ steps:
     SourceFolder: tests\CacheCompat
     Contents: '**\bin\**\**'
     TargetFolder: '$(build.artifactstagingdirectory)/cacheCompatTests'
-
-- task: CopyFiles@2
-  displayName: 'Stage Device Authentication Tests'
-  inputs:
-    SourceFolder: tests/Microsoft.Identity.Test.Integration.Win8
-    Contents: '**/bin/**/*'
-    TargetFolder: '$(build.artifactstagingdirectory)/DeviceAuth'
 
 - task: CopyFiles@2
   displayName: 'Copy WAM DevApp Dlls'

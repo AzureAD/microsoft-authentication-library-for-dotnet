@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             // ~2x faster, no visual rendering
             // remove when debugging to see the UI automation
-            options.AddArguments("headless");
+            //options.AddArguments("headless");
 
             var env = Environment.GetEnvironmentVariable("ChromeWebDriver");
             if (string.IsNullOrEmpty(env))
@@ -265,13 +265,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     {
                         Trace.WriteLine("No, workaround failed");
                     }
-                }
-
-                if (user.FederationProvider == FederationProvider.AdfsV2 && (user.UserType == UserType.Federated))
-                {
-                    Trace.WriteLine("Logging in ... AFDSv2 - Entering the username again, this time in the ADFSv2 form");
-                    driver.FindElementById(CoreUiTestConstants.AdfsV2WebUsernameInputId).SendKeys(user.Upn);
-                }
+                }               
             }
         }
 
