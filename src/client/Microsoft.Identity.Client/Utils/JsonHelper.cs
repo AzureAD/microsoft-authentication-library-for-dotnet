@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using Microsoft.Identity.Client.Platforms.net6;
 using System.Text.Json;
@@ -159,20 +158,24 @@ namespace Microsoft.Identity.Client.Utils
         internal static T GetValue<T>(JsonNode json) => json != null ? json.GetValue<T>() : default;
 
         /// <summary>
-        /// Combines two JSON strings into a single JSON string with indentation.
+        /// Merges two JSON objects into a single JSON object.
         /// </summary>
-        /// <param name="originalJson">The original JSON string to merge.</param>
-        /// <param name="newContent">The additional JSON content to merge.</param>
-        /// <returns>A UTF-8 encoded string representing the merged JSON.</returns>
-        /// Code reference : https://github.com/dotnet/runtime/issues/31433
-        internal static string Merge(string originalJson, string newContent)
+        /// <param name="originalJson">The original JSON object to merge.</param>
+        /// <param name="newContent">The additional JSON object to merge.</param>
+        /// <returns>A JObject representing the merged JSON.</returns>
+        /// <remarks>
+        /// This method parses the original and new JSON objects, merges their elements, and returns
+        /// a JObject representing the merged JSON.
+        /// Original Code Reference: https://github.com/dotnet/runtime/issues/31433
+        /// </remarks>
+        internal static JObject Merge(JObject originalJson, JObject newContent)
         {
             // Output buffer to store the merged JSON
             var outputBuffer = new ArrayBufferWriter<byte>();
 
             // Parse the original and new JSON content
-            using (JsonDocument jDoc1 = JsonDocument.Parse(originalJson))
-            using (JsonDocument jDoc2 = JsonDocument.Parse(newContent))
+            using (JsonDocument jDoc1 = JsonDocument.Parse(originalJson.ToJsonString()))
+            using (JsonDocument jDoc2 = JsonDocument.Parse(newContent.ToJsonString()))
             using (var jsonWriter = new Utf8JsonWriter(outputBuffer, new JsonWriterOptions { Indented = true }))
             {
                 // Merge the JSON elements
@@ -180,7 +183,10 @@ namespace Microsoft.Identity.Client.Utils
             }
 
             // Convert the merged JSON to a UTF-8 encoded string
-            return Encoding.UTF8.GetString(outputBuffer.WrittenSpan);
+            string mergedJsonString = Encoding.UTF8.GetString(outputBuffer.WrittenSpan);
+
+            // Parse the merged JSON string to a JObject
+            return ParseIntoJsonObject(mergedJsonString);
         }
 
         // Merges two JSON elements based on their value kind
@@ -207,6 +213,9 @@ namespace Microsoft.Identity.Client.Utils
             // Start writing the merged object
             jsonWriter.WriteStartObject();
 
+            // Create a HashSet to track processed property names
+            HashSet<string> processedProperties = new HashSet<string>();
+
             // Iterate through properties of the first JSON object
             foreach (JsonProperty property in root1.EnumerateObject())
             {
@@ -219,6 +228,7 @@ namespace Microsoft.Identity.Client.Utils
                 {
                     // Write the property name
                     jsonWriter.WritePropertyName(propertyName);
+                    processedProperties.Add(propertyName);
 
                     JsonElement originalValue = property.Value;
                     JsonValueKind originalValueKind = originalValue.ValueKind;
@@ -244,7 +254,7 @@ namespace Microsoft.Identity.Client.Utils
             // Iterate through properties unique to the second JSON object
             foreach (JsonProperty property in root2.EnumerateObject())
             {
-                if (!root1.TryGetProperty(property.Name, out _))
+                if (!processedProperties.Contains(property.Name))
                 {
                     // Write properties unique to the second object
                     property.WriteTo(jsonWriter);
@@ -261,16 +271,16 @@ namespace Microsoft.Identity.Client.Utils
             // Start writing the merged array
             jsonWriter.WriteStartArray();
 
-            // Iterate through elements of the first array and write to the output
-            foreach (JsonElement element in root1.EnumerateArray())
+            // Merge elements of the first array
+            for (int i = 0; i < root1.GetArrayLength(); i++)
             {
-                element.WriteTo(jsonWriter);
+                root1[i].WriteTo(jsonWriter);
             }
 
-            // Iterate through elements of the second array and write to the output
-            foreach (JsonElement element in root2.EnumerateArray())
+            // Merge elements of the second array
+            for (int i = 0; i < root2.GetArrayLength(); i++)
             {
-                element.WriteTo(jsonWriter);
+                root2[i].WriteTo(jsonWriter);
             }
 
             // End writing the merged array
