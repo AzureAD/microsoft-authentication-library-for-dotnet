@@ -3,7 +3,7 @@
 
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.Platforms.netdesktop
 {
     internal class NetDesktopFeatureFlags : IFeatureFlags
     {

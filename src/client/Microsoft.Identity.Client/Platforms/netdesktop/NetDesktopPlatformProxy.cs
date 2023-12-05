@@ -20,7 +20,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Win32;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.Platforms.netdesktop
 {
     /// <summary>
     ///     Platform / OS specific logic.
@@ -244,7 +244,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         public override IDeviceAuthManager CreateDeviceAuthManager()
         {
-            return new NetDesktopDeviceAuthManager();
+            return new DeviceAuthManager(CryptographyManager);
         }
 
         public override bool BrokerSupportsWamAccounts => true;

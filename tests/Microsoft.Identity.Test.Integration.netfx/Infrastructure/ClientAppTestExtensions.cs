@@ -5,7 +5,7 @@ using System.Diagnostics;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 
-namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
+namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
     public static class ClientAppTestExtensions
     {
