@@ -90,21 +90,21 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return WindowsOS;
+                return RuntimeInformation.OSDescription;
             }
             
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                return MacOs;
+                return MacOsDescriptionForSTS;
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return LinuxOS;
+                return LinuxOSDescriptionForSTS;
             }
 
             // All other cases (FreeBSD?) - return the OS description
-            return System.Runtime.InteropServices.RuntimeInformation.OSDescription;
+            return RuntimeInformation.OSDescription;
         }
 
         protected override string InternalGetDeviceModel()
