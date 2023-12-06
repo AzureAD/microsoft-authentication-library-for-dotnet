@@ -119,6 +119,8 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     sb.AppendLine("=== End of inner exception stack trace ===");
                 }
 
+                sb.AppendLine("To see full exception details, enable Pii Logging.");
+
                 if (ex.StackTrace != null)
                 {
                     sb.Append(Environment.NewLine + ex.StackTrace);
