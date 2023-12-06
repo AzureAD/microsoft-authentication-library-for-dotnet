@@ -153,7 +153,6 @@ namespace Microsoft.Identity.Test.Unit
         public const string ClientCapabilitiesJson = @"{""access_token"":{""xms_cc"":{""values"":[""cp1"",""cp2""]}}}";
         // this a JSON merge from Claims and ClientCapabilitiesJson
         public const string ClientCapabilitiesAndClaimsJson = @"{""access_token"":{""xms_cc"":{""values"":[""cp1"",""cp2""]}},""userinfo"":{""given_name"":{""essential"":true},""nickname"":null,""email"":{""essential"":true},""email_verified"":{""essential"":true},""picture"":null,""http://example.info/claims/groups"":null},""id_token"":{""auth_time"":{""essential"":true},""acr"":{""values"":[""urn:mace:incommon:iap:silver""]}}}";
-        public const string ClaimsWithAccessToken = @"{""access_token"":{""nbf"":{""essential"":true, ""value"":""1701477303""}}}";
         public const string ClientCapabilitiesAndClaimsJsonWithAccessToken = @"{""access_token"":{""xms_cc"":{""values"":[""cp1"",""cp2""]},""nbf"":{""essential"":true,""value"":""1701477303""}}}";
         public const string EmptyClaimsJson = @"{}";
         public const string ClaimsWithAdditionalClaim = @"{""access_token"":{""nbf"":{""essential"":true, ""value"":""1701477303""},""additional_claim"":{""key"":""value""}}}";
