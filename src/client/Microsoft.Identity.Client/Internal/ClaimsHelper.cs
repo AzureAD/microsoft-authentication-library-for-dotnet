@@ -55,10 +55,7 @@ namespace Microsoft.Identity.Client.Internal
                         ex);
                 }
 #if SUPPORTS_SYSTEM_TEXT_JSON
-
-                var mergedJson = Merge(capabilitiesJson.ToJsonString(), claimsJson.ToJsonString());
-
-                capabilitiesJson = JsonNode.Parse(mergedJson) as JObject;
+                capabilitiesJson = JsonHelper.Merge(capabilitiesJson, claimsJson);
 #else
                 capabilitiesJson.Merge(claimsJson, new JsonMergeSettings
                 {

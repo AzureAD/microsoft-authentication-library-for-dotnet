@@ -44,11 +44,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return response;
         }
 
-        // only set up for this format of query: {URI-scheme}://{URI-host}/{resource-path}/UPN
-        public static async Task<LabResponse> GetLabUserDataForSpecificUserAsync(string upn)
+
+        [Obsolete("Use GetSpecificUserAsync instead", true)]
+        public static Task<LabResponse> GetLabUserDataForSpecificUserAsync(string upn)
         {
-            string result = await s_labService.GetLabResponseAsync(LabApiConstants.LabEndPoint + "/" + upn).ConfigureAwait(false);
-            return s_labService.CreateLabResponseFromResultStringAsync(result).Result;
+            throw new NotSupportedException();
         }
 
         public static async Task<string> GetMSIEnvironmentVariablesAsync(string uri)
@@ -57,9 +57,22 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return result;
         }
 
+        /// <summary>
+        /// Returns the AAD cloud user idlab1@msidlab4.onmicrosoft.com
+        /// </summary>
+        /// <returns></returns>
         public static Task<LabResponse> GetDefaultUserAsync()
         {
             return GetLabUserDataAsync(UserQuery.PublicAadUserQuery);
+        }
+
+        /// <summary>
+        /// Returns the AAD cloud user idlab@msidlab4.onmicrosoft.com
+        /// </summary>
+        /// <returns></returns>
+        public static Task<LabResponse> GetDefaultUser2Async()
+        {
+            return GetLabUserDataAsync(UserQuery.PublicAadUser2Query);
         }
 
         public static Task<LabResponse> GetMsaUserAsync()
@@ -100,7 +113,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static Task<LabResponse> GetSpecificUserAsync(string upn)
         {
-            return GetLabUserDataForSpecificUserAsync(upn);
+            return GetLabUserDataAsync(new UserQuery() { Upn = upn });
         }
 
         public static Task<LabResponse> GetArlingtonUserAsync()
@@ -122,9 +135,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static Task<LabResponse> GetAdfsUserAsync(FederationProvider federationProvider, bool federated = true)
         {
-            var query = UserQuery.PublicAadUserQuery;
-            query.FederationProvider = federationProvider;
-            query.UserType = federated ? UserType.Federated : UserType.Cloud;
+            var query = new UserQuery()
+            {
+                AzureEnvironment = LabInfrastructure.AzureEnvironment.azurecloud,
+                FederationProvider = federationProvider,
+                UserType = federated ? UserType.Federated : UserType.Cloud
+            };
 
             if (!federated &&
                 federationProvider != FederationProvider.ADFSv2019)

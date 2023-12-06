@@ -3,7 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 
     <!-- Version of the Microsoft.Identity.Client.NativeInterop package. -->
-    <MSALRuntimeNativeInteropVersion>0.13.12</MSALRuntimeNativeInteropVersion>
+    <MSALRuntimeNativeInteropVersion>0.13.14</MSALRuntimeNativeInteropVersion>
 
     <!-- Version of MSAL if not defined by the CI-->
     <MsalInternalVersion>4.51.0</MsalInternalVersion>
