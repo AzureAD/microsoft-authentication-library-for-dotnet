@@ -1,14 +1,11 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-
     <!-- Version of the Microsoft.Identity.Client.NativeInterop package. -->
     <MSALRuntimeNativeInteropVersion>0.13.14</MSALRuntimeNativeInteropVersion>
-
     <!-- Version of MSAL if not defined by the CI-->
     <MsalInternalVersion>4.51.0</MsalInternalVersion>
   </PropertyGroup>
-  
   <!-- Add packages, then highlight all lines and go to Edit > Advanced > Sort Lines -->
   <ItemGroup>
     <!-- Packages for the main MSAL code -->
@@ -33,12 +30,14 @@
     <PackageVersion Include="System.Xml.XmlDocument" Version="4.3.0" />
     <PackageVersion Include="Xamarin.Android.Support.CustomTabs" Version="28.0.0.3" />
     <PackageVersion Include="Xamarin.AndroidX.Browser" Version="1.4.0" PrivateAssets="All" />
-    
+</ItemGroup>
+<ItemGroup>
     <!-- Analyzers and dev packages -->
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.8.14" PrivateAssets="All" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0" PrivateAssets="All" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-
+</ItemGroup>
+<ItemGroup>
     <!-- Packages for the tests -->
     <PackageVersion Include="Azure.Security.KeyVault.Certificates" Version="4.3.0" />
     <PackageVersion Include="Azure.Security.KeyVault.Secrets" Version="4.3.0" />
@@ -59,6 +58,7 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageVersion Include="NSubstitute" Version="4.4.0" />
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.15" />
+    <PackageVersion Include="NuGet.Versioning" Version="6.8.0" />
     <PackageVersion Include="NUnit" Version="3.13.3" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.6.0" />

@@ -246,6 +246,11 @@ namespace NetDesktopWinForms
                     GetRandomDownstreamUri());
                 }
 
+                if (cbxWithForceRefresh.Checked)
+                {
+                    builder = builder.WithForceRefresh(true);
+                }
+
                 Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");
                 return await builder
                     .ExecuteAsync(GetAutocancelToken())
