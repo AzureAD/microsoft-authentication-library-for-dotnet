@@ -27,7 +27,6 @@ using Microsoft.Identity.Test.Integration.net45.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using NUnit.Framework.Internal;
 
 namespace Microsoft.Identity.Test.Integration.Broker
 {
