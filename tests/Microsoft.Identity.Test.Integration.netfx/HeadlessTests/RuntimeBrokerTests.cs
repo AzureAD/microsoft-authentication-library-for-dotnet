@@ -246,6 +246,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 .ConfigureAwait(false);
 
             DateTimeOffset ropcTokenExpiration = result.ExpiresOn;
+            string ropcToken = result.AccessToken;
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
             Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
@@ -258,20 +259,15 @@ namespace Microsoft.Identity.Test.Integration.Broker
             result = await pca.AcquireTokenSilent(scopes, account)
                 .ExecuteAsync().ConfigureAwait(false);
 
-            // This proves the token is the one cached
-            CoreAssert.IsWithinRange(
-                ropcTokenExpiration, 
-                result.ExpiresOn, 
-                TimeSpan.FromMilliseconds(500));
+            // This proves the token is from the cache
+            Assert.AreEqual(ropcToken, result.AccessToken);
 
             result = await pca.AcquireTokenSilent(scopes, account)
                 .WithForceRefresh(true)
                .ExecuteAsync().ConfigureAwait(false);
 
-            // when doing force refresh, MSAL will perform at least one more roundtrip
-            // to the server, so the new token will have higher expiration.
-            var diff = (result.ExpiresOn - ropcTokenExpiration).TotalMilliseconds;
-            Assert.IsTrue(diff > 500);
+            // This proves the token is not from the cache
+            Assert.AreNotEqual(ropcToken, result.AccessToken);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
