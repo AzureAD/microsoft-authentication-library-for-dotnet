@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit
             });
 
             Assert.AreEqual(ex.ErrorCode, MsalError.CertificateNotRsa);
-            Assert.AreEqual(ex.Message, MsalErrorMessage.CertMustBeRsa);
+            Assert.AreEqual(ex.Message, MsalErrorMessage.CertMustBeRsa(cert.PublicKey.Oid.FriendlyName));
         }
     }
 #endif

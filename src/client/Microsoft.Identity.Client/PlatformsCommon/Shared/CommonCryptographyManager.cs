@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             //Ensure certificate is of type RSA.
             if (rsa == null)
             {
-                throw new MsalClientException(MsalError.CertificateNotRsa, MsalErrorMessage.CertMustBeRsa);
+                throw new MsalClientException(MsalError.CertificateNotRsa, MsalErrorMessage.CertMustBeRsa(certificate.PublicKey?.Oid?.FriendlyName));
             }
 
             try
