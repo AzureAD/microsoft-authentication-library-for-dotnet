@@ -312,6 +312,21 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         var errorMessage = "Could not acquire token silently.";
                         msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                     }
+
+                    if (acquireTokenSilentParameters.ForceRefresh && !string.IsNullOrEmpty(msalTokenResponse.AccessToken))
+                    {
+                        authParams.AccessTokenToRenew = msalTokenResponse.AccessToken;
+
+                        using (NativeInterop.AuthResult result = await s_lazyCore.Value.AcquireTokenSilentlyAsync(
+                        authParams,
+                        authenticationRequestParameters.CorrelationId.ToString("D"),
+                        readAccountResult.Account,
+                        cancellationToken).ConfigureAwait(false))
+                        {
+                            var errorMessage = "Could not acquire token silently with AccessTokenToRenew option.";
+                            msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                        }
+                    }
                 }
             }
 
@@ -343,6 +358,21 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     var errorMessage = "Could not acquire token silently for the default user.";
                     msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
                 }
+
+                if (acquireTokenSilentParameters.ForceRefresh && !string.IsNullOrEmpty(msalTokenResponse.AccessToken))
+                {
+                    authParams.AccessTokenToRenew = msalTokenResponse.AccessToken;
+
+                    using (NativeInterop.AuthResult result = await s_lazyCore.Value.SignInSilentlyAsync(
+                       authParams,
+                       authenticationRequestParameters.CorrelationId.ToString("D"),
+                       cancellationToken).ConfigureAwait(false))
+                    {
+                        var errorMessage = "Could not acquire token silently for the default user.";
+                        msalTokenResponse = WamAdapters.HandleResponse(result, authenticationRequestParameters, _logger, errorMessage);
+                    }
+                }
+
             }
 
             return msalTokenResponse;
