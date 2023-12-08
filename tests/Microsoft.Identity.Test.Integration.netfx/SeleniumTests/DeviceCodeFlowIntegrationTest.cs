@@ -117,7 +117,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         #region Azure AD Kerberos Feature Tests
-        [IgnoreOnOneBranch, RunOn(TargetFrameworks.NetCore)]
+        [IgnoreOnOneBranch]
+        [RunOn(TargetFrameworks.NetCore)]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         public async Task KerberosDeviceCodeFlowTestAsync()
         {

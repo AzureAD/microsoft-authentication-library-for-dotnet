@@ -38,7 +38,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
         static extern IntPtr GetForegroundWindow();
 
         // This test should fail locally but succeed in a CI build.
-        [IgnoreOnOneBranch, RunOn(TargetFrameworks.NetCore)]
+        [IgnoreOnOneBranch]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WamSilentAuthUserInteractionRequiredAsync()
         {
             string[] scopes = new[]
@@ -70,8 +71,9 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 Assert.Fail(ex.Message);
             }
         }
-        
-        [IgnoreOnOneBranch, RunOn(TargetFrameworks.NetCore)]
+
+        [IgnoreOnOneBranch]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ExtractNonceWithAuthParserAndValidateShrAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -112,7 +114,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 result).ConfigureAwait(false);
         }
 
-        [IgnoreOnOneBranch, RunOn(TargetFrameworks.NetCore)]
+        [IgnoreOnOneBranch]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WamInvalidROPC_ThrowsException_TestAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -141,7 +144,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.IsNotNull(ex.AdditionalExceptionData[MsalException.BrokerTelemetry]);
         }
 
-        [IgnoreOnOneBranch, RunOn(TargetFrameworks.NetCore)]
+        [IgnoreOnOneBranch]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WamSilentAuthLoginHintNoAccontInCacheAsync()
         {
             string[] scopes = new[]
@@ -170,7 +174,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
         }
 
-        [IgnoreOnOneBranch, RunOn(TargetFrameworks.NetCore)]
+        [IgnoreOnOneBranch]
+        [RunOn(TargetFrameworks.NetCore)]
         [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordRequestAsync()
         {
@@ -220,7 +225,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
         }
 
-        [IgnoreOnOneBranch, RunOn(TargetFrameworks.NetCore)]
+        [IgnoreOnOneBranch]
+        [RunOn(TargetFrameworks.NetCore)]
         [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
         {
@@ -273,7 +279,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
         }
 
-        [IgnoreOnOneBranch, RunOn(TargetFrameworks.NetCore)]
+        [IgnoreOnOneBranch]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WamListWindowsWorkAndSchoolAccountsAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -310,9 +317,10 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreEqual(labResponse.User.Upn, account.Username);
         }
 
+        [IgnoreOnOneBranch]
         [DataTestMethod]
         [DataRow(null)]
-        [IgnoreOnOneBranch, RunOn(TargetFrameworks.NetCore)]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WamAddDefaultScopesWhenNoScopesArePassedAsync(string scopes)
         {
             IntPtr intPtr = GetForegroundWindow();
@@ -335,7 +343,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.IsTrue(!string.IsNullOrEmpty(ex.ErrorCode));
         }
 
-        [IgnoreOnOneBranch, RunOn(TargetFrameworks.NetCore)]
+        [IgnoreOnOneBranch]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
         {
             //Arrange
@@ -368,7 +377,8 @@ namespace Microsoft.Identity.Test.Integration.Broker
             Assert.AreEqual(popUser, result.Account.Username);
         }
 
-        [IgnoreOnOneBranch, RunOn(TargetFrameworks.NetCore)]
+        [IgnoreOnOneBranch]
+        [RunOn(TargetFrameworks.NetCore)]
         [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
         {
