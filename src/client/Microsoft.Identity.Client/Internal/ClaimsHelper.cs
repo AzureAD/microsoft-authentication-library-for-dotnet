@@ -5,9 +5,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using JObject = System.Text.Json.Nodes.JsonObject;
+using System.Buffers;
+using System.Diagnostics;
 #else
 using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
@@ -52,10 +55,8 @@ namespace Microsoft.Identity.Client.Internal
                         ex);
                 }
 #if SUPPORTS_SYSTEM_TEXT_JSON
-                foreach (var claim in claimsJson)
-                {
-                    capabilitiesJson[claim.Key] = claim.Value != null ? JsonNode.Parse(claim.Value.ToJsonString()) : null;
-                }
+
+                capabilitiesJson = JsonHelper.Merge(capabilitiesJson, claimsJson);
 #else
                 capabilitiesJson.Merge(claimsJson, new JsonMergeSettings
                 {

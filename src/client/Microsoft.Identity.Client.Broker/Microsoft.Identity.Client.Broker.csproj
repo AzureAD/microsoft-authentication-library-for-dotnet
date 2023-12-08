@@ -59,7 +59,7 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Identity.Client.NativeInterop" Version="$(MSALRuntimeNativeInteropVersion)" IncludeAssets="all" />
+    <PackageReference Include="Microsoft.Identity.Client.NativeInterop" IncludeAssets="all" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
 

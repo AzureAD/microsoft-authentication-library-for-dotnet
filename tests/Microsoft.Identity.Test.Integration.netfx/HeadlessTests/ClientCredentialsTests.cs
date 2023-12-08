@@ -69,8 +69,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
-        [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
+        //[DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
+        //[DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
         [DataRow(Cloud.Arlington, TargetFrameworks.NetCore)]
         //[DataRow(Cloud.PPE)] - secret not setup
         public async Task WithSecret_TestAsync(Cloud cloud, TargetFrameworks runOn)

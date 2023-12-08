@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <!-- Disable central package management for cache compat tests -->
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Update="Microsoft.VisualStudio.Threading.Analyzers" Version="17.*" PrivateAssets="All" />
+    <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="*" PrivateAssets="All" />
+  </ItemGroup>
+</Project>

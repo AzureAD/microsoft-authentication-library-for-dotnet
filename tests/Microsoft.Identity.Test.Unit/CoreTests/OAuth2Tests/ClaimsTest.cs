@@ -16,6 +16,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
 {
@@ -241,34 +242,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             Assert.AreEqual(MsalError.InvalidJsonClaimsFormat, ex.ErrorCode);
         }
 
-        [TestMethod]
-        public void ClaimsMerge_Test()
+        [DataTestMethod]
+        [DynamicData(nameof(TestData.GetClaimsAndCapabilities), typeof(TestData), DynamicDataSourceType.Method)]
+        public void ClaimsMerge_Test(string claims, string[] capabilities, string expectedMergedJson)
         {
-            var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
-                TestConstants.Claims,
-                TestConstants.ClientCapabilities);
-
-            Assert.AreEqual(TestConstants.ClientCapabilitiesAndClaimsJson, mergedJson);
-        }
-
-        [TestMethod]
-        public void ClaimsMerge_NoCapabilities_Test()
-        {
-            var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
-                TestConstants.Claims,
-                new string[0]);
-
-            Assert.AreEqual(TestConstants.Claims, mergedJson);
-        }
-
-        [TestMethod]
-        public void ClaimsMerge_NoClaims_Test()
-        {
-            var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(
-               null,
-               TestConstants.ClientCapabilities);
-
-            Assert.AreEqual(TestConstants.ClientCapabilitiesJson, mergedJson);
+            var mergedJson = ClaimsHelper.GetMergedClaimsAndClientCapabilities(claims, capabilities);
+            Assert.AreEqual(expectedMergedJson, mergedJson);
         }
     }
 }

@@ -77,6 +77,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #if NET_CORE || NET6_WIN || DESKTOP || NETSTANDARD
             try
             {
+                // No support on Mac or Linux
+                if (!DesktopOsHelper.IsWindows())
+                    return false;
+
                 return !DesktopOsHelper.IsWin10OrServerEquivalent();
             }
             catch (DllNotFoundException)
