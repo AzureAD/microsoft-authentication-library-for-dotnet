@@ -36,6 +36,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Internal;
 using System.Security.Claims;
 using System.Net.Sockets;
+using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -457,8 +458,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result2.AuthenticationResultMetadata.TokenSource);
         }
 
-#if NET_CORE && !ONEBRANCH_BUILD
-        [TestMethod]
+#if NET_CORE
+        [IgnoreOnOneBranch]
         public async Task WamUsernamePasswordRequestWithPOPAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);

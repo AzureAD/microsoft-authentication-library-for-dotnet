@@ -1,7 +1,7 @@
 $url = "https://msedgedriver.azureedge.net/119.0.2151.72/edgedriver_win64.zip" #Chrome Driver from https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
 $fileName = "edgedriver_win64.zip"
 $source = "C:\Downloads\$fileName"
-$destination = "C:\Program Files\dotnet\"
+$destination = "C:\%programfiles%\dotnet\"
 
 if (Test-Path "$PSScriptRoot\win-installer-helper.psm1") 
 {
