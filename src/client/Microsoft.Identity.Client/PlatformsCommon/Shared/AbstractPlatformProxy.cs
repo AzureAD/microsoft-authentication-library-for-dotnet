@@ -19,6 +19,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
     internal abstract class AbstractPlatformProxy : IPlatformProxy
     {
+        
+        public const string MacOsDescriptionForSTS = "MacOS";
+        public const string LinuxOSDescriptionForSTS = "Linux";
+
         private readonly Lazy<string> _callingApplicationName;
         private readonly Lazy<string> _callingApplicationVersion;
         private readonly Lazy<ICryptographyManager> _cryptographyManager;

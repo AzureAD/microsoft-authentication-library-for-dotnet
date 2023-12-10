@@ -1,3 +1,14 @@
+4.58.1
+==========
+### New Features
+- Added `WithForceRefresh` support for silent flows using the Windows broker. See [4457](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4457).
+
+### Bug Fixes
+- Fixed a bug when a `x-ms-pkeyauth` HTTP header was incorrectly sent on Mac and Linux platforms. See [4445](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4445).
+- Fixed an issue with client capabilities and claims JSON not being merged correctly. See [4447](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4447).
+- MSAL can now be used in .NET 8 applications which use native AOT configuration binder source generator. See [4453](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4453).
+- Fixed an issue with sending an incorrect operating system descriptor in silent flows on Mac. See [4444](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4444).
+
 4.58.0
 ==========
 ### New Features
@@ -173,7 +184,7 @@
 
 ### New Features
 - Removed support for deprecated `net5.0-windows10.0.17763.0` target. See [3770](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3770) and note below.  
-- Added support for `net6.0` and `net6.0-windows10.0.17763.0` targets. See [3682](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3682) and note below.  
+- Added support for `net6.0` and `net6.0-windows10.0.17763.0` targets. See [3682](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3682) and note below. Library is trimmable and uses System.Text.Json for serialization via code generation.
 - Removed support for old `xamarinmac20` target. See [3722](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3722).  
 - `WithProofOfPossession` for public client applications is now generally available. See [3767](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3767).  
 - Added telemetry to log Proof-of-Possession usage. See [3718](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3718).  
