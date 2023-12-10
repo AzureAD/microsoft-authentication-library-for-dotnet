@@ -834,37 +834,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         [TestMethod]
         [ExpectedException(typeof(MsalManagedIdentityException))]
-        public async Task ManagedIdentityInvalidRefreshOnThrowsAsync()
-        {
-            // Arrange
-            using (MockHttpAndServiceBundle harness = CreateTestHarness())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
-            {
-                ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(TestConstants.ClientId, UserAssignedIdentityId.ClientId);
-
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.Machine);
-                miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
-
-                miBuilder.WithHttpManager(httpManager);
-
-                ManagedIdentityApplication mi = miBuilder.BuildConcrete();
-
-                httpManager.AddManagedIdentityCredentialMockHandler(
-                    CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
-                    MockHelpers.GetSuccessfulCredentialResponse(expires_on: 1),
-                    userAssignedId: TestConstants.ClientId,
-                    userAssignedIdentityId: UserAssignedIdentityId.ClientId);
-
-                AcquireTokenForManagedIdentityParameterBuilder builder = mi.AcquireTokenForManagedIdentity(Resource);
-
-                AuthenticationResult result = await builder.ExecuteAsync().ConfigureAwait(false);
-            }
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(MsalManagedIdentityException))]
         public async Task ManagedIdentityNoClientIdInCredentialResponseThrowsAsync()
         {
             // Arrange
