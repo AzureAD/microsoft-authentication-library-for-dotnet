@@ -40,9 +40,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             if (_managedIdentityApplication.KeyMaterialManager.CryptoKeyType != CryptoKeyType.None)
             {
-                //check resource format 
-                if (!managedIdentityParameters.Resource.EndsWith("/.default", StringComparison.OrdinalIgnoreCase))
+                // Check resource format 
+                if (Uri.TryCreate(managedIdentityParameters.Resource, UriKind.Absolute, out Uri resourceUri) &&
+                    (resourceUri.Scheme == Uri.UriSchemeHttp || resourceUri.Scheme == Uri.UriSchemeHttps) &&
+                    !managedIdentityParameters.Resource.EndsWith("/.default", StringComparison.OrdinalIgnoreCase))
                 {
+                    // Add "/.default" to the scopes
                     commonParameters.Scopes = new SortedSet<string>
                     {
                         managedIdentityParameters.Resource + "/.default"

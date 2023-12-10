@@ -354,6 +354,12 @@ namespace Microsoft.Identity.Test.Unit
                ""correlation_id"":""e7619cf4-53ea-443c-b76a-194c032e9840"",
                ""error_uri"":""https://login.microsoftonline.com/error?code=50049""}";
 
+        public const string InvalidResourceError = "AADSTS500011: The resource principal named https://graph.microsoft.com/user.read was not found in the tenant named Cross Cloud B2B Test Tenant. This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant. You might have sent your authentication request to the wrong tenant. Trace ID: 9d8cb0bf-7e34-40fd-babc-f6ff018a1800 Correlation ID: 42186e1b-17eb-46fb-b5b7-4c43cae4d336 Timestamp: 2023-12-08 22:20:25Z";
+
+        public const string InvalidScopeError70011 = "AADSTS70011: The provided request must include a 'scope' input parameter. The provided value for the input parameter 'scope' is not valid. The scope user.read/.default is not valid. Trace ID: 9e8a0bd6-fb1b-45cf-8e00-95c2c73e1400 Correlation ID: 6ce4a5ab-87a1-4985-b06d-5ab08b5fa924 Timestamp: 2023-12-08 21:56:44Z";
+
+        public const string InvalidScopeError1002012 = "AADSTS1002012: The provided value for scope user.read is not valid. Client credential flows must have a scope value with /.default suffixed to the resource identifier (application ID URI). Trace ID: 8575f1d5-0144-4d71-87c8-2df9f1e30000 Correlation ID: a5469466-6c01-40e0-abf8-302d09c991e3 Timestamp: 2023-12-08 22:11:08Z";
+
         public const string TokenResponseJson = @"{
                                                    ""token_type"": ""Bearer"",
                                                    ""scope"": ""user_impersonation"",

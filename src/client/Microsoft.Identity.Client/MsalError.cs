@@ -1069,6 +1069,11 @@ namespace Microsoft.Identity.Client
         public const string HttpListenerError = "http_listener_error";
 
         /// <summary>
+        /// Wrong Http Customization Error.
+        /// </summary>
+        public const string HttpCustomizationError = "http_customization_error";
+
+        /// <summary>
         /// <para>What happens?</para>Failure setting process security to enable WAM Account Picker in an elevated process.
         /// <para>Mitigation</para>For troubleshooting details, see https://aka.ms/msal-net-wam .
         /// </summary>

@@ -10,7 +10,9 @@ string line = new('-', lineWidth);
 
 IIdentityLogger identityLogger = new IdentityLogger();
 
-IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder
+                //.Create(ManagedIdentityId.SystemAssigned)
+                .Create(ManagedIdentityId.WithUserAssignedClientId("8cb8b863-d8a3-455c-8ffc-23963507ca4c"))
                 .WithLogging(identityLogger, true)
                 .WithExperimentalFeatures(true)
                 .WithClientCapabilities(new[] { "cp1" })

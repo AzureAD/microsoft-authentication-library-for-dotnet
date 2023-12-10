@@ -7,44 +7,32 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Core;
-using System.Collections.Concurrent;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
-using System.Web;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Internal.Requests;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Identity.Client.Credential
 {
-    /// <summary>
-    /// Represents a cache for managing and storing Managed Identity credentials.
-    /// </summary>
-    internal class ManagedIdentityCredentialResponseCache : IManagedIdentityCredentialResponseCache
+    internal class ManagedIdentityCredentialResponse : IManagedIdentityCredentialResponse
     {
-        private readonly ConcurrentDictionary<string, CredentialResponse> _cache = new();
         private readonly Uri _uri;
-        private readonly string _clientId;
         private readonly X509Certificate2 _bindingCertificate;
-        private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
         private readonly RequestContext _requestContext;
         private readonly CancellationToken _cancellationToken;
+        internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
 
-        public ManagedIdentityCredentialResponseCache(
+        public ManagedIdentityCredentialResponse(
             Uri uri,
-            string clientId,
             X509Certificate2 bindingCertificate,
-            AcquireTokenForManagedIdentityParameters managedIdentityParameters,
             RequestContext requestContext,
             CancellationToken cancellationToken)
         {
             _uri = uri;
-            _clientId = clientId;
             _bindingCertificate = bindingCertificate;
-            _managedIdentityParameters = managedIdentityParameters;
             _requestContext = requestContext;
             _cancellationToken = cancellationToken;
         }
@@ -54,82 +42,72 @@ namespace Microsoft.Identity.Client.Credential
         /// </summary>
         /// <returns></returns>
         /// <exception cref="MsalManagedIdentityException"></exception>
-        public async Task<CredentialResponse> GetOrFetchCredentialAsync()
+        public async Task<CredentialResponse> GetCredentialAsync()
         {
-            string cacheKey = _clientId;
-
-            if (_cache.TryGetValue(cacheKey, out CredentialResponse response))
-            {
-                long expiresOnSeconds = response.ExpiresOn;
-#if NET45
-                DateTimeOffset expiresOnDateTime = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero)
-                                                            .AddSeconds(expiresOnSeconds)
-                                                            .ToLocalTime();
-#else
-                DateTimeOffset expiresOnDateTime = DateTimeOffset.FromUnixTimeSeconds(expiresOnSeconds);
-#endif
-                //Credential expires in 15 minutes, having a 60 second buffer before we request a new credential
-                const int expirationBufferSeconds = 60;
-
-                if (expiresOnDateTime > DateTimeOffset.UtcNow.AddSeconds(-expirationBufferSeconds) ||
-                    !_managedIdentityParameters.ForceRefresh ||
-                    !string.IsNullOrEmpty(_managedIdentityParameters.Claims)
-                    )
-                {
-                    // Cache hit and not expired
-                    _requestContext.Logger.Info("[Managed Identity] Returned cached credential response.");
-                    _requestContext.ApiEvent.CredentialSource = TokenSource.Cache;
-                    return response;
-                }
-                else
-                {
-                    // Cache hit but expired or force refresh was set, remove cached credential
-                    _requestContext.Logger.Info("[Managed Identity] Cached credential expired or force refresh was set.");
-                    RemoveCredential(cacheKey);
-                }
-            }
-
             CredentialResponse credentialResponse = await FetchFromServiceAsync(
                 _requestContext.ServiceBundle.HttpManager,
                 _cancellationToken
-                ).ConfigureAwait(false);
+            ).ConfigureAwait(false);
 
-            if (credentialResponse == null ||
-                credentialResponse.Credential.IsNullOrEmpty() ||
-                credentialResponse.RegionalTokenUrl.IsNullOrEmpty() ||
-                credentialResponse.ClientId.IsNullOrEmpty())
+            ValidateCredentialResponse(credentialResponse);
+
+            return credentialResponse;
+        }
+
+        /// <summary>
+        /// Validates the properties of a CredentialResponse to ensure it meets the necessary criteria for authentication.
+        /// </summary>
+        /// <param name="credentialResponse">The CredentialResponse to be validated.</param>
+        private void ValidateCredentialResponse(CredentialResponse credentialResponse)
+        {
+            var errorMessages = new List<string>();
+
+            // Check if the CredentialResponse is null or if any required property is missing or invalid
+            if (credentialResponse == null)
             {
-                _requestContext.Logger.Error("[Managed Identity] Required Response fields are missing from the credential response " +
-                    "and/or insufficient for authentication.");
+                errorMessages.Add("CredentialResponse is null.");
+            }
+            else
+            {
+                if (credentialResponse.Credential.IsNullOrEmpty())
+                {
+                    errorMessages.Add("Credential is missing or empty.");
+                }
 
+                if (credentialResponse.ExpiresOn <= DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+                {
+                    errorMessages.Add("ExpiresOn must be in the future.");
+                }
+
+                if (credentialResponse.RegionalTokenUrl.IsNullOrEmpty())
+                {
+                    errorMessages.Add("RegionalTokenUrl is missing or empty.");
+                }
+
+                if (credentialResponse.ClientId.IsNullOrEmpty())
+                {
+                    errorMessages.Add("ClientId is missing or empty.");
+                }
+
+                if (credentialResponse.TenantId.IsNullOrEmpty())
+                {
+                    errorMessages.Add("TenantId is missing or empty.");
+                }
+            }
+
+            // Check if any error messages were added
+            if (errorMessages.Any())
+            {
+                // Log an error message indicating the missing or insufficient fields
+                _requestContext.Logger.Error("[Managed Identity] " + string.Join(" ", errorMessages) +
+                    " and/or insufficient for authentication.");
+
+                // Throw an exception indicating that the CredentialResponse is invalid
                 throw new MsalManagedIdentityException(
                     MsalError.ManagedIdentityRequestFailed,
                     MsalErrorMessage.ManagedIdentityInvalidResponse,
                     ManagedIdentitySource.Credential);
             }
-
-            AddCredential(cacheKey, credentialResponse);
-            _requestContext.ApiEvent.CredentialSource = TokenSource.IdentityProvider;
-            return credentialResponse;
-        }
-
-        /// <summary>
-        /// Adds a credential response to the cache.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="response"></param>
-        public void AddCredential(string key, CredentialResponse response)
-        {
-            _cache[key] = response;
-        }
-
-        /// <summary>
-        /// Removes a credential from the cache.
-        /// </summary>
-        /// <param name="key"></param>
-        public void RemoveCredential(string key)
-        {
-            _cache.TryRemove(key, out _);
         }
 
         /// <summary>
@@ -156,6 +134,16 @@ namespace Microsoft.Identity.Client.Credential
                 return credentialResponse;
 
             }
+            catch (HttpRequestException ex)
+            {
+                throw new MsalManagedIdentityException(
+                    MsalError.ManagedIdentityUnreachableNetwork, ex.Message, ex.InnerException, ManagedIdentitySource.Credential);
+            }
+            catch (TaskCanceledException)
+            {
+                _requestContext.Logger.Error(TimeoutError);
+                throw;
+            }
             catch (Exception ex)
             {
                 _requestContext.Logger.Error("[Managed Identity] Error fetching credential from IMDS endpoint: " + ex.Message);
@@ -164,7 +152,6 @@ namespace Microsoft.Identity.Client.Credential
                     MsalError.CredentialRequestFailed,
                     MsalErrorMessage.CredentialEndpointNoResponseReceived,
                     ManagedIdentitySource.Credential);
-                ;
             }
         }
 
@@ -179,8 +166,6 @@ namespace Microsoft.Identity.Client.Credential
 
             client.AddHeader("Metadata", "true");
             client.AddHeader("x-ms-client-request-id", _requestContext.CorrelationId.ToString("D"));
-            // client.AddQueryParameter("cred-api-version", "1.0");
-
             string jsonPayload = GetCredentialPayload(_bindingCertificate);
             client.AddBodyContent(new StringContent(jsonPayload, System.Text.Encoding.UTF8, "application/json"));
 

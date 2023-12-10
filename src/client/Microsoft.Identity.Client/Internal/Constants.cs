@@ -43,9 +43,11 @@ namespace Microsoft.Identity.Client.Internal
         public const string ManagedIdentityObjectId = "object_id";
         public const string ManagedIdentityResourceId = "mi_res_id";
         public const string ManagedIdentityDefaultClientId = "system_assigned_managed_identity";
+        public const string CredentialIdentityDefaultClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
         public const string ManagedIdentityDefaultTenant = "managed_identity";
         public const string CiamAuthorityHostSuffix = ".ciamlogin.com";
-        public const string CredentialEndpoint = "http://169.254.169.254/metadata/identity/credential?cred-api-version=1.0";
+        //public const string CredentialEndpoint = "http://169.254.169.254/metadata/identity/credential?cred-api-version=1.0";
+        public const string CredentialEndpoint = "http://169.254.169.254/metadata/identity/credential";
 
         public static string FormatEnterpriseRegistrationOnPremiseUri(string domain)
         {

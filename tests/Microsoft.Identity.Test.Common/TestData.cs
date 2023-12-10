@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Common
@@ -80,6 +81,32 @@ namespace Microsoft.Identity.Test.Common
 
             // Test case with claims containing an additional key and access key (different order), non-empty capabilities, and the expected merged JSON
             yield return new object[] { TestConstants.ClaimWithAdditionalKeyAndAccessKey, TestConstants.ClientCapabilities, TestConstants.MergedJsonClaimWithAdditionalKeyAndAccessKey };
+        }
+
+        public static IEnumerable<object[]> GetMtlsInvalidResourceErrorData()
+        {
+            // Use Func<string> for dynamic error data
+            
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.GetMtlsInvalidResourceError()),
+                "https://graph.microsoft.com/user.read",
+                TestConstants.InvalidResourceError
+            };
+
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.GetMtlsInvalidScopeError70011()),
+                "user.read",
+                TestConstants.InvalidScopeError70011
+            };
+
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.GetMtlsInvalidScopeError1002012()),
+                "user.read",
+                TestConstants.InvalidScopeError1002012
+            };
         }
     }
 }

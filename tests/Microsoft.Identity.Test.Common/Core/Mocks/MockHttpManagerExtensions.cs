@@ -435,6 +435,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string filePath = null)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+
             if (filePath != null)
             {
                 responseMessage.Headers.Add("WWW-Authenticate", $"Basic realm={filePath}");
@@ -452,28 +453,51 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static void AddManagedIdentityCredentialMockHandler(
             this MockHttpManager httpManager,
             string expectedUrl,
-            bool sendHeaders = false,
-            string content = null)
+            string resource,
+            bool isCredentialEndpoint = false,
+            string response = null,
+            string userAssignedId = null,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            HttpStatusCode statusCode = HttpStatusCode.OK)
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
+            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
+            
+            HttpContent content = new StringContent(response);
+            responseMessage.Content = content;
 
-            if (sendHeaders)
+            httpMessageHandler.ExpectedMethod = HttpMethod.Post;
+
+            if (isCredentialEndpoint)
             {
                 responseMessage.Headers.Add("Server", "IMDS");
+                expectedQueryParams.Add("cred-api-version", "1.0");
+
+                if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
+                {
+                    expectedQueryParams.Add(Constants.ManagedIdentityClientId, userAssignedId);
+                }
+
+                if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
+                {
+                    expectedQueryParams.Add(Constants.ManagedIdentityResourceId, userAssignedId);
+                }
+
+                if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)
+                {
+                    expectedQueryParams.Add(Constants.ManagedIdentityObjectId, userAssignedId);
+                }
+                
+                httpMessageHandler.ExpectedQueryParams = expectedQueryParams;
             }
 
-            if (!string.IsNullOrEmpty(content))
-            {
-                responseMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
-            }
+            httpMessageHandler.ResponseMessage = responseMessage;
+            httpMessageHandler.ExpectedUrl = expectedUrl;
+            
 
-            httpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Post,
-                        ExpectedUrl = expectedUrl,
-                        ResponseMessage = responseMessage
-                    });
+            httpManager.AddMockHandler(httpMessageHandler);
         }
 
         public static void AddRegionDiscoveryMockHandlerNotFound(

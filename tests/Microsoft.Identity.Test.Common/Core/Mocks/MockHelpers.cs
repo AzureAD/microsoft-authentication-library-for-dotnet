@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
@@ -134,9 +135,25 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return "{\"statusCode\":\"500\",\"message\":\"An unexpected error occured while fetching the AAD Token.\",\"correlationId\":\"7d0c9763-ff1d-4842-a3f3-6d49e64f4513\"}";
         }
 
-        public static string GetSuccessfulCredentialResponse()
+        public static string GetSuccessfulCredentialResponse(
+            string credential = "accesstoken",
+            ManagedIdentityIdType identityType = ManagedIdentityIdType.SystemAssigned,
+            string client_id = "2d0d13ad-3a4d-4cfd-98f8-f20621d55ded",
+            long expires_on = 0,
+            string regional_token_url = "https://centraluseuap.mtlsauth.microsoft.com",
+            string tenant_id = "72f988bf-86f1-41af-91ab-2d7cd011db47")
         {
-            return "{\"client_id\":\"2d0d13ad-3a4d-4cfd-98f8-f20621d55ded\",\"credential\":\"access_token\",\"expires_on\":1700087787,\"identity_type\":\"SystemAssigned\",\"refresh_in\":1700085987,\"regional_token_url\":\"https://centraluseuap.mtlsauth.microsoft.com\",\"tenant_id\":\"72f988bf-86f1-41af-91ab-2d7cd011db47\"}";
+            var identityTypeString = identityType.ToString();
+
+            if (expires_on == 0)
+            {
+                long currentUnixTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                expires_on = currentUnixTimestamp + 3600; // Add one hour (3600 seconds) for example
+            }
+
+            long refresh_in = expires_on / 2;
+
+            return "{\"client_id\":\"" + client_id + "\",\"credential\":\"" + credential + "\",\"expires_on\":" + expires_on + ",\"identity_type\":\"" + identityTypeString + "\",\"refresh_in\":" + refresh_in + ",\"regional_token_url\":\"" + regional_token_url + "\",\"tenant_id\":\"" + tenant_id + "\"}";
         }
 
         public static string GetSuccessfulMtlsResponse()
@@ -144,7 +161,36 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return "{\"token_type\":\"Bearer\",\"expires_in\":86399,\"ext_expires_in\":86399,\"access_token\":\"some-token\"}";
         }
 
+        public static string GetMtlsInvalidResourceError()
+        {
+            return @"{""error"":""invalid_resource"",
+                       ""error_description"":""AADSTS500011: The resource principal named https://graph.microsoft.com/user.read was not found in the tenant named Cross Cloud B2B Test Tenant. This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant. You might have sent your authentication request to the wrong tenant. Trace ID: 9d8cb0bf-7e34-40fd-babc-f6ff018a1800 Correlation ID: 42186e1b-17eb-46fb-b5b7-4c43cae4d336 Timestamp: 2023-12-08 22:20:25Z"",
+                       ""error_codes"":[500011],
+                       ""timestamp"":""2023-12-08 22:20:25Z"",
+                       ""trace_id"":""9d8cb0bf-7e34-40fd-babc-f6ff018a1800"",
+                       ""correlation_id"":""42186e1b-17eb-46fb-b5b7-4c43cae4d336"",
+                       ""error_uri"":""https://eastus2euap.mtlsauth.microsoft.com/error?code=500011""}";
+        }
 
+        public static string GetMtlsInvalidScopeError70011()
+        {
+            return @"{""error"":""invalid_scope"",
+                   ""error_description"":""AADSTS70011: The provided request must include a 'scope' input parameter. The provided value for the input parameter 'scope' is not valid. The scope user.read/.default is not valid. Trace ID: 9e8a0bd6-fb1b-45cf-8e00-95c2c73e1400 Correlation ID: 6ce4a5ab-87a1-4985-b06d-5ab08b5fa924 Timestamp: 2023-12-08 21:56:44Z"",
+                   ""error_codes"":[70011],
+                   ""timestamp"":""2023-12-08 21:56:44Z"",
+                   ""trace_id"":""9e8a0bd6-fb1b-45cf-8e00-95c2c73e1400"",
+                   ""correlation_id"":""6ce4a5ab-87a1-4985-b06d-5ab08b5fa924""}";
+        }
+
+        public static string GetMtlsInvalidScopeError1002012()
+        {
+            return @"{""error"":""invalid_scope"",
+                    ""error_description"":""AADSTS1002012: The provided value for scope user.read is not valid. Client credential flows must have a scope value with /.default suffixed to the resource identifier (application ID URI). Trace ID: 8575f1d5-0144-4d71-87c8-2df9f1e30000 Correlation ID: a5469466-6c01-40e0-abf8-302d09c991e3 Timestamp: 2023-12-08 22:11:08Z"",
+                    ""error_codes"":[1002012],
+                    ""timestamp"":""2023-12-08 22:11:08Z"",
+                    ""trace_id"":""8575f1d5-0144-4d71-87c8-2df9f1e30000"",
+                    ""correlation_id"":""a5469466-6c01-40e0-abf8-302d09c991e3""}";
+        }
 
         public static string GetMsiImdsErrorResponse()
         {

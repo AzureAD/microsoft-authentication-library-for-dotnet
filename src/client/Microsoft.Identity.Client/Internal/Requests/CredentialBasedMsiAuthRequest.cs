@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -42,7 +43,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenForManagedIdentityParameters managedIdentityParameters)
         {
-            return IsCredentialKeyAvailable(authenticationRequestParameters.RequestContext, out Uri credentialEndpointUri) ?
+            if (serviceBundle.Config.HttpClientFactory is IMsalHttpClientFactory && string.IsNullOrEmpty(managedIdentityParameters.Claims))
+            {
+                authenticationRequestParameters.RequestContext.Logger.Info($"[Managed Identity] Credential based managed identity is unavailable. {MsalErrorMessage.CredentialHttpCustomizationError}");
+                return null;
+
+            }
+
+            return IsCredentialKeyAvailable(authenticationRequestParameters.RequestContext, managedIdentityParameters, out Uri credentialEndpointUri) ?
                     new CredentialBasedMsiAuthRequest(
                     serviceBundle,
                     authenticationRequestParameters,
@@ -172,7 +180,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             catch (MsalManagedIdentityException ex)
             {
                 logger.Verbose(() => $"[CredentialBasedMsiAuthRequest] Caught an exception. {ex.Message}");
-                throw new MsalManagedIdentityException(ex.Source, ex.Message, ManagedIdentity.ManagedIdentitySource.Credential);
+                throw new MsalManagedIdentityException(ex.ErrorCode, ex.Message, ManagedIdentity.ManagedIdentitySource.Credential);
             }
             finally
             {
@@ -217,15 +225,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             CancellationToken cancellationToken
             )
         {
-            var credentialResponseCache = new ManagedIdentityCredentialResponseCache(
+            var managedIdentityCredentialResponse = new ManagedIdentityCredentialResponse(
                 _credentialEndpoint,
-                AuthenticationRequestParameters.AppConfig.ClientId,
                 keyMaterial.BindingCertificate,
-                _managedIdentityParameters,
                 AuthenticationRequestParameters.RequestContext,
                 cancellationToken);
 
-            CredentialResponse credentialResponse = await credentialResponseCache.GetOrFetchCredentialAsync().ConfigureAwait(false);
+            CredentialResponse credentialResponse = await managedIdentityCredentialResponse.GetCredentialAsync().ConfigureAwait(false);
 
             logger.Verbose(() => "[CredentialBasedMsiAuthRequest] A credential was successfully fetched.");
 
@@ -246,25 +252,34 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return null;
         }
 
+        // Create an AuthenticationResult based on a cached access token item.
         private AuthenticationResult CreateAuthenticationResultFromCache(MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
+            // Create an AuthenticationResult using the provided cachedAccessTokenItem.
             AuthenticationResult authResult = new AuthenticationResult(
-                                                            cachedAccessTokenItem,
-                                                            null,
-                                                            AuthenticationRequestParameters.AuthenticationScheme,
-                                                            AuthenticationRequestParameters.RequestContext.CorrelationId,
-                                                            TokenSource.Cache,
-                                                            AuthenticationRequestParameters.RequestContext.ApiEvent,
-                                                            account: null,
-                                                            spaAuthCode: null,
-                                                            additionalResponseParameters: null);
+                cachedAccessTokenItem,
+                null, // No ID token provided for cache-based authentication.
+                AuthenticationRequestParameters.AuthenticationScheme,
+                AuthenticationRequestParameters.RequestContext.CorrelationId,
+                TokenSource.Cache,
+                AuthenticationRequestParameters.RequestContext.ApiEvent,
+                account: null, // No user account associated with cached token.
+                spaAuthCode: null, // No SPA authorization code associated.
+                additionalResponseParameters: null // No additional response parameters.
+            );
+
+            // Return the created AuthenticationResult.
             return authResult;
         }
 
+
+        // Override method to return a sorted set of scopes based on the input set.
         protected override SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)
         {
+            // Create a new SortedSet from the inputScopes to ensure a consistent and sorted order.
             return new SortedSet<string>(inputScopes);
         }
+
 
         /// <summary>
         /// Creates an OAuth2 client request for fetching the managed identity credential.
@@ -278,24 +293,29 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IHttpManager httpManager,
             CredentialResponse credentialResponse)
         {
+            // Initialize an OAuth2 client with logger, HTTP manager, and binding certificate.
             var client = new OAuth2Client(
                 AuthenticationRequestParameters.RequestContext.Logger,
                 httpManager,
                 keyMaterial.BindingCertificate);
 
+            // Convert overridden scopes to a single string.
             string scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope).AsSingleString();
 
+            // Add required parameters for client credentials grant request.
             client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials);
             client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
             client.AddBodyParameter(OAuth2Parameter.ClientId, credentialResponse.ClientId);
             client.AddBodyParameter(OAuth2Parameter.ClientAssertion, credentialResponse.Credential);
             client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
 
+            // Add optional claims and client capabilities parameter if provided.
             if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.ClaimsAndClientCapabilities))
             {
                 client.AddBodyParameter(OAuth2Parameter.Claims, AuthenticationRequestParameters.ClaimsAndClientCapabilities);
             }
 
+            // Return the configured OAuth2 client.
             return client;
         }
 
@@ -304,39 +324,51 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return null;
         }
 
+        // Check if CredentialKeyType is set to a valid value for Managed Identity.
         private static bool IsCredentialKeyAvailable(
-                RequestContext requestContext, out Uri credentialEndpointUri)
+            RequestContext requestContext,
+            AcquireTokenForManagedIdentityParameters managedIdentityParameters,
+            out Uri credentialEndpointUri)
         {
             credentialEndpointUri = null;
 
+            // If Managed Identity CredentialKeyType is set to None, indicate unavailability.
             if (requestContext.ServiceBundle.Config.ManagedIdentityCredentialKeyType == CryptoKeyType.None)
             {
                 requestContext.Logger.Verbose(() => "[Managed Identity] Credential based managed identity is unavailable.");
                 return false;
             }
 
+            // Initialize the credentialUri with the constant CredentialEndpoint and API version.
             string credentialUri = Constants.CredentialEndpoint;
+            credentialUri += $"?cred-api-version=1.0";
 
+            // Switch based on the type of Managed Identity ID provided.
             switch (requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
             {
+                // If the ID is of type ClientId, add user assigned client id to the request.
                 case ManagedIdentityIdType.ClientId:
                     requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
                     credentialUri += $"&{Constants.ManagedIdentityClientId}={requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
                     break;
 
+                // If the ID is of type ResourceId, add user assigned resource id to the request.
                 case ManagedIdentityIdType.ResourceId:
                     requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
                     credentialUri += $"&{Constants.ManagedIdentityResourceId}={requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
                     break;
 
+                // If the ID is of type ObjectId, add user assigned object id to the request.
                 case ManagedIdentityIdType.ObjectId:
                     requestContext.Logger.Info("[Managed Identity] Adding user assigned object id to the request.");
                     credentialUri += $"&{Constants.ManagedIdentityObjectId}={requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
                     break;
             }
 
-            credentialEndpointUri = new(credentialUri);
+            // Set the credentialEndpointUri with the constructed URI.
+            credentialEndpointUri = new Uri(credentialUri);
 
+            // Log information about creating Credential based managed identity.
             requestContext.Logger.Info($"[Managed Identity] Creating Credential based managed identity.");
             return true;
         }
