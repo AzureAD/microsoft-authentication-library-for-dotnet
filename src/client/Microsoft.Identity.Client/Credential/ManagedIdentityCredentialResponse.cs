@@ -74,11 +74,6 @@ namespace Microsoft.Identity.Client.Credential
                     errorMessages.Add("Credential is missing or empty.");
                 }
 
-                if (credentialResponse.ExpiresOn <= DateTimeOffset.UtcNow.ToUnixTimeSeconds())
-                {
-                    errorMessages.Add("ExpiresOn must be in the future.");
-                }
-
                 if (credentialResponse.RegionalTokenUrl.IsNullOrEmpty())
                 {
                     errorMessages.Add("RegionalTokenUrl is missing or empty.");
