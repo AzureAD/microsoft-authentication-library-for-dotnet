@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
+namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
     public class ECDCertificatePopCryptoProvider : IPoPCryptoProvider
     {
