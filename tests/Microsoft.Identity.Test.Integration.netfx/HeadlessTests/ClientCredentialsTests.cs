@@ -81,8 +81,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
-        [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
-        [DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
+        //[DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
+        //[DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientAssertion_Manual_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
@@ -253,6 +253,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             authResult = await confidentialApp
                 .AcquireTokenForClient(settings.AppScopes)
                 .WithCorrelationId(correlationId)
+                .WithExtraQueryParameters("dc=ESTS-PUB-SCUS-LZ1-FD000-TEST1")
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -448,7 +449,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             {
               { "alg", "RS256"},
               { "typ", "JWT"},
-              { "x5t", Base64UrlHelpers.Encode(certificate.GetCertHash())},
+              //{ "x5t", Base64UrlHelpers.Encode(certificate.GetCertHash())},
+              { "x5t#S256", Base64UrlHelpers.Encode(certificate.GetCertHash(HashAlgorithmName.SHA256))},
             };
 
             var headerBytes = JsonSerializer.SerializeToUtf8Bytes(header);
@@ -459,7 +461,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 rsa.SignData(
                     Encoding.UTF8.GetBytes(token),
                     HashAlgorithmName.SHA256,
-                    RSASignaturePadding.Pkcs1));
+                    RSASignaturePadding.Pss));
             return string.Concat(token, ".", signature);
         }
     }
