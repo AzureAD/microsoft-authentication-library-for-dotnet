@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// <returns>
         /// The X.509 certificate if available and still valid in the cache; otherwise, a new certificate is created.
         /// </returns>
-        private X509Certificate2 GetOrCreateCertificateFromCryptoKeyInfo()
+        public X509Certificate2 GetOrCreateCertificateFromCryptoKeyInfo()
         {
             if (s_bindingCertificate != null && !CertificateNeedsRotation(s_bindingCertificate))
             {
@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// <returns>
         /// True if the certificate needs rotation, false otherwise.
         /// </returns>
-        private static bool CertificateNeedsRotation(X509Certificate2 certificate, double rotationPercentageThreshold = 70)
+        public static bool CertificateNeedsRotation(X509Certificate2 certificate, double rotationPercentageThreshold = 70)
         {
             DateTime now = DateTime.UtcNow;
 
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// <returns>
         /// The initialized ECDsaCng key if successful, otherwise null.
         /// </returns>
-        private ECDsaCng GetCngKey()
+        public ECDsaCng GetCngKey()
         {
             _logger.Verbose(() => "[Managed Identity] Initializing Cng Key.");
 
@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// <returns>
         ///   <c>true</c> if the key material is successfully retrieved; otherwise, <c>false</c>.
         /// </returns>
-        private bool TryGetKeyMaterial(
+        public bool TryGetKeyMaterial(
             string keyProviderName,
             string keyName,
             CngKeyOpenOptions cngKeyOpenOptions,
@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// <returns>
         ///   <c>true</c> if the key is protected by KeyGuard; otherwise, <c>false</c>.
         /// </returns>
-        private bool IsKeyGuardProtected(CngKey cngKey)
+        public bool IsKeyGuardProtected(CngKey cngKey)
         {
             //Check to see if the KeyGuard Isolation flag was set in the key
             if (!cngKey.HasProperty(IsKeyGuardEnabledProperty, CngPropertyOptions.None))
@@ -234,7 +234,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// Determines the cryptographic key type based on the characteristics of the specified CNG key.
         /// </summary>
         /// <param name="cngKey">The CNG key for which to determine the cryptographic key type.</param>
-        private void DetermineKeyType(CngKey cngKey)
+        public void DetermineKeyType(CngKey cngKey)
         {
             switch (true)
             {
@@ -264,7 +264,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// </summary>
         /// <param name="eCDsaCngKey">The CNG key used for creating the certificate.</param>
         /// <returns>The created binding certificate.</returns>
-        private X509Certificate2 CreateCngCertificate(ECDsaCng eCDsaCngKey)
+        public X509Certificate2 CreateCngCertificate(ECDsaCng eCDsaCngKey)
         {
             string certSubjectname = eCDsaCngKey.Key.KeyName;
 
@@ -313,7 +313,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// <param name="subjectName">The subject name for the certificate (e.g., Common Name).</param>
         /// <param name="ecdsaKey">The ECDsa key to be associated with the certificate request.</param>
         /// <returns>The certificate request for the binding certificate.</returns>
-        private CertificateRequest CreateCertificateRequest(string subjectName, ECDsaCng ecdsaKey)
+        public CertificateRequest CreateCertificateRequest(string subjectName, ECDsaCng ecdsaKey)
         {
             CertificateRequest certificateRequest = null;
 
@@ -331,7 +331,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// <param name="publicKeyOnlyCertificate">The public key-only certificate.</param>
         /// <param name="eCDsaCngKey">The ECDsa key used for associating the private key.</param>
         /// <returns>The certificate with the private key information associated.</returns>
-        private X509Certificate2 AssociatePrivateKeyInfo(X509Certificate2 publicKeyOnlyCertificate, ECDsaCng eCDsaCngKey)
+        public X509Certificate2 AssociatePrivateKeyInfo(X509Certificate2 publicKeyOnlyCertificate, ECDsaCng eCDsaCngKey)
         {
             _logger.Verbose(() => "[Managed Identity] Associating private key with the binding certificate.");
 

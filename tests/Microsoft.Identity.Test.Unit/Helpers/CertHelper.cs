@@ -12,6 +12,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
     public static class CertHelper
     {
         private static X509Certificate2 s_x509Certificate2 = null;
+        private static object s_lockObject;
 
         public static X509Certificate2 GetOrCreateTestCert()
         {
@@ -54,5 +55,43 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 return cert;
             }
         }
+
+        public static X509Certificate2 GetOrCreateTestCertWithBuilder()
+        {
+            // create the cert if it doesn't exist. use a lock to prevent multiple threads from creating the cert
+
+            if (s_x509Certificate2 == null)
+            {
+                lock (s_lockObject)
+                {
+                    if (s_x509Certificate2 == null)
+                    {
+                        // Use the X509Certificate2Builder to create the certificate
+                        using (RSA rsa = RSA.Create(4096))
+                        {
+                            DateTimeOffset notBefore = DateTimeOffset.UtcNow;
+                            DateTimeOffset notAfter = notBefore.AddDays(1);
+
+                            X509Certificate2 cert = new X509Certificate2Builder()
+                                .WithSubjectName("CN=Test Cert")
+                                .WithPublicKey(rsa)
+                                .WithHashAlgorithm(HashAlgorithmName.SHA256)
+                                .WithSignatureAlgorithm(RSASignaturePadding.Pkcs1)
+                                .WithBasicConstraintsExtension(true, false, 0, true)
+                                .WithSubjectKeyIdentifierExtension(false)
+                                .WithNotBefore(notBefore)
+                                .WithNotAfter(notAfter)
+                                .Build();
+
+                            return cert;
+                        }
+                    }
+                }
+            }
+
+            return s_x509Certificate2;
+        }
+
+
     }
 }

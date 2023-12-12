@@ -287,14 +287,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return authResult;
         }
 
-
         // Override method to return a sorted set of scopes based on the input set.
         protected override SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)
         {
             // Create a new SortedSet from the inputScopes to ensure a consistent and sorted order.
             return new SortedSet<string>(inputScopes);
         }
-
 
         /// <summary>
         /// Creates an OAuth2 client request for fetching the managed identity credential.
