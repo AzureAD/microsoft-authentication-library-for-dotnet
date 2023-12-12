@@ -19,7 +19,7 @@ using Microsoft.Identity.Client.WsTrust;
 using Microsoft.Identity.Client.Platforms.netstandard;
 #endif
 #if NET451_OR_GREATER
-using Microsoft.Identity.Client.Platforms.net45;
+using Microsoft.Identity.Client.Platforms.netdesktop;
 #endif
 
 namespace Microsoft.Identity.Client.Internal
