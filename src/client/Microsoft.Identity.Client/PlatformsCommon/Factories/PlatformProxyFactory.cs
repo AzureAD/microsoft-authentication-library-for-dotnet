@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -34,7 +35,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
 #elif NETSTANDARD
             return new Microsoft.Identity.Client.Platforms.netstandard.NetStandardPlatformProxy(finalLogger);
 #elif DESKTOP
-            return new Microsoft.Identity.Client.Platforms.net45.NetDesktopPlatformProxy(finalLogger);
+            return new Microsoft.Identity.Client.Platforms.netdesktop.NetDesktopPlatformProxy(finalLogger);
 #else
             throw new PlatformNotSupportedException();
 #endif

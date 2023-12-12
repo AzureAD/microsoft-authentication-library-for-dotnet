@@ -17,11 +17,7 @@ namespace Microsoft.Identity.Client.Utils
 #endif
         public static IReadOnlyList<T> GetEmptyReadOnlyList<T>()
         {
-#if NET45
-            return new List<T>();
-#else
             return Array.Empty<T>();
-#endif
         }
 
 #if HAVE_METHOD_IMPL_ATTRIBUTE

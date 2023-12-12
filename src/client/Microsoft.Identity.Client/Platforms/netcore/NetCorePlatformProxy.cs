@@ -299,7 +299,10 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return false;
         }
 
-        public override IDeviceAuthManager CreateDeviceAuthManager() => new NetCoreDeviceAuthManager();
+        public override IDeviceAuthManager CreateDeviceAuthManager()
+        {
+            return new DeviceAuthManager(CryptographyManager);
+        }
 
         public override IKeyMaterialManager GetKeyMaterialManager()
         {
