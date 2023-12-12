@@ -353,7 +353,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddTokenErrorResponse("invalid_grant", System.Net.HttpStatusCode.BadRequest);
 
-                MsalUiRequiredException ex = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(async () =>
+                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
@@ -474,7 +474,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task ManagedIdentityTestWrongScopeAsync(
             Func<string> errorFactory, // Use Func<string> for dynamic error data
             string resource,
-            string expectedErrorMessage)
+            string expectedErrorMessage,
+            string expectedErrorCode)
         {
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))
@@ -504,14 +505,60 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     isCredentialEndpoint: false,
                     errorFactory.Invoke(), statusCode: HttpStatusCode.BadRequest);
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
+                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(ex.Message, expectedErrorMessage);
-                //Assert.AreEqual(ManagedIdentitySource.Credential, ex.ManagedIdentitySource);
-                //Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+                Assert.AreEqual(ManagedIdentitySource.Credential, ex.ManagedIdentitySource);
+                Assert.AreEqual(ex.ErrorCode, expectedErrorCode);
+            }
+        }
+
+        [DataTestMethod]
+        [DynamicData(nameof(Common.TestData.GetMtlsErrorData), typeof(Common.TestData), DynamicDataSourceType.Method)]
+        public async Task MtlsErrorsAreTransformedToManagedIdentityExceptionsAsync(
+            Func<string> errorFactory, // Use Func<string> for dynamic error data
+            string expectedErrorMessage,
+            string expectedErrorCode)
+        {
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                //Arrange
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.Ephemeral);
+                miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                IManagedIdentityApplication mi = miBuilder.Build();
+
+                // Arrange
+                httpManager.AddManagedIdentityCredentialMockHandler(
+                    CredentialEndpoint,
+                    ManagedIdentityTests.Resource,
+                    isCredentialEndpoint: true,
+                    MockHelpers.GetSuccessfulCredentialResponse());
+
+                httpManager.AddManagedIdentityCredentialMockHandler(
+                    MtlsEndpoint,
+                    Resource,
+                    isCredentialEndpoint: false,
+                    errorFactory.Invoke(), statusCode: HttpStatusCode.BadRequest);
+
+                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(ex.Message, expectedErrorMessage);
+                Assert.AreEqual(ManagedIdentitySource.Credential, ex.ManagedIdentitySource);
+                Assert.AreEqual(ex.ErrorCode, expectedErrorCode);
             }
         }
 
@@ -634,6 +681,45 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 IManagedIdentityApplication mi = miBuilder.Build();
 
                 // Arrange
+                httpManager.AddFailingRequest(new HttpRequestException("A socket operation was attempted to an unreachable network.",
+                    new SocketException(10051)));
+
+                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                    await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+
+                Assert.IsNotNull(ex);
+                Assert.AreEqual(ManagedIdentitySource.Credential, ex.ManagedIdentitySource);
+                Assert.AreEqual(MsalError.ManagedIdentityUnreachableNetwork, ex.ErrorCode);
+                Assert.AreEqual("A socket operation was attempted to an unreachable network.", ex.Message);
+            }
+        }
+
+        [TestMethod]
+        public async Task MtlsUnreachableNetworkAsync()
+        {
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                //Arrange
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.Ephemeral);
+                miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                IManagedIdentityApplication mi = miBuilder.Build();
+
+                // Arrange
+                httpManager.AddManagedIdentityCredentialMockHandler(
+                    CredentialEndpoint,
+                    ManagedIdentityTests.Resource,
+                    isCredentialEndpoint: true,
+                    MockHelpers.GetSuccessfulCredentialResponse());
+
                 httpManager.AddFailingRequest(new HttpRequestException("A socket operation was attempted to an unreachable network.",
                     new SocketException(10051)));
 

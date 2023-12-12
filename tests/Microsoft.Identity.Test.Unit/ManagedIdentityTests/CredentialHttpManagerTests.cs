@@ -27,6 +27,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         internal const string MtlsEndpoint = "https://centraluseuap.mtlsauth.microsoft.com/" +
             "72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/v2.0/token";
         internal const string Resource = "https://management.azure.com";
+        internal const string ImdsEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token";
 
         /// <summary>
         /// Test the Public APIs for Credential endpoint support for http client customizations.
@@ -70,46 +71,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 }
 
                 Assert.IsTrue(mi.GetBindingCertificate().Thumbprint == CertHelper.GetOrCreateTestCert().Thumbprint);
-            }
-        }
-
-        /// <summary>
-        /// Tests for http client customization.
-        /// </summary>
-        [TestMethod]
-        public async Task CredentialWithWrongHttpClientCustomizationAsync()
-        {
-            // Arrange
-            using (MockHttpAndServiceBundle harness = CreateTestHarness())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true, invokeNonMtlsHttpManagerFactory: true))
-            {
-                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder
-                    .Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager);
-
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.User);
-                miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
-                IManagedIdentityApplication mi = miBuilder.Build();
-
-                httpManager.AddManagedIdentityCredentialMockHandler(
-                    CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
-                    MockHelpers.GetSuccessfulCredentialResponse());
-
-                // Act
-                // Test for MsalClientException
-                MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(
-                    () => mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource) 
-                    .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
-
-                Assert.IsNotNull(ex);
-                Assert.IsNotNull(ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.CredentialHttpCustomizationError, ex.Message); 
             }
         }
 
@@ -212,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         /// <summary>
-        /// Tests claims api with wrong http client throws.
+        /// Tests MI customized with IMsalHttpClientFactory returns IMDS token.
         /// </summary>
         [TestMethod]
         public async Task WithHttpClientCustomizationReturnsMsiTokenAsync()
@@ -225,6 +186,48 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpClientFactory(mockHttpClient);
+
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.User);
+                miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                IManagedIdentityApplication mi = miBuilder.Build();
+
+                // Act
+                var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                result = await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        /// <summary>
+        /// Tests MI customized with IMsalHttpClientFactory returns IMDS token.
+        /// </summary>
+        [TestMethod]
+        public async Task WithMtlsHttpClientCustomizationReturnsMtlsTokenAsync()
+        {
+            // Arrange
+            using MockMtlsHttpClientFactory mockHttpClient = new MockMtlsHttpClientFactory();
+            using (mockHttpClient.AddMockHandler(MockHttpCreator.CreateMtlsCredentialHandler(CertHelper.GetOrCreateTestCert())))
+            using (mockHttpClient.AddMockHandler(MockHttpCreator.CreateMtlsCredentialHandler(CertHelper.GetOrCreateTestCert())))
+            using (mockHttpClient.AddMockHandler(MockHttpCreator.CreateMtlsTokenHandler()))
+            using (mockHttpClient.AddMockHandler(MockHttpCreator.CreateMtlsTokenHandler()))
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
+            {
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder
+                    .Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpClientFactory(mockHttpClient as IMsalMtlsHttpClientFactory);
 
                 KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.User);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;

@@ -43,11 +43,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenForManagedIdentityParameters managedIdentityParameters)
         {
-            if (serviceBundle.Config.HttpClientFactory is IMsalHttpClientFactory && string.IsNullOrEmpty(managedIdentityParameters.Claims))
+            if ((serviceBundle.Config.HttpClientFactory != null && 
+                serviceBundle.Config.HttpClientFactory is not IMsalMtlsHttpClientFactory) 
+                && string.IsNullOrEmpty(managedIdentityParameters.Claims))
             {
                 authenticationRequestParameters.RequestContext.Logger.Info($"[Managed Identity] Credential based managed identity is unavailable. {MsalErrorMessage.CredentialHttpCustomizationError}");
                 return null;
-
             }
 
             return IsCredentialKeyAvailable(authenticationRequestParameters.RequestContext, managedIdentityParameters, out Uri credentialEndpointUri) ?
@@ -194,29 +195,43 @@ namespace Microsoft.Identity.Client.Internal.Requests
             CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {
-            logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Getting token from the managed identity endpoint.");
+            try
+            {
 
-            CredentialResponse credentialResponse =
-                await GetCredentialAssertionAsync(keyMaterial, logger, cancellationToken).ConfigureAwait(false);
+                logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Getting token from the managed identity endpoint.");
 
-            var baseUri = new Uri(credentialResponse.RegionalTokenUrl);
-            var tokenUrl = new Uri(baseUri, $"{credentialResponse.TenantId}/oauth2/v2.0/token");
+                CredentialResponse credentialResponse =
+                    await GetCredentialAssertionAsync(keyMaterial, logger, cancellationToken).ConfigureAwait(false);
 
-            OAuth2Client client = CreateClientRequest(
-                keyMaterial,
-                AuthenticationRequestParameters.RequestContext.ServiceBundle.HttpManager,
-                credentialResponse);
+                var baseUri = new Uri(credentialResponse.RegionalTokenUrl);
+                var tokenUrl = new Uri(baseUri, $"{credentialResponse.TenantId}/oauth2/v2.0/token");
 
-            MsalTokenResponse msalTokenResponse = await client
-                    .GetTokenAsync(tokenUrl,
-                    AuthenticationRequestParameters.RequestContext,
-                    true,
-                    AuthenticationRequestParameters.OnBeforeTokenRequestHandler).ConfigureAwait(false);
+                OAuth2Client client = CreateClientRequest(
+                    keyMaterial,
+                    AuthenticationRequestParameters.RequestContext.ServiceBundle.HttpManager,
+                    credentialResponse);
 
-            msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
+                MsalTokenResponse msalTokenResponse = await client
+                        .GetTokenAsync(tokenUrl,
+                        AuthenticationRequestParameters.RequestContext,
+                        true,
+                        AuthenticationRequestParameters.OnBeforeTokenRequestHandler).ConfigureAwait(false);
 
-            return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse)
-                .ConfigureAwait(false);
+                msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
+
+                return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse)
+                    .ConfigureAwait(false);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new MsalManagedIdentityException(
+                    MsalError.ManagedIdentityUnreachableNetwork, ex.Message, ManagedIdentity.ManagedIdentitySource.Credential);
+            }
+            catch (MsalServiceException ex)
+            {
+                logger.Verbose(() => $"[CredentialBasedMsiAuthRequest] Caught an exception. {ex.Message}");
+                throw new MsalManagedIdentityException(ex.ErrorCode, ex.Message, ManagedIdentity.ManagedIdentitySource.Credential);
+            }
         }
 
         private async Task<CredentialResponse> GetCredentialAssertionAsync(

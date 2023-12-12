@@ -45,6 +45,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return CreateSuccessResponseMessage(msiSuccessResponse);
         }
 
+        public static HttpResponseMessage GetSuccessfulMtlsResponse()
+        {
+            string mtlsResponse = "{\"token_type\":\"Bearer\",\"expires_in\":86399,\"ext_expires_in\":86399,\"access_token\":\"some-token\"}";
+
+            return CreateSuccessResponseMessage(mtlsResponse);
+        }
+
+
         public static HttpResponseMessage CreateSuccessResponseMessage(string successResponse)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
@@ -74,6 +82,39 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             };
 
             return handler;
+        }
+
+        public static MockHttpMessageHandler CreateMtlsCredentialHandler(X509Certificate2 mtlsBindingCert)
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = GetSuccessfulCredentialResponse(),
+            };
+
+            // Add the certificate to the handler if provided
+            if (mtlsBindingCert != null)
+            {
+                handler.AddClientCertificate(mtlsBindingCert);
+            }
+
+            return handler;
+        }
+
+        public static MockHttpMessageHandler CreateMtlsTokenHandler()
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = GetSuccessfulMtlsResponse(),
+            };
+
+            return handler;
+        }
+
+        public static void AddClientCertificate(this MockHttpMessageHandler handler, X509Certificate2 certificate)
+        {   
+            handler.ClientCertificates.Add(certificate);
         }
     }
 }
