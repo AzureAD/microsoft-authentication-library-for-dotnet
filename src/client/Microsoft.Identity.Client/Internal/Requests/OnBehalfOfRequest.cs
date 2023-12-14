@@ -123,11 +123,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessToken,
-                        () =>
-                        {
-                            var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                            return RefreshRtOrFetchNewAccessTokenAsync(tokenSource.Token);
-                        }, logger);
+                        () => RefreshRtOrFetchNewAccessTokenAsync(cancellationToken), logger);
                     }
                 }
 

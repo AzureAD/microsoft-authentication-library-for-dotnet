@@ -66,11 +66,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
-                        () =>
-                        {
-                            var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                            return GetAccessTokenAsync(tokenSource.Token, logger);
-                        }, logger);
+                        () => GetAccessTokenAsync(cancellationToken, logger), logger);
                     }
                 }
                 catch (MsalServiceException e)
