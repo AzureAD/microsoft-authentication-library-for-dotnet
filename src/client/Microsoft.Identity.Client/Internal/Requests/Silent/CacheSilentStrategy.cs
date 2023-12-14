@@ -93,7 +93,11 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
-                        () => RefreshRtOrFailAsync(cancellationToken), logger);
+                        () =>
+                        {
+                            var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                            return RefreshRtOrFailAsync(tokenSource.Token);
+                        }, logger);
                     }
                 }
 
