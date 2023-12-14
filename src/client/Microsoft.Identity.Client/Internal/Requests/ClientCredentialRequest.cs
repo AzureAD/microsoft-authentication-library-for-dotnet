@@ -114,13 +114,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationResult authResult;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
 
+            //allow only one call to the provider 
+            logger.Verbose(() => "[ClientCredentialRequest] Entering token acquire for client credential request semaphore.");
+            await s_semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
+            logger.Verbose(() => "[ClientCredentialRequest] Entered token acquire for client credential request semaphore.");
+
             try
             {
-                //allow only one call to the provider 
-                logger.Verbose(() => "[ClientCredentialRequest] Entering token acquire for client credential request semaphore.");
-                await s_semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
-                logger.Verbose(() => "[ClientCredentialRequest] Entered token acquire for client credential request semaphore.");
-                
                 // Bypass cache and send request to token endpoint, when 
                 // 1. Force refresh is requested, or
                 // 2. Claims are passed, or 

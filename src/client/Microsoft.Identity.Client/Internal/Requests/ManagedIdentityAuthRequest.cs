@@ -100,14 +100,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             logger.Verbose(() => "[ManagedIdentityAuthRequest] Entering token acquire for managed identity " +
             "endpoint semaphore.");
 
+            // Requests to a managed identity endpoint must be throttled; 
+            // otherwise, the endpoint will throw a HTTP 429.
+            await s_semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
+            logger.Verbose(() => "[ManagedIdentityAuthRequest] Entered token acquire for managed identity " +
+            "endpoint semaphore.");
+
             try
             {
-                // Requests to a managed identity endpoint must be throttled; 
-                // otherwise, the endpoint will throw a HTTP 429.
-                await s_semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
-                logger.Verbose(() => "[ManagedIdentityAuthRequest] Entered token acquire for managed identity " +
-                "endpoint semaphore.");
-
                 // Bypass cache and send request to token endpoint, when
                 // 1. Force refresh is requested, or
                 // 2. Proactively Refreshed
