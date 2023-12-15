@@ -7,7 +7,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Integration.net45.Infrastructure
+namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
     public class HttpTelemetryRecorder
     {
