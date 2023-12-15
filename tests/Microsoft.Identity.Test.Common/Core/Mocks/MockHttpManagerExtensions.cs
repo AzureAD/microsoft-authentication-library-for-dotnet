@@ -453,8 +453,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static void AddManagedIdentityCredentialMockHandler(
             this MockHttpManager httpManager,
             string expectedUrl,
-            string resource,
-            bool isCredentialEndpoint = false,
             string response = null,
             string userAssignedId = null,
             UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
@@ -462,41 +460,72 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
-            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            IDictionary<string, string> expectedHeaders = new Dictionary<string, string>();
             MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
             
             HttpContent content = new StringContent(response);
             responseMessage.Content = content;
 
             httpMessageHandler.ExpectedMethod = HttpMethod.Post;
+            
+            expectedHeaders.Add("Metadata", "true");
+            expectedQueryParams.Add("cred-api-version", "1.0");
 
-            if (isCredentialEndpoint)
+            if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
             {
-                responseMessage.Headers.Add("Server", "IMDS");
-                expectedQueryParams.Add("cred-api-version", "1.0");
-
-                if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
-                {
-                    expectedQueryParams.Add(Constants.ManagedIdentityClientId, userAssignedId);
-                }
-
-                if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
-                {
-                    expectedQueryParams.Add(Constants.ManagedIdentityResourceId, userAssignedId);
-                }
-
-                if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)
-                {
-                    expectedQueryParams.Add(Constants.ManagedIdentityObjectId, userAssignedId);
-                }
-                
-                httpMessageHandler.ExpectedQueryParams = expectedQueryParams;
+                expectedQueryParams.Add(Constants.ManagedIdentityClientId, userAssignedId);
             }
+
+            if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
+            {
+                expectedQueryParams.Add(Constants.ManagedIdentityResourceId, userAssignedId);
+            }
+
+            if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)
+            {
+                expectedQueryParams.Add(Constants.ManagedIdentityObjectId, userAssignedId);
+            }
+                
+            httpMessageHandler.ExpectedQueryParams = expectedQueryParams;
 
             httpMessageHandler.ResponseMessage = responseMessage;
             httpMessageHandler.ExpectedUrl = expectedUrl;
-            
 
+            httpMessageHandler.ExpectedRequestHeaders = expectedHeaders;
+
+            httpManager.AddMockHandler(httpMessageHandler);
+        }
+
+        public static void AddManagedIdentityMtlsMockHandler(
+            this MockHttpManager httpManager,
+            string expectedUrl,
+            string resource,
+            string client_id = TestConstants.SystemAssignedClientId,
+            string response = null,
+            HttpStatusCode statusCode = HttpStatusCode.OK)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
+            IDictionary<string, string> expectedBodyParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
+            Guid correlationId = Guid.NewGuid();
+
+            HttpContent content = new StringContent(response);
+            responseMessage.Content = content;
+
+            httpMessageHandler.ExpectedMethod = HttpMethod.Post;
+            //expectedRequestHeaders.Add("client-request-id", correlationId.ToString("D"));
+            httpMessageHandler.ResponseMessage = responseMessage;
+            httpMessageHandler.ExpectedUrl = expectedUrl;
+
+            expectedBodyParams.Add("grant_type", "client_credentials");
+            expectedBodyParams.Add("scope", resource + "/.default");
+            expectedBodyParams.Add("client_id", client_id);
+            expectedBodyParams.Add("client_assertion", "managed-identity-credential");
+            expectedBodyParams.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
+
+            httpMessageHandler.ExpectedPostData = expectedBodyParams;
+            httpMessageHandler.ExpectedRequestHeaders = expectedRequestHeaders;
             httpManager.AddMockHandler(httpMessageHandler);
         }
 

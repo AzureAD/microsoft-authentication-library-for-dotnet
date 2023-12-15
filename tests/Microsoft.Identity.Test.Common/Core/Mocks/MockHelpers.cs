@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public static string GetSuccessfulCredentialResponse(
-            string credential = "accesstoken",
+            string credential = "managed-identity-credential",
             ManagedIdentityIdType identityType = ManagedIdentityIdType.SystemAssigned,
             string client_id = "2d0d13ad-3a4d-4cfd-98f8-f20621d55ded",
             long expires_on = 0,

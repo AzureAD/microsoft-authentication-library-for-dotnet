@@ -98,8 +98,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse());
 
                 // Act

@@ -139,6 +139,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string B2CEditProfileHomeAccountObjectId = Uid + "-" + B2CEditProfile;
 
         public const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
+        public const string SystemAssignedClientId = "2d0d13ad-3a4d-4cfd-98f8-f20621d55ded";
         public const string ClientId2 = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
         public const string ObjectId = "593b2662-5af7-4a90-a9cb-5a9de615b82f";
         public const string FamilyId = "1";

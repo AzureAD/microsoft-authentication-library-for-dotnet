@@ -145,13 +145,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationResult authResult = null;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
 
+            //allow only one call to the provider 
+            logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Entering token acquire for managed identity credential request semaphore.");
+            await s_semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
+            logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Entered token acquire for managed identity credential request semaphore.");
+
             try
             {
-                //allow only one call to the provider 
-                logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Entering token acquire for managed identity credential request semaphore.");
-                await s_semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
-                logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Entered token acquire for managed identity credential request semaphore.");
-
                 // Bypass cache and send request to token endpoint, when 
                 // 1. Force refresh is requested, or
                 // 2. Claims are passed, or 
@@ -197,7 +197,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             try
             {
-
                 logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Getting token from the managed identity endpoint.");
 
                 CredentialResponse credentialResponse =

@@ -65,15 +65,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse());
 
-                httpManager.AddManagedIdentityCredentialMockHandler(
+                httpManager.AddManagedIdentityMtlsMockHandler(
                     MtlsEndpoint,
                     ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: false,
-                    MockHelpers.GetSuccessfulMtlsResponse());
+                    response: MockHelpers.GetSuccessfulMtlsResponse());
 
                 // Act
                 // We should get the auth result from the token provider
@@ -126,17 +123,15 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
-                    MockHelpers.GetSuccessfulCredentialResponse(),
+                    MockHelpers.GetSuccessfulCredentialResponse(client_id: TestConstants.ClientId),
                     userAssignedId: userAssignedId,
                     userAssignedIdentityId: userAssignedIdentityId);
 
-                httpManager.AddManagedIdentityCredentialMockHandler(
+                httpManager.AddManagedIdentityMtlsMockHandler(
                     MtlsEndpoint,
                     ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: false,
-                    MockHelpers.GetSuccessfulMtlsResponse());
+                    client_id: TestConstants.ClientId,
+                    response: MockHelpers.GetSuccessfulMtlsResponse());
 
                 // Act
                 // We should get the auth result from the token provider
@@ -185,15 +180,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse());
 
-                httpManager.AddManagedIdentityCredentialMockHandler(
+                httpManager.AddManagedIdentityMtlsMockHandler(
                     MtlsEndpoint,
                     ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: false,
-                    MockHelpers.GetSuccessfulMtlsResponse());
+                    response: MockHelpers.GetSuccessfulMtlsResponse());
 
                 // Act
                 // We should get the auth result from the token provider
@@ -217,15 +209,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse());
 
-                httpManager.AddManagedIdentityCredentialMockHandler(
+                httpManager.AddManagedIdentityMtlsMockHandler(
                     MtlsEndpoint,
                     ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: false,
-                    MockHelpers.GetSuccessfulMtlsResponse());
+                    response: MockHelpers.GetSuccessfulMtlsResponse());
 
                 // We should get the auth result from the token provider when force refreshed
                 result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
@@ -265,15 +254,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse());
 
-                httpManager.AddManagedIdentityCredentialMockHandler(
+                httpManager.AddManagedIdentityMtlsMockHandler(
                     MtlsEndpoint,
                     ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: false,
-                    MockHelpers.GetSuccessfulMtlsResponse());
+                    response: MockHelpers.GetSuccessfulMtlsResponse());
 
                 // Act
                 // We should get the auth result from the token provider
@@ -298,15 +284,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Arrange
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse());
 
-                httpManager.AddManagedIdentityCredentialMockHandler(
+                httpManager.AddManagedIdentityMtlsMockHandler(
                     MtlsEndpoint,
                     ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: false,
-                    MockHelpers.GetSuccessfulMtlsResponse());
+                    response: MockHelpers.GetSuccessfulMtlsResponse());
 
                 // Act
                 // We should get the auth result from the token provider when claims are passed
@@ -345,8 +328,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Arrange
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse());
 
                 var correlationId = Guid.NewGuid();
@@ -423,15 +404,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Arrange
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse());
 
-                httpManager.AddManagedIdentityCredentialMockHandler(
+                httpManager.AddManagedIdentityMtlsMockHandler(
                     MtlsEndpoint,
                     ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: false,
-                    MockHelpers.GetSuccessfulMtlsResponse());
+                    response: MockHelpers.GetSuccessfulMtlsResponse());
 
                 var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource).ExecuteAsync().ConfigureAwait(false);
 
@@ -450,15 +428,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Arrange
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    anotherScope,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse());
 
-                httpManager.AddManagedIdentityCredentialMockHandler(
+                httpManager.AddManagedIdentityMtlsMockHandler(
                     MtlsEndpoint,
                     anotherScope,
-                    isCredentialEndpoint: false,
-                    MockHelpers.GetSuccessfulMtlsResponse());
+                    response: MockHelpers.GetSuccessfulMtlsResponse());
 
                 // Acquire token for another scope
                 result = await mi.AcquireTokenForManagedIdentity(anotherScope).ExecuteAsync().ConfigureAwait(false);
@@ -495,15 +470,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Arrange
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse());
 
-                httpManager.AddManagedIdentityCredentialMockHandler(
+                httpManager.AddManagedIdentityMtlsMockHandler(
                     MtlsEndpoint,
                     resource,
-                    isCredentialEndpoint: false,
-                    errorFactory.Invoke(), statusCode: HttpStatusCode.BadRequest);
+                    response: errorFactory.Invoke(), statusCode: HttpStatusCode.BadRequest);
 
                 MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(resource)
@@ -541,15 +513,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Arrange
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse());
 
-                httpManager.AddManagedIdentityCredentialMockHandler(
+                httpManager.AddManagedIdentityMtlsMockHandler(
                     MtlsEndpoint,
                     Resource,
-                    isCredentialEndpoint: false,
-                    errorFactory.Invoke(), statusCode: HttpStatusCode.BadRequest);
+                    response: errorFactory.Invoke(), statusCode: HttpStatusCode.BadRequest);
 
                 MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
@@ -609,8 +578,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Arrange
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     "",
                     statusCode: HttpStatusCode.InternalServerError);
 
@@ -646,8 +613,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Arrange
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     "",
                     statusCode: HttpStatusCode.OK);
 
@@ -716,8 +681,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Arrange
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse());
 
                 httpManager.AddFailingRequest(new HttpRequestException("A socket operation was attempted to an unreachable network.",
@@ -760,15 +723,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Arrange
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     "",
                     statusCode: statusCode);
 
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     "",
                     statusCode: statusCode);
 
@@ -803,15 +762,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Arrange
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse());
 
-                httpManager.AddManagedIdentityCredentialMockHandler(
+                httpManager.AddManagedIdentityMtlsMockHandler(
                     MtlsEndpoint,
                     ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: false,
-                    MockHelpers.GetSuccessfulMtlsResponse());
+                    response: MockHelpers.GetSuccessfulMtlsResponse());
 
                 var builder = mi.AcquireTokenForManagedIdentity(Resource);
                 var result = await builder.ExecuteAsync().ConfigureAwait(false);
@@ -844,17 +800,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse(),
                     userAssignedId: TestConstants.ClientId,
                     userAssignedIdentityId: UserAssignedIdentityId.ClientId);
 
-                httpManager.AddManagedIdentityCredentialMockHandler(
+                httpManager.AddManagedIdentityMtlsMockHandler(
                     MtlsEndpoint,
                     ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: false,
-                    MockHelpers.GetSuccessfulMtlsResponse());
+                    response: MockHelpers.GetSuccessfulMtlsResponse());
 
                 // Act
                 // We should get the auth result from the token provider
@@ -900,17 +853,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse(), 
                     userAssignedId: TestConstants.ClientId, 
                     userAssignedIdentityId: UserAssignedIdentityId.ClientId);
 
-                httpManager.AddManagedIdentityCredentialMockHandler(
+                httpManager.AddManagedIdentityMtlsMockHandler(
                     MtlsEndpoint,
                     ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: false,
-                    MockHelpers.GetSuccessfulMtlsResponse());
+                    response: MockHelpers.GetSuccessfulMtlsResponse());
 
                 var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync(cancellationToken).ConfigureAwait(false);
 
@@ -937,8 +887,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse(client_id: null),
                     userAssignedId: TestConstants.ClientId,
                     userAssignedIdentityId: UserAssignedIdentityId.ClientId);
@@ -968,8 +916,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse(regional_token_url: null),
                     userAssignedId: TestConstants.ClientId,
                     userAssignedIdentityId: UserAssignedIdentityId.ClientId);
@@ -999,8 +945,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse(tenant_id: null),
                     userAssignedId: TestConstants.ClientId,
                     userAssignedIdentityId: UserAssignedIdentityId.ClientId);
@@ -1030,8 +974,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse(credential: null),
                     userAssignedId: TestConstants.ClientId,
                     userAssignedIdentityId: UserAssignedIdentityId.ClientId);
@@ -1062,17 +1004,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse(),
                     userAssignedId: TestConstants.ClientId,
                     userAssignedIdentityId: UserAssignedIdentityId.ClientId);
 
-                httpManager.AddManagedIdentityCredentialMockHandler(
+                httpManager.AddManagedIdentityMtlsMockHandler(
                     MtlsEndpoint,
                     ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: false,
-                    MockHelpers.GetSuccessfulMtlsResponse());
+                    response: MockHelpers.GetSuccessfulMtlsResponse());
 
                 AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync()
@@ -1086,17 +1025,14 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse(),
                     userAssignedId: TestConstants.ClientId,
                     userAssignedIdentityId: UserAssignedIdentityId.ClientId);
 
-                httpManager.AddManagedIdentityCredentialMockHandler(
+                httpManager.AddManagedIdentityMtlsMockHandler(
                     MtlsEndpoint,
                     ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: false,
-                    MockHelpers.GetSuccessfulMtlsResponse());
+                    response: MockHelpers.GetSuccessfulMtlsResponse());
 
                 // Act
                 Trace.WriteLine("4. ATM - should perform an RT refresh");
@@ -1150,15 +1086,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 // Arrange
                 httpManager.AddManagedIdentityCredentialMockHandler(
                     CredentialEndpoint,
-                    ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: true,
                     MockHelpers.GetSuccessfulCredentialResponse());
 
-                httpManager.AddManagedIdentityCredentialMockHandler(
+                httpManager.AddManagedIdentityMtlsMockHandler(
                     MtlsEndpoint,
                     ManagedIdentityTests.Resource,
-                    isCredentialEndpoint: false,
-                    MockHelpers.GetSuccessfulMtlsResponse());
+                    response: MockHelpers.GetSuccessfulMtlsResponse());
 
                 Task[] tasks = new Task[numOfTasks];
                 for (int i = 0; i < numOfTasks; i++)

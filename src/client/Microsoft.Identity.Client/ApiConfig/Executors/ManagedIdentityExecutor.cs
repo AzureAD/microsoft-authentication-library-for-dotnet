@@ -40,19 +40,23 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
             if (_managedIdentityApplication.KeyMaterialManager.CryptoKeyType != CryptoKeyType.None)
             {
-                // Check resource format 
-                if (Uri.TryCreate(managedIdentityParameters.Resource, UriKind.Absolute, out Uri resourceUri) &&
-                    (resourceUri.Scheme == Uri.UriSchemeHttp || resourceUri.Scheme == Uri.UriSchemeHttps) &&
-                    !managedIdentityParameters.Resource.EndsWith("/.default", StringComparison.OrdinalIgnoreCase))
+                // managed identity resource 
+                string miResource = managedIdentityParameters.Resource;
+
+                // Check if the input ends with "/.default"
+                bool endsWithDefault = miResource.EndsWith("/.default", StringComparison.OrdinalIgnoreCase);
+
+                // Add "/.default" only if it doesn't end with "/.default" and doesn't contain "/.somethingelse"
+                if (!endsWithDefault)
                 {
                     // Add "/.default" to the scopes
                     commonParameters.Scopes = new SortedSet<string>
                     {
                         managedIdentityParameters.Resource + "/.default"
                     };
-                }
 
-                requestContext.Logger.Info(LogMessages.CredentialScopeUpdated);
+                    requestContext.Logger.Verbose(() => $"User provided scope : {miResource} was updated with /.default for managed identity.");
+                }
             }
 
             var requestParams = await _managedIdentityApplication.CreateRequestParametersAsync(
