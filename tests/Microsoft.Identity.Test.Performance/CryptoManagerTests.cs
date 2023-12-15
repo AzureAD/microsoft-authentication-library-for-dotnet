@@ -17,7 +17,7 @@ using Microsoft.Identity.Test.Unit;
 namespace Microsoft.Identity.Test.Performance
 {
     /// <summary>
-    /// Specifically used to test <c>SignWithCertificate</c> method in <see cref="Microsoft.Identity.Client.Platforms.net45.NetDesktopCryptographyManager"/>.
+    /// Specifically used to test <c>SignWithCertificate</c> method 
     /// </summary>
     public class CryptoManagerTests
     {

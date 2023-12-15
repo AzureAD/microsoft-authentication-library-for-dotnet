@@ -159,11 +159,6 @@ namespace Microsoft.Identity.Client
         {
 #pragma warning disable CS0162 // Unreachable code detected
 
-#if NET45
-            throw new PlatformNotSupportedException(
-                "The Windows broker is not available on .NET Framework 4.5, use at least .NET Framework 4.6.2");
-#endif
-
 #if NET462
             if (Config.BrokerCreatorFunc == null)
             {

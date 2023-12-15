@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Test.Integration.net45.Infrastructure;
+using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
