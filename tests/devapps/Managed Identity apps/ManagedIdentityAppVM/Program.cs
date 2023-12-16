@@ -13,7 +13,7 @@ IIdentityLogger identityLogger = new IdentityLogger();
 
 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder
                 //.Create(ManagedIdentityId.SystemAssigned)
-                .Create(ManagedIdentityId.WithUserAssignedClientId("8cb8b863-d8a3-455c-8ffc-23963507ca4c"))
+                .Create(ManagedIdentityId.WithUserAssignedClientId("3b57c42c-3201-4295-ae27-d6baec5b7027"))
                 .WithLogging(identityLogger, true)
                 .WithExperimentalFeatures(true)
                 .WithClientCapabilities(new[] { "cp1" })

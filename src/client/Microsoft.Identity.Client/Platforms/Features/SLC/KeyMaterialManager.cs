@@ -292,7 +292,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                     //this is needed for mtls schannel to work with in-memory certificates
                     X509Certificate2 authCertificate = AssociatePrivateKeyInfo(publicKeyOnlyCertificate, eCDsaCngKey);
 
-                    _logger.Verbose(() => "[Managed Identity] Binding certificate (with cng key) created successfully.");
+                    _logger.Verbose(() => $"[Managed Identity] Binding certificate (with cng key) created successfully. Has Private Key ? : {authCertificate.HasPrivateKey}");
 
                     return authCertificate;
                 }
