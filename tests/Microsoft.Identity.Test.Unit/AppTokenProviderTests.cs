@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         public async Task ParallelRequests_CallTokenEndpointOnceAsync()
         {
-            int numOfTasks = 10; 
+            int numOfTasks = 10;
             int identityProviderHits = 0;
             int cacheHits = 0;
 
@@ -201,6 +201,26 @@ namespace Microsoft.Identity.Test.Unit
             Debug.WriteLine($"Total Identity Hits: {identityProviderHits}");
             Debug.WriteLine($"Total Cache Hits: {cacheHits}");
             Assert.IsTrue(cacheHits == 9);
+        }
+
+        [TestMethod]
+        public async Task CanceledRequest_ThrowsTaskCanceledExceptionAsync()
+        {
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithInstanceDiscovery(false)
+                .WithAppTokenProvider((AppTokenProviderParameters parameters) =>
+                {
+                    return Task.FromResult(GetAppTokenProviderResult());
+                })
+                .BuildConcrete();
+
+            var tokenSource = new CancellationTokenSource();
+            tokenSource.Cancel();
+
+            await AssertException.TaskThrowsAsync<TaskCanceledException>(
+                () => app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithForceRefresh(true)
+                        .ExecuteAsync(tokenSource.Token)).ConfigureAwait(false);
         }
     }
 }
