@@ -19,6 +19,7 @@ using Microsoft.Identity.Client.Internal;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
+using OpenTelemetry.Trace;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
@@ -364,11 +365,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 IManagedIdentityApplication mi = miBuilder.Build();
 
-                var correlationId = Guid.NewGuid();
-                var tokenRequest = httpManager.AddFailureTokenEndpointResponse(
-                    "invalid_grant",
-                    TestConstants.AuthorityUtidTenant,
-                    correlationId.ToString());
+                httpManager.AddManagedIdentityCredentialMockHandler(
+                    MockHelpers.GetMsiErrorResponse(),
+                    "",
+                    statusCode: HttpStatusCode.BadRequest);
 
                 MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
@@ -736,8 +736,19 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(MsalError.CredentialRequestFailed, ex.ErrorCode);
-                //Assert.IsTrue(ex.IsRetryable);
+
+                if(statusCode == HttpStatusCode.NotFound)
+                {
+                    Assert.AreEqual(MsalError.HttpStatusNotFound, ex.ErrorCode);
+                }
+                else if (statusCode == HttpStatusCode.RequestTimeout)
+                {
+                    Assert.AreEqual(MsalError.HttpStatusCodeNotOk, ex.ErrorCode);
+                }
+                else
+                {
+                    Assert.AreEqual(MsalError.ServiceNotAvailable, ex.ErrorCode);
+                }
             }
         }
 

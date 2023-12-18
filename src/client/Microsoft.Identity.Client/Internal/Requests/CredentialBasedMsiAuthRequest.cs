@@ -3,10 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -18,6 +15,7 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -195,6 +193,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {
+            string message;
+            Exception exception = null;
+
             try
             {
                 logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Getting token from the managed identity endpoint.");
@@ -218,19 +219,34 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
 
+                logger.Info("[CredentialBasedMsiAuthRequest] Successful response received.");
+
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse)
                     .ConfigureAwait(false);
+            }
+            catch (MsalClientException ex)
+            {
+                logger.Verbose(() => $"[CredentialBasedMsiAuthRequest] Caught an exception. {ex.Message}");
+                throw;
             }
             catch (HttpRequestException ex)
             {
                 throw new MsalManagedIdentityException(
-                    MsalError.ManagedIdentityUnreachableNetwork, ex.Message, ManagedIdentity.ManagedIdentitySource.Credential);
+                    MsalError.ManagedIdentityUnreachableNetwork, ex.Message, ManagedIdentitySource.Credential);
             }
             catch (MsalServiceException ex)
             {
-                logger.Verbose(() => $"[CredentialBasedMsiAuthRequest] Caught an exception. {ex.Message}");
-                throw new MsalManagedIdentityException(ex.ErrorCode, ex.Message, ManagedIdentity.ManagedIdentitySource.Credential);
+                logger.Verbose(() => $"[CredentialBasedMsiAuthRequest] Caught an exception. {ex.Message}. Error Code : {ex.ErrorCode} Status Code : {ex.StatusCode}");
+                throw new MsalManagedIdentityException(ex.ErrorCode, ex.Message, ManagedIdentitySource.Credential);
             }
+            catch (Exception e) when (e is not MsalManagedIdentityException)
+            {
+                logger.Error($"[Managed Identity] Exception: {e.Message}");
+                exception = e;
+                message = MsalErrorMessage.ManagedIdentityUnexpectedResponse;
+            }
+
+            throw new MsalManagedIdentityException(MsalError.ManagedIdentityRequestFailed, message, exception, ManagedIdentitySource.Credential);
         }
 
         private async Task<CredentialResponse> GetCredentialAssertionAsync(
