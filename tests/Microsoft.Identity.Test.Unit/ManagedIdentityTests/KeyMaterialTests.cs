@@ -4,7 +4,9 @@
 using System.Security.Cryptography.X509Certificates;
 using System;
 using Microsoft.Identity.Client.Core;
+#if NET6_0 || NET6_WIN
 using Microsoft.Identity.Client.Platforms.netcore;
+#endif
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -21,7 +23,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     public class KeyMaterialTests : TestBase
     {
         private readonly ILoggerAdapter _logger = new NullLogger();
-
+#if NET6_0 || NET6_WIN
         [TestMethod]
         public void GetOrCreateCertificateFromCryptoKeyInfo_NoKey_ReturnsNoCertificate()
         {
@@ -194,5 +196,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.IsFalse(result, "Expected false since the KeyGuard Isolation flag is not set.");
             Assert.AreEqual(CryptoKeyType.None, provider.CryptoKeyType, "Expected CryptoKeyType to be None.");
         }
+#endif
     }
 }

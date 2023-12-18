@@ -384,7 +384,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataTestMethod]
         [DataRow("https://graph.microsoft.com")]
         public async Task ManagedIdentityDifferentScopesTestAsync(string anotherScope)
-      
         {
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))
@@ -441,6 +440,34 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
+        public async Task CanceledRequest_ThrowsTaskCanceledExceptionAsync()
+        {
+            using (MockHttpAndServiceBundle harness = CreateTestHarness())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                //Arrange
+                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.Ephemeral);
+                miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                IManagedIdentityApplication mi = miBuilder.Build();
+
+                var tokenSource = new CancellationTokenSource();
+                tokenSource.Cancel();
+
+                await AssertException.TaskThrowsAsync<TaskCanceledException>(
+                    () => mi.AcquireTokenForManagedIdentity(Resource)
+                            .WithForceRefresh(true)
+                            .ExecuteAsync(tokenSource.Token)).ConfigureAwait(false);
             }
         }
 
