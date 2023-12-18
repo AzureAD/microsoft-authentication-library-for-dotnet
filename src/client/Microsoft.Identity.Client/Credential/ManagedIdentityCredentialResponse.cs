@@ -116,45 +116,15 @@ namespace Microsoft.Identity.Client.Credential
             IHttpManager httpManager,
             CancellationToken cancellationToken)
         {
-            string message = null;
-            Exception exception = null;
+            _requestContext.Logger.Info("[Managed Identity] Fetching new managed identity credential from IMDS endpoint.");
 
-            try
-            {
-                _requestContext.Logger.Info("[Managed Identity] Fetching new managed identity credential from IMDS endpoint.");
+            OAuth2Client client = CreateClientRequest(httpManager);
 
-                OAuth2Client client = CreateClientRequest(httpManager);
+            CredentialResponse credentialResponse = await client
+                .GetCredentialResponseAsync(_uri, _requestContext)
+                .ConfigureAwait(false);
 
-                CredentialResponse credentialResponse = await client
-                    .GetCredentialResponseAsync(_uri, _requestContext)
-                    .ConfigureAwait(false);
-
-                return credentialResponse;
-
-            }
-            catch (HttpRequestException ex)
-            {
-                throw new MsalManagedIdentityException(
-                    MsalError.ManagedIdentityUnreachableNetwork, ex.Message, ex.InnerException, ManagedIdentitySource.Credential);
-            }
-            catch (TaskCanceledException)
-            {
-                _requestContext.Logger.Error(TimeoutError);
-                throw;
-            }
-            catch (MsalServiceException ex)
-            {
-                _requestContext.Logger.Verbose(() => $"[CredentialBasedMsiAuthRequest] Caught an exception. {ex.Message}. Error Code : {ex.ErrorCode} Status Code : {ex.StatusCode}");
-                throw new MsalManagedIdentityException(ex.ErrorCode, ex.Message, ManagedIdentitySource.Credential, ex.StatusCode);
-            }
-            catch (Exception e) when (e is not MsalManagedIdentityException)
-            {
-                _requestContext.Logger.Error($"[Managed Identity] Exception: {e.Message}");
-                exception = e;
-                message = MsalErrorMessage.CredentialEndpointNoResponseReceived;
-            }
-
-            throw new MsalManagedIdentityException(MsalError.CredentialRequestFailed, message, exception, ManagedIdentitySource.Credential);
+            return credentialResponse;
         }
 
         /// <summary>
