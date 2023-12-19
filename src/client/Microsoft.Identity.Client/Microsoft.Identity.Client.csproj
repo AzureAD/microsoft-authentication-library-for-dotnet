@@ -2,6 +2,7 @@
 
   <PropertyGroup Label="Targets required for unit tests to run">
     <TargetFrameworkNetDesktop462>net462</TargetFrameworkNetDesktop462>
+    <TargetFrameworkNetDesktop472>net472</TargetFrameworkNetDesktop472>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
     <TargetFrameworkNet6>net6.0</TargetFrameworkNet6>
     <TargetFrameworkNet6Win>net6.0-windows</TargetFrameworkNet6Win>    

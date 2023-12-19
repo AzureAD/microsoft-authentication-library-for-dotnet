@@ -776,6 +776,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 {
                     Assert.AreEqual(MsalError.ServiceNotAvailable, ex.ErrorCode);
                 }
+
+                Assert.IsTrue(ex.IsRetryable);
             }
         }
 

@@ -319,7 +319,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
             _logger.Verbose(() => "[Managed Identity] Creating certificate request for the binding certificate.");
 
-            return certificateRequest = new(
+            return certificateRequest = new CertificateRequest(
                     $"CN={subjectName}", // Common Name 
                     ecdsaKey, // ECDsa key
                     HashAlgorithmName.SHA256); // Hash algorithm for the certificate
