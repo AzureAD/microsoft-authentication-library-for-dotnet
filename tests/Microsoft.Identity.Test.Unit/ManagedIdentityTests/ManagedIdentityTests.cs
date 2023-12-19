@@ -780,6 +780,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4472
+        // Should throw TaskCanceledException instead of trying to take a semaphore
         public async Task CanceledRequest_ThrowsTaskCanceledExceptionAsync()
         {
             var app = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)

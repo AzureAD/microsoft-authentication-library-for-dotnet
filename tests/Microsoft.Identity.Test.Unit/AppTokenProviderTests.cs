@@ -204,6 +204,8 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
+        // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4472
+        // Should throw TaskCanceledException instead of trying to take a semaphore
         public async Task CanceledRequest_ThrowsTaskCanceledExceptionAsync()
         {
             var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
