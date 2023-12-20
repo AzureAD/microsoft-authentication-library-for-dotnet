@@ -33,10 +33,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (!Uri.TryCreate(identityEndpoint, UriKind.Absolute, out Uri endpointUri))
             {
-                throw new MsalManagedIdentityException(MsalError.InvalidManagedIdentityEndpoint, 
-                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, 
-                        "IDENTITY_ENDPOINT", identityEndpoint, "Service Fabric"), 
-                    ManagedIdentitySource.ServiceFabric);
+                string errorMessage = string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError,
+                        "IDENTITY_ENDPOINT", identityEndpoint, "Service Fabric");
+
+                ThrowServiceException(MsalError.InvalidManagedIdentityEndpoint, errorMessage, null, ManagedIdentitySource.ServiceFabric);
             }
 
             requestContext.Logger.Verbose(() => "[Managed Identity] Creating Service Fabric managed identity. Endpoint URI: " + identityEndpoint);

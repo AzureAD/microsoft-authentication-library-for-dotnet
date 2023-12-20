@@ -11,6 +11,7 @@ namespace Microsoft.Identity.Client
     /// This exception class is for exceptions generated from Managed Identity sources.
     /// For more details, see https://aka.ms/msal-net-managed-identity
     /// </summary>
+    [Obsolete("MsalManagedIdentityException is deprecated. Use MsalServiceException instead.")]
     public class MsalManagedIdentityException : MsalServiceException
     {
         /// <summary>

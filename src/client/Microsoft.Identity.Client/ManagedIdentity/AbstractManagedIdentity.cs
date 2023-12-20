@@ -2,18 +2,16 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Core;
 using System.Net;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using System.Net.Sockets;
+using System.Collections.Generic;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -21,7 +19,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/ManagedIdentitySource.cs
     /// </summary>
     internal abstract class AbstractManagedIdentity
-
     {
         protected readonly RequestContext _requestContext;
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
@@ -67,13 +64,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
             }
-            catch (HttpRequestException ex)
+            catch (Exception ex)
             {
-                throw new MsalManagedIdentityException(MsalError.ManagedIdentityUnreachableNetwork, ex.Message, ex.InnerException, _sourceType);
-            }
-            catch (TaskCanceledException)
-            {
-                _requestContext.Logger.Error(TimeoutError);
+                HandleException(ex);
                 throw;
             }
         }
@@ -83,9 +76,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             HttpResponse response,
             CancellationToken cancellationToken)
         {
-            string message;
-            Exception exception = null;
-
             try
             {
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -94,17 +84,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     return Task.FromResult(GetSuccessfulResponse(response));
                 }
 
-                message = GetMessageFromErrorResponse(response);
+                string message = GetMessageFromErrorResponse(response);
                 _requestContext.Logger.Error($"[Managed Identity] request failed, HttpStatusCode: {response.StatusCode} Error message: {message}");
+                ThrowManagedIdentityException(MsalError.ManagedIdentityRequestFailed, message, null, ManagedIdentitySource.None, (int)response.StatusCode);
             }
-            catch (Exception e) when (e is not MsalManagedIdentityException)
+            catch (Exception e)
             {
-                _requestContext.Logger.Error($"[Managed Identity] Exception: {e.Message} Http status code: {response?.StatusCode}");
-                exception = e;
-                message = MsalErrorMessage.ManagedIdentityUnexpectedResponse;
+                HandleException(e);
+                throw;
             }
 
-            throw new MsalManagedIdentityException(MsalError.ManagedIdentityRequestFailed, message, exception, _sourceType, (int)response.StatusCode);
+            return Task.FromResult<ManagedIdentityResponse>(null);
         }
 
         protected abstract ManagedIdentityRequest CreateRequest(string resource);
@@ -116,10 +106,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             if (managedIdentityResponse == null || managedIdentityResponse.AccessToken.IsNullOrEmpty() || managedIdentityResponse.ExpiresOn.IsNullOrEmpty())
             {
                 _requestContext.Logger.Error("[Managed Identity] Response is either null or insufficient for authentication.");
-                throw new MsalManagedIdentityException(
-                    MsalError.ManagedIdentityRequestFailed, 
-                    MsalErrorMessage.ManagedIdentityInvalidResponse, 
-                    _sourceType);
+                ThrowManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    MsalErrorMessage.ManagedIdentityInvalidResponse);
             }
 
             return managedIdentityResponse;
@@ -127,7 +116,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         internal string GetMessageFromErrorResponse(HttpResponse response)
         {
-            var managedIdentityErrorResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
+            ManagedIdentityErrorResponse managedIdentityErrorResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
 
             if (managedIdentityErrorResponse == null)
             {
@@ -140,6 +129,98 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             return $"[Managed Identity] Error Code: {managedIdentityErrorResponse.Error} Error Message: {managedIdentityErrorResponse.ErrorDescription}";
+        }
+
+        internal void HandleException(Exception ex, ManagedIdentitySource source = ManagedIdentitySource.None, string additionalInfo = null)
+        {
+            if (ex is HttpRequestException httpRequestException)
+            {
+                ThrowManagedIdentityException(
+                    MsalError.ManagedIdentityUnreachableNetwork,
+                    httpRequestException.Message,
+                    httpRequestException.InnerException);
+            }
+            else if (ex is TaskCanceledException taskCanceledException)
+            {
+                _requestContext.Logger.Error(TimeoutError);
+                throw taskCanceledException;
+            }
+            else if (ex is FormatException formatException)
+            {
+                string errorMessage = additionalInfo ?? formatException.Message;
+                _requestContext.Logger.Error($"[Managed Identity] Format Exception: {errorMessage}");
+                ThrowManagedIdentityException(
+                    MsalError.InvalidManagedIdentityEndpoint,
+                    errorMessage,
+                    formatException,
+                    source);
+            }
+            else if (ex is not MsalServiceException)
+            {
+                _requestContext.Logger.Error($"[Managed Identity] Exception: {ex.Message}");
+                
+                ThrowManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    ex.Message,
+                    ex);
+            }
+            else
+            {
+                // If it's already a MsalServiceException, rethrow it
+                throw ex;
+            }
+        }
+
+        internal void ThrowManagedIdentityException(
+            string errorCode,
+            string errorMessage,
+            Exception innerException = null,
+            ManagedIdentitySource managedIdentitySource = ManagedIdentitySource.None,
+            int? statusCode = null)
+        {
+            ManagedIdentitySource source = managedIdentitySource != ManagedIdentitySource.None ? managedIdentitySource : _sourceType;
+
+            ThrowServiceException(errorCode, errorMessage, innerException, source, statusCode);
+        }
+
+        internal static void ThrowServiceException(
+            string errorCode, 
+            string errorMessage,
+            Exception innerException,
+            ManagedIdentitySource managedIdentitySource,
+            int? statusCode = null)
+        {
+            MsalException ex;
+
+            if (statusCode.HasValue)
+            {
+                ex = new MsalServiceException(errorCode, errorMessage, (int)statusCode, innerException);
+            }
+            else if (innerException != null)
+            {
+                ex = new MsalServiceException(errorCode, errorMessage, innerException);
+            }
+            else
+            {
+                ex = new MsalServiceException(errorCode, errorMessage);
+            }
+
+            ex = DecorateExceptionWithManagedIdentitySource(ex, managedIdentitySource);
+            throw ex;
+        }
+
+        internal static MsalException DecorateExceptionWithManagedIdentitySource(
+            MsalException exception, 
+            ManagedIdentitySource managedIdentitySource)
+        {
+            var result = new Dictionary<string, string>()
+            {
+                { MsalException.ManagedIdentitySource, managedIdentitySource.ToString() }
+            };
+
+            exception.AdditionalExceptionData = result;
+
+            return exception;
         }
     }
 }

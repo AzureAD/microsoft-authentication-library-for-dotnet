@@ -36,9 +36,19 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             catch (FormatException ex)
             {
                 requestContext.Logger.Error("[Managed Identity] Invalid endpoint found for the environment variable MSI_ENDPOINT: " + msiEndpoint);
-                throw new MsalManagedIdentityException(MsalError.InvalidManagedIdentityEndpoint, string.Format(
-                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "MSI_ENDPOINT", msiEndpoint, CloudShell), 
-                    ex, ManagedIdentitySource.CloudShell);
+
+                string errorMessage = string.Format(
+                    CultureInfo.InvariantCulture,
+                    MsalErrorMessage.ManagedIdentityEndpointInvalidUriError,
+                    "MSI_ENDPOINT", msiEndpoint, CloudShell);
+
+                ThrowServiceException(
+                    MsalError.InvalidManagedIdentityEndpoint,
+                    errorMessage,
+                    ex,
+                    ManagedIdentitySource.CloudShell);
+
+                throw;
             }
 
             requestContext.Logger.Verbose(()=>"[Managed Identity] Creating cloud shell managed identity. Endpoint URI: " + msiEndpoint);
@@ -52,8 +62,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (requestContext.ServiceBundle.Config.ManagedIdentityId._isUserAssigned)
             {
-                throw new MsalManagedIdentityException(MsalError.UserAssignedManagedIdentityNotSupported, 
-                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, CloudShell), 
+                string errorMessage = string.Format(
+                    CultureInfo.InvariantCulture, 
+                    MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, 
+                    CloudShell);
+
+                ThrowManagedIdentityException(
+                    MsalError.UserAssignedManagedIdentityNotSupported,
+                    errorMessage,
+                    null,
                     ManagedIdentitySource.CloudShell);
             }
         }
