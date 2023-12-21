@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                         cachedAccessTokenItem,
                         () =>
                         {
-                            var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                             return RefreshRtOrFailAsync(tokenSource.Token);
                         }, logger);
                     }

@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         cachedAccessTokenItem,
                         () =>
                         {
-                            var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                             return GetAccessTokenAsync(tokenSource.Token, logger);
                         }, logger);
                     }
