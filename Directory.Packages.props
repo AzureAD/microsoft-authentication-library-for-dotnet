@@ -12,7 +12,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.RulesetToEditorconfigConverter" Version="3.3.3" PrivateAssets="All" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageVersion Include="Microsoft.Identity.Client.NativeInterop" Version="$(MSALRuntimeNativeInteropVersion)" IncludeAssets="all" />
-    <PackageVersion Include="Microsoft.IdentityModel.Abstractions" Version="6.22.0" />
+    <PackageVersion Include="Microsoft.IdentityModel.Abstractions" Version="7.0.3" />
     <PackageVersion Include="Microsoft.Web.WebView2" Version="1.0.864.35" />
     <PackageVersion Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="7.0.2" />
@@ -30,14 +30,14 @@
     <PackageVersion Include="System.Xml.XmlDocument" Version="4.3.0" />
     <PackageVersion Include="Xamarin.Android.Support.CustomTabs" Version="28.0.0.3" />
     <PackageVersion Include="Xamarin.AndroidX.Browser" Version="1.4.0" PrivateAssets="All" />
-</ItemGroup>
-<ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
     <!-- Analyzers and dev packages -->
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.8.14" PrivateAssets="All" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0" PrivateAssets="All" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-</ItemGroup>
-<ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
     <!-- Packages for the tests -->
     <PackageVersion Include="Azure.Security.KeyVault.Certificates" Version="4.3.0" />
     <PackageVersion Include="Azure.Security.KeyVault.Secrets" Version="4.3.0" />
