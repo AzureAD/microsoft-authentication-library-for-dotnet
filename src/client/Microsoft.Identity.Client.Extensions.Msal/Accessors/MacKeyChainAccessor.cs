@@ -54,7 +54,6 @@ namespace Microsoft.Identity.Client.Extensions.Msal
             _logger.LogInformation($"After delete mac keychain service: {_service} account {_account}");
         }
 
-
         public byte[] Read()
         {
             _logger.LogInformation($"ReadDataCore, Before reading from mac keychain service: {_service} account {_account}");
