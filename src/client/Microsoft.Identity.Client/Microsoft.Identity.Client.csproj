@@ -5,8 +5,6 @@
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
     <TargetFrameworkNet6>net6.0</TargetFrameworkNet6>
     <TargetFrameworkNet6Win>net6.0-windows</TargetFrameworkNet6Win>
-    <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
-
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
