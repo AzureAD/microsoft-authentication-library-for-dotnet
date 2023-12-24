@@ -234,6 +234,12 @@ namespace Microsoft.Identity.Client
         protected virtual void UpdateIsRetryable()
         {
             //To-Do : need to find a better way to do this
+            if(AdditionalExceptionData.TryGetValue(ManagedIdentitySource, out var managedIdentitySource))
+            {
+                IsRetryable = true;
+                return;
+            }   
+
             if (ErrorCode.StartsWith("managed_identity"))
             {
                 IsRetryable = StatusCode switch

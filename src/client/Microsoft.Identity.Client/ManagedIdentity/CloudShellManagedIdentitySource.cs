@@ -42,13 +42,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     MsalErrorMessage.ManagedIdentityEndpointInvalidUriError,
                     "MSI_ENDPOINT", msiEndpoint, CloudShell);
 
-                ThrowServiceException(
+                // Use the factory to create and throw the exception
+                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.InvalidManagedIdentityEndpoint,
                     errorMessage,
-                    ex,
-                    ManagedIdentitySource.CloudShell);
+                    ex, 
+                    ManagedIdentitySource.CloudShell,
+                    null); 
 
-                throw;
+                throw exception;
             }
 
             requestContext.Logger.Verbose(()=>"[Managed Identity] Creating cloud shell managed identity. Endpoint URI: " + msiEndpoint);
@@ -67,11 +69,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, 
                     CloudShell);
 
-                ThrowManagedIdentityException(
+                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.UserAssignedManagedIdentityNotSupported,
                     errorMessage,
                     null,
-                    ManagedIdentitySource.CloudShell);
+                    ManagedIdentitySource.CloudShell,
+                    null);
+
+                throw exception;
             }
         }
 

@@ -106,11 +106,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 _requestContext.Logger.Error($"Error message: {message} Http status code: {response.StatusCode}");
 
-                ThrowManagedIdentityException(
-                            MsalError.ManagedIdentityRequestFailed,
-                            message,
-                            null,  
-                            ManagedIdentitySource.Imds);
+                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    message,
+                    null,
+                    ManagedIdentitySource.Imds,
+                    null);
+
+                throw exception;
             }
 
             // Default behavior to handle successful scenario and general errors.

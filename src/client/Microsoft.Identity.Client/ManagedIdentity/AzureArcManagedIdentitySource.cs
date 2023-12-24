@@ -45,11 +45,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     MsalErrorMessage.ManagedIdentityEndpointInvalidUriError,
                     "IDENTITY_ENDPOINT", identityEndpoint, AzureArc);
 
-                ThrowServiceException(
+                // Use the factory to create and throw the exception
+                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.InvalidManagedIdentityEndpoint,
                     errorMessage,
-                    null,
-                    ManagedIdentitySource.AzureArc);
+                    null, 
+                    ManagedIdentitySource.AzureArc,
+                    null); 
+
+                throw exception;
             }
 
             requestContext.Logger.Verbose(()=>"[Managed Identity] Creating Azure Arc managed identity. Endpoint URI: " + endpointUri);
@@ -64,12 +68,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             if (requestContext.ServiceBundle.Config.ManagedIdentityId._isUserAssigned)
             {
                 string errorMessage = string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, AzureArc);
-                
-                ThrowManagedIdentityException(
-                    MsalError.UserAssignedManagedIdentityNotSupported,
-                    errorMessage,
-                    null,
-                    ManagedIdentitySource.AzureArc);
+
+                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalError.UserAssignedManagedIdentityNotSupported, 
+                    errorMessage, 
+                    null, 
+                    ManagedIdentitySource.AzureArc, 
+                    null);
+
+                throw exception;
             }
         }
 
@@ -97,13 +104,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 {
                     _requestContext.Logger.Error("[Managed Identity] WWW-Authenticate header is expected but not found.");
 
-                    ThrowManagedIdentityException(
+                    var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                         MsalError.ManagedIdentityRequestFailed,
                         MsalErrorMessage.ManagedIdentityNoChallengeError,
                         null,
-                        ManagedIdentitySource.AzureArc);
+                        ManagedIdentitySource.AzureArc,
+                        null);
 
-                    return null;
+                    throw exception;
                 }
 
                 var splitChallenge = challenge.Split(new char[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
@@ -112,13 +120,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 {
                     _requestContext.Logger.Error("[Managed Identity] The WWW-Authenticate header for Azure arc managed identity is not an expected format.");
 
-                    ThrowManagedIdentityException(
+                    var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                         MsalError.ManagedIdentityRequestFailed,
                         MsalErrorMessage.ManagedIdentityInvalidChallenge,
                         null,
-                        ManagedIdentitySource.AzureArc);
+                        ManagedIdentitySource.AzureArc,
+                        null);
 
-                    return null;
+                    throw exception;
                 }
 
                 var authHeaderValue = "Basic " + File.ReadAllText(splitChallenge[1]);

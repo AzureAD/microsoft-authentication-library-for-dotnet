@@ -36,7 +36,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 string errorMessage = string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError,
                         "IDENTITY_ENDPOINT", identityEndpoint, "Service Fabric");
 
-                ThrowServiceException(MsalError.InvalidManagedIdentityEndpoint, errorMessage, null, ManagedIdentitySource.ServiceFabric);
+                // Use the factory to create and throw the exception
+                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalError.InvalidManagedIdentityEndpoint,
+                    errorMessage,
+                    null, 
+                    ManagedIdentitySource.ServiceFabric,
+                    null); 
+
+                throw exception;
             }
 
             requestContext.Logger.Verbose(() => "[Managed Identity] Creating Service Fabric managed identity. Endpoint URI: " + identityEndpoint);

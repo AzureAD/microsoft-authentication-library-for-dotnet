@@ -126,21 +126,44 @@ namespace Microsoft.Identity.Client
             return ex;
         }
 
-        internal static MsalServiceException FromManagedIdentityResponse(
+        internal static MsalException CreateManagedIdentityException(
             string errorCode,
-            HttpResponse httpResponse)
+            string errorMessage,
+            Exception innerException,
+            ManagedIdentitySource managedIdentitySource,
+            int? statusCode)
         {
-            ManagedIdentityErrorResponse managedIdentityResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(httpResponse?.Body);
+            MsalException exception;
 
-            string message = managedIdentityResponse == null ? 
-                "Empty error response received." :
-                $"Error message: {managedIdentityResponse.Message}. Correlation Id: {managedIdentityResponse.CorrelationId}";
+            if (statusCode.HasValue)
+            {
+                exception = new MsalServiceException(errorCode, errorMessage, (int)statusCode, innerException);
+            }
+            else if (innerException != null)
+            {
+                exception = new MsalServiceException(errorCode, errorMessage, innerException);
+            }
+            else
+            {
+                exception = new MsalServiceException(errorCode, errorMessage);
+            }
 
-            MsalServiceException ex = new MsalServiceException(errorCode, message, (int)httpResponse.StatusCode);
+            exception = DecorateExceptionWithManagedIdentitySource(exception, managedIdentitySource);
+            return exception;
+        }
 
-            SetHttpExceptionData(ex, httpResponse);
+        private static MsalException DecorateExceptionWithManagedIdentitySource(
+            MsalException exception,
+            ManagedIdentitySource managedIdentitySource)
+        {
+            var result = new Dictionary<string, string>()
+            {
+                { MsalException.ManagedIdentitySource, managedIdentitySource.ToString() }
+            };
 
-            return ex;
+            exception.AdditionalExceptionData = result;
+
+            return exception;
         }
 
         internal static MsalThrottledServiceException FromThrottledAuthenticationResponse(HttpResponse httpResponse)
