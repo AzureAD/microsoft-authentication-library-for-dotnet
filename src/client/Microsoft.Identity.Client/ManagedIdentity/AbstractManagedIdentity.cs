@@ -157,7 +157,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             else if (ex is TaskCanceledException)
             {
                 _requestContext.Logger.Error(TimeoutError);
-                // Consider if you need to throw an exception here as well
             }
             else if (ex is FormatException formatException)
             {
