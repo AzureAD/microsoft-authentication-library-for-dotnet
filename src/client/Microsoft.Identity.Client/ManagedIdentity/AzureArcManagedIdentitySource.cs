@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             _endpoint = endpoint;
 
-            if (requestContext.ServiceBundle.Config.ManagedIdentityId._isUserAssigned)
+            if (requestContext.ServiceBundle.Config.ManagedIdentityId.IsUserAssigned)
             {
                 string errorMessage = string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, AzureArc);
 

@@ -21,23 +21,22 @@ namespace Microsoft.Identity.Client.AppConfig
     {
         internal string UserAssignedId { get; private set; }
         internal ManagedIdentityIdType IdType { get; private set; }
-        internal readonly bool _isUserAssigned;
+        
+        /// <summary>
+        /// Gets a value indicating whether the managed identity is user-assigned.
+        /// </summary>
+        /// <remarks>
+        /// This property is true if the managed identity is user-assigned, and false if it is system-assigned.
+        /// </remarks>
+        /// <value>
+        /// True if the managed identity is user-assigned; otherwise, false.
+        /// </value>
+        public bool IsUserAssigned { get; private set; }
 
         private ManagedIdentityId(ManagedIdentityIdType idType)
         {
             IdType = idType;
-
-            switch (idType)
-            {
-                case ManagedIdentityIdType.SystemAssigned:
-                    _isUserAssigned = false;
-                    break;
-                case ManagedIdentityIdType.ClientId:
-                case ManagedIdentityIdType.ResourceId:
-                case ManagedIdentityIdType.ObjectId:
-                    _isUserAssigned = true;
-                    break;
-            }
+            IsUserAssigned = idType != ManagedIdentityIdType.SystemAssigned;
         }
 
         /// <summary>

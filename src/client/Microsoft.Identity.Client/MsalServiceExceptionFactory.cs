@@ -138,6 +138,14 @@ namespace Microsoft.Identity.Client
             if (statusCode.HasValue)
             {
                 exception = new MsalServiceException(errorCode, errorMessage, (int)statusCode, innerException);
+
+                var isRetryable = statusCode switch
+                {
+                    404 or 408 or 429 or 500 or 503 or 504 => true,
+                    _ => false,
+                };
+
+                exception.IsRetryable = isRetryable;
             }
             else if (innerException != null)
             {

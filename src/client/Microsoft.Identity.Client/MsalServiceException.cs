@@ -233,30 +233,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         protected virtual void UpdateIsRetryable()
         {
-            //To-Do : need to find a better way to do this
-            if(AdditionalExceptionData.TryGetValue(ManagedIdentitySource, out var managedIdentitySource))
-            {
-                IsRetryable = true;
-                return;
-            }   
-
-            if (ErrorCode.StartsWith("managed_identity"))
-            {
-                IsRetryable = StatusCode switch
-                {
-                    404 or 408 or 429 or 500 or 503 or 504 => true,
-                    _ => false,
-                };
-            }
-            else
-            {
-                IsRetryable =
+            IsRetryable =
                     (StatusCode >= 500 && StatusCode < 600) ||
                     StatusCode == 429 || // too many requests
                     StatusCode == (int)HttpStatusCode.RequestTimeout ||
                     string.Equals(ErrorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase) ||
                     string.Equals(ErrorCode, "temporarily_unavailable", StringComparison.OrdinalIgnoreCase); // as per https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes#handling-error-codes-in-your-application
-            }
         }
 
         /// <summary>
