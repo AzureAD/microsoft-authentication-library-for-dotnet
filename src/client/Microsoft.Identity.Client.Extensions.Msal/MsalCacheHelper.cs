@@ -95,8 +95,6 @@ namespace Microsoft.Identity.Client.Extensions.Msal
             }
         }
 
-
-
         /// <summary>
         /// Gets the current set of accounts in the cache by creating a new public client, and
         /// deserializing the cache into a temporary object.

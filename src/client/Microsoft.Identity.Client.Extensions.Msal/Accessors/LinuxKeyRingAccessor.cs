@@ -114,8 +114,6 @@ namespace Microsoft.Identity.Client.Extensions.Msal
             _logger.LogInformation("After deleting secret from linux keyring");
         }
 
-
-
         public byte[] Read()
         {
             _logger.LogInformation("ReadDataCore");
@@ -199,7 +197,6 @@ namespace Microsoft.Identity.Client.Extensions.Msal
             // Change the "last modified" attribute and trigger file changed events
             FileIOWithRetries.TouchFile(_cacheFilePath, _logger);
         }
-
 
         private IntPtr GetLibsecretSchema()
         {

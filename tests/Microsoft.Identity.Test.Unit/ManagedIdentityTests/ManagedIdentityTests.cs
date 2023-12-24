@@ -779,5 +779,22 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsTrue(cacheHits == 9);
             }
         }
+
+        [TestMethod]
+        // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4472
+        // Should throw TaskCanceledException instead of trying to take a semaphore
+        public async Task CanceledRequest_ThrowsTaskCanceledExceptionAsync()
+        {
+            var app = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                .BuildConcrete();
+
+            var tokenSource = new CancellationTokenSource();
+            tokenSource.Cancel();
+
+            await AssertException.TaskThrowsAsync<TaskCanceledException>(
+                () => app.AcquireTokenForManagedIdentity(Resource)
+                        .WithForceRefresh(true)
+                        .ExecuteAsync(tokenSource.Token)).ConfigureAwait(false);
+        }
     }
 }
