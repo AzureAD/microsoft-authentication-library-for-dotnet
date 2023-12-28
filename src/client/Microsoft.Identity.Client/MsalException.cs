@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string BrokerTelemetry = "BrokerTelemetry";
         /// <summary>
-        /// An <see cref="AdditionalExceptionData"/> property key, available when using Managed Identity.
+        /// An <see cref="AdditionalExceptionData"/> property key, available when using managed identity.
         /// </summary>
         public const string ManagedIdentitySource = "ManagedIdentitySource";
 

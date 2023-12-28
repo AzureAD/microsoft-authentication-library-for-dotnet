@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <value>
         /// True if the managed identity is user-assigned; otherwise, false.
         /// </value>
-        public bool IsUserAssigned { get; private set; }
+        internal bool IsUserAssigned { get; private set; }
 
         private ManagedIdentityId(ManagedIdentityIdType idType)
         {
