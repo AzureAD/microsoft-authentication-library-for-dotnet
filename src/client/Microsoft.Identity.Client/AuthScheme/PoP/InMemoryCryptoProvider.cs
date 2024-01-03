@@ -16,7 +16,6 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         internal /* internal for test only */ const int RsaKeySize = 2048;
         private RSA _signingKey;
 
-
         public InMemoryCryptoProvider()
         {
             InitializeSigningKey();

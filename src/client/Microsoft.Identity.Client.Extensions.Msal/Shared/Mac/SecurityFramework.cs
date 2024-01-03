@@ -137,7 +137,6 @@ namespace Microsoft.Identity.Extensions.Mac
 
         public const int ErrSecUserCanceled = -128;
 
-
         public static void ThrowIfError(int error, string defaultErrorMessage = "Unknown error.")
         {
             switch (error)
