@@ -19,8 +19,29 @@ namespace Microsoft.Identity.Client.AppConfig
     /// </summary>
     public class ManagedIdentityId
     {
+        /// <summary>
+        /// Gets the identifier for a user-assigned managed identity.
+        /// </summary>
+        /// <remarks>
+        /// This property holds the unique identifier of the user-assigned managed identity. 
+        /// It can be a client ID, a resource ID, or an object ID, depending on how the managed identity is configured.
+        /// </remarks>
+        /// <value>
+        /// The identifier string of the user-assigned managed identity.
+        /// </value>
         internal string UserAssignedId { get; private set; }
-        internal ManagedIdentityIdType IdType { get; private set; }
+        
+        /// <summary>
+        /// Gets the type of identifier used for the managed identity.
+        /// </summary>
+        /// <remarks>
+        /// This property indicates the type of the managed identity identifier, 
+        /// which can be either a client ID, a resource ID, or an object ID.
+        /// </remarks>
+        /// <value>
+        /// The enumeration value representing the managed identity identifier type.
+        /// </value>
+        internal ManagedIdentityIdType IdType { get; }
         
         /// <summary>
         /// Gets a value indicating whether the managed identity is user-assigned.
@@ -31,7 +52,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <value>
         /// True if the managed identity is user-assigned; otherwise, false.
         /// </value>
-        public bool IsUserAssigned { get; private set; }
+        internal bool IsUserAssigned { get; }
 
         private ManagedIdentityId(ManagedIdentityIdType idType)
         {
