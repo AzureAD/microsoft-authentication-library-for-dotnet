@@ -323,7 +323,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="authorityUri">OpenIdConnect authority</param>
         /// <returns>The builder to chain the .With methods</returns>
-        /// <remarks>This is an experimental API and only AcquireTokenForClient (client_credentials flow) has been implemented</remarks>        
+        /// <remarks>This is an experimental API and only available on Confidential Client flows.</remarks>        
         public ConfidentialClientApplicationBuilder WithGenericAuthority(string authorityUri)
         {
             ValidateUseOfExperimentalFeature("WithGenericAuthority");
