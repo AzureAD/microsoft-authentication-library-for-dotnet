@@ -25,13 +25,13 @@
     "uti": "6nciX02SMki9k73-F1sZAA",
     "ver": "2.0"
   },
-  "at_cache_key": "9f4880d8-80ba-4c40-97bc-f7a23c703084.f645ad92-e38d-4d1a-b510-d1b09a74a8ca-login.windows.net-accesstoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-calendars.read openid profile tasks.read user.read email",
-  "at_cache_key_ios_service": "accesstoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-calendars.read openid profile tasks.read user.read email",
+  "at_cache_key": "9f4880d8-80ba-4c40-97bc-f7a23c703084.f645ad92-e38d-4d1a-b510-d1b09a74a8ca-login.windows.net-accesstoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-calendars.read email openid profile tasks.read user.read",
+  "at_cache_key_ios_service": "accesstoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-f645ad92-e38d-4d1a-b510-d1b09a74a8ca-calendars.read email openid profile tasks.read user.read",
   "at_cache_key_ios_account": "9f4880d8-80ba-4c40-97bc-f7a23c703084.f645ad92-e38d-4d1a-b510-d1b09a74a8ca-login.windows.net",
   "at_cache_key_ios_generic": "accesstoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-f645ad92-e38d-4d1a-b510-d1b09a74a8ca",
   "at_cache_value": {
     "secret": "<removed_at>",
-    "target": "Calendars.Read openid profile Tasks.Read User.Read email",
+    "target": "Calendars.Read email openid profile Tasks.Read User.Read",
     "extended_expires_on": "1538801522",
     "credential_type": "AccessToken",
     "environment": "login.windows.net",

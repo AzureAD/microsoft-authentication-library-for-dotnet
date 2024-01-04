@@ -25,13 +25,13 @@
     "tid": "9188040d-6c67-4c5b-b112-36a304b66dad",
     "aio": "DWgKnl!EsfVkSU8jFVbxM6PhZaR2EyXsMBymRGSXvREu4i*FmBU1RBl5hHvNvoGSGlqdBJFxndAsA6*Z3qZBr0c9vaIRwUpeICV*SXZjw8!B"
   },
-  "at_cache_key": "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad-login.windows.net-accesstoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-9188040d-6c67-4c5b-b112-36a304b66dad-tasks.read user.read openid profile",
-  "at_cache_key_ios_service": "accesstoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-9188040d-6c67-4c5b-b112-36a304b66dad-tasks.read user.read openid profile",
+  "at_cache_key": "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad-login.windows.net-accesstoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-9188040d-6c67-4c5b-b112-36a304b66dad-openid profile tasks.read user.read",
+  "at_cache_key_ios_service": "accesstoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-9188040d-6c67-4c5b-b112-36a304b66dad-openid profile tasks.read user.read",
   "at_cache_key_ios_account": "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad-login.windows.net",
   "at_cache_key_ios_generic": "accesstoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-9188040d-6c67-4c5b-b112-36a304b66dad",
   "at_cache_value": {
     "secret": "<removed_at>",
-    "target": "Tasks.Read User.Read openid profile",
+    "target": "openid profile Tasks.Read User.Read",
     "credential_type": "AccessToken",
     "environment": "login.windows.net",
     "realm": "9188040d-6c67-4c5b-b112-36a304b66dad",
