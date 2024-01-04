@@ -80,6 +80,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             unit: "ms",
             description: "Performance of token acquisition calls network latency"));
 
+        public OtelInstrumentation()
+        {
+            _ = Meter.Version;
+        }
+
         // Aggregates the successful requests based on token source and cache refresh reason.
         void IOtelInstrumentation.LogSuccessMetrics(
             string platform,
