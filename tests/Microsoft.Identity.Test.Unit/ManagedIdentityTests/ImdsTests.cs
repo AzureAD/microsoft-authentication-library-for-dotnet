@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(ManagedIdentitySource.Imds.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.IsTrue(ex.Message.Contains("The requested identity has not been assigned to this resource."));
+                Assert.IsTrue(ex.Message.Contains("Authentication unavailable. Either the requested identity has not been assigned to this resource, or other errors could be present."));
             }
         }
     }

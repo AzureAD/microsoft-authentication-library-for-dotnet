@@ -28,8 +28,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string DefaultMessage = "[Managed Identity] Service request failed.";
 
         internal const string IdentityUnavailableError = "[Managed Identity] Authentication unavailable. " +
-            "Either the requested identity has not been assigned to this resource or there could be other " +
-            "errors. See inner exception for details.";
+            "Either the requested identity has not been assigned to this resource, or other errors could " +
+            "be present. Ensure the identity is correctly assigned and check the inner exception for more " +
+            "details. For more information, visit https://aka.ms/msal-managed-identity.";
 
         internal const string GatewayError = "[Managed Identity] Authentication unavailable. The request failed due to a gateway error.";
 
