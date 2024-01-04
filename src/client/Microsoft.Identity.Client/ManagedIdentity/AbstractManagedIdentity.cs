@@ -76,32 +76,24 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             HttpResponse response,
             CancellationToken cancellationToken)
         {
-            try
+            if (response.StatusCode == HttpStatusCode.OK)
             {
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    _requestContext.Logger.Info("[Managed Identity] Successful response received.");
-                    return Task.FromResult(GetSuccessfulResponse(response));
-                }
-
-                string message = GetMessageFromErrorResponse(response);
-                
-                _requestContext.Logger.Error($"[Managed Identity] request failed, HttpStatusCode: {response.StatusCode} Error message: {message}");
-                
-                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
-                    MsalError.ManagedIdentityRequestFailed,
-                    message,
-                    null,
-                    _sourceType,
-                    (int)response.StatusCode);
-
-                throw exception;
+                _requestContext.Logger.Info("[Managed Identity] Successful response received.");
+                return Task.FromResult(GetSuccessfulResponse(response));
             }
-            catch (Exception e)
-            {
-                HandleException(e);
-                throw;
-            }
+
+            string message = GetMessageFromErrorResponse(response);
+                
+            _requestContext.Logger.Error($"[Managed Identity] request failed, HttpStatusCode: {response.StatusCode} Error message: {message}");
+
+            MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                MsalError.ManagedIdentityRequestFailed,
+                message,
+                null,
+                _sourceType,
+                (int)response.StatusCode);
+
+            throw exception;
         }
 
         protected abstract ManagedIdentityRequest CreateRequest(string resource);
@@ -181,7 +173,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             Exception innerException, 
             ManagedIdentitySource source)
         {
-            var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+            MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                 errorCode,
                 errorMessage,
                 innerException,
