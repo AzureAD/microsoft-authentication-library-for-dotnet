@@ -27,7 +27,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string ImdsApiVersion = "2018-02-01";
         private const string DefaultMessage = "[Managed Identity] Service request failed.";
 
-        internal const string IdentityUnavailableError = "[Managed Identity] Authentication unavailable. The requested identity has not been assigned to this resource.";
+        internal const string IdentityUnavailableError = "[Managed Identity] Authentication unavailable. " +
+            "Either the requested identity has not been assigned to this resource or there could be other " +
+            "errors. See inner exception for details.";
+
         internal const string GatewayError = "[Managed Identity] Authentication unavailable. The request failed due to a gateway error.";
 
         private readonly Uri _imdsEndpoint;
