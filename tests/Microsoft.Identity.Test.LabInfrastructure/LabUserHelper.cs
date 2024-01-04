@@ -44,7 +44,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return response;
         }
 
-
         [Obsolete("Use GetSpecificUserAsync instead", true)]
         public static Task<LabResponse> GetLabUserDataForSpecificUserAsync(string upn)
         {

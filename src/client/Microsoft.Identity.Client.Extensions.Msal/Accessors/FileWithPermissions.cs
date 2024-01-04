@@ -19,7 +19,6 @@ namespace Microsoft.Identity.Client.Extensions.Msal.Accessors
     {
         #region Unix specific
 
-
         /// <summary>
         /// Equivalent to calling open() with flags  O_CREAT|O_WRONLY|O_TRUNC. O_TRUNC will truncate the file. 
         /// See https://man7.org/linux/man-pages/man2/open.2.html
@@ -31,7 +30,6 @@ namespace Microsoft.Identity.Client.Extensions.Msal.Accessors
         private static extern int PosixChmod([MarshalAs(UnmanagedType.LPStr)] string pathname, int mode);
 
         #endregion
-
 
         /// <summary>
         /// Creates a new file with "600" permissions (i.e. read / write only by the owner) and writes some data to it.
@@ -124,7 +122,6 @@ namespace Microsoft.Identity.Client.Extensions.Msal.Accessors
                 fs = info.Create(FileMode.Create, rights, FileShare.Read, data.Length, FileOptions.None, security);
 #endif
 
-
                 fs.Write(data, 0, data.Length);
             }
             finally
@@ -132,7 +129,6 @@ namespace Microsoft.Identity.Client.Extensions.Msal.Accessors
                 fs?.Dispose();
             }
         }
-
 
     }
 }

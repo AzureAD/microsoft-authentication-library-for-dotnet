@@ -83,7 +83,6 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// will look at x-client-os; as such the name of the OS should be parseable by the STS. 
         /// Do not use RID, as the format is not standardized across platforms.
         /// Do not use OSDescription, as it can be very long and non-standard, e.g. 
-
         /// Darwin 23.1.0 Darwin Kernel Version 23.1.0: Mon Oct 9 21:27:27 PDT 2023; root:xnu-10002.41.9~6/RELEASE_X86_64
         /// </summary>
         /// <returns></returns>

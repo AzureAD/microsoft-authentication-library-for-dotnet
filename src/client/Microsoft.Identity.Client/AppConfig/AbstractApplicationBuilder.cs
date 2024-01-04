@@ -429,7 +429,6 @@ namespace Microsoft.Identity.Client
 
         #region Authority
 
-
         /// <summary>
         /// Adds a known authority to the application. See <see href="https://aka.ms/msal-net-application-configuration">Application configuration options</see>.
         /// This constructor is mainly used for scenarios where the authority is not a standard Azure AD authority,
