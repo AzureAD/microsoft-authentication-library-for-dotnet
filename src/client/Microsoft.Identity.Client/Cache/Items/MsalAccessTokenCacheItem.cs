@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string keyId = null,
             string oboCacheKey = null)
             : this(
-                scopes: response.Scope, // token providers send pre-sorted (alphabetically) scopes
+                scopes: ScopeHelper.OrderScopesAlphabetically(response.Scope), // order scopes to avoid cache duplication. This is not in the hot path.
                 cachedAt: DateTimeOffset.UtcNow,
                 expiresOn: DateTimeHelpers.DateTimeOffsetFromDuration(response.ExpiresIn),
                 extendedExpiresOn: DateTimeHelpers.DateTimeOffsetFromDuration(response.ExtendedExpiresIn),
@@ -49,6 +49,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             InitCacheKey();
         }
 
+      
         internal /* for test */ MsalAccessTokenCacheItem(
             string preferredCacheEnv,
             string clientId,

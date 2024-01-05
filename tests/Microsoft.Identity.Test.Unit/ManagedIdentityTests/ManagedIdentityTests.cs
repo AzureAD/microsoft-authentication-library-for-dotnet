@@ -721,6 +721,61 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public async Task ProactiveRefresh_CancelsSuccessfully_Async()
+        {
+            bool wasErrorLogged = false;
+
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithLogging(LocalLogCallback)
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.BuildConcrete();
+
+                httpManager.AddManagedIdentityMockHandler(
+                        AppServiceEndpoint,
+                        Resource,
+                        MockHelpers.GetMsiSuccessfulResponse(),
+                        ManagedIdentitySource.AppService);
+
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                TestCommon.UpdateATWithRefreshOn(mi.AppTokenCacheInternal.Accessor);
+
+                var cts = new CancellationTokenSource();
+                var cancellationToken = cts.Token;
+                cts.Cancel();
+                cts.Dispose();
+
+                // Act
+                result = await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync(cancellationToken)
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsTrue(TestCommon.YieldTillSatisfied(() => wasErrorLogged));
+
+                void LocalLogCallback(LogLevel level, string message, bool containsPii)
+                {
+                    if (level == LogLevel.Warning &&
+                        message.Contains(SilentRequestHelper.ProactiveRefreshCancellationError))
+                    {
+                        wasErrorLogged = true;
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
         public async Task ParallelRequests_CallTokenEndpointOnceAsync()
         {
             int numOfTasks = 10; 

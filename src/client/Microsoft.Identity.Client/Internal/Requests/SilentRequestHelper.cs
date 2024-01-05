@@ -18,6 +18,9 @@ namespace Microsoft.Identity.Client.Internal
     internal static class SilentRequestHelper
     {
         internal const string MamEnrollmentIdKey = "microsoft_enrollment_id";
+        internal const string ProactiveRefreshServiceError = "Proactive token refresh failed with MsalServiceException.";
+        internal const string ProactiveRefreshGeneralError = "Proactive token refresh failed with exception.";
+        internal const string ProactiveRefreshCancellationError = "Proactive token refresh was canceled.";
 
         internal static async Task<MsalTokenResponse> RefreshAccessTokenAsync(MsalRefreshTokenCacheItem msalRefreshTokenItem, RequestBase request, AuthenticationRequestParameters authenticationRequestParameters, CancellationToken cancellationToken)
         {
@@ -89,20 +92,23 @@ namespace Microsoft.Identity.Client.Internal
                 }
                 catch (MsalServiceException ex)
                 {
-                    string logMsg = $"Background fetch failed with MsalServiceException. Is exception retryable? { ex.IsRetryable}";
+                    string logMsg = $"{ProactiveRefreshServiceError} Is exception retryable? {ex.IsRetryable}";
                     if (ex.StatusCode == 400)
                     {
                         logger.ErrorPiiWithPrefix(ex, logMsg);
                     }
                     else
                     {
-                        logger.WarningPiiWithPrefix(ex, logMsg);
+                        logger.ErrorPiiWithPrefix(ex, logMsg);
                     }
+                }
+                catch (OperationCanceledException ex)
+                {
+                    logger.WarningPiiWithPrefix(ex, ProactiveRefreshCancellationError);
                 }
                 catch (Exception ex)
                 {
-                    string logMsg = $"Background fetch failed with exception.";
-                    logger.WarningPiiWithPrefix(ex, logMsg);
+                    logger.ErrorPiiWithPrefix(ex, ProactiveRefreshGeneralError);
                 }
             });
         }
