@@ -34,7 +34,13 @@ namespace Microsoft.Identity.Client
             }
 
             return idToken.PreferredUsername.NullIfWhiteSpace() ??
-                   idToken.Upn.NullIfWhiteSpace() ??                     
+                   idToken.Upn.NullIfWhiteSpace() ??
+
+#if !iOS // on iOS the username is used for caching, so better not to change this
+
+                   idToken.Email.NullIfWhiteSpace() ??
+                   idToken.Name.NullIfWhiteSpace() ??
+#endif
                    NullPreferredUsernameDisplayLabel;
         }
 
