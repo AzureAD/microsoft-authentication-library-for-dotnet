@@ -55,13 +55,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return authResult;
             }
 
-            //check cache for AT
             MsalAccessTokenCacheItem cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
 
             // No access token or cached access token needs to be refreshed
             if (cachedAccessTokenItem != null)
             {
-                //return the token in the cache and check if it needs to be proactively refreshed
                 authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
 
                 logger.Info("[ManagedIdentityAuthRequest] Access token retrieved from cache for managed identity.");
