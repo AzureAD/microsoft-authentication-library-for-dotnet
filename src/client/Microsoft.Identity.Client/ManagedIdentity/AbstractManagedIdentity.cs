@@ -161,11 +161,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 _requestContext.Logger.Error($"[Managed Identity] Exception: {ex.Message}");
                 CreateAndThrowException(MsalError.ManagedIdentityRequestFailed, ex.Message, ex, source);
             }
-            else
-            {
-                // If it's already a MsalServiceException, rethrow it
-                throw ex;
-            }
         }
 
         private void CreateAndThrowException(string errorCode, 
