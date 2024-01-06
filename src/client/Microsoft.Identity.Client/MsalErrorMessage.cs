@@ -342,8 +342,6 @@ namespace Microsoft.Identity.Client
         public const string ScopesRequired = "At least one scope needs to be requested for this authentication flow. ";
         public const string InvalidAdalCacheMultipleRTs = "The ADAL cache is invalid as it contains multiple refresh token entries for one user. Deleting invalid ADAL cache. ";
 
-        public const string CredentialHttpCustomizationError = "You customized HttpClient factory but you are using APIs which require provisioning of a client certificate in HttpClient. Implement IMsalMtlsHttpClientFactory. For details see https://aka.ms/msal-net-msi-claims";
-
         public static string ExperimentalFeature(string methodName)
         {
             return string.Format(

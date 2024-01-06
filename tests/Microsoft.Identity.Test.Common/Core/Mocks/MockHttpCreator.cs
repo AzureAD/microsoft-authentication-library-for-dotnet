@@ -112,6 +112,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return handler;
         }
 
+        public static MockHttpMessageHandler CreateCredentialTokenHandler()
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = GetSuccessfulCredentialResponse(),
+            };
+
+            return handler;
+        }
+
         public static void AddClientCertificate(this MockHttpMessageHandler handler, X509Certificate2 certificate)
         {   
             handler.ClientCertificates.Add(certificate);

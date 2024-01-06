@@ -153,19 +153,14 @@ namespace Microsoft.Identity.Client.Http
 
         private HttpClient GetHttpClient(X509Certificate2 x509Certificate2)
         {
-            if (x509Certificate2 is null)
-            {
-                return _httpClientFactory.GetHttpClient();
-            }
-
             if (_httpClientFactory is IMsalMtlsHttpClientFactory msalMtlsHttpClientFactory)
             {
+                // If the factory is an IMsalMtlsHttpClientFactory, use it to get an HttpClient with the certificate
                 return msalMtlsHttpClientFactory.GetHttpClient(x509Certificate2);
             }
 
-            throw new MsalClientException(
-                "http_client_factory",
-                MsalErrorMessage.CredentialHttpCustomizationError);
+            // If the factory is not an IMsalMtlsHttpClientFactory, use it to get a default HttpClient
+            return _httpClientFactory.GetHttpClient();
         }
 
         private HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)

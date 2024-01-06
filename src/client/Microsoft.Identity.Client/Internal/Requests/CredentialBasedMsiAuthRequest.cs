@@ -41,14 +41,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenForManagedIdentityParameters managedIdentityParameters)
         {
-            if ((serviceBundle.Config.HttpClientFactory != null &&
-                serviceBundle.Config.HttpClientFactory is not IMsalMtlsHttpClientFactory)
-                && string.IsNullOrEmpty(managedIdentityParameters.Claims))
-            {
-                authenticationRequestParameters.RequestContext.Logger.Info($"[Managed Identity] Credential based managed identity is unavailable. {MsalErrorMessage.CredentialHttpCustomizationError}");
-                return null;
-            }
-
             return IsCredentialKeyAvailable(authenticationRequestParameters.RequestContext, managedIdentityParameters, out Uri credentialEndpointUri) ?
                     new CredentialBasedMsiAuthRequest(
                     serviceBundle,
