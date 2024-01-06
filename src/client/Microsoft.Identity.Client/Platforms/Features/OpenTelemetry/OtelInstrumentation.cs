@@ -82,6 +82,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 
         public OtelInstrumentation()
         {
+            // Needed to fail fast if the runtime, like in-process Azure Functions, doesn't support OpenTelemetry 
             _ = Meter.Version;
         }
 
