@@ -186,6 +186,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string GivenName = "Joe";
         public const string FamilyName = "Doe";
         public const string Username = "joe@localhost.com";
+        public const string Email = "joe@contoso.com";
         public const string PKeyAuthResponse = "PKeyAuth Context=\"context\",Version=\"1.0\"";
 
         public const string RegionName = "REGION_NAME";
@@ -222,6 +223,7 @@ namespace Microsoft.Identity.Test.Unit
                 };
             }
         }
+
 
         public const string MsalCCAKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/";
         public const string MsalCCAKeyVaultSecretName = "AzureADIdentityDivisionTestAgentSecret";
