@@ -58,6 +58,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             //check cache for AT
             MsalAccessTokenCacheItem cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
 
+            // No access token or cached access token needs to be refreshed
             if (cachedAccessTokenItem != null)
             {
                 //return the token in the cache and check if it needs to be proactively refreshed
@@ -69,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     var proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
 
-                    // may fire a request to get a new token in the background when AT needs to be refreshed
+                    // If needed, refreshes token in the background
                     if (proactivelyRefresh)
                     {
                         logger.Info("[ManagedIdentityAuthRequest] Initiating a proactive refresh.");
@@ -78,7 +79,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
-                        () => GetAccessTokenAsync(cancellationToken, logger), logger);
+                        () =>
+                        {
+                            // Use a linked token source, in case the original cancellation token source is disposed before this background task completes.
+                            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                            return GetAccessTokenAsync(tokenSource.Token, logger);
+                        }, logger);
                     }
                 }
                 catch (MsalServiceException e)

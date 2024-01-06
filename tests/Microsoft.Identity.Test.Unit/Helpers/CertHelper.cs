@@ -11,87 +11,76 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     public static class CertHelper
     {
-        private static X509Certificate2 s_x509Certificate2 = null;
-        private static object s_lockObject;
+        private static Dictionary<KnownTestCertType, X509Certificate2> s_x509Certificates = new Dictionary<KnownTestCertType, X509Certificate2>();
 
-        public static X509Certificate2 GetOrCreateTestCert()
+        public static X509Certificate2 GetOrCreateTestCert(KnownTestCertType knownTestCertType = KnownTestCertType.RSA)
         {
-           // create the cert if it doesn't exist. use a lock to prevent multiple threads from creating the cert
+            // create the cert if it doesn't exist. use a lock to prevent multiple threads from creating the cert
+            s_x509Certificates.TryGetValue(knownTestCertType, out X509Certificate2 x509Certificate2);
 
-            if (s_x509Certificate2 == null)
+            if (x509Certificate2 == null)
             {
                 lock (typeof(CertHelper))
                 {
-                    if (s_x509Certificate2 == null)
+                    if (x509Certificate2 == null)
                     {
-                        s_x509Certificate2 = CreateTestCert();
+                        x509Certificate2 = CreateTestCert(knownTestCertType);
+                        s_x509Certificates.Add(knownTestCertType, x509Certificate2);
                     }
                 }
             }
 
-            return s_x509Certificate2;
+            return x509Certificate2;
         }
 
-        private static X509Certificate2 CreateTestCert()
+        private static X509Certificate2 CreateTestCert(KnownTestCertType knownTestCertType = KnownTestCertType.RSA)
         {
-            using (RSA rsa = RSA.Create(4096))
+            switch (knownTestCertType)
             {
-                CertificateRequest parentReq = new CertificateRequest(
-                    "CN=Test Cert",
-                    rsa,
-                    HashAlgorithmName.SHA256,
-                    RSASignaturePadding.Pkcs1);
+                case KnownTestCertType.ECD:
+                    string secp256r1Oid = "1.2.840.10045.3.1.7";  //oid for prime256v1(7)  other identifier: secp256r1
 
-                parentReq.CertificateExtensions.Add(
-                    new X509BasicConstraintsExtension(true, false, 0, true));
-
-                parentReq.CertificateExtensions.Add(
-                    new X509SubjectKeyIdentifierExtension(parentReq.PublicKey, false));
-
-                X509Certificate2 cert = parentReq.CreateSelfSigned(
-                     DateTimeOffset.UtcNow,
-                     DateTimeOffset.UtcNow.AddDays(1));
-
-                return cert;
-            }
-        }
-
-        public static X509Certificate2 GetOrCreateTestCertWithBuilder()
-        {
-            // create the cert if it doesn't exist. use a lock to prevent multiple threads from creating the cert
-
-            if (s_x509Certificate2 == null)
-            {
-                lock (s_lockObject)
-                {
-                    if (s_x509Certificate2 == null)
+                    using (var ecdsa = ECDsa.Create(ECCurve.CreateFromValue(secp256r1Oid)))
                     {
-                        // Use the X509Certificate2Builder to create the certificate
-                        using (RSA rsa = RSA.Create(4096))
-                        {
-                            DateTimeOffset notBefore = DateTimeOffset.UtcNow;
-                            DateTimeOffset notAfter = notBefore.AddDays(1);
+                        string subjectName = "SelfSignedEdcCert";
 
-                            X509Certificate2 cert = new X509Certificate2Builder()
-                                .WithSubjectName("CN=Test Cert")
-                                .WithPublicKey(rsa)
-                                .WithHashAlgorithm(HashAlgorithmName.SHA256)
-                                .WithSignatureAlgorithm(RSASignaturePadding.Pkcs1)
-                                .WithBasicConstraintsExtension(true, false, 0, true)
-                                .WithSubjectKeyIdentifierExtension(false)
-                                .WithNotBefore(notBefore)
-                                .WithNotAfter(notAfter)
-                                .Build();
+                        var certRequest = new CertificateRequest($"CN={subjectName}", ecdsa, HashAlgorithmName.SHA256);
 
-                            return cert;
-                        }
+                        X509Certificate2 generatedCert = certRequest.CreateSelfSigned(DateTimeOffset.Now.AddDays(-1), DateTimeOffset.Now.AddYears(10)); // generate the cert and sign!
+
+                        X509Certificate2 pfxGeneratedCert = new X509Certificate2(generatedCert.Export(X509ContentType.Pfx)); //has to be turned into pfx or Windows at least throws a security credentials not found during sslStream.connectAsClient or HttpClient request...
+
+                        return pfxGeneratedCert;
                     }
-                }
+                case KnownTestCertType.RSA:
+                default:
+                    using (RSA rsa = RSA.Create(4096))
+                    {
+                        CertificateRequest parentReq = new CertificateRequest(
+                            "CN=Test Cert",
+                            rsa,
+                            HashAlgorithmName.SHA256,
+                            RSASignaturePadding.Pkcs1);
+
+                        parentReq.CertificateExtensions.Add(
+                            new X509BasicConstraintsExtension(true, false, 0, true));
+
+                        parentReq.CertificateExtensions.Add(
+                            new X509SubjectKeyIdentifierExtension(parentReq.PublicKey, false));
+
+                        X509Certificate2 cert = parentReq.CreateSelfSigned(
+                             DateTimeOffset.UtcNow,
+                             DateTimeOffset.UtcNow.AddDays(1));
+
+                        return cert;
+                    }
             }
-
-            return s_x509Certificate2;
         }
+    }
 
-
+    public enum KnownTestCertType
+    {
+        RSA,
+        ECD
     }
 }
