@@ -861,6 +861,12 @@ namespace Microsoft.Identity.Client
         public const string CertWithoutPrivateKey = "cert_without_private_key";
 
         /// <summary>
+        /// <para>What happens?</para>The certificate provided is not of type RSA.
+        /// <para>Mitigation</para>Please use an RSA certificate.
+        /// </summary>
+        public const string CertificateNotRsa = "certificate_not_rsa";
+
+        /// <summary>
         /// Device certificate not found.
         /// </summary>
         public const string DeviceCertificateNotFound = "device_certificate_not_found";

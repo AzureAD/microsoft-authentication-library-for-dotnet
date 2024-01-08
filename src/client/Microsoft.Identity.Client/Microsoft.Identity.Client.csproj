@@ -9,7 +9,7 @@
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
-  <!-- Mobile and legacy targets - comment these out or set env variable INCLUDE_MOBILE_AND_LEGACY_TFM to speedup the build -->
+  <!-- Mobile and legacy targets are disabled by default to speed up dev box -->
   <PropertyGroup Condition="'$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
     <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
     <TargetFrameworkAndroid9>MonoAndroid9.0</TargetFrameworkAndroid9>

@@ -394,6 +394,14 @@ namespace Microsoft.Identity.Client
                 certificateName);
         }
 
+        public static string CertMustBeRsa(string certificateFriendlyName)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "The provided certificate is not of type RSA. Please use a certificate of type RSA. Provided certificate's Friendly Name: {0}.",
+                certificateFriendlyName);
+        }
+
         public const string LinuxOpenToolFailed = "Unable to open a web page using xdg-open, gnome-open, kfmclient or wslview tools. See inner exception for details. Possible causes for this error are: tools are not installed or they cannot open a URL. Make sure you can open a web page by invoking from a terminal: xdg-open https://www.bing.com ";
         public const string LinuxOpenAsSudoNotSupported = "Unable to open a web page using xdg-open, gnome-open, kfmclient or wslview tools in sudo mode. Please run the process as non-sudo user.";
 
