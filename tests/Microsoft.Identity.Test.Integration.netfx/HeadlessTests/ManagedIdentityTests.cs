@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
 
                 //Act
-                MsalManagedIdentityException ex = await AssertException.TaskThrowsAsync<MsalManagedIdentityException>(async () =>
+                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
                 {
                     await mia
                     .AcquireTokenForManagedIdentity(s_msi_scopes)
@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //Assert
                 Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
-                Assert.AreEqual(expectedResource, ex.ManagedIdentitySource);
+                Assert.AreEqual(expectedResource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
             }
         }
 
@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
 
                 //Act
-                MsalManagedIdentityException ex = await AssertException.TaskThrowsAsync<MsalManagedIdentityException>(async () =>
+                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
                 {
                     await mia
                     .AcquireTokenForManagedIdentity(s_wrong_msi_scopes)
@@ -203,7 +203,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //Assert
                 Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
-                Assert.AreEqual(ManagedIdentitySource.AppService, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.AppService.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
             }
         }
 
