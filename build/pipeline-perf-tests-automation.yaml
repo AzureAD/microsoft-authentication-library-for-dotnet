@@ -16,6 +16,7 @@ pool:
 variables:
   BuildPlatform: 'any cpu'
   BuildConfiguration: 'release'
+  BuildRuntime: 'net8.0'
 
 jobs:
   - job: 'BuildJob'

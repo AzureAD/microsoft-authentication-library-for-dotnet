@@ -3,6 +3,6 @@
 
 steps:
 - task: UseDotNet@2
-  displayName: 'Use .Net Core sdk'
+  displayName: 'Use the latest .NET 8'
   inputs:
-    version: 3.x
+    version: 8.x

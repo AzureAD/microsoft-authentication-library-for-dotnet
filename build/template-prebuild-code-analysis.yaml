@@ -8,9 +8,9 @@ steps:
     versionSpec: '16.x'
 
 - task: UseDotNet@2
-  displayName: 'Use .NET SDK 6.x'
+  displayName: 'Use the latest .NET 8'
   inputs:
-    version: 6.x
+    version: 8.x
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@2
   displayName: 'Run PoliCheck'

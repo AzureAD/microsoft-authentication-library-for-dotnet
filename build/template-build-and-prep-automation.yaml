@@ -4,18 +4,12 @@ steps:
   displayName: 'Use latest NuGet'
   inputs:
     versionSpec: 6.x
-
-# Unit tests require .NET 3.x
-- task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 3.x'
-  inputs:
-    version: 3.x
-    
+   
 # Use the latest .NET SDK
 - task: UseDotNet@2
-  displayName: 'Use .Net Core sdk 6.x'
+  displayName: 'Use the latest .NET 8'
   inputs:
-    version: 6.x
+    version: 8.x
 
 - task: PowerShell@2
   displayName: 'Installing Xamarin iOS/macOS components'

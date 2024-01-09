@@ -7,14 +7,9 @@ parameters:
   
 steps:
 - task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 3.x'
+  displayName: 'Use the latest .NET 8'
   inputs:
-    version: 3.x
-
-- task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 5.x'
-  inputs:
-    version: 5.x
+    version: 8.x
 
 # Bootstrap the build
 - template: template-bootstrap-build.yaml
