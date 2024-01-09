@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
             oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion);
 
-            return TaskUtil.CompletedTask;
+            return Task.CompletedTask;
         }
     }
 }

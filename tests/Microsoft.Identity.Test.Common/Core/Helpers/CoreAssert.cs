@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -23,6 +24,24 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             foreach (string expectedScope in expectedScopes)
             {
                 Assert.IsTrue(actualScopes.Contains(expectedScope));
+            }
+        }
+
+        internal static void AreAccountsEqual(
+            string expectedUsername,
+            string expectedEnv,
+            string expectedId,
+            string expectedTid,
+            string expectedOid,
+            params IAccount[] accounts)
+        {            
+            foreach (var account in accounts)
+            {
+                Assert.AreEqual(expectedUsername, account.Username);
+                Assert.AreEqual(expectedEnv, account.Environment);
+                Assert.AreEqual(expectedId, account.HomeAccountId.Identifier);
+                Assert.AreEqual(expectedTid, account.HomeAccountId.TenantId);
+                Assert.AreEqual(expectedOid, account.HomeAccountId.ObjectId);
             }
         }
 

@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        internal class MockProxy : Client.Platforms.net45.NetDesktopPlatformProxy
+        internal class MockProxy : Microsoft.Identity.Client.Platforms.netdesktop.NetDesktopPlatformProxy
         {
 
             public MockProxy() : base(new NullLogger())

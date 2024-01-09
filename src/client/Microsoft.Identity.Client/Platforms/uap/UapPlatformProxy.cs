@@ -173,13 +173,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
         protected override IFeatureFlags CreateFeatureFlags() => new UapFeatureFlags();
-       
-
-        public override IDeviceAuthManager CreateDeviceAuthManager()
-        {
-            return new NullDeviceAuthManager();
-        }
-
+             
         public override bool LegacyCacheRequiresSerialization => false;
     }
 }

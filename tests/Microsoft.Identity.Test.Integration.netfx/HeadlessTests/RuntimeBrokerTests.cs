@@ -23,7 +23,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.Integration.net45.Infrastructure;
+using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -169,8 +169,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
             }
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
-        [ExpectedException(typeof(MsalUiRequiredException))]
+        [RunOn(TargetFrameworks.NetCore)]        
         public async Task WamUsernamePasswordRequestAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -215,8 +214,59 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             Assert.IsNotNull(accounts);
 
-            // this should throw MsalUiRequiredException
-            result = await pca.AcquireTokenSilent(scopes, account).ExecuteAsync().ConfigureAwait(false);
+            await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
+               () => pca.AcquireTokenSilent(scopes, account).ExecuteAsync())
+                .ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task WamUsernamePasswordWithForceRefreshAsync()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            string[] scopes = { "User.Read" };
+            string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
+
+            IntPtr intPtr = GetForegroundWindow();
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+               .Create(labResponse.App.AppId)
+               .WithParentActivityOrWindow(windowHandleProvider)
+               .WithAuthority(labResponse.Lab.Authority, "organizations")
+               .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+               .Build();
+
+            // Acquire token using username password
+            var result = await pca.AcquireTokenByUsernamePassword(
+                scopes, 
+                labResponse.User.Upn, 
+                labResponse.User.GetOrFetchPassword())
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            DateTimeOffset ropcTokenExpiration = result.ExpiresOn;
+            string ropcToken = result.AccessToken;
+
+            MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);
+            Assert.IsNotNull(result.AuthenticationResultMetadata.Telemetry);
+
+            // Get Accounts
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);            
+            var account = accounts.FirstOrDefault();
+            Assert.IsNotNull(account);
+
+            result = await pca.AcquireTokenSilent(scopes, account)
+                .ExecuteAsync().ConfigureAwait(false);
+
+            // This proves the token is from the cache
+            Assert.AreEqual(ropcToken, result.AccessToken);
+
+            result = await pca.AcquireTokenSilent(scopes, account)
+                .WithForceRefresh(true)
+               .ExecuteAsync().ConfigureAwait(false);
+
+            // This proves the token is not from the cache
+            Assert.AreNotEqual(ropcToken, result.AccessToken);
         }
 
         [RunOn(TargetFrameworks.NetCore)]

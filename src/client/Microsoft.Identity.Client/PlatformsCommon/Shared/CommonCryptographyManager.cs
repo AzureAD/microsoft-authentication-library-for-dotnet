@@ -64,13 +64,18 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             // MSAL used to check min key size by looking at certificate.GetRSAPublicKey().KeySize
             // but this causes sporadic failures in the crypto stack. Rely on AAD to perform key size validations.
-
             if (!s_certificateToRsaMap.TryGetValue(certificate.Thumbprint, out RSA rsa))
             {
                 if (s_certificateToRsaMap.Count >= s_maximumMapSize)
                     s_certificateToRsaMap.Clear();
 
                 rsa = certificate.GetRSAPrivateKey();
+            }
+
+            //Ensure certificate is of type RSA.
+            if (rsa == null)
+            {
+                throw new MsalClientException(MsalError.CertificateNotRsa, MsalErrorMessage.CertMustBeRsa(certificate.PublicKey?.Oid?.FriendlyName));
             }
 
             try

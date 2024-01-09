@@ -105,6 +105,7 @@ namespace NetDesktopWinForms
             var builder = PublicClientApplicationBuilder
                 .Create(clientId)
                 .WithRedirectUri("http://localhost")
+                .WithClientCapabilities(new[] { "cp1"})
                 .WithMultiCloudSupport(cbxMultiCloud2.Checked)
                 .WithAuthority(authority);
 
@@ -124,11 +125,11 @@ namespace NetDesktopWinForms
                     break;
                 case AuthMethod.SystemBrowser:
                     builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
-                    builder = ToggleOldBroker(builder, false);
+                    builder = builder.WithBroker(false);
                     break;
                 case AuthMethod.EmbeddedBrowser:
                     builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
-                    builder = ToggleOldBroker(builder, false);
+                    builder = builder.WithBroker(false);
 
                     break;
                 default:
@@ -141,12 +142,6 @@ namespace NetDesktopWinForms
 
             BindCache(pca.UserTokenCache, UserCacheFile);
             return pca;
-        }
-
-        private static PublicClientApplicationBuilder ToggleOldBroker(PublicClientApplicationBuilder builder, bool enable)
-        {
-            builder = builder.WithBroker(enable);
-            return builder;
         }
 
         private static void BindCache(ITokenCache tokenCache, string file)
@@ -244,6 +239,11 @@ namespace NetDesktopWinForms
                         Guid.NewGuid().ToString(),
                     System.Net.Http.HttpMethod.Get,
                     GetRandomDownstreamUri());
+                }
+
+                if (cbxWithForceRefresh.Checked)
+                {
+                    builder = builder.WithForceRefresh(true);
                 }
 
                 Log($"ATS with IAccount for {acc?.Username ?? acc.HomeAccountId.ToString() ?? "null"}");

@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = cacheInfoTelemetry;
             }
 
-            // No AT or AT neesd to be refreshed 
+            // No access token or cached access token needs to be refreshed 
             try
             {
                 if (cachedAccessTokenItem == null)
@@ -86,14 +86,19 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 {
                     var shouldRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
 
-                    // may fire a request to get a new token in the background
+                    // If needed, refreshes token in the background
                     if (shouldRefresh)
                     {
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ProactivelyRefreshed;
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
-                        () => RefreshRtOrFailAsync(cancellationToken), logger);
+                        () =>
+                        {
+                            // Use a linked token source, in case the original cancellation token source is disposed before this background task completes.
+                            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                            return RefreshRtOrFailAsync(tokenSource.Token);
+                        }, logger);
                     }
                 }
 

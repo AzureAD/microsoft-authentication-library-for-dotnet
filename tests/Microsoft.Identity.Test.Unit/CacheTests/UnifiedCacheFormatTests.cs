@@ -262,10 +262,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private void ValidateAccount(ITokenCacheInternal cache)
         {
-            // TODO: NEED TO LOOK INTO HOW TO HANDLE THIS TEST
-            //ValidateCacheEntityValue
-            //    (ExpectedAccountCacheValue, cache.GetAllAccountCacheItems(requestContext));
-
             var accountCacheItem = cache.Accessor.GetAllAccounts().First();
             var iOSKey = accountCacheItem.iOSCacheKey;
 
@@ -273,7 +269,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.AreEqual(_expectedAccountCacheKeyIosService, iOSKey.iOSService);
             Assert.AreEqual(_expectedAccountCacheKeyIosAccount, iOSKey.iOSAccount);
-            Assert.AreEqual(_expectedAccountCacheKeyIosGeneric, iOSKey.iOSGeneric);
             Assert.AreEqual(MsalCacheKeys.iOSAuthorityTypeToAttrType["MSSTS"], iOSKey.iOSType);
         }
 

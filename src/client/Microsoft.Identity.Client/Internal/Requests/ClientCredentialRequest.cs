@@ -47,35 +47,39 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             AuthenticationResult authResult = null;
 
-            //skip checking cache for force refresh or when claims are present
+            // Skip checking cache when force refresh or claims are specified
             if (_clientParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
-                logger.Info("[ClientCredentialRequest] Skipped looking for an Access Token in the cache because ForceRefresh was set.");
+                logger.Info("[ClientCredentialRequest] Skipped looking for a cached access token because ForceRefresh or Claims were set.");
                 authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
                 return authResult;
             }
 
-            //check cache for AT
             MsalAccessTokenCacheItem cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
 
+            // No access token or cached access token needs to be refreshed 
             if (cachedAccessTokenItem != null)
             {
-                //return the token in the cache and check if it needs to be proactively refreshed
                 authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
 
                 try
                 {
                     var proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
 
-                    // may fire a request to get a new token in the background when AT needs to be refreshed
+                    // If needed, refreshes token in the background
                     if (proactivelyRefresh)
                     {
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ProactivelyRefreshed;
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
-                        () => GetAccessTokenAsync(cancellationToken, logger), logger);
+                        () =>
+                        {
+                            // Use a linked token source, in case the original cancellation token source is disposed before this background task completes.
+                            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                            return GetAccessTokenAsync(tokenSource.Token, logger);
+                        }, logger);
                     }
                 }
                 catch (MsalServiceException e)
@@ -85,7 +89,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             else
             {
-                //  No AT in the cache 
+                //  No access token in the cache 
                 if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != CacheRefreshReason.Expired)
                 {
                     AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
@@ -103,28 +107,28 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
-            //calls sent to AAD
+            // Get a token from AAD
             if (ServiceBundle.Config.AppTokenProvider == null)
             {
                 MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
             }
 
-            //calls sent to app token provider
+            // Get a token from the app provider delegate
             AuthenticationResult authResult;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
 
+            // Allow only one call to the provider 
+            logger.Verbose(() => "[ClientCredentialRequest] Entering client credential request semaphore.");
+            await s_semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
+            logger.Verbose(() => "[ClientCredentialRequest] Entered client credential request semaphore.");
+
             try
             {
-                //allow only one call to the provider 
-                logger.Verbose(() => "[ClientCredentialRequest] Entering token acquire for client credential request semaphore.");
-                await s_semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
-                logger.Verbose(() => "[ClientCredentialRequest] Entered token acquire for client credential request semaphore.");
-                
                 // Bypass cache and send request to token endpoint, when 
                 // 1. Force refresh is requested, or
                 // 2. Claims are passed, or 
-                // 3. If the AT needs to be refreshed pro-actively 
+                // 3. If the access token needs to be refreshed proactively. 
                 if (_clientParameters.ForceRefresh ||
                     AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
                     !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
@@ -133,6 +137,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 else
                 {
+                    // Check the cache again after acquiring the semaphore in case the previous request cached a new token.
                     cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
 
                     if (cachedAccessTokenItem == null)
@@ -141,7 +146,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     }
                     else
                     {
-                        logger.Verbose(() => "[ClientCredentialRequest] Getting Access token from cache ...");
+                        logger.Verbose(() => "[ClientCredentialRequest] Checking for a cached access token.");
                         authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
                     }
                 }
@@ -151,14 +156,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             finally
             {
                 s_semaphoreSlim.Release();
-                logger.Verbose(() => "[ClientCredentialRequest] Released token acquire for client credential request semaphore.");
+                logger.Verbose(() => "[ClientCredentialRequest] Released client credential request semaphore.");
             }
         }
 
         private async Task<AuthenticationResult> SendTokenRequestToAppTokenProviderAsync(ILoggerAdapter logger, 
             CancellationToken cancellationToken)
         {
-            logger.Info("[ClientCredentialRequest] Sending Token response to client credential request endpoint ...");
+            logger.Info("[ClientCredentialRequest] Acquiring a token from the token provider.");
             AppTokenProviderParameters appTokenProviderParameters = new AppTokenProviderParameters
             {
                 Scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope),
@@ -212,8 +217,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected override SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)
         {
             // Client credentials should not add the reserved scopes
-            // "openid", "profile" and "offline_access" 
-            // because AT is on behalf of an app (no profile, no IDToken, no RT)
+            // ("openid", "profile", and "offline_access")
+            // because the access token is on behalf of an app (no profile, no ID token, no refresh token)
             return new SortedSet<string>(inputScopes);
         }
 

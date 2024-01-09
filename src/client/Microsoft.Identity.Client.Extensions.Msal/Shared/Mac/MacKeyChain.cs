@@ -108,7 +108,6 @@ namespace Microsoft.Identity.Client.Extensions.Msal
 
             string serviceName = CreateServiceName(service);
 
-
             uint serviceNameLength = (uint)serviceName.Length;
             uint accountLength = (uint)(account?.Length ?? 0);
 
