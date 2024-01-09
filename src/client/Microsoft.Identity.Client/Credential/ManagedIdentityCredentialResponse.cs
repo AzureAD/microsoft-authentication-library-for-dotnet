@@ -98,10 +98,14 @@ namespace Microsoft.Identity.Client.Credential
                     " and/or insufficient for authentication.");
 
                 // Throw an exception indicating that the CredentialResponse is invalid
-                throw new MsalManagedIdentityException(
-                    MsalError.ManagedIdentityRequestFailed,
-                    MsalErrorMessage.ManagedIdentityInvalidResponse,
-                    ManagedIdentitySource.Credential);
+                MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                MsalError.ManagedIdentityRequestFailed,
+                MsalErrorMessage.ManagedIdentityInvalidResponse,
+                null,
+                ManagedIdentitySource.Credential,
+                null);
+
+                throw exception;
             }
         }
 

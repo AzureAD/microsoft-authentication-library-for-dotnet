@@ -13,8 +13,6 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
-
-
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
 
@@ -110,7 +108,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             AuthenticationResult authResult;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
-
 
             // Requests to a managed identity endpoint must be throttled; 
             // otherwise, the endpoint will throw a HTTP 429.

@@ -335,7 +335,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 httpManager.AddTokenErrorResponse("invalid_grant", System.Net.HttpStatusCode.BadRequest);
 
-                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
@@ -370,13 +370,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     "",
                     statusCode: HttpStatusCode.BadRequest);
 
-                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 //Act
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySource.Credential, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.Credential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CredentialEndpointNoResponseReceived), ex.Message);
             }
         }
@@ -504,13 +504,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     resource,
                     response: errorFactory.Invoke(), statusCode: HttpStatusCode.BadRequest);
 
-                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(ex.Message, expectedErrorMessage);
-                Assert.AreEqual(ManagedIdentitySource.Credential, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.Credential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(ex.ErrorCode, expectedErrorCode);
             }
         }
@@ -547,13 +547,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     Resource,
                     response: errorFactory.Invoke(), statusCode: HttpStatusCode.BadRequest);
 
-                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(ex.Message, expectedErrorMessage);
-                Assert.AreEqual(ManagedIdentitySource.Credential, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.Credential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(ex.ErrorCode, expectedErrorCode);
             }
         }
@@ -608,12 +608,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     "",
                     statusCode: HttpStatusCode.InternalServerError);
 
-                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("scope")
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySource.Credential, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.Credential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.CredentialRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.CredentialEndpointNoResponseReceived, ex.Message);
             }
@@ -643,12 +643,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     "",
                     statusCode: HttpStatusCode.OK);
 
-                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySource.Credential, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.Credential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidResponse, ex.Message);
             }
@@ -676,12 +676,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddFailingRequest(new HttpRequestException("A socket operation was attempted to an unreachable network.",
                     new SocketException(10051)));
 
-                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySource.Credential, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.Credential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityUnreachableNetwork, ex.ErrorCode);
                 Assert.AreEqual("A socket operation was attempted to an unreachable network.", ex.Message);
             }
@@ -713,12 +713,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddFailingRequest(new HttpRequestException("A socket operation was attempted to an unreachable network.",
                     new SocketException(10051)));
 
-                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySource.Credential, ex.ManagedIdentitySource);
+                Assert.AreEqual(ManagedIdentitySource.Credential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityUnreachableNetwork, ex.ErrorCode);
                 Assert.AreEqual("A socket operation was attempted to an unreachable network.", ex.Message);
             }
@@ -758,7 +758,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     "",
                     statusCode: statusCode);
 
-                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
@@ -909,7 +909,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(MsalManagedIdentityException))]
+        [ExpectedException(typeof(MsalServiceException))]
         public async Task ManagedIdentityNoClientIdInCredentialResponseThrowsAsync()
         {
             // Arrange
@@ -938,7 +938,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(MsalManagedIdentityException))]
+        [ExpectedException(typeof(MsalServiceException))]
         public async Task ManagedIdentityNoTokenUrlThrowsAsync()
         {
             // Arrange
@@ -967,7 +967,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(MsalManagedIdentityException))]
+        [ExpectedException(typeof(MsalServiceException))]
         public async Task ManagedIdentityNoTenantIdThrowsAsync()
         {
             // Arrange
@@ -996,7 +996,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(MsalManagedIdentityException))]
+        [ExpectedException(typeof(MsalServiceException))]
         public async Task ManagedIdentityNoCredentialInResponseThrowsAsync()
         {
             // Arrange

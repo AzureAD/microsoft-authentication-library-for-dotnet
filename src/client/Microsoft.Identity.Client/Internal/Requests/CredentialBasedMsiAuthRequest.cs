@@ -218,22 +218,43 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             catch (HttpRequestException ex)
             {
-                throw new MsalManagedIdentityException(
-                    MsalError.ManagedIdentityUnreachableNetwork, ex.Message, ManagedIdentitySource.Credential);
+                exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                MsalError.ManagedIdentityUnreachableNetwork,
+                ex.Message,
+                ex.InnerException,
+                ManagedIdentitySource.Credential,
+                null);
+
+                throw exception;
             }
             catch (MsalServiceException ex)
             {
                 logger.Verbose(() => $"[CredentialBasedMsiAuthRequest] Caught an exception. {ex.Message}. Error Code : {ex.ErrorCode} Status Code : {ex.StatusCode}");
-                throw new MsalManagedIdentityException(ex.ErrorCode, ex.Message, ManagedIdentitySource.Credential, ex.StatusCode);
+
+                exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    ex.ErrorCode,
+                    ex.Message,
+                    ex.InnerException,
+                    ManagedIdentitySource.Credential,
+                    ex.StatusCode);
+
+                throw exception;
             }
-            catch (Exception e) when (e is not MsalManagedIdentityException)
+            catch (Exception e) when (e is not MsalServiceException)
             {
                 logger.Error($"[Managed Identity] Exception: {e.Message}");
                 exception = e;
                 message = MsalErrorMessage.CredentialEndpointNoResponseReceived;
             }
 
-            throw new MsalManagedIdentityException(MsalError.CredentialRequestFailed, message, exception, ManagedIdentitySource.Credential);
+            MsalException msalException = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                MsalError.CredentialRequestFailed,
+                message,
+                exception,
+                ManagedIdentitySource.Credential,
+                null);
+
+            throw msalException;
         }
 
         private async Task<CredentialResponse> GetCredentialAssertionAsync(

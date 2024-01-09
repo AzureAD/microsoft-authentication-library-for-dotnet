@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         protected readonly RequestContext _requestContext;
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
         internal readonly ManagedIdentitySource _sourceType;
+
         protected AbstractManagedIdentity(RequestContext requestContext, ManagedIdentitySource sourceType)
         {
             _requestContext = requestContext;
@@ -40,14 +41,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             HttpResponse response = null;
-
             // Convert the scopes to a resource string.
             string resource = parameters.Resource;
 
             ManagedIdentityRequest request = CreateRequest(resource);
 
             _requestContext.Logger.Info("[Managed Identity] sending request to managed identity endpoints.");
-
             try
             {
                 if (request.Method == HttpMethod.Get)
@@ -66,9 +65,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 }
                 else
                 {
-                    
-                    Debug.WriteLine("_sourceType in AuthenticateAsync" + _sourceType);
-
                     response = await _requestContext.ServiceBundle.HttpManager
                         .SendRequestAsync(
                             request.ComputeUri(),
@@ -81,7 +77,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             mtlsCertificate: null,
                             cancellationToken)
                         .ConfigureAwait(false);
-                    
+
                 }
             }
             catch (Exception ex)
@@ -105,7 +101,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             string message = GetMessageFromErrorResponse(response);
-                
+
             _requestContext.Logger.Error($"[Managed Identity] request failed, HttpStatusCode: {response.StatusCode} Error message: {message}");
 
             MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
@@ -132,11 +128,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.ManagedIdentityRequestFailed,
                     MsalErrorMessage.ManagedIdentityInvalidResponse,
-                    null, 
-                    _sourceType, 
-                    null); 
+                    null,
+                    _sourceType,
+                    null);
 
-                    throw exception;
+                throw exception;
             }
 
             return managedIdentityResponse;
@@ -162,8 +158,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 $"Error Message: {managedIdentityErrorResponse.ErrorDescription} ";
         }
 
-        private void HandleException(Exception ex, 
-            ManagedIdentitySource managedIdentitySource = ManagedIdentitySource.None, 
+        private void HandleException(Exception ex,
+            ManagedIdentitySource managedIdentitySource = ManagedIdentitySource.None,
             string additionalInfo = null)
         {
             ManagedIdentitySource source = managedIdentitySource != ManagedIdentitySource.None ? managedIdentitySource : _sourceType;
@@ -189,9 +185,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        private void CreateAndThrowException(string errorCode, 
-            string errorMessage, 
-            Exception innerException, 
+        private void CreateAndThrowException(string errorCode,
+            string errorMessage,
+            Exception innerException,
             ManagedIdentitySource source)
         {
             MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
