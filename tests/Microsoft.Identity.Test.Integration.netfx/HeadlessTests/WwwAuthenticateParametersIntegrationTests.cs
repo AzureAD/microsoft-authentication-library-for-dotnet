@@ -15,7 +15,6 @@ using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     [TestClass]

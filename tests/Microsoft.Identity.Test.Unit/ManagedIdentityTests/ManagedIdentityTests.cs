@@ -290,12 +290,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiErrorResponse(),
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
 
-                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(managedIdentitySource, ex.ManagedIdentitySource);
+                Assert.AreEqual(managedIdentitySource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
             }
         }
@@ -345,12 +345,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
 
-                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("scope")
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(managedIdentitySource, ex.ManagedIdentitySource);
+                Assert.AreEqual(managedIdentitySource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.ManagedIdentityNoResponseReceived, ex.Message);
             }
@@ -384,12 +384,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     managedIdentitySource,
                     statusCode: HttpStatusCode.OK);
 
-                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(managedIdentitySource, ex.ManagedIdentitySource);
+                Assert.AreEqual(managedIdentitySource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidResponse, ex.Message);
             }
@@ -419,12 +419,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddFailingRequest(new HttpRequestException("A socket operation was attempted to an unreachable network.",
                     new SocketException(10051)));
 
-                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(managedIdentitySource, ex.ManagedIdentitySource);
+                Assert.AreEqual(managedIdentitySource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityUnreachableNetwork, ex.ErrorCode);
                 Assert.AreEqual("A socket operation was attempted to an unreachable network.", ex.Message);
             }
@@ -469,12 +469,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     managedIdentitySource,
                     statusCode: statusCode); 
 
-                MsalManagedIdentityException ex = await Assert.ThrowsExceptionAsync<MsalManagedIdentityException>(async () =>
+                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
+                Assert.AreEqual(managedIdentitySource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.IsTrue(ex.IsRetryable);
             }
         }
@@ -721,6 +722,61 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
+        public async Task ProactiveRefresh_CancelsSuccessfully_Async()
+        {
+            bool wasErrorLogged = false;
+
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithLogging(LocalLogCallback)
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.BuildConcrete();
+
+                httpManager.AddManagedIdentityMockHandler(
+                        AppServiceEndpoint,
+                        Resource,
+                        MockHelpers.GetMsiSuccessfulResponse(),
+                        ManagedIdentitySource.AppService);
+
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                TestCommon.UpdateATWithRefreshOn(mi.AppTokenCacheInternal.Accessor);
+
+                var cts = new CancellationTokenSource();
+                var cancellationToken = cts.Token;
+                cts.Cancel();
+                cts.Dispose();
+
+                // Act
+                result = await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync(cancellationToken)
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsTrue(TestCommon.YieldTillSatisfied(() => wasErrorLogged));
+
+                void LocalLogCallback(LogLevel level, string message, bool containsPii)
+                {
+                    if (level == LogLevel.Warning &&
+                        message.Contains(SilentRequestHelper.ProactiveRefreshCancellationError))
+                    {
+                        wasErrorLogged = true;
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
         public async Task ParallelRequests_CallTokenEndpointOnceAsync()
         {
             int numOfTasks = 10; 
@@ -777,6 +833,23 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Debug.WriteLine($"Total Cache Hits: {cacheHits}");
                 Assert.IsTrue(cacheHits == 9);
             }
+        }
+
+        [TestMethod]
+        // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4472
+        // Should throw TaskCanceledException instead of trying to take a semaphore
+        public async Task CanceledRequest_ThrowsTaskCanceledExceptionAsync()
+        {
+            var app = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                .BuildConcrete();
+
+            var tokenSource = new CancellationTokenSource();
+            tokenSource.Cancel();
+
+            await AssertException.TaskThrowsAsync<TaskCanceledException>(
+                () => app.AcquireTokenForManagedIdentity(Resource)
+                        .WithForceRefresh(true)
+                        .ExecuteAsync(tokenSource.Token)).ConfigureAwait(false);
         }
     }
 }

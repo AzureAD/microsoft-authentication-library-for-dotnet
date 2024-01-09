@@ -12,9 +12,7 @@ namespace Microsoft.Identity.Client.Utils
     internal static class Base64UrlHelpers
     {
         private const char base64PadCharacter = '=';
-#if NET45
-        private const string doubleBase64PadCharacter = "==";
-#endif
+
         private const char base64Character62 = '+';
         private const char base64Character63 = '/';
         private const char base64UrlCharacter62 = '-';
@@ -159,38 +157,9 @@ namespace Microsoft.Identity.Client.Utils
         {
             if (str == null)
                 return null;
-#if NET45
-            // 62nd char of encoding
-            str = str.Replace(base64UrlCharacter62, base64Character62);
-
-            // 63rd char of encoding
-            str = str.Replace(base64UrlCharacter63, base64Character63);
-
-            // check for padding
-            switch (str.Length % 4)
-            {
-                case 0:
-                    // No pad chars in this case
-                    break;
-                case 2:
-                    // Two pad chars
-                    str += doubleBase64PadCharacter;
-                    break;
-                case 3:
-                    // One pad char
-                    str += base64PadCharacter;
-                    break;
-                default:
-                    throw new FormatException($"Unable to decode: {str} as Base64url encoded string.");
-            }
-
-            return Convert.FromBase64String(str);
-#else
             return UnsafeDecode(str);
-#endif
         }
 
-#if !NET45
         private unsafe static byte[] UnsafeDecode(string str)
         {
             int mod = str.Length % 4;
@@ -253,7 +222,6 @@ namespace Microsoft.Identity.Client.Utils
                 }
             }
         }
-#endif
 
         /// <summary>
         /// Decodes the string from Base64UrlEncoded to UTF8.

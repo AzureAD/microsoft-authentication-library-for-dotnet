@@ -20,7 +20,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Win32;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.Platforms.netdesktop
 {
     /// <summary>
     ///     Platform / OS specific logic.
@@ -120,7 +120,10 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <inheritdoc/>
         protected override string InternalGetOperatingSystem()
         {
-            return DesktopOsHelper.GetWindowsVersionString();
+            return IsWindows ?
+                  DesktopOsHelper.GetWindowsVersionString()               
+                : Environment.OSVersion.Platform.ToString(); // probably for Mono, which we don't support
+            ;
         }
 
         /// <inheritdoc/>
@@ -207,7 +210,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
 
         /// <inheritdoc/>
-        protected override ICryptographyManager InternalGetCryptographyManager() => new NetDesktopCryptographyManager(Logger);
+        protected override ICryptographyManager InternalGetCryptographyManager() => new CommonCryptographyManager(Logger);
 
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
@@ -241,7 +244,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         public override IDeviceAuthManager CreateDeviceAuthManager()
         {
-            return new NetDesktopDeviceAuthManager();
+            return new DeviceAuthManager(CryptographyManager);
         }
 
         public override bool BrokerSupportsWamAccounts => true;

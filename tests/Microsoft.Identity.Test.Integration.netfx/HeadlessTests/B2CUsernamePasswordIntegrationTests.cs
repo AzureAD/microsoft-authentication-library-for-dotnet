@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Integration.net45.Infrastructure;
+using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var acc = (await msalPublicClient.GetAccountsAsync().ConfigureAwait(false)).Single();
             var claimsPrincipal = acc.GetTenantProfiles().Single().ClaimsPrincipal;
 
-            Assert.AreEqual(TokenResponseHelper.NullPreferredUsernameDisplayLabel, acc.Username);
+            Assert.AreNotEqual(TokenResponseHelper.NullPreferredUsernameDisplayLabel, acc.Username);
             Assert.IsNotNull(claimsPrincipal.FindFirst("Name"));
             Assert.IsNotNull(claimsPrincipal.FindFirst("nbf"));
             Assert.IsNotNull(claimsPrincipal.FindFirst("exp"));

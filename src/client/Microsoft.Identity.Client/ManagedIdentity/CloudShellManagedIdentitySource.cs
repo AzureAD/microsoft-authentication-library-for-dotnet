@@ -36,9 +36,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             catch (FormatException ex)
             {
                 requestContext.Logger.Error("[Managed Identity] Invalid endpoint found for the environment variable MSI_ENDPOINT: " + msiEndpoint);
-                throw new MsalManagedIdentityException(MsalError.InvalidManagedIdentityEndpoint, string.Format(
-                    CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError, "MSI_ENDPOINT", msiEndpoint, CloudShell), 
-                    ex, ManagedIdentitySource.CloudShell);
+
+                string errorMessage = string.Format(
+                    CultureInfo.InvariantCulture,
+                    MsalErrorMessage.ManagedIdentityEndpointInvalidUriError,
+                    "MSI_ENDPOINT", msiEndpoint, CloudShell);
+
+                // Use the factory to create and throw the exception
+                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalError.InvalidManagedIdentityEndpoint,
+                    errorMessage,
+                    ex, 
+                    ManagedIdentitySource.CloudShell,
+                    null); 
+
+                throw exception;
             }
 
             requestContext.Logger.Verbose(()=>"[Managed Identity] Creating cloud shell managed identity. Endpoint URI: " + msiEndpoint);
@@ -50,11 +62,21 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             _endpoint = endpoint;
 
-            if (requestContext.ServiceBundle.Config.ManagedIdentityId._isUserAssigned)
+            if (requestContext.ServiceBundle.Config.ManagedIdentityId.IsUserAssigned)
             {
-                throw new MsalManagedIdentityException(MsalError.UserAssignedManagedIdentityNotSupported, 
-                    string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, CloudShell), 
-                    ManagedIdentitySource.CloudShell);
+                string errorMessage = string.Format(
+                    CultureInfo.InvariantCulture, 
+                    MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, 
+                    CloudShell);
+
+                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalError.UserAssignedManagedIdentityNotSupported,
+                    errorMessage,
+                    null,
+                    ManagedIdentitySource.CloudShell,
+                    null);
+
+                throw exception;
             }
         }
 

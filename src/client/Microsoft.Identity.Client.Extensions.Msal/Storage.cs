@@ -26,9 +26,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         /// </summary>
         internal StorageCreationProperties StorageCreationProperties { get; }
 
-
         internal const string PersistenceValidationDummyData = "msal_persistence_test";
-
 
         /// <summary>
         /// A default logger for use if the user doesn't want to provide their own.

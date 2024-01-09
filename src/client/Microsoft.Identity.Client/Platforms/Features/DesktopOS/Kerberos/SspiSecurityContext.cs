@@ -143,11 +143,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
 
             if (_logonId != 0)
             {
-#if NET45
-                authIdPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(long)));
-#else
                 authIdPtr = Marshal.AllocHGlobal(Marshal.SizeOf<long>());
-#endif
                 Marshal.StructureToPtr(_logonId, authIdPtr, false);
             }
 
