@@ -48,6 +48,10 @@ namespace Microsoft.Identity.Client
         /// An <see cref="AdditionalExceptionData"/> property key, available when using desktop brokers.
         /// </summary>
         public const string BrokerTelemetry = "BrokerTelemetry";
+        /// <summary>
+        /// An <see cref="AdditionalExceptionData"/> property key, available when using managed identity.
+        /// </summary>
+        public const string ManagedIdentitySource = "ManagedIdentitySource";
 
         private string _errorCode;
 
@@ -180,6 +184,7 @@ namespace Microsoft.Identity.Client
             internal const string BrokerErrorStatus = "broker_error_status";
             internal const string BrokerErrorCode = "broker_error_code";
             internal const string BrokerTelemetry = "broker_telemetry";
+            internal const string ManagedIdentitySource = "managed_identity_source";
         }
 
         internal virtual void PopulateJson(JObject jObject)
@@ -210,6 +215,10 @@ namespace Microsoft.Identity.Client
             if (AdditionalExceptionData.TryGetValue(BrokerTelemetry, out string brokerTelemetry))
             {
                 exceptionData[ExceptionSerializationKey.BrokerTelemetry] = brokerTelemetry;
+            }
+            if(AdditionalExceptionData.TryGetValue(ManagedIdentitySource, out string managedIdentitySource))
+            {
+                exceptionData[ExceptionSerializationKey.ManagedIdentitySource] = managedIdentitySource;
             }
 
             jObject[ExceptionSerializationKey.AdditionalExceptionData] = exceptionData;
@@ -244,6 +253,11 @@ namespace Microsoft.Identity.Client
             {
                 exceptionData[BrokerTelemetry] = brokerTelemetry;
                 exceptionData.Remove(ExceptionSerializationKey.BrokerTelemetry);
+            }
+            if(exceptionData.TryGetValue(ExceptionSerializationKey.ManagedIdentitySource, out string managedIdentitySource))
+            {
+                exceptionData[ManagedIdentitySource] = managedIdentitySource;
+                exceptionData.Remove(ExceptionSerializationKey.ManagedIdentitySource);
             }
 
             AdditionalExceptionData = (IReadOnlyDictionary<string, string>)exceptionData;
