@@ -67,9 +67,9 @@ namespace Microsoft.Identity.Test.Performance
         private const string LogPrefix = "[Test.Performance]";
         public static void Log(string message, ConsoleColor color = ConsoleColor.Blue)
         {
-            Console.ForegroundColor = color;
+            //Console.ForegroundColor = color;
             Console.WriteLine($"{LogPrefix} {message}");
-            Console.ForegroundColor = ConsoleColor.White;
+            //Console.ForegroundColor = ConsoleColor.White;
         }
         public static void LogError(string message) => Log(message, ConsoleColor.Red);
     }
