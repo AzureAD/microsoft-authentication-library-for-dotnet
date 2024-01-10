@@ -5,14 +5,15 @@ using System;
 using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
-using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Utils;
+
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json.Serialization;
 using JObject = System.Text.Json.Nodes.JsonObject;
 #else
 using Microsoft.Identity.Json.Linq;
 #endif
+
 namespace Microsoft.Identity.Client
 {
 
@@ -232,11 +233,11 @@ namespace Microsoft.Identity.Client
         protected virtual void UpdateIsRetryable()
         {
             IsRetryable =
-                (StatusCode >= 500 && StatusCode < 600) ||
-                StatusCode == 429 || // too many requests
-                StatusCode == (int)HttpStatusCode.RequestTimeout ||
-                string.Equals(ErrorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(ErrorCode, "temporarily_unavailable", StringComparison.OrdinalIgnoreCase); // as per https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes#handling-error-codes-in-your-application
+                    (StatusCode >= 500 && StatusCode < 600) ||
+                    StatusCode == 429 || // too many requests
+                    StatusCode == (int)HttpStatusCode.RequestTimeout ||
+                    string.Equals(ErrorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(ErrorCode, "temporarily_unavailable", StringComparison.OrdinalIgnoreCase); // as per https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes#handling-error-codes-in-your-application
         }
 
         /// <summary>

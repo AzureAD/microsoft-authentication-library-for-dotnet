@@ -24,6 +24,7 @@ namespace Microsoft.Identity.Client.Internal
         public const string Version = "ver";
         public const string PreferredUsername = "preferred_username";
         public const string Name = "name";
+        public const string Email = "email";
         public const string HomeObjectId = "home_oid";
         public const string GivenName = "given_name";
         public const string FamilyName = "family_name";
@@ -63,6 +64,7 @@ namespace Microsoft.Identity.Client.Internal
         public string PreferredUsername { get; private set; }
 
         public string Name { get; private set; }
+        public string Email { get; private set; }
 
         public string Upn { get; private set; }
 
@@ -112,6 +114,7 @@ namespace Microsoft.Identity.Client.Internal
                 parsedIdToken.TenantId = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.TenantId)?.Value;
                 parsedIdToken.PreferredUsername = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.PreferredUsername)?.Value;
                 parsedIdToken.Name = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.Name)?.Value;
+                parsedIdToken.Email = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.Email)?.Value;
                 parsedIdToken.Upn = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.Upn)?.Value;
                 parsedIdToken.GivenName = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.GivenName)?.Value;
                 parsedIdToken.FamilyName = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.FamilyName)?.Value;
@@ -353,6 +356,7 @@ namespace Microsoft.Identity.Client.Internal
                 parsedIdToken.TenantId = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.TenantId)?.Value;
                 parsedIdToken.PreferredUsername = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.PreferredUsername)?.Value;
                 parsedIdToken.Name = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.Name)?.Value;
+                parsedIdToken.Email = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.Email)?.Value;
                 parsedIdToken.Upn = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.Upn)?.Value;
                 parsedIdToken.GivenName = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.GivenName)?.Value;
                 parsedIdToken.FamilyName = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.FamilyName)?.Value;
