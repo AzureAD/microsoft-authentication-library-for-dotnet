@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
@@ -54,7 +55,15 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private IOtelInstrumentation InternalGetOtelInstrumentation()
         {
 #if SUPPORTS_OTEL
-            return new OtelInstrumentation();
+            try
+            {
+                return new OtelInstrumentation();
+            } catch (FileNotFoundException ex) 
+            {
+                // Can happen in in-process Azure Functions: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4456
+                Logger.Warning("Failed instantiating OpenTelemetry instrumentation. Exception: " + ex.Message);
+                return new NullOtelInstrumentation();
+            }
 #else
             return new NullOtelInstrumentation();
 #endif
