@@ -331,9 +331,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     CredentialEndpoint,
                     MockHelpers.GetSuccessfulCredentialResponse());
 
-                var correlationId = Guid.NewGuid();
-
-                httpManager.AddTokenErrorResponse("invalid_grant", System.Net.HttpStatusCode.BadRequest);
+                httpManager.AddTokenErrorResponse("invalid_grant", HttpStatusCode.BadRequest);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
