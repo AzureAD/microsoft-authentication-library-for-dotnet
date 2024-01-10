@@ -80,11 +80,9 @@
     <!-- Ensures that the Resources.designer.cs do not end up in the dll, see #1449 -->
     <AndroidUseIntermediateDesignerFile>false</AndroidUseIntermediateDesignerFile>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkAndroid9)'">
-    <TargetFrameworkVersion>v9.0</TargetFrameworkVersion>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkAndroid10)'">
-    <TargetFrameworkVersion>v10.0</TargetFrameworkVersion>
+    <!-- Corresponds to API level 31 -->
+    <TargetFrameworkVersion>v12.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' ">
     <!-- These are for MSAL json/* build infra -->
