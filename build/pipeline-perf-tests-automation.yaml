@@ -26,11 +26,13 @@ jobs:
       displayName: 'Use the latest NuGet 6.x'
       inputs:
         versionSpec: 6.x
+        includePreviewVersions: true
 
     - task: UseDotNet@2
       displayName: 'Use the latest .NET 8'
       inputs:
         version: 8.x
+        includePreviewVersions: true
 
     - task: NuGetCommand@2
       displayName: 'NuGet restore'
