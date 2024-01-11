@@ -3,7 +3,6 @@ steps:
   displayName: 'Use the latest .NET 8'
   inputs:
     version: 8.x
-    includePreviewVersions: true
 
 - task: DownloadPipelineArtifact@2
   displayName: 'Download Drop'
