@@ -26,14 +26,13 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         public static IWebDriver CreateDefaultWebDriver()
         {
             EdgeOptions options = new EdgeOptions();
-            //ChromeOptions options = new ChromeOptions();
             EdgeDriver driver;
 
             // ~2x faster, no visual rendering
             // remove when debugging to see the UI automation
             //options.AddArguments("headless");
 
-            var env = Environment.GetEnvironmentVariable("ChromeWebDriver");
+            var env = Environment.GetEnvironmentVariable("EDGEWEBDRIVER");
             if (string.IsNullOrEmpty(env))
             {
                 driver = new EdgeDriver(options);
