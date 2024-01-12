@@ -25,13 +25,11 @@ stages:
       displayName: 'Use latest NuGet'
       inputs:
         versionSpec: 6.x
-        includePreviewVersions: true
 
     - task: UseDotNet@2
-      displayName: 'Use the latest .NET 8'
+      displayName: 'Use the latest .NET 6'
       inputs:
-        version: 8.x
-        includePreviewVersions: true
+        version: 6.x
 
     - task: CmdLine@2
       displayName: 'Clear local NuGet cache'

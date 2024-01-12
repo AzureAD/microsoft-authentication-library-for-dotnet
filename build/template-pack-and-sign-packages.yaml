@@ -21,13 +21,6 @@ steps:
   displayName: 'Use the latest .NET 6'
   inputs:
     version: 6.x
-    includePreviewVersions: true
-
-- task: UseDotNet@2
-  displayName: 'Use the latest .NET 8'
-  inputs:
-    version: 8.x
-    includePreviewVersions: true
 
 - task: PowerShell@2
   displayName: 'Installing Xamarin iOS/macOS components'
