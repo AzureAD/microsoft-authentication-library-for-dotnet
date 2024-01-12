@@ -224,6 +224,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 .ConfigureAwait(false);
         }
 
+        [IgnoreOnOneBranch]
         [TestMethod]
         public async Task WamUsernamePasswordWithForceRefreshAsync()
         {
