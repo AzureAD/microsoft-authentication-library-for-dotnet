@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        //[DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
+        [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
         //[DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
         [DataRow(Cloud.Arlington, TargetFrameworks.NetCore)]
         //[DataRow(Cloud.PPE)] - secret not setup
@@ -306,7 +306,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     builder.WithCertificate(settings.GetCertificate());
                     break;
                 case CredentialType.Secret:
-                    builder.WithClientSecret(settings.GetSecret());
+                    builder.WithClientSecret("wfregrfd");
                     break;
                 case CredentialType.ClientAssertion_Manual:
 

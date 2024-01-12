@@ -113,8 +113,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 {
                     sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "HTTP StatusCode {0}", msalServiceException.StatusCode));
                     sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "CorrelationId {0}", msalServiceException.CorrelationId));
-                    var aadError = JsonHelper.GetExistingOrEmptyString(JsonHelper.ParseIntoJsonObject(msalServiceException.ResponseBody), OAuth2ResponseBaseClaim.ErrorDescription).Split(':').FirstOrDefault();
-                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "AAD Error Code {0}", aadError));
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "AAD Error Code AADSTS{0}", msalServiceException.ErrorCodes.FirstOrDefault()));
                 }
 
                 if (ex.InnerException != null)
@@ -124,7 +123,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                     sb.AppendLine("=== End of inner exception stack trace ===");
                 }
 
-                sb.AppendLine("To see full exception details, enable Pii Logging. See https://aka.ms/msal-net-logging");
+                sb.AppendLine("To see full exception details, enable PII Logging. See https://aka.ms/msal-net-logging");
 
                 if (ex.StackTrace != null)
                 {
