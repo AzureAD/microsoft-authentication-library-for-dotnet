@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
                 catch (Exception e)
                 {
                     throw new InteropException(
-                        $"An exception was encountered while processing libsecret error information during clearing secret in the {nameof(Storage)} ex:'{e}'", 0);
+                        $"An exception was encountered while processing libsecret error information during clearing secret in the {nameof(Storage)} ex:'{e}'", 0, e);
                 }
             }
 
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
                 catch (Exception e)
                 {
                     throw new InteropException(
-                        $"An exception was encountered while processing libsecret error information during reading in the {nameof(Storage)} ex:'{e}'", 0);
+                        $"An exception was encountered while processing libsecret error information during reading in the {nameof(Storage)} ex:'{e}'", 0, e);
                 }
             }
             else if (string.IsNullOrEmpty(secret))
