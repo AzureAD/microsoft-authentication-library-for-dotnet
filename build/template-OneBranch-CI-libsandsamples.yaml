@@ -31,3 +31,23 @@ steps:
     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
+
+- powershell: 'powershell.exe -File "$(MsalSourceDir)build\installEdgeDriver.ps1" -ExecutionPolicy Bypass'
+  displayName: 'Install EdgeDriver'
+
+  # Run All Desktop Tests
+- template: template-run-all-tests.yaml
+  parameters:
+    BuildConfiguration: '$(BuildConfiguration)'
+
+- task: VSTest@2
+  displayName: 'Run cache compat tests'
+  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\CacheCompat\CommonCache.Test.Unit\bin\**\CommonCache.Test.Unit.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    codeCoverageEnabled: true
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: '1'
+    runInParallel: true
