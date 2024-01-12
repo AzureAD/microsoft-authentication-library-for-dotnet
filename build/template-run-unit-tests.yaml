@@ -8,7 +8,7 @@ steps:
 
 - task: VSTest@2
   displayName: 'Run unit tests (.NET FX)'
-  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+  condition: and(succeeded(), eq(variables['PipelineType'], ''))
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net4*\Microsoft.Identity.Test.Unit.dll'
@@ -18,11 +18,10 @@ steps:
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
     pathtoCustomTestAdapters: 'C:\temp' # Workaround for test failure, as NUnit Test Adapter that gets detected seems to mess something up
-    condition: eq(variables['PipelineType'], '')
 
 - task: VSTest@2
   displayName: 'Run unit tests (.NET FX) on OneBranch'
-  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+  condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net4*\Microsoft.Identity.Test.Unit.dll'
@@ -31,11 +30,9 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
-    condition: eq(variables['PipelineType'], 'OneBranch')
 
 - task: VSTest@2
   displayName: 'Run unit tests (.NET 6)'
-  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net6.0\Microsoft.Identity.Test.Unit.dll'
@@ -47,7 +44,6 @@ steps:
 
 - task: VSTest@2
   displayName: 'Run unit tests (NET6-WIN)'
-  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net6.0-windows\Microsoft.Identity.Test.Unit.dll'
