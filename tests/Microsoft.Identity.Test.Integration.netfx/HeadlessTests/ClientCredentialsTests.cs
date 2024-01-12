@@ -57,9 +57,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore | TargetFrameworks.NetStandard)]
+        [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore | TargetFrameworks.NetStandard )]
         [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
-        [DataRow(Cloud.PPE, TargetFrameworks.NetFx)]
+        [DataRow(Cloud.PPE, TargetFrameworks.NetFx)]        
         [DataRow(Cloud.Public, TargetFrameworks.NetCore, true)]
         //[DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithCertificate_TestAsync(Cloud cloud, TargetFrameworks runOn, bool useAppIdUri = false)
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
+        [DataRow(Cloud.Public, TargetFrameworks.NetCore)]                
         public async Task WithOnBeforeTokenRequest_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
             IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(cloud);
@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithExperimentalFeatures(true)
                 .WithTestLogging()
                 .Build();
-
+            
             authResult = await confidentialApp
                 .AcquireTokenForClient(settings.AppScopes)
                 .OnBeforeTokenRequest((data) =>
@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .ExecuteAsync()
                .ConfigureAwait(false);
 
-            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
+            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);            
         }
 
         [TestMethod]
@@ -306,7 +306,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     builder.WithCertificate(settings.GetCertificate());
                     break;
                 case CredentialType.Secret:
-                    builder.WithClientSecret(settings.GetSecret());
+                    builder.WithClientSecret("wfregrfd");
                     break;
                 case CredentialType.ClientAssertion_Manual:
 
@@ -418,8 +418,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// <param name="certificate"></param>
         /// <returns></returns>
         internal static string GetSignedClientAssertionManual(
-            string issuer,
-            string audience,
+            string issuer, 
+            string audience, 
             X509Certificate2 certificate)
         {
             const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
