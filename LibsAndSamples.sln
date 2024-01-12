@@ -166,7 +166,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{38B77C31-B
 		changelog.txt = changelog.txt
 		CONTRIBUTING.md = CONTRIBUTING.md
 		LICENSE = LICENSE
-		MauiStatus.md = MauiStatus.md
 		README.md = README.md
 		RELEASES.md = RELEASES.md
 		SECURITY.md = SECURITY.md
