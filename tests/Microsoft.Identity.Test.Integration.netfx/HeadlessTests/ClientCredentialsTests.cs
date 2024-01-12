@@ -306,7 +306,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     builder.WithCertificate(settings.GetCertificate());
                     break;
                 case CredentialType.Secret:
-                    builder.WithClientSecret("wfregrfd");
+                    builder.WithClientSecret(settings.GetSecret());
                     break;
                 case CredentialType.ClientAssertion_Manual:
 
