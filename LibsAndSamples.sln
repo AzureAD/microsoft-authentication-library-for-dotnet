@@ -20,6 +20,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.LabInfrastructure", "tests\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj", "{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{E19B0572-BBD7-424E-81D5-E59E6884EB3A}"
+	ProjectSection(SolutionItems) = preProject
+		build\installEdgeDriver.ps1 = build\installEdgeDriver.ps1
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Common", "tests\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj", "{18559D36-C735-4933-AA86-398C8222D4F6}"
 EndProject
@@ -162,7 +165,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{38B77C31-B
 		changelog.txt = changelog.txt
 		CONTRIBUTING.md = CONTRIBUTING.md
 		LICENSE = LICENSE
-		MauiStatus.md = MauiStatus.md
 		README.md = README.md
 		RELEASES.md = RELEASES.md
 		SECURITY.md = SECURITY.md

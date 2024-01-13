@@ -3,4 +3,7 @@
   <PropertyGroup>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(PipelineType)' == 'OneBranch'">
+    <DefineConstants>$(DefineConstants);ONEBRANCH_BUILD</DefineConstants>
+  </PropertyGroup>
 </Project>
