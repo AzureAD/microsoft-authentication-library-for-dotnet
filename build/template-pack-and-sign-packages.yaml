@@ -18,10 +18,9 @@ steps:
 
 # Use the latest .NET SDK
 - task: UseDotNet@2
-  displayName: 'Use .Net Core sdk 6.x'
+  displayName: 'Use the latest .NET 6'
   inputs:
     version: 6.x
-    includePreviewVersions: true
 
 - task: PowerShell@2
   displayName: 'Installing Xamarin iOS/macOS components'
@@ -52,7 +51,6 @@ steps:
     targetType: 'inline'
     script: |
       dotnet nuget locals all --clear 
-      dotnet workload install maui --source https://api.nuget.org/v3/index.json
       dotnet workload install android ios macos maui --source https://api.nuget.org/v3/index.json
 
 - task: JavaToolInstaller@0

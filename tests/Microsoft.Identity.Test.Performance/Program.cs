@@ -2,11 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Order;
+using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
 
 namespace Microsoft.Identity.Test.Performance
@@ -19,33 +21,40 @@ namespace Microsoft.Identity.Test.Performance
 
             try
             {
-                BenchmarkSwitcher.FromTypes(new[] {
+                var results = BenchmarkSwitcher.FromTypes(new[] {
                     typeof(AcquireTokenForClientCacheTests),
                     typeof(AcquireTokenForOboCacheTests),
                     typeof(TokenCacheTests),
                     typeof(AcquireTokenNoCacheTests),
-            }).RunAll(
+                }).RunAll(
 #if DEBUG
-                    new DebugInProcessConfig()
-                        .WithOptions(ConfigOptions.DontOverwriteResults) // When running manually locally
+                    new DebugInProcessConfig() // Allows debugging into benchmarks
+                        .WithOptions(ConfigOptions.DontOverwriteResults) // When debugging locally
 #else
                     DefaultConfig.Instance
+                        .AddJob(Job.Default.WithId("Job-PerfTests"))
 #endif
                         .WithOptions(ConfigOptions.DisableLogFile)
                         .WithOptions(ConfigOptions.StopOnFirstError)
-                        //.WithOptions(ConfigOptions.JoinSummary)
+                        //.WithOptions(ConfigOptions.JoinSummary) // Should be commented for Benchmark GitHub Action to work.
                         .WithOrderer(new DefaultOrderer(SummaryOrderPolicy.Method))
                         .HideColumns(Column.UnrollFactor, Column.Type, Column.InvocationCount, Column.Error, Column.StdDev, Column.Median, Column.Job)
                         .AddDiagnoser(MemoryDiagnoser.Default) // https://benchmarkdotnet.org/articles/configs/diagnosers.html
                         //.AddDiagnoser(new EtwProfiler()) // https://adamsitnik.com/ETW-Profiler/
-                .AddJob(
-                    Job.Default
-                        .WithId("Job-PerfTests")), args);
+                 , args);
+
+                // If no tests ran for whatever reason, throw an exception to break the build.
+                Summary summary = results?.FirstOrDefault();
+                BenchmarkReport report = summary?.Reports.FirstOrDefault();
+                if (summary == null || report == null || !report.Success)
+                {
+                    throw new InvalidOperationException("No performance tests ran.");
+                }
             }
             catch (Exception ex)
             {
-                Logger.Log("Error running performance tests.");
-                Logger.Log(ex.ToString());
+                Logger.LogError("Error running performance tests. See logs for details.");
+                Logger.LogError(ex.ToString());
                 throw;
             }
 
@@ -56,6 +65,12 @@ namespace Microsoft.Identity.Test.Performance
     public static class Logger
     {
         private const string LogPrefix = "[Test.Performance]";
-        public static void Log(string message) => Console.WriteLine($"{LogPrefix} {message}");
+        public static void Log(string message, ConsoleColor color = ConsoleColor.Blue)
+        {
+            Console.ForegroundColor = color;
+            Console.WriteLine($"{LogPrefix} {message}");
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+        public static void LogError(string message) => Log(message, ConsoleColor.Red);
     }
 }
