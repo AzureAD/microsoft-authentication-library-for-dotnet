@@ -3,6 +3,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using Microsoft.Identity.Extensions;
 
 namespace Microsoft.Identity.Client.Extensions.Msal
 {
@@ -103,11 +104,14 @@ namespace Microsoft.Identity.Client.Extensions.Msal
                 try
                 {
                     GError err = (GError)Marshal.PtrToStructure(error, typeof(GError));
-                    _logger.LogError($"An error was encountered while clearing secret from keyring in the {nameof(Storage)} domain:'{err.Domain}' code:'{err.Code}' message:'{err.Message}'");
+                    throw new InteropException(
+                        $"An error was encountered while clearing secret from keyring in the {nameof(Storage)} domain:'{err.Domain}' code:'{err.Code}' message:'{err.Message}'", 
+                        err.Code);
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError($"An exception was encountered while processing libsecret error information during clearing secret in the {nameof(Storage)} ex:'{e}'");
+                    throw new InteropException(
+                        $"An exception was encountered while processing libsecret error information during clearing secret in the {nameof(Storage)} ex:'{e}'", 0, e);
                 }
             }
 
@@ -116,8 +120,6 @@ namespace Microsoft.Identity.Client.Extensions.Msal
 
         public byte[] Read()
         {
-            _logger.LogInformation("ReadDataCore");
-
             _logger.LogInformation($"ReadDataCore, Before reading from linux keyring");
 
             byte[] fileData = null;
@@ -139,16 +141,18 @@ namespace Microsoft.Identity.Client.Extensions.Msal
                 try
                 {
                     GError err = (GError)Marshal.PtrToStructure(error, typeof(GError));
-                    _logger.LogError($"An error was encountered while reading secret from keyring in the {nameof(Storage)} domain:'{err.Domain}' code:'{err.Code}' message:'{err.Message}'");
+                    throw new InteropException(
+                        $"An error was encountered while reading secret from keyring in the {nameof(Storage)} domain:'{err.Domain}' code:'{err.Code}' message:'{err.Message}'", err.Code);
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError($"An exception was encountered while processing libsecret error information during reading in the {nameof(Storage)} ex:'{e}'");
+                    throw new InteropException(
+                        $"An exception was encountered while processing libsecret error information during reading in the {nameof(Storage)} ex:'{e}'", 0, e);
                 }
             }
             else if (string.IsNullOrEmpty(secret))
             {
-                _logger.LogError("No matching secret found in the keyring");
+                _logger.LogWarning("No matching secret found in the keyring");
             }
             else
             {
@@ -184,11 +188,13 @@ namespace Microsoft.Identity.Client.Extensions.Msal
                 try
                 {
                     GError err = (GError)Marshal.PtrToStructure(error, typeof(GError));
-                    _logger.LogError($"An error was encountered while saving secret to keyring in the {nameof(Storage)} domain:'{err.Domain}' code:'{err.Code}' message:'{err.Message}'");
+                    string message = $"An error was encountered while saving secret to keyring in the {nameof(Storage)} domain:'{err.Domain}' code:'{err.Code}' message:'{err.Message}'";
+                    throw new InteropException(message, err.Code);
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError($"An exception was encountered while processing libsecret error information during saving in the {nameof(Storage)} ex:'{e}'");
+                    throw new InteropException(
+                        $"An exception was encountered while processing libsecret error information during saving in the {nameof(Storage)}", 0, e);
                 }
             }
 
@@ -215,7 +221,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
 
                 if (_libsecretSchema == IntPtr.Zero)
                 {
-                    _logger.LogError($"Failed to create libsecret schema from the {nameof(Storage)}");
+                    throw new InteropException("Failed to create libsecret schema from the {nameof(Storage)}", 0);                   
                 }
 
                 _logger.LogInformation("After creating libsecret schema");
