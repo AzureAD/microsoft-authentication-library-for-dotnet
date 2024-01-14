@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
         {
             var tcs = new TaskCompletionSource<object>();
             process.EnableRaisingEvents = true;
-            process.Exited += (sender, args) =>
+            process.Exited += (_, _) =>
             {
                 Trace.WriteLine($"Process finished {process.Id}");
                 tcs.TrySetResult(null);

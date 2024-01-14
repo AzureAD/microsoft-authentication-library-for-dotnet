@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 }
             });
 
-            pca.UserTokenCache.SetBeforeWrite(notificationArgs =>
+            pca.UserTokenCache.SetBeforeWrite(_ =>
             {
                 _beforeWriteCalls++;
             });

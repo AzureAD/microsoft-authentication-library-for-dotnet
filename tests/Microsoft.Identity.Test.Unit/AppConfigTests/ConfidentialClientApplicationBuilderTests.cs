@@ -235,7 +235,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var cca = ConfidentialClientApplicationBuilder
                       .Create(TestConstants.ClientId)
                             .WithClientSecret("cats")
-                            .WithLogging((level, message, pii) => { }).Build();
+                            .WithLogging((_, _, _) => { }).Build();
 
             Assert.IsNotNull(cca.AppConfig.LoggingCallback);
         }

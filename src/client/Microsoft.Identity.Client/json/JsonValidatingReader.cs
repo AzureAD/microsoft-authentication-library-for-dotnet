@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Json
                 _tokenType = tokenType;
                 _schemas = schemas;
 
-                _requiredProperties = schemas.SelectMany<JsonSchemaModel, string>(GetRequiredProperties).Distinct().ToDictionary(p => p, p => false);
+                _requiredProperties = schemas.SelectMany<JsonSchemaModel, string>(GetRequiredProperties).Distinct().ToDictionary(p => p, _ => false);
 
                 if (tokenType == JTokenType.Array && schemas.Any(s => s.UniqueItems))
                 {

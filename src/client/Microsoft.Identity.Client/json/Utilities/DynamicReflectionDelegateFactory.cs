@@ -315,7 +315,7 @@ namespace Microsoft.Identity.Json.Utilities
             if (fieldInfo.IsLiteral)
             {
                 object constantValue = fieldInfo.GetValue(null);
-                Func<T, object?> getter = o => constantValue;
+                Func<T, object?> getter = _ => constantValue;
                 return getter;
             }
 

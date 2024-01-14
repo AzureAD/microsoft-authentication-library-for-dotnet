@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             ((TokenCache)cache).LegacyCachePersistence = legacyCachePersistence;
             if (serializeCache) // no point in invoking the Legacy ADAL cache if you're only keeping it memory
             {
-                cache.SetBeforeAccess((n) => { });
+                cache.SetBeforeAccess((_) => { });
             }
 
             var requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle);
@@ -1386,7 +1386,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
             string logs = string.Empty;
-            LogCallback logCallback = (LogLevel level, string message, bool containsPii) =>
+            LogCallback logCallback = (LogLevel level, string message, bool _) =>
                                     {
                                         if (level == LogLevel.Verbose)
                                         {
@@ -1396,7 +1396,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(harness.HttpManager, logCallback: logCallback);
             ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
-            cache.SetAfterAccess((args) => { return; });
+            cache.SetAfterAccess((_) => { return; });
 
             TokenCacheHelper.PopulateCacheWithAccessTokens(cache.Accessor, 11);
 
