@@ -19,10 +19,8 @@ using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class CredentialBasedMsiAuthRequest : RequestBase
+    internal class CredentialBasedMsiAuthRequest : MsiAuthRequest
     {
-        private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
-        private static readonly SemaphoreSlim s_semaphoreSlim = new(1, 1);
         private readonly Uri _credentialEndpoint;
 
         private CredentialBasedMsiAuthRequest(
@@ -32,7 +30,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             Uri credentialEndpoint)
             : base(serviceBundle, authenticationRequestParameters, managedIdentityParameters)
         {
-            _managedIdentityParameters = managedIdentityParameters;
             _credentialEndpoint = credentialEndpoint;
         }
 
@@ -41,90 +38,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenForManagedIdentityParameters managedIdentityParameters)
         {
-            return IsCredentialKeyAvailable(authenticationRequestParameters.RequestContext, managedIdentityParameters, out Uri credentialEndpointUri) ?
+            return IsCredentialKeyAvailable(
+                authenticationRequestParameters.RequestContext, 
+                managedIdentityParameters, 
+                out Uri credentialEndpointUri) ?
                     new CredentialBasedMsiAuthRequest(
                     serviceBundle,
                     authenticationRequestParameters,
-                    managedIdentityParameters, credentialEndpointUri) :
-                    null;
+                    managedIdentityParameters, credentialEndpointUri) : null;
         }
 
-        protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
-        {
-            if (AuthenticationRequestParameters.Scope == null || AuthenticationRequestParameters.Scope.Count == 0)
-            {
-                throw new MsalClientException(
-                    MsalError.ScopesRequired,
-                    MsalErrorMessage.ScopesRequired);
-            }
-
-            ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
-
-            AuthenticationResult authResult = null;
-            IKeyMaterialManager keyMaterial = base.ServiceBundle.Config.KeyMaterialManagerForTest ??
-                AuthenticationRequestParameters.RequestContext.ServiceBundle.PlatformProxy.GetKeyMaterialManager();
-
-            //skip checking cache for force refresh or when claims are present
-            if (_managedIdentityParameters.ForceRefresh || !string.IsNullOrEmpty(_managedIdentityParameters.Claims))
-            {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
-
-                logger.Info("[CredentialBasedMsiAuthRequest] Skipped looking for an Access Token in the cache because " +
-                    "ForceRefresh was set.");
-
-                if (ServiceBundle.Config.ManagedIdentityClientCertificate.Thumbprint
-                    != keyMaterial.BindingCertificate.Thumbprint)
-                {
-                    logger.Info("[CredentialBasedMsiAuthRequest] Managed Identity Client Certificate has been renewed. " +
-                        "If you had customized httpfactory with certificate then you need to get the new certificate. ");
-                }
-
-                authResult = await GetAccessTokenAsync(keyMaterial, cancellationToken, logger).ConfigureAwait(false);
-                return authResult;
-            }
-
-            //check cache for AT
-            MsalAccessTokenCacheItem cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
-
-            if (cachedAccessTokenItem != null)
-            {
-                //return the token in the cache and check if it needs to be proactively refreshed
-                authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
-
-                try
-                {
-                    var proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
-
-                    // may fire a request to get a new token in the background when AT needs to be refreshed
-                    if (proactivelyRefresh)
-                    {
-                        AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ProactivelyRefreshed;
-
-                        SilentRequestHelper.ProcessFetchInBackground(
-                        cachedAccessTokenItem,
-                        () => GetAccessTokenAsync(keyMaterial, cancellationToken, logger), logger);
-                    }
-                }
-                catch (MsalServiceException e)
-                {
-                    return await HandleTokenRefreshErrorAsync(e, cachedAccessTokenItem).ConfigureAwait(false);
-                }
-            }
-            else
-            {
-                //  No AT in the cache 
-                if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != CacheRefreshReason.Expired)
-                {
-                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
-                }
-
-                authResult = await GetAccessTokenAsync(keyMaterial, cancellationToken, logger).ConfigureAwait(false);
-            }
-
-            return authResult;
-        }
-
-        private async Task<AuthenticationResult> GetAccessTokenAsync(
+        protected override async Task<AuthenticationResult> GetAccessTokenAsync(
             IKeyMaterialManager keyMaterial,
             CancellationToken cancellationToken,
             ILoggerAdapter logger)
@@ -276,47 +200,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return credentialResponse;
         }
 
-        private async Task<MsalAccessTokenCacheItem> GetCachedAccessTokenAsync()
-        {
-            MsalAccessTokenCacheItem cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
-
-            if (cachedAccessTokenItem != null && !_managedIdentityParameters.ForceRefresh)
-            {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
-                Metrics.IncrementTotalAccessTokensFromCache();
-                return cachedAccessTokenItem;
-            }
-
-            return null;
-        }
-
-        // Create an AuthenticationResult based on a cached access token item.
-        private AuthenticationResult CreateAuthenticationResultFromCache(MsalAccessTokenCacheItem cachedAccessTokenItem)
-        {
-            // Create an AuthenticationResult using the provided cachedAccessTokenItem.
-            AuthenticationResult authResult = new AuthenticationResult(
-                cachedAccessTokenItem,
-                null, // No ID token provided for cache-based authentication.
-                AuthenticationRequestParameters.AuthenticationScheme,
-                AuthenticationRequestParameters.RequestContext.CorrelationId,
-                TokenSource.Cache,
-                AuthenticationRequestParameters.RequestContext.ApiEvent,
-                account: null, // No user account associated with cached token.
-                spaAuthCode: null, // No SPA authorization code associated.
-                additionalResponseParameters: null // No additional response parameters.
-            );
-
-            // Return the created AuthenticationResult.
-            return authResult;
-        }
-
-        // Override method to return a sorted set of scopes based on the input set.
-        protected override SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)
-        {
-            // Create a new SortedSet from the inputScopes to ensure a consistent and sorted order.
-            return new SortedSet<string>(inputScopes);
-        }
-
         /// <summary>
         /// Creates an OAuth2 client request for fetching the managed identity credential.
         /// </summary>
@@ -353,11 +236,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             // Return the configured OAuth2 client.
             return client;
-        }
-
-        protected override KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
-        {
-            return null;
         }
 
         // Check if CredentialKeyType is set to a valid value for Managed Identity.

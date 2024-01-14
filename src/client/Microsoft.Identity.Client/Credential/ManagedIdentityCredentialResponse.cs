@@ -65,28 +65,28 @@ namespace Microsoft.Identity.Client.Credential
             // Check if the CredentialResponse is null or if any required property is missing or invalid
             if (credentialResponse == null)
             {
-                errorMessages.Add("CredentialResponse is null.");
+                errorMessages.Add("CredentialResponse is null. ");
             }
             else
             {
                 if (credentialResponse.Credential.IsNullOrEmpty())
                 {
-                    errorMessages.Add("Credential is missing or empty.");
+                    errorMessages.Add("Credential is missing or empty. ");
                 }
 
                 if (credentialResponse.RegionalTokenUrl.IsNullOrEmpty())
                 {
-                    errorMessages.Add("RegionalTokenUrl is missing or empty.");
+                    errorMessages.Add("RegionalTokenUrl is missing or empty. ");
                 }
 
                 if (credentialResponse.ClientId.IsNullOrEmpty())
                 {
-                    errorMessages.Add("ClientId is missing or empty.");
+                    errorMessages.Add("ClientId is missing or empty. ");
                 }
 
                 if (credentialResponse.TenantId.IsNullOrEmpty())
                 {
-                    errorMessages.Add("TenantId is missing or empty.");
+                    errorMessages.Add("TenantId is missing or empty. ");
                 }
             }
 
@@ -99,11 +99,11 @@ namespace Microsoft.Identity.Client.Credential
 
                 // Throw an exception indicating that the CredentialResponse is invalid
                 MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
-                MsalError.ManagedIdentityRequestFailed,
-                MsalErrorMessage.ManagedIdentityInvalidResponse,
-                null,
-                ManagedIdentitySource.Credential,
-                null);
+                    MsalError.ManagedIdentityRequestFailed,
+                    MsalErrorMessage.ManagedIdentityInvalidResponse,
+                    null,
+                    ManagedIdentitySource.Credential,
+                    null);
 
                 throw exception;
             }

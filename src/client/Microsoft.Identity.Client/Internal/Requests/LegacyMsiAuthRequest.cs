@@ -1,21 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Security.AccessControl;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
-
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -24,85 +18,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
     /// Old implementation of MSI, which works by getting tokens directly from the MSI infrastructure. 
     /// </summary>
     internal class LegacyMsiAuthRequest
-        : RequestBase
+        : MsiAuthRequest
     {
-        private readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
-        private static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
-
         public LegacyMsiAuthRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenForManagedIdentityParameters managedIdentityParameters)
             : base(serviceBundle, authenticationRequestParameters, managedIdentityParameters)
-        {
-            _managedIdentityParameters = managedIdentityParameters;
-        }
+        {}
 
-        protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
-        {
-            AuthenticationResult authResult = null;
-            ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
-
-            // Skip checking cache when force refresh is specified
-            if (_managedIdentityParameters.ForceRefresh)
-            {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
-                logger.Info("[ManagedIdentityRequest] Skipped looking for a cached access token because ForceRefresh was set.");
-                authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
-                return authResult;
-            }
-
-            MsalAccessTokenCacheItem cachedAccessTokenItem = await GetCachedAccessTokenAsync().ConfigureAwait(false);
-
-            // No access token or cached access token needs to be refreshed
-            if (cachedAccessTokenItem != null)
-            {
-                authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
-
-                logger.Info("[ManagedIdentityRequest] Access token retrieved from cache.");
-
-                try
-                {
-                    var proactivelyRefresh = SilentRequestHelper.NeedsRefresh(cachedAccessTokenItem);
-
-                    // If needed, refreshes token in the background
-                    if (proactivelyRefresh)
-                    {
-                        logger.Info("[ManagedIdentityRequest] Initiating a proactive refresh.");
-
-                        AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ProactivelyRefreshed;
-
-                        SilentRequestHelper.ProcessFetchInBackground(
-                        cachedAccessTokenItem,
-                        () =>
-                        {
-                            // Use a linked token source, in case the original cancellation token source is disposed before this background task completes.
-                            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                            return GetAccessTokenAsync(tokenSource.Token, logger);
-                        }, logger);
-                    }
-                }
-                catch (MsalServiceException e)
-                {
-                    return await HandleTokenRefreshErrorAsync(e, cachedAccessTokenItem).ConfigureAwait(false);
-                }
-            }
-            else
-            {
-                //  No AT in the cache 
-                if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo != CacheRefreshReason.Expired)
-                {
-                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
-                }
-
-                logger.Info("[ManagedIdentityRequest] No cached access token. Getting a token from the managed identity endpoint.");
-                authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
-            }
-
-            return authResult;
-        }
-
-        private async Task<AuthenticationResult> GetAccessTokenAsync(
+        protected override async Task<AuthenticationResult> GetAccessTokenAsync(
+            IKeyMaterialManager keyMaterial,
             CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {
@@ -156,8 +82,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
-            ManagedIdentityClient managedIdentityClient =
-                new ManagedIdentityClient(AuthenticationRequestParameters.RequestContext);
+            ManagedIdentityClient managedIdentityClient = new(AuthenticationRequestParameters.RequestContext);
 
             ManagedIdentityResponse managedIdentityResponse =
                 await managedIdentityClient
@@ -168,40 +93,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
 
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
-        }
-
-        private async Task<MsalAccessTokenCacheItem> GetCachedAccessTokenAsync()
-        {
-            MsalAccessTokenCacheItem cachedAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
-
-            if (cachedAccessTokenItem != null)
-            {
-                AuthenticationRequestParameters.RequestContext.ApiEvent.IsAccessTokenCacheHit = true;
-                Metrics.IncrementTotalAccessTokensFromCache();
-                return cachedAccessTokenItem;
-            }
-
-            return null;
-        }
-
-        private AuthenticationResult CreateAuthenticationResultFromCache(MsalAccessTokenCacheItem cachedAccessTokenItem)
-        {
-            AuthenticationResult authResult = new AuthenticationResult(
-                                                            cachedAccessTokenItem,
-                                                            null,
-                                                            AuthenticationRequestParameters.AuthenticationScheme,
-                                                            AuthenticationRequestParameters.RequestContext.CorrelationId,
-                                                            TokenSource.Cache,
-                                                            AuthenticationRequestParameters.RequestContext.ApiEvent,
-                                                            account: null,
-                                                            spaAuthCode: null,
-                                                            additionalResponseParameters: null);
-            return authResult;
-        }
-
-        protected override KeyValuePair<string, string>? GetCcsHeader(IDictionary<string, string> additionalBodyParameters)
-        {
-            return null;
         }
     }
 }
