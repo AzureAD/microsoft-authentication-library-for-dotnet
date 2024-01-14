@@ -26,8 +26,6 @@
 using System;
 using Microsoft.Identity.Json.Utilities;
 using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Identity.Json
 {

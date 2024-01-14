@@ -5,7 +5,6 @@ using System;
 using System.Drawing;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;

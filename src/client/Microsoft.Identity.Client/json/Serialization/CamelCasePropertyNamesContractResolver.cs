@@ -25,7 +25,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Microsoft.Identity.Json.Utilities;
 
 namespace Microsoft.Identity.Json.Serialization

@@ -27,7 +27,6 @@
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Linq;
 using System.Linq.Expressions;
 #if !HAVE_REFLECTION_BINDER
 using System.Reflection;
@@ -35,10 +34,8 @@ using System.Reflection;
 using Microsoft.CSharp.RuntimeBinder;
 #endif
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Globalization;
 using Microsoft.Identity.Json.Serialization;
-using System.Diagnostics;
 
 namespace Microsoft.Identity.Json.Utilities
 {

@@ -4,10 +4,6 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

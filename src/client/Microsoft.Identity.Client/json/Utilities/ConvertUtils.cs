@@ -27,7 +27,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 #if HAVE_BIG_INTEGER
 using System.Numerics;
 #endif
@@ -42,7 +41,6 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Identity.Json.Utilities.LinqBridge;
 #endif
 #if HAVE_ADO_NET
-using System.Data.SqlTypes;
 
 #endif
 

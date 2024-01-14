@@ -24,14 +24,11 @@
 #endregion
 
 #if HAVE_FSHARP_TYPES
-using System.Threading;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Microsoft.Identity.Json.Serialization;
-using System.Diagnostics;
 
 namespace Microsoft.Identity.Json.Utilities
 {

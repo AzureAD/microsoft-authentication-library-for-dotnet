@@ -25,7 +25,6 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Microsoft.Identity.Json.Utilities
 {

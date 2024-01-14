@@ -25,7 +25,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Globalization;
 #if HAVE_BIG_INTEGER
 using System.Numerics;

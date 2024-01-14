@@ -25,7 +25,6 @@
 
 #if HAVE_ASYNC
 
-using System;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;

@@ -2,16 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.AuthScheme;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {

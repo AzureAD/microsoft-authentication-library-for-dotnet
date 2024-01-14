@@ -13,7 +13,6 @@ using AppKit;
 #endif
 
 using System.Threading;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
 
 namespace Microsoft.Identity.Client.UI
 {

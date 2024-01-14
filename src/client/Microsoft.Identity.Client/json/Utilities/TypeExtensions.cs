@@ -26,12 +26,10 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
 using Microsoft.Identity.Json.Utilities.LinqBridge;
 #else
-using System.Linq;
 #endif
 
 namespace Microsoft.Identity.Json.Utilities

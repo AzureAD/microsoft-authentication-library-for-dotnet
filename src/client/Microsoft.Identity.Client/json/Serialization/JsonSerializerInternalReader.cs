@@ -26,9 +26,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 #if HAVE_DYNAMIC
-using System.ComponentModel;
 using System.Dynamic;
 #endif
 using System.Diagnostics;
@@ -36,12 +34,9 @@ using System.Globalization;
 #if HAVE_BIG_INTEGER
 using System.Numerics;
 #endif
-using System.Reflection;
 using System.Runtime.Serialization;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Json.Utilities;
-using System.Runtime.CompilerServices;
-using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
 using Microsoft.Identity.Json.Utilities.LinqBridge;
 #else

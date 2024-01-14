@@ -8,13 +8,11 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
-using System.Security;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.AppConfig;
 #if NET48
 using Microsoft.Identity.Client.Desktop;

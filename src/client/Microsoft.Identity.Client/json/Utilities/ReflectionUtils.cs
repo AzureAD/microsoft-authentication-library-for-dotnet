@@ -32,7 +32,6 @@ using System.Reflection;
 using System.Collections;
 using System.Globalization;
 using System.Text;
-using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
 using Microsoft.Identity.Json.Utilities.LinqBridge;

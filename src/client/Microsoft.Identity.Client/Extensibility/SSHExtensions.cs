@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using Microsoft.Identity.Client.AuthScheme.SSHCertificates;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.SSHCertificates
 {

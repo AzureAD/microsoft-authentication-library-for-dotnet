@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Cache

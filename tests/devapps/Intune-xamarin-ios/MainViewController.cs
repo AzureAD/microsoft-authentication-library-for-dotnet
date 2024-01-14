@@ -1,15 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using CoreGraphics;
-using Microsoft.Identity.Client;
-using Microsoft.Intune.MAM;
-using UIKit;
-
 namespace IntuneMAMSampleiOS
 {
 #pragma warning disable CS0618 // Type or member is obsolete

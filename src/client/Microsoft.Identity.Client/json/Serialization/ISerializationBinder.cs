@@ -25,7 +25,6 @@
 
 using System;
 using System.Reflection;
-using System.Runtime.Serialization;
 
 namespace Microsoft.Identity.Json.Serialization
 {

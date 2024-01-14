@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.IO;
-using System.Security.Cryptography;
 using CommonCache.Test.Common;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;

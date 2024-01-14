@@ -20,7 +20,6 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
-using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {

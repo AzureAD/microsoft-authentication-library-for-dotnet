@@ -28,7 +28,6 @@ using System;
 using System.Globalization;
 using Microsoft.Identity.Json.Utilities;
 using System.Collections.Generic;
-using System.Diagnostics;
 #if HAVE_ADO_NET
 using System.Data.SqlTypes;
 #endif

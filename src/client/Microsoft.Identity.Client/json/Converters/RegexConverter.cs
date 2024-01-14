@@ -26,7 +26,6 @@
 using System;
 using System.Text.RegularExpressions;
 using Microsoft.Identity.Json.Bson;
-using System.Globalization;
 using System.Runtime.CompilerServices;
 using Microsoft.Identity.Json.Serialization;
 using Microsoft.Identity.Json.Utilities;

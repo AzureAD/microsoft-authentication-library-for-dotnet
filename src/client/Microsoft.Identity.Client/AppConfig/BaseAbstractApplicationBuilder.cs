@@ -2,18 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
-using Microsoft.Identity.Client.Internal;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else

@@ -34,7 +34,6 @@ using System.Numerics;
 using System.Threading.Tasks;
 using Microsoft.Identity.Json.Serialization;
 using Microsoft.Identity.Json.Utilities;
-using System.Diagnostics;
 
 namespace Microsoft.Identity.Json
 {

@@ -25,12 +25,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Collections.ObjectModel;
 using Microsoft.Identity.Json.Utilities;
 using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Identity.Json.Serialization

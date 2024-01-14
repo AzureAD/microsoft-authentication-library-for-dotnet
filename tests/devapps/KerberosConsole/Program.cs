@@ -7,7 +7,6 @@ using Microsoft.Identity.Client.Kerberos;
 using System;
 using System.ComponentModel;
 using System.Globalization;
-using System.Security;
 using System.Threading.Tasks;
 
 namespace KerberosConsole

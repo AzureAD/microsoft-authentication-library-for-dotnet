@@ -28,7 +28,6 @@ using System;
 using Microsoft.Identity.Json.Serialization;
 using System.Globalization;
 using Microsoft.Identity.Json.Utilities;
-using System.Diagnostics;
 
 namespace Microsoft.Identity.Json.Converters
 {

@@ -27,8 +27,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Json.Utilities;
 using System.Globalization;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 #if !HAVE_LINQ
 using Microsoft.Identity.Json.Utilities.LinqBridge;
 #else

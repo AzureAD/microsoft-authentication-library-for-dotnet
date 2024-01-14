@@ -37,7 +37,6 @@ using System.Security;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Json.Utilities;
 using System.Runtime.Serialization;
-using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
 using Microsoft.Identity.Json.Utilities.LinqBridge;

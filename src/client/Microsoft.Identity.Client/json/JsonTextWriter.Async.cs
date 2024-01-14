@@ -33,7 +33,6 @@ using System.Numerics;
 #endif
 using System.Threading.Tasks;
 using Microsoft.Identity.Json.Utilities;
-using System.Diagnostics;
 
 namespace Microsoft.Identity.Json
 {

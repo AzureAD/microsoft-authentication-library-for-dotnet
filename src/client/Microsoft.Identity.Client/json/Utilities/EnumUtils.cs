@@ -25,7 +25,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.Serialization;
 #if !HAVE_LINQ
@@ -36,7 +35,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.Identity.Json.Serialization;
-using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Identity.Json.Utilities

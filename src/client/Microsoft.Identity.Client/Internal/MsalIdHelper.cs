@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;

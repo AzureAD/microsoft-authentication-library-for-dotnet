@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Unit;
-using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {

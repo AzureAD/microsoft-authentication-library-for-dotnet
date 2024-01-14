@@ -26,7 +26,6 @@
 using System;
 using System.Collections.Generic;
 #if HAVE_INOTIFY_COLLECTION_CHANGED
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 #endif
 using System.ComponentModel;
@@ -37,7 +36,6 @@ using System.Linq.Expressions;
 using System.IO;
 using Microsoft.Identity.Json.Utilities;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
 using Microsoft.Identity.Json.Utilities.LinqBridge;

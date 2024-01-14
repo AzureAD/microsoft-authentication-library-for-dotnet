@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics.Tracing;
 using Microsoft.Identity.Client.Internal.Logger;
-using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Core
 {

@@ -7,7 +7,6 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.ClientCredential
 {

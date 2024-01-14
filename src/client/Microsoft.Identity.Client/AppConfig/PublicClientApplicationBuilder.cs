@@ -6,8 +6,6 @@ using System.ComponentModel;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
-using System.Runtime.CompilerServices;
 using Microsoft.Identity.Client.AppConfig;
 
 #if iOS

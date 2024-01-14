@@ -27,7 +27,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Json.Serialization;
 using Microsoft.Identity.Json.Utilities;
-using System.Reflection;
 
 namespace Microsoft.Identity.Json.Converters
 {

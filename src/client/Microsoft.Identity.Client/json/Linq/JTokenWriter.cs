@@ -24,7 +24,6 @@
 #endregion
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
 #if HAVE_BIG_INTEGER
 using System.Numerics;

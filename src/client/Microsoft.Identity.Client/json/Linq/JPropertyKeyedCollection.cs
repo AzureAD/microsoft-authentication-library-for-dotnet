@@ -27,7 +27,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 using Microsoft.Identity.Json.Utilities;
 
 namespace Microsoft.Identity.Json.Linq

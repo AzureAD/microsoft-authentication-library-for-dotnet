@@ -1,14 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 using NSubstitute;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 
 namespace Microsoft.Identity.Test.Common.Mocks

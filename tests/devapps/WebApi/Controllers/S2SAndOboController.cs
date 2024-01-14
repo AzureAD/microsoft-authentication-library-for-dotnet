@@ -6,11 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache.CacheImpl;
-using Microsoft.Identity.Client.Internal.Logger;
 using WebApi.Misc;
 using WebApi.MockHttp;
 
