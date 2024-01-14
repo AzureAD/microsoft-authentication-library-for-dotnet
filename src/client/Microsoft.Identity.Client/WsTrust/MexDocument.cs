@@ -68,13 +68,11 @@ namespace Microsoft.Identity.Client.WsTrust
         {
             //try ws-trust 1.3 first
             return _policies
-                .Values
-                .Where(p => p.Url != null && p.AuthType == userAuthType && p.Version == WsTrustVersion.WsTrust13)
-                .FirstOrDefault() ??
-                    _policies
-                        .Values
-                        .Where(p => p.Url != null && p.AuthType == userAuthType)
-                        .FirstOrDefault();
+                       .Values
+                       .FirstOrDefault(p => p.Url != null && p.AuthType == userAuthType && p.Version == WsTrustVersion.WsTrust13) ??
+                   _policies
+                       .Values
+                       .FirstOrDefault(p => p.Url != null && p.AuthType == userAuthType);
         }
 
         private void ReadPolicies(XContainer mexDocument)
