@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Specifies the managed identity source from which the exception initiates.
         /// </summary>
-        public ManagedIdentitySource ManagedIdentitySource { get; }
+        public new ManagedIdentitySource ManagedIdentitySource { get; }
 
         /// <summary>
         /// Retry error codes specific to managed identity

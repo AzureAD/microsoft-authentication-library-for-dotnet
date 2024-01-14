@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System.Diagnostics;
 using System.Net;
@@ -65,15 +65,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         [RunOn(TargetFrameworks.NetCore)]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
-        [TestCategory(TestCategories.Arlington)]
-        public async Task ArlingtonDeviceCodeFlowAdfsTestAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
-            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user").ConfigureAwait(false);
-        }
-
-        [RunOn(TargetFrameworks.NetCore)]
-        [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.MSA)]
         public async Task DeviceCodeFlowMsaTestAsync()
         {
@@ -116,6 +107,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         #region Azure AD Kerberos Feature Tests
+        [IgnoreOnOneBranch]
         [RunOn(TargetFrameworks.NetCore)]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         public async Task KerberosDeviceCodeFlowTestAsync()

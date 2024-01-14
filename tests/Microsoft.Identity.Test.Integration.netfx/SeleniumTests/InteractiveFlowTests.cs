@@ -422,6 +422,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .WithLoginHint(labResponse.User.Upn)
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
+
             userCacheAccess.AssertAccessCounts(2, 3);
             AssertCcsRoutingInformationIsSent(factory, labResponse);
             ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(
