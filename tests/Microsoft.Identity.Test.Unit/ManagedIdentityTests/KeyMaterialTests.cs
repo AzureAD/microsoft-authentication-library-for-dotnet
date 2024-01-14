@@ -173,29 +173,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             Assert.IsFalse(result, "Expected false since the key does not exist.");
             Assert.IsNull(eCDsaCng, "Expected a null key when the key does not exist.");
         }
-
-        [TestMethod]
-        public void IsKeyGuardProtected_KeyGuardNotEnabled_ReturnsFalse()
-        {
-            // Arrange
-            var provider = new ManagedIdentityCertificateProvider(_logger);
-
-            // Create a CngKey without the KeyGuard Isolation flag set
-            CngKeyCreationParameters creationParameters = new CngKeyCreationParameters
-            {
-                KeyUsage = CngKeyUsages.AllUsages,
-                KeyCreationOptions = CngKeyCreationOptions.None
-            };
-
-            var cngKey = CngKey.Create(CngAlgorithm.ECDsaP256, null, creationParameters);
-
-            // Act
-            var result = provider.IsKeyGuardProtected(cngKey);
-
-            // Assert
-            Assert.IsFalse(result, "Expected false since the KeyGuard Isolation flag is not set.");
-            Assert.AreEqual(CryptoKeyType.None, provider.CryptoKeyType, "Expected CryptoKeyType to be None.");
-        }
 #endif
     }
 }

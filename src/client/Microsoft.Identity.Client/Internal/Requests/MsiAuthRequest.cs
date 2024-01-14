@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal abstract class MsiAuthRequest : RequestBase
     {
         protected readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
-        protected static readonly SemaphoreSlim s_semaphoreSlim = new SemaphoreSlim(1, 1);
+        protected static readonly SemaphoreSlim s_semaphoreSlim = new(1, 1);
 
         protected MsiAuthRequest(
             IServiceBundle serviceBundle,
@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
             AuthenticationResult authResult = null;
 
-            IKeyMaterialManager keyMaterial = base.ServiceBundle.Config.KeyMaterialManagerForTest ??
+            IKeyMaterialManager keyMaterial = ServiceBundle.Config.KeyMaterialManagerForTest ??
                                               AuthenticationRequestParameters.RequestContext.ServiceBundle.PlatformProxy.GetKeyMaterialManager();
 
             // Skip checking cache for force refresh or when claims are present

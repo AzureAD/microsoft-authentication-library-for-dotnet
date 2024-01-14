@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
     /// </summary>
     internal class ManagedIdentityCertificateProvider : IKeyMaterialManager
     {
-        // Property to hold the name of the key guard isolation property
+        // The name of the key guard isolation property
         private const string IsKeyGuardEnabledProperty = "Virtual Iso";
 
         // Field to store the current crypto key type
@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         private const string MachineKeyName = "ManagedIdentityCredentialKey";
         private const string SoftwareKeyName = "ResourceBindingKey";
 
-        // Static field to cache the binding certificate across instances
+        // Cache the binding certificate across instances
         private static X509Certificate2 s_bindingCertificate;
 
         // Lock object for ensuring thread safety when accessing key information
@@ -38,11 +38,36 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         // Logger instance for capturing log information
         private readonly ILoggerAdapter _logger;
 
+        private bool _isInitialized = false;
+
         // Property to get or create the binding certificate from crypto key information
-        public X509Certificate2 BindingCertificate => GetOrCreateCertificateFromCryptoKeyInfo();
+        public X509Certificate2 BindingCertificate
+        {
+            get
+            {
+                if (!_isInitialized)
+                {
+                    s_bindingCertificate = GetOrCreateCertificateFromCryptoKeyInfo();
+                    _isInitialized = true;
+                }
+
+                return s_bindingCertificate;
+            }
+        }
 
         // Property to expose the current crypto key type
-        public CryptoKeyType CryptoKeyType => _cryptoKeyType;
+        public CryptoKeyType CryptoKeyType
+        {
+            get
+            {
+                if (!_isInitialized)
+                {
+                    throw new InvalidOperationException("CryptoKeyType cannot be accessed before initialization.");
+                }
+
+                return _cryptoKeyType;
+            }
+        }
 
         public ManagedIdentityCertificateProvider(ILoggerAdapter logger)
         {
@@ -68,6 +93,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                 if (s_bindingCertificate != null && !CertificateNeedsRotation(s_bindingCertificate))
                 {
                     _logger.Verbose(() => "[Managed Identity] Another thread created the certificate while waiting for the lock.");
+                    _isInitialized = true;
                     return s_bindingCertificate;
                 }
 
@@ -77,10 +103,12 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                 if (cngkey != null)
                 {
                     s_bindingCertificate = CreateCngCertificate(cngkey);
+                    _isInitialized = true;
                     return s_bindingCertificate;
                 }
             }
-
+            
+            _isInitialized = false;
             return null;
         }
 
@@ -234,7 +262,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// Determines the cryptographic key type based on the characteristics of the specified CNG key.
         /// </summary>
         /// <param name="cngKey">The CNG key for which to determine the cryptographic key type.</param>
-        public void DetermineKeyType(CngKey cngKey)
+        private void DetermineKeyType(CngKey cngKey)
         {
             switch (true)
             {
@@ -264,7 +292,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// </summary>
         /// <param name="eCDsaCngKey">The CNG key used for creating the certificate.</param>
         /// <returns>The created binding certificate.</returns>
-        public X509Certificate2 CreateCngCertificate(ECDsaCng eCDsaCngKey)
+        private X509Certificate2 CreateCngCertificate(ECDsaCng eCDsaCngKey)
         {
             string certSubjectname = eCDsaCngKey.Key.KeyName;
 
@@ -313,7 +341,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// <param name="subjectName">The subject name for the certificate (e.g., Common Name).</param>
         /// <param name="ecdsaKey">The ECDsa key to be associated with the certificate request.</param>
         /// <returns>The certificate request for the binding certificate.</returns>
-        public CertificateRequest CreateCertificateRequest(string subjectName, ECDsaCng ecdsaKey)
+        private CertificateRequest CreateCertificateRequest(string subjectName, ECDsaCng ecdsaKey)
         {
             CertificateRequest certificateRequest = null;
 
@@ -331,7 +359,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// <param name="publicKeyOnlyCertificate">The public key-only certificate.</param>
         /// <param name="eCDsaCngKey">The ECDsa key used for associating the private key.</param>
         /// <returns>The certificate with the private key information associated.</returns>
-        public X509Certificate2 AssociatePrivateKeyInfo(X509Certificate2 publicKeyOnlyCertificate, ECDsaCng eCDsaCngKey)
+        private X509Certificate2 AssociatePrivateKeyInfo(X509Certificate2 publicKeyOnlyCertificate, ECDsaCng eCDsaCngKey)
         {
             _logger.Verbose(() => "[Managed Identity] Associating private key with the binding certificate.");
 
