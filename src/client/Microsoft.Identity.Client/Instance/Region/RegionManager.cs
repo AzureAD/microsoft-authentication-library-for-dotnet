@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Client.Region
             RegionInfo result = null;
             try
             {
-                await _lockDiscover.WaitAsync().ConfigureAwait(false);
+                await _lockDiscover.WaitAsync(requestCancellationToken).ConfigureAwait(false);
 
                 var regionInfo = GetCachedRegion(logger);
                 if (regionInfo != null)

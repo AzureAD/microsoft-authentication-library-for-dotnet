@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                                 sendAuthorizeRequest,
                                 cancellationToken,
                                 TaskCreationOptions.None,
-                                staTaskScheduler).Wait();
+                                staTaskScheduler).Wait(cancellationToken);
                         }
                         catch (AggregateException ae)
                         {
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                 sendAuthorizeRequest();
             }
 
-            return await Task.Factory.StartNew(() => authorizationResult).ConfigureAwait(false);
+            return await Task.Factory.StartNew(() => authorizationResult, cancellationToken).ConfigureAwait(false);
         }
 
         internal AuthorizationResult Authenticate(Uri requestUri, Uri callbackUri, CancellationToken cancellationToken)

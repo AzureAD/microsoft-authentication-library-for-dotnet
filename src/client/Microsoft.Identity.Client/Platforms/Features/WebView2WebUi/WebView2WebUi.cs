@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                                 sendAuthorizeRequest,
                                 cancellationToken,
                                 TaskCreationOptions.None,
-                                staTaskScheduler).Wait();
+                                staTaskScheduler).Wait(cancellationToken);
                         }
                         catch (AggregateException ae)
                         {
