@@ -102,9 +102,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             // Requests to a managed identity endpoint must be throttled; 
             // otherwise, the endpoint will throw a HTTP 429.
-            logger.Verbose(() => "[ManagedIdentityRequest] Entering managed identity request semaphore.");
+            logger.Verbose("[ManagedIdentityRequest] Entering managed identity request semaphore.");
             await s_semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
-            logger.Verbose(() => "[ManagedIdentityRequest] Entered managed identity request semaphore.");
+            logger.Verbose("[ManagedIdentityRequest] Entered managed identity request semaphore.");
 
             try
             {
@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             finally
             {
                 s_semaphoreSlim.Release();
-                logger.Verbose(() => "[ManagedIdentityRequest] Released managed identity request semaphore.");
+                logger.Verbose("[ManagedIdentityRequest] Released managed identity request semaphore.");
             }
         }
 

@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
 
-            _logger?.Verbose(() => "[RuntimeBroker] Using Windows account picker.");
+            _logger?.Verbose("[RuntimeBroker] Using Windows account picker.");
 
             if (authenticationRequestParameters?.Account?.HomeAccountId?.ObjectId != null)
             {
@@ -239,7 +239,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             MsalTokenResponse msalTokenResponse = null;
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
 
-            _logger?.Verbose(() => "[RuntimeBroker] Signing in with the default user account.");
+            _logger?.Verbose("[RuntimeBroker] Signing in with the default user account.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters,
@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
 
-            _logger?.Verbose(() => "[RuntimeBroker] Acquiring token silently.");
+            _logger?.Verbose("[RuntimeBroker] Acquiring token silently.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters,
@@ -343,7 +343,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
 
-            _logger?.Verbose(() => "[RuntimeBroker] Acquiring token silently for default account.");
+            _logger?.Verbose("[RuntimeBroker] Acquiring token silently for default account.");
 
             using (var authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters,
@@ -388,7 +388,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
             MsalTokenResponse msalTokenResponse = null;
 
-            _logger?.Verbose(() => "[RuntimeBroker] Acquiring token with Username Password flow.");
+            _logger?.Verbose("[RuntimeBroker] Acquiring token with Username Password flow.");
 
             using (AuthParameters authParams = WamAdapters.GetCommonAuthParameters(
                 authenticationRequestParameters,
@@ -418,7 +418,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             if (account == null)
             {
-                _logger?.Verbose(() => "[RuntimeBroker] No valid account was passed to RemoveAccountAsync. ");
+                _logger?.Verbose("[RuntimeBroker] No valid account was passed to RemoveAccountAsync. ");
                 throw new MsalClientException("wam_remove_account_failed", "No valid account was passed.");
             }
 
@@ -427,7 +427,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             //if OperatingSystemAccount is passed then we use the user signed -in on the machine
             if (PublicClientApplication.IsOperatingSystemAccount(account))
             {
-                _logger?.Verbose(() => "[RuntimeBroker] Default Operating System Account cannot be removed. ");
+                _logger?.Verbose("[RuntimeBroker] Default Operating System Account cannot be removed. ");
                 throw new MsalClientException("wam_remove_account_failed", "Default Operating System account cannot be removed.");
             }
 
@@ -441,7 +441,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 {
                     if (readAccountResult.IsSuccess)
                     {
-                        _logger?.Verbose(() => "[RuntimeBroker] WAM Account exists and can be removed.");
+                        _logger?.Verbose("[RuntimeBroker] WAM Account exists and can be removed.");
 
                     }
                     else
@@ -458,7 +458,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     {
                         if (result.IsSuccess)
                         {
-                            _logger?.Verbose(() => "[RuntimeBroker] Account signed out successfully. ");
+                            _logger?.Verbose("[RuntimeBroker] Account signed out successfully. ");
                         }
                         else
                         {
@@ -514,7 +514,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                                 environmentList,
                                 requestContext).ConfigureAwait(false);
 
-                        _logger.Verbose(() => $"[RuntimeBroker] Filtering WAM accounts based on Environment.");
+                        _logger.Verbose("[RuntimeBroker] Filtering WAM accounts based on Environment.");
 
                         wamAccounts.RemoveAll(acc => !instanceMetadata.Aliases.ContainsOrdinalIgnoreCase(acc.Environment));
 
@@ -576,12 +576,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             if (s_lazyCore.Value == null)
             {
-                _logger?.Info(() => "[RuntimeBroker] MsalRuntime initialization failed. See https://aka.ms/msal-net-wam#wam-limitations");
+                _logger?.Info("[RuntimeBroker] MsalRuntime initialization failed. See https://aka.ms/msal-net-wam#wam-limitations");
                 _logger?.InfoPii(s_initException);
                 return false;
             }
 
-            _logger?.Verbose(() => "[RuntimeBroker] MsalRuntime initialization successful.");
+            _logger?.Verbose("[RuntimeBroker] MsalRuntime initialization successful.");
             return true;
         }
 

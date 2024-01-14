@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // if BOTH the env vars IDENTITY_ENDPOINT and IMDS_ENDPOINT are set the MsiType is Azure Arc
             if (string.IsNullOrEmpty(identityEndpoint) || string.IsNullOrEmpty(imdsEndpoint))
             {
-                requestContext.Logger.Verbose(()=>"[Managed Identity] Azure Arc managed identity is unavailable.");
+                requestContext.Logger.Verbose("[Managed Identity] Azure Arc managed identity is unavailable.");
                 return null;
             }
 
@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 ManagedIdentityRequest request = CreateRequest(parameters.Resource);
 
-                _requestContext.Logger.Verbose(() => "[Managed Identity] Adding authorization header to the request.");
+                _requestContext.Logger.Verbose("[Managed Identity] Adding authorization header to the request.");
                 request.Headers.Add("Authorization", authHeaderValue);
 
                 response = await _requestContext.ServiceBundle.HttpManager.SendGetAsync(request.ComputeUri(), request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);

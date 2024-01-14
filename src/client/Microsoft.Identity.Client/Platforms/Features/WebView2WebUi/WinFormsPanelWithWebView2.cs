@@ -264,7 +264,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
 
         private void WebView2Control_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
         {
-            _logger.Verbose(() => "[WebView2Control] CoreWebView2InitializationCompleted ");
+            _logger.Verbose("[WebView2Control] CoreWebView2InitializationCompleted ");
             _webView2.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
             _webView2.CoreWebView2.Settings.AreDevToolsEnabled = false;
             _webView2.CoreWebView2.Settings.AreHostObjectsAllowed = false;

@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             // if ONLY the env var MSI_ENDPOINT is set the MsiType is CloudShell
             if (string.IsNullOrEmpty(msiEndpoint))
             {
-                requestContext.Logger.Verbose(()=>"[Managed Identity] Cloud shell managed identity is unavailable.");
+                requestContext.Logger.Verbose("[Managed Identity] Cloud shell managed identity is unavailable.");
                 return null;
             }
 

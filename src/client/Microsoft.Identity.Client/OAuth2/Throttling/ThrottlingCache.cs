@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                 logger.Info(() => $"[Throttling] Entry found. Creation: {entry.CreationTime} Expiration: {entry.ExpirationTime} ");
                 if (entry.IsExpired)
                 {
-                    logger.Info(() => "[Throttling] Removing entry because it is expired");
+                    logger.Info("[Throttling] Removing entry because it is expired");
                     _cache.TryRemove(key, out _);
                     return false;
                 }
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             if (_lastCleanupTime + s_cleanupCacheInterval < DateTimeOffset.UtcNow &&
                 !_cleanupInProgress)
             {
-                logger.Verbose(() => "[Throttling] Acquiring lock to cleanup throttling state");
+                logger.Verbose("[Throttling] Acquiring lock to cleanup throttling state");
 
                 lock (_padlock)
                 {

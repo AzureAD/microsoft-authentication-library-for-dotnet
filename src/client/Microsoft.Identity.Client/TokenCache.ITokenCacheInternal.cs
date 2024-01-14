@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client
 
             logger.Verbose(() => $"[SaveTokenResponseAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}.");
             await _semaphoreSlim.WaitAsync(requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
-            logger.Verbose(() => "[SaveTokenResponseAsync] Entered token cache semaphore. ");
+            logger.Verbose("[SaveTokenResponseAsync] Entered token cache semaphore. ");
             ITokenCacheInternal tokenCacheInternal = this;
 
             try
@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Client
             finally
             {
                 _semaphoreSlim.Release();
-                logger.Verbose(() => "[SaveTokenResponseAsync] Released token cache semaphore. ");
+                logger.Verbose("[SaveTokenResponseAsync] Released token cache semaphore. ");
             }
         }
 
@@ -385,7 +385,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                requestParams.RequestContext.Logger.Verbose(() => "Not saving to ADAL legacy cache. ");
+                requestParams.RequestContext.Logger.Verbose("Not saving to ADAL legacy cache. ");
             }
         }
 
@@ -461,7 +461,7 @@ namespace Microsoft.Identity.Client
             if (accessTokens.Count == 0)
             {
 
-                logger.Verbose(() => "[FindAccessTokenAsync] No access tokens found in the cache. Skipping filtering. ");
+                logger.Verbose("[FindAccessTokenAsync] No access tokens found in the cache. Skipping filtering. ");
                 requestParams.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.NoCachedAccessToken;
 
                 return null;
@@ -478,7 +478,7 @@ namespace Microsoft.Identity.Client
             // no match
             if (accessTokens.Count == 0)
             {
-                logger.Verbose(() => "[FindAccessTokenAsync] No tokens found for matching authority, client_id, user and scopes. ");
+                logger.Verbose("[FindAccessTokenAsync] No tokens found for matching authority, client_id, user and scopes. ");
                 return null;
             }
 
@@ -503,7 +503,7 @@ namespace Microsoft.Identity.Client
             var logger = requestParams.RequestContext.Logger;
             if (tokenCacheItems.Count == 0)
             {
-                logger.Verbose(() => "Not filtering by scopes, because there are no candidates");
+                logger.Verbose("Not filtering by scopes, because there are no candidates");
                 return;
             }
 
@@ -662,7 +662,7 @@ namespace Microsoft.Identity.Client
 
             if (tokenCacheItems.Count == 0)
             {
-                logger.Verbose(() => "Not filtering AT by environment, because there are no candidates");
+                logger.Verbose("Not filtering AT by environment, because there are no candidates");
                 return tokenCacheItems;
             }
 
@@ -708,13 +708,13 @@ namespace Microsoft.Identity.Client
             string requestKid = authenticationRequest.AuthenticationScheme.KeyId;
             if (string.IsNullOrEmpty(item.KeyId) && string.IsNullOrEmpty(requestKid))
             {
-                authenticationRequest.RequestContext.Logger.Verbose(() => "Bearer token found");
+                authenticationRequest.RequestContext.Logger.Verbose("Bearer token found");
                 return item;
             }
 
             if (string.Equals(item.KeyId, requestKid, StringComparison.OrdinalIgnoreCase))
             {
-                authenticationRequest.RequestContext.Logger.Verbose(() => "Keyed token found");
+                authenticationRequest.RequestContext.Logger.Verbose("Keyed token found");
                 return item;
             }
 
@@ -809,10 +809,10 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                requestParams.RequestContext.Logger.Verbose(() => "[FindRefreshTokenAsync] No RTs found in the MSAL cache ");
+                requestParams.RequestContext.Logger.Verbose("[FindRefreshTokenAsync] No RTs found in the MSAL cache ");
             }
 
-            requestParams.RequestContext.Logger.Verbose(() => "[FindRefreshTokenAsync] Checking ADAL cache for matching RT. ");
+            requestParams.RequestContext.Logger.Verbose("[FindRefreshTokenAsync] Checking ADAL cache for matching RT. ");
 
             if (IsLegacyAdalCacheEnabled(requestParams) &&
                 requestParams.Account != null &&
@@ -1172,11 +1172,11 @@ namespace Microsoft.Identity.Client
 
             requestParameters.RequestContext.Logger.Verbose(() => $"[StopLongRunningOboProcessAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}");
             await _semaphoreSlim.WaitAsync(requestParameters.RequestContext.UserCancellationToken).ConfigureAwait(false);
-            requestParameters.RequestContext.Logger.Verbose(() => "[StopLongRunningOboProcessAsync] Entered token cache semaphore");
+            requestParameters.RequestContext.Logger.Verbose("[StopLongRunningOboProcessAsync] Entered token cache semaphore");
 
             try
             {
-                requestParameters.RequestContext.Logger.Info(() => "[StopLongRunningOboProcessAsync] Stopping long running OBO process by removing tokens from cache.");
+                requestParameters.RequestContext.Logger.Info("[StopLongRunningOboProcessAsync] Stopping long running OBO process by removing tokens from cache.");
 
                 ITokenCacheInternal tokenCacheInternal = this;
 
@@ -1246,7 +1246,7 @@ namespace Microsoft.Identity.Client
         {
             requestParameters.RequestContext.Logger.Verbose(() => $"[RemoveAccountAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}");
             await _semaphoreSlim.WaitAsync(requestParameters.RequestContext.UserCancellationToken).ConfigureAwait(false);
-            requestParameters.RequestContext.Logger.Verbose(() => "[RemoveAccountAsync] Entered token cache semaphore");
+            requestParameters.RequestContext.Logger.Verbose("[RemoveAccountAsync] Entered token cache semaphore");
 
             var cacheKey = account.HomeAccountId?.Identifier;
             try

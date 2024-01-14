@@ -274,7 +274,7 @@ namespace Microsoft.Identity.Client.Region
                 return new RegionInfo(s_autoDiscoveredRegion, RegionAutodetectionSource.Cache, null);
             }
 
-            logger.Verbose(() => $"[Region discovery] Auto-discovery did not run yet.");
+            logger.Verbose("[Region discovery] Auto-discovery did not run yet.");
             return null;
         }
 

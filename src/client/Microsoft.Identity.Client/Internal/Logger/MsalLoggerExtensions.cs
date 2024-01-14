@@ -99,12 +99,20 @@ namespace Microsoft.Identity.Client.Core
         {
             logger.Log(LogLevel.Info, exWithPii?.ToString(), LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
-       
+
         public static void Verbose(this ILoggerAdapter logger, Func<string> messageProducer)
         {
             if (logger.IsLoggingEnabled(LogLevel.Verbose))
             {
                 logger.Log(LogLevel.Verbose, string.Empty, messageProducer());
+            }
+        }
+
+        public static void Verbose(this ILoggerAdapter logger, string message)
+        {
+            if (logger.IsLoggingEnabled(LogLevel.Verbose))
+            {
+                logger.Log(LogLevel.Verbose, string.Empty, message);
             }
         }
 

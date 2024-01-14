@@ -119,9 +119,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
 
             // Allow only one call to the provider 
-            logger.Verbose(() => "[ClientCredentialRequest] Entering client credential request semaphore.");
+            logger.Verbose("[ClientCredentialRequest] Entering client credential request semaphore.");
             await s_semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
-            logger.Verbose(() => "[ClientCredentialRequest] Entered client credential request semaphore.");
+            logger.Verbose("[ClientCredentialRequest] Entered client credential request semaphore.");
 
             try
             {
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     }
                     else
                     {
-                        logger.Verbose(() => "[ClientCredentialRequest] Checking for a cached access token.");
+                        logger.Verbose("[ClientCredentialRequest] Checking for a cached access token.");
                         authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
                     }
                 }
@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             finally
             {
                 s_semaphoreSlim.Release();
-                logger.Verbose(() => "[ClientCredentialRequest] Released client credential request semaphore.");
+                logger.Verbose("[ClientCredentialRequest] Released client credential request semaphore.");
             }
         }
 
