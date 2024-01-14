@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client
         /// Use Microsoft Edge to navigate to the given URI. On non-windows platforms it uses 
         /// whatever browser is the default.
         /// </summary>
-        public static async Task OpenWithEdgeBrowserAsync(Uri uri)
+        public static Task OpenWithEdgeBrowserAsync(Uri uri)
         {
             if (uri == null)
             {
@@ -32,11 +32,12 @@ namespace Microsoft.Identity.Client
             {
                 url = url.Replace("&", "^&");
                 Process.Start(new ProcessStartInfo("cmd", $"/c start microsoft-edge:{url}") { CreateNoWindow = true });
+                return Task.CompletedTask;
             }
             else
             {
                 var proxy = PlatformProxyFactory.CreatePlatformProxy(new NullLogger());
-                await proxy.StartDefaultOsBrowserAsync(url, true).ConfigureAwait(false);
+                return proxy.StartDefaultOsBrowserAsync(url, true);
             }
 
         }

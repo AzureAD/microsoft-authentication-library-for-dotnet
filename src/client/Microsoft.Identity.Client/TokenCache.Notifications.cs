@@ -41,28 +41,31 @@ namespace Microsoft.Identity.Client
                 (this as ITokenCacheInternal).IsAppSubscribedToSerializationEvents();
         }
 
-        async Task ITokenCacheInternal.OnAfterAccessAsync(TokenCacheNotificationArgs args)
+        Task ITokenCacheInternal.OnAfterAccessAsync(TokenCacheNotificationArgs args)
         {
             AfterAccess?.Invoke(args);
 
-            if (AsyncAfterAccess != null)
+            if (AsyncAfterAccess == null)
             {
-                await AsyncAfterAccess.Invoke(args).ConfigureAwait(false);
+                return Task.CompletedTask;
             }
+
+            return AsyncAfterAccess.Invoke(args);
         }
 
-        async Task ITokenCacheInternal.OnBeforeAccessAsync(TokenCacheNotificationArgs args)
+        Task ITokenCacheInternal.OnBeforeAccessAsync(TokenCacheNotificationArgs args)
         {
             BeforeAccess?.Invoke(args);
-            if (AsyncBeforeAccess != null)
+            if (AsyncBeforeAccess == null)
             {
-                await AsyncBeforeAccess
-                    .Invoke(args)
-                    .ConfigureAwait(false);
+                return Task.CompletedTask;
             }
+
+            return AsyncBeforeAccess
+                .Invoke(args);
         }
 
-        async Task ITokenCacheInternal.OnBeforeWriteAsync(TokenCacheNotificationArgs args)
+        Task ITokenCacheInternal.OnBeforeWriteAsync(TokenCacheNotificationArgs args)
         {
 #pragma warning disable CS0618 // Type or member is obsolete, but preserve old behavior until it is deleted
             HasStateChanged = true;
@@ -70,10 +73,12 @@ namespace Microsoft.Identity.Client
             args.HasStateChanged = true;
             BeforeWrite?.Invoke(args);
 
-            if (AsyncBeforeWrite != null)
+            if (AsyncBeforeWrite == null)
             {
-                await AsyncBeforeWrite.Invoke(args).ConfigureAwait(false);
+                return Task.CompletedTask;
             }
+
+            return AsyncBeforeWrite.Invoke(args);
         }
 
         /// <summary>

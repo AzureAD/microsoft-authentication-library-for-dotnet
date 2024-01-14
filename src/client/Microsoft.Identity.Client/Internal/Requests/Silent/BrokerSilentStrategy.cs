@@ -61,26 +61,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return null;
         }
 
-        private async Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
+        private Task<MsalTokenResponse> SendTokenRequestToBrokerAsync()
         {
             _authenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
 
-            MsalTokenResponse msalTokenResponse;
-
-            if (!PublicClientApplication.IsOperatingSystemAccount(_authenticationRequestParameters.Account))
+            if (PublicClientApplication.IsOperatingSystemAccount(_authenticationRequestParameters.Account))
             {
-                msalTokenResponse = await Broker.AcquireTokenSilentAsync(
-                      _authenticationRequestParameters,
-                      _silentParameters).ConfigureAwait(false);
+                return Broker.AcquireTokenSilentDefaultUserAsync(
+                    _authenticationRequestParameters,
+                    _silentParameters);
             }
             else
             {
-                msalTokenResponse = await Broker.AcquireTokenSilentDefaultUserAsync(
-                     _authenticationRequestParameters,
-                     _silentParameters).ConfigureAwait(false);
+                return Broker.AcquireTokenSilentAsync(
+                    _authenticationRequestParameters,
+                    _silentParameters);
             }
-
-            return msalTokenResponse;
         }
 
         internal /* internal for test */ void ValidateResponseFromBroker(MsalTokenResponse msalTokenResponse)

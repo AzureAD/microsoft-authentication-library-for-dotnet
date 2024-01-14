@@ -35,11 +35,11 @@ namespace Microsoft.Identity.Client.Internal
             _serviceBundle = _requestParams.RequestContext.ServiceBundle;
         }
 
-        public async Task<Tuple<AuthorizationResult, string>> FetchAuthCodeAndPkceVerifierAsync(
+        public Task<Tuple<AuthorizationResult, string>> FetchAuthCodeAndPkceVerifierAsync(
             CancellationToken cancellationToken)
         {
             var webUi = CreateWebAuthenticationDialog();
-            return await FetchAuthCodeAndPkceInternalAsync(webUi, cancellationToken).ConfigureAwait(false);
+            return FetchAuthCodeAndPkceInternalAsync(webUi, cancellationToken);
         }
 
         public async Task<Uri> GetAuthorizationUriWithoutPkceAsync(CancellationToken cancellationToken)

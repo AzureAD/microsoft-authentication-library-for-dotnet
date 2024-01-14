@@ -53,24 +53,24 @@ namespace Microsoft.Identity.Client
 
         #region Accounts
         /// <inheritdoc/>
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync()
+        public Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
-            return await GetAccountsAsync(default(CancellationToken)).ConfigureAwait(false);
+            return GetAccountsAsync(default(CancellationToken));
         }
 
         // TODO: MSAL 5 - add cancellationToken to the interface
         /// <summary>
         /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
         /// </summary>
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync(CancellationToken cancellationToken = default)
+        public Task<IEnumerable<IAccount>> GetAccountsAsync(CancellationToken cancellationToken = default)
         {
-            return await GetAccountsInternalAsync(ApiIds.GetAccounts, null, cancellationToken).ConfigureAwait(false);
+            return GetAccountsInternalAsync(ApiIds.GetAccounts, null, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow)
+        public Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow)
         {
-            return await GetAccountsAsync(userFlow, default(CancellationToken)).ConfigureAwait(false);
+            return GetAccountsAsync(userFlow, default(CancellationToken));
         }
 
         // TODO: MSAL 5 - add cancellationToken to the interface
@@ -111,23 +111,23 @@ namespace Microsoft.Identity.Client
         }
 
         /// <inheritdoc/>
-        public async Task<IAccount> GetAccountAsync(string accountId)
+        public Task<IAccount> GetAccountAsync(string accountId)
         {
             if (!string.IsNullOrWhiteSpace(accountId))
             {
-                return await GetAccountAsync(accountId, default(CancellationToken)).ConfigureAwait(false);
+                return GetAccountAsync(accountId, default(CancellationToken));
             }
 
-            return null;
+            return Task.FromResult<IAccount>(null);
         }
 
         /// <summary>
         /// Removes all tokens in the cache for the specified account.
         /// </summary>
         /// <param name="account">Instance of the account that needs to be removed</param>
-        public async Task RemoveAsync(IAccount account)
+        public Task RemoveAsync(IAccount account)
         {
-            await RemoveAsync(account, default(CancellationToken)).ConfigureAwait(false);
+            return RemoveAsync(account, default(CancellationToken));
         }
 
         // TODO: MSAL 5 - add cancellationToken to the interface

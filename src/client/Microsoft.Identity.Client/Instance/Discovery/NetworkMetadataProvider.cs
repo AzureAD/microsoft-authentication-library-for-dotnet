@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             return discoveryResponse;
         }
 
-        private async Task<InstanceDiscoveryResponse> SendInstanceDiscoveryRequestAsync(
+        private Task<InstanceDiscoveryResponse> SendInstanceDiscoveryRequestAsync(
           Uri authority,
           RequestContext requestContext)
         {
@@ -83,11 +83,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
             Uri instanceDiscoveryEndpoint = ComputeHttpEndpoint(authority, requestContext);
 
-            InstanceDiscoveryResponse discoveryResponse = await client
-                .DiscoverAadInstanceAsync(instanceDiscoveryEndpoint, requestContext)
-                .ConfigureAwait(false);
-
-            return discoveryResponse;
+            return client.DiscoverAadInstanceAsync(instanceDiscoveryEndpoint, requestContext);
         }
 
         private Uri ComputeHttpEndpoint(Uri authority, RequestContext requestContext)

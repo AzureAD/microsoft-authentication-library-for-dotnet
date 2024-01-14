@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
         #endregion
 
-        private async Task<MsalTokenResponse> FetchTokensFromBrokerAsync(string brokerInstallUrl, CancellationToken cancellationToken)
+        private Task<MsalTokenResponse> FetchTokensFromBrokerAsync(string brokerInstallUrl, CancellationToken cancellationToken)
         {
             IBroker broker = _serviceBundle.PlatformProxy.CreateBroker(
                 _serviceBundle.Config,
@@ -84,8 +84,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     broker,
                     brokerInstallUrl);
 
-            return await brokerInteractiveRequest.FetchTokensAsync(cancellationToken)
-                .ConfigureAwait(false);
+            return brokerInteractiveRequest.FetchTokensAsync(cancellationToken);
         }
 
         private async Task<MsalTokenResponse> GetTokenResponseAsync(CancellationToken cancellationToken)

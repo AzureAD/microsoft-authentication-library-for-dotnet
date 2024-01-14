@@ -85,15 +85,15 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             }
         }
 
-        internal new async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse response)
+        internal new Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse response)
         {
-            return await base.CacheTokenResponseAndCreateAuthenticationResultAsync(response).ConfigureAwait(false);
+            return base.CacheTokenResponseAndCreateAuthenticationResultAsync(response);
         }
 
         //internal for test
-        internal async Task<AuthenticationResult> ExecuteTestAsync(CancellationToken cancellationToken)
+        internal Task<AuthenticationResult> ExecuteTestAsync(CancellationToken cancellationToken)
         {
-            return await ExecuteAsync(cancellationToken).ConfigureAwait(false);
+            return ExecuteAsync(cancellationToken);
         }
 
         private async Task UpdateRequestWithAccountAsync()
@@ -149,14 +149,14 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             return null;
         }
 
-        private async Task<IAccount> GetAccountFromParamsOrLoginHintAsync(IAccount account, string loginHint)
+        private Task<IAccount> GetAccountFromParamsOrLoginHintAsync(IAccount account, string loginHint)
         {
-            if (account != null)
+            if (account == null)
             {
-                return account;
+                return GetSingleAccountForLoginHintAsync(loginHint);
             }
 
-            return await GetSingleAccountForLoginHintAsync(loginHint).ConfigureAwait(false);
+            return Task.FromResult(account);
         }
 
         protected override void ValidateAccountIdentifiers(ClientInfo fromServer)

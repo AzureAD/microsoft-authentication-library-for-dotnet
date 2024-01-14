@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Utils
         /// <param name="onAttemptFailed">The retry handler.</param>
         /// <param name="allowedExceptions"></param>
         /// <returns>The <see cref="Task"/> producing the result.</returns>
-        public static async Task ExecuteWithRetryAsync(Func<Task> func, int maxAttempts, TimeSpan? retryInterval = null, Action<int, Exception> onAttemptFailed = null, ISet<Type> allowedExceptions = null)
+        public static Task ExecuteWithRetryAsync(Func<Task> func, int maxAttempts, TimeSpan? retryInterval = null, Action<int, Exception> onAttemptFailed = null, ISet<Type> allowedExceptions = null)
         {
             if (func == null)
             {
@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.Utils
                 return true;
             };
 
-            await ExecuteWithRetryAsync(wrapper, maxAttempts, retryInterval, onAttemptFailed, allowedExceptions).ConfigureAwait(true);
+            return ExecuteWithRetryAsync(wrapper, maxAttempts, retryInterval, onAttemptFailed, allowedExceptions);
         }
     }
 }

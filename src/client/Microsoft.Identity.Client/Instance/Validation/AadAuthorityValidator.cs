@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
         /// because instance metadata is used for aliasing, and authority validation is orthogonal to that. 
         /// MSAL must figure out aliasing even if ValidateAuthority is set to false.
         /// </summary>
-        public async Task ValidateAuthorityAsync(
+        public Task ValidateAuthorityAsync(
             AuthorityInfo authorityInfo)
         {
             var authorityUri = authorityInfo.CanonicalAuthority;
@@ -32,16 +32,18 @@ namespace Microsoft.Identity.Client.Instance.Validation
             _requestContext.Logger.Info(() => $"Authority validation enabled? {authorityInfo.ValidateAuthority}. ");
             _requestContext.Logger.Info(() => $"Authority validation - is known env? {isKnownEnv}. ");
 
-            if (!isKnownEnv)
+            if (isKnownEnv)
             {
-                _requestContext.Logger.Info("Authority validation is being performed. ");
-
-                // MSAL will throw if the instance discovery URI does not respond with a valid json
-                await _requestContext.ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
-                                             authorityInfo,
-                                             _requestContext, 
-                                             forceValidation: true).ConfigureAwait(false);
+                return Task.CompletedTask;
             }
+
+            _requestContext.Logger.Info("Authority validation is being performed. ");
+
+            // MSAL will throw if the instance discovery URI does not respond with a valid json
+            return _requestContext.ServiceBundle.InstanceDiscoveryManager.GetMetadataEntryAsync(
+                authorityInfo,
+                _requestContext,
+                forceValidation: true);
         }
     }
 }
