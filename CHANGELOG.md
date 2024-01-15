@@ -1,3 +1,18 @@
+4.59.0
+==========
+### New Features
+- Removed support for deprecated Xamarin.Android 9 framework. MSAL.NET packages will no longer include `monoandroid90` binary. Xamarin.Android 10 apps will now have a minimum target framework version of 12 (corresponding to Android API level 31). See [3530](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3530).
+- Removed support for deprecated .NET 4.5 framework. MSAL.NET packages will no longer include `net45` binary. Existing applications should target at least .NET 4.6.2. See [4314](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4314).
+
+### Bug Fixes
+- When public client apps persist cache data on Linux platforms, exceptions are now thrown, instead of just logged. This behavior is now consistent with Windows and Mac cache accessors. See [4493](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4493).
+- Downgraded System.Diagnostics.DiagnosticSource dependency to 6.0.1 from 7.0.2 to enable apps to run in .NET 6 in-process Azure Functions. Added extra checks to prevent crashing if OpenTelemetry dependencies cannot be used in the app's runtime. See [4456](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4456).
+- MSAL now throws `MsalServiceException` instead of `MsalManagedIdentityException` in managed identity flows. See [4483](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4483).
+- Background proactive token refresh operation can now be cancelled using the cancelation token passed into the parent acquire token call. See [4473](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4473).
+- Fixed `SemaphoreFullException` happening in managed identity flows. See [4472](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4472).
+- Improved exception messages when using non-RSA certificates. See [4407](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4407).
+- Fixed a scenario when the same tokens are cached under different cache keys when an identity provider sends scopes in a different order. See [4474](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4474).
+
 4.58.1
 ==========
 ### New Features
