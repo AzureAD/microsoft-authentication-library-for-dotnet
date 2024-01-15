@@ -4,7 +4,7 @@
 using System.Security.Cryptography.X509Certificates;
 using System;
 using Microsoft.Identity.Client.Core;
-#if NET6_0 || NET6_WIN
+#if SUPPORTS_MIV2
 using Microsoft.Identity.Client.Platforms.netcore;
 #endif
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -12,7 +12,6 @@ using NSubstitute;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Client.Internal.Logger;
 using System.Security.Cryptography;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
@@ -23,7 +22,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     public class KeyMaterialTests : TestBase
     {
         private readonly ILoggerAdapter _logger = new NullLogger();
-#if NET6_0 || NET6_WIN
+#if SUPPORTS_MIV2
         [TestMethod]
         public void GetOrCreateCertificateFromCryptoKeyInfo_NoKey_ReturnsNoCertificate()
         {
@@ -31,7 +30,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var provider = new ManagedIdentityCertificateProvider(_logger);
 
             // Act
-            var result = provider.GetOrCreateCertificateFromCryptoKeyInfo();
+            X509Certificate2 result = provider.GetOrCreateCertificateFromCryptoKeyInfo();
 
             // Assert
             Assert.AreEqual(null, result, "Expected no certificate to be returned.");
@@ -41,7 +40,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public void CertificateNeedsRotation_DefaultRotationValue_ReturnsFalse()
         {
             // Arrange
-            var certificate = new X509Certificate2Builder()
+            X509Certificate2 certificate = new X509Certificate2Builder()
                 .WithSubjectName("CN=TestCert")
                 .WithNotBefore(DateTime.UtcNow.AddMonths(-2))
                 .WithNotAfter(DateTime.UtcNow.AddMonths(6))
@@ -58,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public void CertificateNeedsRotation_OverrideRotationValueHigher_ReturnsFalse()
         {
             // Arrange
-            var certificate = new X509Certificate2Builder()
+            X509Certificate2 certificate = new X509Certificate2Builder()
                 .WithSubjectName("CN=TestCert")
                 .WithNotBefore(DateTime.UtcNow.AddMonths(-2))
                 .WithNotAfter(DateTime.UtcNow.AddMonths(6))
@@ -77,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public void CertificateNeedsRotation_OverrideRotationValueLower_ReturnsFalse()
         {
             // Arrange
-            var certificate = new X509Certificate2Builder()
+            X509Certificate2 certificate = new X509Certificate2Builder()
                 .WithSubjectName("CN=TestCert")
                 .WithNotBefore(DateTime.UtcNow.AddMonths(-2))
                 .WithNotAfter(DateTime.UtcNow.AddMonths(6))
@@ -96,7 +95,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public void CertificateNeedsRotation_CertificateExpired_ReturnsTrue()
         {
             // Arrange
-            var certificate = new X509Certificate2Builder()
+            X509Certificate2 certificate = new X509Certificate2Builder()
                 .WithSubjectName("CN=TestCert")
                 .WithNotBefore(DateTime.UtcNow.AddMonths(-12))
                 .WithNotAfter(DateTime.UtcNow.AddMonths(-6))
@@ -113,7 +112,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public void CertificateNeedsRotation_CertificateForceRotate_ReturnsFalse()
         {
             // Arrange
-            var certificate = new X509Certificate2Builder()
+            X509Certificate2 certificate = new X509Certificate2Builder()
                 .WithSubjectName("CN=TestCert")
                 .WithNotBefore(DateTime.UtcNow)
                 .WithNotAfter(DateTime.UtcNow.AddDays(1))
@@ -130,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public void CertificateNeedsRotation_CertificateExpiresSoonButAboveCustomThreshold_ReturnsTrue()
         {
             // Arrange
-            var certificate = new X509Certificate2Builder()
+            X509Certificate2 certificate = new X509Certificate2Builder()
                 .WithSubjectName("CN=TestCert")
                 .WithNotBefore(DateTime.UtcNow)
                 .WithNotAfter(DateTime.UtcNow.AddDays(1))
@@ -152,7 +151,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var provider = new ManagedIdentityCertificateProvider(_logger);
 
             // Act
-            var result = provider.GetCngKey();
+            ECDsaCng result = provider.GetCngKey();
 
             // Assert
             Assert.IsNull(result, "Expected no key to be returned.");
@@ -172,6 +171,18 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             // Assert
             Assert.IsFalse(result, "Expected false since the key does not exist.");
             Assert.IsNull(eCDsaCng, "Expected a null key when the key does not exist.");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void CryptoKeyType_ShouldThrowException_IfNotInitialized()
+        {
+            // Arrange
+            ILoggerAdapter logger = Substitute.For<ILoggerAdapter>();
+            ManagedIdentityCertificateProvider provider = new(logger);
+
+            // Act & Assert
+            _ = provider.CryptoKeyType;
         }
 #endif
     }

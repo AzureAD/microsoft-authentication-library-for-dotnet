@@ -308,7 +308,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
                     // Create a self-signed X.509 certificate
                     DateTimeOffset startDate = DateTimeOffset.UtcNow;
-                    DateTimeOffset endDate = startDate.AddYears(2); //expiry 
+                    DateTimeOffset endDate = startDate.AddYears(5); //expiry 
 
                     //Create the self signed cert
                     X509Certificate2 selfSigned = request.CreateSelfSigned(startDate, endDate);

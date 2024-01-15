@@ -19,10 +19,6 @@ using Microsoft.Identity.Client.Internal;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
-using OpenTelemetry.Trace;
-using Microsoft.Identity.Client.Platforms.netcore;
-using Microsoft.Identity.Client.Core;
-using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
@@ -994,18 +990,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 AuthenticationResult result = await builder.ExecuteAsync().ConfigureAwait(false);
             }
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void CryptoKeyType_ShouldThrowException_IfNotInitialized()
-        {
-            // Arrange
-            ILoggerAdapter logger = Substitute.For<ILoggerAdapter>();
-            ManagedIdentityCertificateProvider provider = new(logger);
-
-            // Act & Assert
-            _ = provider.CryptoKeyType;
         }
 
         [TestMethod]
