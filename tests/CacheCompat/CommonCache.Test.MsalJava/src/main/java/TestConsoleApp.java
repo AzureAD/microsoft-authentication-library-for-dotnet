@@ -14,7 +14,7 @@ import java.util.Set;
 
 public class TestConsoleApp {
     static String readFile(String path) throws IOException {
-        return new String(Files.readAllBytes(Paths.get(path)));
+        return new String(Files.readAllBytes(Paths.get(path))); //codeql [SM00697] Non-production test app that reads from a known file.
     }
 
     static void writeFile(String path, String content) throws IOException {
