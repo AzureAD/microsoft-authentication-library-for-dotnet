@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 {
                     sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "HTTP StatusCode {0}", msalServiceException.StatusCode));
                     sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "CorrelationId {0}", msalServiceException.CorrelationId));
-                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "AAD Error Code AADSTS{0}", msalServiceException.ErrorCodes.FirstOrDefault()));
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "AAD Error Code AADSTS{0}", string.Join(" ", msalServiceException.ErrorCodes)));
                 }
 
                 if (ex.InnerException != null)
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
                 if (ex.StackTrace != null)
                 {
-                    sb.Append(Environment.NewLine + ex.StackTrace);
+                    sb.AppendLine(ex.StackTrace);
                 }
             }
 
