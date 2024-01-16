@@ -1,8 +1,0 @@
-# template-install-dotnet-core.yaml
-# install the version of dotnet core we need on the machine
-
-steps:
-- task: UseDotNet@2
-  displayName: 'Use .Net Core sdk'
-  inputs:
-    version: 3.x

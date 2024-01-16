@@ -54,6 +54,9 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
+#if ONEBRANCH_BUILD
+        [Ignore]
+#endif
         public void NetCoreFactory_System()
         {
             // Arrange

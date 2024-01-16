@@ -1,19 +1,8 @@
 steps:
 - task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 3.x'
-  inputs:
-    version: 3.x
-
-- task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 5.x'
-  inputs:
-    version: 5.x    
-
-- task: UseDotNet@2
-  displayName: 'Use .Net Core SDK 6.x'
+  displayName: 'Use the latest .NET 6'
   inputs:
     version: 6.x
-    includePreviewVersions: true
 
 - task: DownloadPipelineArtifact@2
   displayName: 'Download Drop'
