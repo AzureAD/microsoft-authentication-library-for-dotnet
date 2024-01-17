@@ -1,7 +1,7 @@
 4.59.0
 ==========
 ### New Features
-- Removed support for deprecated Xamarin.Android 9 framework. MSAL.NET packages will no longer include `monoandroid90` binary. Xamarin.Android 10 apps will now have a minimum target framework version of 12 (corresponding to Android API level 31). See [3530](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3530).
+- Removed support for deprecated Xamarin.Android 9 and Xamarin.Android 10 frameworks. MSAL.NET packages will no longer include `monoandroid90` and `monoandroid10.0` binaries and instead include `monoandroid12.0`. Xamarin.Android apps should now target framework version 12 (corresponding to Android API level 31) or above. See [3530](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3530).
 - Removed support for deprecated .NET 4.5 framework. MSAL.NET packages will no longer include `net45` binary. Existing applications should target at least .NET 4.6.2. See [4314](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4314).
 
 ### Bug Fixes
