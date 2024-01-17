@@ -2338,7 +2338,7 @@ namespace Microsoft.Identity.Json.Serialization
 
             // only need to keep a track of properties' presence if they are required or a value should be defaulted if missing
             Dictionary<JsonProperty, PropertyPresence>? propertiesPresence = (contract.HasRequiredOrDefaultValueProperties || HasFlag(Serializer._defaultValueHandling, DefaultValueHandling.Populate))
-                ? contract.Properties.ToDictionary(m => m, _ => PropertyPresence.None)
+                ? contract.Properties.ToDictionary(m => m, m => PropertyPresence.None)
                 : null;
 
             if (id != null)

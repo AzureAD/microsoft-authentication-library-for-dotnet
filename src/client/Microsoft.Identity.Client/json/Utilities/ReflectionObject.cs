@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Json.Utilities
                 {
                     Func<object> ctor = delegateFactory.CreateDefaultConstructor<object>(t);
 
-                    creatorConstructor = _ => ctor();
+                    creatorConstructor = args => ctor();
                 }
             }
 

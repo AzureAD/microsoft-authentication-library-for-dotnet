@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Json.Utilities
 
             if (method is ConstructorInfo c)
             {
-                return (_, a) => c.Invoke(a);
+                return (o, a) => c.Invoke(a);
             }
 
             return (o, a) => method.Invoke(o, a);
