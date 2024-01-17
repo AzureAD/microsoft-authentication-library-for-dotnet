@@ -113,7 +113,10 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 {
                     sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "HTTP StatusCode {0}", msalServiceException.StatusCode));
                     sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "CorrelationId {0}", msalServiceException.CorrelationId));
-                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "AAD Error Code AADSTS{0}", string.Join(" ", msalServiceException.ErrorCodes)));
+                    if (msalServiceException.ErrorCodes != null && msalServiceException.ErrorCodes.Count() > 0)
+                    {
+                        sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "Microsoft Entra ID Error Code AADSTS{0}", string.Join(" ", msalServiceException.ErrorCodes)));
+                    }
                 }
 
                 if (ex.InnerException != null)
