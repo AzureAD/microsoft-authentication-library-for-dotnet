@@ -201,7 +201,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 { MsalException.BrokerErrorTag, $"0x{runtimeAuthResult?.Error.Tag:X}" },
                 { MsalException.BrokerErrorStatus, runtimeAuthResult?.Error.Status.ToString() },
                 { MsalException.BrokerErrorCode, (runtimeAuthResult?.Error.ErrorCode).ToString() },
-                { MsalException.BrokerTelemetry, (runtimeAuthResult?.TelemetryData).ToString() },
+                { MsalException.BrokerTelemetry, runtimeAuthResult?.TelemetryData },
             };
 
             exception.AdditionalExceptionData = result;
@@ -348,7 +348,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     CorrelationId = correlationId,
                     Scope = authResult.GrantedScopes,
                     ExpiresIn = (long)(DateTime.SpecifyKind(authResult.ExpiresOn, DateTimeKind.Utc) - DateTimeOffset.UtcNow).TotalSeconds,
-                    ClientInfo = authResult.Account.ClientInfo.ToString(),
+                    ClientInfo = authResult.Account.ClientInfo,
                     TokenType = authResult.IsPopAuthorization ? Constants.PoPAuthHeaderPrefix : BrokerResponseConst.Bearer,
                     WamAccountId = authResult.Account.AccountId,
                     TokenSource = TokenSource.Broker

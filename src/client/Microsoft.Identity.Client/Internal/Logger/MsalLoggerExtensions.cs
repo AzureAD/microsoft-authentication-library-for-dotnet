@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Core
 
         public static void ErrorPiiWithPrefix(this ILoggerAdapter logger, Exception exWithPii, string prefix)
         {
-            logger.Log(LogLevel.Error, prefix + exWithPii.ToString(), prefix + LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+            logger.Log(LogLevel.Error, prefix + exWithPii, prefix + LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public static void ErrorPii(this ILoggerAdapter logger, string messageWithPii, string messageScrubbed)
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Core
 
         public static void WarningPiiWithPrefix(this ILoggerAdapter logger, Exception exWithPii, string prefix)
         {
-            logger.Log(LogLevel.Warning, prefix + exWithPii.ToString(), prefix + LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
+            logger.Log(LogLevel.Warning, prefix + exWithPii, prefix + LoggerHelper.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public static void Info(this ILoggerAdapter logger, string message)
