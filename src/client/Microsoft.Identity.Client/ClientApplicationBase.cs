@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc/>
         public Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow)
         {
-            return GetAccountsAsync(userFlow, default(CancellationToken));
+            return GetAccountsAsync(userFlow, default);
         }
 
         // TODO: MSAL 5 - add cancellationToken to the interface
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client
         {
             if (!string.IsNullOrWhiteSpace(accountId))
             {
-                return await GetAccountAsync(accountId, default(CancellationToken)).ConfigureAwait(false);
+                return await GetAccountAsync(accountId, default).ConfigureAwait(false);
             }
 
             return null;
