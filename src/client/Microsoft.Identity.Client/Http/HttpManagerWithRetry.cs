@@ -29,40 +29,40 @@ namespace Microsoft.Identity.Client.Http
             base(httpClientFactory) { }
 
         /// <inheritdoc/>
-        public override async Task<HttpResponse> SendPostAsync(
+        public override Task<HttpResponse> SendPostAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
             HttpContent body,
             ILoggerAdapter logger,
             CancellationToken cancellationToken = default)
         {
-            return await SendRequestAsync(endpoint, headers, body, HttpMethod.Post, logger, retry: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return SendRequestAsync(endpoint, headers, body, HttpMethod.Post, logger, retry: true, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc/>
-        public override async Task<HttpResponse> SendGetAsync(
+        public override Task<HttpResponse> SendGetAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
             ILoggerAdapter logger,
             bool retry = true,
             CancellationToken cancellationToken = default)
         {
-            return await SendRequestAsync(endpoint, headers, null, HttpMethod.Get, logger, retry: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return SendRequestAsync(endpoint, headers, null, HttpMethod.Get, logger, retry: true, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc/>
-        public override async Task<HttpResponse> SendGetForceResponseAsync(
+        public override Task<HttpResponse> SendGetForceResponseAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
             ILoggerAdapter logger,
             bool retry = true,
             CancellationToken cancellationToken = default)
         {
-            return await SendRequestAsync(endpoint, headers, null, HttpMethod.Get, logger, retry: true, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return SendRequestAsync(endpoint, headers, null, HttpMethod.Get, logger, retry: true, doNotThrow: true, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc/>
-        public override async Task<HttpResponse> SendPostForceResponseAsync(
+        public override Task<HttpResponse> SendPostForceResponseAsync(
             Uri uri,
             IDictionary<string, string> headers,
             IDictionary<string, string> bodyParameters,
@@ -70,18 +70,18 @@ namespace Microsoft.Identity.Client.Http
             CancellationToken cancellationToken = default)
         {
             HttpContent body = bodyParameters == null ? null : new FormUrlEncodedContent(bodyParameters);
-            return await SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, retry: true, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, retry: true, doNotThrow: true, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc/>
-        public override async Task<HttpResponse> SendPostForceResponseAsync(
+        public override Task<HttpResponse> SendPostForceResponseAsync(
             Uri uri,
             IDictionary<string, string> headers,
             StringContent body,
             ILoggerAdapter logger,
             CancellationToken cancellationToken = default)
         {
-            return await SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, retry: true, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, retry: true, doNotThrow: true, cancellationToken: cancellationToken);
         }
 
         protected override HttpClient GetHttpClient()
