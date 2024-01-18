@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
             if (!e.Cancel)
             {
-                string urlDecode = CoreHelpers.UrlDecode(e.Url.ToString());
+                string urlDecode = CoreHelpers.UrlDecode(e.Url);
                 RequestContext.Logger.VerbosePii(
                     () => string.Format(CultureInfo.InvariantCulture, "[Legacy WebView] Navigating to '{0}'.", urlDecode),
                     () => string.Empty);
