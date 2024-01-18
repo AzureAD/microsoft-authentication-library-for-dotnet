@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex) when (ex is not MsalClientException)
             {
-                throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader + $"Response Headers: {httpResponseHeaders.ToString()} See inner exception for details.", ex);
+                throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, $"{MsalErrorMessage.UnableToParseAuthenticationHeader}Response Headers: {httpResponseHeaders} See inner exception for details.", ex);
             }
         }
     }

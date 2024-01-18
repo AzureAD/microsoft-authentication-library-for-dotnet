@@ -272,7 +272,7 @@ namespace Microsoft.Identity.Client
                         throw;
                     }
 
-                    throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader + $"Response Headers: {httpResponseHeaders.ToString()} See inner exception for details.", ex);
+                    throw new MsalClientException(MsalError.UnableToParseAuthenticationHeader, MsalErrorMessage.UnableToParseAuthenticationHeader + $"Response Headers: {httpResponseHeaders} See inner exception for details.", ex);
                 }
             }
 
