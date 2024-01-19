@@ -25,16 +25,15 @@ namespace WebApi.Misc
             }
             else if (thevalue == null)
                 return 0;
-            else if (thevalue is string)
-                returnval = Encoding.Default.GetByteCount(thevalue as string);
+            else if (thevalue is string stringValue)
+                returnval = Encoding.Default.GetByteCount(stringValue);
             else if (type.IsArray && type.GetElementType().IsValueType)
             {
                 returnval = ((Array)thevalue).GetLength(0) * System.Runtime.InteropServices.Marshal.SizeOf(type.GetElementType());
             }
-            else if (thevalue is Stream)
+            else if (thevalue is Stream streamValue)
             {
-                Stream thestram = thevalue as Stream;
-                returnval = (int)thestram.Length;
+                returnval = (int)streamValue.Length;
             }
             else if (type.IsSerializable)
             {
