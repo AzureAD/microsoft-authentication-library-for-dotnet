@@ -13,9 +13,9 @@ namespace Microsoft.Identity.Client.Extensibility
     public class AppTokenProviderResult
     {
         /// <summary>
-        /// The actual token, ussually in JWT format
-        /// </summary>        
-        public string AccessToken { get; set; }       
+        /// The actual token, usually in JWT format
+        /// </summary>
+        public string AccessToken { get; set; }
 
         /// <summary>
         /// Expiration of token 

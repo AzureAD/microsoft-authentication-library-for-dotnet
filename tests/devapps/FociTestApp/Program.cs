@@ -188,8 +188,8 @@ namespace FociTestApp
         private static Task<AuthenticationResult> StartSilentAuthAsync(IPublicClientApplication pca)
         {
             // get all serialized accounts
-            // get all RTs WHERE rt.client == app.client OR app is part of family or unkown
-            // JOIN acounts and RTs ON homeAccountID
+            // get all RTs WHERE rt.client == app.client OR app is part of family or unknown
+            // JOIN accounts and RTs ON homeAccountID
 
             // A -> interactive auth -> account, RT1
             // B -> GetAccounts -> NULL

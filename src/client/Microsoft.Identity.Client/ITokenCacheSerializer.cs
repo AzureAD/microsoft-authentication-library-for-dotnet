@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Serializes a part of the token cache - the refresh tokens - to the ADAL.NET 3.x cache format. 
         /// If you need to maintain SSO between an application using ADAL 3.x and this application using MSAL 3.x or later,
-        /// use <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> in adition to <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
+        /// use <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> in addition to <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
         ///
         /// See https://aka.ms/adal-to-msal-net/cache for details on how to use this advanced API correctly.
         /// </summary>
