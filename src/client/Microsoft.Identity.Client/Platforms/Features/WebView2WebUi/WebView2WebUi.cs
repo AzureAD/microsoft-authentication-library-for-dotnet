@@ -85,9 +85,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                             Exception innerException = ae.InnerExceptions[0];
 
                             // In MTA case, AggregateException is two layer deep, so checking the InnerException for that.
-                            if (innerException is AggregateException)
+                            if (innerException is AggregateException exception)
                             {
-                                innerException = ((AggregateException)innerException).InnerExceptions[0];
+                                innerException = exception.InnerExceptions[0];
                             }
 
                             throw innerException;
