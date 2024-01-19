@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client
         /// <returns>true if object are equal.</returns>
         public override bool Equals(object obj)
         {
-            return obj is Prompt && this == (Prompt)obj;
+            return obj is Prompt prompt && this == prompt;
         }
 
         /// <summary>

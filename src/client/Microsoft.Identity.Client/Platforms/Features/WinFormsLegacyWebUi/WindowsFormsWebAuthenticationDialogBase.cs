@@ -60,13 +60,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             {
                 this.ownerWindow = null;
             }
-            else if (ownerWindow is IWin32Window)
+            else if (ownerWindow is IWin32Window window)
             {
-                this.ownerWindow = (IWin32Window)ownerWindow;
+                this.ownerWindow = window;
             }
-            else if (ownerWindow is IntPtr)
+            else if (ownerWindow is IntPtr ptr)
             {
-                this.ownerWindow = new Win32Window((IntPtr)ownerWindow);
+                this.ownerWindow = new Win32Window(ptr);
             }
             else
             {
