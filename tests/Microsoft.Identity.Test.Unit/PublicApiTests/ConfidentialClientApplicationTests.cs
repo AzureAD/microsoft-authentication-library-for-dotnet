@@ -656,8 +656,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var jsonToken = handler.ReadJwtToken(actualAssertion);
                 var claims = jsonToken.Claims;
                 //checked if additional claim is in signed assertion
-                var audclaim = TestConstants.s_clientAssertionClaims.Where(x => x.Key == "aud").FirstOrDefault();
-                var validClaim = claims.Where(x => x.Type == audclaim.Key && x.Value == audclaim.Value).FirstOrDefault();
+                var audclaim = TestConstants.s_clientAssertionClaims.FirstOrDefault(x => x.Key == "aud");
+                var validClaim = claims.FirstOrDefault(x => x.Type == audclaim.Key && x.Value == audclaim.Value);
                 Assert.IsNotNull(validClaim);
             }
         }
