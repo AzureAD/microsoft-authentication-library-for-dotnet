@@ -12,8 +12,8 @@ namespace Microsoft.Identity.Test.Performance.Helpers
         public static X509Certificate2 CreateCertificate(string x509DistinguishedName, object key, HashAlgorithmName hashAlgorithmName, X509Certificate2 issuer)
         {
             CertificateRequest certificateRequest = null;
-            if (key is RSA)
-                certificateRequest = new CertificateRequest(x509DistinguishedName, key as RSA, hashAlgorithmName, RSASignaturePadding.Pkcs1);
+            if (key is RSA rsa1)
+                certificateRequest = new CertificateRequest(x509DistinguishedName, rsa1, hashAlgorithmName, RSASignaturePadding.Pkcs1);
 
             if (issuer == null)
             {
@@ -24,8 +24,8 @@ namespace Microsoft.Identity.Test.Performance.Helpers
             {
                 var certificate = certificateRequest.Create(issuer, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(10), Guid.NewGuid().ToByteArray());
 
-                if (key is RSA)
-                    return certificate.CopyWithPrivateKey(key as RSA);
+                if (key is RSA rsa)
+                    return certificate.CopyWithPrivateKey(rsa);
 
                 return certificate;
             }
