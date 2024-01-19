@@ -32,7 +32,7 @@ namespace ManualTestApp
             cacheHelper.RegisterCache(pca.UserTokenCache);
 
             // Advanced scenario for when 2 or more apps share the same cache             
-            cacheHelper.CacheChanged += (s, e) => // this event is very expensive perf wise
+            cacheHelper.CacheChanged += (_, e) => // this event is very expensive perf wise
             {
                 Console.BackgroundColor = ConsoleColor.DarkCyan;
                 Console.WriteLine($"Cache Changed, Added: {e.AccountsAdded.Count()} Removed: {e.AccountsRemoved.Count()}");

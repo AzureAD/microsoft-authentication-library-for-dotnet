@@ -387,13 +387,13 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             SemaphoreSlim semaphore2 = new SemaphoreSlim(0);
             bool lockCreated = false, lockDeleted = false;
 
-            fileSystemWatcher.Created += (s, e) =>
+            fileSystemWatcher.Created += (_, _) =>
             {
                 semaphore1.Release();
                 lockCreated = true;
             };
 
-            fileSystemWatcher.Deleted += (s, e) =>
+            fileSystemWatcher.Deleted += (_, _) =>
             {
                 semaphore2.Release();
                 lockDeleted = true;
@@ -445,7 +445,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             int cacheChangedEventFired = 0;
 
             // event is fired asynchronously, test has to wait for it for a while
-            helper.CacheChanged += (sender, e) =>
+            helper.CacheChanged += (_, _) =>
             {
                 semaphore.Release();
                 cacheChangedEventFired++;
@@ -512,7 +512,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             int cacheChangedEventFired = 0;
 
             // event is fired asynchronously, test has to wait for it for a while
-            helper.CacheChanged += (sender, e) =>
+            helper.CacheChanged += (_, _) =>
             {
                 semaphore.Release();
                 cacheChangedEventFired++;
@@ -540,7 +540,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
 
             // event is fired asynchronously, test has to wait for it for a while
             AssertException.Throws<InvalidOperationException>(
-                () => helper.CacheChanged += (sender, e) =>
+                () => helper.CacheChanged += (_, _) =>
             {
                 Assert.Fail("Should not fire");
             });

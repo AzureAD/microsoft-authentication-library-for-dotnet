@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     return IsMsalRetryableException(ex, out retryAfter);
                 }).RetryAsync(5,
-                    async (exception, retryCount, context) =>
+                    async (exception, retryCount, _) =>
                     {
                         IsMsalRetryableException(exception, out retryAfter);
                         switch (retryCount)

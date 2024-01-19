@@ -433,12 +433,12 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             string[] actualFailedApiIds = lastRequestParts[2]
                 .Split(',')
-                .Where((item, index) => index % 2 == 0)
+                .Where((_, index) => index % 2 == 0)
                 .Where(it => !string.IsNullOrEmpty(it))
                 .ToArray();
             string[] correlationIds = lastRequestParts[2]
                 .Split(',')
-                .Where((item, index) => index % 2 != 0)
+                .Where((_, index) => index % 2 != 0)
                 .Where(it => !string.IsNullOrEmpty(it))
                 .ToArray();
 
@@ -449,12 +449,12 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             string[] regions = lastRequestParts[4]
                 .Split(',')
-                .Where((item, index) => index % 2 == 0)
+                .Where((_, index) => index % 2 == 0)
                 .Where(it => !string.IsNullOrEmpty(it))
                 .ToArray();
             string[] regionSources = lastRequestParts[4]
                 .Split(',')
-                .Where((item, index) => index % 2 != 0)
+                .Where((_, index) => index % 2 != 0)
                 .Where(it => !string.IsNullOrEmpty(it))
                 .ToArray();
 

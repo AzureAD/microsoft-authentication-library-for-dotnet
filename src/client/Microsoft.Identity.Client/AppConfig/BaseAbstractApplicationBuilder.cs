@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Client
             bool withDefaultPlatformLoggingEnabled = false)
         {
             WithLogging(
-                (level, message, pii) => { Debug.WriteLine($"{level}: {message}"); },
+                (level, message, _) => { Debug.WriteLine($"{level}: {message}"); },
                 logLevel,
                 enablePiiLogging,
                 withDefaultPlatformLoggingEnabled);
