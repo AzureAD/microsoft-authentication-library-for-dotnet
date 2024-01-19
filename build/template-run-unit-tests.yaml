@@ -8,7 +8,7 @@ steps:
 
 - task: VSTest@2
   displayName: 'Run unit tests (.NET FX)'
-  condition: and(succeeded(), eq(variables['PipelineType'], ''))
+  condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Unit\bin\**\net4*\Microsoft.Identity.Test.Unit.dll'
