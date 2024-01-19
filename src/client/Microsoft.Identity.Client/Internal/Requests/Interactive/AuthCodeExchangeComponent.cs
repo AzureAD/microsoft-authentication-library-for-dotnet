@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public Task<MsalTokenResponse> FetchTokensAsync(CancellationToken cancellationToken)
         {
             AddCcsHeadersToTokenClient();
-            return _tokenClient.SendTokenRequestAsync(GetBodyParameters());
+            return _tokenClient.SendTokenRequestAsync(GetBodyParameters(), cancellationToken: cancellationToken);
         }
 
         private Dictionary<string, string> GetBodyParameters()
