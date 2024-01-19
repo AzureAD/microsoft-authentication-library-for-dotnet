@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client
             SecureString password);
 
         /// <summary>
-        /// Acquries a token without user interaction using username and password authentication.
+        /// Acquires a token without user interaction using username and password authentication.
         /// This method does not look in the token cache, but stores the result in it. Before calling this method, use other methods 
         /// such as <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/> to check the token cache.
         /// </summary>

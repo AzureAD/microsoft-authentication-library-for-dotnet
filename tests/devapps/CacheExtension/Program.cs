@@ -361,7 +361,7 @@ namespace ManualTestApp
 
                 storageProperties =
                     new StorageCreationPropertiesBuilder(
-                        Config.CacheFileName + ".plaintext", // do not use the same file name so as not to overwrite the encypted version
+                        Config.CacheFileName + ".plaintext", // do not use the same file name so as not to overwrite the encrypted version
                         Config.CacheDir)
                     .WithUnprotectedFile()
                     .Build();
