@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Extensions.Msal
 {
@@ -244,10 +245,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         /// <returns>A new instance of <see cref="MsalCacheHelper"/>.</returns>
         public static async Task<MsalCacheHelper> CreateAsync(StorageCreationProperties storageCreationProperties, TraceSource logger = null)
         {
-            if (storageCreationProperties is null)
-            {
-                throw new ArgumentNullException(nameof(storageCreationProperties));
-            }
+            Guard.AgainstNull(storageCreationProperties);
 
             // We want CrossPlatLock around this operation so that we don't have a race against first read of the file and creating the watcher
             using (CreateCrossPlatLock(storageCreationProperties))
@@ -305,10 +303,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         /// <remarks>Call <see cref="UnregisterCache(ITokenCache)"/> to have the given token cache stop syncronizing.</remarks>
         public void RegisterCache(ITokenCache tokenCache)
         {
-            if (tokenCache == null)
-            {
-                throw new ArgumentNullException(nameof(tokenCache));
-            }
+            Guard.AgainstNull(tokenCache);
 
             _logger.LogInformation($"Registering token cache with on disk storage");
 
@@ -324,10 +319,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         /// </summary>
         public void UnregisterCache(ITokenCache tokenCache)
         {
-            if (tokenCache == null)
-            {
-                throw new ArgumentNullException(nameof(tokenCache));
-            }
+            Guard.AgainstNull(tokenCache);
 
             tokenCache.SetBeforeAccess(null);
             tokenCache.SetAfterAccess(null);

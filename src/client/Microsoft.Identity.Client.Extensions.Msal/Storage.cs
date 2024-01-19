@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Extensions;
 
 namespace Microsoft.Identity.Client.Extensions.Msal
@@ -149,10 +150,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         /// <param name="data">Cache data</param>
         public void WriteData(byte[] data)
         {
-            if (data == null)
-            {
-                throw new ArgumentNullException(nameof(data));
-            }
+            Guard.AgainstNull(data);
 
             try
             {

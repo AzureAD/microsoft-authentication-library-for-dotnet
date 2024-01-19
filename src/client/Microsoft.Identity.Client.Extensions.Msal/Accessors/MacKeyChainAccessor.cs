@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Text;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Extensions.Msal
 {
@@ -21,25 +22,10 @@ namespace Microsoft.Identity.Client.Extensions.Msal
 
         public MacKeychainAccessor(string cacheFilePath, string keyChainServiceName, string keyChainAccountName, TraceSourceLogger logger)
         {
-            if (string.IsNullOrWhiteSpace(cacheFilePath))
-            {
-                throw new ArgumentNullException(nameof(cacheFilePath));
-            }
-
-            if (string.IsNullOrWhiteSpace(keyChainServiceName))
-            {
-                throw new ArgumentNullException(nameof(keyChainServiceName));
-            }
-
-            if (string.IsNullOrWhiteSpace(keyChainAccountName))
-            {
-                throw new ArgumentNullException(nameof(keyChainAccountName));
-            }
-
-            _cacheFilePath = cacheFilePath;
-            _service = keyChainServiceName;
-            _account = keyChainAccountName;
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _cacheFilePath = Guard.AgainstNullOrWhitespace(cacheFilePath);
+            _service = Guard.AgainstNullOrWhitespace(keyChainServiceName);
+            _account = Guard.AgainstNullOrWhitespace(keyChainAccountName);
+            _logger = Guard.AgainstNull(logger);
 
             _keyChain = new MacOSKeychain();
         }

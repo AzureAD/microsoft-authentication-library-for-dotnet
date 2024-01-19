@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
             IAccountPickerFactory accountPickerFactory = null,
             IMsaPassthroughHandler msaPassthroughHandler = null)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = Guard.AgainstNull(logger);
             _synchronizationContext = uiParent?.SynchronizationContext;
 
             _wamProxy = wamProxy ?? new WamProxy(_logger, _synchronizationContext);

@@ -3,6 +3,7 @@
 
 using System;
 using System.Security.Cryptography;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Extensions.Msal
 {
@@ -14,13 +15,8 @@ namespace Microsoft.Identity.Client.Extensions.Msal
 
         public DpApiEncryptedFileAccessor(string cacheFilePath, TraceSourceLogger logger)
         {
-            if (string.IsNullOrEmpty(cacheFilePath))
-            {
-                throw new ArgumentNullException(nameof(cacheFilePath));
-            }
-
-            _cacheFilePath = cacheFilePath;
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _cacheFilePath = Guard.AgainstNullOrEmpty(cacheFilePath);
+            _logger = Guard.AgainstNull(logger);
             _unencryptedFileAccessor = new FileAccessor(_cacheFilePath, false, _logger);
         }
 

@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             ApplicationConfiguration appConfig,
             ILoggerAdapter logger)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = Guard.AgainstNull(logger);
 
             if (_logger.PiiLoggingEnabled)
             {

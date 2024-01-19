@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Security.AccessControl;
 using System.Text;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Extensions.Msal
 {
@@ -20,7 +21,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         {
             _cacheFilePath = cacheFilePath;
             _setOwnerOnlyPermission = setOwnerOnlyPermissions;
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = Guard.AgainstNull(logger);
         }
 
         public void Clear()

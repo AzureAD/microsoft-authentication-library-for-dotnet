@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
@@ -38,9 +39,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
          Uri endUri)
         {
             _embeddedWebViewOptions = embeddedWebViewOptions ?? EmbeddedWebViewOptions.GetDefaultOptions();
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _startUri = startUri ?? throw new ArgumentNullException(nameof(startUri));
-            _endUri = endUri ?? throw new ArgumentNullException(nameof(endUri));
+            _logger = Guard.AgainstNull(logger);
+            _startUri = Guard.AgainstNull(startUri);
+            _endUri = Guard.AgainstNull(endUri);
 
             if (ownerWindow == null)
             {

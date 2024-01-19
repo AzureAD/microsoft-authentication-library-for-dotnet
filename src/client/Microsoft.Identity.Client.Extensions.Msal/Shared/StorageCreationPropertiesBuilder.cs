@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Extensions.Msal
 {
@@ -154,12 +155,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
             KeyValuePair<string, string> attribute1,
             KeyValuePair<string, string> attribute2)
         {
-            if (string.IsNullOrEmpty(schemaName))
-            {
-                throw new ArgumentNullException(nameof(schemaName));
-            }        
-
-            _keyringSchemaName = schemaName;
+            _keyringSchemaName = Guard.AgainstNullOrEmpty(schemaName);
             _keyringCollection = collection;
             _keyringSecretLabel = secretLabel;
             _keyringAttribute1 = attribute1;

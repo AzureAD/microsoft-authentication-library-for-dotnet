@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Shared.DefaultOSBrowser;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 {
@@ -46,7 +47,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             SystemWebViewOptions webViewOptions,
             /* for test */ IUriInterceptor uriInterceptor = null)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = Guard.AgainstNull(logger);
             _webViewOptions = webViewOptions;
             _platformProxy = proxy ?? throw new ArgumentNullException(nameof(proxy));
 

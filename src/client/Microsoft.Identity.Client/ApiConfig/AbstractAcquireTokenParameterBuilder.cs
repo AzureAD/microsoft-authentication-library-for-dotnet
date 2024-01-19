@@ -107,10 +107,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("This API has been deprecated. You can override the tenant ID in the request using WithTenantId. See https://aka.ms/msal-net-authority-override ")]
         public T WithAuthority(string authorityUri, bool validateAuthority = true)
         {
-            if (string.IsNullOrWhiteSpace(authorityUri))
-            {
-                throw new ArgumentNullException(nameof(authorityUri));
-            }
+            Guard.AgainstNullOrWhitespace(authorityUri);
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAuthorityUri(authorityUri, validateAuthority);
             return this as T;
         }
@@ -132,10 +129,7 @@ namespace Microsoft.Identity.Client
             Guid tenantId,
             bool validateAuthority = true)
         {
-            if (string.IsNullOrWhiteSpace(cloudInstanceUri))
-            {
-                throw new ArgumentNullException(nameof(cloudInstanceUri));
-            }
+            Guard.AgainstNullOrWhitespace(cloudInstanceUri);
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenantId, validateAuthority);
             return this as T;
         }
@@ -164,10 +158,7 @@ namespace Microsoft.Identity.Client
             string tenant,
             bool validateAuthority = true)
         {
-            if (string.IsNullOrWhiteSpace(cloudInstanceUri))
-            {
-                throw new ArgumentNullException(nameof(cloudInstanceUri));
-            }
+            Guard.AgainstNullOrWhitespace(cloudInstanceUri);
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenant, validateAuthority);
             return this as T;
         }
@@ -273,10 +264,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public T WithTenantId(string tenantId)
         {
-            if (string.IsNullOrEmpty(tenantId))
-            {
-                throw new ArgumentNullException(nameof(tenantId));
-            }
+            Guard.AgainstNullOrEmpty(tenantId);
 
             Authority newAuthority = AuthorityInfo.AuthorityInfoHelper.CreateAuthorityWithTenant(
                 ServiceBundle.Config.Authority, 
@@ -303,10 +291,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public T WithTenantIdFromAuthority(Uri authorityUri)
         {
-            if (authorityUri == null)
-            {
-                throw new ArgumentNullException(nameof(authorityUri));
-            }
+            Guard.AgainstNull(authorityUri);
 
             var authorityInfo = AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), false);
             var authority = Authority.CreateAuthority(authorityInfo);

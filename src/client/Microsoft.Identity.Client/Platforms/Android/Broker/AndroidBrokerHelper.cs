@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         public AndroidBrokerHelper(Context androidContext, ILoggerAdapter logger)
         {
             _androidContext = androidContext ?? throw new ArgumentNullException(nameof(androidContext));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = Guard.AgainstNull(logger);
 
             _logger.Verbose(()=>"[Android broker] Getting the Android context for broker request. ");
             AndroidAccountManager = AccountManager.Get(_androidContext);

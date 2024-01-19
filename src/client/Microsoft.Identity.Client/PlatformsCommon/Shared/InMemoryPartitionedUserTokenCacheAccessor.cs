@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public InMemoryPartitionedUserTokenCacheAccessor(ILoggerAdapter logger, CacheOptions tokenCacheAccessorOptions)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = Guard.AgainstNull(logger);
             _tokenCacheAccessorOptions = tokenCacheAccessorOptions ?? new CacheOptions();
 
             if (_tokenCacheAccessorOptions.UseSharedCache)

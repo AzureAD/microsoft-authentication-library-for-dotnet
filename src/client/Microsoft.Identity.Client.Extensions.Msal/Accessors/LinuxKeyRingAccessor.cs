@@ -3,6 +3,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Extensions;
 
 namespace Microsoft.Identity.Client.Extensions.Msal
@@ -32,40 +33,15 @@ namespace Microsoft.Identity.Client.Extensions.Msal
             string attributeValue2,
             TraceSourceLogger logger)
         {
-            if (string.IsNullOrWhiteSpace(cacheFilePath))
-            {
-                throw new ArgumentNullException(nameof(cacheFilePath));
-            }
-
-            if (string.IsNullOrWhiteSpace(attributeKey1))
-            {
-                throw new ArgumentNullException(nameof(attributeKey1));
-            }
-
-            if (string.IsNullOrWhiteSpace(attributeValue1))
-            {
-                throw new ArgumentNullException(nameof(attributeValue1));
-            }
-
-            if (string.IsNullOrWhiteSpace(attributeKey2))
-            {
-                throw new ArgumentNullException(nameof(attributeKey2));
-            }
-
-            if (string.IsNullOrWhiteSpace(attributeValue2))
-            {
-                throw new ArgumentNullException(nameof(attributeValue2));
-            }
-
-            _cacheFilePath = cacheFilePath;
+            _cacheFilePath = Guard.AgainstNullOrWhitespace(cacheFilePath);
             _keyringCollection = keyringCollection;
             _keyringSchemaName = keyringSchemaName;
             _keyringSecretLabel = keyringSecretLabel;
-            _attributeKey1 = attributeKey1;
-            _attributeValue1 = attributeValue1;
-            _attributeKey2 = attributeKey2;
-            _attributeValue2 = attributeValue2;
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _attributeKey1 = Guard.AgainstNullOrWhitespace(attributeKey1);
+            _attributeValue1 =Guard.AgainstNullOrWhitespace(attributeValue1);
+            _attributeKey2 = Guard.AgainstNullOrWhitespace(attributeKey2);
+            _attributeValue2 = Guard.AgainstNullOrWhitespace(attributeValue2);
+            _logger = Guard.AgainstNull(logger);
         }
 
         public ICacheAccessor CreateForPersistenceValidation()
