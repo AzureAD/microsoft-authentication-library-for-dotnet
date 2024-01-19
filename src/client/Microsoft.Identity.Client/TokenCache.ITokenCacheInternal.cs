@@ -1372,7 +1372,7 @@ namespace Microsoft.Identity.Client
 
             RemoveIdTokens(partitionKey, logger, filterByClientId);
 
-            RemoveAccounts(account, logger, filterByClientId);
+            RemoveAccounts(account);
         }
 
         private int RemoveRefreshTokens(List<MsalRefreshTokenCacheItem> refreshTokens, ILoggerAdapter logger, out bool filterByClientId)
@@ -1433,7 +1433,7 @@ namespace Microsoft.Identity.Client
             return idTokens.Count;
         }
 
-        private void RemoveAccounts(IAccount account, ILoggerAdapter logger, bool filterByClientId)
+        private void RemoveAccounts(IAccount account)
         {
             if (account != null)
             {
