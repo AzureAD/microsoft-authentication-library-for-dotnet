@@ -322,13 +322,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private static void AssertCancellationToken(TokenCacheAccessRecorder cacheAccessRecorder, CancellationTokenSource cancellationTokenSource, bool write = false)
         {
             Assert.AreEqual(cancellationTokenSource.Token, cacheAccessRecorder.LastAfterAccessNotificationArgs.CancellationToken);
-            Assert.IsFalse(default(CancellationToken) == cacheAccessRecorder.LastAfterAccessNotificationArgs.CancellationToken);
+            Assert.IsFalse(default == cacheAccessRecorder.LastAfterAccessNotificationArgs.CancellationToken);
             Assert.AreEqual(cancellationTokenSource.Token, cacheAccessRecorder.LastBeforeAccessNotificationArgs.CancellationToken);
-            Assert.IsFalse(default(CancellationToken) == cacheAccessRecorder.LastBeforeAccessNotificationArgs.CancellationToken);
+            Assert.IsFalse(default == cacheAccessRecorder.LastBeforeAccessNotificationArgs.CancellationToken);
             if (write)
             {
                 Assert.AreEqual(cancellationTokenSource.Token, cacheAccessRecorder.LastBeforeWriteNotificationArgs.CancellationToken);
-                Assert.IsFalse(default(CancellationToken) == cacheAccessRecorder.LastBeforeWriteNotificationArgs.CancellationToken);
+                Assert.IsFalse(default == cacheAccessRecorder.LastBeforeWriteNotificationArgs.CancellationToken);
             }
         }
 

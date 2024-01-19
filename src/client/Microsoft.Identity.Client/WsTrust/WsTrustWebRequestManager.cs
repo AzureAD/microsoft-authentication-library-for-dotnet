@@ -76,47 +76,12 @@ namespace Microsoft.Identity.Client.WsTrust
                     httpResponse);
             }
 
-            mexDoc = new MexDocument(httpResponse.Body);
-
-            requestContext.Logger.InfoPii(
-                () => $"MEX document fetched and parsed from '{federationMetadataUrl}'",
-                () => "Fetched and parsed MEX");
-
-            return mexDoc;
-        }
-
-        /// <inheritdoc/>
-        public async Task<WsTrustResponse> GetWsTrustResponseAsync(
-            WsTrustEndpoint wsTrustEndpoint,
-            string wsTrustRequest,
-            RequestContext requestContext)
-        {
-            var headers = new Dictionary<string, string>
-            {
-                { "SOAPAction", (wsTrustEndpoint.Version == WsTrustVersion.WsTrust2005) ? XmlNamespace.Issue2005.ToString() : XmlNamespace.Issue.ToString() }
-            };
-
-            var body = new StringContent(
-                wsTrustRequest,
-                Encoding.UTF8, "application/soap+xml");
-
-            HttpResponse resp = await _httpManager.SendRequestAsync(
-                    wsTrustEndpoint.Uri,
-                    headers,
-                    body: body,
-                    HttpMethod.Post,
-                    logger: requestContext.Logger,
-                    doNotThrow: true,
-                    retry: true,
-                    mtlsCertificate: null,
-                    requestContext.UserCancellationToken).ConfigureAwait(false);
-
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 string errorMessage = null;
                 try
                 {
-                    errorMessage = WsTrustResponse.ReadErrorResponse(XDocument.Parse(resp.Body, LoadOptions.None), requestContext);
+                    errorMessage = WsTrustResponse.ReadErrorResponse(XDocument.Parse(resp.Body, LoadOptions.None));
                 }
                 catch (System.Xml.XmlException)
                 {
