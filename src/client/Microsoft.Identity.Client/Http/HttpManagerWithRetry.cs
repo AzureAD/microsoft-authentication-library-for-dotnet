@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Client.Http
             if (isRetriable && retry)
             {
                 logger.Info("Retrying one more time..");
-                await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken).ConfigureAwait(false);
                 return await SendRequestAsync(
                     endpoint,
                     headers,
