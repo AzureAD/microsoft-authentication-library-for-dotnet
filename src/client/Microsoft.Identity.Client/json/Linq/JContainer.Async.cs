@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Json.Linq
                         }
                         else
                         {
-                            await reader.SkipAsync(cancellationToken).ConfigureAwait(false);
+                            await reader.SkipAsync().ConfigureAwait(false);
                         }
                         break;
                     default:
