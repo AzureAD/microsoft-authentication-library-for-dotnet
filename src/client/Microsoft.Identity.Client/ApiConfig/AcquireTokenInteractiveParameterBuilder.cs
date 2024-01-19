@@ -14,6 +14,7 @@ using System.Net.Http;
 using System.ComponentModel;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Microsoft.Identity.Client.Utils;
 
 #if iOS
 using UIKit;
@@ -250,11 +251,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(Activity activity)
         {
-            if (activity == null)
-            {
-                throw new ArgumentNullException(nameof(activity));
-            }
-
+            Guard.AgainstNull(activity);
             return WithParentObject((object)activity);
         }
 #endif
@@ -268,11 +265,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(UIViewController viewController)
         {
-            if (viewController == null)
-            {
-                throw new ArgumentNullException(nameof(viewController));
-            }
-
+            Guard.AgainstNull(viewController);
             return WithParentObject((object)viewController);
         }
 #endif
@@ -287,11 +280,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(IWin32Window window)
         {
-            if (window == null)
-            {
-                throw new ArgumentNullException(nameof(window));
-            }
-
+            Guard.AgainstNull(window);
             return WithParentObject((object)window);
         }
 #endif
@@ -323,11 +312,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         public AcquireTokenInteractiveParameterBuilder WithParentActivityOrWindow(NSWindow nsWindow)
         {
-            if (nsWindow == null)
-            {
-                throw new ArgumentNullException(nameof(nsWindow));
-            }
-
+            Guard.AgainstNull(nsWindow);
             return WithParentObject((object)nsWindow);
         }
 #endif
@@ -374,11 +359,7 @@ namespace Microsoft.Identity.Client
 
             PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri);
 
-            if (string.IsNullOrEmpty(nonce))
-            {
-                throw new ArgumentNullException(nameof(nonce));
-            }
-
+            Guard.AgainstNullOrEmpty(nonce);
             popConfig.Nonce = nonce;
             popConfig.HttpMethod = httpMethod;
 

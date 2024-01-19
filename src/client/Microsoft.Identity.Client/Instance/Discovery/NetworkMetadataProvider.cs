@@ -27,8 +27,8 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             INetworkCacheMetadataProvider networkCacheMetadataProvider, 
             Uri userProvidedInstanceDiscoveryUri = null)
         {
-            _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
-            _networkCacheMetadataProvider = networkCacheMetadataProvider ?? throw new ArgumentNullException(nameof(networkCacheMetadataProvider));
+            _httpManager = Guard.AgainstNull(httpManager);
+            _networkCacheMetadataProvider = Guard.AgainstNull(networkCacheMetadataProvider);
             _userProvidedInstanceDiscoveryUri = userProvidedInstanceDiscoveryUri; // can be null
         }
 

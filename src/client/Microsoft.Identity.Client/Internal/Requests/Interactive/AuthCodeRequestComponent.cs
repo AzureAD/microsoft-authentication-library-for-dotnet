@@ -30,8 +30,8 @@ namespace Microsoft.Identity.Client.Internal
             AuthenticationRequestParameters requestParams,
             AcquireTokenInteractiveParameters interactiveParameters)
         {
-            _requestParams = requestParams ?? throw new ArgumentNullException(nameof(requestParams));
-            _interactiveParameters = interactiveParameters ?? throw new ArgumentNullException(nameof(requestParams));
+            _requestParams = Guard.AgainstNull(requestParams);
+            _interactiveParameters = Guard.AgainstNull(interactiveParameters);
             _serviceBundle = _requestParams.RequestContext.ServiceBundle;
         }
 

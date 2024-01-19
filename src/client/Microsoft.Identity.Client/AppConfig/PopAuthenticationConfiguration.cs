@@ -4,6 +4,7 @@
 using System;
 using System.Net.Http;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -40,8 +41,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </remarks>
         public PoPAuthenticationConfiguration(HttpRequestMessage httpRequestMessage)
         {
-            if (httpRequestMessage == null)
-                throw new ArgumentNullException(nameof(httpRequestMessage));
+            Guard.AgainstNull(httpRequestMessage);
 
             HttpMethod = httpRequestMessage.Method;
             HttpHost = httpRequestMessage.RequestUri.Authority; // this includes the optional port
@@ -56,8 +56,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </remarks>
         public PoPAuthenticationConfiguration(Uri requestUri)
         {
-            if (requestUri == null)
-                throw new ArgumentNullException(nameof(requestUri));
+            Guard.AgainstNull(requestUri);
 
             HttpHost = requestUri.Authority;
             HttpPath = requestUri.AbsolutePath;

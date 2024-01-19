@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public TokenClient(AuthenticationRequestParameters requestParams)
         {
-            _requestParams = requestParams ?? throw new ArgumentNullException(nameof(requestParams));
+            _requestParams = Guard.AgainstNull(requestParams);
             _serviceBundle = _requestParams.RequestContext.ServiceBundle;
 
             _oAuth2Client = new OAuth2Client(

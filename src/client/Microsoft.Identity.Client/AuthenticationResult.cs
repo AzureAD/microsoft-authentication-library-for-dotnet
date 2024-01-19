@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -136,8 +137,7 @@ namespace Microsoft.Identity.Client
             string spaAuthCode, 
             IReadOnlyDictionary<string, string> additionalResponseParameters)
         {
-            _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
-            
+            _authenticationScheme = Guard.AgainstNull(authenticationScheme);
             string homeAccountId =
                 msalAccessTokenCacheItem?.HomeAccountId ??
                 msalIdTokenCacheItem?.HomeAccountId;

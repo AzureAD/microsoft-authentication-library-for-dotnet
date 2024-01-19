@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Region;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Instance.Discovery
 {
@@ -59,7 +60,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
             INetworkMetadataProvider networkMetadataProvider = null,
             IRegionDiscoveryProvider regionDiscoveryProvider = null)
         {
-            _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
+            _httpManager = Guard.AgainstNull(httpManager);
 
             _userMetadataProvider = userMetadataProvider;
             _knownMetadataProvider = knownMetadataProvider ?? new KnownMetadataProvider();

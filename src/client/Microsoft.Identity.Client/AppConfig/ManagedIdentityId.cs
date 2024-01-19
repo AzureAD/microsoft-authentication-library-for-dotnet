@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -74,11 +75,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <exception cref="ArgumentNullException"></exception>
         public static ManagedIdentityId WithUserAssignedClientId(string clientId)
         {
-            if (string.IsNullOrEmpty(clientId))
-            {
-                throw new ArgumentNullException(clientId);
-            }
-
+            Guard.AgainstNullOrEmpty(clientId);
             return new ManagedIdentityId(ManagedIdentityIdType.ClientId) { UserAssignedId = clientId };
         }
 
@@ -90,11 +87,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <exception cref="ArgumentNullException"></exception>
         public static ManagedIdentityId WithUserAssignedResourceId(string resourceId)
         {
-            if (string.IsNullOrEmpty(resourceId))
-            {
-                throw new ArgumentNullException(resourceId);
-            }
-
+            Guard.AgainstNullOrEmpty(resourceId);
             return new ManagedIdentityId(ManagedIdentityIdType.ResourceId) { UserAssignedId = resourceId };
         }
 
@@ -106,11 +99,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <exception cref="ArgumentNullException"></exception>
         public static ManagedIdentityId WithUserAssignedObjectId(string objectId)
         {
-            if (string.IsNullOrEmpty(objectId))
-            {
-                throw new ArgumentNullException(objectId);
-            }
-
+            Guard.AgainstNullOrEmpty(objectId);
             return new ManagedIdentityId(ManagedIdentityIdType.ObjectId) { UserAssignedId = objectId };
         }
     }

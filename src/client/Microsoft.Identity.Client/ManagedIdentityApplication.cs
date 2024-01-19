@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -45,10 +46,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc/>
         public AcquireTokenForManagedIdentityParameterBuilder AcquireTokenForManagedIdentity(string resource)
         {
-            if (string.IsNullOrEmpty(resource))
-            {
-                throw new ArgumentNullException(nameof(resource));
-            }
+            Guard.AgainstNullOrEmpty(resource);
 
             return AcquireTokenForManagedIdentityParameterBuilder.Create(
                 ClientExecutorFactory.CreateManagedIdentityExecutor(this),

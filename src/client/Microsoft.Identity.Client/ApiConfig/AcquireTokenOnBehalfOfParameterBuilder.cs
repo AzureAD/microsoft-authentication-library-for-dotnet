@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         private AcquireTokenOnBehalfOfParameterBuilder WithCacheKey(string cacheKey)
         {
-            Parameters.LongRunningOboCacheKey = cacheKey ?? throw new ArgumentNullException(nameof(cacheKey));
+            Parameters.LongRunningOboCacheKey = Guard.AgainstNull(cacheKey);
             return this;
         }
 

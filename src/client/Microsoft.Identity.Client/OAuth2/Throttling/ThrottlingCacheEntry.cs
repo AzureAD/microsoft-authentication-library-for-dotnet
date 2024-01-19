@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.OAuth2.Throttling
 {
@@ -11,14 +12,14 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             MsalServiceException exception, 
             TimeSpan lifetime)
         {
-            Exception = exception ?? throw new ArgumentNullException(nameof(exception));
+            Exception = Guard.AgainstNull(exception);
             CreationTime = DateTimeOffset.UtcNow;
             ExpirationTime = CreationTime.Add(lifetime);
         }
 
         public ThrottlingCacheEntry(MsalServiceException exception, DateTimeOffset creationTime, DateTimeOffset expirationTime)
         {
-            Exception = exception ?? throw new ArgumentNullException(nameof(exception));
+            Exception = Guard.AgainstNull(exception);
             CreationTime = creationTime;
             ExpirationTime = expirationTime;
         }

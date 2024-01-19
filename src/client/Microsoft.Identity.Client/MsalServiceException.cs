@@ -45,10 +45,7 @@ namespace Microsoft.Identity.Client
         public MsalServiceException(string errorCode, string errorMessage)
             : base(errorCode, errorMessage)
         {
-            if (string.IsNullOrWhiteSpace(errorMessage))
-            {
-                throw new ArgumentNullException(nameof(errorMessage));
-            }
+            Guard.AgainstNullOrWhitespace(errorMessage);
             UpdateIsRetryable();
         }
 

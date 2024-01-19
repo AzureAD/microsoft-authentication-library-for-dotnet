@@ -15,10 +15,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public static async Task OpenWithEdgeBrowserAsync(Uri uri)
         {
-            if (uri == null)
-            {
-                throw new ArgumentNullException(nameof(uri));
-            }
+            Guard.AgainstNull(uri);
             string url = uri.AbsoluteUri;
 
             url = url.Replace("&", "^&");
@@ -32,10 +29,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public static async Task OpenWithChromeEdgeBrowserAsync(Uri uri)
         {
-            if (uri == null)
-            {
-                throw new ArgumentNullException(nameof(uri));
-            }
+            Guard.AgainstNull(uri);
 
             string url = uri.AbsoluteUri;
 

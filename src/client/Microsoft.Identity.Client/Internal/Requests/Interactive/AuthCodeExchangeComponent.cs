@@ -28,10 +28,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string pkceCodeVerifier,
             string clientInfo)
         {
-            _requestParams = requestParams ?? throw new ArgumentNullException(nameof(requestParams));
-            _interactiveParameters = interactiveParameters ?? throw new ArgumentNullException(nameof(interactiveParameters));
-            _authorizationCode = authorizationCode ?? throw new ArgumentNullException(nameof(authorizationCode));
-            _pkceCodeVerifier = pkceCodeVerifier ?? throw new ArgumentNullException(nameof(pkceCodeVerifier));
+            _requestParams = Guard.AgainstNull(requestParams);
+            _interactiveParameters = Guard.AgainstNull(interactiveParameters);
+            _authorizationCode = Guard.AgainstNull(authorizationCode);
+            _pkceCodeVerifier = Guard.AgainstNull(pkceCodeVerifier);
             _clientInfo = clientInfo;
 
             _tokenClient = new TokenClient(requestParams);

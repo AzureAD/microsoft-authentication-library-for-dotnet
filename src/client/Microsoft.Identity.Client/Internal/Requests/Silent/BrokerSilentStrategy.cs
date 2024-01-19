@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests.Silent;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -33,7 +34,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _silentParameters = silentParameters;
             _serviceBundle = serviceBundle;
             _silentRequest = request;
-            Broker = broker ?? throw new ArgumentNullException(nameof(broker));
+            Broker = Guard.AgainstNull(broker);
             _logger = authenticationRequestParameters.RequestContext.Logger;
         }
 

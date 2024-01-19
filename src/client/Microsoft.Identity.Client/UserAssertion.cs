@@ -5,6 +5,7 @@ using System;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -22,7 +23,7 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS1587 // XML comment is not placed on a valid language element
     {
         /// <summary>
-        /// Constructor from a JWT assertion. For other assertion types (SAML), use the other constructor <see cref="UserAssertion.UserAssertion(string, string)"/>
+        /// Constructor from a JWT assertion. For other assertion types (SAML), use the other constructor <see cref="UserAssertion"/>
         /// </summary>
         /// <param name="jwtBearerToken">JWT bearer token used to access the Web application itself</param>
         public UserAssertion(string jwtBearerToken) : this(jwtBearerToken, OAuth2GrantType.JwtBearer)
@@ -42,15 +43,8 @@ namespace Microsoft.Identity.Client
         /// </list></param>
         public UserAssertion(string assertion, string assertionType)
         {
-            if (string.IsNullOrWhiteSpace(assertion))
-            {
-                throw new ArgumentNullException(nameof(assertion));
-            }
-
-            if (string.IsNullOrWhiteSpace(assertionType))
-            {
-                throw new ArgumentNullException(nameof(assertionType));
-            }
+            Guard.AgainstNullOrWhitespace(assertion);
+            Guard.AgainstNullOrWhitespace(assertionType);
 
             ICryptographyManager crypto = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
 

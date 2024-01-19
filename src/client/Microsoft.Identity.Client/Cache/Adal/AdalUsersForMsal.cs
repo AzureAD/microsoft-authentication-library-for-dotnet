@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.Cache
 
         public AdalUsersForMsal(IEnumerable<AdalUserForMsalEntry> userEntries)
         {
-            _userEntries = userEntries ?? throw new ArgumentNullException(nameof(userEntries));
+            _userEntries = Guard.AgainstNull(userEntries);
         }
 
         public IDictionary<string, AdalUserInfo> GetUsersWithClientInfo(IEnumerable<string> envAliases)

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
 {
@@ -15,18 +16,8 @@ namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
 
         public SSHCertAuthenticationScheme(string keyId, string jwk)
         {
-            if (string.IsNullOrEmpty(keyId))
-            {
-                throw new ArgumentNullException(nameof(keyId));
-            }
-
-            if (string.IsNullOrEmpty(jwk))
-            {
-                throw new ArgumentNullException(nameof(jwk));
-            }
-
-            KeyId = keyId;
-            _jwk = jwk;
+            KeyId = Guard.AgainstNullOrEmpty(keyId);
+            _jwk = Guard.AgainstNullOrEmpty(jwk);
         }
 
         public TokenType TelemetryTokenType => TokenType.SshCert;

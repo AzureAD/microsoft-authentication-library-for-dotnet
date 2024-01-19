@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Http
 {
@@ -29,8 +30,7 @@ namespace Microsoft.Identity.Client.Http
 
         public HttpManager(IMsalHttpClientFactory httpClientFactory)
         {
-            _httpClientFactory = httpClientFactory ?? 
-                throw new ArgumentNullException(nameof(httpClientFactory));
+            _httpClientFactory = Guard.AgainstNull(httpClientFactory);
         }
 
         protected virtual HttpClient GetHttpClient()

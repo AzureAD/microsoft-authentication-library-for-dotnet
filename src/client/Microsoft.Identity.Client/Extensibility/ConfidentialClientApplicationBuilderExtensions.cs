@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
@@ -26,7 +27,7 @@ namespace Microsoft.Identity.Client.Extensibility
             this ConfidentialClientApplicationBuilder builder,
             Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> appTokenProvider)
         {
-            builder.Config.AppTokenProvider = appTokenProvider ?? throw new ArgumentNullException(nameof(appTokenProvider));
+            builder.Config.AppTokenProvider = Guard.AgainstNull(appTokenProvider);
             return builder;
         }
     }

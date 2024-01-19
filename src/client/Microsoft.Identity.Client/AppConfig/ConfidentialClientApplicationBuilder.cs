@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
@@ -113,10 +114,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys. </remarks>
         public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate, bool sendX5C)
         {
-            if (certificate == null)
-            {
-                throw new ArgumentNullException(nameof(certificate));
-            }
+            Guard.AgainstNull(certificate);
 
             if (!certificate.HasPrivateKey)
             {
@@ -157,10 +155,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>You should use certificates with a private key size of at least 2048 bytes. Future versions of this library might reject certificates with smaller keys.</remarks>
         public ConfidentialClientApplicationBuilder WithClientClaims(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool mergeWithDefaultClaims = true, bool sendX5C = false)
         {
-            if (certificate == null)
-            {
-                throw new ArgumentNullException(nameof(certificate));
-            }
+            Guard.AgainstNull(certificate);
 
             if (claimsToSign == null || !claimsToSign.Any())
             {
@@ -179,11 +174,8 @@ namespace Microsoft.Identity.Client
         /// of the application (the client) requesting the tokens</param>
         /// <returns></returns>
         public ConfidentialClientApplicationBuilder WithClientSecret(string clientSecret)
-        {            
-            if (string.IsNullOrWhiteSpace(clientSecret))
-            {
-                throw new ArgumentNullException(nameof(clientSecret));
-            }
+        {
+            Guard.AgainstNullOrWhitespace(clientSecret);
 
             Config.ClientCredential = new SecretStringClientCredential(clientSecret);
             return this;
@@ -199,12 +191,9 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public ConfidentialClientApplicationBuilder WithClientAssertion(string signedClientAssertion)
         {
-            if (string.IsNullOrWhiteSpace(signedClientAssertion))
-            {
-                throw new ArgumentNullException(nameof(signedClientAssertion));
-            }
+            Guard.AgainstNullOrWhitespace(signedClientAssertion);
 
-            Config.ClientCredential = new SignedAssertionClientCredential(signedClientAssertion);            
+            Config.ClientCredential = new SignedAssertionClientCredential(signedClientAssertion);
             return this;
         }
 
@@ -218,10 +207,7 @@ namespace Microsoft.Identity.Client
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<string> clientAssertionDelegate)
         {
-            if (clientAssertionDelegate == null)
-            {
-                throw new ArgumentNullException(nameof(clientAssertionDelegate));
-            }
+            Guard.AgainstNull(clientAssertionDelegate);
 
             Func<CancellationToken, Task<string>> clientAssertionAsyncDelegate = (_) =>
             {
@@ -242,10 +228,7 @@ namespace Microsoft.Identity.Client
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<CancellationToken, Task<string>> clientAssertionAsyncDelegate)
         {
-            if (clientAssertionAsyncDelegate == null)
-            {
-                throw new ArgumentNullException(nameof(clientAssertionAsyncDelegate));
-            }
+            Guard.AgainstNull(clientAssertionAsyncDelegate);
 
             Config.ClientCredential = new SignedAssertionDelegateClientCredential(clientAssertionAsyncDelegate);
             return this;
@@ -260,10 +243,7 @@ namespace Microsoft.Identity.Client
         /// <remarks> Callers can use this mechanism to cache their assertions </remarks>
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<AssertionRequestOptions, Task<string>> clientAssertionAsyncDelegate)
         {
-            if (clientAssertionAsyncDelegate == null)
-            {
-                throw new ArgumentNullException(nameof(clientAssertionAsyncDelegate));
-            }
+            Guard.AgainstNull(clientAssertionAsyncDelegate);
 
             Config.ClientCredential = new SignedAssertionDelegateClientCredential(clientAssertionAsyncDelegate);
             return this;
@@ -289,12 +269,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public ConfidentialClientApplicationBuilder WithAzureRegion(string azureRegion = ConfidentialClientApplication.AttemptRegionDiscovery)
         {
-            if (string.IsNullOrEmpty(azureRegion))
-            {
-                throw new ArgumentNullException(nameof(azureRegion));
-            }
-
-            Config.AzureRegion = azureRegion;
+            Config.AzureRegion = Guard.AgainstNullOrEmpty(azureRegion);
 
             return this;
         }
@@ -341,19 +316,13 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public ConfidentialClientApplicationBuilder WithTelemetryClient(params ITelemetryClient[] telemetryClients)
         {
-            if (telemetryClients == null)
-            {
-                throw new ArgumentNullException(nameof(telemetryClients));
-            }
+            Guard.AgainstNull(telemetryClients);
 
             if (telemetryClients.Length > 0)
             {
                 foreach (var telemetryClient in telemetryClients)
                 {
-                    if (telemetryClient == null)
-                    {
-                        throw new ArgumentNullException(nameof(telemetryClient));
-                    }
+                    Guard.AgainstNull(telemetryClient);
 
                     telemetryClient.Initialize();
                 }

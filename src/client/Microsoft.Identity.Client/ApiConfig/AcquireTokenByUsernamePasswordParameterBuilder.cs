@@ -14,6 +14,7 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -91,10 +92,7 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.BrokerDoesNotSupportPop, MsalErrorMessage.BrokerDoesNotSupportPop);
             }
 
-            if (string.IsNullOrEmpty(nonce))
-            {
-                throw new ArgumentNullException(nameof(nonce));
-            }
+            Guard.AgainstNullOrEmpty(nonce);
 
             PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri);
 

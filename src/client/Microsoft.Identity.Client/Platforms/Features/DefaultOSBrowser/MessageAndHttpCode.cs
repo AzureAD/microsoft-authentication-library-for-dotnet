@@ -3,6 +3,7 @@
 
 using System;
 using System.Net;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
 {
@@ -11,7 +12,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
         public MessageAndHttpCode(HttpStatusCode httpCode, string message)
         {
             HttpCode = httpCode;
-            Message = message ?? throw new ArgumentNullException(nameof(message));
+            Message = Guard.AgainstNull(message);
         }
 
         public HttpStatusCode HttpCode { get;  }

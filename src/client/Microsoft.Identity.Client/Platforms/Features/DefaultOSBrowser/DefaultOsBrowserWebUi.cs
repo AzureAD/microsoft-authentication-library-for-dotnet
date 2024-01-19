@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
         {
             _logger = Guard.AgainstNull(logger);
             _webViewOptions = webViewOptions;
-            _platformProxy = proxy ?? throw new ArgumentNullException(nameof(proxy));
+            _platformProxy = Guard.AgainstNull(proxy);
 
             _uriInterceptor = uriInterceptor ?? new HttpListenerInterceptor(_logger);
         }

@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.OAuth2
         public OAuth2Client(ILoggerAdapter logger, IHttpManager httpManager)
         {
             _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
-            _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
+            _httpManager = Guard.AgainstNull(httpManager);
         }
 
         public void AddQueryParameter(string key, string value)

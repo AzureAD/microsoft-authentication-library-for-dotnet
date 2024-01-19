@@ -307,10 +307,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods.</returns>                
         public T WithAdfsAuthority(string authorityUri, bool validateAuthority = true)
         {
-            if (string.IsNullOrWhiteSpace(authorityUri))
-            {
-                throw new ArgumentNullException(nameof(authorityUri));
-            }
+            Guard.AgainstNullOrWhitespace(authorityUri);
             CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.Adfs, authorityUri, validateAuthority);
             return this as T;
         }
@@ -324,17 +321,14 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods.</returns>
         public T WithB2CAuthority(string authorityUri)
         {
-            if (string.IsNullOrWhiteSpace(authorityUri))
-            {
-                throw new ArgumentNullException(nameof(authorityUri));
-            }
+            Guard.AgainstNullOrWhitespace(authorityUri);
             CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
             return this as T;
         }
 
         internal /* for testing */ T WithAuthenticationScheme(IAuthenticationScheme scheme)
         {
-            CommonParameters.AuthenticationScheme = scheme ?? throw new ArgumentNullException(nameof(scheme));
+            CommonParameters.AuthenticationScheme = Guard.AgainstNull(scheme);
             return this as T;
         }
     }

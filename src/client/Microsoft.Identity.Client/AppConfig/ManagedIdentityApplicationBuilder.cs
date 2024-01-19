@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
 
         private static ApplicationConfiguration BuildConfiguration(ManagedIdentityId managedIdentityId)
         {
-            _ = managedIdentityId ?? throw new ArgumentNullException(nameof(managedIdentityId));
+            _ = Guard.AgainstNull(managedIdentityId);
             var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient);
 
             config.ManagedIdentityId = managedIdentityId;
@@ -75,19 +75,13 @@ namespace Microsoft.Identity.Client
         {
             ValidateUseOfExperimentalFeature("ITelemetryClient");
 
-            if (telemetryClients == null)
-            {
-                throw new ArgumentNullException(nameof(telemetryClients));
-            }
+            Guard.AgainstNull(telemetryClients);
 
             if (telemetryClients.Length > 0)
             {
                 foreach (var telemetryClient in telemetryClients)
                 {
-                    if (telemetryClient == null)
-                    {
-                        throw new ArgumentNullException(nameof(telemetryClient));
-                    }
+                    Guard.AgainstNull(telemetryClient);
 
                     telemetryClient.Initialize();
                 }

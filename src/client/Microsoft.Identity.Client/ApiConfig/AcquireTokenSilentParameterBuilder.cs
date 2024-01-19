@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -167,7 +168,7 @@ namespace Microsoft.Identity.Client
             ClientApplicationBase.GuardMobileFrameworks();
             ValidateUseOfExperimentalFeature();
 
-            CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
+            CommonParameters.PopAuthenticationConfiguration = Guard.AgainstNull(popAuthenticationConfiguration);
 
             CommonParameters.AuthenticationScheme = new PopAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
 
@@ -217,10 +218,7 @@ namespace Microsoft.Identity.Client
 
             if (ServiceBundle.Config.IsBrokerEnabled)
             {
-                if (string.IsNullOrEmpty(nonce))
-                {
-                    throw new ArgumentNullException(nameof(nonce));
-                }
+                Guard.AgainstNullOrEmpty(nonce);
 
                 if (!broker.IsPopSupported)
                 {
@@ -228,8 +226,8 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri ?? throw new ArgumentNullException(nameof(requestUri)));
-            popConfig.HttpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
+            PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(Guard.AgainstNull(requestUri));
+            popConfig.HttpMethod = Guard.AgainstNull(httpMethod);
             popConfig.Nonce = nonce;
 
             IAuthenticationScheme authenticationScheme;

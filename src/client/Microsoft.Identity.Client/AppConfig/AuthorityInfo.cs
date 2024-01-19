@@ -363,10 +363,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         private static Uri ValidateAndCreateAuthorityUri(string authority, AuthorityType? authorityType = null)
         {
-            if (string.IsNullOrWhiteSpace(authority))
-            {
-                throw new ArgumentNullException(nameof(authority));
-            }
+            Guard.AgainstNullOrWhitespace(authority);
 
             if (!Uri.IsWellFormedUriString(authority, UriKind.Absolute))
             {

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
@@ -24,11 +25,7 @@ namespace Microsoft.Identity.Client.Extensibility
             string keyId,
             string expectedTokenTypeFromAad = "Bearer")
         {
-            if (string.IsNullOrEmpty(keyId))
-            {
-                throw new ArgumentNullException(nameof(keyId));
-            }
-
+            Guard.AgainstNullOrEmpty(keyId);
             builder.ValidateUseOfExperimentalFeature();
             builder.CommonParameters.AuthenticationScheme = new ExternalBoundTokenScheme(keyId, expectedTokenTypeFromAad);
 

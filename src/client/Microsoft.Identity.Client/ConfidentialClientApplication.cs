@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Client
@@ -87,10 +88,7 @@ namespace Microsoft.Identity.Client
             string userToken,
             ref string longRunningProcessSessionKey)
         {
-            if (string.IsNullOrEmpty(userToken))
-            {
-                throw new ArgumentNullException(nameof(userToken));
-            }
+            Guard.AgainstNullOrEmpty(userToken);
 
             UserAssertion userAssertion = new UserAssertion(userToken);
 
@@ -111,10 +109,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             string longRunningProcessSessionKey)
         {
-            if (string.IsNullOrEmpty(longRunningProcessSessionKey))
-            {
-                throw new ArgumentNullException(nameof(longRunningProcessSessionKey));
-            }
+            Guard.AgainstNullOrEmpty(longRunningProcessSessionKey);
 
             return AcquireTokenOnBehalfOfParameterBuilder.Create(
                 ClientExecutorFactory.CreateConfidentialClientExecutor(this),
@@ -132,10 +127,7 @@ namespace Microsoft.Identity.Client
         /// <exception cref="ArgumentNullException"><paramref name="longRunningProcessSessionKey"/> is not set.</exception>
         public async Task<bool> StopLongRunningProcessInWebApiAsync(string longRunningProcessSessionKey, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrEmpty(longRunningProcessSessionKey))
-            {
-                throw new ArgumentNullException(nameof(longRunningProcessSessionKey));
-            }
+            Guard.AgainstNullOrEmpty(longRunningProcessSessionKey);
 
             Guid correlationId = Guid.NewGuid();
             RequestContext requestContext = base.CreateRequestContext(correlationId, cancellationToken);

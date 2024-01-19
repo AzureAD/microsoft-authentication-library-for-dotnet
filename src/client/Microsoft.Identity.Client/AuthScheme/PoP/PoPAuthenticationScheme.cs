@@ -36,12 +36,9 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// </remarks>
         public PopAuthenticationScheme(PoPAuthenticationConfiguration popAuthenticationConfiguration, IServiceBundle serviceBundle)
         {
-            if (serviceBundle == null)
-            {
-                throw new ArgumentNullException(nameof(serviceBundle));
-            }
+            Guard.AgainstNull(serviceBundle);
 
-            _popAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
+            _popAuthenticationConfiguration = Guard.AgainstNull(popAuthenticationConfiguration);
 
             _popCryptoProvider = _popAuthenticationConfiguration.PopCryptoProvider ?? serviceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
 

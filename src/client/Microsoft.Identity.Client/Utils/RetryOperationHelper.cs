@@ -28,10 +28,7 @@ namespace Microsoft.Identity.Client.Utils
         /// <returns>The <see cref="Task"/> producing the result.</returns>
         public static async Task<T> ExecuteWithRetryAsync<T>(Func<Task<T>> func, int maxAttempts, TimeSpan? retryInterval = null, Action<int, Exception> onAttemptFailed = null, ISet<Type> allowedExceptions = null)
         {
-            if (func == null)
-            {
-                throw new ArgumentNullException(nameof(func));
-            }
+            Guard.AgainstNull(func);
 
             if (maxAttempts < 1)
             {
@@ -81,10 +78,7 @@ namespace Microsoft.Identity.Client.Utils
         /// <returns>The <see cref="Task"/> producing the result.</returns>
         public static async Task ExecuteWithRetryAsync(Func<Task> func, int maxAttempts, TimeSpan? retryInterval = null, Action<int, Exception> onAttemptFailed = null, ISet<Type> allowedExceptions = null)
         {
-            if (func == null)
-            {
-                throw new ArgumentNullException(nameof(func));
-            }
+            Guard.AgainstNull(func);
 
             Func<Task<bool>> wrapper = async () =>
             {

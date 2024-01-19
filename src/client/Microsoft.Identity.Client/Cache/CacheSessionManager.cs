@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -29,8 +30,8 @@ namespace Microsoft.Identity.Client.Cache
             ITokenCacheInternal tokenCacheInternal,
             AuthenticationRequestParameters requestParams)
         {
-            TokenCacheInternal = tokenCacheInternal ?? throw new ArgumentNullException(nameof(tokenCacheInternal));
-            _requestParams = requestParams ?? throw new ArgumentNullException(nameof(requestParams));
+            TokenCacheInternal = Guard.AgainstNull(tokenCacheInternal);
+            _requestParams = Guard.AgainstNull(requestParams);
             RequestContext = _requestParams.RequestContext;
         }
 
@@ -66,10 +67,7 @@ namespace Microsoft.Identity.Client.Cache
         {
             await RefreshCacheForReadOperationsAsync().ConfigureAwait(false);
 
-            if (string.IsNullOrEmpty(familyId))
-            {
-                throw new ArgumentNullException(nameof(familyId));
-            }
+            Guard.AgainstNullOrEmpty(familyId);
 
             return await TokenCacheInternal.FindRefreshTokenAsync(_requestParams, familyId).ConfigureAwait(false);
         }

@@ -94,10 +94,7 @@ namespace Microsoft.Identity.Client
         public MsalException(string errorCode, string errorMessage)
             : base(errorMessage)
         {
-            if (string.IsNullOrWhiteSpace(Message))
-            {
-                throw new ArgumentNullException(nameof(errorMessage));
-            }
+            Guard.AgainstNullOrWhitespace(errorMessage);
             ErrorCode = errorCode;
         }
 
@@ -118,11 +115,7 @@ namespace Microsoft.Identity.Client
         public MsalException(string errorCode, string errorMessage, Exception innerException)
             : base(errorMessage, innerException)
         {
-            if (string.IsNullOrWhiteSpace(Message))
-            {
-                throw new ArgumentNullException(nameof(errorMessage));
-            }
-
+            Guard.AgainstNullOrWhitespace(errorMessage);
             ErrorCode = errorCode;
         }
 

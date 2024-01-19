@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -9,10 +10,10 @@ namespace Microsoft.Identity.Client.Cache
     {
         public AdalUserForMsalEntry(string clientId, string authority, string clientInfo, AdalUserInfo userInfo)
         {
-            ClientId = clientId ?? throw new ArgumentNullException(nameof(clientId));
+            ClientId = Guard.AgainstNull(clientId);
             Authority = authority;
             ClientInfo = clientInfo;
-            UserInfo = userInfo ?? throw new ArgumentNullException(nameof(userInfo));
+            UserInfo = Guard.AgainstNull(userInfo);
         }
 
         public string ClientId { get; }

@@ -59,14 +59,8 @@ namespace Microsoft.Identity.Client
         /// <exception cref="ArgumentNullException">Thrown if the <c>resourceUri</c> or <c>httpClient</c> is null.</exception>
         public static async Task<AuthenticationHeaderParser> ParseAuthenticationHeadersAsync(string resourceUri, HttpClient httpClient, CancellationToken cancellationToken = default)
         {
-            if (httpClient is null)
-            {
-                throw new ArgumentNullException(nameof(httpClient));
-            }
-            if (string.IsNullOrWhiteSpace(resourceUri))
-            {
-                throw new ArgumentNullException(nameof(resourceUri));
-            }
+            Guard.AgainstNull(httpClient);
+            Guard.AgainstNullOrWhitespace(resourceUri);
 
             // call this endpoint and see what the header says and return that
             HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(resourceUri, cancellationToken).ConfigureAwait(false);

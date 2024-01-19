@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal.Logger;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -22,10 +23,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public static async Task OpenWithEdgeBrowserAsync(Uri uri)
         {
-            if (uri == null)
-            {
-                throw new ArgumentNullException(nameof(uri));
-            }
+            Guard.AgainstNull(uri);
 
             string url = uri.AbsoluteUri;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -38,7 +36,6 @@ namespace Microsoft.Identity.Client
                 var proxy = PlatformProxyFactory.CreatePlatformProxy(new NullLogger());
                 await proxy.StartDefaultOsBrowserAsync(url, true).ConfigureAwait(false);
             }
-
         }
 
         /// <summary>
@@ -47,10 +44,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public static async Task OpenWithChromeEdgeBrowserAsync(Uri uri)
         {
-            if (uri == null)
-            {
-                throw new ArgumentNullException(nameof(uri));
-            }
+            Guard.AgainstNull(uri);
 
             string url = uri.AbsoluteUri;
 

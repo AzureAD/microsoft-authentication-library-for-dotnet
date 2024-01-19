@@ -309,10 +309,7 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc/>
         public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint)
         {
-            if (string.IsNullOrWhiteSpace(loginHint))
-            {
-                throw new ArgumentNullException(nameof(loginHint));
-            }
+            Guard.AgainstNullOrWhitespace(loginHint);
 
             return AcquireTokenSilentParameterBuilder.Create(
                 ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),

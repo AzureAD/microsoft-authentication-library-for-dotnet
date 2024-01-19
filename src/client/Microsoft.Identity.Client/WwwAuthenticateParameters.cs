@@ -148,15 +148,8 @@ namespace Microsoft.Identity.Client
         [Obsolete("This api is now obsolete and has been replaced with replaced with CreateFromAuthenticationResponseAsync(HttpResponseHeaders, string)")]
         public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(HttpClient httpClient, string resourceUri, CancellationToken cancellationToken = default)
         {
-            if (httpClient is null)
-            {
-                throw new ArgumentNullException(nameof(httpClient));
-            }
-            if (string.IsNullOrWhiteSpace(resourceUri))
-            {
-                throw new ArgumentNullException(nameof(resourceUri));
-            }
-
+            Guard.AgainstNull(httpClient);
+            Guard.AgainstNull(resourceUri);
             // call this endpoint and see what the header says and return that
             HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(resourceUri, cancellationToken).ConfigureAwait(false);
             var wwwAuthParam = CreateFromResponseHeaders(httpResponseMessage.Headers);
@@ -228,14 +221,8 @@ namespace Microsoft.Identity.Client
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
         public static async Task<WwwAuthenticateParameters> CreateFromAuthenticationResponseAsync(string resourceUri, string scheme, HttpClient httpClient, CancellationToken cancellationToken = default)
         {
-            if (httpClient is null)
-            {
-                throw new ArgumentNullException(nameof(httpClient));
-            }
-            if (string.IsNullOrWhiteSpace(resourceUri))
-            {
-                throw new ArgumentNullException(nameof(resourceUri));
-            }
+            Guard.AgainstNull(httpClient);
+            Guard.AgainstNullOrWhitespace(resourceUri);
 
             // call this endpoint and see what the header says and return that
             HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(resourceUri, cancellationToken).ConfigureAwait(false);
@@ -301,14 +288,8 @@ namespace Microsoft.Identity.Client
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
         public static async Task<IReadOnlyList<WwwAuthenticateParameters>> CreateFromAuthenticationResponseAsync(string resourceUri, HttpClient httpClient, CancellationToken cancellationToken = default)
         {
-            if (httpClient is null)
-            {
-                throw new ArgumentNullException(nameof(httpClient));
-            }
-            if (string.IsNullOrWhiteSpace(resourceUri))
-            {
-                throw new ArgumentNullException(nameof(resourceUri));
-            }
+            Guard.AgainstNull(httpClient);
+            Guard.AgainstNullOrWhitespace(resourceUri);
 
             // call this endpoint and see what the header says and return that
             HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(resourceUri, cancellationToken).ConfigureAwait(false);

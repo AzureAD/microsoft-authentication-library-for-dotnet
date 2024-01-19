@@ -48,10 +48,7 @@ namespace Microsoft.Identity.Client
         [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithInstanceDicoveryMetadata(string instanceDiscoveryJson)
         {
-            if (string.IsNullOrEmpty(instanceDiscoveryJson))
-            {
-                throw new ArgumentNullException(instanceDiscoveryJson);
-            }
+            Guard.AgainstNullOrEmpty(instanceDiscoveryJson);
 
             try
             {
@@ -85,10 +82,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public T WithInstanceDiscoveryMetadata(string instanceDiscoveryJson)
         {
-            if (string.IsNullOrEmpty(instanceDiscoveryJson))
-            {
-                throw new ArgumentNullException(instanceDiscoveryJson);
-            }
+            Guard.AgainstNullOrEmpty(instanceDiscoveryJson);
 
             try
             {
@@ -124,8 +118,7 @@ namespace Microsoft.Identity.Client
         [EditorBrowsable(EditorBrowsableState.Never)]
         public T WithInstanceDicoveryMetadata(Uri instanceDiscoveryUri)
         {
-            Config.CustomInstanceDiscoveryMetadataUri = instanceDiscoveryUri ??
-                throw new ArgumentNullException(nameof(instanceDiscoveryUri));
+            Config.CustomInstanceDiscoveryMetadataUri = Guard.AgainstNull(instanceDiscoveryUri);
 
             return this as T;
         }
@@ -147,8 +140,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public T WithInstanceDiscoveryMetadata(Uri instanceDiscoveryUri)
         {
-            Config.CustomInstanceDiscoveryMetadataUri = instanceDiscoveryUri ??
-                throw new ArgumentNullException(nameof(instanceDiscoveryUri));
+            Config.CustomInstanceDiscoveryMetadataUri = Guard.AgainstNull(instanceDiscoveryUri);
 
             return this as T;
         }
@@ -443,11 +435,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAuthority(Uri authorityUri, bool validateAuthority = true)
         {
-            if (authorityUri == null)
-            {
-                throw new ArgumentNullException(nameof(authorityUri));
-            }
-
+            Guard.AgainstNull(authorityUri);
             return WithAuthority(authorityUri.ToString(), validateAuthority);
         }
 
@@ -472,10 +460,7 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAuthority(string authorityUri, bool validateAuthority = true)
         {
-            if (string.IsNullOrWhiteSpace(authorityUri))
-            {
-                throw new ArgumentNullException(authorityUri);
-            }
+            Guard.AgainstNullOrWhitespace(authorityUri);
 
             Config.Authority = Authority.CreateAuthority(authorityUri, validateAuthority);
 
@@ -525,14 +510,8 @@ namespace Microsoft.Identity.Client
             string tenant,
             bool validateAuthority = true)
         {
-            if (string.IsNullOrWhiteSpace(cloudInstanceUri))
-            {
-                throw new ArgumentNullException(nameof(cloudInstanceUri));
-            }
-            if (string.IsNullOrWhiteSpace(tenant))
-            {
-                throw new ArgumentNullException(nameof(tenant));
-            }
+            Guard.AgainstNullOrWhitespace(cloudInstanceUri);
+            Guard.AgainstNullOrWhitespace(tenant);
 
             var authorityInfo = AuthorityInfo.FromAadAuthority(
                 cloudInstanceUri,
@@ -579,10 +558,7 @@ namespace Microsoft.Identity.Client
             string tenant,
             bool validateAuthority = true)
         {
-            if (string.IsNullOrWhiteSpace(tenant))
-            {
-                throw new ArgumentNullException(nameof(tenant));
-            }
+            Guard.AgainstNullOrWhitespace(tenant);
 
             Config.AzureCloudInstance = azureCloudInstance;
             Config.TenantId = tenant;

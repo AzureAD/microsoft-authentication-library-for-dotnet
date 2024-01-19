@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -21,10 +22,7 @@ namespace Microsoft.Identity.Client.Instance
     {
         protected Authority(AuthorityInfo authorityInfo)
         {
-            if (authorityInfo == null)
-            {
-                throw new ArgumentNullException(nameof(authorityInfo));
-            }
+            Guard.AgainstNull(authorityInfo);
 
             // Don't reuse the same authority info, instead copy it
             // to prevent objects updating each other's details

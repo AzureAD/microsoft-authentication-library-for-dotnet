@@ -40,16 +40,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters authenticationRequestParameters,
             IAcquireTokenParameters acquireTokenParameters)
         {
-            ServiceBundle = serviceBundle ??
-                throw new ArgumentNullException(nameof(serviceBundle));
+            ServiceBundle =Guard.AgainstNull(serviceBundle);
 
-            AuthenticationRequestParameters = authenticationRequestParameters ??
-                throw new ArgumentNullException(nameof(authenticationRequestParameters));
+            AuthenticationRequestParameters = Guard.AgainstNull(authenticationRequestParameters);
 
-            if (acquireTokenParameters == null)
-            {
-                throw new ArgumentNullException(nameof(acquireTokenParameters));
-            }
+            Guard.AgainstNull(acquireTokenParameters);
 
             ValidateScopeInput(authenticationRequestParameters.Scope);
             acquireTokenParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);

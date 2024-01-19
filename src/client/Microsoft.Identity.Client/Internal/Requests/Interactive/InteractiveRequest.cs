@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -48,8 +49,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 requestParams,
                 interactiveParameters)
         {
-            _requestParams = requestParams ?? throw new ArgumentNullException(nameof(requestParams));
-            _interactiveParameters = interactiveParameters ?? throw new ArgumentNullException(nameof(interactiveParameters));
+            _requestParams = Guard.AgainstNull(requestParams);
+            _interactiveParameters = Guard.AgainstNull(interactiveParameters);
             _authCodeRequestComponentOverride = authCodeRequestComponentOverride;
             _authCodeExchangeComponentOverride = authCodeExchangeComponentOverride;
             _brokerInteractiveComponent = brokerExchangeComponentOverride;

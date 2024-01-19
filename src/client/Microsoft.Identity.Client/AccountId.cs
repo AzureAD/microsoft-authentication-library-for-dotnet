@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -40,7 +41,7 @@ namespace Microsoft.Identity.Client
         /// <param name="tenantId">A string representation for a GUID which is the ID of the tenant where the account resides.</param>
         public AccountId(string identifier, string objectId, string tenantId)
         {
-            Identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
+            Identifier = Guard.AgainstNull(identifier);
             ObjectId = objectId;
             TenantId = tenantId;
 

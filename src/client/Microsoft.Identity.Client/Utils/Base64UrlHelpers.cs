@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Utils
         /// <exception cref="ArgumentOutOfRangeException">offset or length is negative OR offset plus length is greater than the length of inArray.</exception>
         private static string Encode(byte[] inArray, int offset, int length)
         {
-            _ = inArray ?? throw new ArgumentNullException(nameof(inArray));
+            _ = Guard.AgainstNull(inArray);
 
             if (length == 0)
                 return string.Empty;

@@ -4,6 +4,7 @@
 using System;
 using System.Runtime.InteropServices;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
 {
@@ -95,10 +96,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
         /// <param name="luid">The Logon Id of the user owning the ticket cache. The default of 0 represents the currently logged on user.</param>
         public unsafe void ImportCredential(byte[] ticketBytes, long luid = 0)
         {
-            if (ticketBytes is null)
-            {
-                throw new ArgumentNullException(nameof(ticketBytes));
-            }
+            Guard.AgainstNull(ticketBytes);
 
             var ticketRequest = new NativeMethods.KERB_SUBMIT_TKT_REQUEST
             {

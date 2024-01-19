@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using System.Runtime.CompilerServices;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Utils;
 
 #if iOS
 using UIKit;
@@ -278,11 +279,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         public PublicClientApplicationBuilder WithParentActivityOrWindow(Func<Activity> activityFunc)
         {
-            if (activityFunc == null)
-            {
-                throw new ArgumentNullException(nameof(activityFunc));
-            }
-
+            Guard.AgainstNull(activityFunc);
             return WithParentFunc(() => (object)activityFunc());
         }
 #endif
@@ -296,11 +293,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         public PublicClientApplicationBuilder WithParentActivityOrWindow(Func<UIViewController> viewControllerFunc)
         {
-            if (viewControllerFunc == null)
-            {
-                throw new ArgumentNullException(nameof(viewControllerFunc));
-            }
-
+            Guard.AgainstNull(viewControllerFunc);
             return WithParentFunc(() => (object)viewControllerFunc());
         }
 #endif
@@ -315,11 +308,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         public PublicClientApplicationBuilder WithParentActivityOrWindow(Func<IWin32Window> windowFunc)
         {
-            if (windowFunc == null)
-            {
-                throw new ArgumentNullException(nameof(windowFunc));
-            }
-
+            Guard.AgainstNull(windowFunc);
             return WithParentFunc(() => windowFunc());
         }
 #endif
@@ -334,11 +323,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         public PublicClientApplicationBuilder WithParentActivityOrWindow(Func<IntPtr> windowFunc)
         {
-            if (windowFunc == null)
-            {
-                throw new ArgumentNullException(nameof(windowFunc));
-            }
-
+            Guard.AgainstNull(windowFunc);
             return WithParentFunc(() => windowFunc());
         }
 #endif

@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Client.Utils
         public ConcurrentHashSet(IEnumerable<T> collection, IEqualityComparer<T> comparer)
             : this(comparer)
         {
-            if (collection == null) throw new ArgumentNullException(nameof(collection));
+            Guard.AgainstNull(collection);
 
             InitializeFromCollection(collection);
         }
@@ -203,7 +203,7 @@ namespace Microsoft.Identity.Client.Utils
         public ConcurrentHashSet(int concurrencyLevel, IEnumerable<T> collection, IEqualityComparer<T> comparer)
             : this(concurrencyLevel, DefaultCapacity, false, comparer)
         {
-            if (collection == null) throw new ArgumentNullException(nameof(collection));
+            Guard.AgainstNull(collection);
 
             InitializeFromCollection(collection);
         }
@@ -402,7 +402,7 @@ namespace Microsoft.Identity.Client.Utils
 
         void ICollection<T>.CopyTo(T[] array, int arrayIndex)
         {
-            if (array == null) throw new ArgumentNullException(nameof(array));
+            Guard.AgainstNull(array);
             if (arrayIndex < 0) throw new ArgumentOutOfRangeException(nameof(arrayIndex));
 
             var locksAcquired = 0;
