@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// </summary>
         internal MsalAccessTokenCacheItem WithExpiresOn(DateTimeOffset expiresOn)
         {
-            MsalAccessTokenCacheItem newAtItem = new MsalAccessTokenCacheItem(
+            var newAtItem = new MsalAccessTokenCacheItem(
                Environment,
                ClientId,
                ScopeString,

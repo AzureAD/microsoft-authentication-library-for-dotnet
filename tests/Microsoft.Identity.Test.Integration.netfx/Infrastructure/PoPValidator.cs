@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             string token, 
             string tokenType)
         {
-            Uri protectedUri = new Uri(requestUri);
+            var protectedUri = new Uri(requestUri);
 
             ClaimsPrincipal popClaims = IdToken.Parse(token).ClaimsPrincipal;
             string assertionWithoutShr = popClaims.FindFirst("at").Value;

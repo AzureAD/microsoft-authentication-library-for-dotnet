@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                 int statusCodeInt = (statusCode == null) ? 0 : ((int)statusCode);
 
 #pragma warning disable 618 // WebBrowserNavigateErrorEventArgs is marked obsolete
-                WebBrowserNavigateErrorEventArgs e = new WebBrowserNavigateErrorEventArgs(uriString, frameString,
+                var e = new WebBrowserNavigateErrorEventArgs(uriString, frameString,
                     statusCodeInt, pDisp);
 #pragma warning restore 618
                 parent.OnNavigateError(e);
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                 byte[] postDataBytes = (byte[])postData;
                 string headersString = (headers == null) ? string.Empty : ((string)headers);
 
-                WebBrowserBeforeNavigateEventArgs e = new WebBrowserBeforeNavigateEventArgs(urlString, postDataBytes,
+                var e = new WebBrowserBeforeNavigateEventArgs(urlString, postDataBytes,
                     headersString, flagsInt, targetFrameNameString, pDisp);
                 parent.OnBeforeNavigate(e);
                 cancel = e.Cancel;

@@ -325,7 +325,7 @@ namespace Microsoft.Identity.Client
         public static IReadOnlyList<WwwAuthenticateParameters> CreateFromAuthenticationHeaders(
             HttpResponseHeaders httpResponseHeaders)
         {
-            List<WwwAuthenticateParameters> parameterList = new List<WwwAuthenticateParameters>();
+            var parameterList = new List<WwwAuthenticateParameters>();
 
             foreach (AuthenticationHeaderValue wwwAuthenticateHeaderValue in httpResponseHeaders.WwwAuthenticate)
             {
@@ -409,7 +409,7 @@ namespace Microsoft.Identity.Client
 
         internal static WwwAuthenticateParameters CreateWwwAuthenticateParameters(IDictionary<string, string> values, string scheme)
         {
-            WwwAuthenticateParameters wwwAuthenticateParameters = new WwwAuthenticateParameters();
+            var wwwAuthenticateParameters = new WwwAuthenticateParameters();
 
             wwwAuthenticateParameters.AuthenticationScheme = scheme;
 

@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         protected override ManagedIdentityRequest CreateRequest(string resource)
         {
-            ManagedIdentityRequest request = new ManagedIdentityRequest(System.Net.Http.HttpMethod.Get, _endpoint);
+            var request = new ManagedIdentityRequest(System.Net.Http.HttpMethod.Get, _endpoint);
 
             request.Headers.Add("Metadata", "true");
             request.QueryParameters["api-version"] = ArcApiVersion;

@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// </summary>
         private string CreateJWS(string payload, string header)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.Append(Base64UrlHelpers.Encode(Encoding.UTF8.GetBytes(header)));
             sb.Append(".");
             sb.Append(Base64UrlHelpers.Encode(payload));

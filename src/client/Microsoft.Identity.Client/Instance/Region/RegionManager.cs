@@ -297,7 +297,7 @@ namespace Microsoft.Identity.Client.Region
 
         private async Task<string> GetImdsUriApiVersionAsync(ILoggerAdapter logger, Dictionary<string, string> headers, CancellationToken userCancellationToken)
         {
-            Uri imdsErrorUri = new Uri(ImdsEndpoint);
+            var imdsErrorUri = new Uri(ImdsEndpoint);
 
             HttpResponse response = await _httpManager.SendGetAsync(imdsErrorUri, headers, logger, retry: false, cancellationToken: GetCancellationToken(userCancellationToken)).ConfigureAwait(false);
 
@@ -325,7 +325,7 @@ namespace Microsoft.Identity.Client.Region
 
         private Uri BuildImdsUri(string apiVersion)
         {
-            UriBuilder uriBuilder = new UriBuilder(ImdsEndpoint);
+            var uriBuilder = new UriBuilder(ImdsEndpoint);
             uriBuilder.AppendQueryParameters($"api-version={apiVersion}");
             uriBuilder.AppendQueryParameters("format=text");
             return uriBuilder.Uri;
@@ -333,7 +333,7 @@ namespace Microsoft.Identity.Client.Region
 
         private CancellationToken GetCancellationToken(CancellationToken userCancellationToken)
         {
-            CancellationTokenSource tokenSource = new CancellationTokenSource(_imdsCallTimeoutMs);
+            var tokenSource = new CancellationTokenSource(_imdsCallTimeoutMs);
             CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(userCancellationToken, tokenSource.Token);
 
             return linkedTokenSource.Token;

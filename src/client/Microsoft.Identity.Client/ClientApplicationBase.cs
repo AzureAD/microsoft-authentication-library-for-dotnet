@@ -268,7 +268,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<IAccount> cacheAccounts,
             IEnumerable<IAccount> brokerAccounts)
         {
-            List<IAccount> allAccounts = new List<IAccount>(cacheAccounts);
+            var allAccounts = new List<IAccount>(cacheAccounts);
 
             foreach (IAccount account in brokerAccounts)
             {

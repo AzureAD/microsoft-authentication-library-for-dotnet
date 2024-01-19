@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal string ToJsonString()
         {
-            JObject root = new JObject();
+            var root = new JObject();
 
             // Access Tokens
             var accessTokensRoot = new JObject();

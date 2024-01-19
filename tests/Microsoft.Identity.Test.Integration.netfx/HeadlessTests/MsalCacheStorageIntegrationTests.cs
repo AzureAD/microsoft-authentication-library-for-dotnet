@@ -234,7 +234,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             if (SharedUtilities.IsWindowsPlatform())
             {
-                FileInfo fi = new FileInfo(filePath);
+                var fi = new FileInfo(filePath);
                 var acl = fi.GetAccessControl();
                 var accessRules = acl.GetAccessRules(true, true, typeof(System.Security.Principal.SecurityIdentifier));
 

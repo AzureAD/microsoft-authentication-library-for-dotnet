@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             string authority,
             ICryptographyManager crypto)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             if (bodyParams.TryGetValue(OAuth2Parameter.ClientId, out string clientId))
             {
                 sb.Append((clientId ?? "") + ThrottleCommon.KeyDelimiter);

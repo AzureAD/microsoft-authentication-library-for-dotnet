@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         protected override ManagedIdentityRequest CreateRequest(string resource)
         {
-            ManagedIdentityRequest request = new ManagedIdentityRequest(HttpMethod.Get, _endpoint);
+            var request = new ManagedIdentityRequest(HttpMethod.Get, _endpoint);
 
             request.Headers["secret"] = _identityHeaderValue;
 

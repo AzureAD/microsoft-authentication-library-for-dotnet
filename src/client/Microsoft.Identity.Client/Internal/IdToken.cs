@@ -346,7 +346,7 @@ namespace Microsoft.Identity.Client.Internal
                 string payload = Base64UrlHelpers.Decode(idTokenSegments[1]);
                 var idTokenClaims = JsonDocument.Parse(payload);
 
-                IdToken parsedIdToken = new IdToken();
+                var parsedIdToken = new IdToken();
 
                 List<Claim> claims = GetClaimsFromRawToken(idTokenClaims);
                 parsedIdToken.ClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
@@ -377,7 +377,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             var idTokenClaims = jsonDocument.RootElement;
 
-            List<Claim> claims = new List<Claim>();
+            var claims = new List<Claim>();
 
             string issuer = null;
             if (idTokenClaims.TryGetProperty(IdTokenClaim.Issuer, out JsonElement issuerObj))

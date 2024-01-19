@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
-            ManagedIdentityClient managedIdentityClient = 
+            var managedIdentityClient = 
                 new ManagedIdentityClient(AuthenticationRequestParameters.RequestContext);
 
             ManagedIdentityResponse managedIdentityResponse =
@@ -177,16 +177,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private AuthenticationResult CreateAuthenticationResultFromCache(MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
-            AuthenticationResult authResult = new AuthenticationResult(
-                                                            cachedAccessTokenItem,
-                                                            null,
-                                                            AuthenticationRequestParameters.AuthenticationScheme,
-                                                            AuthenticationRequestParameters.RequestContext.CorrelationId,
-                                                            TokenSource.Cache,
-                                                            AuthenticationRequestParameters.RequestContext.ApiEvent,
-                                                            account: null,
-                                                            spaAuthCode: null,
-                                                            additionalResponseParameters: null);
+            var authResult = new AuthenticationResult(
+                cachedAccessTokenItem,
+                null,
+                AuthenticationRequestParameters.AuthenticationScheme,
+                AuthenticationRequestParameters.RequestContext.CorrelationId,
+                TokenSource.Cache,
+                AuthenticationRequestParameters.RequestContext.ApiEvent,
+                account: null,
+                spaAuthCode: null,
+                additionalResponseParameters: null);
             return authResult;
         }
 

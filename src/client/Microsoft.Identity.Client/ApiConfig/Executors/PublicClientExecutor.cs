@@ -36,8 +36,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             requestParams.LoginHint = interactiveParameters.LoginHint;
             requestParams.Account = interactiveParameters.Account;
 
-            InteractiveRequest interactiveRequest = 
-                new InteractiveRequest(requestParams, interactiveParameters);
+            var interactiveRequest = new InteractiveRequest(requestParams, interactiveParameters);
 
             return await interactiveRequest.RunAsync(cancellationToken).ConfigureAwait(false);
         }

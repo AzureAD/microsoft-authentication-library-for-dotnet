@@ -249,9 +249,9 @@ namespace Microsoft.Identity.Client.OAuth2
 
         private async Task<MsalTokenResponse> SendHttpAndClearTelemetryAsync(string tokenEndpoint, Core.ILoggerAdapter logger)
         {
-            UriBuilder builder = new UriBuilder(tokenEndpoint);
+            var builder = new UriBuilder(tokenEndpoint);
             builder.AppendQueryParameters(_requestParams.ExtraQueryParameters);
-            Uri tokenEndpointWithQueryParams = builder.Uri;
+            var tokenEndpointWithQueryParams = builder.Uri;
 
             try
             {
@@ -309,7 +309,7 @@ namespace Microsoft.Identity.Client.OAuth2
             // OAuth spec states that scopes are case sensitive, but 
             // merge the reserved scopes in a case insensitive way, to 
             // avoid sending things like "openid OpenId" (note that EVO is tolerant of this)
-            SortedSet<string> set = new SortedSet<string>(
+            var set = new SortedSet<string>(
                 inputScope.ToArray(),
                 StringComparer.OrdinalIgnoreCase);
 

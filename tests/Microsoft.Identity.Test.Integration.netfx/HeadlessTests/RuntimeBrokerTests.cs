@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             Assert.IsTrue(pca.IsProofOfPossessionSupportedByClient(), "Either the broker is not configured or it does not support POP.");
 
-            Uri requestUri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
+            var requestUri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
 
             var result = await pca
                 .AcquireTokenByUsernamePassword(
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             string[] scopes = { "User.Read" };
-            WamLoggerValidator wastestLogger = new WamLoggerValidator();
+            var wastestLogger = new WamLoggerValidator();
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
@@ -288,7 +288,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
-            WamLoggerValidator testLogger = new WamLoggerValidator();
+            var testLogger = new WamLoggerValidator();
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)

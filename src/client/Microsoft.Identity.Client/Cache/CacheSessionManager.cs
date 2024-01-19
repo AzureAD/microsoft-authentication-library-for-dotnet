@@ -107,8 +107,8 @@ namespace Microsoft.Identity.Client.Cache
                     await TokenCacheInternal.Semaphore.WaitAsync(_requestParams.RequestContext.UserCancellationToken).ConfigureAwait(false);
                     _requestParams.RequestContext.Logger.Verbose(()=>"[Cache Session Manager] Entered cache semaphore");
 
-                    TelemetryData telemetryData = new TelemetryData();
-                    Stopwatch stopwatch = new Stopwatch();
+                    var telemetryData = new TelemetryData();
+                    var stopwatch = new Stopwatch();
                     try
                     {
                         if (!_cacheRefreshedForRead) // double check locking

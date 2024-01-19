@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         {
             // Start a new UI thread to run the browser dialog on so that we can block this one and present
             // a synchronous interface to callers.
-            Thread uiSubThread = new Thread(
+            var uiSubThread = new Thread(
                 () =>
                 {
                     try

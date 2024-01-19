@@ -42,9 +42,9 @@ namespace Microsoft.Identity.Client.Cache
                 }
 
                 //Using scope instead of resource because that value does not exist. STS should return it.
-                AdalTokenCacheKey key = new AdalTokenCacheKey(authority, scope, rtItem.ClientId, TokenSubjectType.User,
+                var key = new AdalTokenCacheKey(authority, scope, rtItem.ClientId, TokenSubjectType.User,
                 uniqueId, idItem.IdToken.PreferredUsername);
-                AdalResultWrapper wrapper = new AdalResultWrapper()
+                var wrapper = new AdalResultWrapper()
                 {
                     Result = new AdalResult()
                     {

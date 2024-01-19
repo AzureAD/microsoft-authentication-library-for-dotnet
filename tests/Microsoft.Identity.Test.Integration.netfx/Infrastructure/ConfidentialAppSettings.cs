@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
             private static Lazy<X509Certificate2> s_certLazy => new Lazy<X509Certificate2>(() =>
             {
-                KeyVaultSecretsProvider kv = new KeyVaultSecretsProvider();
+                var kv = new KeyVaultSecretsProvider();
                 return kv.GetCertificateWithPrivateMaterialAsync(AdfsCertName).GetAwaiter().GetResult();
             });
 

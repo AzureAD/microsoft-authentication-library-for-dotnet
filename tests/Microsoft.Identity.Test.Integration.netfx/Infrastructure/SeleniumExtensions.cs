@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         public static IWebDriver CreateDefaultWebDriver()
         {
-            EdgeOptions options = new EdgeOptions();
+            var options = new EdgeOptions();
             EdgeDriver driver;
 
             // ~2x faster, no visual rendering
@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         public static void PerformLogin(this IWebDriver driver, LabUser user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false)
         {
-            UserInformationFieldIds fields = new UserInformationFieldIds(user);
+            var fields = new UserInformationFieldIds(user);
 
             EnterUsername(driver, user, withLoginHint, adfsOnly, fields);
             EnterPassword(driver, user, fields);

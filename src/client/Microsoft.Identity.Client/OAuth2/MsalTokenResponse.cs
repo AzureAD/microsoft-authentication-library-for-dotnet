@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 return CollectionHelpers.GetEmptyDictionary<string, string>();
             }
 
-            Dictionary<string, string> stringExtensionData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var stringExtensionData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
 #if SUPPORTS_SYSTEM_TEXT_JSON
             foreach (KeyValuePair<string, JsonElement> item in ExtensionData)
@@ -361,7 +361,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 };
             }
 
-            MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
+            var msalTokenResponse = new MsalTokenResponse()
             {
                 AccessToken = authResult[BrokerResponseConst.AccessToken].ToString(),
                 IdToken = authResult[BrokerResponseConst.IdToken].ToString(),
@@ -385,8 +385,8 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             if (logger.IsLoggingEnabled(logLevel))
             {
-                StringBuilder withPii = new StringBuilder();
-                StringBuilder withoutPii = new StringBuilder();
+                var withPii = new StringBuilder();
+                var withoutPii = new StringBuilder();
 
                 withPii.AppendLine($"{Environment.NewLine}[MsalTokenResponse]");
                 withPii.AppendLine($"Error: {Error}");

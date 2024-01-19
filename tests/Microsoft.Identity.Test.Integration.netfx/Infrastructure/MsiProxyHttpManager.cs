@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
                 .ConfigureAwait(false);
 
             //Form the response received from the helper service
-            HttpResponse response = new HttpResponse()
+            var response = new HttpResponse()
             {
                 StatusCode = result.StatusCode,
                 Body = await result.Content.ReadAsStringAsync().ConfigureAwait(false)

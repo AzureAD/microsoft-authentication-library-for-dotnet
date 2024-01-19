@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             CancellationToken cancellationToken)
         {
             logger.Info("[ClientCredentialRequest] Acquiring a token from the token provider.");
-            AppTokenProviderParameters appTokenProviderParameters = new AppTokenProviderParameters
+            var appTokenProviderParameters = new AppTokenProviderParameters
             {
                 Scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope),
                 CorrelationId = AuthenticationRequestParameters.RequestContext.CorrelationId.ToString(),
@@ -201,16 +201,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private AuthenticationResult CreateAuthenticationResultFromCache(MsalAccessTokenCacheItem cachedAccessTokenItem)
         {
-            AuthenticationResult authResult = new AuthenticationResult(
-                                                            cachedAccessTokenItem,
-                                                            null,
-                                                            AuthenticationRequestParameters.AuthenticationScheme,
-                                                            AuthenticationRequestParameters.RequestContext.CorrelationId,
-                                                            TokenSource.Cache,
-                                                            AuthenticationRequestParameters.RequestContext.ApiEvent,
-                                                            account: null,
-                                                            spaAuthCode: null,
-                                                            additionalResponseParameters: null);
+            var authResult = new AuthenticationResult(
+                cachedAccessTokenItem,
+                null,
+                AuthenticationRequestParameters.AuthenticationScheme,
+                AuthenticationRequestParameters.RequestContext.CorrelationId,
+                TokenSource.Cache,
+                AuthenticationRequestParameters.RequestContext.ApiEvent,
+                account: null,
+                spaAuthCode: null,
+                additionalResponseParameters: null);
             return authResult;
         }
 

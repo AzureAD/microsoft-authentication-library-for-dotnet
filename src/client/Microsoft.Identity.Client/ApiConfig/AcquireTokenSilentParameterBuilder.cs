@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri ?? throw new ArgumentNullException(nameof(requestUri)));
+            var popConfig = new PoPAuthenticationConfiguration(requestUri ?? throw new ArgumentNullException(nameof(requestUri)));
             popConfig.HttpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
             popConfig.Nonce = nonce;
 

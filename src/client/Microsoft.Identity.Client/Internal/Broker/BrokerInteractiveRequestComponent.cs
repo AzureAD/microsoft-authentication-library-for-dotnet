@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         private static string ExtractAppLink(string authCode)
         {
-            Uri authCodeUri = new Uri(authCode);
+            var authCodeUri = new Uri(authCode);
             string query = authCodeUri.Query;
 
             if (query.StartsWith("?", StringComparison.OrdinalIgnoreCase))

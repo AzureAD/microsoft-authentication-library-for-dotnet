@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal static BrokerOptions CreateFromWindowsOptions(WindowsBrokerOptions winOptions)
         {
-            BrokerOptions ret = new BrokerOptions(OperatingSystems.Windows);
+            var ret = new BrokerOptions(OperatingSystems.Windows);
             ret.Title = winOptions.HeaderText;
             ret.MsaPassthrough = winOptions.MsaPassthrough;
             ret.ListOperatingSystemAccounts = winOptions.ListWindowsWorkAndSchoolAccounts;

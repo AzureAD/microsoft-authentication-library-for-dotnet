@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.Internal
 
         private static string EncodeHeaderToJson(X509Certificate2 certificate, string base64EncodedThumbprint, bool sendX5C)
         {
-            JWTHeaderWithCertificate header = new JWTHeaderWithCertificate(certificate, base64EncodedThumbprint, sendX5C);
+            var header = new JWTHeaderWithCertificate(certificate, base64EncodedThumbprint, sendX5C);
             return JsonHelper.SerializeToJson(header);
         }
 

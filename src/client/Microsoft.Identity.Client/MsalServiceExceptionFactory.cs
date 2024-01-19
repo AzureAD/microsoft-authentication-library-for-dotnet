@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Client
           HttpResponse httpResponse,
           Exception innerException = null)
         {
-            MsalServiceException ex = new MsalServiceException(errorCode, errorMessage, innerException);
+            var ex = new MsalServiceException(errorCode, errorMessage, innerException);
 
             SetHttpExceptionData(ex, httpResponse);
 
@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Client
 
         internal static MsalThrottledServiceException FromThrottledAuthenticationResponse(HttpResponse httpResponse)
         {
-            MsalServiceException ex = new MsalServiceException(MsalError.RequestThrottled, MsalErrorMessage.AadThrottledError);
+            var ex = new MsalServiceException(MsalError.RequestThrottled, MsalErrorMessage.AadThrottledError);
             SetHttpExceptionData(ex, httpResponse);
             return new MsalThrottledServiceException(ex);
         }

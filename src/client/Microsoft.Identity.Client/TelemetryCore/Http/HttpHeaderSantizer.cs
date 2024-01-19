@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             string sanitizedHeader = value;
             if (HeaderValueNeedsEncoding(value))
             {
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 foreach (char c in value)
                 {
                     if (c < 32 && c != 9)

@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         internal static string CreateRequestFailedMessage(HttpResponse response, string message)
         {
-            StringBuilder messageBuilder = new StringBuilder();
+            var messageBuilder = new StringBuilder();
 
             messageBuilder
                 .AppendLine(message ?? DefaultMessage)

@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(userToken));
             }
 
-            UserAssertion userAssertion = new UserAssertion(userToken);
+            var userAssertion = new UserAssertion(userToken);
 
             if (string.IsNullOrEmpty(longRunningProcessSessionKey))
             {

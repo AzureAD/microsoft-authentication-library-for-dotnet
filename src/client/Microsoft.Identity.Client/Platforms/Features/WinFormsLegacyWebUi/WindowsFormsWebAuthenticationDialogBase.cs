@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                 return;
             }
 
-            Uri url = new Uri(e.Url);
+            var url = new Uri(e.Url);
 
             // we cancel further processing, if we reached final URL.
             // Security issue: we prohibit navigation with auth code

@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 driver.PerformLogin(labResponse.User, Prompt.SelectAccount, false, false);
             }, TestContext);
 
-            CancellationTokenSource cts = new CancellationTokenSource(s_timeout);
+            var cts = new CancellationTokenSource(s_timeout);
             Uri authCodeUri = await seleniumUi.AcquireAuthorizationCodeAsync(
                 authUri,
                 new Uri(redirectUri),

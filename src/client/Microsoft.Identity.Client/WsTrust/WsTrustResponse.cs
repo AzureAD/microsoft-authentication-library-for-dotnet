@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
         internal static WsTrustResponse CreateFromResponseDocument(XDocument responseDocument, WsTrustVersion version)
         {
-            Dictionary<string, string> tokenResponseDictionary = new Dictionary<string, string>();
+            var tokenResponseDictionary = new Dictionary<string, string>();
 
             XNamespace t = XmlNamespace.Trust;
             if (version == WsTrustVersion.WsTrust2005)
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 ? Saml1Assertion
                 : tokenResponseDictionary.Keys.First();
 
-            WsTrustResponse wsTrustResponse = new WsTrustResponse
+            var wsTrustResponse = new WsTrustResponse
             {
                 TokenType = tokenType,
                 Token = tokenResponseDictionary[tokenType]

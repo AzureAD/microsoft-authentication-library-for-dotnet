@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         private string CreateJwk()
         {
-            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048);
+            var rsa = new RSACryptoServiceProvider(2048);
             RSAParameters rsaKeyInfo = rsa.ExportParameters(false);
 
             string modulus = Base64UrlHelpers.Encode(rsaKeyInfo.Modulus);

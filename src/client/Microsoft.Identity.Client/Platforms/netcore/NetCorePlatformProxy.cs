@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         private void OpenLinuxBrowser(string openToolPath, string url)
         {
-            ProcessStartInfo psi = new ProcessStartInfo(openToolPath, url)
+            var psi = new ProcessStartInfo(openToolPath, url)
             {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true

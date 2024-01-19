@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private string GetCiamSecret()
         {
-            KeyVaultSecretsProvider provider = new KeyVaultSecretsProvider();
+            var provider = new KeyVaultSecretsProvider();
             return provider.GetSecretByName("msidlabciam2-cc").Value;
         }
     }

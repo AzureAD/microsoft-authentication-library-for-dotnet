@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
                 return redirectUri;
             }
 
-            TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
+            var listener = new TcpListener(IPAddress.Loopback, 0);
             try
             {
                 listener.Start();

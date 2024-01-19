@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal.Accessors
 
                 fs = File.Create(filePath, data.Length, FileOptions.None, security);
 #else
-                FileInfo info = new FileInfo(filePath);
+                var info = new FileInfo(filePath);
                 fs = info.Create(FileMode.Create, rights, FileShare.Read, data.Length, FileOptions.None, security);
 #endif
 

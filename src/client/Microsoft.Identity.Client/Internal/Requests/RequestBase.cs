@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
             AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
-            MsalTelemetryEventDetails telemetryEventDetails = new MsalTelemetryEventDetails(TelemetryConstants.AcquireTokenEventName);
+            var telemetryEventDetails = new MsalTelemetryEventDetails(TelemetryConstants.AcquireTokenEventName);
             ITelemetryClient[] telemetryClients = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.TelemetryClients;
 
             using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
@@ -296,7 +296,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private ApiEvent InitializeApiEvent(string accountId)
         {
-            ApiEvent apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.CorrelationId)
+            var apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.CorrelationId)
             {
                 ApiId = AuthenticationRequestParameters.ApiId,
             };

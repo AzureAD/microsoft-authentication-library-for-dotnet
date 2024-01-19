@@ -11,7 +11,7 @@ namespace Microsoft.Identity.Client.Utils
     {
         public static DateTimeOffset UnixTimestampToDateTime(double unixTimestamp)
         {
-            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             dateTime = dateTime.AddSeconds(unixTimestamp).ToUniversalTime();
             return dateTime;
         }
@@ -21,14 +21,14 @@ namespace Microsoft.Identity.Client.Utils
             if (unixTimestamp == 0)
                 return null;
 
-            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             dateTime = dateTime.AddSeconds(unixTimestamp).ToUniversalTime();
             return dateTime;
         }
 
         public static string DateTimeToUnixTimestamp(DateTimeOffset dateTimeOffset)
         {
-            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             long unixTimestamp = (long)dateTimeOffset.Subtract(dateTime).TotalSeconds;
             return unixTimestamp.ToString(CultureInfo.InvariantCulture);
         }
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Utils
 
         public static long DateTimeToUnixTimestampMilliseconds(DateTimeOffset dateTimeOffset)
         {
-            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             long unixTimestamp = (long)dateTimeOffset.Subtract(dateTime).TotalMilliseconds;
             return unixTimestamp;
         }

@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // the reason for creating the RsaSecurityKey from RSAParameters is so that a SignatureProvider created with this key
             // will own the RSA object and dispose it. If we pass a RSA object, the SignatureProvider does not own the object, the RSA object will not be disposed.
             RSAParameters rsaParameters = rsa.ExportParameters(true);
-            RsaSecurityKey rsaSecuirtyKey = new RsaSecurityKey(rsaParameters) { KeyId = CreateRsaKeyId(rsaParameters) };
+            var rsaSecuirtyKey = new RsaSecurityKey(rsaParameters) { KeyId = CreateRsaKeyId(rsaParameters) };
             rsa.Dispose();
             return rsaSecuirtyKey;
         }

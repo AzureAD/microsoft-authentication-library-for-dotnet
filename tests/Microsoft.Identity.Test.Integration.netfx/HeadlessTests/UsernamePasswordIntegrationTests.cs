@@ -375,7 +375,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var telemetryLastValue = req.Headers.Single(h => h.Key == TelemetryConstants.XClientLastTelemetry).Value;
             var telemetryCurrentValue = req.Headers.Single(h => h.Key == TelemetryConstants.XClientCurrentTelemetry).Value;
-            HttpTelemetryRecorder httpTelemetryRecorder = new HttpTelemetryRecorder();
+            var httpTelemetryRecorder = new HttpTelemetryRecorder();
 
             string csvCurrent = telemetryCurrentValue.FirstOrDefault();
             string csvPrevious = telemetryLastValue.FirstOrDefault();

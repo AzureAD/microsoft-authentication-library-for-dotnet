@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var cca = BuildCCA(userAuthResult.TenantId);
 
             string oboCacheKey = "obo-cache-key";
-            UserAssertion userAssertion = new UserAssertion(userAuthResult.AccessToken);
+            var userAssertion = new UserAssertion(userAuthResult.AccessToken);
 
             var result = await cca.InitiateLongRunningProcessInWebApi(s_scopes, userAuthResult.AccessToken, ref oboCacheKey)
                 .ExecuteAsync().ConfigureAwait(false);
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var cca = BuildCCA(userAuthResult.TenantId);
 
             string oboCacheKey = null;
-            UserAssertion userAssertion = new UserAssertion(userAuthResult.AccessToken);
+            var userAssertion = new UserAssertion(userAuthResult.AccessToken);
 
             // InitiateLR - Empty cache - AT via OBO flow (new AT, RT cached)
             var result = await cca.InitiateLongRunningProcessInWebApi(s_scopes, userAuthResult.AccessToken, ref oboCacheKey)
@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var cca = BuildCCA(userAuthResult.TenantId);
 
-            UserAssertion userAssertion = new UserAssertion(userAuthResult.AccessToken);
+            var userAssertion = new UserAssertion(userAuthResult.AccessToken);
             string oboCacheKey = userAssertion.AssertionHash;
 
             // AcquireNormal - AT from IdP via OBO flow (only new AT cached, no RT in cache)
@@ -259,7 +259,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var cca = BuildCCA(userAuthResult.TenantId);
 
-            UserAssertion userAssertion = new UserAssertion(userAuthResult.AccessToken);
+            var userAssertion = new UserAssertion(userAuthResult.AccessToken);
             string oboCacheKey = userAssertion.AssertionHash;
 
             // AcquireNormal - AT from IdP via OBO flow(only new AT cached, no RT in cache)
@@ -316,7 +316,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var cca = BuildCCA(userAuthResult.TenantId);
 
             string oboCacheKey = "obo-cache-key";
-            UserAssertion userAssertion = new UserAssertion(userAuthResult.AccessToken);
+            var userAssertion = new UserAssertion(userAuthResult.AccessToken);
 
             var result = await cca.InitiateLongRunningProcessInWebApi(s_scopes, userAuthResult.AccessToken, ref oboCacheKey)
                 .ExecuteAsync().ConfigureAwait(false);

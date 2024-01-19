@@ -269,7 +269,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public string ToJsonString()
         {
-            JObject jObject = new JObject();
+            var jObject = new JObject();
             PopulateJson(jObject);
 
 #if SUPPORTS_SYSTEM_TEXT_JSON

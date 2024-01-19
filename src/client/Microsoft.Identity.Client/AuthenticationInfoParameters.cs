@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication-Info provided by the endpoint</returns>
         public static AuthenticationInfoParameters CreateFromResponseHeaders(HttpResponseHeaders httpResponseHeaders)
         {
-            AuthenticationInfoParameters parameters = new AuthenticationInfoParameters();
+            var parameters = new AuthenticationInfoParameters();
 
             try
             {

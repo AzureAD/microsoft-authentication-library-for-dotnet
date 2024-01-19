@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
 
         private void CleanupCacheNoLocks()
         {
-            List<string> toRemove = new List<string>();
+            var toRemove = new List<string>();
             foreach (var kvp in _cache)
             {
                 if (kvp.Value.IsExpired)

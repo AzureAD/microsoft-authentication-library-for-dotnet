@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             if (!doneSignaled)
             {
                 timer.Stop();
-                SilentWebUIDoneEventArgs args = new SilentWebUIDoneEventArgs(exception);
+                var args = new SilentWebUIDoneEventArgs(exception);
 
                 Done?.Invoke(this, args);
 

@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private async Task<Dictionary<string, string>> GetEnvironmentVariablesAsync(
             MsiAzureResource resource)
         {
-            Dictionary<string, string> environmentVariables = new Dictionary<string, string>();
+            var environmentVariables = new Dictionary<string, string>();
 
             //Get the Environment Variables from the MSI Helper Service
             string uri = s_baseURL + "EnvironmentVariables?resource=" + resource;
@@ -261,7 +261,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private IManagedIdentityApplication CreateMIAWithProxy(string url, string userAssignedId = "", UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
         {
             //Proxy the MSI token request 
-            MsiProxyHttpManager proxyHttpManager = new MsiProxyHttpManager(url);
+            var proxyHttpManager = new MsiProxyHttpManager(url);
 
             var builder = ManagedIdentityApplicationBuilder
                .Create(ManagedIdentityId.SystemAssigned);

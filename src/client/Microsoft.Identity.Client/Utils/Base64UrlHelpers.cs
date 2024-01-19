@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Client.Utils
 
             if (needReplace)
             {
-                string decodedString = new string(char.MinValue, decodedLength);
+                var decodedString = new string(char.MinValue, decodedLength);
                 fixed (char* dest = decodedString)
                 {
                     int i = 0;
@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Client.Utils
                 }
                 else
                 {
-                    string decodedString = new string(char.MinValue, decodedLength);
+                    var decodedString = new string(char.MinValue, decodedLength);
                     fixed (char* src = str)
                     fixed (char* dest = decodedString)
                     {

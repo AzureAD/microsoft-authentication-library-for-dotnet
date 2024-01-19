@@ -345,7 +345,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
                 authenticationRequestParameters.RequestContext.ApiEvent.MsalRuntimeTelemetry = authResult.TelemetryData;
 
-                MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
+                var msalTokenResponse = new MsalTokenResponse()
                 {
                     AuthorityUrl = authorityUrl,
                     AccessToken = token,

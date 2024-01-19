@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         protected override ManagedIdentityRequest CreateRequest(string resource)
         {
-            ManagedIdentityRequest request = new ManagedIdentityRequest(HttpMethod.Post, _endpoint);
+            var request = new ManagedIdentityRequest(HttpMethod.Post, _endpoint);
 
             request.Headers.Add("ContentType", "application/x-www-form-urlencoded");
             request.Headers.Add("Metadata", "true");

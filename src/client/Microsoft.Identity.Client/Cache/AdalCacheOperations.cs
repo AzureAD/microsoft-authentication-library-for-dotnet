@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Cache
         {
             using (Stream stream = new MemoryStream())
             {
-                BinaryWriter writer = new BinaryWriter(stream);
+                var writer = new BinaryWriter(stream);
                 writer.Write(SchemaVersion);
                 logger.Info(() => $"[AdalCacheOperations] Serializing token cache with {tokenCacheDictionary.Count} items. ");
 
@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Cache
 
                 int length = (int)stream.Position;
                 stream.Position = 0;
-                BinaryReader reader = new BinaryReader(stream);
+                var reader = new BinaryReader(stream);
                 return reader.ReadBytes(length);
             }
         }
@@ -49,12 +49,12 @@ namespace Microsoft.Identity.Client.Cache
 
             using (Stream stream = new MemoryStream())
             {
-                BinaryWriter writer = new BinaryWriter(stream);
+                var writer = new BinaryWriter(stream);
                 writer.Write(state);
                 writer.Flush();
                 stream.Position = 0;
 
-                BinaryReader reader = new BinaryReader(stream);
+                var reader = new BinaryReader(stream);
                 int blobSchemaVersion = reader.ReadInt32();
                 if (blobSchemaVersion != SchemaVersion)
                 {
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Cache
 
                     string[] kvpElements = keyString.Split(new[] { Delimiter }, StringSplitOptions.None);
                     AdalResultWrapper resultEx = AdalResultWrapper.Deserialize(reader.ReadString());
-                    AdalTokenCacheKey key = new AdalTokenCacheKey(kvpElements[0], kvpElements[1], kvpElements[2],
+                    var key = new AdalTokenCacheKey(kvpElements[0], kvpElements[1], kvpElements[2],
                         (TokenSubjectType)int.Parse(kvpElements[3], CultureInfo.CurrentCulture),
                         resultEx.Result.UserInfo);
 

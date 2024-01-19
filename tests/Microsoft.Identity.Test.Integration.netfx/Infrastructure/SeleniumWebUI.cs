@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         public static string FindFreeLocalhostRedirectUri()
         {
-            TcpListener l = new TcpListener(IPAddress.Loopback, 0);
+            var l = new TcpListener(IPAddress.Loopback, 0);
             l.Start();
             int port = ((IPEndPoint)l.LocalEndpoint).Port;
             l.Stop();
@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
                 // Run the TCP listener and the selenium automation in parallel
                 // but make sure to start the TCP listener first
-                CancellationTokenSource innerSource = new CancellationTokenSource();
+                var innerSource = new CancellationTokenSource();
                 var tcpCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(
                     innerSource.Token, 
                     externalCancellationToken);

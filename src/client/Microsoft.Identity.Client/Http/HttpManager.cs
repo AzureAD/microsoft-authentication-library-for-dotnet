@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client.Http
 
         private HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
         {
-            HttpRequestMessage requestMessage = new HttpRequestMessage { RequestUri = endpoint };
+            var requestMessage = new HttpRequestMessage { RequestUri = endpoint };
             requestMessage.Headers.Accept.Clear();
             if (headers != null)
             {

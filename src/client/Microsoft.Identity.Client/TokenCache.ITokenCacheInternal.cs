@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Client
                     tenantProfiles = await GetTenantProfilesAsync(requestParams, homeAccountId).ConfigureAwait(false);
                     if (tenantProfiles != null)
                     {
-                        TenantProfile tenantProfile = new TenantProfile(msalIdTokenCacheItem);
+                        var tenantProfile = new TenantProfile(msalIdTokenCacheItem);
                         tenantProfiles[msalIdTokenCacheItem.TenantId] = tenantProfile;
                     }
                 }
@@ -304,7 +304,7 @@ namespace Microsoft.Identity.Client
                 var accessTokenCacheItemsSubset = accessTokenCacheItems.Take(10).ToList();
                 var refreshTokenCacheItemsSubset = refreshTokenCacheItems.Take(10).ToList();
 
-                StringBuilder tokenCacheKeyLog = new StringBuilder();
+                var tokenCacheKeyLog = new StringBuilder();
 
                 tokenCacheKeyLog.AppendLine($"Total number of access tokens in the cache: {accessTokenCacheItems.Count}");
                 tokenCacheKeyLog.AppendLine($"Total number of refresh tokens in the cache: {refreshTokenCacheItems.Count}");
@@ -1134,7 +1134,7 @@ namespace Microsoft.Identity.Client
             // some accessors might not support partitioning, so make sure to filter by home account id
             idTokenCacheItems.RemoveAll(idToken => !homeAccountId.Equals(idToken.HomeAccountId));
 
-            Dictionary<string, TenantProfile> tenantProfiles = new Dictionary<string, TenantProfile>();
+            var tenantProfiles = new Dictionary<string, TenantProfile>();
             foreach (MsalIdTokenCacheItem idTokenCacheItem in idTokenCacheItems)
             {
                 tenantProfiles[idTokenCacheItem.TenantId] = new TenantProfile(idTokenCacheItem);

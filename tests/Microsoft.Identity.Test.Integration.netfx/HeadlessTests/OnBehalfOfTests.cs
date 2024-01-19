@@ -312,7 +312,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var userCacheRecorder = confidentialApp.UserTokenCache.RecordAccess();
 
-            UserAssertion userAssertion = new UserAssertion(authResult.AccessToken);
+            var userAssertion = new UserAssertion(authResult.AccessToken);
 
             string atHash = userAssertion.AssertionHash;
 

@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Utils
 
         public static string ToQueryParameter(this IDictionary<string, string> input)
         {
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
 
             if (input.Count > 0)
             {
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.Utils
 
         internal static List<string> SplitWithQuotes(string input, char delimiter)
         {
-            List<string> items = new List<string>();
+            var items = new List<string>();
 
             if (string.IsNullOrWhiteSpace(input))
             {

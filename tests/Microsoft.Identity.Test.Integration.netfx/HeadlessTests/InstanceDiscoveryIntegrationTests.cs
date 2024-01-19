@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             const string validDiscoveryUri = @"https://login.microsoftonline.com/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.microsoftonline.com%2Fcommon%2Foauth2%2Fv2.0%2Fauthorize";
             const string validPpeDiscoveryUri = @"https://login.windows-ppe.net/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.microsoftonline.com%2Fcommon%2Foauth2%2Fv2.0%2Fauthorize";
-            HttpClient httpClient = new HttpClient();
+            var httpClient = new HttpClient();
             HttpResponseMessage discoveryResponse = await httpClient.SendAsync(
                 new HttpRequestMessage(
                     HttpMethod.Get,

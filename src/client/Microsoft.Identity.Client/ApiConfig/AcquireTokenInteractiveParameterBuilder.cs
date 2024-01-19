@@ -372,7 +372,7 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.BrokerDoesNotSupportPop, MsalErrorMessage.BrokerDoesNotSupportPop);
             }
 
-            PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(requestUri);
+            var popConfig = new PoPAuthenticationConfiguration(requestUri);
 
             if (string.IsNullOrEmpty(nonce))
             {
