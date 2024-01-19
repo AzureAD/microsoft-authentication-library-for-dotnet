@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             CacheKey = stringBuilder.ToString();
 
-            iOSCacheKeyLazy = new Lazy<IiOSKey>(() => InitiOSKey());
+            iOSCacheKeyLazy = new Lazy<IiOSKey>(InitiOSKey);
         }
 
         #region iOS
