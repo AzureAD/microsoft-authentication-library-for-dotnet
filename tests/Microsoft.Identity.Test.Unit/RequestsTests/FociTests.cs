@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Act
                 await InteractiveAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
-                // B cannot acquire a token interactivelty, but will try to use FRT
+                // B cannot acquire a token interactively, but will try to use FRT
                 var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
                     () => SilentAsync(_appB, ServerTokenResponse.ErrorClientMismatch)).ConfigureAwait(false);
                 Assert.AreEqual(MsalError.NoTokensFoundError, ex.ErrorCode);
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 // Act
                 await InteractiveAsync(_appA, ServerTokenResponse.FociToken).ConfigureAwait(false);
 
-                // B cannot acquire a token interactivelty, but will try to use FRT
+                // B cannot acquire a token interactively, but will try to use FRT
                 var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
                     () => SilentAsync(_appB, ServerTokenResponse.OtherError)).ConfigureAwait(false);
 

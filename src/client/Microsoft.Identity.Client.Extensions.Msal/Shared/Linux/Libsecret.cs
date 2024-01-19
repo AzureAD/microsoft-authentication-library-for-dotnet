@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         public static extern IntPtr secret_schema_new(string name, int flags, string attribute1, int attribute1Type, string attribute2, int attribute2Type, IntPtr end);
 
         /// <summary>
-        /// saves a secret in the secret stroe using the keyring
+        /// saves a secret in the secret store using the keyring
         /// </summary>
         /// <param name="schema">schema for saving secret</param>
         /// <param name="collection">collection where to save the secret</param>

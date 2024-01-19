@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                         catch (Exception e)
                         {
                             // Need to catch the exception here and put on the TCS which is the task we are waiting on so that
-                            // the exception comming out of Authenticate is correctly thrown.
+                            // the exception coming out of Authenticate is correctly thrown.
                             ((TaskCompletionSource<object>)tcs).TrySetException(e);
                         }
                     });
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                                 sendAuthorizeRequest,
                                 cancellationToken,
                                 TaskCreationOptions.None,
-                                staTaskScheduler).Wait();
+                                staTaskScheduler).Wait(cancellationToken);
                         }
                         catch (AggregateException ae)
                         {
