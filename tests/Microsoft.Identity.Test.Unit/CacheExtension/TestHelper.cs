@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
         /// immediately as canceled.</param>
         /// <returns>A Task representing waiting for the process to end.</returns>
         public static Task WaitForExitAsync(this Process process,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             var tcs = new TaskCompletionSource<object>();
             process.EnableRaisingEvents = true;
@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
                 tcs.TrySetResult(null);
             };
 
-            if (cancellationToken != default(CancellationToken))
+            if (cancellationToken != default)
             {
                 cancellationToken.Register(tcs.SetCanceled);
             }
