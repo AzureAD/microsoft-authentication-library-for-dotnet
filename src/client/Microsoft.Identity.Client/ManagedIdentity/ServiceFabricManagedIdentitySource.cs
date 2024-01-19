@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (string.IsNullOrEmpty(identityEndpoint) || string.IsNullOrEmpty(identityHeader) || string.IsNullOrEmpty(identityServerThumbprint))
             {
-                requestContext.Logger.Verbose("[Managed Identity] Service Fabric managed identity unavailable.");
+                requestContext.Logger.Verbose(() => "[Managed Identity] Service Fabric managed identity unavailable.");
                 return null;
             }
 

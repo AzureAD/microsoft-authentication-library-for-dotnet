@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 return null;
             }
 
-            logger.Verbose("[FOCI] App is part of the family or unknown, looking for FRT. ");
+            logger.Verbose(() => "[FOCI] App is part of the family or unknown, looking for FRT. ");
             var familyRefreshToken = await CacheManager.FindFamilyRefreshTokenAsync(TheOnlyFamilyId).ConfigureAwait(false);
             logger.Verbose(()=>"[FOCI] FRT found? " + (familyRefreshToken != null));
 
@@ -202,7 +202,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                     MsalTokenResponse frtTokenResponse = await SilentRequestHelper.RefreshAccessTokenAsync(familyRefreshToken, _silentRequest, AuthenticationRequestParameters, cancellationToken)
                         .ConfigureAwait(false);
 
-                    logger.Verbose("[FOCI] FRT refresh succeeded. ");
+                    logger.Verbose(() => "[FOCI] FRT refresh succeeded. ");
                     return frtTokenResponse;
                 }
                 catch (MsalServiceException ex)
@@ -237,7 +237,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             var msalRefreshTokenItem = await CacheManager.FindRefreshTokenAsync().ConfigureAwait(false);
             if (msalRefreshTokenItem == null)
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Verbose("No Refresh Token was found in the cache. ");
+                AuthenticationRequestParameters.RequestContext.Logger.Verbose(() => "No Refresh Token was found in the cache. ");
 
                 throw new MsalUiRequiredException(
                     MsalError.NoTokensFoundError,

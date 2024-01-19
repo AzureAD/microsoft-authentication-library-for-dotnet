@@ -135,8 +135,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
             if (_serviceBundle.Config.ClientCredential != null)
             {
-                _requestParams.RequestContext.Logger.Verbose(
-                    "[TokenClient] Before adding the client assertion / secret");
+                _requestParams.RequestContext.Logger.Verbose(() => "[TokenClient] Before adding the client assertion / secret");
 
                 var tokenEndpoint = await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
                 await _serviceBundle.Config.ClientCredential.AddConfidentialClientParametersAsync(
@@ -148,8 +147,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     _requestParams.SendX5C,
                     cancellationToken).ConfigureAwait(false);
 
-                _requestParams.RequestContext.Logger.Verbose(
-                    "[TokenClient] After adding the client assertion / secret");
+                _requestParams.RequestContext.Logger.Verbose(() => "[TokenClient] After adding the client assertion / secret");
             }
 
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
@@ -255,7 +253,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
             try
             {
-                logger.Verbose("[Token Client] Fetching MsalTokenResponse .... ");
+                logger.Verbose(() => "[Token Client] Fetching MsalTokenResponse .... ");
                 MsalTokenResponse msalTokenResponse =
                     await _oAuth2Client
                         .GetTokenAsync(tokenEndpointWithQueryParams,

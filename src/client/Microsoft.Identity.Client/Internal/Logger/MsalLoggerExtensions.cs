@@ -108,14 +108,6 @@ namespace Microsoft.Identity.Client.Core
             }
         }
 
-        public static void Verbose(this ILoggerAdapter logger, string message)
-        {
-            if (logger.IsLoggingEnabled(LogLevel.Verbose))
-            {
-                logger.Log(LogLevel.Verbose, string.Empty, message);
-            }
-        }
-
         public static void VerbosePii(
             this ILoggerAdapter logger, 
             Func<string> messageWithPiiProducer, 

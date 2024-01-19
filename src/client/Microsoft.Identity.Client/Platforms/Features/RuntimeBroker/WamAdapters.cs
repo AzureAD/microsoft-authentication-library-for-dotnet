@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             BrokerOptions brokerOptions,
             ILoggerAdapter logger)
         {
-            logger.Verbose("[RuntimeBroker] Validating Common Auth Parameters.");
+            logger.Verbose(() => "[RuntimeBroker] Validating Common Auth Parameters.");
 
             var authParams = new NativeInterop.AuthParameters
                 (authenticationRequestParameters.AppConfig.ClientId,
@@ -144,12 +144,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             if (!ScopeHelper.HasNonMsalScopes(authenticationRequestParameters.Scope))
             {
                 authParams.RequestedScopes = ScopeHelper.GetMsalRuntimeScopes();
-                logger.Verbose("[RuntimeBroker] No scopes were passed in the request. Adding default scopes.");
+                logger.Verbose(() => "[RuntimeBroker] No scopes were passed in the request. Adding default scopes.");
             }
             else
             {
                 authParams.RequestedScopes = string.Join(" ", authenticationRequestParameters.Scope);
-                logger.Verbose("[RuntimeBroker] Scopes were passed in the request.");
+                logger.Verbose(() => "[RuntimeBroker] Scopes were passed in the request.");
             }
 
             //WAM redirect URi does not need to be configured by the user
@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
             AddPopParams(authenticationRequestParameters, authParams);
 
-            logger.Verbose("[RuntimeBroker] Acquired Common Auth Parameters.");
+            logger.Verbose(() => "[RuntimeBroker] Acquired Common Auth Parameters.");
 
             return authParams;
         }
@@ -248,12 +248,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
                     if (tenantObjectId.Equals(Constants.MsaTenantId, StringComparison.OrdinalIgnoreCase))
                     {
-                        logger.Verbose("[RuntimeBroker] MSALRuntime Identity provider set to MSA.");
+                        logger.Verbose(() => "[RuntimeBroker] MSALRuntime Identity provider set to MSA.");
                         authParams.Properties[MsalIdentityProvider] = IdentityProviderTypeMSA;
                     }
                     else
                     {
-                        logger.Verbose("[RuntimeBroker] MSALRuntime Identity provider set to AAD");
+                        logger.Verbose(() => "[RuntimeBroker] MSALRuntime Identity provider set to AAD");
                         authParams.Properties[MsalIdentityProvider] = IdentityProviderTypeAAD;
                     }
                 }
@@ -270,7 +270,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             if (TokenReceivedFromWam(authResult, logger))
             {
                 msalTokenResponse = ParseRuntimeResponse(authResult, authenticationRequestParameters, logger);
-                logger.Verbose("[RuntimeBroker] Successfully retrieved token.");
+                logger.Verbose(() => "[RuntimeBroker] Successfully retrieved token.");
                 return msalTokenResponse;
             }
 
