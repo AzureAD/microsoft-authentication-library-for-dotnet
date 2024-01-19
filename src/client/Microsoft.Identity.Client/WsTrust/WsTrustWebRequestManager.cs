@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client.WsTrust
                 string errorMessage = null;
                 try
                 {
-                    errorMessage = WsTrustResponse.ReadErrorResponse(XDocument.Parse(resp.Body, LoadOptions.None), requestContext);
+                    errorMessage = WsTrustResponse.ReadErrorResponse(XDocument.Parse(resp.Body, LoadOptions.None));
                 }
                 catch (System.Xml.XmlException)
                 {

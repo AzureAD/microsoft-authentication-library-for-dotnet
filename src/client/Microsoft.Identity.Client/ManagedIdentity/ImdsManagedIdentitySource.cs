@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 HttpStatusCode.BadRequest => IdentityUnavailableError,
                 HttpStatusCode.BadGateway => GatewayError,
                 HttpStatusCode.GatewayTimeout => GatewayError,
-                _ => default(string)
+                _ => default
             };
 
             if (baseMessage != null)
