@@ -168,10 +168,10 @@ namespace Microsoft.Identity.Client.Region
         private async Task<RegionInfo> DiscoverAsync(ILoggerAdapter logger, CancellationToken requestCancellationToken)
         {
             RegionInfo result = null;
+            
+            await _lockDiscover.WaitAsync(requestCancellationToken).ConfigureAwait(false);
             try
             {
-                await _lockDiscover.WaitAsync(requestCancellationToken).ConfigureAwait(false);
-
                 var regionInfo = GetCachedRegion(logger);
                 if (regionInfo != null)
                 {
