@@ -1,16 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
 using System.Text.Json;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Net.WebSockets;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Web;
 
 namespace MSIHelperService.Helper

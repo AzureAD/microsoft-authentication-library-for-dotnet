@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Security.AccessControl;
 using System.Text;
 
 namespace Microsoft.Identity.Client.Extensions.Msal

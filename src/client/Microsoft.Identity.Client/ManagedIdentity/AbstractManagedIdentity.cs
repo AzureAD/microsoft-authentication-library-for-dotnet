@@ -11,7 +11,6 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Core;
 using System.Net;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using System.Collections.Generic;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {

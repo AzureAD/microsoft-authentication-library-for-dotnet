@@ -2,9 +2,6 @@
 // Licensed under the MIT License.
 
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.OpenApi.Models;
-using MSIHelperService;
-using MSIHelperService.Controllers;
 
 WebApplicationBuilder? builder = WebApplication.CreateBuilder(args);
 
@@ -13,10 +10,10 @@ builder.Services.AddControllers();
 
 //Register an instance of type IHttpClientFactory
 //When you dispose of a HttpClient instance, the connection remains open for up to four minutes.
-//Further, the number of sockets that you can open at any point in time has a limit —
-//you can’t have too many sockets open at once. So when you use too many HttpClient instances,
+//Further, the number of sockets that you can open at any point in time has a limit â€”
+//you canâ€™t have too many sockets open at once. So when you use too many HttpClient instances,
 //you might end up exhausting your supply of sockets.
-//Here’s where IHttpClientFactory comes to the rescue.
+//Hereâ€™s where IHttpClientFactory comes to the rescue.
 //You can take advantage of IHttpClientFactory to create HttpClient instances for invoking
 //HTTP API methods by adhering to the best practices to avoid issues faced with HttpClient.
 //The primary goal of IHttpClientFactory in ASP.NET Core is to ensure that HttpClient instances

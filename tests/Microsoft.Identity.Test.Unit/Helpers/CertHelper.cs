@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {

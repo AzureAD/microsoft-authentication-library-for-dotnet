@@ -13,7 +13,6 @@ using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Http;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client.Internal

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.IO;
-using System.Security.Cryptography;
 using Microsoft.Identity.Client;
 
 namespace DesktopTestApp

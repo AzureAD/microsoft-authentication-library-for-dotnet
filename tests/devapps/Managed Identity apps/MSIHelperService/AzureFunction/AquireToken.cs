@@ -5,9 +5,7 @@
 //This is the Azure Function App Code - not related to this solution 
 //The contents of this file is copied to the Azure Function 
 
-using System.Net;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
 
 namespace MSIHelperService.AzureFunction
 {

@@ -1,9 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 using static Microsoft.Identity.Extensions.Mac.LibSystem;
 
 namespace Microsoft.Identity.Extensions.Mac

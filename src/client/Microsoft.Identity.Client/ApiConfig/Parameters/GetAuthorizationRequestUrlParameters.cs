@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {

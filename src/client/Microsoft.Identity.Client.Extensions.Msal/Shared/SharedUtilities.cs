@@ -3,10 +3,7 @@
 
 using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Extensions.Msal
 {

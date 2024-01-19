@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics.Tracing;
-using System.Globalization;
 using System.Runtime.CompilerServices;
 using Microsoft.Identity.Client.Core;
 using Microsoft.IdentityModel.Abstractions;

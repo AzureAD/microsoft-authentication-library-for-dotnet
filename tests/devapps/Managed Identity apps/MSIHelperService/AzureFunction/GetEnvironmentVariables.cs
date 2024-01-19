@@ -5,10 +5,7 @@
 //This is the Azure Function App Code - not related to this solution 
 //The contents of this file is copied to the Azure Function 
 
-using System.Net;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
 
 
 namespace MSIHelperService.AzureFunction // Name space is not required while updating this code in the function app

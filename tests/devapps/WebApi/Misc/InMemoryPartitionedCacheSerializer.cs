@@ -2,11 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
 
 namespace WebApi.Misc
 {

@@ -2,13 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
-using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Identity.Client.Extensions.Msal;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CacheExtension

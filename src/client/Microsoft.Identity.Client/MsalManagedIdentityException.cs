@@ -3,7 +3,6 @@
 
 using System;
 using System.ComponentModel;
-using System.Net;
 using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Client

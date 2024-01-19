@@ -1,12 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using Microsoft.Intune.MAM;
-using Foundation;
-using UIKit;
-using Microsoft.Identity.Client;
-
 namespace IntuneMAMSampleiOS
 {
     // The UIApplicationDelegate for the application. This class is responsible for launching the
