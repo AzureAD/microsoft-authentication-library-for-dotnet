@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                                         .BuildConcrete();
             app.ServiceBundle.ConfigureMockWebUI();
 
-            //Adding one instance discovery response to ensure the cache is hit for the subsiquent requests.
+            //Adding one instance discovery response to ensure the cache is hit for the subsequent requests.
             //If MSAL tries to do an additional request this test will fail.
             harness.HttpManager.AddInstanceDiscoveryMockHandler();
             harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost("https://" + TestConstants.PpeOrgEnvironment + "/common/");//login.windows-ppe.org is not known to MSAL

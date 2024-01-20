@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 IBroker mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).ReturnsForAnyArgs(brokerIsInstalledAndInvokable);
 
-                harness.ServiceBundle.Config.BrokerCreatorFunc = (app, config, logger) => mockBroker;
+                harness.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
 
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,
@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TestConstants.ProductionPrefCacheEnvironment,
                     brokerID);
 
-                harness.ServiceBundle.Config.BrokerCreatorFunc = (app, config, logger) => mockBroker;
+                harness.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
 
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,

@@ -214,7 +214,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // network fails with invalid_instance exception
             _networkMetadataProvider
                 .When(x => x.GetMetadataAsync(Arg.Any<Uri>(), _testRequestContext))
-                .Do(x => throw validationException);
+                .Do(_ => throw validationException);
 
             // Act
             var actualException = await AssertException.TaskThrowsAsync<MsalServiceException>(() =>
@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // network fails with something other than invalid_instance exception
             _networkMetadataProvider
                 .When(x => x.GetMetadataAsync(Arg.Any<Uri>(), _testRequestContext))
-                .Do(x => throw new MsalServiceException("endpoint_busy", "some exception message"));
+                .Do(_ => throw new MsalServiceException("endpoint_busy", "some exception message"));
 
             // Act
             var actualResult = await _discoveryManager.GetMetadataEntryAsync(
@@ -263,7 +263,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // network fails with something other than invalid_instance exception
             _networkMetadataProvider
                 .When(x => x.GetMetadataAsync(Arg.Any<Uri>(), _testRequestContext))
-                .Do(x => throw new MsalServiceException("endpoint_busy", "some exception message"));
+                .Do(_ => throw new MsalServiceException("endpoint_busy", "some exception message"));
 
             // Act
             var actualResult = await _discoveryManager.GetMetadataEntryAsync(
@@ -413,7 +413,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // network fails with invalid_instance exception
             _networkMetadataProvider
                 .When(x => x.GetMetadataAsync(Arg.Any<Uri>(), requestContext))
-                .Do(x => throw validationException);
+                .Do(_ => throw validationException);
 
             InstanceDiscoveryMetadataEntry actualResult = await _discoveryManager.GetMetadataEntryAsync(
                 AuthorityInfo.FromAuthorityUri("https://some_env.com/tid", true),

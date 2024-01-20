@@ -242,7 +242,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
 
-                builder.Config.BrokerCreatorFunc = (parent, config, logger) => { return new NullBroker(logger); };
+                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
 
                 var app = builder.WithBroker(true).BuildConcrete();
 
@@ -458,7 +458,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
 
-                builder.Config.BrokerCreatorFunc = (parent, config, logger) => { return new NullBroker(logger); };
+                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
 
                 var app = builder.WithBroker(true).BuildConcrete();
 
@@ -484,7 +484,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                      .Create(TestConstants.ClientId)
                      .WithHttpManager(harness.HttpManager);
 
-                builder.Config.BrokerCreatorFunc = (parent, config, logger) => { return broker; };
+                builder.Config.BrokerCreatorFunc = (_, _, _) => { return broker; };
 
                 var app = builder.WithBroker(true).BuildConcrete();
 
@@ -511,7 +511,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
 
-                builder.Config.BrokerCreatorFunc = (parent, config, logger) => { return new NullBroker(logger); };
+                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
 
                 var app = builder.WithBroker(true).BuildConcrete();
 
@@ -557,7 +557,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
 
-                builder.Config.BrokerCreatorFunc = (parent, config, logger) => { return new IosBrokerMock(logger); };
+                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new IosBrokerMock(logger); };
                 builder.Config.PlatformProxy = platformProxy;
 
                 var app = builder.WithBroker(true).BuildConcrete();

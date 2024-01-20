@@ -463,7 +463,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.IsNull(app.Certificate);
                     break;
                 case CredentialType.SignedAssertionAsyncDelegate:
-                    builder = builder.WithClientAssertion(async (CancellationToken ct) => await Task.FromResult(TestConstants.DefaultClientAssertion).ConfigureAwait(false));
+                    builder = builder.WithClientAssertion(async (CancellationToken _) => await Task.FromResult(TestConstants.DefaultClientAssertion).ConfigureAwait(false));
                     app = builder.BuildConcrete();
                     Assert.IsNull(app.Certificate);
                     break;
@@ -656,8 +656,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var jsonToken = handler.ReadJwtToken(actualAssertion);
                 var claims = jsonToken.Claims;
                 //checked if additional claim is in signed assertion
-                var audclaim = TestConstants.s_clientAssertionClaims.Where(x => x.Key == "aud").FirstOrDefault();
-                var validClaim = claims.Where(x => x.Type == audclaim.Key && x.Value == audclaim.Value).FirstOrDefault();
+                var audclaim = TestConstants.s_clientAssertionClaims.FirstOrDefault(x => x.Key == "aud");
+                var validClaim = claims.FirstOrDefault(x => x.Type == audclaim.Key && x.Value == audclaim.Value);
                 Assert.IsNotNull(validClaim);
             }
         }
@@ -1774,7 +1774,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(TestConstants.ClientId)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithLogging((LogLevel level, string message, bool containsPii) => log = log + message)
+                    .WithLogging((LogLevel _, string message, bool _) => log = log + message)
                     .BuildConcrete();
 
 #pragma warning disable CS0618 // Type or member is obsolete

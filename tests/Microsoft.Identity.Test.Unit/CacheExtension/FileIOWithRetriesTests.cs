@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             int cacheChangedEventFired = 0;
 
             // expect this event to be fired twice
-            watcher.Changed += (sender, args) =>
+            watcher.Changed += (_, _) =>
             {
                 _logger.TraceInformation("Event fired!");
                 cacheChangedEventFired++;

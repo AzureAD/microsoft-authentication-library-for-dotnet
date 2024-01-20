@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Utils
 
         public static string OrderScopesAlphabetically(string originalScopes)
         {
-            // split by space and order aphabetically
+            // split by space and order alphabetically
             string[] split = originalScopes.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             // order the scopes in alphabetical order
             Array.Sort(split, StringComparer.OrdinalIgnoreCase);
