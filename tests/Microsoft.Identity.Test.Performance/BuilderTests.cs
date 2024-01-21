@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Test.Performance
     {
         private readonly X509Certificate2 _certificate;
         private readonly IConfidentialClientApplication _cca;
-        private readonly LogCallback _logger = (message, level, isPii) => { };
+        private readonly LogCallback _logger = (_, _, _) => { };
 
         public BuilderTests()
         {

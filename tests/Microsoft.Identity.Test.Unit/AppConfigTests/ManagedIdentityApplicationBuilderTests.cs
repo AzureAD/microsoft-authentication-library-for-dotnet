@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             var mi = ManagedIdentityApplicationBuilder
                 .Create(ManagedIdentityId.SystemAssigned)
-                .WithLogging((level, message, pii) => { })
+                .WithLogging((_, _, _) => { })
                 .BuildConcrete();
 
             Assert.IsNotNull(mi.ServiceBundle.Config.LoggingCallback);

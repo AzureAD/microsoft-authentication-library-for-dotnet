@@ -48,9 +48,9 @@ namespace Microsoft.Identity.Test.Integration.Win8
 
             //Assert that the PKeyAuth header is used and the token response is successful
             var (req, res) = factory.RequestsAndResponses
-                .Where(x => x.Item1.Headers.Authorization != null
-                && x.Item1.Headers.Authorization.Scheme.Contains(PKeyAuthConstants.PKeyAuthName)
-                && x.Item2.StatusCode == HttpStatusCode.OK).FirstOrDefault();
+                .FirstOrDefault(x => x.Item1.Headers.Authorization != null
+                                     && x.Item1.Headers.Authorization.Scheme.Contains(PKeyAuthConstants.PKeyAuthName)
+                                     && x.Item2.StatusCode == HttpStatusCode.OK);
 
             Assert.IsNotNull(req);
             Assert.IsNotNull(res);

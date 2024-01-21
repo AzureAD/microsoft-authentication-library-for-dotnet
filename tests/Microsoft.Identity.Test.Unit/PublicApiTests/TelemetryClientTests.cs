@@ -452,7 +452,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task AcquireTokenGenericErrorTelemetryTestAsync()
         {
             IMsalHttpClientFactory factoryThatThrows = Substitute.For<IMsalHttpClientFactory>();
-            factoryThatThrows.When(x => x.GetHttpClient()).Do(x => { throw new SocketException(0); });
+            factoryThatThrows.When(x => x.GetHttpClient()).Do(_ => { throw new SocketException(0); });
 
             var cca = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
@@ -559,7 +559,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 case AssertionType.ManagedIdentity:
                     _cca = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
-                        .WithAppTokenProvider((AppTokenProviderParameters parameters) => { return Task.FromResult(GetAppTokenProviderResult()); })
+                        .WithAppTokenProvider((AppTokenProviderParameters _) => { return Task.FromResult(GetAppTokenProviderResult()); })
                         .WithHttpManager(_harness.HttpManager)
                         .WithExperimentalFeatures()
                         .WithTelemetryClient(_telemetryClient)
