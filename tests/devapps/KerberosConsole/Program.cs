@@ -160,7 +160,7 @@ namespace KerberosConsole
 
         /// <summary>
         /// Acquire an authentication token.
-        /// If a valid token recevied, then show the received token information with included Kerberos Ticket.
+        /// If a valid token received, then show the received token information with included Kerberos Ticket.
         /// If IdToken is used for token container, cached the received Kerberos Ticket into current user's
         /// Windows Ticket Cache.
         /// </summary>
@@ -304,7 +304,7 @@ namespace KerberosConsole
         /// <returns>The <see cref="AuthenticationResult"/> object.</returns>
         private AuthenticationResult AcquireTokenFromPublicClientWithInteractive()
         {
-            // 1. Setup pulic client application to get Kerberos Ticket.
+            // 1. Setup public client application to get Kerberos Ticket.
             var app = PublicClientApplicationBuilder.Create(_clientId)
                 .WithTenantId(_tenantId)
                 .WithRedirectUri(_redirectUri)
@@ -353,7 +353,7 @@ namespace KerberosConsole
         /// <returns>The <see cref="AuthenticationResult"/> object.</returns>
         private AuthenticationResult AcquireTokenFromPublicClientWithUserPassword()
         {
-            // 1. Setup pulic client application to get Kerberos Ticket.
+            // 1. Setup public client application to get Kerberos Ticket.
             var app = PublicClientApplicationBuilder.Create(_clientId)
                 .WithTenantId(_tenantId)
                 .WithRedirectUri(_redirectUri)
@@ -395,7 +395,7 @@ namespace KerberosConsole
         /// <returns>The <see cref="AuthenticationResult"/> object.</returns>
         private AuthenticationResult AcquireTokenWithDeviceCodeFlow()
         {
-            // 1. Setup pulic client application to get Kerberos Ticket.
+            // 1. Setup public client application to get Kerberos Ticket.
             var app = PublicClientApplicationBuilder.Create(_clientId)
                 .WithTenantId(_tenantId)
                 .WithRedirectUri(_redirectUri)

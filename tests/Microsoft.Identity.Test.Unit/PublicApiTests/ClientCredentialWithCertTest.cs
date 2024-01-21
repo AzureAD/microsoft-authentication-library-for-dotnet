@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Unit
                     // Check presence and value of x5c cert claim.
                     var handler = new JwtSecurityTokenHandler();
                     var jsonToken = handler.ReadJwtToken(encodedJwt);
-                    var x5c = jsonToken.Header.Where(header => header.Key == "x5c").FirstOrDefault();
+                    var x5c = jsonToken.Header.FirstOrDefault(header => header.Key == "x5c");
                     if (expectedX5C != null)
                     {
                         Assert.AreEqual("x5c", x5c.Key, "x5c should be present");
