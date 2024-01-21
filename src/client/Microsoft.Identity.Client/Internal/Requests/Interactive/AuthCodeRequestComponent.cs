@@ -84,8 +84,7 @@ namespace Microsoft.Identity.Client.Internal
 
             VerifyAuthorizationResult(authorizationResult, state);
 
-            return new Tuple<AuthorizationResult, string>(authorizationResult, codeVerifier);
-
+            return new(authorizationResult, codeVerifier);
         }
 
         private Tuple<Uri, string> CreateAuthorizationUriWithCodeChallenge(
@@ -99,7 +98,7 @@ namespace Microsoft.Identity.Client.Internal
 
             UriBuilder builder = CreateInteractiveRequestParameters(authEndpoint, requestParameters);
 
-            return new Tuple<Uri, string>(builder.Uri, codeVerifier);
+            return new(builder.Uri, codeVerifier);
         }
 
         private Tuple<Uri, string, string> CreateAuthorizationUri(string authEndpoint, bool addPkceAndState = false)
@@ -123,7 +122,7 @@ namespace Microsoft.Identity.Client.Internal
             requestParameters[OAuth2Parameter.ClientInfo] = "1";
             UriBuilder builder = CreateInteractiveRequestParameters(authEndpoint, requestParameters);
 
-            return new Tuple<Uri, string, string>(builder.Uri, state, codeVerifier);
+            return new(builder.Uri, state, codeVerifier);
         }
 
         private UriBuilder CreateInteractiveRequestParameters(string authEndpoint, IDictionary<string, string> requestParameters)
