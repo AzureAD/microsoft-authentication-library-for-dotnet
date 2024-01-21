@@ -250,10 +250,10 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             var item = new MsalAccessTokenCacheItem(
                 scopes: scopes,
-                expiresOn: DateTimeHelpers.UnixTimestampToDateTime(expiresOnUnixTimestamp),
-                extendedExpiresOn: DateTimeHelpers.UnixTimestampToDateTime(extendedExpiresOnUnixTimestamp),
+                expiresOn: DateTimeOffset.FromUnixTimeSeconds(expiresOnUnixTimestamp),
+                extendedExpiresOn: DateTimeOffset.FromUnixTimeSeconds(extendedExpiresOnUnixTimestamp),
                 refreshOn: DateTimeHelpers.UnixTimestampToDateTimeOrNull(refreshOnUnixTimestamp),
-                cachedAt: DateTimeHelpers.UnixTimestampToDateTime(cachedAtUnixTimestamp),
+                cachedAt: DateTimeOffset.FromUnixTimeSeconds(cachedAtUnixTimestamp),
                 tenantId: tenantId,
                 keyId: keyId,
                 tokenType: tokenType);

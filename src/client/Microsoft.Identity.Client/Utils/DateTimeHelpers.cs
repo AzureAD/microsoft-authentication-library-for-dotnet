@@ -9,13 +9,6 @@ namespace Microsoft.Identity.Client.Utils
 {
     internal static class DateTimeHelpers
     {
-        public static DateTimeOffset UnixTimestampToDateTime(double unixTimestamp)
-        {
-            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            dateTime = dateTime.AddSeconds(unixTimestamp).ToUniversalTime();
-            return dateTime;
-        }
-
         public static DateTimeOffset? UnixTimestampToDateTimeOrNull(double unixTimestamp)
         {
             if (unixTimestamp == 0)

@@ -172,9 +172,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             for (int i = 1; i <= numAccessTokens; i++)
             {
                 var item = CreateAccessTokenItem(
-                    cachedAt: DateTimeHelpers.UnixTimestampToDateTime(34567),
-                    expiresOn: DateTimeHelpers.UnixTimestampToDateTime(12345),
-                    extendedExpiresOn: DateTimeHelpers.UnixTimestampToDateTime(23456));
+                    cachedAt: DateTimeOffset.FromUnixTimeSeconds(34567),
+                    expiresOn: DateTimeOffset.FromUnixTimeSeconds(12345),
+                    extendedExpiresOn: DateTimeOffset.FromUnixTimeSeconds(23456));
 
                 item.Environment += $"_{keyPrefix}{i}"; // ensure we get unique cache keys
                 item.InitCacheKey();
@@ -727,9 +727,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                "User.Read User.ReadBasic.All profile openid email",
                "26039cce-489d-4002-8293-5b0c5134eacb",
                secret: "",
-               cachedAt: DateTimeHelpers.UnixTimestampToDateTime(1548803419),
-               expiresOn: DateTimeHelpers.UnixTimestampToDateTime(1548846619),
-               extendedExpiresOn: DateTimeHelpers.UnixTimestampToDateTime(1548846619),
+               cachedAt: DateTimeOffset.FromUnixTimeSeconds(1548803419),
+               expiresOn: DateTimeOffset.FromUnixTimeSeconds(1548846619),
+               extendedExpiresOn: DateTimeOffset.FromUnixTimeSeconds(1548846619),
                rawClientInfo: string.Empty,
                homeAccountId: "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb"
                );
