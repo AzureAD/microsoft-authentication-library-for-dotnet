@@ -13,7 +13,6 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -24,9 +23,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class OnBehalfOfTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
-        private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
-        const string PublicClientID = "be9b0186-7dfd-448a-a944-f771029105bf";
-        const string OboConfidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
+        private static readonly string[] s_oboServiceScope = { $"api://{LabApiConstants.LabOboConfidentialClientId}/access_as_user" };
+        const string PublicClientID = LabApiConstants.LabOboPublicClientId;
+        const string OboConfidentialClientID = LabApiConstants.LabOboConfidentialClientId;
 
         private static InMemoryTokenCache s_inMemoryTokenCache = new InMemoryTokenCache();
         private string _confidentialClientSecret;
@@ -59,8 +58,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task OboAndSilent_ReturnsCorrectTokens_TestAsync(bool serializeCache, bool usePartitionedSerializationCache)
         {
             // Setup: Get lab users, create PCA and get user tokens
-            var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
-            var user2 = (await LabUserHelper.GetSpecificUserAsync("idlab@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
+            var user2 = (await LabUserHelper.GetDefaultUser2Async().ConfigureAwait(false)).User;
             var partitionedInMemoryTokenCache = new InMemoryPartitionedTokenCache();
             var nonPartitionedInMemoryTokenCache = new InMemoryTokenCache();
             var oboTokens = new HashSet<string>();
@@ -174,7 +173,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task OboAndClientCredentials_WithRegional_ReturnsCorrectTokens_TestAsync()
         {
             // Setup: Get lab user, create PCA and get user tokens
-            var user = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var user = (await LabUserHelper.GetDefaultUser2Async().ConfigureAwait(false)).User;
 
             var pca = PublicClientApplicationBuilder
                     .Create(PublicClientID)

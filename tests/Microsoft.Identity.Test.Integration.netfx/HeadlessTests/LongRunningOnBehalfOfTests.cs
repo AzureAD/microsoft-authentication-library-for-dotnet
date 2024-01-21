@@ -3,14 +3,12 @@
 
 using System;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,9 +19,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class LongRunningOnBehalfOfTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
-        private static readonly string[] s_oboServiceScope = { "api://23c64cd8-21e4-41dd-9756-ab9e2c23f58c/access_as_user" };
-        const string PublicClientID = "be9b0186-7dfd-448a-a944-f771029105bf";
-        const string OboConfidentialClientID = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
+        private static readonly string[] s_oboServiceScope = { $"api://{LabApiConstants.LabOboConfidentialClientId}/access_as_user" };
+        const string PublicClientID = LabApiConstants.LabOboPublicClientId;
+        const string OboConfidentialClientID = LabApiConstants.LabOboConfidentialClientId;
 
         private string _confidentialClientSecret;
 
@@ -52,7 +50,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [RunOn(TargetFrameworks.NetCore)]
         public async Task LongRunningAndNormalObo_WithDifferentKeys_TestAsync()
         {
-            var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUser2Async().ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
                 .Create(PublicClientID)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
@@ -102,7 +100,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [RunOn(TargetFrameworks.NetCore)]
         public async Task LongRunningThenNormalObo_WithTheSameKey_TestAsync()
         {
-            var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUser2Async().ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
                 .Create(PublicClientID)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
@@ -177,7 +175,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [RunOn(TargetFrameworks.NetCore)]
         public async Task NormalOboThenLongRunningAcquire_WithTheSameKey_TestAsync()
         {
-            var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUser2Async().ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
                 .Create(PublicClientID)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
@@ -246,7 +244,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [RunOn(TargetFrameworks.NetCore)]
         public async Task NormalOboThenLongRunningInitiate_WithTheSameKey_TestAsync()
         {
-            var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUser2Async().ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
                 .Create(PublicClientID)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
@@ -301,7 +299,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task WithDifferentScopes_TestAsync()
         {
             string[] scopes2 = { "api://eec635da-5760-452d-940a-448220db047c/access_as_user" };
-            var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
+            var user1 = (await LabUserHelper.GetDefaultUser2Async().ConfigureAwait(false)).User;
             var pca = PublicClientApplicationBuilder
                 .Create(PublicClientID)
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)

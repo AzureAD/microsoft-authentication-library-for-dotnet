@@ -5,7 +5,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public class LabApiConstants
     {
-        // constants for Lab api
+        // constants for the Lab API
         public const string MobileDeviceManagementWithConditionalAccess = "mdmca";
         public const string MobileAppManagementWithConditionalAccess = "mamca";
         public const string MobileAppManagement = "mam";
@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public const string MSAOutlookAccountClientID = "9668f2bd-6103-4292-9024-84fa2d1b6fb2";
         public const string Upn = "upn";
 
-        // constants for V2 Lab api
+        // constants for the V2 Lab API
         public const string ProtectionPolicy = "protectionpolicy";
         public const string HomeDomain = "homedomain";
         public const string HomeUPN = "homeupn";
@@ -43,5 +43,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public const string LabUserCredentialEndpoint = "https://msidlab.com/api/LabSecret";
         public const string LabAppEndpoint = "https://msidlab.com/api/app/";
         public const string LabInfoEndpoint = "https://msidlab.com/api/Lab/";
+
+        public const string LabOboPublicClientId = "be9b0186-7dfd-448a-a944-f771029105bf";
+        public const string LabOboConfidentialClientId = "23c64cd8-21e4-41dd-9756-ab9e2c23f58c";
+        public const string LabCaeConfidentialClientId = "";
     }
 }
