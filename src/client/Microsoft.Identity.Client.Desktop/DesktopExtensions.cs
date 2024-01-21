@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Desktop
             else
             {
                 builder.Config.BrokerCreatorFunc =
-                   (uiParent, appConfig, logger) =>
+                   (_, _, logger) =>
                    {
                        logger.Info("[RuntimeBroker] Not a Windows 10 or Server equivalent machine. WAM is not available.");
                        return new NullBroker(logger);

@@ -201,7 +201,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>  
         /// If this flag is false in the OnAfterAccessAsync notification - the node can be deleted from the underlying storage (e.g. IDistributedCache).
         /// MSAL takes into consideration access tokens expiration when computing this flag. Use in conjunction with SuggestedCacheExpiry.
-        /// If a refresh token exists in the cache, this proprety will always be true. 
+        /// If a refresh token exists in the cache, this property will always be true.
         /// </remarks>
         public bool HasTokens { get; }
 

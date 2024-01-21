@@ -1046,7 +1046,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             var pcaBuilder = PublicClientApplicationBuilder
                 .Create(clientIdInFile)
-                .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[{lvl}] {msg}"))
+                .WithLogging((lvl, msg, _) => Trace.WriteLine($"[{lvl}] {msg}"))
                 .WithHttpManager(httpManager);
 
             if (authority != null)
@@ -1173,8 +1173,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var usernamePasswordBuilder = app.AcquireTokenByUsernamePassword(TestConstants.s_scope, "upn@live.com", "");
             CheckBuilderCommonMethods(usernamePasswordBuilder);
 
-            var deviceCodeBuilder = app.AcquireTokenWithDeviceCode(TestConstants.s_scope, result => Task.FromResult(0))
-               .WithDeviceCodeResultCallback(result => Task.FromResult(0));
+            var deviceCodeBuilder = app.AcquireTokenWithDeviceCode(TestConstants.s_scope, _ => Task.FromResult(0))
+               .WithDeviceCodeResultCallback(_ => Task.FromResult(0));
             CheckBuilderCommonMethods(deviceCodeBuilder);
 
             var silentBuilder = app.AcquireTokenSilent(TestConstants.s_scope, TestConstants.s_user)

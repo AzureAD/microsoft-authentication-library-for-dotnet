@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         private static bool IsImmutable(Type type)
         {
-            if (type == typeof(string) || type.GetTypeInfo().IsPrimitive || type.GetTypeInfo().IsEnum)
+            if (type == typeof(string) || type.IsPrimitive || type.IsEnum)
             {
                 return true;
             }

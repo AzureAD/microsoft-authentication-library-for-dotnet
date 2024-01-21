@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             string differentScopesForAt = string.Empty;
             var app1 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                          .WithAppTokenProvider((AppTokenProviderParameters parameters) =>
+                                                          .WithAppTokenProvider((AppTokenProviderParameters _) =>
                                                           {
                                                               AppTokenProviderResult result = new AppTokenProviderResult
                                                               {
@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Test.Unit
 
             var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithAuthority("https://login.microsoftonline.com/tid")
-                .WithAppTokenProvider((AppTokenProviderParameters parameters) =>
+                .WithAppTokenProvider((AppTokenProviderParameters _) =>
                 {
                     return Task.FromResult(GetAppTokenProviderResult());
                 })
@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithInstanceDiscovery(false)
-                .WithAppTokenProvider((AppTokenProviderParameters parameters) =>
+                .WithAppTokenProvider((AppTokenProviderParameters _) =>
                 {
                     return Task.FromResult(GetAppTokenProviderResult());
                 })
