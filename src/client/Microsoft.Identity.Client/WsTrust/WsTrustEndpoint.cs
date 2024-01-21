@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Xml;
 using Microsoft.Identity.Client.Utils;
@@ -61,7 +62,7 @@ namespace Microsoft.Identity.Client.WsTrust
             }
             const string wsaNamespaceValue = "http://www.w3.org/2005/08/addressing";
 
-            using (var sw = new StringWriterWithEncoding(Encoding.UTF8))
+            using (var sw = new StringWriter())
             {
                 using (XmlWriter writer = XmlWriter.Create(sw, new XmlWriterSettings()
                 {
