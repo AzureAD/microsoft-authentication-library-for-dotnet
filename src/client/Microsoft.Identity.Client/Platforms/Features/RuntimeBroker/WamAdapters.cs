@@ -339,6 +339,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 {
                     IdToken idToken = IdToken.Parse(authResult.RawIdToken);
                     authorityUrl = idToken.ClaimsPrincipal.FindFirst("iss")?.Value;
+                    if (authorityUrl == null)
+                    {
+                        throw new Exception("Expected the RawIdToken from the auth result to contain a ClaimsPrincipal named 'iss'.");
+                    }
+
                     if (authorityUrl.EndsWith("v2.0"))
                         authorityUrl = authorityUrl.Substring(0, authorityUrl.Length - "v2.0".Length);
                 }
