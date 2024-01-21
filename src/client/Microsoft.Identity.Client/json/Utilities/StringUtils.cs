@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Json.Utilities
 
         public static string ToCamelCase(string s)
         {
-            if (StringUtils.IsNullOrEmpty(s) || !char.IsUpper(s[0]))
+            if (IsNullOrEmpty(s) || !char.IsUpper(s[0]))
             {
                 return s;
             }
@@ -217,7 +217,7 @@ namespace Microsoft.Identity.Json.Utilities
 
         private static string ToSeparatedCase(string s, char separator)
         {
-            if (StringUtils.IsNullOrEmpty(s))
+            if (IsNullOrEmpty(s))
             {
                 return s;
             }

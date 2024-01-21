@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             if (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errorCode))
             {
-                string metadataOriginal = responseDictionary.ContainsKey(MsalTokenResponse.iOSBrokerErrorMetadata) ? responseDictionary[MsalTokenResponse.iOSBrokerErrorMetadata] : null;
+                string metadataOriginal = responseDictionary.ContainsKey(iOSBrokerErrorMetadata) ? responseDictionary[iOSBrokerErrorMetadata] : null;
                 Dictionary<string, string> metadataDictionary = null;
 
                 if (metadataOriginal != null)
@@ -205,7 +205,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
 
                 string homeAcctId = null;
-                metadataDictionary?.TryGetValue(MsalTokenResponse.iOSBrokerHomeAccountId, out homeAcctId);
+                metadataDictionary?.TryGetValue(iOSBrokerHomeAccountId, out homeAcctId);
                 return new MsalTokenResponse
                 {
                     Error = errorCode,
