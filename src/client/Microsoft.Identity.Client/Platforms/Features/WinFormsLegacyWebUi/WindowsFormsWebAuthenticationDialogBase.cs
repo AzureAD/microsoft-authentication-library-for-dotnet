@@ -396,10 +396,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         /// </summary>
         protected MsalClientException CreateExceptionForAuthenticationUiFailed(int statusCode)
         {
-            if (NavigateErrorStatus.Messages.ContainsKey(statusCode))
+            if (NavigateErrorStatus.Messages.TryGetValue(statusCode, out string statusCodeMessages))
             {
                 string format = "The browser based authentication dialog failed to complete. Reason: {0}";
-                string message = string.Format(CultureInfo.InvariantCulture, format, NavigateErrorStatus.Messages[statusCode]);
+                string message = string.Format(CultureInfo.InvariantCulture, format, statusCodeMessages);
                 return new MsalClientException(MsalError.AuthenticationUiFailedError, message);
             }
 

@@ -448,9 +448,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
-            if (additionalBodyParameters.ContainsKey(OAuth2Parameter.Username))
+            if (additionalBodyParameters.TryGetValue(OAuth2Parameter.Username, out string parameter))
             {
-                return GetCcsUpnHeader(additionalBodyParameters[OAuth2Parameter.Username]);
+                return GetCcsUpnHeader(parameter);
             }
 
             if (!String.IsNullOrEmpty(AuthenticationRequestParameters.LoginHint))
