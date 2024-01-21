@@ -138,11 +138,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                     queryDict.Add(LabApiConstants.PublicClient, query.PublicClient.ToString());
                 }
 
-                return SendLabRequestAsync(LabApiConstants.LabEndPoint, queryDict);
+                return SendLabRequestAsync(LabApiConstants.LabUserEndPoint, queryDict);
             }
             else
             {
-                return SendLabRequestAsync(LabApiConstants.LabEndPoint + "/" + query.Upn, queryDict);
+                return SendLabRequestAsync(LabApiConstants.LabUserEndPoint + query.Upn, queryDict);
             }
         }
 
@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         internal async Task<string> GetLabResponseAsync(string address)
         {
             if (_labApiAccessToken == null)
-                _labApiAccessToken = await LabAuthenticationHelper.GetAccessTokenForLabAPIAsync(_labAccessAppId, _labAccessClientSecret).ConfigureAwait(false);
+                _labApiAccessToken = await LabAuthenticationHelper.GetAccessTokenForLabApiAsync(_labAccessAppId, _labAccessClientSecret).ConfigureAwait(false);
 
             using (HttpClient httpClient = new HttpClient())
             {
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             if (_msiHelperApiAccessToken == null)
             {
                 _msiHelperApiAccessToken = await LabAuthenticationHelper
-                    .GetAccessTokenForLabAPIAsync(_labAccessAppId, _msiHelperServiceSecret)
+                    .GetAccessTokenForLabApiAsync(_labAccessAppId, _msiHelperServiceSecret)
                     .ConfigureAwait(false);
             }
 

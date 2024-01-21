@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Azure.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Unit;
-using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -38,7 +37,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             }
         }
         
-        public static async Task<AccessToken> GetAccessTokenForLabAPIAsync(string labAccessClientId, string labAccessSecret)
+        public static async Task<AccessToken> GetAccessTokenForLabApiAsync(string labAccessClientId, string labAccessSecret)
         {
             string[] scopes = new string[] { "https://msidlab.com/.default" };
 

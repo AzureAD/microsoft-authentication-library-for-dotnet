@@ -2,20 +2,16 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.NetFx.SeleniumTests
@@ -55,7 +51,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.SeleniumTests
             var response1 = await _httpClient.SendAsync(CreateRequest(result)).ConfigureAwait(false);
             Assert.AreEqual(HttpStatusCode.OK, response1.StatusCode);
 
-            LabAuthenticationHelper.RevokeUserSession(labResponse.User);
+            await LabUserHelper.RevokeUserSessionAsync(labResponse.User).ConfigureAwait(false);
             await Task.Delay(_delayTimeout).ConfigureAwait(false);
 
             var response2 = await _httpClient.SendAsync(CreateRequest(result)).ConfigureAwait(false);

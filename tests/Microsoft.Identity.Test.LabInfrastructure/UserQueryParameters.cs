@@ -1,9 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public struct UserQuery
@@ -33,6 +30,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public static UserQuery PublicAadUser2Query => new UserQuery()
         {
             Upn = "idlab@msidlab4.onmicrosoft.com"
+        };
+        
+        public static UserQuery PublicAadCaeUserQuery => new UserQuery()
+        {
+            Upn = "idlabcae@msidlab4.onmicrosoft.com"
         };
 
         public static UserQuery MsaUserQuery => new UserQuery

@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string uri = s_baseURL + "EnvironmentVariables?resource=" + resource;
 
             var environmentVariableResponse = await LabUserHelper
-                .GetMSIEnvironmentVariablesAsync(uri)
+                .GetMsiEnvironmentVariablesAsync(uri)
                 .ConfigureAwait(false);
 
             //process the response

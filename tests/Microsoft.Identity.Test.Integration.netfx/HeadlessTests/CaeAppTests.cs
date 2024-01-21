@@ -25,18 +25,18 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
         private readonly string[] _graphAppScope = ["https://graph.microsoft.com/.default"];
 
         [TestInitialize]
-        public void TestInitialize()
+        public async Task TestInitialize()
         {
             if (string.IsNullOrEmpty(_confidentialClientSecret))
             {
                 _confidentialClientSecret = _keyVaultProvider.GetSecretByName(TestConstants.MsalCCAKeyVaultSecretName).Value;
             }
-            LabAuthenticationHelper.EnableAppServicePrincipal(LabApiConstants.LabCaeConfidentialClientId);
+            await LabUserHelper.EnableAppServicePrincipal(LabApiConstants.LabCaeConfidentialClientId).ConfigureAwait(false);
         }
         [TestCleanup]
-        public void TestCleanup()
+        public async Task TestCleanup()
         {
-            LabAuthenticationHelper.EnableAppServicePrincipal(LabApiConstants.LabCaeConfidentialClientId);
+            await LabUserHelper.EnableAppServicePrincipal(LabApiConstants.LabCaeConfidentialClientId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
             var response1 = await _httpClient.SendAsync(CreateRequest(result)).ConfigureAwait(false);
             Assert.AreEqual(HttpStatusCode.OK, response1.StatusCode);
 
-            LabAuthenticationHelper.DisableAppServicePrincipal(LabApiConstants.LabCaeConfidentialClientId);
+            await LabUserHelper.DisableAppServicePrincipal(LabApiConstants.LabCaeConfidentialClientId).ConfigureAwait(false);
             await Task.Delay(_delayTimeout).ConfigureAwait(false);
 
             var response2 = await _httpClient.SendAsync(CreateRequest(result)).ConfigureAwait(false);

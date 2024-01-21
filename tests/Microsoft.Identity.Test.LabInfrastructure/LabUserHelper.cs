@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
@@ -50,7 +51,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             throw new NotSupportedException();
         }
 
-        public static async Task<string> GetMSIEnvironmentVariablesAsync(string uri)
+        public static async Task<string> GetMsiEnvironmentVariablesAsync(string uri)
         {
             string result = await s_labService.GetLabResponseAsync(uri).ConfigureAwait(false);
             return result;
@@ -72,6 +73,15 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public static Task<LabResponse> GetDefaultUser2Async()
         {
             return GetLabUserDataAsync(UserQuery.PublicAadUser2Query);
+        }
+
+        /// <summary>
+        /// Returns the AAD cloud user idlabcae@msidlab4.onmicrosoft.com for CAE testing
+        /// </summary>
+        /// <returns></returns>
+        public static Task<LabResponse> GetCaeUserAsync()
+        {
+            return GetLabUserDataAsync(UserQuery.PublicAadCaeUserQuery);
         }
 
         public static Task<LabResponse> GetMsaUserAsync()
@@ -171,6 +181,21 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             {
                 throw new InvalidOperationException("Test setup: cannot get the user password. See inner exception.", e);
             }
+        }
+
+        public static async Task RevokeUserSessionAsync(LabUser user)
+        {
+            await s_labService.GetLabResponseAsync(Path.Combine(LabApiConstants.LabUserEndPoint, "revokeusersession", user.Upn)).ConfigureAwait(false);
+        }
+
+        public static async Task DisableAppServicePrincipal(string appId)
+        {
+            await s_labService.GetLabResponseAsync(Path.Combine(LabApiConstants.LabAppEndpoint, "disableserviceprincipal", appId)).ConfigureAwait(false);
+        }
+
+        public static async Task EnableAppServicePrincipal(string appId)
+        {
+            await s_labService.GetLabResponseAsync(Path.Combine(LabApiConstants.LabAppEndpoint, "enableserviceprincipal", appId)).ConfigureAwait(false);
         }
     }
 }
