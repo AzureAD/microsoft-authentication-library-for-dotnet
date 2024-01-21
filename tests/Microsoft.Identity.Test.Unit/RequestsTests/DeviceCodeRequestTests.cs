@@ -282,7 +282,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 var deviceCodeParameters = new AcquireTokenWithDeviceCodeParameters
                 {
-                    DeviceCodeResultCallback = result => Task.FromResult(0)
+                    DeviceCodeResultCallback = _ => Task.FromResult(0)
                 };
 
                 var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);

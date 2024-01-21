@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task CallsToPublicCloudDoNotHitTheNetworkAsync()
         {
             IMsalHttpClientFactory factoryThatThrows = Substitute.For<IMsalHttpClientFactory>();
-            factoryThatThrows.When(x => x.GetHttpClient()).Do(x => { Assert.Fail("A network call is being performed"); });
+            factoryThatThrows.When(x => x.GetHttpClient()).Do(_ => { Assert.Fail("A network call is being performed"); });
 
             // Arrange
             PublicClientApplication pca = PublicClientApplicationBuilder
@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             // if a network call is made, this test will fail
             IMsalHttpClientFactory factoryThatThrows = Substitute.For<IMsalHttpClientFactory>();
-            factoryThatThrows.When(x => x.GetHttpClient()).Do(x => { Assert.Fail("A network call is being performed"); });
+            factoryThatThrows.When(x => x.GetHttpClient()).Do(_ => { Assert.Fail("A network call is being performed"); });
 
             var pcaDe = PublicClientApplicationBuilder
               .Create(ClientIdInFile)

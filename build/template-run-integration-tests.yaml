@@ -5,7 +5,7 @@ steps:
 
 - task: VSTest@2
   displayName: 'Run integration tests (.NET FX)'
-  condition: and(succeeded(), eq(variables['PipelineType'], ''))
+  condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netfx\bin\**\Microsoft.Identity.Test.Integration.NetFx.dll'

@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             var cacheAccessor = Substitute.For<ICacheAccessor>();
             var exception = new InvalidOperationException("some error");
             cacheAccessor.Read().Throws(exception);
-            cacheAccessor.When((x) => x.Clear()).Do(x => throw exception);
+            cacheAccessor.When((x) => x.Clear()).Do(_ => throw exception);
             _logger.Listeners.Add(stringListener);
             var actualLogger = new TraceSourceLogger(_logger);
             var storage = new Storage(s_storageCreationProperties, cacheAccessor, actualLogger);
