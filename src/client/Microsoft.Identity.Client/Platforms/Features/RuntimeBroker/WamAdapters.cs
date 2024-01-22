@@ -335,7 +335,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
                 // workaround for bug https://identitydivision.visualstudio.com/Engineering/_workitems/edit/2047936
                 // i.e. environment is not set correctly in multi-cloud apps and home_environment is not set
-                if (authenticationRequestParameters.AppConfig.MultiCloudSupportEnabled && string.IsNullOrEmpty(authorityUrl))
+                if (authenticationRequestParameters.AppConfig.MultiCloudSupportEnabled)
                 {
                     IdToken idToken = IdToken.Parse(authResult.RawIdToken);
                     authorityUrl = idToken.ClaimsPrincipal.FindFirst("iss")?.Value;
