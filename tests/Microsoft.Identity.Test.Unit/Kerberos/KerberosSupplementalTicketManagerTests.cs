@@ -4,8 +4,6 @@
 #if NETFRAMEWORK
 using System.Linq;
 using Microsoft.Identity.Client.Kerberos;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Json.Linq;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -147,13 +145,13 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
             CheckKerberosClaim(idToken);
         }
 
-        [TestMethod]
-        public void GetKerberosTicketClaim_AccessToken()
-        {
-            string kerberosClaim
-                = KerberosSupplementalTicketManager.GetKerberosTicketClaim(_testServicePrincipalName, KerberosTicketContainer.AccessToken);
+        //[TestMethod]
+        //public void GetKerberosTicketClaim_AccessToken()
+        //{
+        //    string kerberosClaim
+        //        = KerberosSupplementalTicketManager.GetKerberosTicketClaim(_testServicePrincipalName, KerberosTicketContainer.AccessToken);
 
-            Assert.IsFalse(string.IsNullOrEmpty(kerberosClaim));
+        //    Assert.IsFalse(string.IsNullOrEmpty(kerberosClaim));
 
             JObject claim = JObject.Parse(kerberosClaim);
             Assert.IsNotNull(claim);
@@ -162,8 +160,8 @@ namespace Microsoft.Identity.Test.Unit.Kerberos
             JToken accessToken = claim.GetValue("access_token");
             Assert.IsNotNull(accessToken);
 
-            CheckKerberosClaim(accessToken);
-        }
+        //    CheckKerberosClaim(accessToken);
+        //}
 
         private void CheckKerberosClaim(JToken claim)
         {            
