@@ -8,8 +8,6 @@
     <TargetFrameworks>$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet6);$(TargetFrameworkNet6Win)</TargetFrameworks>
     <IsPackable>false</IsPackable>
 
-    <LangVersion>latest</LangVersion>
-
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
 
     <Platforms>AnyCPU;x64</Platforms>
