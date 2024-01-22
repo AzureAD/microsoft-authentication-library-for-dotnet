@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace Microsoft.Identity.Client.Utils
 {
-    static class Guard
+    internal static class Guard
     {
         public static T AgainstNull<T>(
             [NotNull] T? argument,
