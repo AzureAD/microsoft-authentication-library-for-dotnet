@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Utils
     }
 }
 
-#if NETFRAMEWORK || NETSTANDARD || NETCOREAPP2X
+#if NETFRAMEWORK || NETSTANDARD
 
 namespace System.Runtime.CompilerServices
 {
