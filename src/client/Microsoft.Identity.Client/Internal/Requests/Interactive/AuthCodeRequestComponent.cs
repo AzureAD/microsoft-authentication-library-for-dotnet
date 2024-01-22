@@ -136,13 +136,13 @@ namespace Microsoft.Identity.Client.Internal
                     requestParameters[OAuth2Parameter.LoginHint] = _interactiveParameters.Account.Username;
                 }
 
-                if (_interactiveParameters.Account?.HomeAccountId?.ObjectId != null)
+                if (_interactiveParameters.Account.HomeAccountId?.ObjectId != null)
                 {
                     requestParameters[OAuth2Parameter.LoginReq] =
                         _interactiveParameters.Account.HomeAccountId.ObjectId;
                 }
 
-                if (!string.IsNullOrEmpty(_interactiveParameters.Account?.HomeAccountId?.TenantId))
+                if (!string.IsNullOrEmpty(_interactiveParameters.Account.HomeAccountId?.TenantId))
                 {
                     requestParameters[OAuth2Parameter.DomainReq] =
                         _interactiveParameters.Account.HomeAccountId.TenantId;
