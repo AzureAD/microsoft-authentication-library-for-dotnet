@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         //This corresponds to windows 7, 8, 8.1 and their server equivalents.       
         public static bool CanOSPerformPKeyAuth()
         {
-#if NET_CORE || NET6_WIN || NETFRAMEWORK || NETSTANDARD
+#if NET_CORE || NETFRAMEWORK || NETSTANDARD
             try
             {
                 // No support on Mac or Linux

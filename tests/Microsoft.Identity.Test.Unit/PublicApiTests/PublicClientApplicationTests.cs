@@ -11,10 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Advanced;
-#if !NET5_0_OR_GREATER
-using Microsoft.Identity.Client.Desktop;
-#endif
-#if !NET6_0
+#if NET6_0
 using Microsoft.Identity.Client.Broker;
 #endif
 using Microsoft.Identity.Client.Instance;
@@ -344,28 +341,24 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void AcquireTokenWithDefaultRedirectURITest()
         {
-            using (var harness = CreateTestHarness())
-            {
-                //harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                                            .BuildConcrete();
-                //Validate legacy default uri
-                Assert.AreEqual(TestConstants.RedirectUri, app.AppConfig.RedirectUri);
+            PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                        .BuildConcrete();
+            //Validate legacy default uri
+            Assert.AreEqual(TestConstants.RedirectUri, app.AppConfig.RedirectUri);
 
-                app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                                            .WithHttpManager(harness.HttpManager)
-                                                                            .WithDefaultRedirectUri()
-                                                                            .BuildConcrete();
+            app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                      .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                      .WithDefaultRedirectUri()
+                      .BuildConcrete();
 
-                //Validate new default redirect uri
-#if NETFRAMEWORK || NET6_WIN
-                Assert.AreEqual(Constants.NativeClientRedirectUri, app.AppConfig.RedirectUri);
-#elif NET_CORE 
-                Assert.AreEqual(app.AppConfig.RedirectUri, "http://localhost");
+            //Validate new default redirect uri
+#if NETFRAMEWORK
+            Assert.AreEqual(Constants.NativeClientRedirectUri, app.AppConfig.RedirectUri);
+#else
+            Assert.AreEqual(app.AppConfig.RedirectUri, "http://localhost");
 #endif
-            }
+
         }
 
         [TestMethod]
@@ -499,7 +492,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     });
 
                 //Silent flow should fail when different account is returned.
-                var exception = Assert.ThrowsException<AggregateException>( () =>
+                var exception = Assert.ThrowsException<AggregateException>(() =>
                     result = app
                     .AcquireTokenSilent(TestConstants.s_scope, result.Account)
                     .WithForceRefresh(true)
@@ -1055,13 +1048,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             if (enableBroker)
             {
-#if NET6_WIN && !NET6_0
-                pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
-#elif !NET6_0
-                WamExtension.WithBroker(pcaBuilder, new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+#if NET6_0_OR_GREATER
+                pcaBuilder.WithBroker(
+                    new BrokerOptions(
+                        BrokerOptions.OperatingSystems.Windows));
+#else
+            Assert.Fail("Test failure - not supported");
 #endif
             }
-
             var pca = pcaBuilder.BuildConcrete();
             pca.InitializeTokenCacheFromFile(ResourceHelper.GetTestResourceRelativePath(tokenCacheFile), true);
             var expectedRTs = enableBroker ? 0 : 2;
