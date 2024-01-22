@@ -3,8 +3,6 @@
   <PropertyGroup>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
     <TargetFrameworkNetDesktop Condition="$([MSBuild]::IsOsPlatform('Windows'))">net462</TargetFrameworkNetDesktop>
-
-    <LangVersion>8.0</LangVersion>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <TargetFramework Condition="'$(TargetFrameworkNetDesktop)' == ''">$(TargetFrameworkNetStandard)</TargetFramework>
     <TargetFrameworks Condition="'$(TargetFrameworkNetDesktop)' != ''">$(TargetFrameworkNetStandard);$(TargetFrameworkNetDesktop)</TargetFrameworks>
