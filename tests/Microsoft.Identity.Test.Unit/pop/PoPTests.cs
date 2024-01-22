@@ -14,13 +14,10 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
-#if !NET6_WIN && !NET6_0
+#if !NET6_0
 using Microsoft.Identity.Client.Broker;
 #endif
 
-#if NET6_WIN
-using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
-#endif
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -168,8 +165,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
                                                               .BuildConcrete();
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
-                var popConfig = new PoPAuthenticationConfiguration(request);
-                var provider = PoPProviderFactory.GetOrCreateProvider();
 
                 await AssertException.TaskThrowsAsync<ArgumentNullException>(() =>
                                     app.AcquireTokenInteractive(TestConstants.s_scope.ToArray())
@@ -528,11 +523,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             pcaBuilder = PublicClientApplicationBuilder
                                 .Create(TestConstants.ClientId);
 
-#if NET6_WIN
-            pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
-#else
             pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
-#endif
 
             app = pcaBuilder.Build();
 

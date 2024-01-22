@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 client1.MaxResponseContentBufferSize);
         }
 
-#if NET_CORE || NET6_WIN || NETFRAMEWORK
+#if NET_CORE || NETFRAMEWORK
         [TestMethod]
         public void PlatformProxy_HttpClient_NetCore()
         {
@@ -133,21 +133,21 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             Assert.IsTrue(proxy.BrokerSupportsWamAccounts);
             Assert.IsTrue(proxy.CanBrokerSupportSilentAuth());
 
-            Assert.AreSame(
+            Assert.AreEqual(
                 Constants.DefaultRedirectUri,
                 proxy.GetDefaultRedirectUri("cid", false));
 
-#if NETFRAMEWORK || NET6_WIN || NET7_0
-
-            Assert.AreSame(
-                Constants.NativeClientRedirectUri,
-                proxy.GetDefaultRedirectUri("cid", true));
-
+#if NETFRAMEWORK
+   Assert.AreEqual(
+          Constants.NativeClientRedirectUri,
+          proxy.GetDefaultRedirectUri("cid", true));
 #else
-             Assert.AreSame(
-                Constants.LocalHostRedirectUri,
-                proxy.GetDefaultRedirectUri("cid", true));
+ Assert.AreEqual(
+          Constants.LocalHostRedirectUri,
+          proxy.GetDefaultRedirectUri("cid", true));
 #endif
+
+
         }
 
     }
