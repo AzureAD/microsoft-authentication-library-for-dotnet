@@ -1,5 +1,6 @@
 <Project>
   <PropertyGroup>
+    <LangVersion>latest</LangVersion>
     <!-- This is strong naming, not signing-->
     <SignAssembly>true</SignAssembly>
     <!-- The MSAL.snk has both private and public keys -->

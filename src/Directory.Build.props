@@ -27,7 +27,6 @@
     <IsPackable>true</IsPackable>
     
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   
   <ItemGroup Label="Build Tools" Condition="$([MSBuild]::IsOsPlatform('Windows'))">
