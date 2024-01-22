@@ -36,9 +36,6 @@
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop48)' ">
-    <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Win)' ">
     <DefineConstants>$(DefineConstants);NET6_WIN</DefineConstants>
   </PropertyGroup>
