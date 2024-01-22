@@ -156,13 +156,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal void InitCacheKey()
         {
-            var stringBuilder = new StringBuilder();
-
-            stringBuilder.Append(HomeAccountId + MsalCacheKeys.CacheKeyDelimiter);
-            stringBuilder.Append(Environment + MsalCacheKeys.CacheKeyDelimiter);
-            stringBuilder.Append(TenantId);
-
-            CacheKey = stringBuilder.ToString();
+            CacheKey =  $"{HomeAccountId}{MsalCacheKeys.CacheKeyDelimiter}{Environment}{MsalCacheKeys.CacheKeyDelimiter}{TenantId}";
 
             iOSCacheKeyLazy = new Lazy<IiOSKey>(() => InitiOSKey());
         }
