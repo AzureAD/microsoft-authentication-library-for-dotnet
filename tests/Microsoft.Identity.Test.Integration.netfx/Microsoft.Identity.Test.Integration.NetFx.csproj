@@ -5,7 +5,6 @@
     <IsPackable>false</IsPackable>
     <DefineConstants>$(DefineConstants);DESKTOP;NET_FX</DefineConstants>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
