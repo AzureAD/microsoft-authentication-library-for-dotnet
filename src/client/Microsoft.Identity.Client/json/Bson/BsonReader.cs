@@ -496,8 +496,7 @@ namespace Microsoft.Identity.Json.Bson
                     break;
                 }
                 case BsonType.Binary:
-                    BsonBinaryType binaryType;
-                    byte[] data = ReadBinary(out binaryType);
+                    byte[] data = ReadBinary(out BsonBinaryType binaryType);
 
                     object value = (binaryType != BsonBinaryType.Uuid)
                         ? data
