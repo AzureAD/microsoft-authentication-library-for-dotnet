@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.UI
 
         private static AuthorizationResult FromParsedValues(Dictionary<string, string> parameters, string url = null)
         {
-            if (parameters.TryGetValue(TokenResponseClaim.Error, out string parameter))
+            if (parameters.TryGetValue(TokenResponseClaim.Error, out string error))
             {
                 if (parameters.TryGetValue(TokenResponseClaim.ErrorSubcode, out string subcode))
                 {
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.UI
                 }
 
                 return FromStatus(AuthorizationStatus.ProtocolError,
-                    parameter,
+                    error,
                     parameters.TryGetValue(TokenResponseClaim.ErrorDescription, out string errorDescription)
                             ? errorDescription
                         : null);
