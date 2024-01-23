@@ -309,10 +309,7 @@ namespace Microsoft.Identity.Client.OAuth2
             // OAuth spec states that scopes are case sensitive, but 
             // merge the reserved scopes in a case insensitive way, to 
             // avoid sending things like "openid OpenId" (note that EVO is tolerant of this)
-            SortedSet<string> set = new SortedSet<string>(
-                inputScope.ToArray(),
-                StringComparer.OrdinalIgnoreCase);
-
+            var set = new SortedSet<string>(inputScope, StringComparer.OrdinalIgnoreCase);
             set.UnionWith(OAuth2Value.ReservedScopes);
             return set.AsSingleString();
         }
