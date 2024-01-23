@@ -360,7 +360,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
 
                 //Validate new default redirect uri
-#if DESKTOP || NET6_WIN
+#if NETFRAMEWORK || NET6_WIN
                 Assert.AreEqual(Constants.NativeClientRedirectUri, app.AppConfig.RedirectUri);
 #elif NET_CORE 
                 Assert.AreEqual(app.AppConfig.RedirectUri, "http://localhost");
@@ -1161,7 +1161,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                .WithLoginHint("loginhint")
                .WithPrompt(Prompt.ForceLogin);
 
-#if DESKTOP
+#if NETFRAMEWORK
             interactiveBuilder = interactiveBuilder.WithUseEmbeddedWebView(true);
 #endif
             CheckBuilderCommonMethods(interactiveBuilder);

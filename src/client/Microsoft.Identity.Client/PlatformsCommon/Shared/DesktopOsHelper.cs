@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         return true;
 #else
 
-#if DESKTOP
+#if NETFRAMEWORK
             return Environment.OSVersion.Platform == PlatformID.Win32NT;
 #elif SUPPORTS_WIN32
             return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
 #if IS_XAMARIN_OR_UWP
             return false;
-#elif DESKTOP
+#elif NETFRAMEWORK
             return Environment.OSVersion.Platform == PlatformID.Unix;
 #else
             return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
 #if MAC
             return true;
-#elif DESKTOP
+#elif NETFRAMEWORK
             return Environment.OSVersion.Platform == PlatformID.MacOSX;
 #elif !IS_XAMARIN_OR_UWP
             return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             //Environment.OSVersion as it will return incorrect information on some operating systems
             //For more information on how to acquire the current OS version from the registry
             //See (https://stackoverflow.com/a/61914068)
-#if DESKTOP
+#if NETFRAMEWORK
             var reg = Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
 
             string OSInfo = (string)reg.GetValue("ProductName");

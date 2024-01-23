@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client
                 return this;
             }
 
-            Parameters.CcsRoutingHint = new KeyValuePair<string, string>(userObjectIdentifier, tenantIdentifier) as KeyValuePair<string, string>?;
+            Parameters.CcsRoutingHint = new KeyValuePair<string, string>(userObjectIdentifier, tenantIdentifier);
             return this;
         }
 

@@ -450,9 +450,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
-            if (additionalBodyParameters.ContainsKey(OAuth2Parameter.Username))
+            if (additionalBodyParameters.TryGetValue(OAuth2Parameter.Username, out string username))
             {
-                return GetCcsUpnHeader(additionalBodyParameters[OAuth2Parameter.Username]);
+                return GetCcsUpnHeader(username);
             }
 
             if (!String.IsNullOrEmpty(AuthenticationRequestParameters.LoginHint))
@@ -472,7 +472,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             string OidCcsHeader = CoreHelpers.GetCcsUpnHint(upnHeader);
 
-            return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader) as KeyValuePair<string, string>?;
+            return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader);
         }
 
         private void LogRequestStarted(AuthenticationRequestParameters authenticationRequestParameters)
