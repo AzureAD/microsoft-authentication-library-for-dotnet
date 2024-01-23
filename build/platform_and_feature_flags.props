@@ -19,6 +19,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
     <DefineConstants>$(DefineConstants)DESKTOP;SUPPORTS_BROKER;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)'">
     <DefineConstants>$(DefineConstants);SUPPORTS_BROKER;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32</DefineConstants>
   </PropertyGroup>
