@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
             _tasks = new BlockingCollection<Task>();
 
             // Create the threads to be used by this scheduler
-            _threads = Enumerable.Range(0, numberOfThreads).Select(i =>
+            _threads = Enumerable.Range(0, numberOfThreads).Select(_ =>
             {
                 var thread = new Thread(() =>
                 {

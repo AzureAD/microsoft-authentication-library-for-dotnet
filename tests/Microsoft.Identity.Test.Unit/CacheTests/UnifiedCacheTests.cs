@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                                                         .WithUserTokenLegacyCachePersistenceForTest(
                                                             new TestLegacyCachePersistance())
                                                         .BuildConcrete();
-                app.UserTokenCacheInternal.SetBeforeAccess(n => { });
+                app.UserTokenCacheInternal.SetBeforeAccess(_ => { });
 
                 app.ServiceBundle.ConfigureMockWebUI(
                     AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code"));
@@ -209,7 +209,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                           .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance())
                           .WithHttpManager(harness.HttpManager)
                           .BuildConcrete();
-                app.UserTokenCacheInternal.SetBeforeAccess(n => { });
+                app.UserTokenCacheInternal.SetBeforeAccess(_ => { });
                 CreateAdalCache(harness.ServiceBundle.ApplicationLogger, app.UserTokenCacheInternal.LegacyPersistence, TestConstants.s_scope.ToString());
 
                 var adalUsers =

@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                                 sendAuthorizeRequest,
                                 cancellationToken,
                                 TaskCreationOptions.None,
-                                staTaskScheduler).Wait();
+                                staTaskScheduler).Wait(cancellationToken);
                         }
                         catch (AggregateException ae)
                         {
@@ -84,9 +84,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                             Exception innerException = ae.InnerExceptions[0];
 
                             // In MTA case, AggregateException is two layer deep, so checking the InnerException for that.
-                            if (innerException is AggregateException)
+                            if (innerException is AggregateException innerAggregateException)
                             {
-                                innerException = ((AggregateException)innerException).InnerExceptions[0];
+                                innerException = innerAggregateException.InnerExceptions[0];
                             }
 
                             throw innerException;
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                 sendAuthorizeRequest();
             }
 
-            return await Task.Factory.StartNew(() => authorizationResult).ConfigureAwait(false);
+            return await Task.Factory.StartNew(() => authorizationResult, cancellationToken).ConfigureAwait(false);
         }
 
         internal AuthorizationResult Authenticate(Uri requestUri, Uri callbackUri, CancellationToken cancellationToken)

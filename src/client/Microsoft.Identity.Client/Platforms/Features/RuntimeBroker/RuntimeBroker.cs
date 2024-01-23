@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             //if OperatingSystemAccount is passed then we use the user signed-in on the machine
             if (PublicClientApplication.IsOperatingSystemAccount(authenticationRequestParameters.Account))
             {
-                return await AcquireTokenInteractiveDefaultUserAsync(authenticationRequestParameters, acquireTokenInteractiveParameters).ConfigureAwait(false);
+                return await AcquireTokenInteractiveDefaultUserAsync(authenticationRequestParameters).ConfigureAwait(false);
             }
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                                 $"[RuntimeBroker] Could not find a WAM account for the selected user. Error: {readAccountResult.Error}");
 
                             msalTokenResponse = await SignInInteractivelyAsync(
-                                authenticationRequestParameters, acquireTokenInteractiveParameters)
+                                authenticationRequestParameters)
                                  .ConfigureAwait(false);
                         }
                     }
@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             else
             {
                 msalTokenResponse = await SignInInteractivelyAsync(
-                    authenticationRequestParameters, acquireTokenInteractiveParameters)
+                    authenticationRequestParameters)
                     .ConfigureAwait(false);
             }
 
@@ -197,8 +197,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
         }
 
         private async Task<MsalTokenResponse> SignInInteractivelyAsync(
-            AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
+            AuthenticationRequestParameters authenticationRequestParameters)
         {
             MsalTokenResponse msalTokenResponse = null;
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
@@ -231,8 +230,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
         }
 
         private async Task<MsalTokenResponse> AcquireTokenInteractiveDefaultUserAsync(
-            AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
+            AuthenticationRequestParameters authenticationRequestParameters)
         {
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
 

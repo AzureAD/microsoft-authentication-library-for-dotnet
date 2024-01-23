@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
                 "/",
                 Arg.Any<Func<Uri, MessageAndHttpCode>>(),
                 cts.Token))
-               .Do(x =>
+               .Do(_ =>
                {
                    cts.Cancel();
                    throw new HttpListenerException();
@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             bool customOpenBrowserCalled = false;
             var options = new SystemWebViewOptions()
             {
-                OpenBrowserAsync = (Uri u) =>
+                OpenBrowserAsync = (Uri _) =>
                 {
                     customOpenBrowserCalled = true;
                     return Task.FromResult(0);

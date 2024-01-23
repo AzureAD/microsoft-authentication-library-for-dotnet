@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             await ExecuteTestAsync(
                 false,
                  ui => ui.AcquireAuthorizationCodeAsync(null, null, CancellationToken.None)
-                        .ReturnsForAnyArgs<Uri>(x => { throw new InvalidOperationException(); }),
+                        .ReturnsForAnyArgs<Uri>(_ => { throw new InvalidOperationException(); }),
                 async request =>
                 {
                     await AssertException.TaskThrowsAsync<InvalidOperationException>(
