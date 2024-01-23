@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Utils
             return sb.ToString();
         }
 
-#if NETSTANDARD2_0 || DESKTOP || WINDOWS_APP
+#if NETSTANDARD2_0 || NETFRAMEWORK || WINDOWS_APP
         /// <summary>
         /// Culture aware Contains
         /// </summary>

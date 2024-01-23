@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.UI
         public Activity CallerActivity { get; set; }
 #endif
 
-#if DESKTOP || WINDOWS_APP
+#if NETFRAMEWORK || WINDOWS_APP
         //hidden webview can be used in both WinRT and desktop applications.
         internal bool UseHiddenBrowser { get; set; }
 #endif
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client.UI
         internal bool UseCorporateNetwork { get; set; }
 #endif
 
-#if DESKTOP || NET6_WIN || NET_CORE || NETSTANDARD
+#if NETFRAMEWORK || NET6_WIN || NET_CORE || NETSTANDARD
         internal object OwnerWindow { get; set; }       
 #endif
     }

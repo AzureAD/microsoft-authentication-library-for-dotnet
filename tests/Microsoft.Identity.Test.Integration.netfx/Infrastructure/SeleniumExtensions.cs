@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         {
             Screenshot ss = ((ITakesScreenshot)driver).GetScreenshot();
             string picName = name + s_picNumber++ + ".png";
-#if DESKTOP // Can't attach a file on netcore because mstest doesn't support it
+#if NETFRAMEWORK // Can't attach a file on netcore because mstest doesn't support it
             string failurePicturePath = Path.Combine(testContext.TestResultsDirectory, picName);
 #else
             string failurePicturePath = Path.Combine(Directory.GetCurrentDirectory(), picName);
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             Trace.WriteLine($"Saving picture to {failurePicturePath}");
             ss.SaveAsFile(failurePicturePath, ScreenshotImageFormat.Png);
 
-#if DESKTOP // Can't attach a file to the logs on netcore because mstest doesn't support it
+#if NETFRAMEWORK // Can't attach a file to the logs on netcore because mstest doesn't support it
             testContext.AddResultFile(failurePicturePath);
 #endif
         }

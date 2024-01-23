@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
             return new Microsoft.Identity.Client.Platforms.uap.UapPlatformProxy(finalLogger);
 #elif NETSTANDARD
             return new Microsoft.Identity.Client.Platforms.netstandard.NetStandardPlatformProxy(finalLogger);
-#elif DESKTOP
+#elif NETFRAMEWORK
             return new Microsoft.Identity.Client.Platforms.netdesktop.NetDesktopPlatformProxy(finalLogger);
 #else
             throw new PlatformNotSupportedException();
