@@ -53,12 +53,12 @@ namespace Microsoft.Identity.Client.Instance
         /// - if the authority is defined at app level, and the request level authority of is of different type, throw an exception
         ///
         /// </summary>
-        public static async Task<Authority> CreateAuthorityForRequestAsync(
+        public static Task<Authority> CreateAuthorityForRequestAsync(
             RequestContext requestContext,
             AuthorityInfo requestAuthorityInfo,
             IAccount account = null)
         {
-            return await AuthorityInfo.AuthorityInfoHelper.CreateAuthorityForRequestAsync(requestContext, requestAuthorityInfo, account).ConfigureAwait(false);
+            return AuthorityInfo.AuthorityInfoHelper.CreateAuthorityForRequestAsync(requestContext, requestAuthorityInfo, account);
         }
 
         public static Authority CreateAuthority(string authority, bool validateAuthority = false)

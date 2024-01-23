@@ -53,24 +53,24 @@ namespace Microsoft.Identity.Client
 
         #region Accounts
         /// <inheritdoc/>
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync()
+        public Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
-            return await GetAccountsAsync(default(CancellationToken)).ConfigureAwait(false);
+            return GetAccountsAsync(default(CancellationToken));
         }
 
         // TODO: MSAL 5 - add cancellationToken to the interface
         /// <summary>
         /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
         /// </summary>
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync(CancellationToken cancellationToken = default)
+        public Task<IEnumerable<IAccount>> GetAccountsAsync(CancellationToken cancellationToken = default)
         {
-            return await GetAccountsInternalAsync(ApiIds.GetAccounts, null, cancellationToken).ConfigureAwait(false);
+            return GetAccountsInternalAsync(ApiIds.GetAccounts, null, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow)
+        public Task<IEnumerable<IAccount>> GetAccountsAsync(string userFlow)
         {
-            return await GetAccountsAsync(userFlow, default).ConfigureAwait(false);
+            return GetAccountsAsync(userFlow, default);
         }
 
         // TODO: MSAL 5 - add cancellationToken to the interface
@@ -125,9 +125,9 @@ namespace Microsoft.Identity.Client
         /// Removes all tokens in the cache for the specified account.
         /// </summary>
         /// <param name="account">Instance of the account that needs to be removed</param>
-        public async Task RemoveAsync(IAccount account)
+        public Task RemoveAsync(IAccount account)
         {
-            await RemoveAsync(account, default).ConfigureAwait(false);
+            return RemoveAsync(account, default);
         }
 
         // TODO: MSAL 5 - add cancellationToken to the interface

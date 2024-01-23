@@ -49,24 +49,24 @@ namespace Microsoft.Identity.Client.Http
             return await SendPostAsync(endpoint, headers, body, logger, cancellationToken).ConfigureAwait(false);
         }
 
-        public virtual async Task<HttpResponse> SendPostAsync(
+        public virtual Task<HttpResponse> SendPostAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
             HttpContent body,
             ILoggerAdapter logger,
             CancellationToken cancellationToken = default)
         {
-            return await SendRequestAsync(endpoint, headers, body, HttpMethod.Post, logger, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return SendRequestAsync(endpoint, headers, body, HttpMethod.Post, logger, cancellationToken: cancellationToken);
         }
 
-        public virtual async Task<HttpResponse> SendGetAsync(
+        public virtual Task<HttpResponse> SendGetAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
             ILoggerAdapter logger,
             bool retry = true,
             CancellationToken cancellationToken = default)
         {
-            return await SendRequestAsync(endpoint, headers, null, HttpMethod.Get, logger, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return SendRequestAsync(endpoint, headers, null, HttpMethod.Get, logger, cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -74,14 +74,14 @@ namespace Microsoft.Identity.Client.Http
         /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="HttpResponse"/> associated
         /// with the request.
         /// </summary>
-        public virtual async Task<HttpResponse> SendGetForceResponseAsync(
+        public virtual Task<HttpResponse> SendGetForceResponseAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
             ILoggerAdapter logger,
             bool retry = true,
             CancellationToken cancellationToken = default)
         {
-            return await SendRequestAsync(endpoint, headers, null, HttpMethod.Get, logger, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return SendRequestAsync(endpoint, headers, null, HttpMethod.Get, logger, doNotThrow: true, cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.Http
         /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="HttpResponse"/> associated
         /// with the request.
         /// </summary>
-        public virtual async Task<HttpResponse> SendPostForceResponseAsync(
+        public virtual Task<HttpResponse> SendPostForceResponseAsync(
             Uri uri,
             IDictionary<string, string> headers,
             IDictionary<string, string> bodyParameters,
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.Http
             CancellationToken cancellationToken = default)
         {
             HttpContent body = bodyParameters == null ? null : new FormUrlEncodedContent(bodyParameters);
-            return await SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, doNotThrow: true, cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -105,14 +105,14 @@ namespace Microsoft.Identity.Client.Http
         /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="HttpResponse"/> associated
         /// with the request.
         /// </summary>
-        public virtual async Task<HttpResponse> SendPostForceResponseAsync(
+        public virtual Task<HttpResponse> SendPostForceResponseAsync(
             Uri uri,
             IDictionary<string, string> headers,
             StringContent body,
             ILoggerAdapter logger,
             CancellationToken cancellationToken = default)
         {
-            return await SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, doNotThrow: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, doNotThrow: true, cancellationToken: cancellationToken);
         }
 
         private HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
