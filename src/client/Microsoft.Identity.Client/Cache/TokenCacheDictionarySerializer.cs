@@ -96,33 +96,33 @@ namespace Microsoft.Identity.Client.Cache
                 return null;
             }
 
-            if (cacheDict.ContainsKey(AccessTokenKey))
+            if (cacheDict.TryGetValue(AccessTokenKey, out IEnumerable<string> accessTokenKeys))
             {
-                foreach (var atItem in cacheDict[AccessTokenKey])
+                foreach (var atItem in accessTokenKeys)
                 {
                     _accessor.SaveAccessToken(MsalAccessTokenCacheItem.FromJsonString(atItem));
                 }
             }
 
-            if (cacheDict.ContainsKey(RefreshTokenKey))
+            if (cacheDict.TryGetValue(RefreshTokenKey, out IEnumerable<string> refreshTokenKeys))
             {
-                foreach (var rtItem in cacheDict[RefreshTokenKey])
+                foreach (var rtItem in refreshTokenKeys)
                 {
                     _accessor.SaveRefreshToken(MsalRefreshTokenCacheItem.FromJsonString(rtItem));
                 }
             }
 
-            if (cacheDict.ContainsKey(IdTokenKey))
+            if (cacheDict.TryGetValue(IdTokenKey, out IEnumerable<string> idTokenKeys))
             {
-                foreach (var idItem in cacheDict[IdTokenKey])
+                foreach (var idItem in idTokenKeys)
                 {
                     _accessor.SaveIdToken(MsalIdTokenCacheItem.FromJsonString(idItem));
                 }
             }
 
-            if (cacheDict.ContainsKey(AccountKey))
+            if (cacheDict.TryGetValue(AccountKey, out IEnumerable<string> accountKeys))
             {
-                foreach (var account in cacheDict[AccountKey])
+                foreach (var account in accountKeys)
                 {
                     _accessor.SaveAccount(MsalAccountCacheItem.FromJsonString(account));
                 }
