@@ -40,12 +40,6 @@ namespace Microsoft.Identity.Client
             EnabledOn = enabledOn;
         }
 
-        // The default constructor is private. So developer is forced to set the OS choice(s)
-        private BrokerOptions()
-        {
-
-        }
-
         /// <summary>
         /// Creates BrokerOptions from WindowsBrokerOptions
         /// </summary>
