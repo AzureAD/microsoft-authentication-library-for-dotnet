@@ -416,9 +416,9 @@ namespace NetDesktopWinForms
             }
         }
 
-        private async void getAccountsBtn_Click(object sender, EventArgs e)
+        private void getAccountsBtn_Click(object sender, EventArgs e)
         {
-            await RefreshAccountsAsync().ConfigureAwait(false);
+            return RefreshAccountsAsync();
         }
 
         private async Task RefreshAccountsAsync()

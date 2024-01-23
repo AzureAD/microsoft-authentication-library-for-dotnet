@@ -19,26 +19,11 @@
     <Version>$(MsalClientSemVer)</Version>
     <!-- Copyright needs to be in the form of © not (c) to be compliant -->
     <Title>MSAL.NET extension for desktop scenarios for older .NET platforms</Title>
-    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
-    <Company>Microsoft Corporation</Company>
-    <Authors>Microsoft</Authors>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
-    <PackageReleaseNotes>The release notes are available at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/releases and the roadmap at https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#roadmap. To provide feedback, fill-in the survey at https://ncv.microsoft.com/JrXkdySi0m. </PackageReleaseNotes>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Description>
       This package contains binaries needed to use the Windows broker and other features with MSAL on older platforms such as .NET Framework and .NET Core 3.x.
     </Description>
     <PackageTags>Microsoft Authentication Library Desktop MSAL WAM broker Windows Authentication Manager</PackageTags>
-    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
-    <Company>Microsoft Corporation</Company>
     <Product>Microsoft Authentication Library Desktop</Product>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <!-- Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <IsPackable>true</IsPackable>
   </PropertyGroup>
   
   <PropertyGroup Label="For CI build" Condition="'$(TF_BUILD)' == 'true'">
