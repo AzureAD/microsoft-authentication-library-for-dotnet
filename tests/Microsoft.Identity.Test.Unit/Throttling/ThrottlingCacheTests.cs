@@ -28,9 +28,8 @@ namespace Microsoft.Identity.Test.Unit.Throttling
 
             // Act
             await Task.Delay(1).ConfigureAwait(false);
-            MsalServiceException foundEx1, foundEx2;
-            bool isFound1 = cache.TryGetOrRemoveExpired("k1", _logger, out foundEx1);
-            bool isFound2 = cache.TryGetOrRemoveExpired("k2", _logger, out foundEx2);
+            bool isFound1 = cache.TryGetOrRemoveExpired("k1", _logger, out MsalServiceException foundEx1);
+            bool isFound2 = cache.TryGetOrRemoveExpired("k2", _logger, out MsalServiceException foundEx2);
 
             // Assert
             Assert.IsFalse(isFound1, "Should have been removed as it is expired");
@@ -53,9 +52,8 @@ namespace Microsoft.Identity.Test.Unit.Throttling
             cache.AddAndCleanup("k3", new ThrottlingCacheEntry(_ex2, TimeSpan.FromMilliseconds(1000)), _logger);
 
             // Assert
-            MsalServiceException foundEx1, foundEx2;
-            bool isFound1 = cache.TryGetOrRemoveExpired("k1", _logger, out foundEx1);
-            bool isFound2 = cache.TryGetOrRemoveExpired("k2", _logger, out foundEx2);
+            bool isFound1 = cache.TryGetOrRemoveExpired("k1", _logger, out MsalServiceException foundEx1);
+            bool isFound2 = cache.TryGetOrRemoveExpired("k2", _logger, out MsalServiceException foundEx2);
 
             Assert.IsFalse(isFound1, "Should have been removed by cleanup");
             Assert.IsTrue(isFound2, "Should have been found as it is not expired");
