@@ -27,9 +27,6 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
-    <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
   </PropertyGroup>
