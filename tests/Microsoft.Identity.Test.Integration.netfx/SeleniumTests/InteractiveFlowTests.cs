@@ -166,14 +166,13 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [RunOn(TargetFrameworks.NetCore)]
         public async Task ValidateCcsHeadersForInteractiveAuthCodeFlowAsync()
         {
-            HttpSnifferClientFactory factory = null;
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
 
             var pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithDefaultRedirectUri()
                .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
-               .WithTestLogging(out factory)
+               .WithTestLogging(out HttpSnifferClientFactory factory)
                .Build();
 
             AuthenticationResult authResult = await pca
@@ -369,12 +368,11 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             LabResponse labResponse,
             KerberosTicketContainer ticketContainer)
         {
-            HttpSnifferClientFactory factory = null;
             IPublicClientApplication pca = PublicClientApplicationBuilder
                     .Create(labResponse.App.AppId)
                     .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                     .WithAuthority(labResponse.Lab.Authority + "common")
-                    .WithTestLogging(out factory)
+                    .WithTestLogging(out HttpSnifferClientFactory factory)
                     .WithTenantId(labResponse.Lab.TenantId)
                     .WithClientId(TestConstants.KerberosTestApplicationId)
                     .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, ticketContainer)
