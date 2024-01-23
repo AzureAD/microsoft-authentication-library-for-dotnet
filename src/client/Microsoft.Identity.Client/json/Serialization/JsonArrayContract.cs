@@ -124,6 +124,7 @@ namespace Microsoft.Identity.Json.Serialization
 
             bool canDeserialize;
 
+            Type? tempCollectionType;
             if (IsArray)
             {
                 CollectionItemType = ReflectionUtils.GetCollectionItemType(UnderlyingType);
@@ -179,7 +180,7 @@ namespace Microsoft.Identity.Json.Serialization
                 ShouldCreateWrapper = true;
             }
 #if HAVE_READ_ONLY_COLLECTIONS
-            else if (ReflectionUtils.ImplementsGenericDefinition(NonNullableUnderlyingType, typeof(IReadOnlyCollection<>), out Type tempCollectionType))
+            else if (ReflectionUtils.ImplementsGenericDefinition(NonNullableUnderlyingType, typeof(IReadOnlyCollection<>), out tempCollectionType))
             {
                 CollectionItemType = tempCollectionType.GetGenericArguments()[0];
 

@@ -331,7 +331,9 @@ namespace Microsoft.Identity.Json.Schema
                     case JsonContractType.Dictionary:
                         CurrentSchema.Type = AddNullType(JsonSchemaType.Object, valueRequired);
 
-                        ReflectionUtils.GetDictionaryKeyValueTypes(type, out Type keyType, out Type valueType);
+                        Type keyType;
+                        Type valueType;
+                        ReflectionUtils.GetDictionaryKeyValueTypes(type, out keyType, out valueType);
 
                         if (keyType != null)
                         {
