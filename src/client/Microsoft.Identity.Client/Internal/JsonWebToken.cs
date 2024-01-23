@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Client.Internal
 
                 if (sendCertificate)
                 {
-#if DESKTOP
+#if NETFRAMEWORK
                     X509CertificatePublicCertValue = Convert.ToBase64String(certificate.GetRawCertData());
 #else
                     X509CertificatePublicCertValue = Convert.ToBase64String(certificate.RawData);

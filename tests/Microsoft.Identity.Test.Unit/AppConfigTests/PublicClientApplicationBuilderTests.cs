@@ -653,7 +653,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var builder1 = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId);
 
-#if DESKTOP || NET_CORE
+#if NETFRAMEWORK || NET_CORE
             Assert.IsFalse(builder1.IsBrokerAvailable());
 #else
             Assert.IsTrue(builder1.IsBrokerAvailable());

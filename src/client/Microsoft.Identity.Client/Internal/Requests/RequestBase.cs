@@ -470,7 +470,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             string OidCcsHeader = CoreHelpers.GetCcsUpnHint(upnHeader);
 
-            return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader) as KeyValuePair<string, string>?;
+            return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader);
         }
 
         private void LogRequestStarted(AuthenticationRequestParameters authenticationRequestParameters)
