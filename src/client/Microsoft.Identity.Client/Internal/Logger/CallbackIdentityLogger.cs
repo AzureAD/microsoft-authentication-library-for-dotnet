@@ -20,15 +20,13 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public CallbackIdentityLogger(
             LogCallback logCallback,
-            Guid correlationId,
+            string correlationId,
             string clientName,
             string clientVersion,
             bool enablePiiLogging,
             LogLevel minLogLevel)
         {
-            _correlationId = correlationId.Equals(Guid.Empty)
-                ? string.Empty
-                : " - " + correlationId;
+            _correlationId = correlationId;
             _clientInformation = LoggerHelper.GetClientInfo(clientName, clientVersion);
             _piiLoggingEnabled = enablePiiLogging;
             _logCallback = logCallback;
