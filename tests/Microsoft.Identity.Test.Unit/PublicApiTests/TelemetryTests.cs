@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         private const string TenantId = "1234";
         private const string UserId = "5678";
 
-#if DESKTOP
+#if NETFRAMEWORK
         [TestMethod]
         public async Task DoNotCallPlatformProxyAsync()
         {

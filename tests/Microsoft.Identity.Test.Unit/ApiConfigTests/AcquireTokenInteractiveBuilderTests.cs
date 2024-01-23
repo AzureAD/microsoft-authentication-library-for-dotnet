@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             _harness.ValidateInteractiveParameters(expectedEmbeddedWebView: WebViewPreference.System);
         }
 
-#if DESKTOP
+#if NETFRAMEWORK
         [TestMethod]
         public async Task TestAcquireTokenInteractive_Embedded_Async()
         {

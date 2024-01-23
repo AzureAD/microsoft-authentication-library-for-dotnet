@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
     [TestClass]
     public class ExperimentalFeatureTests
     {
-#if DESKTOP
+#if NETFRAMEWORK
         [TestMethod]
         public async Task ExperimentalFeatureExceptionAsync()
         {

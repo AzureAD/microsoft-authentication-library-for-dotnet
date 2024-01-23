@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
@@ -72,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 client1.MaxResponseContentBufferSize);
         }
 
-#if NET_CORE || NET6_WIN || DESKTOP
+#if NET_CORE || NET6_WIN || NETFRAMEWORK
         [TestMethod]
         public void PlatformProxy_HttpClient_NetCore()
         {
@@ -135,7 +137,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 Constants.DefaultRedirectUri,
                 proxy.GetDefaultRedirectUri("cid", false));
 
-#if DESKTOP || NET6_WIN || NET7_0
+#if NETFRAMEWORK || NET6_WIN || NET7_0
 
             Assert.AreSame(
                 Constants.NativeClientRedirectUri,
