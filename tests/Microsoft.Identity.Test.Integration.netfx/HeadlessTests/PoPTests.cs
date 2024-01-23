@@ -542,7 +542,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static RsaSecurityKey CreateRsaSecurityKey()
         {
-#if NET_FX
+#if NETFRAMEWORK
             RSA rsa = RSA.Create(2048);
 #else
             RSA rsa = new RSACryptoServiceProvider(2048);
