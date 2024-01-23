@@ -24,6 +24,6 @@
     <DefineConstants>$(DefineConstants);iOS;SUPPORTS_BROKER;IS_XAMARIN_OR_UWP</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
-    <DefineConstants>$(DefineConstants);SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_BROKER;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32;</DefineConstants>
+    <DefineConstants>$(DefineConstants);NETSTANDARD;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_BROKER;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32;</DefineConstants>
   </PropertyGroup>
 </Project>
