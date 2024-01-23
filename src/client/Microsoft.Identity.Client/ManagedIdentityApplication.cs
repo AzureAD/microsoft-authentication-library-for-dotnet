@@ -16,6 +16,9 @@ using Microsoft.Identity.Client.ManagedIdentity;
 using System.Diagnostics;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.Internal.Logger;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client
 {
@@ -85,9 +88,16 @@ namespace Microsoft.Identity.Client
         /// Retrives the binding certificate for advanced managed identity scenarios.
         /// </summary>
         /// <returns>Binding certificate used for advanced scenarios</returns>
-        public X509Certificate2 GetBindingCertificate()
+        public static X509Certificate2 GetBindingCertificate()
         {
-            return KeyMaterialManager.BindingCertificate; //return the binding cert
+            // Get the PlatformProxy instance
+            IPlatformProxy platformProxy = PlatformProxyFactory.CreatePlatformProxy(null);
+
+            // Get the KeyMaterialManager
+            IKeyMaterialManager keyMaterialManager = platformProxy.GetKeyMaterialManager();
+
+            // Return the binding certificate
+            return keyMaterialManager.BindingCertificate;
         }
     }
 }

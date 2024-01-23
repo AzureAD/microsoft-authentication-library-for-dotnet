@@ -9,6 +9,8 @@ using Microsoft.IdentityModel.Abstractions;
 int lineWidth = 50; // Adjust the width as needed
 string line = new('-', lineWidth);
 
+Console.WriteLine(ManagedIdentityApplication.GetBindingCertificate());
+
 IIdentityLogger identityLogger = new IdentityLogger();
 
 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder
@@ -22,8 +24,6 @@ IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder
 Console.WriteLine(mi.IsProofOfPossessionSupportedByClient());
 
 Console.WriteLine(mi.IsClaimsSupportedByClient());
-
-Console.WriteLine(mi.GetBindingCertificate());
 
 string? scope = "https://management.azure.com";
 

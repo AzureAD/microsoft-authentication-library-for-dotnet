@@ -37,19 +37,5 @@ namespace Microsoft.Identity.Client
 
             return false;
         }
-
-        /// <summary>
-        /// Retrives the binding certificate for advanced managed identity scenarios.
-        /// </summary>
-        /// <returns>Binding certificate used for advanced scenarios</returns>
-        public static X509Certificate2 GetBindingCertificate(this IManagedIdentityApplication app)
-        {
-            if (app is ManagedIdentityApplication mia)
-            {
-                return mia.GetBindingCertificate();
-            }
-
-            return null;
-        }
     }
 }

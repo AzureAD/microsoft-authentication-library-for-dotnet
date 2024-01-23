@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         private const string IsKeyGuardEnabledProperty = "Virtual Iso";
 
         // Field to store the current crypto key type
-        private CryptoKeyType _cryptoKeyType;
+        private static CryptoKeyType s_cryptoKeyType = CryptoKeyType.None;
 
         // Constants specifying the names for the key storage provider and key names
         private const string KeyProviderName = "Microsoft Software Key Storage Provider";
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                     throw new InvalidOperationException("CryptoKeyType cannot be accessed before initialization.");
                 }
 
-                return _cryptoKeyType;
+                return s_cryptoKeyType;
             }
         }
 
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                     return s_bindingCertificate;
                 }
             }
-            
+
             _isInitialized = false;
             return null;
         }
@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                 return eCDsaCng;
             }
 
-            _cryptoKeyType = CryptoKeyType.None;
+            s_cryptoKeyType = CryptoKeyType.None;
 
             // Both attempts failed, return null and do not alter the crypto key so it remains as none
             // Now we should follow the legacy managed identity flow
@@ -249,7 +249,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                 {
                     // KeyGuard key is available; set the cryptographic key type accordingly
                     _logger.Info("[Managed Identity] KeyGuard key is available. ");
-                    _cryptoKeyType = CryptoKeyType.KeyGuard;
+                    s_cryptoKeyType = CryptoKeyType.KeyGuard;
                     return true;
                 }
             }
@@ -267,22 +267,22 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             switch (true)
             {
                 case var _ when cngKey.IsMachineKey:
-                    _cryptoKeyType = CryptoKeyType.Machine;
+                    s_cryptoKeyType = CryptoKeyType.Machine;
                     // Determine whether the key is KeyGuard protected
                     _ = IsKeyGuardProtected(cngKey);
                     break;
 
                 case var _ when !cngKey.IsEphemeral && !cngKey.IsMachineKey:
-                    _cryptoKeyType = CryptoKeyType.User;
+                    s_cryptoKeyType = CryptoKeyType.User;
                     break;
 
                 case var _ when cngKey.IsEphemeral:
-                    _cryptoKeyType = CryptoKeyType.Ephemeral;
+                    s_cryptoKeyType = CryptoKeyType.Ephemeral;
                     break;
 
                 default:
                     // Handle other cases if needed
-                    _cryptoKeyType = CryptoKeyType.InMemory;
+                    s_cryptoKeyType = CryptoKeyType.InMemory;
                     break;
             }
         }

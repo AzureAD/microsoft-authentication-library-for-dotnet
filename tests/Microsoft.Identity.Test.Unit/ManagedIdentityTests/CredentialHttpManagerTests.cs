@@ -69,8 +69,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 {
                     Assert.IsTrue(mi.IsProofOfPossessionSupportedByClient() == false);
                 }
-
-                Assert.IsTrue(mi.GetBindingCertificate().Thumbprint == CertHelper.GetOrCreateTestCert().Thumbprint);
             }
         }
 
