@@ -95,13 +95,20 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger)
         {
+            var tokenSource = authResultMetadata.TokenSource;
+
+            //if (authResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed)
+            //{
+            //    tokenSource = TokenSource.IdentityProvider;
+            //}
+
             if (s_successCounter.Value.Enabled)
             {
                 s_successCounter.Value.Add(1,
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
-                        new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
+                        new(TelemetryConstants.TokenSource, tokenSource),
                         new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason),
                         new(TelemetryConstants.CacheLevel, cacheLevel));
                 logger.Info("[OpenTelemetry] Completed incrementing to isSuccessful counter."); 
@@ -113,7 +120,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
-                        new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
+                        new(TelemetryConstants.TokenSource, tokenSource),
                         new(TelemetryConstants.CacheLevel, cacheLevel)); 
             }
 
@@ -127,7 +134,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             }
 
             // Only log duration in HTTP when token is fetched from IDP
-            if (s_durationInHttp.Value.Enabled && authResultMetadata.TokenSource.Equals(TokenSource.IdentityProvider))
+            if (s_durationInHttp.Value.Enabled && tokenSource.Equals(TokenSource.IdentityProvider))
             {
                 s_durationInHttp.Value.Record(authResultMetadata.DurationInHttpInMs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
@@ -136,26 +143,28 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             }
 
             // Only log duration in microseconds when the cache level is L1.
-            if (s_durationInL1CacheInUs.Value.Enabled && authResultMetadata.TokenSource.Equals(TokenSource.Cache) 
+            if (s_durationInL1CacheInUs.Value.Enabled && tokenSource.Equals(TokenSource.Cache) 
                 && authResultMetadata.CacheLevel.Equals(CacheLevel.L1Cache))
             {
                 s_durationInL1CacheInUs.Value.Record(totalDurationInUs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
                 new(TelemetryConstants.ApiId, apiId),
-                new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
+                new(TelemetryConstants.TokenSource, tokenSource),
                 new(TelemetryConstants.CacheLevel, cacheLevel));
             }
         }
 
-        void IOtelInstrumentation.LogFailedMetrics(string platform, string errorCode)
+        void IOtelInstrumentation.LogFailedMetrics(string platform, string errorCode, string apiId, bool isProactiveTokenRefresh)
         {
             if (s_failureCounter.Value.Enabled)
             {
                 s_failureCounter.Value.Add(1,
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
-                        new(TelemetryConstants.ErrorCode, errorCode)); 
+                        new(TelemetryConstants.ErrorCode, errorCode), 
+                        new(TelemetryConstants.ApiId, apiId), 
+                        new(TelemetryConstants.IsProactiveRefresh, isProactiveTokenRefresh)); 
             }
         }
     }

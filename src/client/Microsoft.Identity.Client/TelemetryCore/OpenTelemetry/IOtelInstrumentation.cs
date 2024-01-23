@@ -16,6 +16,6 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger);
-        internal void LogFailedMetrics(string platform, string errorCode);
+        internal void LogFailedMetrics(string platform, string errorCode, string apiId, bool isProactiveTokenRefresh);
     }
 }

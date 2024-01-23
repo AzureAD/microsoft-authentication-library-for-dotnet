@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Platforms.Features.OpenTelemetry;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -60,7 +61,101 @@ namespace Microsoft.Identity.Test.Unit
                 await AcquireTokenMsalClientExceptionAsync().ConfigureAwait(false);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(5, _exportedMetrics);
+                VerifyMetrics(5, _exportedMetrics, 2, 2);
+            }
+        }
+
+        [TestMethod]
+        [Description("AT in cache, needs refresh. AAD responds well to Refresh.")]
+        public async Task ProactiveTokenRefresh_ValidResponse_Async()
+        {
+            // Arrange
+            using (_harness = base.CreateTestHarness())
+            {
+                Trace.WriteLine("1. Setup an app");
+                CreateApplication();
+                TokenCacheHelper.PopulateCache(_cca.AppTokenCacheInternal.Accessor, addSecondAt: false);
+
+                Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
+                var refreshOn = TestCommon.UpdateATWithRefreshOn(_cca.AppTokenCacheInternal.Accessor).RefreshOn;
+
+                TokenCacheAccessRecorder cacheAccess = _cca.AppTokenCache.RecordAccess();
+
+                Trace.WriteLine("3. Configure AAD to respond with valid token to the refresh RT flow");
+                _harness.HttpManager.AddAllMocks(TokenResponseType.Valid_ClientCredentials);
+
+                // Act
+                Trace.WriteLine("4. ATS - should perform an RT refresh");
+                AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                TestCommon.YieldTillSatisfied(() => _harness.HttpManager.QueueSize == 0);
+                Assert.IsNotNull(result);
+                Assert.AreEqual(0, _harness.HttpManager.QueueSize,
+                    "MSAL should have refreshed the token because the original AT was marked for refresh");
+                cacheAccess.WaitTo_AssertAcessCounts(1, 1);
+                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed);
+                Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == refreshOn);
+
+                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                                    .ExecuteAsync()
+                                    .ConfigureAwait(false);
+
+                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.NotApplicable);
+
+                s_meterProvider.ForceFlush();
+                VerifyMetrics(3, _exportedMetrics, 2, 0);
+            }
+        }
+
+        [TestMethod]
+        [Description("AT in cache, needs refresh. AAD is unavailable when refreshing.")]
+        public async Task ProactiveTokenRefresh_AadUnavailableResponse_Async()
+        {
+            // Arrange
+            using (_harness = base.CreateTestHarness())
+            {
+                Trace.WriteLine("1. Setup an app ");
+                CreateApplication();
+                TokenCacheHelper.PopulateCache(_cca.AppTokenCacheInternal.Accessor, addSecondAt: false);
+
+                Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
+
+                TestCommon.UpdateATWithRefreshOn(_cca.AppTokenCacheInternal.Accessor);
+
+                TokenCacheAccessRecorder cacheAccess = _cca.AppTokenCache.RecordAccess();
+
+                Trace.WriteLine("3. Configure AAD to respond with an error");
+                _harness.HttpManager.AddAllMocks(TokenResponseType.Invalid_AADUnavailable503);
+                _harness.HttpManager.AddTokenResponse(TokenResponseType.Invalid_AADUnavailable503);
+
+                // Act
+                AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result, "ClientCredentials should still succeeds even though AAD is unavailable");
+                TestCommon.YieldTillSatisfied(() => _harness.HttpManager.QueueSize == 0);
+                Assert.AreEqual(0, _harness.HttpManager.QueueSize);
+                cacheAccess.WaitTo_AssertAcessCounts(1, 0); // the refresh failed, no new data is written to the cache
+
+                // Now let AAD respond with tokens
+                _harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
+
+                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                Assert.IsNotNull(result);
+
+                cacheAccess.WaitTo_AssertAcessCounts(2, 1); // new tokens written to cache
+
+                Thread.Sleep(1000);
+
+                s_meterProvider.ForceFlush();
+                VerifyMetrics(4, _exportedMetrics, 2, 1);
             }
         }
 
@@ -74,16 +169,15 @@ namespace Microsoft.Identity.Test.Unit
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
             Assert.IsNotNull(result);
 
-            // Acquire token silently
-            var account = (await _cca.GetAccountsAsync().ConfigureAwait(false)).Single();
-            result = await _cca.AcquireTokenSilent(TestConstants.s_scope, account)
-                .ExecuteAsync().ConfigureAwait(false);
+            // Acquire token from the cache
+            //var account = (await _cca.GetAccountsAsync().ConfigureAwait(false)).Single();
+            result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
             Assert.IsNotNull(result);
         }
 
         private async Task AcquireTokenMsalServiceExceptionAsync()
         {
-            
             _harness.HttpManager.AddTokenResponse(TokenResponseType.InvalidClient);
 
             //Test for MsalServiceException
@@ -116,16 +210,15 @@ namespace Microsoft.Identity.Test.Unit
                         .WithClientSecret(TestConstants.ClientSecret)
                         .WithHttpManager(_harness.HttpManager)
                         .BuildConcrete();
-            TokenCacheHelper.PopulateCache(_cca.UserTokenCacheInternal.Accessor);
         }
 
-        private void VerifyMetrics(int expectedMetricCount, List<Metric> exportedMetrics)
+        private void VerifyMetrics(int expectedMetricCount, List<Metric> exportedMetrics, 
+            long expectedSuccessfulRequests, long expectedFailedRequests)
         {
             Assert.AreEqual(expectedMetricCount, exportedMetrics.Count);
 
             foreach (Metric exportedItem in exportedMetrics)
             {
-                int expectedTagCount = 0;
                 List<string> expectedTags = new List<string>();
 
                 Assert.AreEqual(OtelInstrumentation.MeterName, exportedItem.MeterName);
@@ -135,7 +228,6 @@ namespace Microsoft.Identity.Test.Unit
                     case "MsalSuccess":
                         Assert.AreEqual(MetricType.LongSum, exportedItem.MetricType);
 
-                        expectedTagCount = 6;
                         expectedTags.Add(TelemetryConstants.MsalVersion);
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ApiId);
@@ -143,58 +235,93 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
 
+                        long totalSuccessfulRequests = 0;
+                        foreach (var metricPoint in exportedItem.GetMetricPoints())
+                        {
+                            totalSuccessfulRequests += metricPoint.GetSumLong();
+                            AssertTags(metricPoint.Tags, 6, expectedTags);
+                        }
+
+                        Assert.AreEqual(expectedSuccessfulRequests, totalSuccessfulRequests);
+
                         break;
                     case "MsalFailure":
                         Assert.AreEqual(MetricType.LongSum, exportedItem.MetricType);
 
-                        expectedTagCount = 3;
                         expectedTags.Add(TelemetryConstants.MsalVersion);
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ErrorCode);
+                        expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.IsProactiveRefresh);
+
+                        long totalFailedRequests = 0;
+                        foreach (var metricPoint in exportedItem.GetMetricPoints())
+                        {
+                            totalFailedRequests += metricPoint.GetSumLong();
+                            AssertTags(metricPoint.Tags, 5, expectedTags);
+                        }
+
+                        Assert.AreEqual(expectedFailedRequests, totalFailedRequests);
 
                         break;
 
                     case "MsalTotalDuration.1A":
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
-                        expectedTagCount = 5;
                         expectedTags.Add(TelemetryConstants.MsalVersion);
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
+
+                        foreach (var metricPoint in exportedItem.GetMetricPoints())
+                        {
+                            AssertTags(metricPoint.Tags, 5, expectedTags);
+                        }
 
                         break;
 
                     case "MsalDurationInL1CacheInUs.1B":
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
-                        expectedTagCount = 5;
                         expectedTags.Add(TelemetryConstants.MsalVersion);
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
 
+                        foreach (var metricPoint in exportedItem.GetMetricPoints())
+                        {
+                            AssertTags(metricPoint.Tags, 5, expectedTags);
+                        }
+
                         break;
 
                     case "MsalDurationInL2Cache.1A":
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
-                        expectedTagCount = 3;
                         expectedTags.Add(TelemetryConstants.MsalVersion);
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ApiId);
+
+                        foreach (var metricPoint in exportedItem.GetMetricPoints())
+                        {
+                            AssertTags(metricPoint.Tags, 3, expectedTags);
+                        }
 
                         break;
 
                     case "MsalDurationInHttp.1A":
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
-                        expectedTagCount = 3;
                         expectedTags.Add(TelemetryConstants.MsalVersion);
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ApiId);
+
+                        foreach (var metricPoint in exportedItem.GetMetricPoints())
+                        {
+                            AssertTags(metricPoint.Tags, 3, expectedTags);
+                        }
 
                         break;
 
@@ -203,10 +330,7 @@ namespace Microsoft.Identity.Test.Unit
                         break;
                 }
 
-                foreach (var metricPoint in exportedItem.GetMetricPoints())
-                {
-                    AssertTags(metricPoint.Tags, expectedTagCount, expectedTags);
-                }
+                
             }
         }
 

@@ -82,10 +82,14 @@ namespace Microsoft.Identity.Client.Internal
         internal static void ProcessFetchInBackground(
             MsalAccessTokenCacheItem oldAccessToken,
             Func<Task<AuthenticationResult>> fetchAction,
-            ILoggerAdapter logger)
+            ILoggerAdapter logger, 
+            IServiceBundle serviceBundle, 
+            string apiId)
         {
             _ = Task.Run(async () =>
             {
+                string error = null;
+
                 try
                 {
                     await fetchAction().ConfigureAwait(false);
@@ -101,14 +105,29 @@ namespace Microsoft.Identity.Client.Internal
                     {
                         logger.ErrorPiiWithPrefix(ex, logMsg);
                     }
+
+                    error = ex.ErrorCode;
                 }
                 catch (OperationCanceledException ex)
                 {
                     logger.WarningPiiWithPrefix(ex, ProactiveRefreshCancellationError);
+                    error = ex.GetType().Name;
                 }
                 catch (Exception ex)
                 {
                     logger.ErrorPiiWithPrefix(ex, ProactiveRefreshGeneralError);
+                    error = ex.GetType().Name;
+                }
+                finally
+                {
+                    if (!string.IsNullOrEmpty(error))
+                    {
+                        serviceBundle.PlatformProxy.OtelInstrumentation.LogFailedMetrics(
+                        serviceBundle.PlatformProxy.GetProductName(),
+                        error,
+                        apiId,
+                        true);
+                    }
                 }
             });
         }

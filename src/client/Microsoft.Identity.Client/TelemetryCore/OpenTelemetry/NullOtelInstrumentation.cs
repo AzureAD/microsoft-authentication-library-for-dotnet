@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             // No op
         }
 
-        public void LogFailedMetrics(string platform, string errorCode)
+        public void LogFailedMetrics(string platform, string errorCode, string apiId, bool isProactiveTokenRefresh)
         {
             // No op
         }

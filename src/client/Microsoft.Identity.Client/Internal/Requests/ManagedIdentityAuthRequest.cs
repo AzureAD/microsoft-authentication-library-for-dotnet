@@ -61,6 +61,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         logger.Info("[ManagedIdentityRequest] Initiating a proactive refresh.");
 
                         AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ProactivelyRefreshed;
+                        authResult.AuthenticationResultMetadata.TokenSource = TokenSource.IdentityProvider;
 
                         SilentRequestHelper.ProcessFetchInBackground(
                         cachedAccessTokenItem,
@@ -69,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             // Use a linked token source, in case the original cancellation token source is disposed before this background task completes.
                             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                             return GetAccessTokenAsync(tokenSource.Token, logger);
-                        }, logger);
+                        }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent.ApiId.ToString());
                     }
                 }
                 catch (MsalServiceException e)
@@ -98,7 +99,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             AuthenticationResult authResult;
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
-
 
             // Requests to a managed identity endpoint must be throttled; 
             // otherwise, the endpoint will throw a HTTP 429.
