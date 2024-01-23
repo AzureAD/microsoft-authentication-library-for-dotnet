@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client
         /// or setting the Agent.
         /// </summary>
         /// <param name="httpClientFactory">HTTP client factory</param>
-        /// <param name="retryOnceOn5xx">Configures MSAL to retry on 5xx server errors. When enabled (on by default), MSAL will wait 1 second after recieving
+        /// <param name="retryOnceOn5xx">Configures MSAL to retry on 5xx server errors. When enabled (on by default), MSAL will wait 1 second after receiving
         /// a 5xx error and then retry the http request again.</param>
         /// <remarks>MSAL does not guarantee that it will not modify the HttpClient, for example by adding new headers.
         /// Prior to the changes needed in order to make MSAL's httpClients thread safe (https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/2046/files),
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Client
         /// PII logs are never written to default outputs like Console, Logcat or NSLog
         /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
         /// You can set it to <c>true</c> for advanced debugging requiring PII
-        /// If both WithLogging apis are set, the other one will overide the this one
+        /// If both WithLogging apis are set, the other one will override the this one
         /// </param>
         /// <param name="enableDefaultPlatformLogging">Flag to enable/disable logging to platform defaults.
         /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Client
             bool withDefaultPlatformLoggingEnabled = false)
         {
             WithLogging(
-                (level, message, pii) => { Debug.WriteLine($"{level}: {message}"); },
+                (level, message, _) => { Debug.WriteLine($"{level}: {message}"); },
                 logLevel,
                 enablePiiLogging,
                 withDefaultPlatformLoggingEnabled);

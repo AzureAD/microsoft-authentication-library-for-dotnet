@@ -20,9 +20,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             string authority,
             RequestContext requestContext)
         {
-            OidcMetadata configuration;
-
-            if (s_cache.TryGetValue(authority, out configuration))
+            if (s_cache.TryGetValue(authority, out OidcMetadata configuration))
             {
                 requestContext.Logger.Verbose(() => $"[OIDC Discovery] OIDC discovery found a cached entry for {authority}");
                 return configuration;

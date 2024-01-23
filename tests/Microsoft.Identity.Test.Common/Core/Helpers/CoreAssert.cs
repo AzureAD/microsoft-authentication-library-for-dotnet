@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         private static bool IsImmutable(Type type)
         {
-            if (type == typeof(string) || type.GetTypeInfo().IsPrimitive || type.GetTypeInfo().IsEnum)
+            if (type == typeof(string) || type.IsPrimitive || type.IsEnum)
             {
                 return true;
             }
@@ -109,8 +109,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
             foreach (var kvp in dict1)
             {
-                TValue value2;
-                if (!dict2.TryGetValue(kvp.Key, out value2))
+                if (!dict2.TryGetValue(kvp.Key, out TValue value2))
                     return false;
                 if (!valueComparer.Equals(kvp.Value, value2))
                     return false;

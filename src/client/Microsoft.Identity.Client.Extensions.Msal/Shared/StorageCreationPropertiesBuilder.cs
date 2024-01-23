@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         }
 
         /// <summary>
-        /// Augments this builder with a custom retry ammount and delay between retries in the cases where a lock is used.
+        /// Augments this builder with a custom retry amount and delay between retries in the cases where a lock is used.
         /// </summary>
         /// <param name="lockRetryDelay">Delay between retries in ms, must be 1 or more</param>
         /// <param name="lockRetryCount">Number of retries, must be 1 or more</param>

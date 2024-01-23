@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             if (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errorCode))
             {
-                string metadataOriginal = responseDictionary.ContainsKey(MsalTokenResponse.iOSBrokerErrorMetadata) ? responseDictionary[MsalTokenResponse.iOSBrokerErrorMetadata] : null;
+                string metadataOriginal = responseDictionary.TryGetValue(MsalTokenResponse.iOSBrokerErrorMetadata, out string iOSBrokerErrorMetadata) ? iOSBrokerErrorMetadata : null;
                 Dictionary<string, string> metadataDictionary = null;
 
                 if (metadataOriginal != null)
@@ -209,20 +209,20 @@ namespace Microsoft.Identity.Client.OAuth2
                 return new MsalTokenResponse
                 {
                     Error = errorCode,
-                    ErrorDescription = responseDictionary.ContainsKey(BrokerResponseConst.BrokerErrorDescription) ? CoreHelpers.UrlDecode(responseDictionary[BrokerResponseConst.BrokerErrorDescription]) : string.Empty,
-                    SubError = responseDictionary.ContainsKey(OAuth2ResponseBaseClaim.SubError) ? responseDictionary[OAuth2ResponseBaseClaim.SubError] : string.Empty,
+                    ErrorDescription = responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorDescription, out string brokerErrorDescription) ? CoreHelpers.UrlDecode(brokerErrorDescription) : string.Empty,
+                    SubError = responseDictionary.TryGetValue(OAuth2ResponseBaseClaim.SubError, out string subError) ? subError : string.Empty,
                     AccountUserId = homeAcctId != null ? AccountId.ParseFromString(homeAcctId).ObjectId : null,
                     TenantId = homeAcctId != null ? AccountId.ParseFromString(homeAcctId).TenantId : null,
                     Upn = (metadataDictionary?.ContainsKey(TokenResponseClaim.Upn) ?? false) ? metadataDictionary[TokenResponseClaim.Upn] : null,
-                    CorrelationId = responseDictionary.ContainsKey(BrokerResponseConst.CorrelationId) ? responseDictionary[BrokerResponseConst.CorrelationId] : null,
+                    CorrelationId = responseDictionary.TryGetValue(BrokerResponseConst.CorrelationId, out string correlationId) ? correlationId : null,
                 };
             }
 
             var response = new MsalTokenResponse
             {
                 AccessToken = responseDictionary[BrokerResponseConst.AccessToken],
-                RefreshToken = responseDictionary.ContainsKey(BrokerResponseConst.RefreshToken)
-                    ? responseDictionary[BrokerResponseConst.RefreshToken]
+                RefreshToken = responseDictionary.TryGetValue(BrokerResponseConst.RefreshToken, out string refreshToken)
+                    ? refreshToken
                     : null,
                 IdToken = responseDictionary[BrokerResponseConst.IdToken],
                 TokenType = BrokerResponseConst.Bearer,
@@ -231,16 +231,16 @@ namespace Microsoft.Identity.Client.OAuth2
                 ExpiresIn = responseDictionary.TryGetValue(BrokerResponseConst.ExpiresOn, out string expiresOn) ?
                                 DateTimeHelpers.GetDurationFromNowInSeconds(expiresOn) :
                                 0,
-                ClientInfo = responseDictionary.ContainsKey(BrokerResponseConst.ClientInfo)
-                                ? responseDictionary[BrokerResponseConst.ClientInfo]
+                ClientInfo = responseDictionary.TryGetValue(BrokerResponseConst.ClientInfo, out string clientInfo)
+                                ? clientInfo
                                 : null,
                 TokenSource = TokenSource.Broker
             };
 
-            if (responseDictionary.ContainsKey(TokenResponseClaim.RefreshIn))
+            if (responseDictionary.TryGetValue(TokenResponseClaim.RefreshIn, out string refreshIn))
             {
                 response.RefreshIn = long.Parse(
-                    responseDictionary[TokenResponseClaim.RefreshIn],
+                    refreshIn,
                     CultureInfo.InvariantCulture);
             }
 

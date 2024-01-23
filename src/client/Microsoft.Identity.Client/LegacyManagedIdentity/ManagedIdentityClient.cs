@@ -32,9 +32,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        internal async Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(AcquireTokenForManagedIdentityParameters parameters, CancellationToken cancellationToken)
+        internal Task<ManagedIdentityResponse> SendTokenRequestForManagedIdentityAsync(AcquireTokenForManagedIdentityParameters parameters, CancellationToken cancellationToken)
         {
-            return await _identitySource.AuthenticateAsync(parameters, cancellationToken).ConfigureAwait(false);
+            return _identitySource.AuthenticateAsync(parameters, cancellationToken);
         }
 
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.

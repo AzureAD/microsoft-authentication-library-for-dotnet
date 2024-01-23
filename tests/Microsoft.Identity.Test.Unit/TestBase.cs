@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit
         [TestInitialize]
         public virtual void TestInitialize()
         {
-#if DESKTOP
+#if NETFRAMEWORK
             Trace.WriteLine("Framework: .NET FX");
 #elif NET6_0
             Trace.WriteLine("Framework: .NET 6");

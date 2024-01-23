@@ -167,7 +167,7 @@ namespace CommonCache.Test.Common
         ///     function.
         /// </param>
         /// <param name="arguments">The arguments to pass to the program.</param>
-        /// <param name="processWorkingDirectory">WorkingDirectory from which proces should be run.</param>
+        /// <param name="processWorkingDirectory">WorkingDirectory from which process should be run.</param>
         /// <exception cref="InvalidOperationException">Thrown if the Process.ExitCode is not 0.</exception>
         /// <returns>A ProcessRunResults object containing information about the process execution.</returns>
         ProcessRunResults RunProcessFromKnownDirectory(string fileName, string arguments, string processWorkingDirectory);

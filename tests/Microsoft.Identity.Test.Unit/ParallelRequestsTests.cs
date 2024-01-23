@@ -222,7 +222,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 }
             });
 
-            pca.UserTokenCache.SetBeforeWrite(notificationArgs =>
+            pca.UserTokenCache.SetBeforeWrite(_ =>
             {
                 _beforeWriteCalls++;
             });
@@ -231,7 +231,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
     /// <summary>
     /// This custom HttpManager does the following: 
-    /// - provides a standard reponse for discovery calls
+    /// - provides a standard response for discovery calls
     /// - responds with valid tokens based on a naming convention (uid = "uid" + rtSecret, upn = "user_" + rtSecret)
     /// </summary>
     internal class ParallelRequestMockHanler : IHttpManager

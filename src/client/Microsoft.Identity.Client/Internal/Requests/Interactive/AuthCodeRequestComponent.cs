@@ -136,13 +136,13 @@ namespace Microsoft.Identity.Client.Internal
                     requestParameters[OAuth2Parameter.LoginHint] = _interactiveParameters.Account.Username;
                 }
 
-                if (_interactiveParameters.Account?.HomeAccountId?.ObjectId != null)
+                if (_interactiveParameters.Account.HomeAccountId?.ObjectId != null)
                 {
                     requestParameters[OAuth2Parameter.LoginReq] =
                         _interactiveParameters.Account.HomeAccountId.ObjectId;
                 }
 
-                if (!string.IsNullOrEmpty(_interactiveParameters.Account?.HomeAccountId?.TenantId))
+                if (!string.IsNullOrEmpty(_interactiveParameters.Account.HomeAccountId?.TenantId))
                 {
                     requestParameters[OAuth2Parameter.DomainReq] =
                         _interactiveParameters.Account.HomeAccountId.TenantId;
@@ -306,7 +306,7 @@ namespace Microsoft.Identity.Client.Internal
 
             CoreUIParent coreUiParent = _interactiveParameters.UiParent;
 
-#if WINDOWS_APP || DESKTOP
+#if WINDOWS_APP || NETFRAMEWORK
             // hidden web view can be used in both WinRT and desktop applications.
             coreUiParent.UseHiddenBrowser = _interactiveParameters.Prompt.Equals(Prompt.Never);
 #if WINDOWS_APP

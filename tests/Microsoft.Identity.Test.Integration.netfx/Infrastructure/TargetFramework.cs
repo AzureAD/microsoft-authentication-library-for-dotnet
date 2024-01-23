@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         public static bool IsNetClassic()
         {
-#if NET_FX
+#if NETFRAMEWORK 
             return true;
 #elif NET_CORE || NETSTANDARD
             return false;
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         public static bool IsNetCore()
         {
-#if NET_FX || NETSTANDARD
+#if NETFRAMEWORK || NETSTANDARD
             return false;
 #elif NET_CORE
             return true;
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         public static bool IsNetStandard()
         {
-#if NET_FX || NET_CORE
+#if NETFRAMEWORK || NET_CORE
             return false;
 #elif NETSTANDARD
             return true;

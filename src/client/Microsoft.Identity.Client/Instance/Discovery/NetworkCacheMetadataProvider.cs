@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
         public void AddMetadata(string environment, InstanceDiscoveryMetadataEntry entry)
         {
             // Always take the most recent value
-            s_cache.AddOrUpdate(environment, entry, (key, oldValue) => entry);
+            s_cache.AddOrUpdate(environment, entry, (_, _) => entry);
         }
 
         public void Clear()

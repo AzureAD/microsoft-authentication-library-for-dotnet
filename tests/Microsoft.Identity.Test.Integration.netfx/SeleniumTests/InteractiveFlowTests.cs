@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.UIAutomation.Infrastructure;
@@ -165,14 +166,13 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [RunOn(TargetFrameworks.NetCore)]
         public async Task ValidateCcsHeadersForInteractiveAuthCodeFlowAsync()
         {
-            HttpSnifferClientFactory factory = null;
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
 
             var pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)
                .WithDefaultRedirectUri()
                .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
-               .WithTestLogging(out factory)
+               .WithTestLogging(out HttpSnifferClientFactory factory)
                .Build();
 
             AuthenticationResult authResult = await pca
@@ -356,7 +356,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         #region Azure AD Kerberos Feature Tests
-        [TestMethod]
+        [IgnoreOnOneBranch]
         public async Task Kerberos_Interactive_AADAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -368,12 +368,11 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             LabResponse labResponse,
             KerberosTicketContainer ticketContainer)
         {
-            HttpSnifferClientFactory factory = null;
             IPublicClientApplication pca = PublicClientApplicationBuilder
                     .Create(labResponse.App.AppId)
                     .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                     .WithAuthority(labResponse.Lab.Authority + "common")
-                    .WithTestLogging(out factory)
+                    .WithTestLogging(out HttpSnifferClientFactory factory)
                     .WithTenantId(labResponse.Lab.TenantId)
                     .WithClientId(TestConstants.KerberosTestApplicationId)
                     .WithKerberosTicketClaim(TestConstants.KerberosServicePrincipalName, ticketContainer)
@@ -422,7 +421,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .WithLoginHint(labResponse.User.Upn)
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
-
             userCacheAccess.AssertAccessCounts(2, 3);
             AssertCcsRoutingInformationIsSent(factory, labResponse);
             ticket = TestCommon.GetValidatedKerberosTicketFromAuthenticationResult(

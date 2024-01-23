@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal
         private static readonly Lazy<string> s_msalVersion = new Lazy<string>(
             () =>
             {
-                string fullVersion = typeof(MsalIdHelper).GetTypeInfo().Assembly.FullName;
+                string fullVersion = typeof(MsalIdHelper).Assembly.FullName;
                 var regex = new Regex(@"Version=[\d]+.[\d+]+.[\d]+.[\d]+");
                 var match = regex.Match(fullVersion);
                 if (!match.Success)
