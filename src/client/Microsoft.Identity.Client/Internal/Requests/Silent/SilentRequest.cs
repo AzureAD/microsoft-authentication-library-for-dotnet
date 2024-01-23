@@ -85,15 +85,15 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             }
         }
 
-        internal new async Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse response)
+        internal new Task<AuthenticationResult> CacheTokenResponseAndCreateAuthenticationResultAsync(MsalTokenResponse response)
         {
-            return await base.CacheTokenResponseAndCreateAuthenticationResultAsync(response).ConfigureAwait(false);
+            return base.CacheTokenResponseAndCreateAuthenticationResultAsync(response);
         }
 
         //internal for test
-        internal async Task<AuthenticationResult> ExecuteTestAsync(CancellationToken cancellationToken)
+        internal Task<AuthenticationResult> ExecuteTestAsync(CancellationToken cancellationToken)
         {
-            return await ExecuteAsync(cancellationToken).ConfigureAwait(false);
+            return ExecuteAsync(cancellationToken);
         }
 
         private async Task UpdateRequestWithAccountAsync()
