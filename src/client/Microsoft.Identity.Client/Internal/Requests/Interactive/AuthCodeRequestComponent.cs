@@ -306,7 +306,7 @@ namespace Microsoft.Identity.Client.Internal
 
             CoreUIParent coreUiParent = _interactiveParameters.UiParent;
 
-#if WINDOWS_APP || DESKTOP
+#if WINDOWS_APP || NETFRAMEWORK
             // hidden web view can be used in both WinRT and desktop applications.
             coreUiParent.UseHiddenBrowser = _interactiveParameters.Prompt.Equals(Prompt.Never);
 #if WINDOWS_APP

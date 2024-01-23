@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Unit
                 }).ConfigureAwait(false);
         }
 
-#if DESKTOP
+#if NETFRAMEWORK
         [TestMethod]
         public void PKeyAuthSuccessResponseTest()
         {

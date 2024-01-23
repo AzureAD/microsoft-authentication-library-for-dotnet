@@ -19,7 +19,7 @@ using UIKit;
 using Android.App;
 #endif
 
-#if DESKTOP || NET6_WIN
+#if NETFRAMEWORK || NET6_WIN
 using System.Windows.Forms;
 #endif
 
@@ -298,7 +298,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if DESKTOP || NET6_WIN
+#if NETFRAMEWORK || NET6_WIN
         /// <summary>
         /// Sets a reference to the current IWin32Window that triggers the browser to be shown.
         /// Used to center the browser that pop-up onto this window.
@@ -313,7 +313,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if DESKTOP || NET6_WIN || NET_CORE || NETSTANDARD
+#if NETFRAMEWORK || NET6_WIN || NET_CORE || NETSTANDARD
         /// <summary>
         /// Sets a reference to the IntPtr to a window that triggers the browser to be shown.
         /// Used to center the browser that pop-up onto this window.

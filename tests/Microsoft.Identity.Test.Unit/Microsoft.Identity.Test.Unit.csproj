@@ -78,9 +78,6 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop48)' ">
-    <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
     <DefineConstants>$(DefineConstants);NET6_WIN</DefineConstants>
   </PropertyGroup>
