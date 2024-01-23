@@ -11,8 +11,6 @@ namespace Microsoft.Identity.Client.Extensions.Msal
 {
     internal class FileAccessor : ICacheAccessor
     {
-        public static readonly byte[] DummyData = Encoding.UTF8.GetBytes("{}");
-
         private readonly string _cacheFilePath;
         private readonly TraceSourceLogger _logger;
         private readonly bool _setOwnerOnlyPermission;
