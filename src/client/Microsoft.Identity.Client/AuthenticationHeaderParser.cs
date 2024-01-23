@@ -47,9 +47,9 @@ namespace Microsoft.Identity.Client
         /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
         /// <returns>An instance of <see cref="AuthenticationHeaderParser"/> containing authentication header data.</returns>
         /// <overloads></overloads>
-        public static async Task<AuthenticationHeaderParser> ParseAuthenticationHeadersAsync(string resourceUri, CancellationToken cancellationToken = default)
+        public static Task<AuthenticationHeaderParser> ParseAuthenticationHeadersAsync(string resourceUri, CancellationToken cancellationToken = default)
         {
-            return await ParseAuthenticationHeadersAsync(resourceUri, GetHttpClient(), cancellationToken).ConfigureAwait(false);
+            return ParseAuthenticationHeadersAsync(resourceUri, GetHttpClient(), cancellationToken);
         }
 
         /// <inheritdoc cref="ParseAuthenticationHeadersAsync(string, CancellationToken)"/>

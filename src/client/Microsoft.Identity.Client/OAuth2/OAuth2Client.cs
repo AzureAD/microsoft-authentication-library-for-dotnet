@@ -70,30 +70,29 @@ namespace Microsoft.Identity.Client.OAuth2
             return new ReadOnlyDictionary<string, string>(_bodyParameters);
         }
 
-        public async Task<InstanceDiscoveryResponse> DiscoverAadInstanceAsync(Uri endpoint, RequestContext requestContext)
+        public Task<InstanceDiscoveryResponse> DiscoverAadInstanceAsync(Uri endpoint, RequestContext requestContext)
         {
-            return await ExecuteRequestAsync<InstanceDiscoveryResponse>(endpoint, HttpMethod.Get, requestContext)
-                       .ConfigureAwait(false);
+            return ExecuteRequestAsync<InstanceDiscoveryResponse>(endpoint, HttpMethod.Get, requestContext);
         }
 
-        public async Task<OidcMetadata> DiscoverOidcMetadataAsync(Uri endpoint, RequestContext requestContext)
+        public Task<OidcMetadata> DiscoverOidcMetadataAsync(Uri endpoint, RequestContext requestContext)
         {
-            return await ExecuteRequestAsync<OidcMetadata>(endpoint, HttpMethod.Get, requestContext).ConfigureAwait(false);
+            return ExecuteRequestAsync<OidcMetadata>(endpoint, HttpMethod.Get, requestContext);
         }
 
-        internal async Task<MsalTokenResponse> GetTokenAsync(
+        internal Task<MsalTokenResponse> GetTokenAsync(
             Uri endPoint,
             RequestContext requestContext,
             bool addCommonHeaders,
             Func<OnBeforeTokenRequestData, Task> onBeforePostRequestHandler)
         {
-            return await ExecuteRequestAsync<MsalTokenResponse>(
+            return ExecuteRequestAsync<MsalTokenResponse>(
                 endPoint,
                 HttpMethod.Post,
                 requestContext,
                 false,
                 addCommonHeaders,
-                onBeforePostRequestHandler).ConfigureAwait(false);
+                onBeforePostRequestHandler);
         }
 
         internal async Task<T> ExecuteRequestAsync<T>(
