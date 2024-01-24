@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         public const string ThrottleRetryAfterHeaderName = "x-ms-lib-capability";
         public const string ThrottleRetryAfterHeaderValue = "retry-after, h429";
 
-        internal const string KeyDelimiter = ".";
+        internal const char KeyDelimiter = '.';
 
         /// <summary>
         /// The strict thumbprint is based on: 
@@ -28,18 +28,22 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             string authority,
             string homeAccountId)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             if (bodyParams.TryGetValue(OAuth2Parameter.ClientId, out string clientId))
             {
-                sb.Append((clientId ?? "") + KeyDelimiter);
+                sb.Append(clientId);
+                sb.Append(KeyDelimiter);
             }
-            sb.Append(authority + KeyDelimiter);
+            sb.Append(authority);
+            sb.Append(KeyDelimiter);
             if (bodyParams.TryGetValue(OAuth2Parameter.Scope, out string scopes))
             {
-                sb.Append((scopes ?? "") + KeyDelimiter);
+                sb.Append(scopes);
+                sb.Append(KeyDelimiter);
             }
 
-            sb.Append((homeAccountId ?? "") + KeyDelimiter);
+            sb.Append(homeAccountId);
+            sb.Append(KeyDelimiter);
 
             return sb.ToString();
         }
