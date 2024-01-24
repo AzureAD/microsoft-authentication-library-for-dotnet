@@ -24,10 +24,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 return data;
             }
 
-            List<string> headerPairs = CoreHelpers.SplitWithQuotes(wwwAuthenticate, ',');
+            var headerPairs = CoreHelpers.SplitWithQuotes(wwwAuthenticate, ',');
             foreach (string pair in headerPairs)
             {
-                List<string> keyValue = CoreHelpers.SplitWithQuotes(pair, '=');
+                var keyValue = CoreHelpers.SplitWithQuotes(pair, '=');
                 if (keyValue.Count == 2)
                 {
                     data.Add(keyValue[0].Trim(), keyValue[1].Trim().Replace("\"", ""));
