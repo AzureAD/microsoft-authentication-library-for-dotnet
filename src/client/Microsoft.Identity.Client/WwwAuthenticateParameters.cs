@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="resourceUri">URI of the resource.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("This api is now obsolete and has been replaced with CreateFromAuthenticationResponseAsync(...)")]
         public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri)
         {
@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client
         /// <param name="resourceUri">URI of the resource.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("This api is now obsolete and has been replaced with CreateFromAuthenticationResponseAsync(...)")]
         public static Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(string resourceUri, CancellationToken cancellationToken = default)
         {
@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Client
         /// <param name="resourceUri">URI of the resource.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>WWW-Authenticate Parameters extracted from response to the unauthenticated call.</returns>
-        [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("This api is now obsolete and has been replaced with replaced with CreateFromAuthenticationResponseAsync(HttpResponseHeaders, string)")]
         public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(HttpClient httpClient, string resourceUri, CancellationToken cancellationToken = default)
         {
@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scheme">Authentication scheme. Default is "Bearer".</param>
         /// <returns>The parameters requested by the web API.</returns>
         /// <remarks>Currently it only supports the Bearer scheme</remarks>
-        [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("This api is now obsolete and has been replaced with CreateFromAuthenticationHeaders(...)")]
         public static WwwAuthenticateParameters CreateFromResponseHeaders(
             HttpResponseHeaders httpResponseHeaders,
@@ -197,7 +197,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="wwwAuthenticateValue">String contained in a WWW-Authenticate header.</param>
         /// <returns>The parameters requested by the web API.</returns>
-        [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("This api is now obsolete and should not be used.")]
         public static WwwAuthenticateParameters CreateFromWwwAuthenticateHeaderValue(string wwwAuthenticateValue)
         {

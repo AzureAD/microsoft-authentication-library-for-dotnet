@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     /// <typeparam name="T"></typeparam>
 #if !SUPPORTS_CONFIDENTIAL_CLIENT
-    [System.ComponentModel.EditorBrowsable(EditorBrowsableState.Never)]  // hide confidential client on mobile
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]  // hide confidential client on mobile
 #endif
     public abstract class AbstractConfidentialClientAcquireTokenParameterBuilder<T>
         : AbstractAcquireTokenParameterBuilder<T>
