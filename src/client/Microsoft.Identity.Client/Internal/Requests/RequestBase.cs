@@ -234,7 +234,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
-            return new Tuple<string, string>(resource, scopes);
+            return new(resource, scopes);
         }
 
         private CacheLevel GetCacheLevel(AuthenticationResult authenticationResult)
