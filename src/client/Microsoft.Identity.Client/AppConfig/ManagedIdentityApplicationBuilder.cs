@@ -55,10 +55,9 @@ namespace Microsoft.Identity.Client
 
         private static ApplicationConfiguration BuildConfiguration(ManagedIdentityId managedIdentityId)
         {
-            _ = Guard.AgainstNull(managedIdentityId);
             var config = new ApplicationConfiguration(MsalClientType.ManagedIdentityClient);
 
-            config.ManagedIdentityId = managedIdentityId;
+            config.ManagedIdentityId = Guard.AgainstNull(managedIdentityId);
 
             config.CacheSynchronizationEnabled = false;
             config.AccessorOptions = CacheOptions.EnableSharedCacheOptions;
