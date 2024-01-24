@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     internal class SimpleHttpClientFactory : IMsalHttpClientFactory
     {
         //Please see (https://aka.ms/msal-httpclient-info) for important information regarding the HttpClient.
-        private static readonly Lazy<HttpClient> s_httpClient = new Lazy<HttpClient>(() => InitializeClient());
+        private static readonly Lazy<HttpClient> s_httpClient = new Lazy<HttpClient>(InitializeClient);
 
         private static HttpClient InitializeClient()
         {
