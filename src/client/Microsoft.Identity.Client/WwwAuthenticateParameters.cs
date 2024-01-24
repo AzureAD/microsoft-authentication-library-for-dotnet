@@ -392,7 +392,6 @@ namespace Microsoft.Identity.Client
 
         private static string[] GetParsedAuthValueElements(string wwwAuthenticateValue)
         {
-            string[] result;
             char[] charsToTrim = { ',', ' ' };
             List<string> authValuesSplit = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ' ');
 
@@ -402,9 +401,7 @@ namespace Microsoft.Identity.Client
                 authValuesSplit = authValuesSplit.Skip(1).ToList();
             }
 
-            result = authValuesSplit.Select(authValue => authValue.TrimEnd(charsToTrim)).ToArray();
-
-            return result ?? new string[0];
+            return authValuesSplit.Select(authValue => authValue.TrimEnd(charsToTrim)).ToArray();
         }
 
         internal static WwwAuthenticateParameters CreateWwwAuthenticateParameters(IDictionary<string, string> values, string scheme)
