@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         /// <returns>Unprotected cache data</returns>
         public byte[] ReadData()
         {
-            byte[] data = null;
+            byte[] data;
             try
             {
                 _logger.LogInformation($"Reading Data");
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
                 throw;
             }
 
-            return data ?? new byte[0];
+            return data ?? Array.Empty<byte>();
         }
 
         /// <summary>
