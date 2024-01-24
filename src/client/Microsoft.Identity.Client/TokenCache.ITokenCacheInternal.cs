@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client
     public sealed partial class TokenCache : ITokenCacheInternal
     {
         #region SaveTokenResponse
-        async Task<Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem, Account>> ITokenCacheInternal.SaveTokenResponseAsync(
+        async Task<(MsalAccessTokenCacheItem accessCacheItem, MsalIdTokenCacheItem tokenCacheItem, Account account)> ITokenCacheInternal.SaveTokenResponseAsync(
             AuthenticationRequestParameters requestParams,
             MsalTokenResponse response)
         {
@@ -276,7 +276,7 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS0618 // Type or member is obsolete
                 }
 
-                return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem, account);
+                return new(msalAccessTokenCacheItem, msalIdTokenCacheItem, account);
             }
             finally
             {

@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Internal
             _serviceBundle = _requestParams.RequestContext.ServiceBundle;
         }
 
-        public async Task<Tuple<AuthorizationResult, string>> FetchAuthCodeAndPkceVerifierAsync(
+        public async Task<(AuthorizationResult result, string codeVerifier)> FetchAuthCodeAndPkceVerifierAsync(
             CancellationToken cancellationToken)
         {
             var webUi = CreateWebAuthenticationDialog();
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Internal
             return result.Item1;
         }
 
-        private async Task<Tuple<AuthorizationResult, string>> FetchAuthCodeAndPkceInternalAsync(
+        private async Task<(AuthorizationResult result, string codeVerifier)> FetchAuthCodeAndPkceInternalAsync(
             IWebUI webUi,
             CancellationToken cancellationToken)
         {
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal
             string authEndpoint = await _requestParams.Authority.GetAuthorizationEndpointAsync(_requestParams.RequestContext)
                 .ConfigureAwait(false);
 
-            Tuple<Uri, string, string> authorizationTuple = CreateAuthorizationUri(authEndpoint, true);
+            (Uri uri, string state, string codeVerifier) authorizationTuple = CreateAuthorizationUri(authEndpoint, true);
             Uri authorizationUri = authorizationTuple.Item1;
             string state = authorizationTuple.Item2;
             string codeVerifier = authorizationTuple.Item3;
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Internal
             return new(authorizationResult, codeVerifier);
         }
 
-        private Tuple<Uri, string> CreateAuthorizationUriWithCodeChallenge(
+        private (Uri uri, string codeVerifier) CreateAuthorizationUriWithCodeChallenge(
             string authEndpoint, string codeVerifier)
         {
             IDictionary<string, string> requestParameters = CreateAuthorizationRequestParameters();
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client.Internal
             return new(builder.Uri, codeVerifier);
         }
 
-        private Tuple<Uri, string, string> CreateAuthorizationUri(string authEndpoint, bool addPkceAndState = false)
+        private (Uri uri, string state, string codeVerifier) CreateAuthorizationUri(string authEndpoint, bool addPkceAndState = false)
         {
             IDictionary<string, string> requestParameters = CreateAuthorizationRequestParameters();
             string codeVerifier = null;

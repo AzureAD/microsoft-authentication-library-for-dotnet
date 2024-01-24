@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Arrange - important for test
                 requestParams.AppConfig.IsBrokerEnabled = false;
-                var authCodeResult = new Tuple<AuthorizationResult, string>(new AuthorizationResult() { Code= "some_auth_code" }, "pkce_verifier");
+                var authCodeResult = (new AuthorizationResult { Code= "some_auth_code" }, "pkce_verifier");
                 _authCodeRequestComponentOverride.FetchAuthCodeAndPkceVerifierAsync(CancellationToken.None)
                     .Returns(Task.FromResult(authCodeResult));
 
@@ -188,9 +188,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 _brokerExchangeComponentOverride
                     .FetchTokensAsync(default)
                     .Returns((MsalTokenResponse)null);
-                
+
                 // web UI can deal with this
-                var authCodeResult = new Tuple<AuthorizationResult, string>(new AuthorizationResult() { Code = "some_auth_code" }, "pkce_verifier");
+                var authCodeResult = (new AuthorizationResult { Code = "some_auth_code" }, "pkce_verifier");
                 _authCodeRequestComponentOverride.FetchAuthCodeAndPkceVerifierAsync(CancellationToken.None)
                     .Returns(Task.FromResult(authCodeResult));
                 _authCodeExchangeComponentOverride.FetchTokensAsync(CancellationToken.None)
@@ -256,7 +256,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 requestParams.AppConfig.IsBrokerEnabled = false;
 
                 // web UI starts the flow, but the auth code shows Evo needs the broker
-                var authCodeResult = new Tuple<AuthorizationResult, string>(new AuthorizationResult() { Code = AuthCodeWithAppLink }, "pkce_verifier");
+                var authCodeResult = (new AuthorizationResult { Code = AuthCodeWithAppLink }, "pkce_verifier");
                 _authCodeRequestComponentOverride.FetchAuthCodeAndPkceVerifierAsync(CancellationToken.None)
                     .Returns(Task.FromResult(authCodeResult));
 

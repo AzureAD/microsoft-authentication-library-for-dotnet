@@ -202,7 +202,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 telemetryEventDetails.SetProperty(TelemetryConstants.CacheLevel, (int)authenticationResult.AuthenticationResultMetadata.CacheLevel);
               
-                Tuple<string, string> resourceAndScopes  = ParseScopesForTelemetry();
+                (string resource, string scopes) resourceAndScopes  = ParseScopesForTelemetry();
                 if (resourceAndScopes.Item1 != null)
                 {
                     telemetryEventDetails.SetProperty(TelemetryConstants.Resource, resourceAndScopes.Item1);
@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private Tuple<string, string> ParseScopesForTelemetry()
+        private (string resource, string scopes) ParseScopesForTelemetry()
         {
             string resource = null;
             string scopes = null;

@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal interface IAuthCodeRequestComponent
     {
-        Task<Tuple<AuthorizationResult, string>> FetchAuthCodeAndPkceVerifierAsync(CancellationToken cancellationToken);
+        Task<(AuthorizationResult result, string codeVerifier)> FetchAuthCodeAndPkceVerifierAsync(CancellationToken cancellationToken);
 
         Task<Uri> GetAuthorizationUriWithoutPkceAsync(CancellationToken cancellationToken);
     }
