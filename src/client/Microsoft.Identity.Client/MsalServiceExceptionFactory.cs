@@ -9,7 +9,9 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.OAuth2.Throttling;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
+using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Client
 {
@@ -23,7 +25,8 @@ namespace Microsoft.Identity.Client
           string errorCode,
           string errorMessage,
           HttpResponse httpResponse,
-          Exception innerException = null)
+          Exception innerException = null,
+          ApiIds apiIds = ApiIds.None)
         {
             MsalServiceException ex = null;
             OAuth2ResponseBase oAuth2Response = JsonHelper.TryToDeserializeFromJson<OAuth2ResponseBase>(httpResponse?.Body);
@@ -33,6 +36,11 @@ namespace Microsoft.Identity.Client
                 if (IsThrottled(oAuth2Response))
                 {
                     ex = new MsalUiRequiredException(errorCode, MsalErrorMessage.AadThrottledError, innerException);
+                }
+                else if (oAuth2Response.Claims != null)
+                {
+                    errorMessage = UpdateExceptionForClaimsChallenge(errorMessage, apiIds);
+                    ex = new MsalClaimsChallengeException(errorCode, errorMessage, innerException);
                 }
                 else
                 {
@@ -220,6 +228,19 @@ namespace Microsoft.Identity.Client
             }
 
             return !s_nonUiSubErrors.Contains(subError);
+        }
+
+
+        private static string UpdateExceptionForClaimsChallenge(string message, ApiIds apiId)
+        {
+            if (ApiEvent.IsOnBehalfOfRequest(apiId) || ApiEvent.IsLongRunningObo(apiId))
+            {
+                return message += " " + MsalErrorMessage.ClaimsChallengeObo;
+            }
+            else
+            {
+                return message += " " + MsalErrorMessage.ClaimsChallenge;
+            }
         }
     }
 }
