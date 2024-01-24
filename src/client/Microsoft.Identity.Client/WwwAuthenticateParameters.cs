@@ -465,7 +465,7 @@ namespace Microsoft.Identity.Client
         /// <returns>a json fragment (original input string or decoded from base64 encoded).</returns>
         private static string GetJsonFragment(string inputString)
         {
-            if (string.IsNullOrEmpty(inputString) || inputString.Length % 4 != 0 || inputString.Any(c => char.IsWhiteSpace(c)))
+            if (string.IsNullOrEmpty(inputString) || inputString.Length % 4 != 0 || inputString.Any(char.IsWhiteSpace))
             {
                 return inputString;
             }
