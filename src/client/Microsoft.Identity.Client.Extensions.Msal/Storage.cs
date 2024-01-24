@@ -127,20 +127,18 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         /// <returns>Unprotected cache data</returns>
         public byte[] ReadData()
         {
-            byte[] data = null;
             try
             {
                 _logger.LogInformation($"Reading Data");
-                data = CacheAccessor.Read();
+                byte[] data = CacheAccessor.Read();
                 _logger.LogInformation($"Got '{data?.Length ?? 0}' bytes from file storage");
+                return data ?? Array.Empty<byte>();
             }
             catch (Exception e)
             {
                 _logger.LogError($"An exception was encountered while reading data from the {nameof(Storage)} : {e}");
                 throw;
             }
-
-            return data ?? new byte[0];
         }
 
         /// <summary>
