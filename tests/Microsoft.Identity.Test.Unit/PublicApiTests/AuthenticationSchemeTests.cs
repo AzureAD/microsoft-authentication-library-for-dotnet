@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
                 TokenCacheHelper.ExpireAllAccessTokens(pca.UserTokenCacheInternal);
 
-                pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
+                pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
 
                 var resultForATI = await pca.AcquireTokenInteractive(TestConstants.s_graphScopes)
                     .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))

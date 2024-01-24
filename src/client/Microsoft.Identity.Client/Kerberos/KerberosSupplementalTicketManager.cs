@@ -61,8 +61,7 @@ namespace Microsoft.Identity.Client.Kerberos
 
             // parse the JSON data and find the included Kerberos Ticket claim.
             JObject payloadJson = JsonHelper.ParseIntoJsonObject(payload);
-            JToken claimValue;
-            if (!JsonHelper.TryGetValue(payloadJson, KerberosClaimType, out claimValue))
+            if (!JsonHelper.TryGetValue(payloadJson, KerberosClaimType, out JToken claimValue))
             {
                 return null;
             }

@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
                     // The invisible dialog has failed to complete in the allotted time.
                     // Attempt a graceful shutdown.
-                    _formsSyncContext.Post(state => _dialog.CloseBrowser(), null);
+                    _formsSyncContext.Post(_ => _dialog.CloseBrowser(), null);
                 }
             }
         }

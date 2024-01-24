@@ -61,13 +61,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             bool beforeAccessCalled = false;
             bool afterAccessCalled = false;
 
-            pca.UserTokenCache.SetBeforeAccess(args =>
+            pca.UserTokenCache.SetBeforeAccess(_ =>
             {
                 beforeAccessCalled = true;
                 throw new InvalidOperationException();
             });
 
-            pca.UserTokenCache.SetAfterAccess(args => { afterAccessCalled = true; });
+            pca.UserTokenCache.SetAfterAccess(_ => { afterAccessCalled = true; });
 
             await AssertException.TaskThrowsAsync<InvalidOperationException>(
                 operationThatTouchesCache).ConfigureAwait(false);
@@ -85,9 +85,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             bool afterAccessCalled = false;
             bool beforeWriteCalled = false;
 
-            pca.UserTokenCache.SetBeforeAccess(args => { beforeAccessCalled = true; });
-            pca.UserTokenCache.SetAfterAccess(args => { afterAccessCalled = true; });
-            pca.UserTokenCache.SetBeforeWrite(args => { beforeWriteCalled = true; });
+            pca.UserTokenCache.SetBeforeAccess(_ => { beforeAccessCalled = true; });
+            pca.UserTokenCache.SetAfterAccess(_ => { afterAccessCalled = true; });
+            pca.UserTokenCache.SetBeforeWrite(_ => { beforeWriteCalled = true; });
 
             await pca.GetAccountsAsync().ConfigureAwait(false);
 
@@ -105,9 +105,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             bool afterAccessCalled = false;
             bool beforeWriteCalled = false;
 
-            pca.UserTokenCache.SetBeforeAccessAsync(async args => { beforeAccessCalled = true; await Task.Delay(10).ConfigureAwait(false); });
-            pca.UserTokenCache.SetAfterAccessAsync(async args => { afterAccessCalled = true; await Task.Delay(10).ConfigureAwait(false); });
-            pca.UserTokenCache.SetBeforeWriteAsync(async args => { beforeWriteCalled = true; await Task.Delay(10).ConfigureAwait(false); });
+            pca.UserTokenCache.SetBeforeAccessAsync(async _ => { beforeAccessCalled = true; await Task.Delay(10).ConfigureAwait(false); });
+            pca.UserTokenCache.SetAfterAccessAsync(async _ => { afterAccessCalled = true; await Task.Delay(10).ConfigureAwait(false); });
+            pca.UserTokenCache.SetBeforeWriteAsync(async _ => { beforeWriteCalled = true; await Task.Delay(10).ConfigureAwait(false); });
 
             await pca.GetAccountsAsync().ConfigureAwait(false);
 
@@ -131,13 +131,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             // Sync method should be called _first_ (just by convention).  But let's validate this.
 
-            pca.UserTokenCache.SetBeforeAccess(args => { beforeAccessCalled = true; });
-            pca.UserTokenCache.SetAfterAccess(args => { afterAccessCalled = true; });
-            pca.UserTokenCache.SetBeforeWrite(args => { beforeWriteCalled = true; });
+            pca.UserTokenCache.SetBeforeAccess(_ => { beforeAccessCalled = true; });
+            pca.UserTokenCache.SetAfterAccess(_ => { afterAccessCalled = true; });
+            pca.UserTokenCache.SetBeforeWrite(_ => { beforeWriteCalled = true; });
 
-            pca.UserTokenCache.SetBeforeAccessAsync(async args => { asyncBeforeAccessCalled = beforeAccessCalled; await Task.Delay(10).ConfigureAwait(false); });
-            pca.UserTokenCache.SetAfterAccessAsync(async args => { asyncAfterAccessCalled = afterAccessCalled; await Task.Delay(10).ConfigureAwait(false); });
-            pca.UserTokenCache.SetBeforeWriteAsync(async args => { asyncBeforeWriteCalled = beforeWriteCalled; await Task.Delay(10).ConfigureAwait(false); });
+            pca.UserTokenCache.SetBeforeAccessAsync(async _ => { asyncBeforeAccessCalled = beforeAccessCalled; await Task.Delay(10).ConfigureAwait(false); });
+            pca.UserTokenCache.SetAfterAccessAsync(async _ => { asyncAfterAccessCalled = afterAccessCalled; await Task.Delay(10).ConfigureAwait(false); });
+            pca.UserTokenCache.SetBeforeWriteAsync(async _ => { asyncBeforeWriteCalled = beforeWriteCalled; await Task.Delay(10).ConfigureAwait(false); });
 
             await pca.GetAccountsAsync().ConfigureAwait(false);
 
@@ -171,7 +171,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
 
-                pca.UserTokenCache.SetBeforeAccessAsync(async args =>
+                pca.UserTokenCache.SetBeforeAccessAsync(async _ =>
                 {
                     sb.Append("beforeaccess-");
                     numBeforeAccessCalls++;
@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     serializedPayload = args.TokenCache.SerializeMsalV3();
                     await Task.Delay(10).ConfigureAwait(false);
                 });
-                pca.UserTokenCache.SetBeforeWriteAsync(async args =>
+                pca.UserTokenCache.SetBeforeWriteAsync(async _ =>
                 {
                     sb.Append("beforewrite-");
                     numBeforeWriteCalls++;
@@ -322,13 +322,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private static void AssertCancellationToken(TokenCacheAccessRecorder cacheAccessRecorder, CancellationTokenSource cancellationTokenSource, bool write = false)
         {
             Assert.AreEqual(cancellationTokenSource.Token, cacheAccessRecorder.LastAfterAccessNotificationArgs.CancellationToken);
-            Assert.IsFalse(default(CancellationToken) == cacheAccessRecorder.LastAfterAccessNotificationArgs.CancellationToken);
+            Assert.IsFalse(default == cacheAccessRecorder.LastAfterAccessNotificationArgs.CancellationToken);
             Assert.AreEqual(cancellationTokenSource.Token, cacheAccessRecorder.LastBeforeAccessNotificationArgs.CancellationToken);
-            Assert.IsFalse(default(CancellationToken) == cacheAccessRecorder.LastBeforeAccessNotificationArgs.CancellationToken);
+            Assert.IsFalse(default == cacheAccessRecorder.LastBeforeAccessNotificationArgs.CancellationToken);
             if (write)
             {
                 Assert.AreEqual(cancellationTokenSource.Token, cacheAccessRecorder.LastBeforeWriteNotificationArgs.CancellationToken);
-                Assert.IsFalse(default(CancellationToken) == cacheAccessRecorder.LastBeforeWriteNotificationArgs.CancellationToken);
+                Assert.IsFalse(default == cacheAccessRecorder.LastBeforeWriteNotificationArgs.CancellationToken);
             }
         }
 
@@ -343,7 +343,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     .WithHttpManager(_harness.HttpManager)
                     .BuildConcrete();
 
-                app.UserTokenCache.SetBeforeAccess(notificationArgs =>
+                app.UserTokenCache.SetBeforeAccess(_ =>
                 {
                     throw new OperationCanceledException();
                 });

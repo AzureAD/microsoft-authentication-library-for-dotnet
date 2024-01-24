@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         }
 
         /// <summary>
-        /// 400 with Retry After with 2 hours, should be throttled on DefaultThrottlig timeout
+        /// 400 with Retry After with 2 hours, should be throttled on DefaultThrottling timeout
         /// </summary>
         [TestMethod]
         public async Task RetryAfter_LargeTimeoutHeader_DefaultTimeout_IsUsed_Async()

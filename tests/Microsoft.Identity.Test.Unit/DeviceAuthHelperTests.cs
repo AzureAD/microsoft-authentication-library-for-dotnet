@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit
         public void CanOSPerformDeviceAuth()
         {
             Assert.IsFalse(DeviceAuthHelper.CanOSPerformPKeyAuth());
-            //Check one additinal time for cache
+            //Check one additional time for cache
             Assert.IsFalse(DeviceAuthHelper.CanOSPerformPKeyAuth());
         }
     }

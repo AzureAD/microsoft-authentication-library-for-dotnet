@@ -299,7 +299,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
-                pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
+                pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
 
                 pca.ServiceBundle.ConfigureMockWebUI();
 
@@ -332,7 +332,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
             PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
-            pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
+            pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
 
             // Act
             MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
@@ -370,7 +370,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                                                environment: "fs.msidlab8.com");
                 TokenCacheHelper.ExpireAllAccessTokens(pca.UserTokenCacheInternal);
 
-                pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
+                pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
 
                 // Act
                 MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
@@ -412,7 +412,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
                 TokenCacheHelper.ExpireAllAccessTokens(pca.UserTokenCacheInternal);
 
-                pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
+                pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
 
                 // Act
                 var result = await pca.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.DisplayableId)
@@ -450,7 +450,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             //Populate local cache with token
             TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
 
-            pca.ServiceBundle.Config.BrokerCreatorFunc = (x, y, z) => mockBroker;
+            pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
 
             // Act
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
