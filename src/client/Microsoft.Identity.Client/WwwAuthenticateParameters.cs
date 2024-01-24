@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client
         public static async Task<WwwAuthenticateParameters> CreateFromResourceResponseAsync(HttpClient httpClient, string resourceUri, CancellationToken cancellationToken = default)
         {
             Guard.AgainstNull(httpClient);
-            Guard.AgainstNull(resourceUri);
+            Guard.AgainstNullOrWhitespace(resourceUri);
             // call this endpoint and see what the header says and return that
             HttpResponseMessage httpResponseMessage = await httpClient.GetAsync(resourceUri, cancellationToken).ConfigureAwait(false);
             var wwwAuthParam = CreateFromResponseHeaders(httpResponseMessage.Headers);
