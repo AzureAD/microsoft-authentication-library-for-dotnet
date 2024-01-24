@@ -390,10 +390,10 @@ namespace Microsoft.Identity.Client
             return CreateWwwAuthenticateParameters(parameters, scheme);
         }
 
-        private static string[] GetParsedAuthValueElements(string wwwAuthenticateValue)
+        private static IEnumerable<string> GetParsedAuthValueElements(string wwwAuthenticateValue)
         {
             char[] charsToTrim = { ',', ' ' };
-            List<string> authValuesSplit = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ' ');
+            var authValuesSplit = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ' ');
 
             //Ensure that known headers are not being parsed.
             if (s_knownAuthenticationSchemes.Contains(authValuesSplit[0]))
@@ -401,7 +401,7 @@ namespace Microsoft.Identity.Client
                 authValuesSplit = authValuesSplit.Skip(1).ToList();
             }
 
-            return authValuesSplit.Select(authValue => authValue.TrimEnd(charsToTrim)).ToArray();
+            return authValuesSplit.Select(authValue => authValue.TrimEnd(charsToTrim));
         }
 
         internal static WwwAuthenticateParameters CreateWwwAuthenticateParameters(IDictionary<string, string> values, string scheme)
