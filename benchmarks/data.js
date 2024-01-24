@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706120431141,
+  "lastUpdate": 1706123519845,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -2906,6 +2906,42 @@ window.BENCHMARK_DATA = {
             "value": 358108.9166666667,
             "unit": "ns",
             "range": "± 3375.4217637701718"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "simon.cropp@gmail.com",
+            "name": "Simon Cropp",
+            "username": "SimonCropp"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d492fb54947ae838274329fd5714c9781bb5a5b9",
+          "message": "reduce some alloc by using Array.Empty (#4573)\n\n* reduce some alloc by using Array.Empty\r\n\r\n* Update Storage.cs\r\n\r\n---------\r\n\r\nCo-authored-by: Neha Bhargava <61847233+neha-bhargava@users.noreply.github.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-01-24T19:04:25Z",
+          "tree_id": "52b3f69e9111167f6e8d785db3f8d214818c3eb2",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/d492fb54947ae838274329fd5714c9781bb5a5b9"
+        },
+        "date": 1706123513976,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 293452.82352941175,
+            "unit": "ns",
+            "range": "± 5815.342447303664"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 332181.8,
+            "unit": "ns",
+            "range": "± 5050.011572829738"
           }
         ]
       }
