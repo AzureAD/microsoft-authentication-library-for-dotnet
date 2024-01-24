@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if DESKTOP
+#if NETFRAMEWORK
 using System;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi;
-using Microsoft.Identity.Client.Platforms.net45;
+using Microsoft.Identity.Client.Platforms.netdesktop;
 using Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         private readonly RequestContext _requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid());
 
         [TestMethod]
-        public void Net45Factory_DefaultEmbedded()
+        public void NetFxFactory_DefaultEmbedded()
         {
             // Act
             var webUi = _webUIFactory.CreateAuthenticationDialog(
@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
-        public void Net45Factory_SilentWebUi()
+        public void NetFxFactory_SilentWebUi()
         {
             // Arrange
             _parent.UseHiddenBrowser = true;
@@ -49,7 +49,10 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
-        public void Net45Factory_SystemWebUi()
+#if ONEBRANCH_BUILD
+        [Ignore]
+#endif
+        public void NetFxFactory_SystemWebUi()
         {
 
             // Act

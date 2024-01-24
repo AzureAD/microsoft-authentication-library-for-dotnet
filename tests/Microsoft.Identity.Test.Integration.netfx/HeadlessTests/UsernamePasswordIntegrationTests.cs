@@ -17,7 +17,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Integration.net45.Infrastructure;
+using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -411,14 +411,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         #region Azure AD Kerberos Feature Tests
-        [TestMethod]
+        [IgnoreOnOneBranch]
         public async Task Kerberos_ROPC_AAD_Async()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             await KerberosRunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [IgnoreOnOneBranch]
         public async Task Kerberos_ROPC_ADFSv4Federated_Async()
         {
             var labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.AdfsV4, true).ConfigureAwait(false);
@@ -476,7 +476,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ValidateKerberosWindowsTicketCacheOperation(ticket);
         }
 
-        #endregion
+#endregion
     }
 }
 #endif

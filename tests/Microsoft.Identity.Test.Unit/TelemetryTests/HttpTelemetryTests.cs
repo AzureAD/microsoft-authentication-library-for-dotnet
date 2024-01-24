@@ -441,7 +441,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             return PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithHttpManager(_harness.HttpManager)
                     .WithDefaultRedirectUri()
-                    .WithLogging((lvl, msg, pii) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
+                    .WithLogging((lvl, msg, _) => Trace.WriteLine($"[MSAL_LOG][{lvl}] {msg}"))
                     .WithLegacyCacheCompatibility(isLegacyCacheEnabled)
                     .BuildConcrete();
         }
@@ -732,12 +732,12 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             string[] actualFailedApiIds = lastRequestParts[2]
                 .Split(',')
-                .Where((item, index) => index % 2 == 0)
+                .Where((_, index) => index % 2 == 0)
                 .Where(it => !string.IsNullOrEmpty(it))
                 .ToArray();
             string[] correlationIds = lastRequestParts[2]
                 .Split(',')
-                .Where((item, index) => index % 2 != 0)
+                .Where((_, index) => index % 2 != 0)
                 .Where(it => !string.IsNullOrEmpty(it))
                 .ToArray();
 

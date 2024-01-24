@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             };
 
             var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
-                .WithLogging((level, message, pii) => { }).Build();
+                .WithLogging((_, _, _) => { }).Build();
 
             Assert.AreEqual(LogLevel.Error, pca.AppConfig.LogLevel);
             Assert.IsTrue(pca.AppConfig.EnablePiiLogging);
@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             };
 
             var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
-                .WithLogging((level, message, pii) => { },
+                .WithLogging((_, _, _) => { },
                     LogLevel.Verbose, true, false).Build();
 
             Assert.AreEqual(LogLevel.Verbose, pca.AppConfig.LogLevel);
@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithLogging()
         {
             var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                    .WithLogging((level, message, pii) => { }, LogLevel.Verbose, true, true)
+                                                    .WithLogging((_, _, _) => { }, LogLevel.Verbose, true, true)
                                                     .Build();
 
             Assert.IsNotNull(pca.AppConfig.LoggingCallback);
@@ -653,7 +653,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             var builder1 = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId);
 
-#if DESKTOP || NET_CORE
+#if NETFRAMEWORK || NET_CORE
             Assert.IsFalse(builder1.IsBrokerAvailable());
 #else
             Assert.IsTrue(builder1.IsBrokerAvailable());

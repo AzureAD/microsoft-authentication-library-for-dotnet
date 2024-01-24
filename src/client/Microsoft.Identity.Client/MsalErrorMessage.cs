@@ -341,14 +341,6 @@ namespace Microsoft.Identity.Client
 
         public const string ScopesRequired = "At least one scope needs to be requested for this authentication flow. ";
         public const string InvalidAdalCacheMultipleRTs = "The ADAL cache is invalid as it contains multiple refresh token entries for one user. Deleting invalid ADAL cache. ";
-
-        public const string CryptoNet45 =
-            "Could not use the certificate for signing. See inner exception for details. " +
-            "Possible cause: this may be a known issue with apps build against .NET Desktop 4.6 or lower. " +
-            "Either target a higher version of .NET desktop - 4.6.1 and above, " +
-            "or use a different certificate type (non-CNG) or sign your own assertion " +
-            "as described at https://aka.ms/msal-net-signed-assertion. ";
-
         public static string ExperimentalFeature(string methodName)
         {
             return string.Format(
@@ -399,6 +391,14 @@ namespace Microsoft.Identity.Client
                 CultureInfo.InvariantCulture,
                 "The certificate {0} does not have a private key. ",
                 certificateName);
+        }
+
+        public static string CertMustBeRsa(string certificateFriendlyName)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "The provided certificate is not of type RSA. Please use a certificate of type RSA. Provided certificate's Friendly Name: {0}.",
+                certificateFriendlyName);
         }
 
         public const string LinuxOpenToolFailed = "Unable to open a web page using xdg-open, gnome-open, kfmclient or wslview tools. See inner exception for details. Possible causes for this error are: tools are not installed or they cannot open a URL. Make sure you can open a web page by invoking from a terminal: xdg-open https://www.bing.com ";

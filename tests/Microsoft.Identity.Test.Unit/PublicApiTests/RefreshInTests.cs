@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
-                // Assert token is proactivly refreshed
+                // Assert token is proactively refreshed
                 Assert.IsNotNull(result);
                 Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed);
                 Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == refreshOn);
@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             void LocalLogCallback(LogLevel level, string message, bool containsPii)
             {
                 if (level == LogLevel.Error &&
-                    message.Contains(BackgroundFetch_Failed))
+                    message.Contains(SilentRequestHelper.ProactiveRefreshServiceError))
                 {
                     wasErrorLogged = true;
                 }
@@ -262,13 +262,51 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsTrue(refreshOnWithJitterList.Distinct().Count() >= 8, "Jitter is random, so we can only have 1-2 identical values");
         }
 
+        [TestMethod]
+        public async Task ATS_ProactiveRefresh_CancelsSuccessfully_Async()
+        {
+            bool wasErrorLogged = false;
+
+            // Arrange
+            using MockHttpAndServiceBundle harness = base.CreateTestHarness();
+            harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+            PublicClientApplication app = SetupPca(harness, LocalLogCallback);
+            TestCommon.UpdateATWithRefreshOn(app.UserTokenCacheInternal.Accessor);
+
+            var account = new Account(TestConstants.s_userIdentifier, TestConstants.DisplayableId, null);
+
+            var cts = new CancellationTokenSource();
+            var cancellationToken = cts.Token;
+            cts.Cancel();
+            cts.Dispose();
+
+            // Act
+            await app.AcquireTokenSilent(
+                    TestConstants.s_scope.ToArray(),
+                    account)
+                .ExecuteAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            Assert.IsTrue(TestCommon.YieldTillSatisfied(() => wasErrorLogged));
+
+            void LocalLogCallback(LogLevel level, string message, bool containsPii)
+            {
+                if (level == LogLevel.Warning &&
+                    message.Contains(SilentRequestHelper.ProactiveRefreshCancellationError))
+                {
+                    wasErrorLogged = true;
+                }
+            }
+        }
+
         #endregion
 
-        #region Client Creds
+        #region Client Credentials
 
         [TestMethod]
         [Description("AT in cache, needs refresh. AAD responds well to Refresh.")]
-        public async Task ClientCreds_NonExpired_NeedsRefresh_ValidResponse_Async()
+        public async Task ClientCredentials_NonExpired_NeedsRefresh_ValidResponse_Async()
         {
             // Arrange
             using (MockHttpAndServiceBundle harness = base.CreateTestHarness())
@@ -309,7 +347,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [Description("AT in cache, needs refresh. AAD responds well to Refresh.")]
-        public async Task ClientCreds_OnBehalfOf_NonExpired_NeedsRefresh_ValidResponse_Async()
+        public async Task ClientCredentials_OnBehalfOf_NonExpired_NeedsRefresh_ValidResponse_Async()
         {
             // Arrange
             using (MockHttpAndServiceBundle harness = base.CreateTestHarness())
@@ -362,7 +400,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [Description("AT in cache, needs refresh. AAD is unavailable when refreshing.")]
-        public async Task ClientCreds_NonExpired_NeedsRefresh_AADUnavailableResponse_Async()
+        public async Task ClientCredentials_NonExpired_NeedsRefresh_AadUnavailableResponse_Async()
         {
             // Arrange
             using (MockHttpAndServiceBundle harness = base.CreateTestHarness())
@@ -386,7 +424,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .ConfigureAwait(false);
 
                 // Assert
-                Assert.IsNotNull(result, "ClientCreds should still succeeds even though AAD is unavailable");
+                Assert.IsNotNull(result, "ClientCredentials should still succeeds even though AAD is unavailable");
                 TestCommon.YieldTillSatisfied(() => harness.HttpManager.QueueSize == 0);
                 Assert.AreEqual(0, harness.HttpManager.QueueSize);
                 cacheAccess.WaitTo_AssertAcessCounts(1, 0); // the refresh failed, no new data is written to the cache
@@ -404,7 +442,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task ClientCreds_NonExpired_NeedsRefresh_AADInvalidResponse_Async()
+        public async Task ClientCredentials_NonExpired_NeedsRefresh_AadInvalidResponse_Async()
         {
             bool wasErrorLogged = false;
             // Arrange
@@ -434,7 +472,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             void LocalLogCallback(LogLevel level, string message, bool containsPii)
             {
                 if (level == LogLevel.Error &&
-                    message.Contains(BackgroundFetch_Failed))
+                    message.Contains(SilentRequestHelper.ProactiveRefreshServiceError))
                 {
                     wasErrorLogged = true;
                 }
@@ -443,7 +481,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [Description("AT expired. AAD fails but is available when refreshing.")]
-        public async Task ClientCreds_Expired_NeedsRefresh_AADInvalidResponse_Async()
+        public async Task ClientCredentials_Expired_NeedsRefresh_AADInvalidResponse_Async()
         {
             // Arrange
             using (MockHttpAndServiceBundle harness = base.CreateTestHarness())
@@ -470,8 +508,39 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        #endregion
+        [TestMethod]
+        public async Task ClientCredentials_ProactiveRefresh_CancelsSuccessfully_Async()
+        {
+            bool wasErrorLogged = false;
 
-        private const string BackgroundFetch_Failed = "Background fetch failed";
+            // Arrange
+            using MockHttpAndServiceBundle harness = CreateTestHarness();
+            harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+            ConfidentialClientApplication app = SetupCca(harness, LocalLogCallback);
+            TestCommon.UpdateATWithRefreshOn(app.AppTokenCacheInternal.Accessor);
+
+            var cts = new CancellationTokenSource();
+            var cancellationToken = cts.Token;
+            cts.Cancel();
+            cts.Dispose();
+
+            // Act
+            await app.AcquireTokenForClient(TestConstants.s_scope)
+                .ExecuteAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            Assert.IsTrue(TestCommon.YieldTillSatisfied(() => wasErrorLogged));
+
+            void LocalLogCallback(LogLevel level, string message, bool containsPii)
+            {
+                if (level == LogLevel.Warning &&
+                    message.Contains(SilentRequestHelper.ProactiveRefreshCancellationError))
+                {
+                    wasErrorLogged = true;
+                }
+            }
+        }
+        #endregion
     }
 }

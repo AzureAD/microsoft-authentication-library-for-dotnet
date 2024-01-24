@@ -13,6 +13,7 @@ using Microsoft.Identity.Test.UIAutomation.Infrastructure;
 using System.Linq;
 using Microsoft.Identity.Client;
 using System.Threading;
+using OpenQA.Selenium.Edge;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
@@ -24,21 +25,21 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         public static IWebDriver CreateDefaultWebDriver()
         {
-            ChromeOptions options = new ChromeOptions();
-            ChromeDriver driver;
+            EdgeOptions options = new EdgeOptions();
+            EdgeDriver driver;
 
             // ~2x faster, no visual rendering
             // remove when debugging to see the UI automation
             //options.AddArguments("headless");
 
-            var env = Environment.GetEnvironmentVariable("ChromeWebDriver");
+            var env = Environment.GetEnvironmentVariable("EDGEWEBDRIVER");
             if (string.IsNullOrEmpty(env))
             {
-                driver = new ChromeDriver(options);
+                driver = new EdgeDriver(options);
             }
             else
             {
-                driver = new ChromeDriver(env, options);
+                driver = new EdgeDriver(env, options);
             }
 
             driver.Manage().Timeouts().ImplicitWait = ImplicitTimespan;
@@ -54,7 +55,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         {
             Screenshot ss = ((ITakesScreenshot)driver).GetScreenshot();
             string picName = name + s_picNumber++ + ".png";
-#if DESKTOP // Can't attach a file on netcore because mstest doesn't support it
+#if NETFRAMEWORK // Can't attach a file on netcore because mstest doesn't support it
             string failurePicturePath = Path.Combine(testContext.TestResultsDirectory, picName);
 #else
             string failurePicturePath = Path.Combine(Directory.GetCurrentDirectory(), picName);
@@ -63,7 +64,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             Trace.WriteLine($"Saving picture to {failurePicturePath}");
             ss.SaveAsFile(failurePicturePath, ScreenshotImageFormat.Png);
 
-#if DESKTOP // Can't attach a file to the logs on netcore because mstest doesn't support it
+#if NETFRAMEWORK // Can't attach a file to the logs on netcore because mstest doesn't support it
             testContext.AddResultFile(failurePicturePath);
 #endif
         }

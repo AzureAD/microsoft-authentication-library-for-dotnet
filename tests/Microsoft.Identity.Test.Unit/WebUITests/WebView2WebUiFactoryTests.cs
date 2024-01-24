@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if DESKTOP || NET6_WIN
+#if NETFRAMEWORK || NET6_WIN
 
 using System;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -29,6 +29,9 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
           new RequestContext(TestCommon.CreateDefaultAdfsServiceBundle(), Guid.NewGuid());
 
         [TestMethod]
+#if ONEBRANCH_BUILD
+        [Ignore]
+#endif
         public void IsSystemWebUiAvailable()
         {
             var webUIFactory = new WebView2WebUiFactory();
@@ -143,6 +146,9 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         }
 
         [TestMethod]
+#if ONEBRANCH_BUILD
+        [Ignore]
+#endif
         public void NetCoreFactory_System()
         {
             // Arrange

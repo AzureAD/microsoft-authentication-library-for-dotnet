@@ -8,8 +8,6 @@
     <TargetFrameworks>$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet6);$(TargetFrameworkNet6Win)</TargetFrameworks>
     <IsPackable>false</IsPackable>
 
-    <LangVersion>latest</LangVersion>
-
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
 
     <Platforms>AnyCPU;x64</Platforms>
@@ -79,9 +77,6 @@
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop48)' ">
-    <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
     <DefineConstants>$(DefineConstants);NET6_WIN</DefineConstants>

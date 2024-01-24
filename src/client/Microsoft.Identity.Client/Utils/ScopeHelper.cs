@@ -12,6 +12,16 @@ namespace Microsoft.Identity.Client.Utils
     {
         private const string DefaultSuffix = "/.default";
 
+        public static string OrderScopesAlphabetically(string originalScopes)
+        {
+            // split by space and order alphabetically
+            string[] split = originalScopes.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            // order the scopes in alphabetical order
+            Array.Sort(split, StringComparer.OrdinalIgnoreCase);
+            return string.Join(" ", split);
+        }
+
+
         public static bool ScopeContains(ISet<string> outerSet, IEnumerable<string> possibleContainedSet)
         {
             foreach (string key in possibleContainedSet)

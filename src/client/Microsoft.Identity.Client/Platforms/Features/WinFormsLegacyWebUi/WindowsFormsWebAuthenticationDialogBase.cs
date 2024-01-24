@@ -60,13 +60,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             {
                 this.ownerWindow = null;
             }
-            else if (ownerWindow is IWin32Window)
+            else if (ownerWindow is IWin32Window window)
             {
-                this.ownerWindow = (IWin32Window)ownerWindow;
+                this.ownerWindow = window;
             }
-            else if (ownerWindow is IntPtr)
+            else if (ownerWindow is IntPtr ptr)
             {
-                this.ownerWindow = new Win32Window((IntPtr)ownerWindow);
+                this.ownerWindow = new Win32Window(ptr);
             }
             else
             {
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
             if (!e.Cancel)
             {
-                string urlDecode = CoreHelpers.UrlDecode(e.Url.ToString());
+                string urlDecode = CoreHelpers.UrlDecode(e.Url);
                 RequestContext.Logger.VerbosePii(
                     () => string.Format(CultureInfo.InvariantCulture, "[Legacy WebView] Navigating to '{0}'.", urlDecode),
                     () => string.Empty);
@@ -396,10 +396,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         /// </summary>
         protected MsalClientException CreateExceptionForAuthenticationUiFailed(int statusCode)
         {
-            if (NavigateErrorStatus.Messages.ContainsKey(statusCode))
+            if (NavigateErrorStatus.Messages.TryGetValue(statusCode, out string statusCodeMessages))
             {
                 string format = "The browser based authentication dialog failed to complete. Reason: {0}";
-                string message = string.Format(CultureInfo.InvariantCulture, format, NavigateErrorStatus.Messages[statusCode]);
+                string message = string.Format(CultureInfo.InvariantCulture, format, statusCodeMessages);
                 return new MsalClientException(MsalError.AuthenticationUiFailedError, message);
             }
 

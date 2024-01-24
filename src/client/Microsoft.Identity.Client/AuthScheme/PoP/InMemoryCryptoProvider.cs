@@ -14,12 +14,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     internal class InMemoryCryptoProvider : IPoPCryptoProvider
     {
         internal /* internal for test only */ const int RsaKeySize = 2048;
-
-#if NET45
-        private RSACryptoServiceProvider _signingKey;
-#else
         private RSA _signingKey;
-#endif
 
         public InMemoryCryptoProvider()
         {
@@ -32,12 +27,8 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         private void InitializeSigningKey()
         {
-#if NET45
-            _signingKey = new RSACryptoServiceProvider(RsaKeySize);
-#else
             _signingKey = RSA.Create();
             _signingKey.KeySize = RsaKeySize;
-#endif
             RSAParameters publicKeyInfo = _signingKey.ExportParameters(false);
 
             CannonicalPublicKeyJwk = ComputeCanonicalJwk(publicKeyInfo);
@@ -45,7 +36,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         public byte[] Sign(byte[] payload)
         {
-            return Sign(_signingKey, payload);
+            return _signingKey.SignData(payload, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         }
 
         /// <summary>
@@ -55,15 +46,6 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         private static string ComputeCanonicalJwk(RSAParameters rsaPublicKey)
         {
             return $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
-        }
-
-        public static byte[] Sign(RSA RsaKey, byte[] payload)
-        {
-#if NET45
-            return ((RSACryptoServiceProvider)RsaKey).SignData(payload, CryptoConfig.MapNameToOID("SHA256"));
-#else
-            return RsaKey.SignData(payload, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-#endif
         }
     }
 }

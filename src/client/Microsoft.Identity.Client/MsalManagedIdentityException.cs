@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ComponentModel;
 using System.Net;
 using Microsoft.Identity.Client.ManagedIdentity;
 
@@ -9,8 +10,12 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// This exception class is for exceptions generated from Managed Identity sources.
+    /// This class is deprecated and will be removed in a future release. 
+    /// Catch MsalServiceException instead.
     /// For more details, see https://aka.ms/msal-net-managed-identity
     /// </summary>
+    [Obsolete("MsalManagedIdentityException is deprecated and will be removed in a future release. Catch MsalServiceException instead.", true)]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public class MsalManagedIdentityException : MsalServiceException
     {
         /// <summary>
@@ -82,7 +87,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Specifies the managed identity source from which the exception initiates.
         /// </summary>
-        public ManagedIdentitySource ManagedIdentitySource { get; }
+        public new ManagedIdentitySource ManagedIdentitySource { get; }
 
         /// <summary>
         /// Retry error codes specific to managed identity

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Security.Cryptography.X509Certificates;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
@@ -55,7 +55,15 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private IOtelInstrumentation InternalGetOtelInstrumentation()
         {
 #if SUPPORTS_OTEL
-            return new OtelInstrumentation();
+            try
+            {
+                return new OtelInstrumentation();
+            } catch (FileNotFoundException ex) 
+            {
+                // Can happen in in-process Azure Functions: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4456
+                Logger.Warning("Failed instantiating OpenTelemetry instrumentation. Exception: " + ex.Message);
+                return new NullOtelInstrumentation();
+            }
 #else
             return new NullOtelInstrumentation();
 #endif
@@ -171,10 +179,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         // RuntimeInformation.FrameworkDescription is available on all platforms except .NET Framework 4.7 and lower.
         protected virtual string InternalGetRuntimeVersion()
         {
-#if !DESKTOP
+#if !NETFRAMEWORK
             return System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
 #else
-            return string.Empty; // For DESKTOP this should not be hit, since NetDesktopPlatformProxy will take over
+            return string.Empty; // For NETFRAMEWORK this should not be hit, since NetDesktopPlatformProxy will take over
 #endif
         }
 

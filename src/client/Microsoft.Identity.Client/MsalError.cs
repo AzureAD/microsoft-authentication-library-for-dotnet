@@ -861,6 +861,12 @@ namespace Microsoft.Identity.Client
         public const string CertWithoutPrivateKey = "cert_without_private_key";
 
         /// <summary>
+        /// <para>What happens?</para>The certificate provided is not of type RSA.
+        /// <para>Mitigation</para>Please use an RSA certificate.
+        /// </summary>
+        public const string CertificateNotRsa = "certificate_not_rsa";
+
+        /// <summary>
         /// Device certificate not found.
         /// </summary>
         public const string DeviceCertificateNotFound = "device_certificate_not_found";
@@ -881,13 +887,6 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para>Region discovery cannot be performed for ADFS authority.
         /// </summary>
         public const string RegionDiscoveryNotEnabled = "region_discovery_unavailable";
-
-        /// <summary>
-        /// <para>What happens?</para>MSAL cannot use the certificate for signing.
-        /// <para>Mitigation</para>Possible cause: use of CNG certificates with .Net classic 4.6 or lower. Either target a higher version of .NET desktop - 4.6.1 and above, or use a different certificate type (non-CNG) 
-        /// or sign your own assertion as described at https://aka.ms/msal-net-signed-assertion
-        /// </summary>
-        public const string CryptoNet45 = "crypto_net45";
 
         /// <summary>
         /// <para>What happens?</para>The request has broker enabled and Proof-of-Possession configured but the broker does not support Proof-of-Possession

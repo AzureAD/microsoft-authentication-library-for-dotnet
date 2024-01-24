@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
 
-                    LogMsalFailedTelemetryToOtel(ex, ex.ErrorCode);
+                    LogMsalFailedTelemetryToOtel(ex.ErrorCode);
                     throw;
                 }
                 catch (Exception ex)
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
                     
-                    LogMsalFailedTelemetryToOtel(ex, ex.GetType().Name);
+                    LogMsalFailedTelemetryToOtel(ex.GetType().Name);
                     throw;
                 }
                 finally
@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         AuthenticationRequestParameters.RequestContext.Logger);
         }
 
-        private void LogMsalFailedTelemetryToOtel(Exception exception, string errorCodeToLog)
+        private void LogMsalFailedTelemetryToOtel(string errorCodeToLog)
         {
             // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailedMetrics(
@@ -235,7 +235,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
-            return new Tuple<string, string>(resource, scopes);
+            return new(resource, scopes);
         }
 
         private CacheLevel GetCacheLevel(AuthenticationResult authenticationResult)
@@ -448,9 +448,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
-            if (additionalBodyParameters.ContainsKey(OAuth2Parameter.Username))
+            if (additionalBodyParameters.TryGetValue(OAuth2Parameter.Username, out string username))
             {
-                return GetCcsUpnHeader(additionalBodyParameters[OAuth2Parameter.Username]);
+                return GetCcsUpnHeader(username);
             }
 
             if (!String.IsNullOrEmpty(AuthenticationRequestParameters.LoginHint))
@@ -470,7 +470,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             string OidCcsHeader = CoreHelpers.GetCcsUpnHint(upnHeader);
 
-            return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader) as KeyValuePair<string, string>?;
+            return new KeyValuePair<string, string>(Constants.CcsRoutingHintHeader, OidCcsHeader);
         }
 
         private void LogRequestStarted(AuthenticationRequestParameters authenticationRequestParameters)

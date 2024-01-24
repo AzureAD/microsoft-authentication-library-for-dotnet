@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             string differentScopesForAt = string.Empty;
             var app1 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                          .WithAppTokenProvider((AppTokenProviderParameters parameters) =>
+                                                          .WithAppTokenProvider((AppTokenProviderParameters _) =>
                                                           {
                                                               AppTokenProviderResult result = new AppTokenProviderResult
                                                               {
@@ -162,13 +162,13 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         public async Task ParallelRequests_CallTokenEndpointOnceAsync()
         {
-            int numOfTasks = 10; 
+            int numOfTasks = 10;
             int identityProviderHits = 0;
             int cacheHits = 0;
 
             var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                 .WithAuthority("https://login.microsoftonline.com/tid")
-                .WithAppTokenProvider((AppTokenProviderParameters parameters) =>
+                .WithAppTokenProvider((AppTokenProviderParameters _) =>
                 {
                     return Task.FromResult(GetAppTokenProviderResult());
                 })
@@ -201,6 +201,28 @@ namespace Microsoft.Identity.Test.Unit
             Debug.WriteLine($"Total Identity Hits: {identityProviderHits}");
             Debug.WriteLine($"Total Cache Hits: {cacheHits}");
             Assert.IsTrue(cacheHits == 9);
+        }
+
+        [TestMethod]
+        // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4472
+        // Should throw TaskCanceledException instead of trying to take a semaphore
+        public async Task CanceledRequest_ThrowsTaskCanceledExceptionAsync()
+        {
+            var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithInstanceDiscovery(false)
+                .WithAppTokenProvider((AppTokenProviderParameters _) =>
+                {
+                    return Task.FromResult(GetAppTokenProviderResult());
+                })
+                .BuildConcrete();
+
+            var tokenSource = new CancellationTokenSource();
+            tokenSource.Cancel();
+
+            await AssertException.TaskThrowsAsync<TaskCanceledException>(
+                () => app.AcquireTokenForClient(TestConstants.s_scope)
+                        .WithForceRefresh(true)
+                        .ExecuteAsync(tokenSource.Token)).ConfigureAwait(false);
         }
     }
 }

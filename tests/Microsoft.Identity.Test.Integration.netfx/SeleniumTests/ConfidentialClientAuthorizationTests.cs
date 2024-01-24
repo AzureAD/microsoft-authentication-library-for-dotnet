@@ -13,7 +13,7 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.Integration.net45.Infrastructure;
+using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -107,14 +107,12 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             IConfidentialClientApplication cca;
             redirectUri = redirectUri ?? SeleniumWebUI.FindFreeLocalhostRedirectUri();
 
-            HttpSnifferClientFactory factory;
-
             cca = ConfidentialClientApplicationBuilder
                 .Create(appId)
                 .WithAuthority(authority)
                 .WithCertificate(cert)
                 .WithRedirectUri(redirectUri)
-                .WithTestLogging(out factory)
+                .WithTestLogging(out HttpSnifferClientFactory factory)
                 .Build();
 
             var cacheAccess = (cca as ConfidentialClientApplication).UserTokenCache.RecordAccess();

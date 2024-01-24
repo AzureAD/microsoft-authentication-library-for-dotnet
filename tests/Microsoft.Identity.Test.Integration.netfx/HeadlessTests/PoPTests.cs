@@ -22,7 +22,7 @@ using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.Integration.net45.Infrastructure;
+using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
@@ -36,6 +36,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Internal;
 using System.Security.Claims;
 using System.Net.Sockets;
+using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -458,7 +459,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
 #if NET_CORE
-        [TestMethod]
+        [IgnoreOnOneBranch]
         public async Task WamUsernamePasswordRequestWithPOPAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -541,7 +542,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static RsaSecurityKey CreateRsaSecurityKey()
         {
-#if NET_FX
+#if NETFRAMEWORK
             RSA rsa = RSA.Create(2048);
 #else
             RSA rsa = new RSACryptoServiceProvider(2048);

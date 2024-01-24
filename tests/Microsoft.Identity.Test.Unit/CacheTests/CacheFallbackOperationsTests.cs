@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             // By setting this to null, logging will fail, making the test fail.
             _logger = Substitute.For<ILoggerAdapter>();
 
-            // Use the net45 accessor for tests
+            // Use the netfx accessor for tests
             _legacyCachePersistence = new InMemoryLegacyCachePersistence();
         }
 
@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                         TestConstants.ProductionPrefNetworkEnvironment,
                         TestConstants.SovereignNetworkEnvironmentDE },
                     TestConstants.ClientId,
-                    new Account(null, null, null)); // too litle info here, do not return RT
+                    new Account(null, null, null)); // too little info here, do not return RT
 
             Assert.IsNull(rt, "Expected to find no items");
         }
@@ -422,7 +422,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             // in case of adalv3 -> adalv4 -> msal2 migration
             // adal cache can have different cache entities for the
-            // same user/account with client info and wihout
+            // same user/account with client info and without
             // CacheFallbackOperations.RemoveAdalUser should remove both
             LegacyTokenCacheHelper.PopulateLegacyWithRtAndId(
                 _logger,

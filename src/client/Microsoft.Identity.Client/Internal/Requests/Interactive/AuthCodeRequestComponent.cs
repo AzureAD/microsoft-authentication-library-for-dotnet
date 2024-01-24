@@ -84,8 +84,7 @@ namespace Microsoft.Identity.Client.Internal
 
             VerifyAuthorizationResult(authorizationResult, state);
 
-            return new Tuple<AuthorizationResult, string>(authorizationResult, codeVerifier);
-
+            return new(authorizationResult, codeVerifier);
         }
 
         private Tuple<Uri, string> CreateAuthorizationUriWithCodeChallenge(
@@ -99,7 +98,7 @@ namespace Microsoft.Identity.Client.Internal
 
             UriBuilder builder = CreateInteractiveRequestParameters(authEndpoint, requestParameters);
 
-            return new Tuple<Uri, string>(builder.Uri, codeVerifier);
+            return new(builder.Uri, codeVerifier);
         }
 
         private Tuple<Uri, string, string> CreateAuthorizationUri(string authEndpoint, bool addPkceAndState = false)
@@ -123,7 +122,7 @@ namespace Microsoft.Identity.Client.Internal
             requestParameters[OAuth2Parameter.ClientInfo] = "1";
             UriBuilder builder = CreateInteractiveRequestParameters(authEndpoint, requestParameters);
 
-            return new Tuple<Uri, string, string>(builder.Uri, state, codeVerifier);
+            return new(builder.Uri, state, codeVerifier);
         }
 
         private UriBuilder CreateInteractiveRequestParameters(string authEndpoint, IDictionary<string, string> requestParameters)
@@ -136,13 +135,13 @@ namespace Microsoft.Identity.Client.Internal
                     requestParameters[OAuth2Parameter.LoginHint] = _interactiveParameters.Account.Username;
                 }
 
-                if (_interactiveParameters.Account?.HomeAccountId?.ObjectId != null)
+                if (_interactiveParameters.Account.HomeAccountId?.ObjectId != null)
                 {
                     requestParameters[OAuth2Parameter.LoginReq] =
                         _interactiveParameters.Account.HomeAccountId.ObjectId;
                 }
 
-                if (!string.IsNullOrEmpty(_interactiveParameters.Account?.HomeAccountId?.TenantId))
+                if (!string.IsNullOrEmpty(_interactiveParameters.Account.HomeAccountId?.TenantId))
                 {
                     requestParameters[OAuth2Parameter.DomainReq] =
                         _interactiveParameters.Account.HomeAccountId.TenantId;
@@ -306,7 +305,7 @@ namespace Microsoft.Identity.Client.Internal
 
             CoreUIParent coreUiParent = _interactiveParameters.UiParent;
 
-#if WINDOWS_APP || DESKTOP
+#if WINDOWS_APP || NETFRAMEWORK
             // hidden web view can be used in both WinRT and desktop applications.
             coreUiParent.UseHiddenBrowser = _interactiveParameters.Prompt.Equals(Prompt.Never);
 #if WINDOWS_APP

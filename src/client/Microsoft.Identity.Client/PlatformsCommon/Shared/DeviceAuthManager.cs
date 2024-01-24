@@ -12,11 +12,14 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
-    internal abstract class DeviceAuthManager : IDeviceAuthManager
+    internal class DeviceAuthManager : IDeviceAuthManager
     {
-        protected abstract DeviceAuthJWTResponse GetDeviceAuthJwtResponse(string submitUrl, string nonce, X509Certificate2 certificate);
+        private readonly ICryptographyManager _cryptographyManager;
 
-        protected abstract byte[] SignWithCertificate(DeviceAuthJWTResponse responseJwt, X509Certificate2 certificate);
+        public DeviceAuthManager(ICryptographyManager cryptographyManager)
+        {
+            _cryptographyManager = cryptographyManager;
+        }
 
         public bool TryCreateDeviceAuthChallengeResponse(HttpResponseHeaders responseHeaders, Uri endpointUri, out string responseHeader)
         {
@@ -60,6 +63,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             FormatResponseHeader(responseJWT, signedResponse, challengeData, out responseHeader);
 
             return true;
+        }
+
+        private DeviceAuthJWTResponse GetDeviceAuthJwtResponse(string submitUrl, string nonce, X509Certificate2 certificate)
+        {
+            return new DeviceAuthJWTResponse(submitUrl, nonce, Convert.ToBase64String(certificate.GetRawCertData()));
+        }
+
+        private byte[] SignWithCertificate(DeviceAuthJWTResponse responseJwt, X509Certificate2 certificate)
+        {
+            return _cryptographyManager.SignWithCertificate(responseJwt.GetResponseToSign(), certificate);
         }
 
         private void FormatResponseHeader(

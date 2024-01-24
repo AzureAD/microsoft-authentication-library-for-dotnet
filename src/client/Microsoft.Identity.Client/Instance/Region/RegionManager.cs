@@ -148,8 +148,8 @@ namespace Microsoft.Identity.Client.Region
         {
             return
                 !(string.IsNullOrEmpty(apiEvent.RegionUsed) &&
-                 apiEvent.RegionAutodetectionSource == default(RegionAutodetectionSource) &&
-                 apiEvent.RegionOutcome == default(RegionOutcome));
+                 apiEvent.RegionAutodetectionSource == default &&
+                 apiEvent.RegionOutcome == default);
         }
 
         private async Task<RegionInfo> DiscoverAndCacheAsync(ILoggerAdapter logger, CancellationToken requestCancellationToken)
@@ -168,10 +168,10 @@ namespace Microsoft.Identity.Client.Region
         private async Task<RegionInfo> DiscoverAsync(ILoggerAdapter logger, CancellationToken requestCancellationToken)
         {
             RegionInfo result = null;
+            
+            await _lockDiscover.WaitAsync(requestCancellationToken).ConfigureAwait(false);
             try
             {
-                await _lockDiscover.WaitAsync().ConfigureAwait(false);
-
                 var regionInfo = GetCachedRegion(logger);
                 if (regionInfo != null)
                 {

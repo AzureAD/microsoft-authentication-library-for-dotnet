@@ -5,11 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -80,6 +82,42 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
+        public async Task ProactiveRefresh_CancelsSuccessfully_Async()
+        {
+            bool wasErrorLogged = false;
+
+            using var httpManager = new MockHttpManager();
+            httpManager.AddInstanceDiscoveryMockHandler();
+            AddMockHandlerAadSuccess(httpManager);
+
+            var cca = BuildCCA(httpManager, LocalLogCallback);
+
+            string oboCacheKey = "obo-cache-key";
+            var result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
+                .ExecuteAsync().ConfigureAwait(false);
+
+            TestCommon.UpdateATWithRefreshOn(cca.UserTokenCacheInternal.Accessor);
+
+            var cts = new CancellationTokenSource();
+            var cancellationToken = cts.Token;
+            cts.Cancel();
+            cts.Dispose();
+
+            result = await cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey).ExecuteAsync(cancellationToken).ConfigureAwait(false);
+
+            Assert.IsTrue(TestCommon.YieldTillSatisfied(() => wasErrorLogged));
+
+            void LocalLogCallback(LogLevel level, string message, bool containsPii)
+            {
+                if (level == LogLevel.Warning &&
+                    message.Contains(SilentRequestHelper.ProactiveRefreshCancellationError))
+                {
+                    wasErrorLogged = true;
+                }
+            }
+        }
+
+        [TestMethod]
         public async Task InitiateLongRunningObo_WithExistingKeyAndToken_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
@@ -109,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     responseMessage: MockHelpers.CreateSuccessTokenResponseMessage(accessToken: TestConstants.ATSecret2));
 
                 //Initiate another process using the same cache key
-                //MSAL should ignore the token in the cache, fetch a new token and overrite the existing one
+                //MSAL should ignore the token in the cache, fetch a new token and overwrite the existing one
                 result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
                     .ExecuteAsync().ConfigureAwait(false);
 
@@ -913,14 +951,18 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             return handler;
         }
 
-        private ConfidentialClientApplication BuildCCA(IHttpManager httpManager)
+        private ConfidentialClientApplication BuildCCA(IHttpManager httpManager, LogCallback logCallback = null)
         {
-            return ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithClientSecret(TestConstants.ClientSecret)
-                    .WithAuthority(TestConstants.AuthorityCommonTenant)
-                    .WithHttpManager(httpManager)
-                    .BuildConcrete();
+            var builder = ConfidentialClientApplicationBuilder
+                            .Create(TestConstants.ClientId)
+                            .WithClientSecret(TestConstants.ClientSecret)
+                            .WithAuthority(TestConstants.AuthorityCommonTenant)
+                            .WithHttpManager(httpManager);
+            if (logCallback != null)
+            {
+                builder.WithLogging(logCallback);
+            }
+            return builder.BuildConcrete();
         }
     }
 }

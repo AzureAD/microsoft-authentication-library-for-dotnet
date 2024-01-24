@@ -27,7 +27,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string ImdsApiVersion = "2018-02-01";
         private const string DefaultMessage = "[Managed Identity] Service request failed.";
 
-        internal const string IdentityUnavailableError = "[Managed Identity] Authentication unavailable. The requested identity has not been assigned to this resource.";
+        internal const string IdentityUnavailableError = "[Managed Identity] Authentication unavailable. " +
+            "Either the requested identity has not been assigned to this resource, or other errors could " +
+            "be present. Ensure the identity is correctly assigned and check the inner exception for more " +
+            "details. For more information, visit https://aka.ms/msal-managed-identity.";
+
         internal const string GatewayError = "[Managed Identity] Authentication unavailable. The request failed due to a gateway error.";
 
         private readonly Uri _imdsEndpoint;
@@ -93,7 +97,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 HttpStatusCode.BadRequest => IdentityUnavailableError,
                 HttpStatusCode.BadGateway => GatewayError,
                 HttpStatusCode.GatewayTimeout => GatewayError,
-                _ => default(string)
+                _ => default
             };
 
             if (baseMessage != null)
@@ -105,8 +109,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 message = message + Environment.NewLine + errorContentMessage;
 
                 _requestContext.Logger.Error($"Error message: {message} Http status code: {response.StatusCode}");
-                throw new MsalManagedIdentityException(MsalError.ManagedIdentityRequestFailed, message, 
-                    ManagedIdentitySource.Imds);
+
+                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    message,
+                    null,
+                    ManagedIdentitySource.Imds,
+                    null);
+
+                throw exception;
             }
 
             // Default behavior to handle successful scenario and general errors.

@@ -5,7 +5,7 @@ steps:
 
 - task: VSTest@2
   displayName: 'Run integration tests (.NET FX)'
-  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+  condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netfx\bin\**\Microsoft.Identity.Test.Integration.NetFx.dll'
@@ -19,8 +19,21 @@ steps:
     pathtoCustomTestAdapters: 'C:\temp' # Workaround for test failure, as NUnit Test Adapter that gets detected seems to mess something up
 
 - task: VSTest@2
+  displayName: 'Run integration tests (.NET FX) On OneBranch'
+  condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netfx\bin\**\Microsoft.Identity.Test.Integration.NetFx.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    rerunFailedTests: true
+    rerunMaxAttempts: '3'
+    runInParallel: false
+    codeCoverageEnabled: true
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: '1'
+
+- task: VSTest@2
   displayName: 'Run integration tests (.NET Core)'
-  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netcore\bin\**\Microsoft.Identity.Test.Integration.NetCore.dll'
@@ -34,7 +47,6 @@ steps:
 
 - task: VSTest@2
   displayName: 'Run integration tests (.NET Standard)'
-  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netstandard\bin\**\Microsoft.Identity.Test.Integration.NetStandard.dll'

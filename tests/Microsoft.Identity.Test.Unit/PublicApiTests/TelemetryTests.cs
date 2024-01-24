@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         private const string TenantId = "1234";
         private const string UserId = "5678";
 
-#if DESKTOP
+#if NETFRAMEWORK
         [TestMethod]
         public async Task DoNotCallPlatformProxyAsync()
         {
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        internal class MockProxy : Client.Platforms.net45.NetDesktopPlatformProxy
+        internal class MockProxy : Microsoft.Identity.Client.Platforms.netdesktop.NetDesktopPlatformProxy
         {
 
             public MockProxy() : base(new NullLogger())
