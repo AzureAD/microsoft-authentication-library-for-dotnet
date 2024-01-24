@@ -89,34 +89,34 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 levelToValidate++;
             };
 
-            _callback.When(x => x(LogLevel.Always, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Always, Arg.Any<string>(), false)).Do(_ => counter++);
             logger.Always(TestConstants.TestMessage);
             Assert.AreEqual(validationCounter, counter);
             _callback.Received().Invoke(Arg.Is((LogLevel)validationCounter - 2), Arg.Any<string>(), Arg.Is(false));
 
             incrementCounter.Invoke();
 
-            _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(_ => counter++);
             logger.Error(TestConstants.TestMessage);
             Assert.AreEqual(validationCounter, counter);
             _callback.Received().Invoke(Arg.Is((LogLevel)validationCounter - 2), Arg.Any<string>(), Arg.Is(false));
 
             incrementCounter.Invoke();
 
-            _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(_ => counter++);
             logger.Warning(TestConstants.TestMessage);
             Assert.AreEqual(validationCounter, counter);
             _callback.Received().Invoke(Arg.Is((LogLevel)validationCounter - 2), Arg.Any<string>(), Arg.Is(false));
 
             incrementCounter.Invoke();
 
-            _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), false)).Do(_ => counter++);
             logger.Info(TestConstants.TestMessage);
             Assert.AreEqual(validationCounter, counter);
 
             incrementCounter.Invoke();
 
-            _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), false)).Do(_ => counter++);
             logger.Verbose(()=>TestConstants.TestMessage);
             Assert.AreEqual(validationCounter, counter);
         }
@@ -143,31 +143,31 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 levelToValidate++;
             };
 
-            _callback.When(x => x(LogLevel.Always, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Always, Arg.Any<string>(), true)).Do(_ => counter++);
             logger.AlwaysPii(TestConstants.TestMessage, string.Empty);
             Assert.AreEqual(validationCounter, counter);
 
             incrementCounter.Invoke();
 
-            _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(_ => counter++);
             logger.ErrorPii(new ArgumentException(TestConstants.TestMessage));
             Assert.AreEqual(validationCounter, counter);
 
             incrementCounter.Invoke();
 
-            _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(_ => counter++);
             logger.WarningPii(TestConstants.TestMessage, string.Empty);
             Assert.AreEqual(validationCounter, counter);
 
             incrementCounter.Invoke();
 
-            _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), true)).Do(_ => counter++);
             logger.InfoPii(TestConstants.TestMessage, string.Empty);
             Assert.AreEqual(validationCounter, counter);
 
             incrementCounter.Invoke();
 
-            _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), true)).Do(_ => counter++);
             logger.VerbosePii(() => TestConstants.TestMessage,()=> string.Empty);
             Assert.AreEqual(validationCounter, counter);
         }
@@ -275,7 +275,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(TestConstants.ClientId)
                     .WithClientSecret("secret")
                     .WithLogging(testLogger, false)
-                    .WithLogging((level, message, containsPii) => { Assert.Fail("MSAL should not use the logging callback"); })
+                    .WithLogging((_, _, _) => { Assert.Fail("MSAL should not use the logging callback"); })
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
@@ -313,7 +313,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     stringBuilder = new StringBuilder();
                     appBuilder.WithLogging(
-                         (level, message, containsPii) => { stringBuilder.AppendLine(message); }, LogLevel.Verbose, piiLogging);
+                         (_, message, _) => { stringBuilder.AppendLine(message); }, LogLevel.Verbose, piiLogging);
                 }
                 else
                 {

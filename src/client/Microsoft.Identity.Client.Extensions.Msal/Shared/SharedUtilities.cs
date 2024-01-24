@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         /// <returns>process id</returns>
         internal static int GetCurrentProcessId()
         {
-            if (s_processId == default(int))
+            if (s_processId == default)
             {
                 using (var process = Process.GetCurrentProcess())
                 {

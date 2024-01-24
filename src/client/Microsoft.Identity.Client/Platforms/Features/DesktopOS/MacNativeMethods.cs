@@ -202,8 +202,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs
         public static IntPtr GetGlobal(IntPtr handle, string symbol)
         {
             IntPtr ptr = dlsym(handle, symbol);
-            var structure = Marshal.PtrToStructure<IntPtr>(ptr);
-            return (IntPtr)structure;
+            return Marshal.PtrToStructure<IntPtr>(ptr);
         }
     }
 }

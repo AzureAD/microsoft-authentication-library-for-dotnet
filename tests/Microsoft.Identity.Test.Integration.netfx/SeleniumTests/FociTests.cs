@@ -17,7 +17,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
-#if DESKTOP
+#if NETFRAMEWORK
     [TestClass]
     public class FociTests
     {

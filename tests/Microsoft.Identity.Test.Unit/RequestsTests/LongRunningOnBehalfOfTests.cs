@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     responseMessage: MockHelpers.CreateSuccessTokenResponseMessage(accessToken: TestConstants.ATSecret2));
 
                 //Initiate another process using the same cache key
-                //MSAL should ignore the token in the cache, fetch a new token and overrite the existing one
+                //MSAL should ignore the token in the cache, fetch a new token and overwrite the existing one
                 result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
                     .ExecuteAsync().ConfigureAwait(false);
 

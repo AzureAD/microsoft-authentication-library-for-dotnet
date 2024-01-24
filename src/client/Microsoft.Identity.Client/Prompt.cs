@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>More details at https://aka.ms/msal-net-prompt-create. </remarks>
         public static readonly Prompt Create = new Prompt("create");
 
-#if DESKTOP || WINDOWS_APP
+#if NETFRAMEWORK || WINDOWS_APP
         /// <summary>
         /// Only available on .NET platform. AcquireToken will send <c>prompt=attempt_none</c> to
         /// the authorization server's authorize endpoint and the library will use a hidden WebView (and its cookies) to authenticate the user.
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client
         /// <returns>true if object are equal.</returns>
         public override bool Equals(object obj)
         {
-            return obj is Prompt && this == (Prompt)obj;
+            return obj is Prompt prompt && this == prompt;
         }
 
         /// <summary>

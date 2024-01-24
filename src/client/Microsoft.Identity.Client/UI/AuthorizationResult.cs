@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.UI
 
         private static AuthorizationResult FromParsedValues(Dictionary<string, string> parameters, string url = null)
         {
-            if (parameters.ContainsKey(TokenResponseClaim.Error))
+            if (parameters.TryGetValue(TokenResponseClaim.Error, out string error))
             {
                 if (parameters.TryGetValue(TokenResponseClaim.ErrorSubcode, out string subcode))
                 {
@@ -85,9 +85,9 @@ namespace Microsoft.Identity.Client.UI
                 }
 
                 return FromStatus(AuthorizationStatus.ProtocolError,
-                    parameters[TokenResponseClaim.Error],
-                    parameters.ContainsKey(TokenResponseClaim.ErrorDescription)
-                            ? parameters[TokenResponseClaim.ErrorDescription]
+                    error,
+                    parameters.TryGetValue(TokenResponseClaim.ErrorDescription, out string errorDescription)
+                            ? errorDescription
                         : null);
             }
 
@@ -96,24 +96,24 @@ namespace Microsoft.Identity.Client.UI
                 Status = AuthorizationStatus.Success
             };
 
-            if (parameters.ContainsKey(OAuth2Parameter.State))
+            if (parameters.TryGetValue(OAuth2Parameter.State, out string state))
             {
-                authResult.State = parameters[OAuth2Parameter.State];
+                authResult.State = state;
             }
 
-            if (parameters.ContainsKey(TokenResponseClaim.CloudInstanceHost))
+            if (parameters.TryGetValue(TokenResponseClaim.CloudInstanceHost, out string cloudInstanceHost))
             {
-                authResult.CloudInstanceHost = parameters[TokenResponseClaim.CloudInstanceHost];
+                authResult.CloudInstanceHost = cloudInstanceHost;
             }
 
-            if (parameters.ContainsKey(TokenResponseClaim.ClientInfo))
+            if (parameters.TryGetValue(TokenResponseClaim.ClientInfo, out string clientInfo))
             {
-                authResult.ClientInfo = parameters[TokenResponseClaim.ClientInfo];
+                authResult.ClientInfo = clientInfo;
             }
 
-            if (parameters.ContainsKey(TokenResponseClaim.Code))
+            if (parameters.TryGetValue(TokenResponseClaim.Code, out string code))
             {
-                authResult.Code = parameters[TokenResponseClaim.Code];
+                authResult.Code = code;
             }
             else if (!string.IsNullOrEmpty(url) && url.StartsWith("msauth://", StringComparison.OrdinalIgnoreCase))
             {

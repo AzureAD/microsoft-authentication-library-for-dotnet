@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.WsTrust
             return CreateFromResponseDocument(responseDocument, version);
         }
 
-        public static string ReadErrorResponse(XDocument responseDocument, RequestContext requestContext)
+        public static string ReadErrorResponse(XDocument responseDocument)
         {
             string errorMessage = null;
             XElement body = responseDocument.Descendants(XmlNamespace.SoapEnvelope + "Body").FirstOrDefault();
