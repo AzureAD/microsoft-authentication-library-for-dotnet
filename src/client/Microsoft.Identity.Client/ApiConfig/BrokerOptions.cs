@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Currently only supported on Windows
         /// Allows the Windows broker to list Work and School accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>
-        /// </summary>        
+        /// </summary>
         public bool ListOperatingSystemAccounts { get; set; }
 
         internal bool IsBrokerEnabledOnCurrentOs()

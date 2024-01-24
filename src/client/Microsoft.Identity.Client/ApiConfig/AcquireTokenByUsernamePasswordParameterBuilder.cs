@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client
         /// </list>
         /// </remarks>
 #if iOS || ANDROID || WINDOWS_UWP
-        [EditorBrowsable(EditorBrowsableState.Never)]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
         public AcquireTokenByUsernamePasswordParameterBuilder WithProofOfPossession(string nonce, HttpMethod httpMethod, Uri requestUri)
         {

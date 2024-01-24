@@ -11,8 +11,8 @@ namespace Microsoft.Identity.Client
     /// For more details see https://aka.ms/msal-net-wam
     /// </summary>
 #if !SUPPORTS_BROKER || __MOBILE__
-    [EditorBrowsable(EditorBrowsableState.Never)]
-#endif    
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+#endif
     public class WindowsBrokerOptions
     {
         /// <summary>
