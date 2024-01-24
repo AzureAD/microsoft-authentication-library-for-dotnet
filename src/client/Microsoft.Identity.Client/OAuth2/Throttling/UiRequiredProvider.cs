@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
                     $"[Throttling] Exception thrown because of throttling rule UiRequired - thumbprint: {thumbprint}",
                     $"[Throttling] Exception thrown because of throttling rule UiRequired ");
 
-                // mark the exception for logging purposes                
+                // mark the exception for logging purposes
                 throw new MsalThrottledUiRequiredException(uiException);
             }
         }
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
         /// Currently, throttling will only apply to public client applications at first. 
         /// </summary>
         private static bool IsRequestSupported(AuthenticationRequestParameters requestParams)
-        {            
+        {
             return !requestParams.AppConfig.IsConfidentialClient &&
                 requestParams.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenSilent;
         }
@@ -102,29 +102,34 @@ namespace Microsoft.Identity.Client.OAuth2.Throttling
             string authority,
             ICryptographyManager crypto)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             if (bodyParams.TryGetValue(OAuth2Parameter.ClientId, out string clientId))
             {
-                sb.Append((clientId ?? "") + ThrottleCommon.KeyDelimiter);
+                sb.Append(clientId);
+                sb.Append(ThrottleCommon.KeyDelimiter);
             }
-            sb.Append(authority + ThrottleCommon.KeyDelimiter);
+            sb.Append(authority);
+            sb.Append(ThrottleCommon.KeyDelimiter);
             if (bodyParams.TryGetValue(OAuth2Parameter.Scope, out string scopes))
             {
-                sb.Append((scopes ?? "") + ThrottleCommon.KeyDelimiter);
+                sb.Append(scopes);
+                sb.Append(ThrottleCommon.KeyDelimiter);
             }
 
-            if (bodyParams.TryGetValue(OAuth2Parameter.RefreshToken, out string rt) && 
+            if (bodyParams.TryGetValue(OAuth2Parameter.RefreshToken, out string rt) &&
                 !string.IsNullOrEmpty(rt))
             {
-                sb.Append(crypto.CreateSha256Hash(rt) + ThrottleCommon.KeyDelimiter);
+                sb.Append(crypto.CreateSha256Hash(rt));
+                sb.Append(ThrottleCommon.KeyDelimiter);
             }
 
             // check mam enrollment id
             if (bodyParams.TryGetValue(SilentRequestHelper.MamEnrollmentIdKey, out string mamEnrollmentId))
             {
-                sb.Append(crypto.CreateSha256Hash(mamEnrollmentId) + ThrottleCommon.KeyDelimiter);
+                sb.Append(crypto.CreateSha256Hash(mamEnrollmentId));
+                sb.Append(ThrottleCommon.KeyDelimiter);
             }
-            
+
             return sb.ToString();
         }
     }
