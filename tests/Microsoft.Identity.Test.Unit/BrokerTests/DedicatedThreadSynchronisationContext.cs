@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         /// <summary>Runs an loop to process all queued work items.</summary>
         private void ThreadWorkerDelegate(object obj)
         {
-            SynchronizationContext.SetSynchronizationContext(obj as SynchronizationContext);
+            SetSynchronizationContext(obj as SynchronizationContext);
 
             try
             {

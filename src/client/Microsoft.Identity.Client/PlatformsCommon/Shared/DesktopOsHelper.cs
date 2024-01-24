@@ -15,9 +15,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     internal static class DesktopOsHelper
     {
         private static Lazy<bool> s_wamSupportedOSLazy = new Lazy<bool>(
-           () => IsWamSupportedOSInternal());
+           IsWamSupportedOSInternal);
         private static Lazy<string> s_winVersionLazy = new Lazy<string>(
-            () => GetWindowsVersionStringInternal());
+            GetWindowsVersionStringInternal);
 
         public static bool IsWindows()
         {

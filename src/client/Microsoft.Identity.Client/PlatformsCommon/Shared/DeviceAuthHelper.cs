@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             IDictionary<string, string> data = new Dictionary<string, string>();
             string wwwAuthenticate = responseHeaders.GetValues(PKeyAuthConstants.WwwAuthenticateHeader).SingleOrDefault();
-            wwwAuthenticate = wwwAuthenticate.Substring(PKeyAuthConstants.PKeyAuthName.Length + 1);
+            wwwAuthenticate = wwwAuthenticate?.Substring(PKeyAuthConstants.PKeyAuthName.Length + 1);
             if (string.IsNullOrEmpty(wwwAuthenticate))
             {
                 return data;

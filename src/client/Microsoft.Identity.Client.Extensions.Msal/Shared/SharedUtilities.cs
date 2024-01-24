@@ -120,45 +120,45 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         public static string GetUserRootDirectory()
         {
             return !IsWindowsPlatform()
-                ? SharedUtilities.GetUserHomeDirOnUnix()
+                ? GetUserHomeDirOnUnix()
                 : Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         }       
 
         private static string GetUserHomeDirOnUnix()
         {
-            if (SharedUtilities.IsWindowsPlatform())
+            if (IsWindowsPlatform())
             {
                 throw new NotSupportedException();
             }
 
-            if (!string.IsNullOrEmpty(SharedUtilities.s_homeEnvVar))
+            if (!string.IsNullOrEmpty(s_homeEnvVar))
             {
-                return SharedUtilities.s_homeEnvVar;
+                return s_homeEnvVar;
             }
 
             string username = null;
-            if (!string.IsNullOrEmpty(SharedUtilities.s_lognameEnvVar))
+            if (!string.IsNullOrEmpty(s_lognameEnvVar))
             {
                 username = s_lognameEnvVar;
             }
-            else if (!string.IsNullOrEmpty(SharedUtilities.s_userEnvVar))
+            else if (!string.IsNullOrEmpty(s_userEnvVar))
             {
                 username = s_userEnvVar;
             }
-            else if (!string.IsNullOrEmpty(SharedUtilities.s_lNameEnvVar))
+            else if (!string.IsNullOrEmpty(s_lNameEnvVar))
             {
                 username = s_lNameEnvVar;
             }
-            else if (!string.IsNullOrEmpty(SharedUtilities.s_usernameEnvVar))
+            else if (!string.IsNullOrEmpty(s_usernameEnvVar))
             {
                 username = s_usernameEnvVar;
             }
 
-            if (SharedUtilities.IsMacPlatform())
+            if (IsMacPlatform())
             {
                 return !string.IsNullOrEmpty(username) ? Path.Combine("/Users", username) : null;
             }
-            else if (SharedUtilities.IsLinuxPlatform())
+            else if (IsLinuxPlatform())
             {
                 if (LinuxNativeMethods.getuid() == LinuxNativeMethods.RootUserId)
                 {

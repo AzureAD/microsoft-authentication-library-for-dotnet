@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 TenantId,
                 scopes: null);
 
-            iOSCacheKeyLazy = new Lazy<IiOSKey>(() => InitiOSKey());
+            iOSCacheKeyLazy = new Lazy<IiOSKey>(InitiOSKey);
         }
 
         private IiOSKey InitiOSKey()

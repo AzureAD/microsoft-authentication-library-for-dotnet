@@ -425,7 +425,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
             {
                 if (cBuffers <= 0)
                 {
-                    return new byte[0];
+                    return Array.Empty<byte>();
                 }
 
                 int finalLen = 0;
