@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 ScopeString,
                 _extraKeyParts);
 
-            iOSCacheKeyLazy = new Lazy<IiOSKey>(() => InitiOSKey());
+            iOSCacheKeyLazy = new Lazy<IiOSKey>(InitiOSKey);
         }
 
         internal string ToLogString(bool piiEnabled = false)

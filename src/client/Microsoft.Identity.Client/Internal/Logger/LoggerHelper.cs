@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 {
     internal class LoggerHelper
     {
-        private static Lazy<string> s_msalVersionLazy = new Lazy<string>(() => MsalIdHelper.GetMsalVersion());
+        private static Lazy<string> s_msalVersionLazy = new Lazy<string>(MsalIdHelper.GetMsalVersion);
         private static Lazy<string> s_runtimeVersionLazy = new Lazy<string>(() => PlatformProxyFactory.CreatePlatformProxy(null).GetRuntimeVersion());
         private static readonly Lazy<ILoggerAdapter> s_nullLogger = new Lazy<ILoggerAdapter>(() => new NullLogger());
 
@@ -99,39 +99,41 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         internal static string GetPiiScrubbedExceptionDetails(Exception ex)
         {
-            var sb = new StringBuilder();
-            if (ex != null)
+            if (ex == null)
             {
-                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "Exception type: {0}", ex.GetType()));
+                return string.Empty;
+            }
 
-                if (ex is MsalException msalException)
+            var sb = new StringBuilder();
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "Exception type: {0}", ex.GetType()));
+
+            if (ex is MsalException msalException)
+            {
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, ", ErrorCode: {0}", msalException.ErrorCode));
+            }
+
+            if (ex is MsalServiceException msalServiceException)
+            {
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "HTTP StatusCode {0}", msalServiceException.StatusCode));
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "CorrelationId {0}", msalServiceException.CorrelationId));
+                if (msalServiceException.ErrorCodes != null && msalServiceException.ErrorCodes.Count() > 0)
                 {
-                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, ", ErrorCode: {0}", msalException.ErrorCode));
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "Microsoft Entra ID Error Code AADSTS{0}", string.Join(" ", msalServiceException.ErrorCodes)));
                 }
+            }
 
-                if (ex is MsalServiceException msalServiceException)
-                {
-                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "HTTP StatusCode {0}", msalServiceException.StatusCode));
-                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "CorrelationId {0}", msalServiceException.CorrelationId));
-                    if (msalServiceException.ErrorCodes != null && msalServiceException.ErrorCodes.Count() > 0)
-                    {
-                        sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "Microsoft Entra ID Error Code AADSTS{0}", string.Join(" ", msalServiceException.ErrorCodes)));
-                    }
-                }
+            if (ex.InnerException != null)
+            {
+                sb.AppendLine("---> Inner Exception Details");
+                sb.AppendLine(GetPiiScrubbedExceptionDetails(ex.InnerException));
+                sb.AppendLine("=== End of inner exception stack trace ===");
+            }
 
-                if (ex.InnerException != null)
-                {
-                    sb.AppendLine("---> Inner Exception Details");
-                    sb.AppendLine(GetPiiScrubbedExceptionDetails(ex.InnerException));
-                    sb.AppendLine("=== End of inner exception stack trace ===");
-                }
+            sb.AppendLine("To see full exception details, enable PII Logging. See https://aka.ms/msal-net-logging");
 
-                sb.AppendLine("To see full exception details, enable PII Logging. See https://aka.ms/msal-net-logging");
-
-                if (ex.StackTrace != null)
-                {
-                    sb.AppendLine(ex.StackTrace);
-                }
+            if (ex.StackTrace != null)
+            {
+                sb.AppendLine(ex.StackTrace);
             }
 
             return sb.ToString();
