@@ -320,7 +320,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(windowFunc));
             }
 
-            return WithParentFunc(() => windowFunc());
+            return WithParentFunc(windowFunc);
         }
 #endif
 

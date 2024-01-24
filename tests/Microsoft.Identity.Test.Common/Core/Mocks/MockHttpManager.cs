@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 #pragma warning restore CS0618 // Type or member is obsolete
             {
                 string remainingMocks = string.Join(" ",
-                    _httpMessageHandlerQueue.Select(m => GetExpectedUrlFromHandler(m)));
+                    _httpMessageHandlerQueue.Select(GetExpectedUrlFromHandler));
                 Assert.AreEqual(0, _httpMessageHandlerQueue.Count,
                     "All mocks should have been consumed. Remaining mocks are for: " + remainingMocks);
             }

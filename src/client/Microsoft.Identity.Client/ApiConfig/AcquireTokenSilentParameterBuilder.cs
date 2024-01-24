@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client
             // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/715 for details
             if (ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType == AuthorityType.B2C &&
                 (CommonParameters.Scopes == null ||
-                 CommonParameters.Scopes.All(s => string.IsNullOrWhiteSpace(s))))
+                 CommonParameters.Scopes.All(string.IsNullOrWhiteSpace)))
             {
                 throw new MsalUiRequiredException(
                    MsalError.ScopesRequired,
