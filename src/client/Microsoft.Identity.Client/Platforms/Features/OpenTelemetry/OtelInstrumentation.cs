@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 using System.Diagnostics.Metrics;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 {
@@ -89,18 +90,18 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         // Aggregates the successful requests based on token source and cache refresh reason.
         void IOtelInstrumentation.LogSuccessMetrics(
             string platform,
-            string apiId,
-            string cacheLevel,
+            ApiEvent.ApiIds apiId,
+            CacheLevel cacheLevel,
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger)
         {
             var tokenSource = authResultMetadata.TokenSource;
 
-            //if (authResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed)
-            //{
-            //    tokenSource = TokenSource.IdentityProvider;
-            //}
+            if (authResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed)
+            {
+                tokenSource = TokenSource.IdentityProvider;
+            }
 
             if (s_successCounter.Value.Enabled)
             {
@@ -125,7 +126,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             }
 
             // Only log cache duration if L2 cache was used.
-            if (s_durationInL2Cache.Value.Enabled && cacheLevel.Equals(CacheLevel.L2Cache))
+            if (s_durationInL2Cache.Value.Enabled && cacheLevel == CacheLevel.L2Cache)
             {
                 s_durationInL2Cache.Value.Record(authResultMetadata.DurationInCacheInMs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
@@ -134,7 +135,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             }
 
             // Only log duration in HTTP when token is fetched from IDP
-            if (s_durationInHttp.Value.Enabled && tokenSource.Equals(TokenSource.IdentityProvider))
+            if (s_durationInHttp.Value.Enabled && tokenSource == TokenSource.IdentityProvider)
             {
                 s_durationInHttp.Value.Record(authResultMetadata.DurationInHttpInMs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
@@ -143,7 +144,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             }
 
             // Only log duration in microseconds when the cache level is L1.
-            if (s_durationInL1CacheInUs.Value.Enabled && tokenSource.Equals(TokenSource.Cache) 
+            if (s_durationInL1CacheInUs.Value.Enabled && tokenSource == TokenSource.Cache
                 && authResultMetadata.CacheLevel.Equals(CacheLevel.L1Cache))
             {
                 s_durationInL1CacheInUs.Value.Record(totalDurationInUs,
@@ -155,7 +156,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             }
         }
 
-        void IOtelInstrumentation.LogFailedMetrics(string platform, string errorCode, string apiId, bool isProactiveTokenRefresh)
+        void IOtelInstrumentation.LogFailedMetrics(string platform, string errorCode, ApiEvent.ApiIds apiId, bool isProactiveTokenRefresh)
         {
             if (s_failureCounter.Value.Enabled)
             {

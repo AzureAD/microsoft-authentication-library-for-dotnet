@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 #if iOS
 using Microsoft.Identity.Client.Platforms.iOS;
 #endif
@@ -84,12 +85,10 @@ namespace Microsoft.Identity.Client.Internal
             Func<Task<AuthenticationResult>> fetchAction,
             ILoggerAdapter logger, 
             IServiceBundle serviceBundle, 
-            string apiId)
+            ApiEvent.ApiIds apiId)
         {
             _ = Task.Run(async () =>
             {
-                string error = null;
-
                 try
                 {
                     await fetchAction().ConfigureAwait(false);
@@ -106,28 +105,29 @@ namespace Microsoft.Identity.Client.Internal
                         logger.ErrorPiiWithPrefix(ex, logMsg);
                     }
 
-                    error = ex.ErrorCode;
+                    serviceBundle.PlatformProxy.OtelInstrumentation.LogFailedMetrics(
+                        serviceBundle.PlatformProxy.GetProductName(),
+                        ex.ErrorCode,
+                        apiId,
+                        true);
                 }
                 catch (OperationCanceledException ex)
                 {
                     logger.WarningPiiWithPrefix(ex, ProactiveRefreshCancellationError);
-                    error = ex.GetType().Name;
+                    serviceBundle.PlatformProxy.OtelInstrumentation.LogFailedMetrics(
+                        serviceBundle.PlatformProxy.GetProductName(),
+                        ex.GetType().Name,
+                        apiId,
+                        true);
                 }
                 catch (Exception ex)
                 {
                     logger.ErrorPiiWithPrefix(ex, ProactiveRefreshGeneralError);
-                    error = ex.GetType().Name;
-                }
-                finally
-                {
-                    if (!string.IsNullOrEmpty(error))
-                    {
-                        serviceBundle.PlatformProxy.OtelInstrumentation.LogFailedMetrics(
+                    serviceBundle.PlatformProxy.OtelInstrumentation.LogFailedMetrics(
                         serviceBundle.PlatformProxy.GetProductName(),
-                        error,
+                        ex.GetType().Name,
                         apiId,
                         true);
-                    }
                 }
             });
         }
