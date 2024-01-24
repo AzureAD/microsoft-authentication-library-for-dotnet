@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             CacheKey =  $"{HomeAccountId}{MsalCacheKeys.CacheKeyDelimiter}{Environment}{MsalCacheKeys.CacheKeyDelimiter}{TenantId}";
 
-            iOSCacheKeyLazy = new Lazy<IiOSKey>(() => InitiOSKey());
+            iOSCacheKeyLazy = new Lazy<IiOSKey>(InitiOSKey);
         }
 
         #region iOS

@@ -197,10 +197,7 @@ namespace WebApi.Misc
                 // if cache is at _maxCapacityPercentage, trim it by _compactionPercentage
                 if ((double)_map.Count / _capacity >= _maxCapacityPercentage)
                 {
-                    _eventQueue.Add(() =>
-                    {
-                        RemoveLRUs();
-                    });
+                    _eventQueue.Add(RemoveLRUs);
                 }
                 // add the new node
                 var newCacheItem = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
