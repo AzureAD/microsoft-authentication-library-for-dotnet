@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
 #else
             var level = SourceLevels.Warning;
 #endif
-            string traceSourceLevelEnvVar = Environment.GetEnvironmentVariable(EnvUtils.TraceLevelEnvVarName);
+            string traceSourceLevelEnvVar = Environment.GetEnvironmentVariable(TraceLevelEnvVarName);
             if (!string.IsNullOrEmpty(traceSourceLevelEnvVar) &&
                 Enum.TryParse(traceSourceLevelEnvVar, ignoreCase: true, result: out SourceLevels result))
             {
