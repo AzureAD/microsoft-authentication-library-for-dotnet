@@ -33,13 +33,15 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         {
             if (logger.IsLoggingEnabled(LogLevel.Info))
             {
-                var builder = new StringBuilder();
-                builder.AppendLine("=== OnBehalfOfParameters ===");
-                builder.AppendLine("SendX5C: " + SendX5C);
-                builder.AppendLine("ForceRefresh: " + ForceRefresh);
-                builder.AppendLine("UserAssertion set: " + (UserAssertion != null));
-                builder.AppendLine("SearchInCacheForLongRunningObo: " + SearchInCacheForLongRunningObo);
-                builder.AppendLine("LongRunningOboCacheKey set: " + !string.IsNullOrWhiteSpace(LongRunningOboCacheKey));
+                var builder = new StringBuilder(
+                    $"""
+                    === OnBehalfOfParameters ===
+                    SendX5C: {SendX5C}
+                    ForceRefresh: {ForceRefresh}
+                    UserAssertion set: {UserAssertion != null}
+                    SearchInCacheForLongRunningObo: {SearchInCacheForLongRunningObo}
+                    LongRunningOboCacheKey set: {!string.IsNullOrWhiteSpace(LongRunningOboCacheKey)}
+                    """);
                 if (UserAssertion != null && !string.IsNullOrWhiteSpace(LongRunningOboCacheKey))
                 {
                     builder.AppendLine("InitiateLongRunningProcessInWebApi called: True");
