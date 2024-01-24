@@ -18,12 +18,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         {
             if (logger.IsLoggingEnabled(LogLevel.Info))
             {
-                var builder = new StringBuilder();
-                builder.AppendLine("=== AcquireTokenForManagedIdentityParameters ===");
-                builder.AppendLine("ForceRefresh: " + ForceRefresh);
-                builder.AppendLine("Resource: " + Resource);
-                builder.AppendLine("Claims: " + Claims);
-                logger.Info(builder.ToString());
+                logger.Info(
+                    $"""
+                     === AcquireTokenForManagedIdentityParameters ===
+                     ForceRefresh: {ForceRefresh}
+                     Resource: {Resource}
+                     """);
             }
         }
     }
