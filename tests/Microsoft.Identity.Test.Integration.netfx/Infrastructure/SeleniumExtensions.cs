@@ -290,11 +290,11 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     seleniumDriver.Navigate().GoToUrl(deviceCodeResult.VerificationUrl);
                     seleniumDriver
                         // Device Code Flow web ui is undergoing A/B testing and is sometimes different - use 2 IDs
-                        .FindElement(SeleniumExtensions.ByIds("otc", codeId))
+                        .FindElement(ByIds("otc", codeId))
                         .SendKeys(deviceCodeResult.UserCode);
 
                     IWebElement continueBtn = seleniumDriver.WaitForElementToBeVisibleAndEnabled(
-                        SeleniumExtensions.ByIds(fields.AADSignInButtonId, continueId));
+                        ByIds(fields.AADSignInButtonId, continueId));
                     continueBtn?.Click();
 
                     seleniumDriver.PerformLogin(user, Prompt.SelectAccount, false, isAdfs);
