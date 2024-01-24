@@ -25,18 +25,19 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
         private readonly string[] _graphAppScope = ["https://graph.microsoft.com/.default"];
 
         [TestInitialize]
-        public async Task TestInitialize()
+        public Task TestInitialize()
         {
             if (string.IsNullOrEmpty(_confidentialClientSecret))
             {
                 _confidentialClientSecret = _keyVaultProvider.GetSecretByName(TestConstants.MsalCCAKeyVaultSecretName).Value;
             }
-            await LabUserHelper.EnableAppServicePrincipal(LabApiConstants.LabCaeConfidentialClientId).ConfigureAwait(false);
+            return LabUserHelper.EnableAppServicePrincipal(LabApiConstants.LabCaeConfidentialClientId);
         }
+
         [TestCleanup]
-        public async Task TestCleanup()
+        public Task TestCleanup()
         {
-            await LabUserHelper.EnableAppServicePrincipal(LabApiConstants.LabCaeConfidentialClientId).ConfigureAwait(false);
+            return LabUserHelper.EnableAppServicePrincipal(LabApiConstants.LabCaeConfidentialClientId);
         }
 
         /// <summary>
@@ -56,7 +57,6 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
                 .WithClientSecret(_confidentialClientSecret)
                 .WithTenantId(_tenantId)
                 .WithClientCapabilities(new[] { "cp1" })
-                .WithLegacyCacheCompatibility(false)
                 .Build();
 
             var result = await cca.AcquireTokenForClient(_graphAppScope).ExecuteAsync().ConfigureAwait(false);           
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
             var claims = WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(response2.Headers);
 
             Assert.IsNotNull(claims);
-            Assert.AreNotEqual(0, claims.Count());
+            Assert.AreNotEqual(0, claims.Length);
 
             MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                 await cca.AcquireTokenForClient(_graphAppScope)

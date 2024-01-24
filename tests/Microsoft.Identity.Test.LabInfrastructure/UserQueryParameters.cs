@@ -22,57 +22,57 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// </summary>
         public string Upn { get; set; }
 
-        public static UserQuery PublicAadUserQuery => new UserQuery()
+        public static UserQuery PublicAadUserQuery => new()
         {
             Upn = "idlab1@msidlab4.onmicrosoft.com"            
         };
 
-        public static UserQuery PublicAadUser2Query => new UserQuery()
+        public static UserQuery PublicAadUser2Query => new()
         {
             Upn = "idlab@msidlab4.onmicrosoft.com"
         };
         
-        public static UserQuery PublicAadCaeUserQuery => new UserQuery()
+        public static UserQuery PublicAadCaeUserQuery => new()
         {
             Upn = "idlabcae@msidlab4.onmicrosoft.com"
         };
 
-        public static UserQuery MsaUserQuery => new UserQuery
+        public static UserQuery MsaUserQuery => new()
         {
             UserType = LabInfrastructure.UserType.MSA
         };
 
-        public static UserQuery B2CLocalAccountUserQuery => new UserQuery
+        public static UserQuery B2CLocalAccountUserQuery => new()
         {
             UserType = LabInfrastructure.UserType.B2C,
             B2CIdentityProvider = LabInfrastructure.B2CIdentityProvider.Local
         };
 
-        public static UserQuery B2CFacebookUserQuery => new UserQuery
+        public static UserQuery B2CFacebookUserQuery => new()
         {
             UserType = LabInfrastructure.UserType.B2C,
             B2CIdentityProvider = LabInfrastructure.B2CIdentityProvider.Facebook
         };
 
-        public static UserQuery B2CGoogleUserQuery => new UserQuery
+        public static UserQuery B2CGoogleUserQuery => new()
         {
             UserType = LabInfrastructure.UserType.B2C,
             B2CIdentityProvider = LabInfrastructure.B2CIdentityProvider.Google
         };
 
-        public static UserQuery B2CMSAUserQuery => new UserQuery
+        public static UserQuery B2CMSAUserQuery => new()
         {
             UserType = LabInfrastructure.UserType.B2C,
             B2CIdentityProvider = LabInfrastructure.B2CIdentityProvider.MSA
         };
 
-        public static UserQuery ArlingtonUserQuery => new UserQuery
+        public static UserQuery ArlingtonUserQuery => new()
         {
             UserType = LabInfrastructure.UserType.Cloud,
             AzureEnvironment = LabInfrastructure.AzureEnvironment.azureusgovernment
         };
 
-        public static UserQuery HybridSpaUserQuery => new UserQuery
+        public static UserQuery HybridSpaUserQuery => new()
         {
             UserType = LabInfrastructure.UserType.Cloud,
             AppPlatform = LabInfrastructure.AppPlatform.spa,

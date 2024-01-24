@@ -60,7 +60,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// <summary>
         /// Returns the AAD cloud user idlab1@msidlab4.onmicrosoft.com
         /// </summary>
-        /// <returns></returns>
         public static Task<LabResponse> GetDefaultUserAsync()
         {
             return GetLabUserDataAsync(UserQuery.PublicAadUserQuery);
@@ -69,7 +68,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// <summary>
         /// Returns the AAD cloud user idlab@msidlab4.onmicrosoft.com
         /// </summary>
-        /// <returns></returns>
         public static Task<LabResponse> GetDefaultUser2Async()
         {
             return GetLabUserDataAsync(UserQuery.PublicAadUser2Query);
@@ -78,7 +76,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// <summary>
         /// Returns the AAD cloud user idlabcae@msidlab4.onmicrosoft.com for CAE testing
         /// </summary>
-        /// <returns></returns>
         public static Task<LabResponse> GetCaeUserAsync()
         {
             return GetLabUserDataAsync(UserQuery.PublicAadCaeUserQuery);
@@ -183,19 +180,19 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             }
         }
 
-        public static async Task RevokeUserSessionAsync(LabUser user)
+        public static Task RevokeUserSessionAsync(LabUser user)
         {
-            await s_labService.GetLabResponseAsync(Path.Combine(LabApiConstants.LabUserEndPoint, "revokeusersession", user.Upn)).ConfigureAwait(false);
+            return  s_labService.GetLabResponseAsync(Path.Combine(LabApiConstants.LabUserEndPoint, "revokeusersession", user.Upn));
         }
 
-        public static async Task DisableAppServicePrincipal(string appId)
+        public static Task DisableAppServicePrincipal(string appId)
         {
-            await s_labService.GetLabResponseAsync(Path.Combine(LabApiConstants.LabAppEndpoint, "disableserviceprincipal", appId)).ConfigureAwait(false);
+            return s_labService.GetLabResponseAsync(Path.Combine(LabApiConstants.LabAppEndpoint, "disableserviceprincipal", appId));
         }
 
-        public static async Task EnableAppServicePrincipal(string appId)
+        public static Task EnableAppServicePrincipal(string appId)
         {
-            await s_labService.GetLabResponseAsync(Path.Combine(LabApiConstants.LabAppEndpoint, "enableserviceprincipal", appId)).ConfigureAwait(false);
+            return s_labService.GetLabResponseAsync(Path.Combine(LabApiConstants.LabAppEndpoint, "enableserviceprincipal", appId));
         }
     }
 }

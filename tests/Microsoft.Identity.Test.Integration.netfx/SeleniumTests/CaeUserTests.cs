@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.SeleniumTests
 
         /// <summary>
         /// Login with the test user using Selenium; the cache should have a user token.
-        /// Acquire token silently from the cache and call Graph; should receive a sucessfull response.
+        /// Acquire token silently from the cache and call Graph; should receive a successful response.
         /// Revoke the user's session and wait until the changes propagate to Graph.
         /// Use the cached token to call Graph again; should receive a 401 with claims. 
         /// Acquire a new token with claims; should receive an MsalUiRequiredException.
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.SeleniumTests
             var claims = WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(response2.Headers);
 
             Assert.IsNotNull(claims);
-            Assert.AreNotEqual(0, claims.Count());
+            Assert.AreNotEqual(0, claims.Length);
 
             MsalUiRequiredException ex = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(async () =>
                 await cca.AcquireTokenSilent(_graphUserScope, labResponse.User.Upn)
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.SeleniumTests
 
         private async Task LoginUser(ConfidentialClientApplication cca, LabUser labUser)
         {
-            string codeVerifier = "";
+            string codeVerifier;
             Uri authUri = await cca
                 .GetAuthorizationRequestUrl(_graphUserScope)
                 .WithPkce(out codeVerifier)
@@ -117,12 +117,12 @@ namespace Microsoft.Identity.Test.Integration.NetFx.SeleniumTests
             var authorizationResult = AuthorizationResult.FromUri(authCodeUri.AbsoluteUri);
             Assert.AreEqual(AuthorizationStatus.Success, authorizationResult.Status);
 
-            var result = await cca.AcquireTokenByAuthorizationCode(_graphUserScope, authorizationResult.Code)
+            await cca.AcquireTokenByAuthorizationCode(_graphUserScope, authorizationResult.Code)
                .WithPkceCodeVerifier(codeVerifier)
                .ExecuteAsync()
                .ConfigureAwait(false);
 
-            Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+            Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
         }
     }
 }
