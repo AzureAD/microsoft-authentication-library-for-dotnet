@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 
-        private Dictionary<string, string> GetBodyParameters(string refreshTokenSecret)
+        private static Dictionary<string, string> GetBodyParameters(string refreshTokenSecret)
         {
             var dict = new Dictionary<string, string>
             {

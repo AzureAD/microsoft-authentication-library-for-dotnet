@@ -283,7 +283,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private bool ShouldCacheAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem, TokenSource tokenSource)
+        private static bool ShouldCacheAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem, TokenSource tokenSource)
         {
 #if iOS
             return msalAccessTokenCacheItem != null;
@@ -698,7 +698,7 @@ namespace Microsoft.Identity.Client
                 $"Filtering AT by environment");
         }
 
-        private MsalAccessTokenCacheItem FilterTokensByPopKeyId(MsalAccessTokenCacheItem item, AuthenticationRequestParameters authenticationRequest)
+        private static MsalAccessTokenCacheItem FilterTokensByPopKeyId(MsalAccessTokenCacheItem item, AuthenticationRequestParameters authenticationRequest)
         {
             if (item == null)
             {
@@ -1075,7 +1075,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private void UpdateWithAdalAccountsWithoutClientInfo(
+        private static void UpdateWithAdalAccountsWithoutClientInfo(
             string envFromRequest,
             IEnumerable<string> envAliases,
             AdalUsersForMsal adalUsers,
