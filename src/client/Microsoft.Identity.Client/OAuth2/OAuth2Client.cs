@@ -15,8 +15,6 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
-using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
-
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else

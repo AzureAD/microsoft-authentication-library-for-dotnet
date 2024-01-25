@@ -9,9 +9,7 @@ using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.OAuth2.Throttling;
-using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
-using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Client
 {
@@ -231,7 +229,6 @@ namespace Microsoft.Identity.Client
 
             return !s_nonUiSubErrors.Contains(subError);
         }
-
 
         private static string UpdateExceptionForClaimsChallenge(string message)
         {

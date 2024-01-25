@@ -233,7 +233,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -242,7 +241,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
 
                 var cca = BuildCCA(httpManager);
-
                 UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
 
                 //Throw exception with claims for OBO:
