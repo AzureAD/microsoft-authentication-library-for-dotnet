@@ -212,8 +212,8 @@ namespace Microsoft.Identity.Client.Http
                 }
             }
         }
-      
-        protected async Task<HttpContent> CloneHttpContentAsync(HttpContent httpContent)
+
+        protected static async Task<HttpContent> CloneHttpContentAsync(HttpContent httpContent)
         {
             var temp = new MemoryStream();
             await httpContent.CopyToAsync(temp).ConfigureAwait(false);

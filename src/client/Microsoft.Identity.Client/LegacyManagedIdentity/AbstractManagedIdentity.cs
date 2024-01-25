@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return managedIdentityResponse;
         }
 
-        internal string GetMessageFromErrorResponse(HttpResponse response)
+        internal static string GetMessageFromErrorResponse(HttpResponse response)
         {
             ManagedIdentityErrorResponse managedIdentityErrorResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
 
@@ -185,9 +185,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        private void CreateAndThrowException(string errorCode,
-            string errorMessage,
-            Exception innerException,
+        private static void CreateAndThrowException(string errorCode, 
+            string errorMessage, 
+            Exception innerException, 
             ManagedIdentitySource source)
         {
             MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(

@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         errorCodeToLog);
         }
 
-        private void LogMsalErrorTelemetryToClient(Exception ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
+        private static void LogMsalErrorTelemetryToClient(Exception ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
         {
             if (telemetryClients.HasEnabledClients(TelemetryConstants.AcquireTokenEventName))
             {
@@ -254,7 +254,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return CacheLevel.None;
         }
 
-        private void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ILoggerAdapter logger)
+        private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ILoggerAdapter logger)
         {
             if (logger.IsLoggingEnabled(LogLevel.Always))
             {

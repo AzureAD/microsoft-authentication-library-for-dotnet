@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             throw new MsalClientException(MsalError.CodeExpired, "Verification code expired before contacting the server");
         }
 
-        private Dictionary<string, string> GetBodyParameters(DeviceCodeResult deviceCodeResult)
+        private static Dictionary<string, string> GetBodyParameters(DeviceCodeResult deviceCodeResult)
         {
             var dict = new Dictionary<string, string>
             {

@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             return new WebView2WebUi(coreUIParent, requestContext);
         }
 
-        private bool IsWebView2Available()
+        private static bool IsWebView2Available()
         {
             try
             {
