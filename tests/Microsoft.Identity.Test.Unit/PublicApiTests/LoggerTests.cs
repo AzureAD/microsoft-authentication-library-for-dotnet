@@ -389,7 +389,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     appBuilder.WithExperimentalFeatures()
                     .WithLogging(testLogger, piiLogging);
 
-
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -398,7 +397,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage(claims: TestConstants.ClaimsChallenge)
                     });
 
-                var app = appBuilder.BuildConcrete();
+                var app = appBuilder.Build();
 
                 var ex = await Assert.ThrowsExceptionAsync<MsalClaimsChallengeException>(async () =>
                 {
