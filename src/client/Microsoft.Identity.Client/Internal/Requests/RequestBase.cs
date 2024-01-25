@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     foreach (string scope in AuthenticationRequestParameters.Scope)
                     {
                         var splitString = scope.Split(new[] { firstScopeAsUri.Host }, StringSplitOptions.None);
-                        string scopeToAppend = splitString.Count() > 1 ? splitString[1].TrimStart('/') + " " : splitString.FirstOrDefault();
+                        string scopeToAppend = splitString.Length > 1 ? splitString[1].TrimStart('/') + " " : splitString.FirstOrDefault();
                         stringBuilder.Append(scopeToAppend);
                     }
 

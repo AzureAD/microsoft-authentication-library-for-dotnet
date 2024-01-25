@@ -402,7 +402,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 httpTelemetryRecorder.SplitPreviousCsv(csvPrevious);
 
                 Assert.AreEqual(UPApiId, httpTelemetryRecorder.ApiId.FirstOrDefault(e => e.Contains(UPApiId)));
-                Assert.AreEqual(1, httpTelemetryRecorder.ErrorCode.Count());
+                Assert.AreEqual(1, httpTelemetryRecorder.ErrorCode.Count);
                 Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.SilentCallSuccessfulCount);
                 Assert.IsFalse(httpTelemetryRecorder.ForceRefresh);
                 Assert.AreEqual(ApiIdAndCorrelationIdSection, httpTelemetryRecorder.ApiIdAndCorrelationIds.FirstOrDefault());

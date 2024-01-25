@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
                     var AuthValuesSplit = authInfoValue.Split(new char[] { ' ' }, 2);
                     IDictionary<string, string> paramValues;
 
-                    if (AuthValuesSplit.Count() != 2)
+                    if (AuthValuesSplit.Length != 2)
                     {
                         //Header is not in the form of a=b.
                         paramValues = new Dictionary<string, string>();
