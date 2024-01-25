@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        public async Task ClaimsChallengeErrorLogging_TestAsync()
+        public async Task ClaimsChallengeErrorHandling_TestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage(claims: TestConstants.GenericClaims + "obo")
+                        ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage(claims: TestConstants.ClaimsChallenge)
                     });
 
                 var cca = BuildCCA(httpManager);
@@ -251,14 +251,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
-                Assert.AreEqual(TestConstants.GenericClaims + "obo", ex.Claims);
-                Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.ClaimsChallengeObo));
+                Assert.AreEqual(TestConstants.ClaimsChallenge, ex.Claims);
+                Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.ClaimsChallenge));
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage(claims: TestConstants.GenericClaims)
+                        ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage(claims: TestConstants.ClaimsChallenge)
                     });
 
                 //Throw exception with claims without OBO:
@@ -267,7 +267,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     await cca.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
-                Assert.AreEqual(TestConstants.GenericClaims, ex.Claims);
+                Assert.AreEqual(TestConstants.ClaimsChallenge, ex.Claims);
                 Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.ClaimsChallenge));
             }
         }
