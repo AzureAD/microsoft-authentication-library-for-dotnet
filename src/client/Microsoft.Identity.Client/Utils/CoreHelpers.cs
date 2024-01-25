@@ -80,11 +80,11 @@ namespace Microsoft.Identity.Client.Utils
         {
             var response = new Dictionary<string, string>();
 
-            List<string> queryPairs = SplitWithQuotes(input, delimiter);
+            var queryPairs = SplitWithQuotes(input, delimiter);
 
             foreach (string queryPair in queryPairs)
             {
-                List<string> pair = SplitWithQuotes(queryPair, '=');
+                var pair = SplitWithQuotes(queryPair, '=');
 
                 if (pair.Count == 2 && !string.IsNullOrWhiteSpace(pair[0]) && !string.IsNullOrWhiteSpace(pair[1]))
                 {
@@ -124,14 +124,14 @@ namespace Microsoft.Identity.Client.Utils
             return ParseKeyValueList(input, delimiter, urlDecode, true, requestContext);
         }
 
-        internal static List<string> SplitWithQuotes(string input, char delimiter)
+        internal static IReadOnlyList<string> SplitWithQuotes(string input, char delimiter)
         {
-            List<string> items = new List<string>();
-
             if (string.IsNullOrWhiteSpace(input))
             {
-                return items;
+                return Array.Empty<string>();
             }
+
+            var items = new List<string>();
 
             int startIndex = 0;
             bool insideString = false;

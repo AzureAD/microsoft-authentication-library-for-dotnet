@@ -371,10 +371,10 @@ namespace Microsoft.Identity.Client
             return CreateWwwAuthenticateParameters(parameters, scheme);
         }
 
-        private static string[] GetParsedAuthValueElements(string wwwAuthenticateValue)
+        private static IEnumerable<string> GetParsedAuthValueElements(string wwwAuthenticateValue)
         {
             char[] charsToTrim = { ',', ' ' };
-            List<string> authValuesSplit = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ' ');
+            var authValuesSplit = CoreHelpers.SplitWithQuotes(wwwAuthenticateValue, ' ');
 
             //Ensure that known headers are not being parsed.
             if (s_knownAuthenticationSchemes.Contains(authValuesSplit[0]))
@@ -382,7 +382,7 @@ namespace Microsoft.Identity.Client
                 authValuesSplit = authValuesSplit.Skip(1).ToList();
             }
 
-            return authValuesSplit.Select(authValue => authValue.TrimEnd(charsToTrim)).ToArray();
+            return authValuesSplit.Select(authValue => authValue.TrimEnd(charsToTrim));
         }
 
         internal static WwwAuthenticateParameters CreateWwwAuthenticateParameters(IDictionary<string, string> values, string scheme)
@@ -446,7 +446,7 @@ namespace Microsoft.Identity.Client
         /// <returns>a json fragment (original input string or decoded from base64 encoded).</returns>
         private static string GetJsonFragment(string inputString)
         {
-            if (string.IsNullOrEmpty(inputString) || inputString.Length % 4 != 0 || inputString.Any(c => char.IsWhiteSpace(c)))
+            if (string.IsNullOrEmpty(inputString) || inputString.Length % 4 != 0 || inputString.Any(char.IsWhiteSpace))
             {
                 return inputString;
             }

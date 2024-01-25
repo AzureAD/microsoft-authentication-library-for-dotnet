@@ -309,7 +309,7 @@ namespace Microsoft.Identity.Client
         public PublicClientApplicationBuilder WithParentActivityOrWindow(Func<IWin32Window> windowFunc)
         {
             Guard.AgainstNull(windowFunc);
-            return WithParentFunc(() => windowFunc());
+            return WithParentFunc(windowFunc);
         }
 #endif
 
