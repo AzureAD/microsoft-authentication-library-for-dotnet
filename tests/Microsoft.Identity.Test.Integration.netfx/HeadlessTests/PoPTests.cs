@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual("Bearer", result.TokenType);
             Assert.AreEqual(
                 2,
-                (cca as ConfidentialClientApplication).AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                (cca as ConfidentialClientApplication).AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
         }
 
         private async Task MultipleKeys_Async()

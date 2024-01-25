@@ -1049,7 +1049,7 @@ namespace Microsoft.Identity.Client
 
                 if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
-                    logger.Verbose(() => $"Filtered by home account id. Remaining accounts {accounts.Count()} ");
+                    logger.Verbose(() => $"Filtered by home account id. Remaining accounts {accounts.Count} ");
                 }
             }
 

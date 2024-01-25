@@ -513,7 +513,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var users = app.GetAccountsAsync().Result;
                 Assert.AreEqual(2, users.Count());
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             }
         }
 
@@ -573,7 +573,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 var users = app.GetAccountsAsync().Result;
                 Assert.AreEqual(2, users.Count());
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             }
         }
 

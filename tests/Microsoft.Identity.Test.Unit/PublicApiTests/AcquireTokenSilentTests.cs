@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 Assert.AreEqual(TestConstants.s_scopeForAnotherResource.AsSingleString(), result.Scopes.AsSingleString());
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
                 cacheAccess.AssertAccessCounts(1, 0);
             }
         }
@@ -210,8 +210,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 Assert.AreEqual(TestConstants.s_scope.AsSingleString(), result.Scopes.AsSingleString());
 
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
             }
         }
 
@@ -351,8 +351,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result.Scopes.AsSingleString());
 
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
                 Assert.AreEqual("my-uid.my-utid", cacheAccess.LastAfterAccessNotificationArgs.SuggestedCacheKey);
                 cacheAccess.AssertAccessCounts(1, 1);
             }
@@ -399,8 +399,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result.Scopes.AsSingleString());
 
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
@@ -427,8 +427,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.DisplayableId, result2.Account.Username);
                 Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result2.Scopes.AsSingleString());
 
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
@@ -455,8 +455,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.DisplayableId, result3.Account.Username);
                 Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result3.Scopes.AsSingleString());
 
-                Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
 
                 // Use same authority as above, number of access tokens should remain constant
                 httpManager.AddMockHandler(
@@ -482,8 +482,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.DisplayableId, result4.Account.Username);
                 Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result4.Scopes.AsSingleString());
 
-                Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
             }
         }
 
@@ -517,8 +517,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result.Scopes.AsSingleString());
                 Assert.AreEqual(0, httpManager.QueueSize);
 
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandler(
@@ -546,8 +546,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.DisplayableId, result2.Account.Username);
                 Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result2.Scopes.AsSingleString());
 
-                Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
@@ -574,8 +574,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.DisplayableId, result3.Account.Username);
                 Assert.AreEqual(TestConstants.s_scope.ToArray().AsSingleString(), result3.Scopes.AsSingleString());
 
-                Assert.AreEqual(4, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(4, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
             }
         }
 
