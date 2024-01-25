@@ -25,26 +25,28 @@ namespace Microsoft.Identity.Client
           string errorCode,
           string errorMessage,
           HttpResponse httpResponse,
-          Exception innerException = null,
-          ApiIds apiIds = ApiIds.None)
+          Exception innerException = null)
         {
             MsalServiceException ex = null;
             OAuth2ResponseBase oAuth2Response = JsonHelper.TryToDeserializeFromJson<OAuth2ResponseBase>(httpResponse?.Body);
 
             if (IsInvalidGrant(oAuth2Response?.Error, oAuth2Response?.SubError) || IsInteractionRequired(oAuth2Response?.Error))
             {
+                var errorMessageToUse = errorMessage;
+
                 if (IsThrottled(oAuth2Response))
                 {
-                    ex = new MsalUiRequiredException(errorCode, MsalErrorMessage.AadThrottledError, innerException);
+                    errorMessageToUse = MsalErrorMessage.AadThrottledError;
                 }
-                else if (oAuth2Response.Claims != null)
+
+                if (oAuth2Response.Claims != null)
                 {
-                    errorMessage = UpdateExceptionForClaimsChallenge(errorMessage, apiIds);
-                    ex = new MsalClaimsChallengeException(errorCode, errorMessage, innerException);
+                    errorMessageToUse = UpdateExceptionForClaimsChallenge(errorMessageToUse);
+                    ex = new MsalClaimsChallengeException(errorCode, errorMessageToUse, innerException);
                 }
                 else
                 {
-                    ex = new MsalUiRequiredException(errorCode, errorMessage, innerException);
+                    ex = new MsalUiRequiredException(errorCode, errorMessageToUse, innerException);
                 }
             }
 
@@ -231,16 +233,9 @@ namespace Microsoft.Identity.Client
         }
 
 
-        private static string UpdateExceptionForClaimsChallenge(string message, ApiIds apiId)
+        private static string UpdateExceptionForClaimsChallenge(string message)
         {
-            if (ApiEvent.IsOnBehalfOfRequest(apiId) || ApiEvent.IsLongRunningObo(apiId))
-            {
-                return message += " " + MsalErrorMessage.ClaimsChallengeObo;
-            }
-            else
-            {
-                return message += " " + MsalErrorMessage.ClaimsChallenge;
-            }
+            return message += " " + MsalErrorMessage.ClaimsChallenge;
         }
     }
 }

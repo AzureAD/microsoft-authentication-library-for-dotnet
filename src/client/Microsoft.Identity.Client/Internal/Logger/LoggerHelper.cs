@@ -126,6 +126,11 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 sb.AppendLine("=== End of inner exception stack trace ===");
             }
 
+            if (ex.Message.Contains(MsalErrorMessage.ClaimsChallenge))
+            {
+                sb.AppendLine(MsalErrorMessage.ClaimsChallenge);
+            }
+
             sb.AppendLine("To see full exception details, enable PII Logging. See https://aka.ms/msal-net-logging");
 
             if (ex.StackTrace != null)

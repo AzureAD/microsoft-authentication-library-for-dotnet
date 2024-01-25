@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client
     /// See https://learn.microsoft.com/en-us/entra/msal/dotnet/advanced/exceptions/msal-error-handling#conditional-access-and-claims-challenges
     /// See https://learn.microsoft.com/en-us/entra/msal/dotnet/acquiring-tokens/web-apps-apis/on-behalf-of-flow#handling-multi-factor-auth-mfa-conditional-access-and-incremental-consent
     /// </summary>
-    internal class MsalClaimsChallengeException : MsalServiceException
+    public class MsalClaimsChallengeException : MsalServiceException
     {
         /// <summary>
         /// Initializes a new instance of the exception class with a specified
