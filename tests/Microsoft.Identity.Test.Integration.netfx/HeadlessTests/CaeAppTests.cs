@@ -49,6 +49,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.HeadlessTests
         /// Acquire a new token with claims; should receive an exception that the SP is disabled.
         /// [Cleanup] Enable the app's service principal again.
         /// </summary>
+        [Ignore("CAE tests are not set up for automation.")]
         [TestMethod]
         public async Task ClientCredentials_WithDisabledServicePrincipal_ThrowsException()
         {

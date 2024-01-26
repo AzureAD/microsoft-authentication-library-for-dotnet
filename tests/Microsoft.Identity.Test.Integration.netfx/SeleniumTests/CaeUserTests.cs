@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.SeleniumTests
         /// Use the cached token to call Graph again; should receive a 401 with claims. 
         /// Acquire a new token with claims; should receive an MsalUiRequiredException.
         /// </summary>
+        [Ignore("CAE tests are not set up for automation.")]
         [TestMethod]
         public async Task UserFlow_WithSessionRevoked_ThrowsMsalUiRequiredException()
         {
