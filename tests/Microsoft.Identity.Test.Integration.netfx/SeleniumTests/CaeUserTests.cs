@@ -19,13 +19,13 @@ namespace Microsoft.Identity.Test.Integration.NetFx.SeleniumTests
     [TestClass]
     public class CaeUserTests
     {
-        private readonly string _certificateName = "for-cca-testing";
-        private readonly string _confidentialClientID = "35dc5034-9b65-4a5d-ad81-73cca468c1e0"; //msidlab4.com app
-        private readonly string _tenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
-        private readonly KeyVaultSecretsProvider _keyVaultProvider = new(KeyVaultInstance.MsalTeam);
-        private readonly HttpClient _httpClient = new();
-        private readonly TimeSpan _delayTimeout = TimeSpan.FromMinutes(5);
-        private readonly string[] _graphUserScope = ["User.Read"];
+        private const string CertificateName = "for-cca-testing";
+        private const string ConfidentialClientID = "35dc5034-9b65-4a5d-ad81-73cca468c1e0"; //msidlab4.com app
+        private const string TenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
+        private static readonly KeyVaultSecretsProvider s_keyVaultProvider = new(KeyVaultInstance.MsalTeam);
+        private static readonly HttpClient s_httpClient = new();
+        private static readonly TimeSpan s_delayTimeout = TimeSpan.FromMinutes(5);
+        private static readonly string[] s_graphUserScope = ["User.Read"];
         private static readonly TimeSpan s_loginTimeout = TimeSpan.FromMinutes(1);
 
         public TestContext TestContext { get; set; }
@@ -42,29 +42,41 @@ namespace Microsoft.Identity.Test.Integration.NetFx.SeleniumTests
         {
             var cca = await BuildCca().ConfigureAwait(false);
 
-            LabResponse labResponse = await LabUserHelper.GetCaeUserAsync().ConfigureAwait(false);
+            var labResponse = await LabUserHelper.GetCaeUserAsync().ConfigureAwait(false);
 
             await LoginUser(cca, labResponse.User).ConfigureAwait(false);
 
-            var result = await cca.AcquireTokenSilent(_graphUserScope, labResponse.User.Upn).ExecuteAsync().ConfigureAwait(false);
+            var result = await cca.AcquireTokenSilent(s_graphUserScope, labResponse.User.Upn).ExecuteAsync().ConfigureAwait(false);
 
-            var response1 = await _httpClient.SendAsync(CreateRequest(result)).ConfigureAwait(false);
+            var response1 = await s_httpClient.SendAsync(CreateRequest(result)).ConfigureAwait(false);
             Assert.AreEqual(HttpStatusCode.OK, response1.StatusCode);
 
             await LabUserHelper.RevokeUserSessionAsync(labResponse.User).ConfigureAwait(false);
-            await Task.Delay(_delayTimeout).ConfigureAwait(false);
+            await Task.Delay(s_delayTimeout).ConfigureAwait(false);
 
-            var response2 = await _httpClient.SendAsync(CreateRequest(result)).ConfigureAwait(false);
+            var response2 = await s_httpClient.SendAsync(CreateRequest(result)).ConfigureAwait(false);
             Assert.AreEqual(HttpStatusCode.Unauthorized, response2.StatusCode);
 
-            var claims = WwwAuthenticateParameters.GetClaimChallengeFromResponseHeaders(response2.Headers);
+            // A WWW-Authenticate header with claims looks like this:
+            //
+            // Bearer realm="", authorization_uri="https://login.microsoftonline.com/common/oauth2/authorize",
+            // client_id="00000003-0000-0000-c000-000000000000",
+            // errorDescription="Continuous access evaluation resulted in challenge with result: InteractionRequired and code: TokenIssuedBeforeRevocationTimestamp",
+            // error="insufficient_claims",
+            // claims="eyhhY2Nlc3NfdG8rZW4iOnsibmJmIjpwfjIzNTQzMiJ9fX0="
+            // 
+            // Decoded claims challenge looks like {"access_token":{"nbf":{"essential":true, "value":"1502185177"}}}
 
-            Assert.IsNotNull(claims);
-            Assert.AreNotEqual(0, claims.Length);
+            var wwwAuthParameters = WwwAuthenticateParameters.CreateFromAuthenticationHeaders(response2.Headers).FirstOrDefault();
 
-            MsalUiRequiredException ex = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(async () =>
-                await cca.AcquireTokenSilent(_graphUserScope, labResponse.User.Upn)
-                         .WithClaims(claims).ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+            Assert.IsNotNull(wwwAuthParameters);
+            Assert.IsNotNull(wwwAuthParameters.Claims);
+            Assert.AreNotEqual(0, wwwAuthParameters.Claims.Length);
+            Assert.IsTrue(wwwAuthParameters.Error.Equals("insufficient_claims", StringComparison.OrdinalIgnoreCase));
+
+            var ex = await Assert.ThrowsExceptionAsync<MsalUiRequiredException>(async () =>
+                await cca.AcquireTokenSilent(s_graphUserScope, labResponse.User.Upn)
+                         .WithClaims(wwwAuthParameters.Claims).ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.InvalidGrantError, ex.ErrorCode);
             Assert.IsTrue(ex.ErrorCodes.Contains("50173")); // Expired token, reauthentication needed
@@ -79,12 +91,12 @@ namespace Microsoft.Identity.Test.Integration.NetFx.SeleniumTests
 
         private async Task<ConfidentialClientApplication> BuildCca()
         {
-            var certificate = await _keyVaultProvider.GetCertificateWithPrivateMaterialAsync(_certificateName).ConfigureAwait(false);
+            var certificate = await s_keyVaultProvider.GetCertificateWithPrivateMaterialAsync(CertificateName).ConfigureAwait(false);
             var redirectUri = SeleniumWebUI.FindFreeLocalhostRedirectUri();
 
             var cca = ConfidentialClientApplicationBuilder
-                        .Create(_confidentialClientID)
-                        .WithTenantId(_tenantId)
+                        .Create(ConfidentialClientID)
+                        .WithTenantId(TenantId)
                         .WithCertificate(certificate)
                         .WithClientCapabilities(new[] { "cp1" })
                         .WithRedirectUri(redirectUri)
@@ -97,7 +109,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.SeleniumTests
         {
             string codeVerifier;
             Uri authUri = await cca
-                .GetAuthorizationRequestUrl(_graphUserScope)
+                .GetAuthorizationRequestUrl(s_graphUserScope)
                 .WithPkce(out codeVerifier)
                 .ExecuteAsync().ConfigureAwait(false);
 
@@ -117,7 +129,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.SeleniumTests
             var authorizationResult = AuthorizationResult.FromUri(authCodeUri.AbsoluteUri);
             Assert.AreEqual(AuthorizationStatus.Success, authorizationResult.Status);
 
-            await cca.AcquireTokenByAuthorizationCode(_graphUserScope, authorizationResult.Code)
+            await cca.AcquireTokenByAuthorizationCode(s_graphUserScope, authorizationResult.Code)
                .WithPkceCodeVerifier(codeVerifier)
                .ExecuteAsync()
                .ConfigureAwait(false);
