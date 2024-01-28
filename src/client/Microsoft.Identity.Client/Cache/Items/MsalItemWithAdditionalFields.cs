@@ -33,12 +33,12 @@ namespace Microsoft.Identity.Client.Cache.Items
             return json;
         }
 
-        internal void SetItemIfValueNotNull(JObject json, string key, JToken value)
+        internal static void SetItemIfValueNotNull(JObject json, string key, JToken value)
         {
             SetValueIfFilterMatches(json, key, value, strVal => !string.IsNullOrEmpty(strVal));
         }
 
-        internal void SetItemIfValueNotNullOrDefault(JObject json, string key, JToken value, string defaultValue)
+        internal static void SetItemIfValueNotNullOrDefault(JObject json, string key, JToken value, string defaultValue)
         {
             SetValueIfFilterMatches(json, key, value, strVal => !string.IsNullOrEmpty(strVal) &&
                             !strVal.Equals(defaultValue, StringComparison.OrdinalIgnoreCase));

@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Http
             return SendRequestAsync(uri, headers, body, HttpMethod.Post, logger, doNotThrow: true, cancellationToken: cancellationToken);
         }
 
-        private HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
+        private static HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
         {
             var requestMessage = new HttpRequestMessage { RequestUri = endpoint };
             requestMessage.Headers.Accept.Clear();
@@ -245,7 +245,7 @@ namespace Microsoft.Identity.Client.Http
             };
         }
 
-        protected async Task<HttpContent> CloneHttpContentAsync(HttpContent httpContent)
+        protected static async Task<HttpContent> CloneHttpContentAsync(HttpContent httpContent)
         {
             var temp = new MemoryStream();
             await httpContent.CopyToAsync(temp).ConfigureAwait(false);

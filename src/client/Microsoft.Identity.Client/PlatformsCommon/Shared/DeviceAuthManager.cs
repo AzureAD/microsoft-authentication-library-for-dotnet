@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return true;
         }
 
-        private DeviceAuthJWTResponse GetDeviceAuthJwtResponse(string submitUrl, string nonce, X509Certificate2 certificate)
+        private static DeviceAuthJWTResponse GetDeviceAuthJwtResponse(string submitUrl, string nonce, X509Certificate2 certificate)
         {
             return new DeviceAuthJWTResponse(submitUrl, nonce, Convert.ToBase64String(certificate.GetRawCertData()));
         }
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return _cryptographyManager.SignWithCertificate(responseJwt.GetResponseToSign(), certificate);
         }
 
-        private void FormatResponseHeader(
+        private static void FormatResponseHeader(
             DeviceAuthJWTResponse responseJWT,
             byte[] signedResponse,
             IDictionary<string, string> challengeData,
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             responseHeader = $"PKeyAuth {authToken}, Context=\"{challengeData["Context"]}\", Version=\"{challengeData["Version"]}\"";
         }
 
-        private X509Certificate2 FindCertificate(IDictionary<string, string> challengeData)
+        private static X509Certificate2 FindCertificate(IDictionary<string, string> challengeData)
         {
             var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
             try
@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
 
-        private X509Certificate2 FindCertificateByCertAuthorities(IDictionary<string, string> challengeData, X509Certificate2Collection certCollection)
+        private static X509Certificate2 FindCertificateByCertAuthorities(IDictionary<string, string> challengeData, X509Certificate2Collection certCollection)
         {
             X509Certificate2Collection signingCert = null;
             string[] certAuthorities = challengeData["CertAuthorities"].Split(new[] { ";" },

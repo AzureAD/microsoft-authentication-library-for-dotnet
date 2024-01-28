@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
                 _webViewOptions?.HtmlMessageSuccess ?? DefaultSuccessHtml);
         }
 
-        private MessageAndHttpCode GetMessage(Uri redirectUri, string message)
+        private static MessageAndHttpCode GetMessage(Uri redirectUri, string message)
         {
             if (redirectUri != null)
             {
