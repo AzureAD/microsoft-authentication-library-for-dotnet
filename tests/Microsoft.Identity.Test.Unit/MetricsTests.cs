@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Test.Unit
                                                               .WithHttpManager(harness.HttpManager)
                                                               .BuildConcrete();
 
-                InMemoryTokenCache memoryTokenCache = new InMemoryTokenCache(withOperationDelay: true, shouldClearExistingCache: false);
+                var memoryTokenCache = new InMemoryTokenCache(withOperationDelay: true, shouldClearExistingCache: false);
                 memoryTokenCache.Bind(cca.AppTokenCache);
 
                 // Act - AcquireTokenForClient
@@ -262,7 +262,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
             }
-            InMemoryTokenCache memoryTokenCache = new InMemoryTokenCache(withOperationDelay: true, shouldClearExistingCache: false);
+            var memoryTokenCache = new InMemoryTokenCache(withOperationDelay: true, shouldClearExistingCache: false);
             memoryTokenCache.Bind(pca.UserTokenCache);
 
             return pca;

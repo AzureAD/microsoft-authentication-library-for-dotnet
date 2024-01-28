@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
             //Arrange
             const int numberOfRetriesToAttempt = 3;
             const int numberOfFailuresToSimulate = 3;
-            TimeSpan retryTimeSpan = new TimeSpan(0, 0, 0, 1);
+            var retryTimeSpan = new TimeSpan(0, 0, 0, 1);
 
             var operationSimulator = new OperationSimulator(numberOfFailuresToSimulate);
             Func<Task<bool>> func = () => operationSimulator.SimulateOperationWithFailuresAsync();

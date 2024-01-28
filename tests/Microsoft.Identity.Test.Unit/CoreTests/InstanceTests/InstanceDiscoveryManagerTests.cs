@@ -359,7 +359,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public async Task CustomDiscoveryEndpoint_Async()
         {
             // Arrange
-            Uri customDiscoveryEndpoint = new Uri("http://some.discovery.endpoint");
+            var customDiscoveryEndpoint = new Uri("http://some.discovery.endpoint");
 
             _discoveryManager = new InstanceDiscoveryManager(
                 _harness.HttpManager,
@@ -411,7 +411,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
             var serviceBundle = ServiceBundle.Create(appConfig);
 
-            RequestContext requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+            var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
 
             // network fails with invalid_instance exception
             _networkMetadataProvider

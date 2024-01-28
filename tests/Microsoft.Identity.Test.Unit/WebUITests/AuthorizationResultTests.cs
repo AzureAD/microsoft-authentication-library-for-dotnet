@@ -26,8 +26,8 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
         [TestMethod]
         public void UrlInErrorDescriptionTest()
         {
-            Uri uri = new Uri("http://some_url.com?q=p");
-            UriBuilder errorUri = new UriBuilder(TestConstants.AuthorityHomeTenant)
+            var uri = new Uri("http://some_url.com?q=p");
+            var errorUri = new UriBuilder(TestConstants.AuthorityHomeTenant)
             {
                 Query = string.Format(
                            CultureInfo.InvariantCulture,

@@ -21,8 +21,8 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         public async Task GetRemovesExpired_Async()
         {
             // Arrange
-            ThrottlingCache cache = new ThrottlingCache();
-            
+            var cache = new ThrottlingCache();
+
             cache.AddAndCleanup("k1", new ThrottlingCacheEntry(_ex1, TimeSpan.FromMilliseconds(1)), _logger); // expired
             cache.AddAndCleanup("k2", new ThrottlingCacheEntry(_ex2, TimeSpan.FromMilliseconds(10000)), _logger);
 
@@ -42,11 +42,11 @@ namespace Microsoft.Identity.Test.Unit.Throttling
         public async Task TestCleanup_Async()
         {
             // Arrange
-            ThrottlingCache cache = new ThrottlingCache(50);
+            var cache = new ThrottlingCache(50);
 
             cache.AddAndCleanup("k1", new ThrottlingCacheEntry(_ex1, TimeSpan.FromMilliseconds(1)), _logger); // expired
             cache.AddAndCleanup("k2", new ThrottlingCacheEntry(_ex2, TimeSpan.FromMilliseconds(10000)), _logger);
-            
+
             // Act - should trigger a cleanup
             await Task.Delay(50).ConfigureAwait(false);
             cache.AddAndCleanup("k3", new ThrottlingCacheEntry(_ex2, TimeSpan.FromMilliseconds(1000)), _logger);

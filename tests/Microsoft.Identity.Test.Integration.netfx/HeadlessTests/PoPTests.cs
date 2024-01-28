@@ -466,7 +466,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string[] scopes = { "User.Read" };
             string[] expectedScopes = { "email", "offline_access", "openid", "profile", "User.Read" };
 
-            WamLoggerValidator wastestLogger = new WamLoggerValidator();
+            var wastestLogger = new WamLoggerValidator();
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
                .Create(labResponse.App.AppId)

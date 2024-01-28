@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
             // Assert
             bool missingErrorCode = false;
-            StringBuilder errorsFound = new StringBuilder();
+            var errorsFound = new StringBuilder();
             foreach (string coreErrorCode in MsalError)
             {
                 var isFound = msalErrorCodes.Contains(coreErrorCode, StringComparer.InvariantCulture);

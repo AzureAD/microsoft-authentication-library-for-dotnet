@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             var webUI = CreateTestWebUI();
             var requestContext = new RequestContext(TestCommon.CreateDefaultServiceBundle(), Guid.NewGuid());
 
-            CancellationTokenSource cts = new CancellationTokenSource();
+            var cts = new CancellationTokenSource();
             _tcpInterceptor.When(x => x.ListenToSingleRequestAndRespondAsync(
                 TestPort,
                 "/",

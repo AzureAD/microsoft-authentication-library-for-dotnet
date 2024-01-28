@@ -335,7 +335,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters acquireTokenSilentParameters)
         {
-            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
+            using var logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
 
             var cancellationToken = authenticationRequestParameters.RequestContext.UserCancellationToken;
@@ -481,7 +481,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 _logger.Info("[RuntimeBroker] ListWindowsWorkAndSchoolAccounts option was not enabled.");
                 return Array.Empty<IAccount>();
             }
-            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
+            using var logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
 
             var requestContext = cacheSessionManager.RequestContext;
@@ -519,7 +519,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                         _logger.Verbose(() => $"[RuntimeBroker] {wamAccounts.Count} account(s) returned after filtering.");
                     }
 
-                    List<IAccount> msalAccounts = new List<IAccount>();
+                    var msalAccounts = new List<IAccount>();
 
                     foreach (var acc in wamAccounts)
                     {

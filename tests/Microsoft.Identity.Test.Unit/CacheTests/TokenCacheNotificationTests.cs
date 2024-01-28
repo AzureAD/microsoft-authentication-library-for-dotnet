@@ -291,7 +291,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 _harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost();
                 var cacheAccessRecorder = app.UserTokenCache.RecordAccess();
 
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                var cancellationTokenSource = new CancellationTokenSource();
 
                 var accounts = await app.GetAccountsAsync(cancellationTokenSource.Token).ConfigureAwait(false);
                 AssertCancellationToken(cacheAccessRecorder, cancellationTokenSource);
@@ -462,10 +462,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // Arrange
                 var cca = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithClientSecret(TestConstants.ClientSecret)     
+                    .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
-                CancellationTokenSource cts = new CancellationTokenSource();
+                var cts = new CancellationTokenSource();
                 var cancellationToken = cts.Token;
 
                 var appTokenCacheRecoder = cca.AppTokenCache.RecordAccess((args) =>

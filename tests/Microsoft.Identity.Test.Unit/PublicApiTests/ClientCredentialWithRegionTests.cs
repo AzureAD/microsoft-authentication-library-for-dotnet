@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Test.Unit
                 IConfidentialClientApplication appWithRegion = CreateCca(
                     httpManager,
                     ConfidentialClientApplication.AttemptRegionDiscovery);
-                InMemoryTokenCache memoryTokenCache = new InMemoryTokenCache();
+                var memoryTokenCache = new InMemoryTokenCache();
                 memoryTokenCache.Bind(appWithRegion.AppTokenCache);
 
                 IConfidentialClientApplication appWithoutRegion = CreateCca(
@@ -694,7 +694,7 @@ namespace Microsoft.Identity.Test.Unit
 
             if (hasCustomInstanceMetadataUri)
             {
-                Uri customMetadataUri = new Uri("http://login.microsoftonline.com/");
+                var customMetadataUri = new Uri("http://login.microsoftonline.com/");
                 builder = builder.WithInstanceDiscoveryMetadata(customMetadataUri);
             }
 

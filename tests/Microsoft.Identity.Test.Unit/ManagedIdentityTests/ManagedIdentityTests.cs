@@ -564,7 +564,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.BuildConcrete();
 
-                CancellationTokenSource cts = new CancellationTokenSource();
+                var cts = new CancellationTokenSource();
                 var cancellationToken = cts.Token;
 
                 var appTokenCacheRecoder = mi.AppTokenCacheInternal.RecordAccess((args) =>

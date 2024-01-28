@@ -22,8 +22,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public void StaticProviderPreservesStateAcrossInstances()
         {
             // Arrange
-            NetworkCacheMetadataProvider staticMetadataProvider1 = new NetworkCacheMetadataProvider();
-            NetworkCacheMetadataProvider staticMetadataProvider2 = new NetworkCacheMetadataProvider();
+            var staticMetadataProvider1 = new NetworkCacheMetadataProvider();
+            var staticMetadataProvider2 = new NetworkCacheMetadataProvider();
             staticMetadataProvider1.AddMetadata("env", new InstanceDiscoveryMetadataEntry());
 
             // Act
@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             string instanceMetadataJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("CustomInstanceMetadata.json"));
             InstanceDiscoveryResponse instanceDiscovery = JsonHelper.DeserializeFromJson<InstanceDiscoveryResponse>(instanceMetadataJson);
 
-            UserMetadataProvider userMetadataProvider = new UserMetadataProvider(instanceDiscovery);
+            var userMetadataProvider = new UserMetadataProvider(instanceDiscovery);
 
             // Act
             InstanceDiscoveryMetadataEntry result = userMetadataProvider.GetMetadataOrThrow("login.microsoftonline.com", _logger);

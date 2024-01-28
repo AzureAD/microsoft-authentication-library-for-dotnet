@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public async Task CreateEndpointsWithCommonTenantAsync()
         {
             using var harness = CreateTestHarness();
-            RequestContext requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid());
+            var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid());
 
             Authority instance = Authority.CreateAuthority("https://login.microsoftonline.com/common");
             Assert.IsNotNull(instance);
@@ -92,14 +92,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             TestCommon.CreateServiceBundleWithCustomHttpManager(harness.HttpManager, authority: instance.AuthorityInfo.CanonicalAuthority.ToString(), validateAuthority: true);
             try
             {
-                AuthorityManager am = new AuthorityManager(new RequestContext(harness.ServiceBundle, Guid.NewGuid()), instance);
+                var am = new AuthorityManager(new RequestContext(harness.ServiceBundle, Guid.NewGuid()), instance);
                 await am.RunInstanceDiscoveryAndValidationAsync().ConfigureAwait(false);
 
                 if (isInstanceDiscoveryEnabled)
                 {
                     Assert.Fail("Validation should have failed with an exception when instance discovery is enabled.");
                 }
-                
+
                 Assert.IsNotNull(am);
             }
             catch (Exception exc)
@@ -309,7 +309,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestMethod]
         public void IsOrganizationsTenantWithMsaPassthroughEnabled()
         {
-            AadAuthority aadAuthorityInstance = new AadAuthority(Authority.CreateAuthority("https://login.microsoftonline.com/common").AuthorityInfo);
+            var aadAuthorityInstance = new AadAuthority(Authority.CreateAuthority("https://login.microsoftonline.com/common").AuthorityInfo);
 
             Assert.IsNotNull(aadAuthorityInstance);
             Assert.AreEqual(aadAuthorityInstance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
@@ -339,7 +339,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             var testAccount = new Account("TEST_ID.9188040d-6c67-4c5b-b112-36a304b66dad", "username", Authority.CreateAuthority("https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad").AuthorityInfo.Host);
 
             using var harness = CreateTestHarness();
-            RequestContext requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid());
+            var requestContext = new RequestContext(harness.ServiceBundle, Guid.NewGuid());
             requestContext.ServiceBundle.Config.IsBrokerEnabled = true;
             requestContext.ServiceBundle.Config.BrokerOptions = new BrokerOptions(BrokerOptions.OperatingSystems.Windows);
             requestContext.ServiceBundle.Config.BrokerOptions.MsaPassthrough = true;

@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 _authCodeExchangeComponentOverride.FetchTokensAsync(CancellationToken.None)
                     .Returns(Task.FromResult(_msalTokenResponse));
 
-                InteractiveRequest interactiveRequest = new InteractiveRequest(
+                var interactiveRequest = new InteractiveRequest(
                        requestParams,
                        interactiveParameters,
                        _authCodeRequestComponentOverride,
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     .FetchTokensAsync(default)
                     .Returns(Task.FromResult(_msalTokenResponseWithTokenSource));
 
-                InteractiveRequest interactiveRequest = new InteractiveRequest(
+                var interactiveRequest = new InteractiveRequest(
                        requestParams,
                        interactiveParameters,
                        _authCodeRequestComponentOverride,
@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 _authCodeExchangeComponentOverride.FetchTokensAsync(CancellationToken.None)
                     .Returns(Task.FromResult(_msalTokenResponse));
 
-                InteractiveRequest interactiveRequest = new InteractiveRequest(
+                var interactiveRequest = new InteractiveRequest(
                        requestParams,
                        interactiveParameters,
                        _authCodeRequestComponentOverride,
@@ -265,7 +265,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     .FetchTokensAsync(default)
                     .Returns(_msalTokenResponse);
 
-                InteractiveRequest interactiveRequest = new InteractiveRequest(
+                var interactiveRequest = new InteractiveRequest(
                        requestParams,
                        interactiveParameters,
                        _authCodeRequestComponentOverride,

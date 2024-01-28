@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string accessToken = TestConstants.ATSecret)
         {
             var expiresIn = (exiresIn.HasValue ? exiresIn.Value : TimeSpan.FromSeconds(ValidExpiresIn));
-            MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
+            var atItem = new MsalAccessTokenCacheItem(
                TestConstants.ProductionPrefCacheEnvironment,
                TestConstants.ClientId,
                scopes,
@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 userAssertionHash = crypto.CreateBase64UrlEncodedSha256Hash(userAssertion);
             }
 
-            MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
+            var atItem = new MsalAccessTokenCacheItem(
                 environment,
                 clientId,
                 overridenScopes ?? TestConstants.s_scope.AsSingleString(),
@@ -281,7 +281,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             // add access token
             accessor.SaveAccessToken(atItem);
 
-            MsalIdTokenCacheItem idTokenCacheItem = new MsalIdTokenCacheItem(
+            var idTokenCacheItem = new MsalIdTokenCacheItem(
                 TestConstants.ProductionPrefCacheEnvironment,
                 TestConstants.ClientId,
                 MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId),
@@ -291,7 +291,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             accessor.SaveIdToken(idTokenCacheItem);
 
-            MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem(
+            var accountCacheItem = new MsalAccountCacheItem(
                 TestConstants.ProductionPrefNetworkEnvironment,
                 null,
                 clientInfo,
@@ -339,7 +339,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string utid,
             string environment = TestConstants.ProductionPrefCacheEnvironment)
         {
-            MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem(
+            var accountCacheItem = new MsalAccountCacheItem(
                 environment,
                 null,
                 MockHelpers.CreateClientInfo(uid, utid),
@@ -385,7 +385,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static MsalAccessTokenCacheItem WithRefreshOn(this MsalAccessTokenCacheItem atItem, DateTimeOffset? refreshOn)
         {
-            MsalAccessTokenCacheItem newAtItem = new MsalAccessTokenCacheItem(
+            var newAtItem = new MsalAccessTokenCacheItem(
                atItem.Environment,
                atItem.ClientId,
                atItem.ScopeString,
@@ -406,7 +406,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static MsalAccessTokenCacheItem WithUserAssertion(this MsalAccessTokenCacheItem atItem, string assertion)
         {
-            MsalAccessTokenCacheItem newAtItem = new MsalAccessTokenCacheItem(
+            var newAtItem = new MsalAccessTokenCacheItem(
                atItem.Environment,
                atItem.ClientId,
                atItem.ScopeString,

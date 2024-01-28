@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Test.Common
                 Assert.IsNotNull(ticketBytes);
 
                 // To validate public field of AP-REQ format Kerberos Ticket, convert binary ticket data as a printable string format.
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 foreach (byte ch in ticketBytes)
                 {
                     if (ch >= 32 && ch < 127)

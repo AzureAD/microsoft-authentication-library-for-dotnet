@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Unit
         public void CreateWwwAuthenticateResponse(string resource, string authorizationUri)
         {
             // Arrange
-            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            var httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
             httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"Bearer realm=\"\", {resource}, {authorizationUri}");
 
             // Act
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Unit
         public void EnsureProperlyFormattedHeadersWithToken86DoNotFail(string scheme, string values)
         {
             // Arrange
-            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            var httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
             httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"{scheme} {values}");
 
             // Act
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Test.Unit
         public void EnsureProperlyFormattedHeadersWithRealmDoNotFail(string scheme, string values)
         {
             // Arrange
-            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            var httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
             httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"{scheme} {values}");
 
             // Act
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Test.Unit
         public void CreateWwwAuthenticateResponseForUnknownChallenges(string scheme, string values)
         {
             // Arrange
-            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            var httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
             httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"{scheme} {values}");
 
             // Act
@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit
         public void CreateFromMalformedAuthInfoResponse(string paramName, string value)
         {
             // Arrange
-            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            var httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
             httpResponse.Headers.Add(AuthenticationInfoName, $"{paramName}={value}");
 
             // Act
@@ -590,7 +590,7 @@ namespace Microsoft.Identity.Test.Unit
 
         private static HttpResponseMessage CreateClaimsHttpResponse(string claims)
         {
-            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            var httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
             httpResponse.Headers.Add(WwwAuthenticateHeaderName, $"Bearer realm=\"\", client_id=\"00000003-0000-0000-c000-000000000000\", authorization_uri=\"https://login.microsoftonline.com/common/oauth2/authorize\", error=\"insufficient_claims\", claims=\"{claims}\"");
             return httpResponse;
         }

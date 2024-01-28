@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public LabServiceApi()
         {
-            KeyVaultSecretsProvider _keyVaultSecretsProvider = new KeyVaultSecretsProvider();
+            var _keyVaultSecretsProvider = new KeyVaultSecretsProvider();
             _labAccessAppId = _keyVaultSecretsProvider.GetSecretByName("LabVaultAppID").Value;
             _labAccessClientSecret = _keyVaultSecretsProvider.GetSecretByName("LabVaultAppSecret").Value;
             _msiHelperServiceSecret = _keyVaultSecretsProvider.GetSecretByName("MSIHelperServiceSecret").Value;
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         private Task<string> RunQueryAsync(UserQuery query)
         {
-            Dictionary<string, string> queryDict = new Dictionary<string, string>();
+            var queryDict = new Dictionary<string, string>();
             if (string.IsNullOrEmpty(query.Upn))
             {
                 //Building user query
@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         private async Task<string> SendLabRequestAsync(string requestUrl, Dictionary<string, string> queryDict)
         {
-            UriBuilder uriBuilder = new UriBuilder(requestUrl);
+            var uriBuilder = new UriBuilder(requestUrl);
 
             if (queryDict.Count > 0)
             {
@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             if (_labApiAccessToken == null)
                 _labApiAccessToken = await LabAuthenticationHelper.GetAccessTokenForLabAPIAsync(_labAccessAppId, _labAccessClientSecret).ConfigureAwait(false);
 
-            using (HttpClient httpClient = new HttpClient())
+            using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Add("Authorization", string.Format(CultureInfo.InvariantCulture, "bearer {0}", _labApiAccessToken.Value.Token));
                 return await httpClient.GetStringAsync(address).ConfigureAwait(false);
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public async Task<string> GetUserSecretAsync(string lab)
         {
-            Dictionary<string, string> queryDict = new Dictionary<string, string>
+            var queryDict = new Dictionary<string, string>
             {
                 { "secret", lab }
             };

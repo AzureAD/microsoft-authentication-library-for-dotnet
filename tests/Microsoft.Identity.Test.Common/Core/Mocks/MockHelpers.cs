@@ -152,8 +152,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static Stream GenerateStreamFromString(string s)
         {
-            MemoryStream stream = new MemoryStream();
-            StreamWriter writer = new StreamWriter(stream);
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
             writer.Write(s);
             writer.Flush();
             stream.Position = 0;
@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static HttpResponseMessage CreateServerErrorMessage(HttpStatusCode statusCode, int? retryAfter = null)
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
+            var responseMessage = new HttpResponseMessage(statusCode);
             if (retryAfter != null)
             {
                 responseMessage.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(retryAfter.Value));
@@ -173,21 +173,21 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static HttpResponseMessage CreateRequestTimeoutResponseMessage()
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.RequestTimeout);
+            var responseMessage = new HttpResponseMessage(HttpStatusCode.RequestTimeout);
             responseMessage.Content = new StringContent("Request Timed Out.");
             return responseMessage;
         }
 
         internal static HttpResponseMessage CreateFailureMessage(HttpStatusCode code, string message)
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(code);
+            var responseMessage = new HttpResponseMessage(code);
             responseMessage.Content = new StringContent(message);
             return responseMessage;
         }
 
         internal static HttpResponseMessage CreateNullMessage(HttpStatusCode code)
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(code);
+            var responseMessage = new HttpResponseMessage(code);
             responseMessage.Content = null;
             return responseMessage;
         }
@@ -336,7 +336,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string accessToken = "some-access-token",
             string refreshToken = "OAAsomethingencrypedQwgAA")
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
+            var responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
             string stringContent = CreateSuccessTokenResponseString(uniqueId, displayableId, scope, foci, utid, accessToken, refreshToken);
             HttpContent content = new StringContent(stringContent);
             responseMessage.Content = content;
@@ -439,16 +439,15 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static HttpResponseMessage CreateSuccessResponseMessage(string successResponse)
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
-            HttpContent content =
-                new StringContent(successResponse);
+            var responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
+            var content = new StringContent(successResponse);
             responseMessage.Content = content;
             return responseMessage;
         }
 
         public static HttpResponseMessage CreateTooManyRequestsNonJsonResponse()
         {
-            HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)429)
+            var httpResponse = new HttpResponseMessage((HttpStatusCode)429)
             {
                 Content = new StringContent(TooManyRequestsContent)
             };
@@ -459,7 +458,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static HttpResponseMessage CreatePKeyAuthChallengeResponse()
         {
-            HttpResponseMessage httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized)
+            var httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized)
             {
                 Content = new StringContent(DefaultEmtpyFailureErrorMessage)
             };
@@ -470,7 +469,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static HttpResponseMessage CreateTooManyRequestsJsonResponse()
         {
-            HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)429)
+            var httpResponse = new HttpResponseMessage((HttpStatusCode)429)
             {
                 Content = new StringContent("{\"error\":\"Server overload\",\"error_description\":\"429: " +
                 TooManyRequestsContent + "\", " +

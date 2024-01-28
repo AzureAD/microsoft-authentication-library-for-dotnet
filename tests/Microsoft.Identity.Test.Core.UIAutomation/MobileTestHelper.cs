@@ -264,8 +264,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
         public static UserInformationFieldIds DetermineUserInformationFieldIds(LabUser user)
         {
-            UserInformationFieldIds userInformationFieldIds = new UserInformationFieldIds(user);
-            return userInformationFieldIds;
+            return new(user);
         }
 
         public void VerifyResult(ITestController controller)

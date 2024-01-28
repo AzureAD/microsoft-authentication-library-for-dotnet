@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
 
         private static Timer CreateStartedTimer(Action onTickAction, int interval)
         {
-            Timer timer = new Timer { Interval = interval };
+            var timer = new Timer { Interval = interval };
             timer.Tick += (_, _) => onTickAction();
             timer.Start();
             return timer;

@@ -20,8 +20,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public void EqualityTest()
         {
             // Arrange
-            AccountId accountId1 = new AccountId("a.b", "a", "b");
-            AccountId accountId2 = new AccountId("a.b", "a", "b");
+            var accountId1 = new AccountId("a.b", "a", "b");
+            var accountId2 = new AccountId("a.b", "a", "b");
 
             // Act Assert
             Assert.AreEqual(accountId1, accountId2);

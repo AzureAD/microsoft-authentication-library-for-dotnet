@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal.Accessors
         /// <param name="data"></param>
         private static void WriteToNewFileWithOwnerRWPermissionsWindows(string filePath, byte[] data)
         {
-            FileSecurity security = new FileSecurity();
+            var security = new FileSecurity();
             var rights = FileSystemRights.Read | FileSystemRights.Write;
 
             // https://stackoverflow.com/questions/39480255/c-sharp-how-to-grant-access-only-to-current-user-and-restrict-access-to-others

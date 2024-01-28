@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
                         X509Certificate2 generatedCert = certRequest.CreateSelfSigned(DateTimeOffset.Now.AddDays(-1), DateTimeOffset.Now.AddYears(10)); // generate the cert and sign!
 
-                        X509Certificate2 pfxGeneratedCert = new X509Certificate2(generatedCert.Export(X509ContentType.Pfx)); //has to be turned into pfx or Windows at least throws a security credentials not found during sslStream.connectAsClient or HttpClient request...
+                        var pfxGeneratedCert = new X509Certificate2(generatedCert.Export(X509ContentType.Pfx)); //has to be turned into pfx or Windows at least throws a security credentials not found during sslStream.connectAsClient or HttpClient request...
 
                         return pfxGeneratedCert;
                     }
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 default:
                     using (RSA rsa = RSA.Create(4096))
                     {
-                        CertificateRequest parentReq = new CertificateRequest(
+                        var parentReq = new CertificateRequest(
                             "CN=Test Cert",
                             rsa,
                             HashAlgorithmName.SHA256,

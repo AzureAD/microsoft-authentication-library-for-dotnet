@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             Uri customDiscoveryEndpoint = null, 
             string instanceMetadataContent = null)
         {
-            Uri authorityURI = new Uri(authority);
+            var authorityURI = new Uri(authority);
 
             string discoveryEndpoint;
 
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static MockHttpMessageHandler AddWsTrustMockHandler(this MockHttpManager httpManager)
         {
-            MockHttpMessageHandler wsTrustHandler = new MockHttpMessageHandler()
+            var wsTrustHandler = new MockHttpMessageHandler()
             {
                 ExpectedUrl = "https://login.microsoftonline.com/common/userrealm/username",
                 ExpectedMethod = HttpMethod.Get,
@@ -345,7 +345,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             HttpStatusCode statusCode = HttpStatusCode.OK
             )
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
+            var responseMessage = new HttpResponseMessage(statusCode);
             HttpContent content = new StringContent(response);
             responseMessage.Content = content;
 
@@ -372,10 +372,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpManager.AddMockHandler(httpMessageHandler);
         }
 
-            
         private static MockHttpMessageHandler BuildMockHandlerForManagedIdentitySource(ManagedIdentitySource managedIdentitySourceType, string resource)
         {
-            MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
+            var httpMessageHandler = new MockHttpMessageHandler();
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
 
@@ -428,12 +427,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string expectedUrl, 
             string filePath = null)
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            var responseMessage = new HttpResponseMessage(HttpStatusCode.Unauthorized);
             if (filePath != null)
             {
                 responseMessage.Headers.Add("WWW-Authenticate", $"Basic realm={filePath}");
             }
-            
+
             httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {

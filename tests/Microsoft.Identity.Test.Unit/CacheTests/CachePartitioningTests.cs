@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private static async Task RunObo_Async(MockHttpManager httpManager, ConfidentialClientApplication app)
         {
             httpManager.AddSuccessTokenResponseMockHandlerForPost();
-            UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+            var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
             var result = await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 

@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
                 resetEvent3.Set();
             });
 
-            Stopwatch getTime = new Stopwatch();
+            var getTime = new Stopwatch();
 
             var thread2 = new Thread(() =>
             {
@@ -376,15 +376,15 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
                 new TraceSourceLogger(new TraceSource("ts")));
             var helper = new MsalCacheHelper(cache, storage, _logger);
 
-            FileSystemWatcher fileSystemWatcher = new FileSystemWatcher(
+            var fileSystemWatcher = new FileSystemWatcher(
                 Path.GetDirectoryName(_cacheFilePath),
                 $"{Path.GetFileName(_cacheFilePath)}.lockfile");
             fileSystemWatcher.EnableRaisingEvents = true;
 
             // the events can be fired at a later time, so we need to wait for them
             // otherwise the test might finish first
-            SemaphoreSlim semaphore1 = new SemaphoreSlim(0);
-            SemaphoreSlim semaphore2 = new SemaphoreSlim(0);
+            var semaphore1 = new SemaphoreSlim(0);
+            var semaphore2 = new SemaphoreSlim(0);
             bool lockCreated = false, lockDeleted = false;
 
             fileSystemWatcher.Created += (_, _) =>

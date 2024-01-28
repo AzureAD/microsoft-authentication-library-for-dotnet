@@ -137,8 +137,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
                 string commonAccId = $"{TestConstants.Uid}.{TestConstants.Utid}";
-                Account brokerAccount1 = new Account(commonAccId, "commonAccount", "login.windows.net");
-                Account brokerAccount2 = new Account("other.account", "brokerAcc2", "login.windows.net");
+                var brokerAccount1 = new Account(commonAccId, "commonAccount", "login.windows.net");
+                var brokerAccount2 = new Account("other.account", "brokerAcc2", "login.windows.net");
                 IReadOnlyList<IAccount> brokerAccounts = new List<IAccount>() { brokerAccount1, brokerAccount2 };
 
                 var mockBroker = Substitute.For<IBroker>();

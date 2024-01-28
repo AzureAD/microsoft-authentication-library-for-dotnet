@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         [DataRow("https://microsoft.com/auth?response_mode=form_post&scope=scope1", "response_mode", "form_post", "https://microsoft.com/auth?response_mode=form_post&scope=scope1")]
         public void AppendOrReplaceQueryParameterTest(string originalUriString, string key, string value, string expectedUriString)
         {
-            UriBuilder uriBuilder = new UriBuilder(originalUriString);
+            var uriBuilder = new UriBuilder(originalUriString);
             uriBuilder.AppendOrReplaceQueryParameter(key, value);
 
             Assert.AreEqual(expectedUriString, uriBuilder.Uri.ToString());

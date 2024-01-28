@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 parameters.RedirectUri = new Uri("some://uri");
                 parameters.LoginHint = TestConstants.DisplayableId;
 
-                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
+                var interactiveParameters = new AcquireTokenInteractiveParameters
                 {
                     Prompt = Prompt.SelectAccount,
                     ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
@@ -114,10 +114,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
             {
-                TokenCache cache = new TokenCache(harness.ServiceBundle, false);
+                var cache = new TokenCache(harness.ServiceBundle, false);
                 string clientInfo = MockHelpers.CreateClientInfo();
                 string homeAccountId = ClientInfo.CreateFromJson(clientInfo).ToAccountIdentifier();
-                MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
+                var atItem = new MsalAccessTokenCacheItem(
                     TestConstants.ProductionPrefNetworkEnvironment,
                     TestConstants.ClientId,
                     TestConstants.s_scope.AsSingleString(),
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 atItem.Secret = atKey;
                 ((ITokenCacheInternal)cache).Accessor.SaveAccessToken(atItem);
 
-                MockWebUI ui = new MockWebUI()
+                var ui = new MockWebUI()
                 {
                     MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?code=some-code")
                 };
@@ -154,13 +154,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
                 parameters.RedirectUri = new Uri("some://uri");
                 parameters.LoginHint = TestConstants.DisplayableId;
-                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
+                var interactiveParameters = new AcquireTokenInteractiveParameters
                 {
                     Prompt = Prompt.SelectAccount,
                     ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
                 };
 
-                InteractiveRequest request = new InteractiveRequest(
+                var request = new InteractiveRequest(
                     parameters,
                     interactiveParameters);
 
@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
                 parameters.RedirectUri = new Uri("some://uri#fragment=not-so-good");
                 parameters.LoginHint = TestConstants.DisplayableId;
-                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
+                var interactiveParameters = new AcquireTokenInteractiveParameters
                 {
                     Prompt = Prompt.ForceLogin,
                     ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
@@ -225,13 +225,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     extraQueryParameters: new Dictionary<string, string> { { "extra", "qp" } });
                 parameters.RedirectUri = new Uri("some://uri");
                 parameters.LoginHint = TestConstants.DisplayableId;
-                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
+                var interactiveParameters = new AcquireTokenInteractiveParameters
                 {
                     Prompt = Prompt.ForceLogin,
                     ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),
                 };
 
-                InteractiveRequest request = new InteractiveRequest(
+                var request = new InteractiveRequest(
                     parameters,
                     interactiveParameters);
 
@@ -275,7 +275,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 
-                MockWebUI webUi = new MockWebUI()
+                var webUi = new MockWebUI()
                 {
                     // error code and error description is empty string (not null)
                     MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?error=some_error&error_description= "),
@@ -314,7 +314,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     extraQueryParameters: new Dictionary<string, string> { { "extra", "qp" }, { "prompt", "login" } });
                 parameters.RedirectUri = new Uri("some://uri");
                 parameters.LoginHint = TestConstants.DisplayableId;
-                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
+                var interactiveParameters = new AcquireTokenInteractiveParameters
                 {
                     Prompt = Prompt.ForceLogin,
                     ExtraScopesToConsent = TestConstants.s_scopeForAnotherResource.ToArray(),

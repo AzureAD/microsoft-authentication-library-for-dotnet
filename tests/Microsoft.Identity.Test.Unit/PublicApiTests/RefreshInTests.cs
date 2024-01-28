@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 return Task.FromResult<AuthenticationResult>(null);
             };
 
-            List<DateTimeOffset?> refreshOnWithJitterList = new List<DateTimeOffset?>();
+            var refreshOnWithJitterList = new List<DateTimeOffset?>();
             for (int i = 1; i <= 10; i++)
             {
                 SilentRequestHelper.NeedsRefresh(at, out DateTimeOffset? refreshOnWithJitter);

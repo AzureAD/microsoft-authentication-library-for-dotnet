@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithParentActivityOrWindowFunc()
         {
-            IntPtr ownerPtr = new IntPtr(23478);
+            var ownerPtr = new IntPtr(23478);
 
             var pca = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)

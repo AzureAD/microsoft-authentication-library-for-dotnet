@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
-                BlockingCache inMemoryTokenCache = new BlockingCache();
+                var inMemoryTokenCache = new BlockingCache();
                 inMemoryTokenCache.Bind(app.AppTokenCache);
 
                 // Seed the cache with a token

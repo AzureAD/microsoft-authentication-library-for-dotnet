@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Unit
             foreach (Metric exportedItem in exportedMetrics)
             {
                 int expectedTagCount = 0;
-                List<string> expectedTags = new List<string>();
+                var expectedTags = new List<string>();
 
                 Assert.AreEqual(OtelInstrumentation.MeterName, exportedItem.MeterName);
 

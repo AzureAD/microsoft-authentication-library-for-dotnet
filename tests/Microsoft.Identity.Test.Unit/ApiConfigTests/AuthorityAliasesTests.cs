@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                                                                         .WithDebugLoggingCallback()
                                                                         .BuildConcrete();
 
-            InMemoryTokenCache cache = new InMemoryTokenCache();
+            var cache = new InMemoryTokenCache();
             cache.Bind(app.UserTokenCache);
 
             app.ServiceBundle.ConfigureMockWebUI(

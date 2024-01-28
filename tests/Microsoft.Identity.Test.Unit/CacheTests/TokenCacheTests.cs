@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var homeAccountId = ClientInfo.CreateFromJson(tokenResponse.ClientInfo).ToAccountIdentifier();
 
             // Act
-            MsalAccessTokenCacheItem at = new MsalAccessTokenCacheItem(
+            var at = new MsalAccessTokenCacheItem(
                 TestConstants.ProductionPrefNetworkEnvironment,
                     TestConstants.ClientId,
                     tokenResponse,
@@ -309,7 +309,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var homeAccountId = ClientInfo.CreateFromJson(tokenResponse.ClientInfo).ToAccountIdentifier();
 
             // Act
-            MsalAccessTokenCacheItem at = new MsalAccessTokenCacheItem(
+            var at = new MsalAccessTokenCacheItem(
                 TestConstants.ProductionPrefNetworkEnvironment,
                 TestConstants.ClientId,
                 tokenResponse,
@@ -331,7 +331,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var homeAccountId = ClientInfo.CreateFromJson(tokenResponse.ClientInfo).ToAccountIdentifier();
 
             // Act
-            MsalAccessTokenCacheItem at = new MsalAccessTokenCacheItem(
+            var at = new MsalAccessTokenCacheItem(
                 TestConstants.ProductionPrefNetworkEnvironment,
                 TestConstants.ClientId,
                 tokenResponse,
@@ -1088,7 +1088,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ITokenCacheInternal adfsCache = new TokenCache(serviceBundle, false);
                 var authority = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
 
-                MsalTokenResponse response = new MsalTokenResponse();
+                var response = new MsalTokenResponse();
 
                 response.IdToken = MockHelpers.CreateIdToken(string.Empty, TestConstants.FabrikamDisplayableId, null);
                 response.ClientInfo = null;

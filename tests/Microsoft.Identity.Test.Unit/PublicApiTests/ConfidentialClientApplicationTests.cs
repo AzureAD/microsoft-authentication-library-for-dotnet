@@ -788,7 +788,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                var cancellationTokenSource = new CancellationTokenSource();
 
                 var builder = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                             .WithHttpManager(httpManager)
@@ -1677,7 +1677,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
-                InMemoryTokenCache cache = new InMemoryTokenCache();
+                var cache = new InMemoryTokenCache();
                 cache.Bind(app.AppTokenCache);
 
                 var cacheRecorder = app.AppTokenCache.RecordAccess();

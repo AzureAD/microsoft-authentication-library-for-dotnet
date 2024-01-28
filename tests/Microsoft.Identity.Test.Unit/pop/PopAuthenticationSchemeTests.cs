@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
         {
             using (var harness = CreateTestHarness())
             {
-                Uri uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
+                var uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
                 HttpMethod method = HttpMethod.Post;
                 HttpRequestMessage httpRequest = new HttpRequestMessage(method, uri);
                 var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
@@ -57,8 +57,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
             using (var harness = CreateTestHarness())
             {
                 // Arrange
-                Uri uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
-                PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(uri);
+                var uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
+                var popConfig = new PoPAuthenticationConfiguration(uri);
                 popConfig.HttpMethod = HttpMethod.Post;
 
                 var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
@@ -71,10 +71,10 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 msalAccessTokenCacheItem.Secret = AtSecret;
 
                 // Act
-                PopAuthenticationScheme authenticationScheme = new PopAuthenticationScheme(popConfig, harness.ServiceBundle);
+                var authenticationScheme = new PopAuthenticationScheme(popConfig, harness.ServiceBundle);
                 var tokenParams = authenticationScheme.GetTokenRequestParams();
                 var popTokenString = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
-                JwtSecurityToken decodedPopToken = new JwtSecurityToken(popTokenString);
+                var decodedPopToken = new JwtSecurityToken(popTokenString);
 
                 // Assert
                 Assert.AreEqual("PoP", authenticationScheme.AuthorizationHeaderPrefix);
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     responseMessage: MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(token: $"header.{Guid.NewGuid()}.signature", tokenType: "pop"));
 
                 Guid correlationId = Guid.NewGuid();
-                TestTimeService testClock = new TestTimeService();
+                var testClock = new TestTimeService();
                 PoPProviderFactory.TimeService = testClock;
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)

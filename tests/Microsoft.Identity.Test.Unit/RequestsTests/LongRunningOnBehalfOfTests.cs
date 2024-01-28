@@ -436,7 +436,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         accessToken: "access-token-normal",
                         refreshToken: "refresh-token-normal"));
 
-                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
                 result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
                 // Cache has 2 partitions (user-provided key, assertion) with 1 token each
@@ -489,7 +489,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 string oboCacheKey = null;
                 string userToken = "user-token";
-                UserAssertion userAssertion = new UserAssertion(userToken);
+                var userAssertion = new UserAssertion(userToken);
 
                 // InitiateLR - Empty cache - AT via OBO flow (new AT, RT cached)
                 var result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, userToken, ref oboCacheKey)
@@ -619,7 +619,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     expectedPostData: new Dictionary<string, string> { { OAuth2Parameter.GrantType, OAuth2GrantType.JwtBearer } });
 
                 string userToken = "user-token";
-                UserAssertion userAssertion = new UserAssertion(userToken);
+                var userAssertion = new UserAssertion(userToken);
                 string oboCacheKey = userAssertion.AssertionHash;
 
                 // AcquireNormal - AT from IdP via OBO flow (only new AT cached, no RT in cache)
@@ -728,7 +728,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     expectedPostData: new Dictionary<string, string> { { OAuth2Parameter.GrantType, OAuth2GrantType.JwtBearer } });
 
                 string userToken = "user-token";
-                UserAssertion userAssertion = new UserAssertion(userToken);
+                var userAssertion = new UserAssertion(userToken);
                 string oboCacheKey = userAssertion.AssertionHash;
 
                 // AcquireNormal - AT from IdP via OBO flow(only new AT cached, no RT in cache)
@@ -862,7 +862,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     expectedPostData: new Dictionary<string, string> { { OAuth2Parameter.GrantType, OAuth2GrantType.JwtBearer } });
 
                 string userToken = "user-token";
-                UserAssertion userAssertion = new UserAssertion(userToken);
+                var userAssertion = new UserAssertion(userToken);
 
                 // InitiateLR - Empty cache - AT via OBO flow (new AT, RT cached)
                 var result = await oboCca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, userToken, ref oboCacheKey)
@@ -910,7 +910,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 var app = BuildCCA(httpManager);
 
-                InMemoryTokenCache cache = new InMemoryTokenCache();
+                var cache = new InMemoryTokenCache();
                 cache.Bind(app.UserTokenCache);
 
                 (app.UserTokenCache as TokenCache).AfterAccess += (args) =>

@@ -721,7 +721,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, accessor.GetAllAccounts().Count);
             Assert.AreEqual(0, accessor.GetAllAppMetadata().Count);
 
-            MsalAccessTokenCacheItem expectedAccessTokenItem = new MsalAccessTokenCacheItem(
+            var expectedAccessTokenItem = new MsalAccessTokenCacheItem(
                "login.windows.net",
                "b945c513-3946-4ecd-b179-6499803a2167",
                "User.Read User.ReadBasic.All profile openid email",

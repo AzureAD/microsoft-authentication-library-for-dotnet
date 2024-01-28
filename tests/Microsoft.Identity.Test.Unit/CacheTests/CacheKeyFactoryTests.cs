@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 AuthorityOverride = tenantAuthority
             };
 
-            UserAssertion userAssertion = new UserAssertion(TestConstants.UserAssertion);
+            var userAssertion = new UserAssertion(TestConstants.UserAssertion);
 
             var parameters = new AuthenticationRequestParameters(
                 _serviceBundle,

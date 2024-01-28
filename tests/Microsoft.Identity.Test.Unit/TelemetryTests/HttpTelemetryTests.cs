@@ -553,7 +553,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                 case AcquireTokenInteractiveOutcome.TaskCanceledException:
                     correlationId = Guid.NewGuid();
 
-                    CancellationTokenSource cts = new CancellationTokenSource();
+                    var cts = new CancellationTokenSource();
                     cts.Cancel(true);
                     CancellationToken token = cts.Token;
 

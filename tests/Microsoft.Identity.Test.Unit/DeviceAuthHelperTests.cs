@@ -58,9 +58,11 @@ namespace Microsoft.Identity.Test.Unit
         public void GetDeviceAuthBypassChallengeResponse()
         {
             //Arrange
-            Dictionary<string, string> pKeyAuthHeaders = new Dictionary<string, string>();
-            pKeyAuthHeaders.Add("Context", "context");
-            pKeyAuthHeaders.Add("Version", "1.0");
+            var pKeyAuthHeaders = new Dictionary<string, string>
+            {
+                {"Context", "context"},
+                {"Version", "1.0"}
+            };
 
             //Act
             var result1 = DeviceAuthHelper.GetBypassChallengeResponse(s_httpResponse.Headers);

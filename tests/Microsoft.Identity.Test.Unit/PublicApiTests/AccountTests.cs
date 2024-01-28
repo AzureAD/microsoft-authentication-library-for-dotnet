@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void Constructor_PropertiesSet()
         {
-            Account actual = new Account("a.b", "disp", "env");
+            var actual = new Account("a.b", "disp", "env");
 
             Assert.AreEqual("a.b", actual.HomeAccountId.Identifier);
             Assert.AreEqual("a", actual.HomeAccountId.ObjectId);
@@ -237,7 +237,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 string clientInfo2 = MockHelpers.CreateClientInfo("uId1", "uTId1");
                 string homeAccountId2 = ClientInfo.CreateFromJson(clientInfo2).ToAccountIdentifier();
 
-                MsalRefreshTokenCacheItem rtItem = new MsalRefreshTokenCacheItem(
+                var rtItem = new MsalRefreshTokenCacheItem(
                     TestConstants.ProductionPrefCacheEnvironment,
                     TestConstants.ClientId,
                     "someRT",
@@ -247,7 +247,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 app.UserTokenCacheInternal.Accessor.SaveRefreshToken(rtItem);
 
-                MsalIdTokenCacheItem idTokenCacheItem = new MsalIdTokenCacheItem(
+                var idTokenCacheItem = new MsalIdTokenCacheItem(
                     TestConstants.ProductionPrefCacheEnvironment,
                     TestConstants.ClientId,
                     MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
@@ -257,7 +257,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 app.UserTokenCacheInternal.Accessor.SaveIdToken(idTokenCacheItem);
 
-                MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem(
+                var accountCacheItem = new MsalAccountCacheItem(
                     TestConstants.ProductionPrefCacheEnvironment,
                     null,
                     clientInfo2,
@@ -376,8 +376,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // copied from https://github.com/AzureAD/microsoft-identity-web/blob/master/src/Microsoft.Identity.Web/AccountExtensions.cs#L13
             static ClaimsPrincipal ToClaimsPrincipal(IAccount account)
             {
-                ClaimsIdentity identity = new ClaimsIdentity(new[]
-                    {
+                var identity = new ClaimsIdentity(new[]
+                {
                     new Claim(ClaimTypes.Upn, account.Username),
                 });
 

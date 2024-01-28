@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
             string fileName = "testFile";
             string path = Path.Combine(dir, fileName);
 
-            FileSystemWatcher watcher = new FileSystemWatcher(dir, fileName);
+            var watcher = new FileSystemWatcher(dir, fileName);
             watcher.EnableRaisingEvents = true;
             var semaphore = new SemaphoreSlim(0);
             int cacheChangedEventFired = 0;

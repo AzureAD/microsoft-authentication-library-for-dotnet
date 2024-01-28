@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     .WithHttpManager(httpManager)
                     .BuildConcrete();
 
-                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
                 var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
                                       .ExecuteAsync().ConfigureAwait(false);
 
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 var cca = BuildCCA(httpManager);
 
-                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
                 var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 var cca = BuildCCA(httpManager);
 
-                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
                 var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 var cca = BuildCCA(httpManager);
 
-                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
                 var result = await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion)
                                       .WithCcsRoutingHint("")
                                       .WithCcsRoutingHint("", "")

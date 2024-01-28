@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Test.Unit
             var app1 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                           .WithAppTokenProvider((AppTokenProviderParameters _) =>
                                                           {
-                                                              AppTokenProviderResult result = new AppTokenProviderResult
+                                                              var result = new AppTokenProviderResult
                                                               {
                                                                   AccessToken = TestConstants.DefaultAccessToken,
                                                                   ExpiresInSeconds = expiresInResponse,

@@ -217,7 +217,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
                     if (serializeCache)
                     {
-                        InMemoryTokenCache mem = new InMemoryTokenCache();
+                        var mem = new InMemoryTokenCache();
                         mem.Bind(app.AppTokenCache);
                     }
 

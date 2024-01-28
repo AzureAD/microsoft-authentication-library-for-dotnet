@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             {
                 httpManager.AddSuccessTokenResponseMockHandlerForGet(queryParameters: queryParams);
 
-                CancellationTokenSource cts = new CancellationTokenSource();
+                var cts = new CancellationTokenSource();
                 cts.Cancel();
 
                 await Assert.ThrowsExceptionAsync<TaskCanceledException>(() => httpManager.SendGetAsync(

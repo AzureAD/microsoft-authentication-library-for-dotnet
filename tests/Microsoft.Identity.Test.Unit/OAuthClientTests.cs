@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Test.Unit
                       ResponseMessage = httpResponseMessage
                   });
 
-                OAuth2Client client = new OAuth2Client(
+                var client = new OAuth2Client(
                     harness.ServiceBundle.ApplicationLogger,
                     harness.HttpManager);
 

@@ -269,7 +269,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                TestIdentityLogger testLogger = new TestIdentityLogger();
+                var testLogger = new TestIdentityLogger();
 
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
@@ -301,7 +301,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                TestIdentityLogger testLogger = new TestIdentityLogger();
+                var testLogger = new TestIdentityLogger();
                 StringBuilder stringBuilder;
 
                 var appBuilder = ConfidentialClientApplicationBuilder
@@ -373,7 +373,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             Assert.IsNotNull(args.IdentityLogger);
 
-            LogEntry entry = new LogEntry();
+            var entry = new LogEntry();
 
             if (args.PiiLoggingEnabled)
             {
@@ -391,7 +391,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             Assert.IsNotNull(args.IdentityLogger);
 
-            LogEntry entry = new LogEntry();
+            var entry = new LogEntry();
 
             if (args.PiiLoggingEnabled)
             {

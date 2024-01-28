@@ -328,7 +328,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         public void CreateFromiOSBroker_HandlesAllErrorFields()
         {
             // Arrange
-            Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
+            var responseDictionary = new Dictionary<string, string>();
             responseDictionary[TestConstants.iOSBrokerErrorMetadata] = TestConstants.iOSBrokerErrorMetadataValue;
             responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
             responseDictionary[OAuth2ResponseBaseClaim.SubError] = TestConstants.iOSBrokerSuberrCode;
@@ -349,7 +349,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         public void CreateFromiOSBroker_HandlesNoSuberror()
         {
             // Arrange
-            Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
+            var responseDictionary = new Dictionary<string, string>();
             responseDictionary[TestConstants.iOSBrokerErrorMetadata] = TestConstants.iOSBrokerErrorMetadataValue;
             responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
             responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
@@ -369,7 +369,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         public void CreateFromiOSBroker_HandlesNoErrorDescription()
         {
             // Arrange
-            Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
+            var responseDictionary = new Dictionary<string, string>();
             responseDictionary[TestConstants.iOSBrokerErrorMetadata] = TestConstants.iOSBrokerErrorMetadataValue;
             responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
             responseDictionary[OAuth2ResponseBaseClaim.SubError] = TestConstants.iOSBrokerSuberrCode;
@@ -389,7 +389,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         public void CreateFromiOSBroker_HandlesNoErrorMetadata()
         {
             // Arrange
-            Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
+            var responseDictionary = new Dictionary<string, string>();
             responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
             responseDictionary[OAuth2ResponseBaseClaim.SubError] = TestConstants.iOSBrokerSuberrCode;
             responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
@@ -430,7 +430,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         public void CreateFromiOSBroker_HandlesNoUpn()
         {
             // Arrange
-            Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
+            var responseDictionary = new Dictionary<string, string>();
             responseDictionary["error_metadata"] = @"{""home_account_id"":""test_home"" }";
             responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
             responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
@@ -946,7 +946,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             _parameters.AppConfig.IsBrokerEnabled = true;
 
-            AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters();
+            var interactiveParameters = new AcquireTokenInteractiveParameters();
             _acquireTokenSilentParameters = new AcquireTokenSilentParameters();
 
             IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(harness.ServiceBundle.Config, null);

@@ -68,15 +68,15 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.IsFalse(piiMessage.Contains(ExMessage));
         }
 
-        [TestMethod]        
+        [TestMethod]
         public void IsRetryable()
         {
-            MsalClientException msalClientException = new MsalClientException("code");
+            var msalClientException = new MsalClientException("code");
             Assert.IsFalse(msalClientException.IsRetryable);
 
             foreach (var code in new[] { 429, 408, 500, 501, 502, 503, 504, 505 })
             {
-                HttpResponse httpResponse1 = new HttpResponse()
+                var httpResponse1 = new HttpResponse()
                 {
                     Body = "body",
                     StatusCode = (HttpStatusCode)code
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
             foreach (var code in new[] { 200, 300, 400, 401 })
             {
-                HttpResponse httpResponse2 = new HttpResponse()
+                var httpResponse2 = new HttpResponse()
                 {
                     Body = "body",
                     StatusCode = (HttpStatusCode)code
@@ -107,7 +107,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
             ex = new MsalServiceException("other_error", "message");
             Assert.IsFalse(ex.IsRetryable);
-
         }
 
         [TestMethod]
@@ -138,7 +137,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var newJsonError = JsonError.Replace("some_suberror", suberror);
 
             // Arrange
-            HttpResponse httpResponse = new HttpResponse()
+            var httpResponse = new HttpResponse()
             {
                 Body = newJsonError,
                 StatusCode = HttpStatusCode.BadRequest, // 400
@@ -176,7 +175,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         public void MsalUiRequiredException_Oauth2Response()
         {
             // Arrange
-            HttpResponse httpResponse = new HttpResponse()
+            var httpResponse = new HttpResponse()
             {
                 Body = JsonError,
                 StatusCode = HttpStatusCode.BadRequest, // 400
@@ -200,7 +199,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         public void InvalidClientException_IsRepackaged()
         {
             // Arrange
-            HttpResponse httpResponse = new HttpResponse()
+            var httpResponse = new HttpResponse()
             {
                 Body = JsonError.Replace("invalid_grant", "invalid_client"),
                 StatusCode = HttpStatusCode.BadRequest, // 400
@@ -220,7 +219,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         public void MsalServiceException_Throws_MsalUIRequiredException_When_Throttled()
         {
             // Arrange
-            HttpResponse httpResponse = new HttpResponse()
+            var httpResponse = new HttpResponse()
             {
                 Body = JsonError.Replace("AADSTS90002", Constants.AadThrottledErrorCode),
                 StatusCode = HttpStatusCode.BadRequest, // 400
@@ -243,7 +242,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             string innerExMsg = "innerExMsg";
             var innerException = new NotImplementedException(innerExMsg);
 
-            HttpResponse httpResponse = new HttpResponse()
+            var httpResponse = new HttpResponse()
             {
                 Body = JsonError,
                 StatusCode = HttpStatusCode.BadRequest, // 400
@@ -379,7 +378,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         public void Exception_ToString()
         {
             var innerException = new InvalidOperationException("innerMsg");
-            MsalException ex = new MsalException("errCode", "errMessage", innerException);
+            var ex = new MsalException("errCode", "errMessage", innerException);
 
             Assert.IsTrue(ex.ToString().Contains("errCode"));
             Assert.IsTrue(ex.ToString().Contains("errMessage"));
@@ -401,7 +400,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             string innerExMsg = "innerExMsg";
             var innerException = new NotImplementedException(innerExMsg);
 
-            HttpResponse httpResponse = new HttpResponse()
+            var httpResponse = new HttpResponse()
             {
                 Body = jsonError,
                 StatusCode = HttpStatusCode.BadRequest, // 400

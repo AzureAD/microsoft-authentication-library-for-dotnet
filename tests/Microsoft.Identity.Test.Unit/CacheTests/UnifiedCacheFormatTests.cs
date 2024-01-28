@@ -65,9 +65,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private void IntitTestData(string fileName)
         {
-            using (StreamReader r = new StreamReader(fileName))
+            using (var reader = new StreamReader(fileName))
             {
-                string json = r.ReadToEnd();
+                string json = reader.ReadToEnd();
                 var configJson = JsonConvert.DeserializeObject<JObject>(json);
 
                 _clientId = configJson.GetValue("client_id").ToString();

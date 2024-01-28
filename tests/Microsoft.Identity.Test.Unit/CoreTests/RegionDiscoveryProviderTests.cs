@@ -423,7 +423,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
         private void ValidateInstanceMetadata(InstanceDiscoveryMetadataEntry entry, string region = "centralus")
         {
-            InstanceDiscoveryMetadataEntry expectedEntry = new InstanceDiscoveryMetadataEntry()
+            var expectedEntry = new InstanceDiscoveryMetadataEntry()
             {
                 Aliases = new[] { $"{region}.{RegionDiscoveryProvider.PublicEnvForRegional}", "login.microsoftonline.com" },
                 PreferredCache = "login.microsoftonline.com",

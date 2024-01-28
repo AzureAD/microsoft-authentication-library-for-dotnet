@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Common.Mocks
             Dictionary<string, string> queryParamsToValidate = null,
             string environment = null)
         {
-            MockWebUI webUi = new MockWebUI
+            var webUi = new MockWebUI
             {
                 QueryParamsToValidate = queryParamsToValidate ?? new Dictionary<string, string>(),
                 MockResult = authorizationResult,

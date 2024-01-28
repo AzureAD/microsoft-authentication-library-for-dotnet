@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         [TestMethod]
         public void Serialize_ClientInfo()
         {
-            ClientInfo clientInfo = new ClientInfo() { UniqueObjectIdentifier = "some_uid", UniqueTenantIdentifier = "some_tid" };
+            var clientInfo = new ClientInfo() { UniqueObjectIdentifier = "some_uid", UniqueTenantIdentifier = "some_tid" };
 
             string actualJson = JsonHelper.SerializeToJson(clientInfo);
             string expectedJson = @"{
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         [TestMethod]
         public void Serialize_ClientInfo_WithNull()
         {
-            ClientInfo clientInfo = new ClientInfo() { UniqueObjectIdentifier = "some_uid" };
+            var clientInfo = new ClientInfo { UniqueObjectIdentifier = "some_uid" };
 
             string actualJson = JsonHelper.SerializeToJson(clientInfo);
             string expectedJson = @"{

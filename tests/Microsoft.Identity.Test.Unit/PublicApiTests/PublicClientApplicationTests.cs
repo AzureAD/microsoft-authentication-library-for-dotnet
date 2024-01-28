@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
 
-                MockWebUI ui = new MockWebUI()
+                var ui = new MockWebUI()
                 {
                     AddStateInAuthorizationResult = false,
                     MockResult = AuthorizationResult.FromUri(app.AppConfig.RedirectUri + "?code=some-code")
@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithHttpManager(harness.HttpManager)
                     .BuildConcrete();
 
-                MockWebUI ui = new MockWebUI()
+                var ui = new MockWebUI()
                 {
                     AddStateInAuthorizationResult = false,
                     MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?code=some-code&state=mismatched")
@@ -792,7 +792,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .BuildConcrete();
 
                 // Interactive call and authentication fails with access denied
-                MockWebUI ui = new MockWebUI()
+                var ui = new MockWebUI()
                 {
                     MockResult = AuthorizationResult.FromUri(TestConstants.AuthorityHomeTenant + "?error=access_denied")
                 };
