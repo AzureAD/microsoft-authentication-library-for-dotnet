@@ -189,8 +189,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         private void AssertExtraHTTPHeadersAreSent(HttpSnifferClientFactory factory)
         {
-            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
-            x.Item2.StatusCode == HttpStatusCode.OK);
+            var (req, _) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
+                                                                    x.Item2.StatusCode == HttpStatusCode.OK);
 
             var ExtraHttpHeader = req.Headers.Single(h => h.Key == TestConstants.ExtraHttpHeader.Keys.FirstOrDefault());
 

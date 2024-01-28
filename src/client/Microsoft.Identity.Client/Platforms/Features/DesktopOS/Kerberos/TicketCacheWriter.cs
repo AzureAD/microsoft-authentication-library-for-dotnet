@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
                     pBuffer,
                     bufferSize,
                     out returnBuffer,
-                    out int returnBufferLength,
+                    out int _,
                     out int protocolStatus
                 );
 

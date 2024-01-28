@@ -923,7 +923,6 @@ namespace Microsoft.Identity.Client
             var logger = requestParameters.RequestContext.Logger;
             var environment = requestParameters.AuthorityInfo.Host;
             bool filterByClientId = !_featureFlags.IsFociEnabled;
-            bool isAadAuthority = requestParameters.AuthorityInfo.AuthorityType == AuthorityType.Aad;
 
             // this will either be the home account ID or null, it can never be OBO assertion or tenant ID
             string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParameters);

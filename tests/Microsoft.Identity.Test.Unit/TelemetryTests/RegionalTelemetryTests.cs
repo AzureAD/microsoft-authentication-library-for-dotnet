@@ -71,7 +71,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             Trace.WriteLine("Step 2. Acquire Token For Client -> HTTP 5xx error (i.e. AAD is down)");
             result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.AADUnavailableError).ConfigureAwait(false);
-            Guid step2CorrelationId = result.Correlationid;
 
             // we can assert telemetry here, as it will be sent to AAD. However, AAD is down, so it will not record it.
             AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient,

@@ -569,7 +569,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     _homeAccountId);
 
-                string rtKey = rtItem.CacheKey;
                 cache.Accessor.SaveRefreshToken(rtItem);
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
@@ -606,7 +605,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     _homeAccountId);
 
-                string rtKey = rtItem.CacheKey;
                 cache.Accessor.SaveRefreshToken(rtItem);
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
@@ -1099,7 +1097,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 response.Scope = TestConstants.s_scope.AsSingleString();
                 response.TokenType = "Bearer";
 
-                RequestContext requestContext = new RequestContext(serviceBundle, new Guid());
                 var requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle, authority);
 
                 adfsCache.SaveTokenResponseAsync(requestParams, response);

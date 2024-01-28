@@ -113,7 +113,6 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow(7200, 500, 500)]
         public async Task CheckRefreshInAsync(long expiresInResponse, long refreshInResponse, long expectedRefreshIn)
         {
-            string differentScopesForAt = string.Empty;
             var app1 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                           .WithAppTokenProvider((AppTokenProviderParameters _) =>
                                                           {
