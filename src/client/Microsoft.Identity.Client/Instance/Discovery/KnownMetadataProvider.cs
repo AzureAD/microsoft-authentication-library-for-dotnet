@@ -37,42 +37,42 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 }
             }
 
-            var publicCloudEntry = new InstanceDiscoveryMetadataEntry()
+            var publicCloudEntry = new InstanceDiscoveryMetadataEntry
             {
                 Aliases = new[] { "login.microsoftonline.com", "login.windows.net", "login.microsoft.com", "sts.windows.net" },
                 PreferredNetwork = "login.microsoftonline.com",
                 PreferredCache = "login.windows.net"
             };
 
-            var cloudEntryChina = new InstanceDiscoveryMetadataEntry()
+            var cloudEntryChina = new InstanceDiscoveryMetadataEntry
             {
                 Aliases = new[] { "login.partner.microsoftonline.cn", "login.chinacloudapi.cn" },
                 PreferredNetwork = "login.partner.microsoftonline.cn",
                 PreferredCache = "login.partner.microsoftonline.cn"
             };
 
-            var cloudEntryGermany = new InstanceDiscoveryMetadataEntry()
+            var cloudEntryGermany = new InstanceDiscoveryMetadataEntry
             {
                 Aliases = new[] { "login.microsoftonline.de" },
                 PreferredNetwork = "login.microsoftonline.de",
                 PreferredCache = "login.microsoftonline.de"
             };
 
-            var usGovCloudEntry = new InstanceDiscoveryMetadataEntry()
+            var usGovCloudEntry = new InstanceDiscoveryMetadataEntry
             {
                 Aliases = new[] { "login.microsoftonline.us", "login.usgovcloudapi.net" },
                 PreferredNetwork = "login.microsoftonline.us",
                 PreferredCache = "login.microsoftonline.us"
             };
 
-            var usCloudEntry = new InstanceDiscoveryMetadataEntry()
+            var usCloudEntry = new InstanceDiscoveryMetadataEntry
             {
                 Aliases = new[] { "login-us.microsoftonline.com" },
                 PreferredNetwork = "login-us.microsoftonline.com",
                 PreferredCache = "login-us.microsoftonline.com"
             };
 
-            var ppeCloudEntry = new InstanceDiscoveryMetadataEntry()
+            var ppeCloudEntry = new InstanceDiscoveryMetadataEntry
             {
                 Aliases = new[] { "login.windows-ppe.net", "sts.windows-ppe.net", "login.microsoft-ppe.com" },
                 PreferredNetwork = "login.windows-ppe.net",
