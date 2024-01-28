@@ -487,7 +487,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             AcquireTokenInteractiveOutcome outcome)
         {
             MockHttpMessageHandler tokenRequestHandler = null;
-            Guid correlationId = default;
+            Guid correlationId;
 
             switch (outcome)
             {
@@ -580,7 +580,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             bool forceRefresh = false)
         {
             MockHttpMessageHandler tokenRequest = null;
-            Guid correlationId = Guid.Empty;
+            Guid correlationId;
 
             var account = (await _app.GetAccountsAsync().ConfigureAwait(false)).Single();
             AcquireTokenSilentParameterBuilder request = _app

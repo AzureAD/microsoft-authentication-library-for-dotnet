@@ -140,8 +140,8 @@ namespace Microsoft.Identity.Client.Http
             bool retry = false,
             CancellationToken cancellationToken = default)
         {
-            HttpResponse response = null;
-            
+            HttpResponse response;
+
             try
             {
                 HttpContent clonedBody = body;

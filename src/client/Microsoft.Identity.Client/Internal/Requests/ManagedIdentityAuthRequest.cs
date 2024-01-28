@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            AuthenticationResult authResult = null;
+            AuthenticationResult authResult;
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
 
             // Skip checking cache when force refresh is specified
@@ -93,14 +93,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         private async Task<AuthenticationResult> GetAccessTokenAsync(
-            CancellationToken cancellationToken, 
+            CancellationToken cancellationToken,
             ILoggerAdapter logger)
         {
             AuthenticationResult authResult;
-            MsalAccessTokenCacheItem cachedAccessTokenItem = null;
+            MsalAccessTokenCacheItem cachedAccessTokenItem;
 
-
-            // Requests to a managed identity endpoint must be throttled; 
+            // Requests to a managed identity endpoint must be throttled;
             // otherwise, the endpoint will throw a HTTP 429.
             logger.Verbose(() => "[ManagedIdentityRequest] Entering managed identity request semaphore.");
             await s_semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);

@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                string errorMessage = null;
+                string errorMessage;
                 try
                 {
                     errorMessage = WsTrustResponse.ReadErrorResponse(XDocument.Parse(resp.Body, LoadOptions.None));

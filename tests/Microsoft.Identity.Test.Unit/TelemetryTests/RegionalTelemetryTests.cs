@@ -200,8 +200,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         private async Task<(HttpRequestMessage HttpRequest, Guid Correlationid)> RunAcquireTokenForClientAsync(
             AcquireTokenForClientOutcome outcome, bool forceRefresh = false, bool serializeCache = false)
         {
-            MockHttpMessageHandler tokenRequestHandler = null;
-            Guid correlationId = default;
+            MockHttpMessageHandler tokenRequestHandler;
+            Guid correlationId;
 
             switch (outcome)
             {
