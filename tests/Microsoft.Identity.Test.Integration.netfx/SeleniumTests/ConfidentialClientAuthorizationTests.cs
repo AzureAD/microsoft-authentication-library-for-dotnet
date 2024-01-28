@@ -104,10 +104,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var cert = await s_secretProvider.GetCertificateWithPrivateMaterialAsync(
                 CertificateName).ConfigureAwait(false);
 
-            IConfidentialClientApplication cca;
-            redirectUri = redirectUri ?? SeleniumWebUI.FindFreeLocalhostRedirectUri();
+            redirectUri ??= SeleniumWebUI.FindFreeLocalhostRedirectUri();
 
-            cca = ConfidentialClientApplicationBuilder
+            IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
                 .Create(appId)
                 .WithAuthority(authority)
                 .WithCertificate(cert)
