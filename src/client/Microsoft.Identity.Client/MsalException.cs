@@ -212,7 +212,7 @@ namespace Microsoft.Identity.Client
             {
                 exceptionData[ExceptionSerializationKey.BrokerTelemetry] = brokerTelemetry;
             }
-            if(AdditionalExceptionData.TryGetValue(ManagedIdentitySource, out string managedIdentitySource))
+            if (AdditionalExceptionData.TryGetValue(ManagedIdentitySource, out string managedIdentitySource))
             {
                 exceptionData[ExceptionSerializationKey.ManagedIdentitySource] = managedIdentitySource;
             }
@@ -250,7 +250,7 @@ namespace Microsoft.Identity.Client
                 exceptionData[BrokerTelemetry] = brokerTelemetry;
                 exceptionData.Remove(ExceptionSerializationKey.BrokerTelemetry);
             }
-            if(exceptionData.TryGetValue(ExceptionSerializationKey.ManagedIdentitySource, out string managedIdentitySource))
+            if (exceptionData.TryGetValue(ExceptionSerializationKey.ManagedIdentitySource, out string managedIdentitySource))
             {
                 exceptionData[ManagedIdentitySource] = managedIdentitySource;
                 exceptionData.Remove(ExceptionSerializationKey.ManagedIdentitySource);

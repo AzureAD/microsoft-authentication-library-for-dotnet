@@ -59,6 +59,29 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Adds a claims challenge to the token request. The SDK will bypass the token cache when a claims challenge is specified.. Retry the 
+        /// token acquisition, and use this value in the <see cref="WithClaims(string)"/> method. A claims challenge typically arises when 
+        /// calling the protected downstream API, for example when the tenant administrator wants to revokes credentials. Apps are required 
+        /// to look for a 401 Unauthorized response from the protected api and to parse the WWW-Authenticate response header in order to 
+        /// extract the claims.See https://aka.ms/msal-net-claim-challenge for details. This API is not always available, depending on the 
+        /// client and that apps can monitor this by using <see cref="ManagedIdentityApplication.IsClaimsSupportedByClient"/> method
+        /// </summary>
+        /// <param name="claims">A string with one or multiple claims.</param>
+        /// <returns>The builder to chain .With methods.</returns>
+        public AcquireTokenForManagedIdentityParameterBuilder WithClaims(string claims)
+        {
+
+            if (string.IsNullOrEmpty(claims))
+            {
+                throw new ArgumentNullException(nameof(claims));
+            }
+
+            CommonParameters.Claims = claims;
+            Parameters.Claims = claims;
+            return this;
+        }
+
         /// <inheritdoc/>
         internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {

@@ -15,6 +15,7 @@ using NSubstitute;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using System.Threading;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {
@@ -27,8 +28,49 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             TestCommon.ResetInternalStaticCaches();
         }
 
+
         [TestMethod]
-        public void TestSendPostNullHeaderNullBody()
+        public async Task MtlsCertAsync()
+        {
+            var bodyParameters = new Dictionary<string, string>
+            {
+                ["key1"] = "some value1",
+                ["key2"] = "some value2"
+            };
+            var headers = new Dictionary<string, string>
+            {
+                ["key1"] = "qp1",
+                ["key2"] = "qp2"
+            };
+
+            X509Certificate2 cert = CertHelper.GetOrCreateTestCert();
+
+            using (var httpManager = new MockHttpManager())
+            {
+                HttpResponseMessage mock = MockHelpers.CreateSuccessTokenResponseMessage();
+                MockHttpMessageHandler handler = httpManager.AddResponseMockHandlerForPost(mock, bodyParameters, headers);
+                handler.ExpectedMtlsBindingCertificate = cert;
+                string expectedContent = mock.Content.ReadAsStringAsync().Result;
+                var response = await httpManager.SendRequestAsync(
+                            new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
+                            headers: null,
+                            body: new FormUrlEncodedContent(bodyParameters),
+                            HttpMethod.Post,
+                            logger: Substitute.For<ILoggerAdapter>(),
+                            doNotThrow: false,
+                            retry: true,
+                            mtlsCertificate: cert,
+                            default)
+                               .ConfigureAwait(false);
+
+                Assert.IsNotNull(response);
+                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+                Assert.AreEqual(expectedContent, response.Body);
+            }
+        }
+
+        [TestMethod]
+        public async Task TestSendPostNullHeaderNullBodyAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -36,11 +78,17 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 string actualResponseBody = mock.Content.ReadAsStringAsync().Result;
                 httpManager.AddResponseMockHandlerForPost(mock);
 
-                var response = httpManager.SendPostAsync(
-                    new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token"),
-                    null,
-                    (IDictionary<string, string>)null,
-                    Substitute.For<ILoggerAdapter>()).Result;
+                var response = await httpManager.SendRequestAsync(
+                             new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token"),
+                             headers: null,
+                             body: null,
+                             HttpMethod.Post,
+                             logger: Substitute.For<ILoggerAdapter>(),
+                             doNotThrow: false,
+                             retry: true,
+                             mtlsCertificate: null,
+                             default)
+                                .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
@@ -51,14 +99,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
-        public void TestSendPostNoFailure()
+        public async Task TestSendPostNoFailureAsync()
         {
             var bodyParameters = new Dictionary<string, string>
             {
                 ["key1"] = "some value1",
                 ["key2"] = "some value2"
             };
-            var queryParams = new Dictionary<string, string>
+            var headers = new Dictionary<string, string>
             {
                 ["key1"] = "qp1",
                 ["key2"] = "qp2"
@@ -69,13 +117,19 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 var mock = MockHelpers.CreateSuccessTokenResponseMessage();
                 string actualResponseBody = mock.Content.ReadAsStringAsync().Result;
 
-                httpManager.AddResponseMockHandlerForPost(mock, bodyParameters, queryParams);
+                httpManager.AddResponseMockHandlerForPost(mock, bodyParameters, headers);
 
-                var response = httpManager.SendPostAsync(
-                    new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
-                    queryParams,
-                    bodyParameters,
-                    Substitute.For<ILoggerAdapter>()).Result;
+                var response = await httpManager.SendRequestAsync(
+                            new Uri(TestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
+                            headers: null,
+                            body: new FormUrlEncodedContent(bodyParameters),
+                            HttpMethod.Post,
+                            logger: Substitute.For<ILoggerAdapter>(),
+                            doNotThrow: false,
+                            retry: true,
+                            mtlsCertificate: null,
+                            default)
+                               .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
@@ -84,7 +138,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
-        public void TestSendGetNoFailure()
+        public async Task TestSendGetNoFailureAsync()
         {
             var queryParams = new Dictionary<string, string>
             {
@@ -96,10 +150,17 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             {
                 httpManager.AddSuccessTokenResponseMockHandlerForGet(queryParameters: queryParams);
 
-                var response = httpManager.SendGetAsync(
-                    new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
-                    queryParams,
-                    Substitute.For<ILoggerAdapter>()).Result;
+                var response = await httpManager.SendRequestAsync(
+                     new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
+                     headers: null,
+                     body: null,
+                     HttpMethod.Get,
+                     logger: Substitute.For<ILoggerAdapter>(),
+                     doNotThrow: false,
+                     retry: true,
+                     mtlsCertificate: null,
+                     default)
+                .ConfigureAwait(false);
 
                 Assert.IsNotNull(response);
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
@@ -123,11 +184,20 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 CancellationTokenSource cts = new CancellationTokenSource();
                 cts.Cancel();
 
-                await Assert.ThrowsExceptionAsync<TaskCanceledException>(() => httpManager.SendGetAsync(
-                        new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
-                        queryParams,
-                        Substitute.For<ILoggerAdapter>(),
-                        cancellationToken: cts.Token)).ConfigureAwait(false);
+                await Assert.ThrowsExceptionAsync<TaskCanceledException>(
+                    () =>
+
+                    httpManager.SendRequestAsync(
+                         new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
+                         headers: queryParams,
+                         body: null,
+                         HttpMethod.Get,
+                         logger: Substitute.For<ILoggerAdapter>(),
+                         doNotThrow: false,
+                         retry: true,
+                         mtlsCertificate: null,
+                         cts.Token))
+                    .ConfigureAwait(false);
             }
         }
 
@@ -138,20 +208,23 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             {
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Get, HttpStatusCode.GatewayTimeout);
 
-                try
-                {
-                    var msalHttpResponse = await httpManager.SendGetAsync(
-                                                                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                                                                null,
-                                                                Substitute.For<ILoggerAdapter>())
-                                                            .ConfigureAwait(false);
-                    Assert.Fail("request should have failed");
-                }
-                catch (MsalServiceException exc)
-                {
-                    Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalError.ServiceNotAvailable, exc.ErrorCode);
-                }
+                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(
+                   () =>
+
+                   httpManager.SendRequestAsync(
+                        new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                        headers: null,
+                        body: null,
+                        HttpMethod.Get,
+                        logger: Substitute.For<ILoggerAdapter>(),
+                        doNotThrow: false,
+                        retry: true,
+                        mtlsCertificate: null,
+                        default))
+                   .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.ServiceNotAvailable, ex.ErrorCode);
+               
             }
         }
 
@@ -163,20 +236,22 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Get, HttpStatusCode.GatewayTimeout);
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Get, HttpStatusCode.InternalServerError);
 
-                try
-                {
-                    var msalHttpResponse = await httpManager.SendGetAsync(
-                                                                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                                                                null,
-                                                                Substitute.For<ILoggerAdapter>())
-                                                            .ConfigureAwait(false);
-                    Assert.Fail("request should have failed");
-                }
-                catch (MsalServiceException exc)
-                {
-                    Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalError.ServiceNotAvailable, exc.ErrorCode);
-                }
+                var ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(
+                () =>
+
+                httpManager.SendRequestAsync(
+                     new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                     headers: null,
+                     body: null,
+                     HttpMethod.Get,
+                     logger: Substitute.For<ILoggerAdapter>(),
+                     doNotThrow: false,
+                     retry: true,
+                     mtlsCertificate: null,
+                     default))
+                .ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.ServiceNotAvailable, ex.ErrorCode);              
             }
         }
 
@@ -194,8 +269,17 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     new System.Net.Http.Headers.RetryConditionHeaderValue(DateTimeOffset.UtcNow + TimeSpan.FromMinutes(2));
 
                 var exc = await AssertException.TaskThrowsAsync<MsalServiceException>(
-                    () => httpManager.SendGetAsync(
-                        new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"), null, Substitute.For<ILoggerAdapter>()))
+                    () => 
+                          httpManager.SendRequestAsync(
+                             new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                             headers: null,
+                             body: null,
+                             HttpMethod.Get,
+                             logger: Substitute.For<ILoggerAdapter>(),
+                             doNotThrow: false,
+                             retry: true,
+                             mtlsCertificate: null,
+                             default))                                       
                     .ConfigureAwait(false);
 
                 Assert.AreEqual(0, httpManager.QueueSize, "HttpManager must not retry because a RetryAfter header is present");
@@ -211,12 +295,16 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.BadGateway);
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.BadGateway);
 
-                var msalHttpResponse = await httpManager.SendPostForceResponseAsync(
-                                                            new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                                                            null,
-                                                            new StringContent("body"),
-                                                            Substitute.For<ILoggerAdapter>())
-                                                        .ConfigureAwait(false);
+                var msalHttpResponse = await httpManager.SendRequestAsync(
+                            new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                            headers: null,
+                            body: new StringContent("body"),
+                            HttpMethod.Post,
+                            logger: Substitute.For<ILoggerAdapter>(),
+                            doNotThrow: true,
+                            retry: true,
+                            mtlsCertificate: null,
+                            default).ConfigureAwait(false);
 
                 Assert.AreEqual(HttpStatusCode.BadGateway, msalHttpResponse.StatusCode);
             }
@@ -230,21 +318,21 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.GatewayTimeout);
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.ServiceUnavailable);
 
-                try
-                {
-                    var msalHttpResponse = await httpManager.SendPostAsync(
-                                                                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                                                                null,
-                                                                (IDictionary<string, string>)null,
-                                                               Substitute.For<ILoggerAdapter>())
-                                                            .ConfigureAwait(false);
-                    Assert.Fail("request should have failed");
-                }
-                catch (MsalServiceException exc)
-                {
-                    Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalError.ServiceNotAvailable, exc.ErrorCode);
-                }
+
+                var exc = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () =>
+                     httpManager.SendRequestAsync(
+                        new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                        headers: null,
+                        body: null,
+                        HttpMethod.Post,
+                        logger: Substitute.For<ILoggerAdapter>(),
+                        doNotThrow: false,
+                        retry: true,
+                        mtlsCertificate: null,
+                        default)).ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.ServiceNotAvailable, exc.ErrorCode);               
             }
         }
 
@@ -256,21 +344,21 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 httpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Get);
                 httpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Get);
 
-                try
-                {
-                    var msalHttpResponse = await httpManager.SendGetAsync(
-                                                                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                                                                new Dictionary<string, string>(),
-                                                                Substitute.For<ILoggerAdapter>())
-                                                            .ConfigureAwait(false);
-                    Assert.Fail("request should have failed");
-                }
-                catch (MsalServiceException exc)
-                {
-                    Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
-                    Assert.IsTrue(exc.InnerException is TaskCanceledException);
-                }
+                var exc = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                  () =>
+                   httpManager.SendRequestAsync(
+                      new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                      headers: null,
+                      body: null,
+                      HttpMethod.Get,
+                      logger: Substitute.For<ILoggerAdapter>(),
+                      doNotThrow: false,
+                      retry: true,
+                      mtlsCertificate: null,
+                      default)).ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
+                Assert.IsTrue(exc.InnerException is TaskCanceledException);             
             }
         }
 
@@ -282,22 +370,20 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 httpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Post);
                 httpManager.AddRequestTimeoutResponseMessageMockHandler(HttpMethod.Post);
 
-                try
-                {
-                    var msalHttpResponse = await httpManager.SendPostAsync(
-                                                                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                                                                new Dictionary<string, string>(),
-                                                                new Dictionary<string, string>(),
-                                                                Substitute.For<ILoggerAdapter>())
-                                                            .ConfigureAwait(false);
-                    Assert.Fail("request should have failed");
-                }
-                catch (MsalServiceException exc)
-                {
-                    Assert.IsNotNull(exc);
-                    Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
-                    Assert.IsTrue(exc.InnerException is TaskCanceledException);
-                }
+                var exc = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () =>
+                     httpManager.SendRequestAsync(
+                        new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                        headers: new Dictionary<string, string>(),
+                        body: new FormUrlEncodedContent(new Dictionary<string, string>()),
+                        HttpMethod.Post,
+                        logger: Substitute.For<ILoggerAdapter>(),
+                        doNotThrow: false,
+                        retry: true,
+                        mtlsCertificate: null,
+                        default)).ConfigureAwait(false);
+                Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
+                Assert.IsTrue(exc.InnerException is TaskCanceledException);
             }
         }
 
@@ -315,19 +401,23 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     //Adding second response for retry
                     httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.ServiceUnavailable);
                 }
-                var msalHttpResponse = await httpManager.SendPostForceResponseAsync(
-                                                        new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                                                        null,
-                                                        new StringContent("body"),
-                                                        Substitute.For<ILoggerAdapter>())
-                                                        .ConfigureAwait(false);
+
+                var msalHttpResponse = await httpManager.SendRequestAsync(
+                        new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                        headers: null,
+                        body: new StringContent("body"),
+                        HttpMethod.Post,
+                        logger: Substitute.For<ILoggerAdapter>(),
+                        doNotThrow: true,
+                        retry: true,
+                        mtlsCertificate: null,
+                        default).ConfigureAwait(false);
 
                 Assert.IsNotNull(msalHttpResponse);
                 Assert.AreEqual(HttpStatusCode.ServiceUnavailable, msalHttpResponse.StatusCode);
                 //If a second request is sent when retry is configured to false, the test will fail since
                 //the MockHttpManager will not be able to serve another response.
                 //The MockHttpManager will also check for unused responses which will check if the retry did not occur when it should have.
-
             }
         }
     }

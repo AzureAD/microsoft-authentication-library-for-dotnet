@@ -10,7 +10,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
