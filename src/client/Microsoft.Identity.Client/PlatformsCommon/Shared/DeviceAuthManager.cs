@@ -56,11 +56,13 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                 }
             }
 
-            DeviceAuthJWTResponse responseJWT = GetDeviceAuthJwtResponse(submitUrl, challengeData["nonce"], certificate);
+            DeviceAuthJWTResponse responseJwt = GetDeviceAuthJwtResponse(submitUrl, challengeData["nonce"], certificate);
 
-            byte[] signedResponse = SignWithCertificate(responseJWT, certificate);
+            string responseToSign = responseJwt.GetResponseToSign();
 
-            FormatResponseHeader(responseJWT, signedResponse, challengeData, out responseHeader);
+            byte[] signedResponse = SignWithCertificate(certificate, responseToSign);
+
+            FormatResponseHeader(signedResponse, challengeData, responseToSign, out responseHeader);
 
             return true;
         }
@@ -70,21 +72,19 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return new DeviceAuthJWTResponse(submitUrl, nonce, Convert.ToBase64String(certificate.GetRawCertData()));
         }
 
-        private byte[] SignWithCertificate(DeviceAuthJWTResponse responseJwt, X509Certificate2 certificate)
+        private byte[] SignWithCertificate(X509Certificate2 certificate, string responseToSign)
         {
-            return _cryptographyManager.SignWithCertificate(responseJwt.GetResponseToSign(), certificate);
+            return _cryptographyManager.SignWithCertificate(responseToSign, certificate);
         }
 
-        private static void FormatResponseHeader(
-            DeviceAuthJWTResponse responseJWT,
-            byte[] signedResponse,
+        private static void FormatResponseHeader(byte[] signedResponse,
             IDictionary<string, string> challengeData,
+            string responseToSign,
             out string responseHeader)
         {
-            string toSign = responseJWT.GetResponseToSign();
             string encoded = Base64UrlHelpers.Encode(signedResponse);
 
-            responseHeader = $"PKeyAuth AuthToken=\"{toSign}.{encoded}\", Context=\"{challengeData["Context"]}\", Version=\"{challengeData["Version"]}\"";
+            responseHeader = $"PKeyAuth AuthToken=\"{responseToSign}.{encoded}\", Context=\"{challengeData["Context"]}\", Version=\"{challengeData["Version"]}\"";
         }
 
         private static X509Certificate2 FindCertificate(IDictionary<string, string> challengeData)
