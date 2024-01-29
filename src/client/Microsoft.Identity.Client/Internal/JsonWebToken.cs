@@ -8,6 +8,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
+using System.Security.Cryptography;
+
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using Microsoft.Identity.Client.Platforms.net6;
 using System.Text.Json.Serialization;
@@ -53,18 +55,24 @@ namespace Microsoft.Identity.Client.Internal
             _appendDefaultClaims = appendDefaultClaims;
         }
 
-        public string Sign(X509Certificate2 certificate, string base64EncodedThumbprint, bool sendX5C)
+        public string Sign(X509Certificate2 certificate,  bool sendX5C, bool useSha2AndPss)
         {
             // Base64Url encoded header and claims
-            string token = Encode(certificate, base64EncodedThumbprint, sendX5C);
+            string token = Encode(certificate, sendX5C, useSha2AndPss);
 
             // Length check before sign
             if (MaxTokenLength < token.Length)
             {
-                throw new MsalException(MsalError.EncodedTokenTooLong);
+                throw new MsalClientException(MsalError.EncodedTokenTooLong);
             }
 
-            byte[] signature = _cryptographyManager.SignWithCertificate(token, certificate);
+            byte[] signature = _cryptographyManager.SignWithCertificate(
+                token,
+                certificate,
+                useSha2AndPss ?
+                    System.Security.Cryptography.RSASignaturePadding.Pss :      // ESTS added support for PSS
+                    System.Security.Cryptography.RSASignaturePadding.Pkcs1);    // Other IdPs may only support PKCS1
+
             return string.Concat(token, ".", UrlEncodeSegment(signature));
         }
 
@@ -78,10 +86,55 @@ namespace Microsoft.Identity.Client.Internal
             return Base64UrlHelpers.Encode(segment);
         }
 
-        private static string EncodeHeaderToJson(X509Certificate2 certificate, string base64EncodedThumbprint, bool sendX5C)
+        private static string EncodeHeaderToJson(X509Certificate2 certificate, bool sendX5C, bool useSha2AndPss)
         {
-            JWTHeaderWithCertificate header = new JWTHeaderWithCertificate(certificate, base64EncodedThumbprint, sendX5C);
-            return JsonHelper.SerializeToJson(header);
+            string thumbprint = ComputeCertThumbprint(certificate, useSha2AndPss);
+
+            string alg = useSha2AndPss ? "PS256" : "RS256";
+            string thumbprintKey = useSha2AndPss ? "x5t#S256" : "x5t";
+            string header;
+
+            if (sendX5C)
+            {
+#if NETFRAMEWORK
+                string x5cValue = Convert.ToBase64String(certificate.GetRawCertData());
+#else
+                string x5cValue = Convert.ToBase64String(certificate.RawData);
+#endif
+                header = $$"""{"alg":"{{alg}}","typ":"JWT","{{thumbprintKey}}":"{{thumbprint}}","x5c":"{{x5cValue}}"}""";
+            }
+            else
+            {
+
+                header = $$"""{"alg":"{{alg}}","typ":"JWT","{{thumbprintKey}}":"{{thumbprint}}"}""";
+            }
+
+            return header;
+        }
+
+        private static string ComputeCertThumbprint(X509Certificate2 certificate, bool useSha2)
+        {
+            string thumbprint = null;
+
+            if (useSha2)
+            {
+#if NET6_0_OR_GREATER
+
+                thumbprint = Base64UrlHelpers.Encode(certificate.GetCertHash(HashAlgorithmName.SHA256));
+#else
+                using (var hasher = SHA256.Create())
+                {
+                    byte[] hash = hasher.ComputeHash(certificate.RawData);
+                    thumbprint = Base64UrlHelpers.Encode(hash);
+                }
+#endif
+            }
+            else
+            {
+                thumbprint = Base64UrlHelpers.Encode(certificate.GetCertHash());
+            }
+
+            return thumbprint;
         }
 
         internal static long ConvertToTimeT(DateTime time)
@@ -91,10 +144,13 @@ namespace Microsoft.Identity.Client.Internal
             return (long)diff.TotalSeconds;
         }
 
-        private string Encode(X509Certificate2 certificate, string base64EncodedThumbprint, bool sendCertificate)
+        private string Encode(
+            X509Certificate2 certificate,
+            bool addX5C,
+            bool useSha2AndPss)
         {
             // Header segment
-            string jsonHeader = EncodeHeaderToJson(certificate, base64EncodedThumbprint, sendCertificate);
+            string jsonHeader = EncodeHeaderToJson(certificate, addX5C, useSha2AndPss);
 
             string encodedHeader = EncodeSegment(jsonHeader);
             string jsonPayload;
@@ -129,45 +185,6 @@ namespace Microsoft.Identity.Client.Internal
             string encodedPayload = EncodeSegment(jsonPayload);
 
             return string.Concat(encodedHeader, ".", encodedPayload);
-        }
-
-        [JsonObject]
-        [Preserve(AllMembers = true)]
-        internal class JWTHeader
-        {
-            public JWTHeader(X509Certificate2 certificate)
-            {
-                Certificate = certificate;
-            }
-
-            protected X509Certificate2 Certificate { get; }
-
-            [JsonProperty(JsonWebTokenConstants.ReservedHeaderParameters.Type)]
-            public string Type
-            {
-                get { return JsonWebTokenConstants.JWTHeaderType; }
-
-                set
-                {
-                    // This setter is required by the serializer
-                }
-            }
-
-            [JsonProperty(JsonWebTokenConstants.ReservedHeaderParameters.Algorithm)]
-            public string Algorithm
-            {
-                get
-                {
-                    return Certificate == null
-                        ? JsonWebTokenConstants.Algorithms.None
-                        : JsonWebTokenConstants.Algorithms.RsaSha256;
-                }
-
-                set
-                {
-                    // This setter is required by the serializer
-                }
-            }
         }
 
         [JsonObject]
@@ -211,65 +228,6 @@ namespace Microsoft.Identity.Client.Internal
                 DefaultValueHandling = DefaultValueHandling.Ignore)]
 #endif
             public string JwtIdentifier { get; set; }
-        }
-
-        [JsonObject]
-        [Preserve(AllMembers = true)]
-        internal sealed class JWTHeaderWithCertificate : JWTHeader
-        {
-            public JWTHeaderWithCertificate(X509Certificate2 certificate, string base64EncodedThumbprint, bool sendCertificate)
-                : base(certificate)
-            {
-                // this is just Base64UrlHelpers.Encode(certificate.GetCertHash()) but computed higher up so that it can be cached
-                X509CertificateThumbprint = base64EncodedThumbprint;
-                X509CertificateKeyId = certificate.Thumbprint;
-
-                X509CertificatePublicCertValue = null;
-
-                if (sendCertificate)
-                {
-#if NETFRAMEWORK
-                    X509CertificatePublicCertValue = Convert.ToBase64String(certificate.GetRawCertData());
-#else
-                    X509CertificatePublicCertValue = Convert.ToBase64String(certificate.RawData);
-#endif
-                }
-            }
-
-            /// <summary>
-            /// x5t = base64 URL encoded cert thumbprint 
-            /// </summary>
-            /// <remarks>
-            /// Mandatory for ADFS 2019
-            /// </remarks>
-            [JsonProperty(JsonWebTokenConstants.ReservedHeaderParameters.X509CertificateThumbprint)]
-            public string X509CertificateThumbprint { get; set; }
-
-            /// <summary>
-            /// kid (key id) = cert thumbprint
-            /// </summary>
-            /// <remarks>
-            /// Key Id is an optional param, but recommended. Wilson adds both kid and x5t to JWT header
-            /// </remarks>
-#if SUPPORTS_SYSTEM_TEXT_JSON
-            [JsonProperty(JsonWebTokenConstants.ReservedHeaderParameters.KeyId)]
-            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-#else
-            [JsonProperty(
-                PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.KeyId,
-                DefaultValueHandling = DefaultValueHandling.Ignore)]
-#endif
-            public string X509CertificateKeyId { get; set; }
-
-#if SUPPORTS_SYSTEM_TEXT_JSON
-            [JsonProperty(JsonWebTokenConstants.ReservedHeaderParameters.X509CertificatePublicCertValue)]
-            [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-#else
-            [JsonProperty(
-                PropertyName = JsonWebTokenConstants.ReservedHeaderParameters.X509CertificatePublicCertValue,
-                DefaultValueHandling = DefaultValueHandling.Ignore)]
-#endif
-            public string X509CertificatePublicCertValue { get; set; }
         }
     }
 }

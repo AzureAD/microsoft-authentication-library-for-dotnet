@@ -32,9 +32,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class ClientCredentialsTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
-        private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };
+        private static readonly string[] s_keyvaultScope = ["https://vault.azure.net/.default"];
         private const string PublicCloudConfidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
-        private const string PublicCloudTestAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
 
         private enum CredentialType
         {
@@ -54,7 +53,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore | TargetFrameworks.NetStandard )]
-        [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
+        [DataRow(Cloud.Adfs, TargetFrameworks.NetFx | TargetFrameworks.NetCore )]
         [DataRow(Cloud.PPE, TargetFrameworks.NetFx)]        
         [DataRow(Cloud.Public, TargetFrameworks.NetCore, true)]
         //[DataRow(Cloud.Arlington)] - cert not setup
@@ -65,8 +64,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        //[DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
-        //[DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
+        [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
+        [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
         [DataRow(Cloud.Arlington, TargetFrameworks.NetCore)]
         //[DataRow(Cloud.PPE)] - secret not setup
         public async Task WithSecret_TestAsync(Cloud cloud, TargetFrameworks runOn)
@@ -77,10 +76,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [TestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
-        [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
+        [DataRow(Cloud.Adfs, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
         [DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
-        public async Task WithClientAssertion_Manual_TestAsync(Cloud cloud, TargetFrameworks runOn)
+        public async Task WithClientAssertion_AAD_Manual_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
             runOn.AssertFramework();
             await RunClientCredsAsync(cloud, CredentialType.ClientAssertion_Manual).ConfigureAwait(false);
@@ -228,7 +227,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string clientId = data.BodyParameters["client_id"];
             string tokenEndpoint = data.RequestUri.AbsoluteUri;
 
-            string assertion = GetSignedClientAssertionManual(issuer: clientId, audience: tokenEndpoint, certificate: certificate);
+            string assertion = GetSignedClientAssertionManual(
+                issuer: clientId, 
+                audience: tokenEndpoint, 
+                certificate: certificate, 
+                useSha2AndPss: true);
+
             data.BodyParameters.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
             data.BodyParameters.Add("client_assertion", assertion);
         }
@@ -242,7 +246,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             AuthenticationResult authResult;
 
-            IConfidentialClientApplication confidentialApp = CreateApp(credentialType, settings, sendX5C);
+            IConfidentialClientApplication confidentialApp = CreateApp(credentialType, settings, sendX5C, cloud != Cloud.Adfs);
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
             Guid correlationId = Guid.NewGuid();
             authResult = await confidentialApp
@@ -288,7 +292,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                appCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
         }
 
-        private static IConfidentialClientApplication CreateApp(CredentialType credentialType, IConfidentialAppSettings settings, bool sendX5C)
+        private static IConfidentialClientApplication CreateApp(
+            CredentialType credentialType, 
+            IConfidentialAppSettings settings, 
+            bool sendX5C, 
+            bool useSha2AndPssForAssertion)
         {
             var builder = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
@@ -312,7 +320,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     string signedAssertionManual = GetSignedClientAssertionManual(
                       settings.ClientId,
                       aud, // for AAD use v2.0, but not for ADFS
-                      settings.GetCertificate());
+                      settings.GetCertificate(),
+                      useSha2AndPssForAssertion);
 
                     builder.WithClientAssertion(signedAssertionManual);
                     break;
@@ -412,10 +421,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// <param name="audience">the token endpoint, i.e. ${authority}/oauth2/v2.0/token for AAD or ${authority}/oauth2/token for ADFS</param>
         /// <param name="certificate"></param>
         /// <returns></returns>
-        internal static string GetSignedClientAssertionManual(
+        private static string GetSignedClientAssertionManual(
             string issuer, 
             string audience, 
-            X509Certificate2 certificate)
+            X509Certificate2 certificate, 
+            bool useSha2AndPss)
         {
             const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
 
@@ -437,14 +447,26 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             RSACng rsa = certificate.GetRSAPrivateKey() as RSACng;
 
-            //alg represents the desired signing algorithm, which is SHA-256 in this case
-            //kid represents the certificate thumbprint
-            var header = new Dictionary<string, string>()
+            Dictionary<string, string> header;
+            if (useSha2AndPss)
             {
-              { "alg", "RS256"},
-              { "typ", "JWT"},
-              { "x5t", Base64UrlHelpers.Encode(certificate.GetCertHash())},
-            };
+                header = new Dictionary<string, string>()
+                {
+                  { "alg", "PS256"},
+                  { "typ", "JWT"},
+                  { "x5t#S256", Base64UrlHelpers.Encode(certificate.GetCertHash(HashAlgorithmName.SHA256))},
+                };
+            }
+            else
+            {
+                header = new Dictionary<string, string>()
+                {
+                  { "alg", "RS256"},
+                  { "typ", "JWT"},
+                  { "x5t", Base64UrlHelpers.Encode(certificate.GetCertHash())},
+                };
+            }
+          
 
             var headerBytes = JsonSerializer.SerializeToUtf8Bytes(header);
             var claimsBytes = JsonSerializer.SerializeToUtf8Bytes(claims);
@@ -454,7 +476,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 rsa.SignData(
                     Encoding.UTF8.GetBytes(token),
                     HashAlgorithmName.SHA256,
-                    RSASignaturePadding.Pkcs1));
+                    useSha2AndPss ? RSASignaturePadding.Pss : RSASignaturePadding.Pkcs1));
             return string.Concat(token, ".", signature);
         }
     }

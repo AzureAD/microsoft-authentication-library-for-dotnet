@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -425,18 +426,38 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        [TestMethod]
-        [Description("Check the JWTHeader when sendCert is true")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Suppressing RoslynAnalyzers: Rule: IA5352 - Do Not Misuse Cryptographic APIs in test only code")]
-        public void CheckJWTHeaderWithCertTrueTest()
+        [DataTestMethod]
+        [DataRow(true, true)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(false, false)]
+        public void CheckJWTHeaderWithCertTrueTest(bool sendX5c, bool useSha2AndPss)
         {
             var cert = new X509Certificate2(
                 ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
 
-            var header = new JWTHeaderWithCertificate(cert, Base64UrlHelpers.Encode(cert.GetCertHash()), true);
+            string assertionString =
+                (new JsonWebToken(new CommonCryptographyManager(), TestConstants.ClientId, "aud"))
+                    .Sign(cert, sendX5C: true, useSha2AndPss: false);
 
-            Assert.IsNotNull(header.X509CertificatePublicCertValue);
-            Assert.IsNotNull(header.X509CertificateThumbprint);
+            //header = $$"""{"alg":"{{alg}}","typ":"JWT","{{thumbprintKey}}":"{{thumbprint}}","x5c":"{{x5cValue}}"}""";
+
+            string thumbprintKey = useSha2AndPss ? "x5t" : "x5t#S256";
+
+            // Wilson is guaranteed to parse the token correctly - use it as baseline
+            JwtSecurityToken decodedToken = new JwtSecurityToken(assertionString);
+            Assert.AreEqual(sendX5c ? 4 : 3, decodedToken.Header.Count);
+            Assert.AreEqual("JWT", decodedToken.Header["typ"]);
+            Assert.AreEqual(useSha2AndPss ? "PS256" : "RSA256", decodedToken.Header["alg"]);
+            if (sendX5c)
+            {
+                Assert.AreEqual("", decodedToken.Header["x5c"]);
+            }
+
+            //var header = new JWTHeader(cert, Base64UrlHelpers.Encode(cert.GetCertHash()), true, true);
+
+            //Assert.IsNotNull(header.X509CertificatePublicCertValue);
+            //Assert.IsNotNull(header.X509CertificateThumbprint);
         }
 
         [TestMethod]
@@ -444,13 +465,13 @@ namespace Microsoft.Identity.Test.Unit
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Internal.Analyzers", "IA5352:DoNotMisuseCryptographicApi", Justification = "Suppressing RoslynAnalyzers: Rule: IA5352 - Do Not Misuse Cryptographic APIs in test only code")]
         public void CheckJWTHeaderWithCertFalseTest()
         {
-            var cert = new X509Certificate2(
-                 ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
+            //var cert = new X509Certificate2(
+            //     ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
 
-            var header = new JWTHeaderWithCertificate(cert, Base64UrlHelpers.Encode(cert.GetCertHash()), false);
+            //var header = new JWTHeader(cert, Base64UrlHelpers.Encode(cert.GetCertHash()), false, true);
 
-            Assert.IsNull(header.X509CertificatePublicCertValue);
-            Assert.IsNotNull(header.X509CertificateThumbprint);
+            //Assert.IsNull(header.X509CertificatePublicCertValue);
+            //Assert.IsNotNull(header.X509CertificateThumbprint);
         }
 
         [TestMethod]

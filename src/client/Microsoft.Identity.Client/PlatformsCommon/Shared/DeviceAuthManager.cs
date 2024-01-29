@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -74,7 +75,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         private byte[] SignWithCertificate(X509Certificate2 certificate, string responseToSign)
         {
-            return _cryptographyManager.SignWithCertificate(responseToSign, certificate);
+            return _cryptographyManager.SignWithCertificate(responseJwt.GetResponseToSign(), certificate, RSASignaturePadding.Pkcs1);
         }
 
         private static void FormatResponseHeader(byte[] signedResponse,
