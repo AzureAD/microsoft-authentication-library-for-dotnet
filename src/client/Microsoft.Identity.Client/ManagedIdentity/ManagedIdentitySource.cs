@@ -42,6 +42,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// <summary>
         /// The source to acquire token for managed identity is Service Fabric.
         /// </summary>
-        ServiceFabric
+        ServiceFabric,
+
+        /// <summary>
+        /// The source to acquire token for managed identity is Credential Endpoint.
+        /// </summary>
+        Credential
     }
 }

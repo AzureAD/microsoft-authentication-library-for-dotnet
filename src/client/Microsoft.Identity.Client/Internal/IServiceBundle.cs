@@ -29,6 +29,8 @@ namespace Microsoft.Identity.Client.Internal
 
         IHttpTelemetryManager HttpTelemetryManager { get; }
 
+        IKeyMaterialManager KeyMaterialManager { get; }
+
         #region Testing
         void SetPlatformProxyForTest(IPlatformProxy platformProxy);
         #endregion Testing

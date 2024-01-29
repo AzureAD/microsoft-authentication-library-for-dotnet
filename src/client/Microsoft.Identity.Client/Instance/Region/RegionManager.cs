@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -197,16 +198,35 @@ namespace Microsoft.Identity.Client.Region
 
                             Uri imdsUri = BuildImdsUri(DefaultApiVersion);
 
-                            HttpResponse response = await _httpManager.SendGetAsync(imdsUri, headers, logger, retry: false, cancellationToken: GetCancellationToken(requestCancellationToken))
-                                .ConfigureAwait(false);
+                            HttpResponse response = await _httpManager.SendRequestAsync(
+                                 imdsUri,
+                                 headers,
+                                 body: null,
+                                 HttpMethod.Get,
+                                 logger: logger,
+                                 doNotThrow: false,
+                                 retry: false,
+                                 mtlsCertificate: null,
+                                 GetCancellationToken(requestCancellationToken))
+                                    .ConfigureAwait(false);
 
                             // A bad request occurs when the version in the IMDS call is no longer supported.
                             if (response.StatusCode == HttpStatusCode.BadRequest)
                             {
                                 string apiVersion = await GetImdsUriApiVersionAsync(logger, headers, requestCancellationToken).ConfigureAwait(false); // Get the latest version
                                 imdsUri = BuildImdsUri(apiVersion);
-                                response = await _httpManager.SendGetAsync(BuildImdsUri(apiVersion), headers, logger, retry: false, cancellationToken: GetCancellationToken(requestCancellationToken))
-                                    .ConfigureAwait(false); // Call again with updated version
+
+                                response = await _httpManager.SendRequestAsync(
+                                   imdsUri,
+                                   headers,
+                                   body: null,
+                                   HttpMethod.Get,
+                                   logger: logger,
+                                   doNotThrow: false,
+                                   retry: false,
+                                   mtlsCertificate: null,
+                                   GetCancellationToken(requestCancellationToken))
+                                      .ConfigureAwait(false); // Call again with updated version
                             }
 
                             if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
@@ -297,9 +317,19 @@ namespace Microsoft.Identity.Client.Region
 
         private async Task<string> GetImdsUriApiVersionAsync(ILoggerAdapter logger, Dictionary<string, string> headers, CancellationToken userCancellationToken)
         {
-            Uri imdsErrorUri = new Uri(ImdsEndpoint);
+            Uri imdsErrorUri = new(ImdsEndpoint);
 
-            HttpResponse response = await _httpManager.SendGetAsync(imdsErrorUri, headers, logger, retry: false, cancellationToken: GetCancellationToken(userCancellationToken)).ConfigureAwait(false);
+            HttpResponse response = await _httpManager.SendRequestAsync(
+                  imdsErrorUri,
+                  headers,
+                  body: null,
+                  System.Net.Http.HttpMethod.Get,
+                  logger: logger,
+                  doNotThrow: false,
+                  retry: false,
+                  mtlsCertificate: null,
+                  GetCancellationToken(userCancellationToken))
+                     .ConfigureAwait(false);
 
             // When IMDS endpoint is called without the api version query param, bad request response comes back with latest version.
             if (response.StatusCode == HttpStatusCode.BadRequest)

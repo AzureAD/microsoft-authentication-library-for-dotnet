@@ -15,6 +15,9 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
+#if NETSTANDARD
+using Microsoft.Identity.Client.Platforms.netstandard;
+#endif
 using Microsoft.Identity.Client.Platforms.Shared.NetStdCore;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -296,6 +299,14 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         public override IDeviceAuthManager CreateDeviceAuthManager()
         {
             return new DeviceAuthManager(CryptographyManager);
+        }
+        public override IKeyMaterialManager GetKeyMaterialManager()
+        {
+#if NETSTANDARD
+            return NullKeyMaterialManager.Instance;
+#else
+            return new ManagedIdentityCertificateProvider(Logger);
+#endif
         }
     }
 }

@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
             // MSAL 4.51.0+
             RemoveOboTokens = 1014,
-            // The API IDs for managed identity will not be found in HTTP telemetry,
+            // The API IDs for legacy managed identity will not be found in HTTP telemetry,
             // as we don't hit eSTS for managed identity calls.
             AcquireTokenForSystemAssignedManagedIdentity = 1015,
             AcquireTokenForUserAssignedManagedIdentity = 1016,
@@ -133,7 +133,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public CacheLevel CacheLevel { get; set; }
 
         public string MsalRuntimeTelemetry { get; set; }
-        
+
+        public TokenSource CredentialSource { get; set; }
+
         public static bool IsLongRunningObo(ApiIds apiId) => apiId == ApiIds.InitiateLongRunningObo || apiId == ApiIds.AcquireTokenInLongRunningObo;
 
         public static bool IsOnBehalfOfRequest(ApiIds apiId) => apiId == ApiIds.AcquireTokenOnBehalfOf || IsLongRunningObo(apiId);

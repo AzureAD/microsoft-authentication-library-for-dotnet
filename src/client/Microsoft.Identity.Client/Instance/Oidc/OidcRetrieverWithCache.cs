@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
     internal static class OidcRetrieverWithCache
     {
         private static readonly ConcurrentDictionary<string, OidcMetadata> s_cache = new();
-        private static readonly SemaphoreSlim s_lockOidcRetrieval = new SemaphoreSlim(1);
+        private static readonly SemaphoreSlim s_lockOidcRetrieval = new(1);
 
         public static async Task<OidcMetadata> GetOidcAsync(
             string authority,
@@ -39,25 +39,33 @@ namespace Microsoft.Identity.Client.Instance.Oidc
 
                 Uri oidcMetadataEndpoint = new Uri(authority + Constants.WellKnownOpenIdConfigurationPath);
 
-                var client = new OAuth2Client(requestContext.Logger, requestContext.ServiceBundle.HttpManager);
-                configuration = await client.DiscoverOidcMetadataAsync(oidcMetadataEndpoint, requestContext).ConfigureAwait(false);
+                var client = new OAuth2Client(
+                    requestContext.Logger,
+                    requestContext.ServiceBundle.HttpManager,
+                    mtlsCertificate: null);
+
+                configuration = await client.DiscoverOidcMetadataAsync(oidcMetadataEndpoint, requestContext)
+                    .ConfigureAwait(false);
 
                 s_cache[authority] = configuration;
 
-                requestContext.Logger.Verbose(() => $"[OIDC Discovery] OIDC discovery retrieved metadata from the network for {authority}");
+                requestContext.Logger.Verbose(() => $"[OIDC Discovery] OIDC discovery retrieved metadata from the " +
+                $"network for {authority}");
 
                 return configuration;
             }
             catch (Exception ex)
             {
-                requestContext.Logger.Error($"[OIDC Discovery] Failed to retrieve OpenID configuration from the OpenID endpoint {authority + Constants.WellKnownOpenIdConfigurationPath} due to {ex}");
+                requestContext.Logger.Error($"[OIDC Discovery] Failed to retrieve OpenID configuration from the OpenID endpoint " +
+                    $"{authority + Constants.WellKnownOpenIdConfigurationPath} due to {ex}");
 
                 if (ex is MsalServiceException)
                     throw;
 
                 throw new MsalServiceException(
                     "oidc_failure",
-                    $"Failed to retrieve OIDC configuration from {authority + Constants.WellKnownOpenIdConfigurationPath}. See inner exception. ",
+                    $"Failed to retrieve OIDC configuration from {authority + Constants.WellKnownOpenIdConfigurationPath}. " +
+                    $"See inner exception. ",
                     ex);
             }
             finally

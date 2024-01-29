@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -97,6 +98,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string ClaimsAndClientCapabilities { get; private set; }
 
         public Guid CorrelationId => _commonParameters.CorrelationId;
+
+        public X509Certificate2 MtlsCertificate => _commonParameters.MtlsCertificate;
 
         /// <summary>
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities

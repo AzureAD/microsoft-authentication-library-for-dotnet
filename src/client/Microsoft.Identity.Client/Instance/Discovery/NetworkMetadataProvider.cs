@@ -34,17 +34,17 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
         {
-            var logger = requestContext.Logger;
+            ILoggerAdapter logger = requestContext.Logger;
 
             string environment = authority.Host;
-            var cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
+            InstanceDiscoveryMetadataEntry cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
             if (cachedEntry != null)
             {
                 logger.Verbose(() => $"[Instance Discovery] The network provider found an entry for {environment}. ");
                 return cachedEntry;
             }
 
-            var discoveryResponse = await FetchAllDiscoveryMetadataAsync(authority, requestContext).ConfigureAwait(false);
+            InstanceDiscoveryResponse discoveryResponse = await FetchAllDiscoveryMetadataAsync(authority, requestContext).ConfigureAwait(false);
             CacheInstanceDiscoveryMetadata(discoveryResponse);
 
             cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
           Uri authority,
           RequestContext requestContext)
         {
-            var client = new OAuth2Client(requestContext.Logger, _httpManager);
+            var client = new OAuth2Client(requestContext.Logger, _httpManager, mtlsCertificate: null);
 
             client.AddQueryParameter("api-version", "1.1");
             client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority));
