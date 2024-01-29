@@ -81,10 +81,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             IDictionary<string, string> challengeData,
             out string responseHeader)
         {
-            string signedJwt = $"{responseJWT.GetResponseToSign()}.{Base64UrlHelpers.Encode(signedResponse)}";
-            string authToken = $"AuthToken=\"{signedJwt}\"";
+            string toSign = responseJWT.GetResponseToSign();
+            string encoded = Base64UrlHelpers.Encode(signedResponse);
 
-            responseHeader = $"PKeyAuth {authToken}, Context=\"{challengeData["Context"]}\", Version=\"{challengeData["Version"]}\"";
+            responseHeader = $"PKeyAuth AuthToken=\"{toSign}.{encoded}\", Context=\"{challengeData["Context"]}\", Version=\"{challengeData["Version"]}\"";
         }
 
         private static X509Certificate2 FindCertificate(IDictionary<string, string> challengeData)
