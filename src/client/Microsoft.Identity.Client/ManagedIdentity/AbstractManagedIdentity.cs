@@ -40,35 +40,55 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
+            HttpResponse response;
+
             // Convert the scopes to a resource string.
             string resource = parameters.Resource;
 
             ManagedIdentityRequest request = CreateRequest(resource);
 
+            _requestContext.Logger.Info("[Managed Identity] sending request to managed identity endpoints.");
+
             try
             {
-                HttpResponse response =
-                    request.Method == HttpMethod.Get ?
-                    await _requestContext.ServiceBundle.HttpManager
-                        .SendGetForceResponseAsync(
-                            request.ComputeUri(), 
-                            request.Headers, 
-                            _requestContext.Logger, 
-                            cancellationToken: cancellationToken).ConfigureAwait(false) :
-                    await _requestContext.ServiceBundle.HttpManager
-                        .SendPostForceResponseAsync(
-                            request.ComputeUri(), 
-                            request.Headers, 
-                            request.BodyParameters, 
-                            _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (request.Method == HttpMethod.Get)
+                {
+                    response = await _requestContext.ServiceBundle.HttpManager
+                        .SendRequestAsync(
+                            request.ComputeUri(),
+                            request.Headers,
+                            body: null,
+                            HttpMethod.Get,
+                            logger: _requestContext.Logger,
+                            doNotThrow: true,
+                            retry: true,
+                            mtlsCertificate: null,
+                            cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    response = await _requestContext.ServiceBundle.HttpManager
+                        .SendRequestAsync(
+                            request.ComputeUri(),
+                            request.Headers,
+                            body: new FormUrlEncodedContent(request.BodyParameters),
+                            HttpMethod.Post,
+                            logger: _requestContext.Logger,
+                            doNotThrow: true,
+                            retry: true,
+                            mtlsCertificate: null,
+                            cancellationToken)
+                        .ConfigureAwait(false);
 
-                return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {
                 HandleException(ex);
                 throw;
             }
+
+            return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
         }
 
         protected virtual Task<ManagedIdentityResponse> HandleResponseAsync(
@@ -102,11 +122,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             ManagedIdentityResponse managedIdentityResponse = JsonHelper.DeserializeFromJson<ManagedIdentityResponse>(response.Body);
 
-            if (managedIdentityResponse == null || managedIdentityResponse.AccessToken.IsNullOrEmpty() || managedIdentityResponse.ExpiresOn.IsNullOrEmpty())
+            if (managedIdentityResponse == null || managedIdentityResponse.AccessToken.IsNullOrEmpty()
+                && (managedIdentityResponse.ExpiresOn.IsNullOrEmpty() || managedIdentityResponse.ExpiresIn.IsNullOrEmpty()))
             {
                 _requestContext.Logger.Error("[Managed Identity] Response is either null or insufficient for authentication.");
 
-                var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
+                MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.ManagedIdentityRequestFailed,
                     MsalErrorMessage.ManagedIdentityInvalidResponse,
                     null, 
@@ -130,10 +151,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (!string.IsNullOrEmpty(managedIdentityErrorResponse.Message))
             { 
-                return $"[Managed Identity] Error Message: {managedIdentityErrorResponse.Message} Managed Identity Correlation ID: {managedIdentityErrorResponse.CorrelationId} Use this Correlation ID for further investigation.";
+                return $"[Managed Identity] Error Message: {managedIdentityErrorResponse.Message} Managed Identity Correlation ID: {managedIdentityErrorResponse.CorrelationId} " +
+                    $"Use this Correlation ID for further investigation.";
             }
 
-            return $"[Managed Identity] Error Code: {managedIdentityErrorResponse.Error} Error Message: {managedIdentityErrorResponse.ErrorDescription}";
+            return $"[Managed Identity] Error Code: {managedIdentityErrorResponse.Error} " +
+                $"Error Message: {managedIdentityErrorResponse.ErrorDescription}";
         }
 
         private void HandleException(Exception ex, 
@@ -163,7 +186,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        private static void CreateAndThrowException(string errorCode, 
+        private static void CreateAndThrowException(
+            string errorCode, 
             string errorMessage, 
             Exception innerException, 
             ManagedIdentitySource source)

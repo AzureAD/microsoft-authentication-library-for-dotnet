@@ -16,6 +16,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public string Resource { get; set; }
 
+        public string Claims { get; set; }
+
         public void LogParameters(ILoggerAdapter logger)
         {
             if (logger.IsLoggingEnabled(LogLevel.Info))

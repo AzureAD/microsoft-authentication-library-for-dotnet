@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <summary>
         /// Create an instance of ManagedIdentityId for a system assigned managed identity.
         /// </summary>
-        public static ManagedIdentityId SystemAssigned { get; } = 
+        public static ManagedIdentityId SystemAssigned { get; } =
             new ManagedIdentityId(ManagedIdentityIdType.SystemAssigned);
 
         /// <summary>

@@ -155,17 +155,19 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
 
+        public virtual IKeyMaterialManager GetKeyMaterialManager()
+        {
+            return NullKeyMaterialManager.Instance;
+        }
+
         /// <inheritdoc/>
         public ICryptographyManager CryptographyManager => _cryptographyManager.Value;
 
         /// <inheritdoc/>
         public IPlatformLogger PlatformLogger => _platformLogger.Value;
-
         public IOtelInstrumentation OtelInstrumentation => _otelInstrumentation.Value;
-
         protected abstract IWebUIFactory CreateWebUiFactory();
         protected abstract IFeatureFlags CreateFeatureFlags();
-
         protected abstract string InternalGetDeviceModel();
         protected abstract string InternalGetOperatingSystem();
         protected abstract string InternalGetProcessorArchitecture();

@@ -117,12 +117,18 @@ namespace Microsoft.Identity.Client
         public bool MultiCloudSupportEnabled { get; set; } = false;
 
         public bool RetryOnServerErrors { get; set; } = true;
+        
+        public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
+#region ManagedIdentity
         public ManagedIdentityId ManagedIdentityId { get; internal set; }
-
         public bool IsManagedIdentity { get; }
 
-        public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
+        public CryptoKeyType ManagedIdentityCredentialKeyType { get; internal set; }
+
+        public X509Certificate2 ManagedIdentityClientCertificate { get; internal set; }
+
+#endregion
 
 #region ClientCredentials
 
@@ -202,6 +208,7 @@ namespace Microsoft.Identity.Client
         public ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
+        public IKeyMaterialManager KeyMaterialManagerForTest { get; set; }
         public bool IsConfidentialClient { get; }
         public bool IsInstanceDiscoveryEnabled { get; internal set; } = true;
         #endregion
