@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var jwtToken = new Client.Internal.JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
             var cert = ConfidentialAppSettings.GetSettings(Cloud.Public).GetCertificate();
 
-            return jwtToken.Sign(cert, Base64UrlHelpers.Encode(cert.GetCertHash()), true);
+            return jwtToken.Sign(cert, true, true);
         }
     }
 }

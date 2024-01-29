@@ -22,7 +22,15 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             Secret = secret;
         }
 
-        public Task AddConfidentialClientParametersAsync(OAuth2Client oAuth2Client, ILoggerAdapter logger, ICryptographyManager cryptographyManager, string clientId, string tokenEndpoint, bool sendX5C, CancellationToken cancellationToken)
+        public Task AddConfidentialClientParametersAsync(
+            OAuth2Client oAuth2Client, 
+            ILoggerAdapter logger, 
+            ICryptographyManager cryptographyManager, 
+            string clientId, 
+            string tokenEndpoint, 
+            bool sendX5C,
+            bool useSha2,
+            CancellationToken cancellationToken)
         {
             oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientSecret, Secret);
             return Task.CompletedTask;

@@ -303,6 +303,12 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        /// <summary>
+        /// True if SHA2 and PSS can be used for creating the client credential from a certificate 
+        /// </summary>
+        public bool IsSha2CredentialSupported => 
+            AuthorityType == AuthorityType.Aad;
+
         internal Authority CreateAuthority()
         {
             switch (AuthorityType)
