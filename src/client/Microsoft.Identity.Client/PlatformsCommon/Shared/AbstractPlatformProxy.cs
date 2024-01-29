@@ -135,6 +135,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return _runtimeVersion.Value;
         }
 
+        public virtual IKeyMaterialManager GetKeyMaterialManager()
+        {
+            return NullKeyMaterialManager.Instance;
+        }
+
         /// <inheritdoc/>
         public abstract ILegacyCachePersistence CreateLegacyCachePersistence();
 
@@ -165,7 +170,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         protected abstract IWebUIFactory CreateWebUiFactory();
         protected abstract IFeatureFlags CreateFeatureFlags();
-
         protected abstract string InternalGetDeviceModel();
         protected abstract string InternalGetOperatingSystem();
         protected abstract string InternalGetProcessorArchitecture();
