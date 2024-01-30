@@ -15,7 +15,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
@@ -73,7 +72,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public int QueueSize => _httpMessageHandlerQueue.Count;
 
         /// <summary>
-        /// For use only in threads that spin many threads. Not thread safe.
+        /// For use only in tests that spin many threads. Not thread safe.
         /// </summary>
         public void ClearQueue()
         {
