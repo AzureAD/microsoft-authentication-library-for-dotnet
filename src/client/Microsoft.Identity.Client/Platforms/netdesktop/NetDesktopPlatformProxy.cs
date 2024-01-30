@@ -248,5 +248,6 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop
         }
 
         public override bool BrokerSupportsWamAccounts => true;
+
     }
 }

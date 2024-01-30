@@ -139,6 +139,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string B2CEditProfileHomeAccountObjectId = Uid + "-" + B2CEditProfile;
 
         public const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
+        public const string SystemAssignedClientId = "2d0d13ad-3a4d-4cfd-98f8-f20621d55ded";
         public const string ClientId2 = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
         public const string ObjectId = "593b2662-5af7-4a90-a9cb-5a9de615b82f";
         public const string FamilyId = "1";
@@ -148,11 +149,11 @@ namespace Microsoft.Identity.Test.Unit
         public const string MiResourceId = "/subscriptions/ffa4aaa2-4444-4444-5555-e3ccedd3d046/resourcegroups/UAMI_group/providers/Microsoft.ManagedIdentityClient/userAssignedIdentities/UAMI";
 
         public const string Claims = @"{""userinfo"":{""given_name"":{""essential"":true},""nickname"":null,""email"":{""essential"":true},""email_verified"":{""essential"":true},""picture"":null,""http://example.info/claims/groups"":null},""id_token"":{""auth_time"":{""essential"":true},""acr"":{""values"":[""urn:mace:incommon:iap:silver""]}}}";
+        public const string ClaimsWithAccessToken = @"{""access_token"":{""nbf"":{""essential"":true, ""value"":""1701477303""}}}";
         public static readonly string[] ClientCapabilities = new[] { "cp1", "cp2" };
         public const string ClientCapabilitiesJson = @"{""access_token"":{""xms_cc"":{""values"":[""cp1"",""cp2""]}}}";
         // this a JSON merge from Claims and ClientCapabilitiesJson
         public const string ClientCapabilitiesAndClaimsJson = @"{""access_token"":{""xms_cc"":{""values"":[""cp1"",""cp2""]}},""userinfo"":{""given_name"":{""essential"":true},""nickname"":null,""email"":{""essential"":true},""email_verified"":{""essential"":true},""picture"":null,""http://example.info/claims/groups"":null},""id_token"":{""auth_time"":{""essential"":true},""acr"":{""values"":[""urn:mace:incommon:iap:silver""]}}}";
-        public const string ClaimsWithAccessToken = @"{""access_token"":{""nbf"":{""essential"":true, ""value"":""1701477303""}}}";
         public const string ClientCapabilitiesAndClaimsJsonWithAccessToken = @"{""access_token"":{""xms_cc"":{""values"":[""cp1"",""cp2""]},""nbf"":{""essential"":true,""value"":""1701477303""}}}";
         public const string EmptyClaimsJson = @"{}";
         public const string ClaimsWithAdditionalClaim = @"{""access_token"":{""nbf"":{""essential"":true, ""value"":""1701477303""},""additional_claim"":{""key"":""value""}}}";
@@ -355,6 +356,38 @@ namespace Microsoft.Identity.Test.Unit
                ""trace_id"":""82e709b9-f0b3-431d-99cd-f3c2ca3d4b00"",
                ""correlation_id"":""e7619cf4-53ea-443c-b76a-194c032e9840"",
                ""error_uri"":""https://login.microsoftonline.com/error?code=50049""}";
+
+        public const string InvalidResourceError = "AADSTS500011: The resource principal named https://graph.microsoft.com/user.read was not found in the tenant named Cross Cloud B2B Test Tenant. This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant. You might have sent your authentication request to the wrong tenant. Trace ID: 9d8cb0bf-7e34-40fd-babc-f6ff018a1800 Correlation ID: 42186e1b-17eb-46fb-b5b7-4c43cae4d336 Timestamp: 2023-12-08 22:20:25Z";
+
+        public const string InvalidScopeError70011 = "AADSTS70011: The provided request must include a 'scope' input parameter. The provided value for the input parameter 'scope' is not valid. The scope user.read/.default is not valid. Trace ID: 9e8a0bd6-fb1b-45cf-8e00-95c2c73e1400 Correlation ID: 6ce4a5ab-87a1-4985-b06d-5ab08b5fa924 Timestamp: 2023-12-08 21:56:44Z";
+
+        public const string InvalidScopeError1002012 = "AADSTS1002012: The provided value for scope user.read is not valid. Client credential flows must have a scope value with /.default suffixed to the resource identifier (application ID URI). Trace ID: 8575f1d5-0144-4d71-87c8-2df9f1e30000 Correlation ID: a5469466-6c01-40e0-abf8-302d09c991e3 Timestamp: 2023-12-08 22:11:08Z";
+
+        public const string InvalidTenantError900023 = "AADSTS900023: Specified tenant identifier 'invalid_tenant' is neither a valid DNS name, nor a valid external domain. Trace ID: f38df5f2-84c4-4195-bad6-8eca059b0b00 Correlation ID: e318f766-8581-445a-97fb-419f80d98d8b Timestamp: 2023-12-11 22:52:53Z";
+
+        public const string WrongTenantError700016 = "AADSTS700016: Application with identifier '833aa854-2811-4f90-9620-c38070f595d7' was not found in the directory 'MSIDLAB4'. This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant. You may have sent your authentication request to the wrong tenant. Trace ID: 68b0d98d-52e8-4e45-9282-9b3b09fc1800 Correlation ID: 75673189-3db2-408b-8384-16860ee0c0f0 Timestamp: 2023-12-11 22:54:25Z";
+
+        public const string WrongMtlsUrlError50171 = "A configuration issue is preventing authentication - check the error message from the server for details. You can modify the configuration in the application registration portal. See https://aka.ms/msal-net-invalid-client for details.  Original exception: AADSTS50171: The given audience can only be used in Mutual-TLS token calls. Trace ID: e350f752-0a39-43c2-a9a2-cbd7ff4a6f00 Correlation ID: 26bb13de-d2cf-4f8f-9f36-d7611c00fecb Timestamp: 2023-12-11 22:58:32Z";
+
+        public const string SendTenantIdInCredentialValueError50027 = "AADSTS50027: JWT token is invalid or malformed. Trace ID: 6ca706cd-c0a1-4ec2-acb1-541b5a579a00 Correlation ID: 52955596-2fe6-43c6-b087-6038942c8254 Timestamp: 2023-12-11 23:02:08Z";
+
+        public const string BadCredNoIssError90014 = "AADSTS90014: The required field 'iss' is missing from the credential. Ensure that you have all the necessary parameters for the login request. Trace ID: 605439e8-8f0e-43f5-9887-5281a05a5200 Correlation ID: abc63349-b90e-4b15-8fb7-edc9326ed3c8 Timestamp: 2023-12-11 23:14:38Z";
+
+        public const string BadCredNoAudError90014 = "AADSTS90014: The required field 'aud' is missing from the credential. Ensure that you have all the necessary parameters for the login request. Trace ID: 0b1cc102-98b7-4fa5-a11a-82520fa85a00 Correlation ID: 23811f20-96bb-4900-a1a3-6368ef8890b2 Timestamp: 2023-12-11 23:16:15Z";
+
+        public const string BadCredBadAlgError5002738 = "A configuration issue is preventing authentication - check the error message from the server for details. You can modify the configuration in the application registration portal. See https://aka.ms/msal-net-invalid-client for details.  Original exception: AADSTS5002738: Invalid JWT token. 'HS256' is not a supported signature algorithm. Supported signing algorithms are: 'RS256,RS384,RS512' Trace ID: 2ed12465-8044-44af-bd27-b73b27e04a00 Correlation ID: bc26e294-ed13-4e6f-a225-28cdec2cc519 Timestamp: 2023-12-11 23:18:06Z";
+
+        public const string BadCredMissingSha1Error5002723 = "A configuration issue is preventing authentication - check the error message from the server for details. You can modify the configuration in the application registration portal. See https://aka.ms/msal-net-invalid-client for details.  Original exception: AADSTS5002723: Invalid JWT token. No certificate SHA-1 thumbprint, certificate SHA-256 thumbprint, nor keyId specified in token header. Trace ID: 3ce71c90-8d35-4413-bedb-73337ec40c00 Correlation ID: 540e9fb1-db53-4b10-a0ca-047d03b97d10 Timestamp: 2023-12-11 23:51:16Z";
+
+        public const string BadTimeRangeError700024 = "A configuration issue is preventing authentication - check the error message from the server for details. You can modify the configuration in the application registration portal. See https://aka.ms/msal-net-invalid-client for details.  Original exception: AADSTS700024: Client assertion is not within its valid time range. Current time: 2023-12-11T23:52:19.6223401Z, assertion valid from 2018-01-18T01:30:22.0000000Z, expiry time of assertion 1970-01-01T00:00:00.0000000Z. Review the documentation at https://docs.microsoft.com/azure/active-directory/develop/active-directory-certificate-credentials . Trace ID: 2486d2c5-63a7-44f5-bb09-05e4c5494000 Correlation ID: fc5f1331-e3ef-44cb-b478-909a171010ab Timestamp: 2023-12-11 23:52:19Z";
+
+        public const string IdentifierMismatchError700021 = "A configuration issue is preventing authentication - check the error message from the server for details. You can modify the configuration in the application registration portal. See https://aka.ms/msal-net-invalid-client for details.  Original exception: AADSTS700021: Client assertion application identifier doesn't match 'client_id' parameter. Review the documentation at https://docs.microsoft.com/azure/active-directory/develop/active-directory-certificate-credentials . Trace ID: 1180e895-2f6b-4504-b0cf-f49632647100 Correlation ID: 88c237d8-7867-4e68-89e4-bc5a6d3b2159 Timestamp: 2023-12-11 23:55:14Z";
+
+        public const string MissingCertError392200 = "AADSTS392200: Client certificate is missing from the request. Trace ID: 35f8d355-5be8-4028-83e5-aeb609b8d500 Correlation ID: e10c5bea-3b7e-42a2-a251-705d6e7aa48d Timestamp: 2023-12-12 00:11:34Z";
+
+        public const string ExpiredCertError392204 = "A configuration issue is preventing authentication - check the error message from the server for details. You can modify the configuration in the application registration portal. See https://aka.ms/msal-net-invalid-client for details.  Original exception: AADSTS392204: The provided client certificate has expired. Trace ID: 44b6984d-e6bd-4374-a9c7-5738ea6b6800 Correlation ID: 7279f188-cd3a-4f09-8236-fc7044d2080a Timestamp: 2023-12-12 00:18:55Z";
+
+        public const string CertMismatchError500181 = "AADSTS500181: The TLS certificate provided does not match the certificate in the assertion. Trace ID: 2781e26e-d4ed-4947-9d95-11dfa81a5900 Correlation ID: e19df97b-3909-4c41-a439-91dc4ec8355b Timestamp: 2023-12-12 00:27:10Z";
 
         public const string TokenResponseJson = @"{
                                                    ""token_type"": ""Bearer"",

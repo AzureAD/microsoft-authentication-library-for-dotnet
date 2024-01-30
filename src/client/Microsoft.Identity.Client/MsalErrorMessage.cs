@@ -255,7 +255,7 @@ namespace Microsoft.Identity.Client
 
         public static string InvalidRedirectUriReceived(string invalidRedirectUri)
         {
-            return string.Format(CultureInfo.InvariantCulture, "Invalid RedirectURI was received ({0})  Not parseable into System.Uri class. ", invalidRedirectUri);
+            return $"Invalid RedirectURI was received ({invalidRedirectUri})  Not parseable into System.Uri class. ";
         }
 
         public const string TelemetryClassIsObsolete =
@@ -274,7 +274,7 @@ namespace Microsoft.Identity.Client
 
         public static string RedirectUriMismatch(string expectedUri, string actualUri)
         {
-            return string.Format(CultureInfo.InvariantCulture, "Redirect Uri mismatch.  Expected ({0}) Actual ({1}). ", expectedUri, actualUri);
+            return $"Redirect Uri mismatch.  Expected ({expectedUri}) Actual ({actualUri}). ";
         }
 
         public const string InteractiveAuthNotSupported =
@@ -341,64 +341,42 @@ namespace Microsoft.Identity.Client
 
         public const string ScopesRequired = "At least one scope needs to be requested for this authentication flow. ";
         public const string InvalidAdalCacheMultipleRTs = "The ADAL cache is invalid as it contains multiple refresh token entries for one user. Deleting invalid ADAL cache. ";
+
         public static string ExperimentalFeature(string methodName)
         {
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "The API {0} is marked as experimental and you should be mindful about using it in production. " +
-                "It may change without incrementing the major version of the library. " +
-                "Call .WithExperimentalFeatures() when creating the public / confidential client to bypass this. See https://aka.ms/msal-net-experimental-features for details. ",
-                methodName);
+            return $"The API {methodName} is marked as experimental and you should be mindful about using it in production. It may change without incrementing the major version of the library. Call .WithExperimentalFeatures() when creating the public / confidential client to bypass this. See https://aka.ms/msal-net-experimental-features for details. ";
         }
 
         public static string NoUserInstanceMetadataEntry(string environment)
         {
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "The json containing instance metadata does not contain details about the authority in use: {0}. See https://aka.ms/msal-net-custom-instance-metadata for more details. ",
-                environment);
+            return $"The json containing instance metadata does not contain details about the authority in use: {environment}. See https://aka.ms/msal-net-custom-instance-metadata for more details. ";
         }
 
         public static string WABError(string status, string errorDetail, string responseData)
         {
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "WAB responded with: status = {0}, error detail = {1}, response data = {2}",
-                status ?? "", errorDetail ?? "", responseData ?? "");
+            return $"WAB responded with: status = {status}, error detail = {errorDetail}, response data = {responseData}";
         }
 
         public static string TokenTypeMismatch(string requestTokenType, string responseTokenType)
         {
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "You asked for token type {0}, but receive {1}. This occurs if the Identity Provider (AAD, B2C, ADFS etc.) does not support the requested token type. If using ADFS, consider upgrading to the latest version. ",
-                requestTokenType, responseTokenType);
+            return $"You asked for token type {requestTokenType}, but receive {responseTokenType}. This occurs if the Identity Provider (AAD, B2C, ADFS etc.) does not support the requested token type. If using ADFS, consider upgrading to the latest version. ";
         }
 
         public const string AccessTokenTypeMissing = "The response from the token endpoint does not contain the token_type parameter. This happens if the identity provider (AAD, B2C, ADFS, etc.) did not include the access token type in the token response. Verify the configuration of the identity provider. ";
 
         public static string InvalidJsonClaimsFormat(string claims)
         {
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "You have configured a claims parameter that is not in JSON format: {0}. Inspect the inner exception for details about the JSON parsing error. To learn more about claim requests, please see https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter. ",
-                claims);
+            return $"You have configured a claims parameter that is not in JSON format: {claims}. Inspect the inner exception for details about the JSON parsing error. To learn more about claim requests, please see https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter. ";
         }
 
         public static string CertMustHavePrivateKey(string certificateName)
         {
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "The certificate {0} does not have a private key. ",
-                certificateName);
+            return $"The certificate {certificateName} does not have a private key. ";
         }
 
         public static string CertMustBeRsa(string certificateFriendlyName)
         {
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "The provided certificate is not of type RSA. Please use a certificate of type RSA. Provided certificate's Friendly Name: {0}.",
-                certificateFriendlyName);
+            return $"The provided certificate is not of type RSA. Please use a certificate of type RSA. Provided certificate's Friendly Name: {certificateFriendlyName}.";
         }
 
         public const string LinuxOpenToolFailed = "Unable to open a web page using xdg-open, gnome-open, kfmclient or wslview tools. See inner exception for details. Possible causes for this error are: tools are not installed or they cannot open a URL. Make sure you can open a web page by invoking from a terminal: xdg-open https://www.bing.com ";
@@ -409,10 +387,7 @@ namespace Microsoft.Identity.Client
         public const string AuthenticationFailedWamElevatedProcess = "WAM Account Picker did not return an account. Either the user cancelled the authentication or the WAM Account Picker crashed because the app is running in an elevated process. For troubleshooting details, see https://aka.ms/msal-net-wam .";
 
         public static string InitializeProcessSecurityError(string errorCode) =>
-            string.Format(
-                CultureInfo.InvariantCulture,
-                "Failure setting process security to enable WAM Account Picker in an elevated process ({0}). For troubleshooting details, see https://aka.ms/msal-net-wam .",
-                errorCode);
+            $"Failure setting process security to enable WAM Account Picker in an elevated process ({errorCode}). For troubleshooting details, see https://aka.ms/msal-net-wam .";
 
         public const string CcsRoutingHintMissing = "Either the userObjectIdentifier or tenantIdentifier are missing. Both are needed to create the CCS routing hint. See https://aka.ms/msal-net/ccsRouting. ";
 
@@ -438,14 +413,11 @@ namespace Microsoft.Identity.Client
         public const string UnableToParseAuthenticationHeader = "MSAL is unable to parse the authentication header returned from the resource endpoint. This can be a result of a malformed header returned in either the WWW-Authenticate or the Authentication-Info collections acquired from the provided endpoint.";
         public static string InvalidTokenProviderResponseValue(string invalidValueName)
         {
-            return string.Format(
-                                CultureInfo.InvariantCulture,
-                                "The following token provider result value is invalid: {0}.",
-                                invalidValueName);
+            return $"The following token provider result value is invalid: {invalidValueName}.";
         }
 
         public const string ManagedIdentityNoResponseReceived = "[Managed Identity] Authentication unavailable. No response received from the managed identity endpoint.";
-        public const string ManagedIdentityInvalidResponse = "[Managed Identity] Invalid response, the authentication response received did not contain the expected fields.";
+        public const string ManagedIdentityInvalidResponse = "[Managed Identity] Required Response fields are missing from the credential response and/or insufficient for authentication.";
         public const string ManagedIdentityUnexpectedResponse = "[Managed Identity] Unexpected exception occurred when parsing the response. See the inner exception for details.";
         public const string ManagedIdentityExactlyOneScopeExpected = "[Managed Identity] To acquire token for managed identity, exactly one scope must be passed.";
 
@@ -454,6 +426,8 @@ namespace Microsoft.Identity.Client
         public const string ManagedIdentityInvalidChallenge = "[Managed Identity] The WWW-Authenticate header in the response from Azure Arc Managed Identity Endpoint did not match the expected format.";
         public const string ManagedIdentityUserAssignedNotSupported = "[Managed Identity] User assigned identity is not supported by the {0} Managed Identity. To authenticate with the system assigned identity omit the client id in ManagedIdentityApplicationBuilder.Create().";
         public const string ManagedIdentityUserAssignedNotConfigurableAtRuntime = "[Managed Identity] Service Fabric user assigned managed identity ClientId or ResourceId is not configurable at runtime.";
+        public const string CredentialEndpointNoResponseReceived = "[Managed Identity] Authentication unavailable. No response received from the managed identity credential endpoint.";
+        public const string CredentialResponseMissingHeader = "[Managed Identity] Did not receive expected Server header in the response from Credential Endpoint.";
         public const string CombinedUserAppCacheNotSupported = "Using a combined flat storage, like a file, to store both app and user tokens is not supported. Use a partitioned token cache (for ex. distributed cache like Redis) or separate files for app and user token caches. See https://aka.ms/msal-net-token-cache-serialization .";
         public const string JsonParseErrorMessage = "There was an error parsing the response from the token endpoint, see inner exception for details. Verify that your app is configured correctly. If this is a B2C app, one possible cause is acquiring a token for Microsoft Graph, which is not supported. See https://aka.ms/msal-net-up";
         public const string SetCiamAuthorityAtRequestLevelNotSupported = "Setting the CIAM authority (ex. \"{tenantName}.ciamlogin.com\") at the request level is not supported. The CIAM authority must be set during application creation";
