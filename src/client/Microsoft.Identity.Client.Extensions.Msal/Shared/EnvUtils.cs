@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
 
         internal static TraceSource GetNewTraceSource(string sourceName)
         {
-            sourceName = sourceName ?? DefaultTraceSource;
+            sourceName ??= DefaultTraceSource;
 #if DEBUG
             var level = SourceLevels.Verbose;
 #else
