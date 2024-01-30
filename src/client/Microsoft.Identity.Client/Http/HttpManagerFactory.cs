@@ -14,16 +14,19 @@ namespace Microsoft.Identity.Client.Http
     /// </summary>
     internal sealed class HttpManagerFactory
     {
-        public static IHttpManager GetHttpManager(IMsalHttpClientFactory httpClientFactory, bool withRetry, bool isManagedIdentity)
+        public static IHttpManager GetHttpManager(
+            IMsalHttpClientFactory httpClientFactory, 
+            bool withRetry, 
+            bool isManagedIdentity)
         {
             if (!withRetry)
             {
-                return new HttpManager(httpClientFactory);
+                return new HttpManager(httpClientFactory, HttpRetryConditions.NoRetry);
             }
 
             return isManagedIdentity ?
-                new HttpManagerManagedIdentity(httpClientFactory) :
-                new HttpManagerWithRetry(httpClientFactory);
+                new HttpManager(httpClientFactory, HttpRetryConditions.Msi) :
+                new HttpManager(httpClientFactory, HttpRetryConditions.Sts);
         }
     }
 }

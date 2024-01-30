@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
@@ -32,7 +33,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()
         {
-            return new Dictionary<string, string>();
+            return CollectionHelpers.GetEmptyDictionary<string, string>();
         }
     }
 }

@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AuthScheme.Bearer
 {
@@ -26,7 +27,7 @@ namespace Microsoft.Identity.Client.AuthScheme.Bearer
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()
         {
             // ESTS issues Bearer tokens by default, no need for any extra params
-            return new Dictionary<string, string>();
+            return CollectionHelpers.GetEmptyDictionary<string, string>();
         }
     }
 }

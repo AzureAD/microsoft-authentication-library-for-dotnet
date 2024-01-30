@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
         private static AbstractManagedIdentity SelectManagedIdentitySource(RequestContext requestContext)
         {
-            return 
+            return
                 ServiceFabricManagedIdentitySource.TryCreate(requestContext) ??
                 AppServiceManagedIdentitySource.TryCreate(requestContext) ?? 
                 CloudShellManagedIdentitySource.TryCreate(requestContext) ??
