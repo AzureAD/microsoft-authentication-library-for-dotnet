@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
 
         public static string ErrorReturnedInBrokerResponse(string error)
         {
-            return string.Format(CultureInfo.InvariantCulture, "Error {0} returned in broker response. ", error);
+            return $"Error {error} returned in broker response. ";
         }
 
         public static string UsingXScopesForRefreshTokenRequest(int numScopes)

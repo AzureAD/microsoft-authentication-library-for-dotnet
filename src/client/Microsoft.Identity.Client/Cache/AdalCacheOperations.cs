@@ -26,8 +26,8 @@ namespace Microsoft.Identity.Client.Cache
                 writer.Write(tokenCacheDictionary.Count);
                 foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in tokenCacheDictionary)
                 {
-                    writer.Write(string.Format(CultureInfo.InvariantCulture, "{1}{0}{2}{0}{3}{0}{4}", Delimiter,
-                        kvp.Key.Authority, kvp.Key.Resource, kvp.Key.ClientId, (int)kvp.Key.TokenSubjectType));
+                    var key = kvp.Key;
+                    writer.Write($"{key.Authority}{Delimiter}{key.Resource}{Delimiter}{key.ClientId}{Delimiter}{(int)key.TokenSubjectType}");
                     writer.Write(kvp.Value.Serialize());
                 }
 
