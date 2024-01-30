@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706580898523,
+  "lastUpdate": 1706580900177,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -10954,6 +10954,54 @@ window.BENCHMARK_DATA = {
             "value": 175356.10861816406,
             "unit": "ns",
             "range": "± 1178.6315853006429"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "simon.cropp@gmail.com",
+            "name": "Simon Cropp",
+            "username": "SimonCropp"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7eecade0da0d66152e2ca9782495478a9bf9847c",
+          "message": "use char based stringbuilder append (#4583)\n\nuse char based append",
+          "timestamp": "2024-01-29T18:08:35-08:00",
+          "tree_id": "205ab8d543e27a3030068685c5a82bcabde304f0",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/7eecade0da0d66152e2ca9782495478a9bf9847c"
+        },
+        "date": 1706580899601,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 21372.80400390625,
+            "unit": "ns",
+            "range": "± 54.03120477028052"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 165181.72583946816,
+            "unit": "ns",
+            "range": "± 179.0184164265118"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 33024.33150736491,
+            "unit": "ns",
+            "range": "± 76.16563807401593"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 167995.41142926898,
+            "unit": "ns",
+            "range": "± 1392.2349642596819"
           }
         ]
       }
