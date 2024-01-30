@@ -89,12 +89,7 @@ namespace Microsoft.Identity.Client.Cache
 
         public static string GetClientCredentialKey(string clientId, string tenantId, string popKid)
         {
-            return string.Format(
-                CultureInfo.InvariantCulture, 
-                "{0}{1}_{2}_AppTokenCache",
-                popKid,
-                clientId,
-                tenantId);
+            return $"{popKid}{clientId}_{tenantId}_AppTokenCache";
         }
 
         public static string GetOboKey(string oboCacheKey, UserAssertion userAssertion)
