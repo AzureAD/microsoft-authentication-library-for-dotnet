@@ -159,17 +159,13 @@ namespace Microsoft.Identity.Client
 
             string innerExceptionContents = InnerException == null
                 ? string.Empty
-                : string.Format(CultureInfo.InvariantCulture, "\nInner Exception: {0}", InnerException.ToString());
+                : $"\nInner Exception: {InnerException}";
 
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "{0}.{1}.{2}: \n\tErrorCode: {3}\n{4}{5}",
-                msalProductName,
-                msalVersion,
-                GetType().Name,
-                ErrorCode,
-                base.ToString(),
-                innerExceptionContents);
+            return $"""
+                    {msalProductName}.{msalVersion}.{GetType().Name}:
+                    	ErrorCode: {ErrorCode}
+                    {base.ToString()}{innerExceptionContents}
+                    """;
         }
 
         #region Serialization

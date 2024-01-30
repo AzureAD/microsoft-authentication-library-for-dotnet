@@ -50,18 +50,12 @@ namespace Microsoft.Identity.Client.Internal
 
         public static string FormatEnterpriseRegistrationOnPremiseUri(string domain)
         {
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "https://enterpriseregistration.{0}/enrollmentserver/contract",
-                domain);
+            return $"https://enterpriseregistration.{domain}/enrollmentserver/contract";
         }
 
         public static string FormatEnterpriseRegistrationInternetUri(string domain)
         {
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "https://enterpriseregistration.windows.net/{0}/enrollmentserver/contract",
-                domain);
+            return $"https://enterpriseregistration.windows.net/{domain}/enrollmentserver/contract";
         }
 
         public const string WellKnownOpenIdConfigurationPath = ".well-known/openid-configuration";
@@ -70,12 +64,7 @@ namespace Microsoft.Identity.Client.Internal
         public const string TenantId = "{tenantid}";
         public static string FormatAdfsWebFingerUrl(string host, string resource)
         {
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "https://{0}/.well-known/webfinger?rel={1}&resource={2}",
-                host,
-                DefaultRealm,
-                resource);
+            return $"https://{host}/.well-known/webfinger?rel={DefaultRealm}&resource={resource}";
         }
     }
 }

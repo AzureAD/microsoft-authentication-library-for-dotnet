@@ -102,10 +102,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 AadAuthority.DefaultTrustedHost;
 
             string instanceDiscoveryEndpoint =  UriBuilderExtensions.GetHttpsUriWithOptionalPort(
-                string.Format(
-                    CultureInfo.InvariantCulture, 
-                    "https://{0}/common/discovery/instance", 
-                    discoveryHost), 
+                $"https://{discoveryHost}/common/discovery/instance",
                 authority.Port);
 
             requestContext.Logger.InfoPii(
