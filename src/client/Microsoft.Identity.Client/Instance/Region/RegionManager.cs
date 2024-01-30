@@ -242,7 +242,7 @@ namespace Microsoft.Identity.Client.Region
                     }
                 }
 
-                result = result ?? new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery, s_regionDiscoveryDetails);
+                result ??= new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery, s_regionDiscoveryDetails);
             }
             finally
             {
