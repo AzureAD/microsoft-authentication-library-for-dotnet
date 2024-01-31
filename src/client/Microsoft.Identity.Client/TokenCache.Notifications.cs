@@ -41,14 +41,16 @@ namespace Microsoft.Identity.Client
                 (this as ITokenCacheInternal).IsAppSubscribedToSerializationEvents();
         }
 
-        async Task ITokenCacheInternal.OnAfterAccessAsync(TokenCacheNotificationArgs args)
+        Task ITokenCacheInternal.OnAfterAccessAsync(TokenCacheNotificationArgs args)
         {
             AfterAccess?.Invoke(args);
 
             if (AsyncAfterAccess != null)
             {
-                await AsyncAfterAccess.Invoke(args).ConfigureAwait(false);
+                return AsyncAfterAccess.Invoke(args);
             }
+
+            return Task.CompletedTask;
         }
 
         Task ITokenCacheInternal.OnBeforeAccessAsync(TokenCacheNotificationArgs args)
