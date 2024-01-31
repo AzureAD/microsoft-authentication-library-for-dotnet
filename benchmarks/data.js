@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706660623396,
+  "lastUpdate": 1706698765167,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -3446,6 +3446,42 @@ window.BENCHMARK_DATA = {
             "value": 333659.21428571426,
             "unit": "ns",
             "range": "± 3062.2518908243233"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "simon.cropp@gmail.com",
+            "name": "Simon Cropp",
+            "username": "SimonCropp"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "61ac67291dde0948c1b5024abc50eb0dd00e42ac",
+          "message": "dont construct a new UTF8Encoding for every call to StringExtensions.ToByteArray (#4587)\n\ndont construct a new UTF8Encoding for every call to StringExtensions. ToByteArray",
+          "timestamp": "2024-01-31T10:52:34Z",
+          "tree_id": "60e392391b454ec63f4e755af7f4a67cf8a8aff9",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/61ac67291dde0948c1b5024abc50eb0dd00e42ac"
+        },
+        "date": 1706698761202,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 252390.57894736843,
+            "unit": "ns",
+            "range": "± 4840.6840921022895"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 335684.28571428574,
+            "unit": "ns",
+            "range": "± 5827.310900849966"
           }
         ]
       }
