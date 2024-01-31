@@ -39,7 +39,11 @@ namespace Microsoft.Identity.Client.Instance.Oidc
 
                 Uri oidcMetadataEndpoint = new Uri(authority + Constants.WellKnownOpenIdConfigurationPath);
 
-                var client = new OAuth2Client(requestContext.Logger, requestContext.ServiceBundle.HttpManager);
+                var client = new OAuth2Client(
+                    requestContext.Logger, 
+                    requestContext.ServiceBundle.HttpManager, 
+                    mtlsCertificate: null);
+
                 configuration = await client.DiscoverOidcMetadataAsync(oidcMetadataEndpoint, requestContext).ConfigureAwait(false);
 
                 s_cache[authority] = configuration;

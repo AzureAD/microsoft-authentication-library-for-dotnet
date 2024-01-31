@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public string ToAccountIdentifier()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", UniqueObjectIdentifier, UniqueTenantIdentifier);
+            return $"{UniqueObjectIdentifier}.{UniqueTenantIdentifier}";
         }
     }
 }

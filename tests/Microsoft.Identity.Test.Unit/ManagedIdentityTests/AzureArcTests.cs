@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task AzureArcInvalidEndpointAsync()
         {
-            using(new EnvVariableContext())
+            using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))
             {
                 SetEnvironmentVariables(ManagedIdentitySource.AzureArc, "localhost/token");
