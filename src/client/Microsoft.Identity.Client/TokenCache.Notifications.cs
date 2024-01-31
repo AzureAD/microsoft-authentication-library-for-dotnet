@@ -51,18 +51,19 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        async Task ITokenCacheInternal.OnBeforeAccessAsync(TokenCacheNotificationArgs args)
+        Task ITokenCacheInternal.OnBeforeAccessAsync(TokenCacheNotificationArgs args)
         {
             BeforeAccess?.Invoke(args);
             if (AsyncBeforeAccess != null)
             {
-                await AsyncBeforeAccess
-                    .Invoke(args)
-                    .ConfigureAwait(false);
+                return AsyncBeforeAccess
+                    .Invoke(args);
             }
+
+            return Task.CompletedTask;
         }
 
-        async Task ITokenCacheInternal.OnBeforeWriteAsync(TokenCacheNotificationArgs args)
+        Task ITokenCacheInternal.OnBeforeWriteAsync(TokenCacheNotificationArgs args)
         {
 #pragma warning disable CS0618 // Type or member is obsolete, but preserve old behavior until it is deleted
             HasStateChanged = true;
@@ -72,8 +73,10 @@ namespace Microsoft.Identity.Client
 
             if (AsyncBeforeWrite != null)
             {
-                await AsyncBeforeWrite.Invoke(args).ConfigureAwait(false);
+                return AsyncBeforeWrite.Invoke(args);
             }
+
+            return Task.CompletedTask;
         }
 
         /// <summary>
