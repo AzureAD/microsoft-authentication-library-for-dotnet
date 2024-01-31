@@ -20,16 +20,7 @@ builder.Services.AddControllers();
 //are created using the factory while at the same time eliminating socket exhaustion.
 builder.Services.AddHttpClient();
 
-//// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-
-// Register the Swagger generator, defining 1 or more Swagger documents
-//builder.Services.AddSwaggerGen(c =>
-//{
-//    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "MSI Helper Service", Version = "1.0.0.0" });
-//    c.IncludeXmlComments(string.Format(@"{0}\MSIHelperService.XML", AppDomain.CurrentDomain.BaseDirectory));
-//    c.EnableAnnotations();
-//});
 
 builder.Services.AddApplicationInsightsTelemetry();
 
