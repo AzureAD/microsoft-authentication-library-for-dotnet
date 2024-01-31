@@ -104,6 +104,30 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         }
 
         [DataTestMethod]
+        [DataRow(TestConstants.AuthorityCommonTenant, true)]
+        [DataRow(TestConstants.AuthorityCommonPpeAuthority, true)]
+        [DataRow(TestConstants.DstsAuthorityCommon, false)]
+        [DataRow(TestConstants.DstsAuthorityTenanted, false)]
+        [DataRow(TestConstants.CiamAuthorityMainFormat, true)]
+        [DataRow(TestConstants.CiamAuthorityWithFriendlyName, true)]
+        [DataRow(TestConstants.CiamAuthorityWithGuid, true)]
+        [DataRow(TestConstants.B2CAuthority, true)]
+        [DataRow(TestConstants.B2CCustomDomain, true)]
+        [DataRow(TestConstants.ADFSAuthority, false)]
+        public void IsSha2Supported(string inputAuthority, bool expected)
+        {
+            Authority a = Authority.CreateAuthority(inputAuthority);
+            Assert.AreEqual(a.AuthorityInfo.IsSha2CredentialSupported, expected);
+        }
+
+        [TestMethod]
+        public void GenericSha2()
+        {
+            var ai = new AuthorityInfo(AuthorityType.Generic, TestConstants.GenericAuthority, false);
+            Assert.IsFalse(ai.IsSha2CredentialSupported);
+        }
+
+        [DataTestMethod]
         [DataRow(TestConstants.AuthorityCommonTenant)]
         [DataRow(TestConstants.AuthorityCommonPpeAuthority)]
         [DataRow(TestConstants.AuthorityConsumersTenant)]

@@ -35,7 +35,6 @@ namespace Microsoft.Identity.Client.Platforms.net6
     [JsonSerializable(typeof(UserRealmDiscoveryResponse))]
     [JsonSerializable(typeof(DeviceCodeResponse))]
     [JsonSerializable(typeof(AdfsWebFingerResponse))]
-    [JsonSerializable(typeof(JsonWebToken.JWTPayload))]
     [JsonSerializable(typeof(DeviceAuthHeader))]
     [JsonSerializable(typeof(DeviceAuthPayload))]
     [JsonSerializable(typeof(ManagedIdentityResponse))]

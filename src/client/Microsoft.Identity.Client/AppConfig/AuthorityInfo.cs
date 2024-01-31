@@ -138,6 +138,14 @@ namespace Microsoft.Identity.Client
             AuthorityType == AuthorityType.B2C ||
             AuthorityType == AuthorityType.Ciam;
 
+        /// <summary>
+        /// True if SHA2 and PSS can be used for creating the client credential from a certificate 
+        /// </summary>
+        internal bool IsSha2CredentialSupported =>
+            AuthorityType != AuthorityType.Dsts &&
+            AuthorityType != AuthorityType.Generic &&
+            AuthorityType != AuthorityType.Adfs;
+
         #region Builders
         internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)
         {
@@ -303,11 +311,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        /// <summary>
-        /// True if SHA2 and PSS can be used for creating the client credential from a certificate 
-        /// </summary>
-        public bool IsSha2CredentialSupported => 
-            AuthorityType == AuthorityType.Aad;
+        
 
         internal Authority CreateAuthority()
         {
