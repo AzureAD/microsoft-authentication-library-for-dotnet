@@ -695,9 +695,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
            Guid[] expectedCorrelationIds = null,
            string[] expectedErrors = null)
         {
-            expectedFailedApiIds = expectedFailedApiIds ?? new ApiIds[0];
-            expectedCorrelationIds = expectedCorrelationIds ?? new Guid[0];
-            expectedErrors = expectedErrors ?? new string[0];
+            expectedFailedApiIds ??= Array.Empty<ApiIds>();
+            expectedCorrelationIds ??= Array.Empty<Guid>();
+            expectedErrors ??= Array.Empty<string>();
 
             var actualHeader = ParseLastRequestHeader(requestMessage);
             TestCommon.YieldTillSatisfied(() => actualHeader.SilentCount == expectedSilentCount);

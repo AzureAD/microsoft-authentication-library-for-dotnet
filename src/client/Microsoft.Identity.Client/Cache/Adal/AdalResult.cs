@@ -18,11 +18,6 @@ namespace Microsoft.Identity.Client.Cache
     [Preserve(AllMembers = true)]
     internal sealed class AdalResult
     {
-        public AdalResult()
-        {
-            // for serialization
-        }
-
         /// <summary>
         /// Gets user information including user Id. Some elements in UserInfo might be null if not returned by the service.
         /// </summary>

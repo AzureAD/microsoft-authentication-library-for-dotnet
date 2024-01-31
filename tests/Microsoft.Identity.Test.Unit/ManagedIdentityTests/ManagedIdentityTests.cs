@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 miBuilder.Config.AccessorOptions = null;
 
                 var mi = miBuilder.Build();
-                
+
                 httpManager.AddManagedIdentityMockHandler(
                 endpoint,
                 Resource,

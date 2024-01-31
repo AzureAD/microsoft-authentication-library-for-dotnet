@@ -258,7 +258,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             return msalTokenResponse;
         }
 
-        private IntPtr GetParentWindow(CoreUIParent uiParent)
+        private static IntPtr GetParentWindow(CoreUIParent uiParent)
         {
             if (uiParent?.OwnerWindow is IntPtr ptr)
             {

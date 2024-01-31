@@ -126,9 +126,6 @@ namespace Microsoft.Identity.Client.Cache
         }
 
         private string DebuggerDisplay =>
-            string.Format(
-                CultureInfo.InvariantCulture,
-                "AdalTokenCacheKey: {0} {1} {2} {3} {4}",
-                Authority, Resource, ClientId, UniqueId, DisplayableId);
+            $"AdalTokenCacheKey: {Authority} {Resource} {ClientId} {UniqueId} {DisplayableId}";
     }
 }

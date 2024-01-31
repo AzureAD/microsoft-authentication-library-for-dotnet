@@ -12,7 +12,6 @@ using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 

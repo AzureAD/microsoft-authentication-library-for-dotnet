@@ -23,21 +23,18 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public static string GetClientInfo(string clientName, string clientVersion)
         {
-            string clientInformation = string.Empty;
             if (!string.IsNullOrEmpty(clientName) && !ApplicationConfiguration.DefaultClientName.Equals(clientName))
             {
                 // space is intentional for formatting of the message
                 if (string.IsNullOrEmpty(clientVersion))
                 {
-                    clientInformation = string.Format(CultureInfo.InvariantCulture, " ({0})", clientName);
+                    return $" ({clientName})";
                 }
-                else
-                {
-                    clientInformation = string.Format(CultureInfo.InvariantCulture, " ({0}: {1})", clientName, clientVersion);
-                }
+
+                return $" ({clientName}: {clientVersion})";
             }
 
-            return clientInformation;
+            return string.Empty;
         }
 
         public static ILoggerAdapter CreateLogger(
@@ -109,16 +106,16 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
             if (ex is MsalException msalException)
             {
-                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, ", ErrorCode: {0}", msalException.ErrorCode));
+                sb.AppendLine($", ErrorCode: {msalException.ErrorCode}");
             }
 
             if (ex is MsalServiceException msalServiceException)
             {
                 sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "HTTP StatusCode {0}", msalServiceException.StatusCode));
-                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "CorrelationId {0}", msalServiceException.CorrelationId));
-                if (msalServiceException.ErrorCodes != null && msalServiceException.ErrorCodes.Count() > 0)
+                sb.AppendLine($"CorrelationId {msalServiceException.CorrelationId}");
+                if (msalServiceException.ErrorCodes is {Length: > 0})
                 {
-                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "Microsoft Entra ID Error Code AADSTS{0}", string.Join(" ", msalServiceException.ErrorCodes)));
+                    sb.AppendLine($"Microsoft Entra ID Error Code AADSTS{string.Join(" ", msalServiceException.ErrorCodes)}");
                 }
             }
 

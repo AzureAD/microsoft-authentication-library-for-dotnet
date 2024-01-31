@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Region
             };
         }
 
-        private string GetRegionalizedEnvironment(Uri authority, string region, RequestContext requestContext)
+        private static string GetRegionalizedEnvironment(Uri authority, string region, RequestContext requestContext)
         {
 
             string host = authority.Host;

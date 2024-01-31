@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop
         {
         }
 
-        private bool IsWindows
+        private static bool IsWindows
         {
             get
             {
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop
             return Task.FromResult(GetUserPrincipalName(NameUserPrincipal));
         }
 
-        private string GetUserPrincipalName(int nameFormat)
+        private static string GetUserPrincipalName(int nameFormat)
         {
             // TODO: there is discrepancy between the implementation of this method on net45 - throws if upn not found - and uap and
             // the rest of the platforms - returns ""
@@ -248,5 +248,6 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop
         }
 
         public override bool BrokerSupportsWamAccounts => true;
+
     }
 }
