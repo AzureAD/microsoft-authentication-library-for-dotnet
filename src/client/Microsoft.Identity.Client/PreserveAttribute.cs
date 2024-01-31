@@ -11,8 +11,6 @@ namespace Microsoft.Identity.Client
     [System.AttributeUsage(System.AttributeTargets.All)]
     class PreserveAttribute : System.Attribute // do not rename
     {
-        public PreserveAttribute() { }
-
         public bool Conditional; // do not change to a property or rename
         public bool AllMembers;  // do not change to a property or rename
     }
