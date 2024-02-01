@@ -472,6 +472,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var claimsBytes = JsonSerializer.SerializeToUtf8Bytes(claims);
             string token = Base64UrlHelpers.Encode(headerBytes) + "." + Base64UrlHelpers.Encode(claimsBytes);
 
+            //codeql [SM03799] Backwards Compatibility: Requires accepting PKCS1 for supporting ADFS 
             string signature = Base64UrlHelpers.Encode(
                 rsa.SignData(
                     Encoding.UTF8.GetBytes(token),
