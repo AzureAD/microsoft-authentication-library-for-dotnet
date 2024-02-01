@@ -123,8 +123,8 @@ namespace Microsoft.Identity.Test.Common
                 ApiId = apiID
             };
 
-            authority = authority ?? Authority.CreateAuthority(TestConstants.AuthorityTestTenant);
-            requestContext = requestContext ?? new RequestContext(serviceBundle, Guid.NewGuid())
+            authority ??= Authority.CreateAuthority(TestConstants.AuthorityTestTenant);
+            requestContext ??= new RequestContext(serviceBundle, Guid.NewGuid())
             {
                 ApiEvent = new Client.TelemetryCore.Internal.Events.ApiEvent(Guid.NewGuid())
             };
@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Test.Common
         {
             MsalAccessTokenCacheItem atItem = accessor.GetAllAccessTokens().Single();
 
-            refreshOn = refreshOn ?? DateTimeOffset.UtcNow - TimeSpan.FromMinutes(30);
+            refreshOn ??= DateTimeOffset.UtcNow - TimeSpan.FromMinutes(30);
 
             atItem = atItem.WithRefreshOn(refreshOn);
 

@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             foreach (var ev in _failedEvents)
             {
                 if (!firstFailure)
-                    errors.Append(",");
+                    errors.Append(',');
 
                 errors.Append(
                     // error codes come from the server / broker and can sometimes be full blown sentences,
@@ -66,10 +66,10 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
                     HttpHeaderSanitizer.SanitizeHeader(ev.ApiErrorCode));
 
                 if (!firstFailure)
-                    failedRequests.Append(",");
+                    failedRequests.Append(',');
 
                 failedRequests.Append(ev.ApiIdString);
-                failedRequests.Append(",");
+                failedRequests.Append(',');
                 failedRequests.Append(ev.CorrelationId.ToString());
 
                 firstFailure = false;

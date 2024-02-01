@@ -33,6 +33,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public string ExpiresOn { get; set; }
 
         /// <summary>
+        /// The timespan when the access token expires.
+        /// </summary>
+        /// <remarks>The date is represented as the number of seconds from "1970-01-01T0:0:0Z UTC" 
+        /// (corresponds to the token's exp claim).</remarks>
+        [JsonProperty("expires_in")]
+        public string ExpiresIn { get; set; }
+        
+        /// <summary>
         /// The resource the access token was requested for.
         /// </summary>
         /// <remarks>Which matches the resource query string parameter of the request.</remarks>

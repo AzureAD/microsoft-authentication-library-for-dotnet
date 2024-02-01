@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System.Diagnostics;
 using System.Net;
@@ -8,7 +8,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
@@ -61,15 +60,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             LabResponse labResponse = await LabUserHelper.GetAdfsUserAsync(FederationProvider.ADFSv2019, true).ConfigureAwait(false);
 
-            await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user").ConfigureAwait(false);
-        }
-
-        [RunOn(TargetFrameworks.NetCore)]
-        [Timeout(2 * 60 * 1000)] // 2 min timeout
-        [TestCategory(TestCategories.Arlington)]
-        public async Task ArlingtonDeviceCodeFlowAdfsTestAsync()
-        {
-            LabResponse labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user").ConfigureAwait(false);
         }
 

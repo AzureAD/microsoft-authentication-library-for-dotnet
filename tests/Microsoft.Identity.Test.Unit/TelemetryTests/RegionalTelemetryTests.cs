@@ -385,11 +385,11 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
            string[] expectedRegions = null,
            string[] expectedRegionSources = null)
         {
-            expectedFailedApiIds = expectedFailedApiIds ?? new ApiIds[0];
-            expectedCorrelationIds = expectedCorrelationIds ?? new Guid[0];
-            expectedErrors = expectedErrors ?? new string[0];
-            expectedRegions = expectedRegions ?? new string[0];
-            expectedRegionSources = expectedRegionSources ?? new string[0];
+            expectedFailedApiIds ??= Array.Empty<ApiIds>();
+            expectedCorrelationIds ??= Array.Empty<Guid>();
+            expectedErrors ??= Array.Empty<string>();
+            expectedRegions ??= Array.Empty<string>();
+            expectedRegionSources ??= Array.Empty<string>();
 
             var actualHeader = ParseLastRequestHeader(requestMessage);
 

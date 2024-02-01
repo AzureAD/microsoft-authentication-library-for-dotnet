@@ -22,11 +22,6 @@ namespace CommonCache.Test.Common
         private static readonly object SyncRoot = new object();
         private static readonly HashSet<ProcessHelper> CurrentRunningProcesses = new HashSet<ProcessHelper>();
 
-        public ProcessUtils()
-        {
-
-        }
-
         public async Task<string> FindProgramAsync(string findArgs, CancellationToken cancellationToken)
         {
             if (File.Exists(findArgs))

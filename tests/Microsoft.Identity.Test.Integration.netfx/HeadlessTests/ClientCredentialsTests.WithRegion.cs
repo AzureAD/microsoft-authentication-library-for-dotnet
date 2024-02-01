@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private void AssertTelemetry(HttpSnifferClientFactory factory, string currentTelemetryHeader, int placement = 0)
         {
-            var (req, _) = factory.RequestsAndResponses.Skip(placement).Single();
+            var (req, res) = factory.RequestsAndResponses.Skip(placement).Single();
             Assert.AreEqual(currentTelemetryHeader, req.Headers.GetValues("x-client-current-telemetry").First());
         }
 
@@ -100,12 +100,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             if (isRegionalHost)
             {
-                var (req, _) = factory.RequestsAndResponses.Skip(placement).Single(x => x.Item1.RequestUri.Host == RegionalHost && x.Item2.StatusCode == HttpStatusCode.OK);
+                var (req, res) = factory.RequestsAndResponses.Skip(placement).Single(x => x.Item1.RequestUri.Host == RegionalHost && x.Item2.StatusCode == HttpStatusCode.OK);
                 Assert.AreEqual(RegionalHost, req.RequestUri.Host);
             }
             else
             {
-                var (req, _) = factory.RequestsAndResponses.Skip(placement).Single(x => x.Item1.RequestUri.Host == GlobalHost && x.Item2.StatusCode == HttpStatusCode.OK);
+                var (req, res) = factory.RequestsAndResponses.Skip(placement).Single(x => x.Item1.RequestUri.Host == GlobalHost && x.Item2.StatusCode == HttpStatusCode.OK);
                 Assert.AreEqual(GlobalHost, req.RequestUri.Host);
             }
         }
