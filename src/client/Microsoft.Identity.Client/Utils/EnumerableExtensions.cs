@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Utils
             this IDictionary<TKey, TValue> source,
             IDictionary<TKey, TValue> other)
         {
-            if (source == null)
+            if (source == null || other == null)
             {
                 return;
             }
