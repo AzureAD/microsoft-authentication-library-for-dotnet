@@ -44,6 +44,10 @@ namespace Microsoft.Identity.Test.Unit
         [DataRow("client_id=00000003-0000-0000-c000-000000000000", "authority=\"https://login.microsoftonline.com/common\"")]
         [DataRow("resource_id=00000003-0000-0000-c000-000000000000", "authorization=\"https://login.microsoftonline.com/common/oauth2/authorize\"")]
         [DataRow("resource=00000003-0000-0000-c000-000000000000", "authorization=\"https://login.microsoftonline.com/common/oauth2/authorize\"")]
+        [DataRow("resource=00000003-0000-0000-c000-000000000000", "authorization_uri=\"https://login.microsoftonline.com/common/v2.0/oauth2/authorize\"")]
+        [DataRow("resource=00000003-0000-0000-c000-000000000000", "authorization_uri=\"https://login.microsoftonline.com/common/oauth2/v2.0/authorize\"")]
+        [DataRow("resource=00000003-0000-0000-c000-000000000000", "authorization=\"https://login.microsoftonline.com/common/v2.0/oauth2/authorize\"")]
+        [DataRow("resource=00000003-0000-0000-c000-000000000000", "authorization=\"https://login.microsoftonline.com/common/oauth2/v2.0/authorize\"")]
         public void CreateWwwAuthenticateResponse(string resource, string authorizationUri)
         {
             // Arrange
