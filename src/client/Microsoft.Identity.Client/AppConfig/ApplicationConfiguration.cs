@@ -24,11 +24,11 @@ namespace Microsoft.Identity.Client
 {
     internal sealed class ApplicationConfiguration : IAppConfig
     {
-        public ApplicationConfiguration(MsalClientType applicationType) 
+        public ApplicationConfiguration(MsalClientType applicationType)
         {
             switch (applicationType)
             {
-                case MsalClientType.ConfidentialClient: 
+                case MsalClientType.ConfidentialClient:
                     IsConfidentialClient = true;
                     break;
 
@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client
                     break;
             }
         }
-        
+
         public const string DefaultClientName = "UnknownClient";
         public const string DefaultClientVersion = "0.0.0.0";
 
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client
         public bool IsBrokerEnabled { get; internal set; }
 
         // Legacy options for UWP. .NET broker options are in BrokerOptions
-        public WindowsBrokerOptions UwpBrokerOptions { get; set; } 
+        public WindowsBrokerOptions UwpBrokerOptions { get; set; }
 
         public BrokerOptions BrokerOptions { get; set; }
 
@@ -107,24 +107,27 @@ namespace Microsoft.Identity.Client
         public string Component { get; internal set; }
         public IDictionary<string, string> ExtraQueryParameters { get; internal set; } = new Dictionary<string, string>();
         public bool UseRecommendedDefaultRedirectUri { get; internal set; }
-
         public bool ExperimentalFeaturesEnabled { get; set; } = false;
-
         public IEnumerable<string> ClientCapabilities { get; set; }
         public bool SendX5C { get; internal set; } = false;
         public bool LegacyCacheCompatibilityEnabled { get; internal set; } = true;
         public bool CacheSynchronizationEnabled { get; internal set; } = true;
         public bool MultiCloudSupportEnabled { get; set; } = false;
-
         public bool RetryOnServerErrors { get; set; } = true;
-
-        public ManagedIdentityId ManagedIdentityId { get; internal set; }
-
-        public bool IsManagedIdentity { get; }
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
-#region ClientCredentials
+        #region ManagedIdentity
+        public ManagedIdentityId ManagedIdentityId { get; internal set; }
+        public bool IsManagedIdentity { get; }
+
+        public CryptoKeyType ManagedIdentityCredentialKeyType { get; internal set; }
+
+        public X509Certificate2 ManagedIdentityClientCertificate { get; internal set; }
+
+        #endregion
+
+        #region ClientCredentials
 
         public IClientCredential ClientCredential { get; internal set; }
 
@@ -155,17 +158,17 @@ namespace Microsoft.Identity.Client
                 {
                     return cred.Certificate;
                 }
-               
+
                 return null;
             }
         }
-#endregion
+        #endregion
 
-#region Region
+        #region Region
         public string AzureRegion { get; set; }
-#endregion
+        #endregion
 
-#region Authority
+        #region Authority
         // These are all used to create the Authority when the app is built.
 
         public string TenantId { get; internal set; }
@@ -193,18 +196,19 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool ValidateAuthority { get; set; }
 
-#endregion
+        #endregion
 
-#region Test Hooks
+        #region Test Hooks
         public ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
 
         public ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
         public ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
         public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
+        public IKeyMaterialManager KeyMaterialManagerForTest { get; set; }
         public bool IsConfidentialClient { get; }
         public bool IsInstanceDiscoveryEnabled { get; internal set; } = true;
-        #endregion
+#endregion
 
     }
 }

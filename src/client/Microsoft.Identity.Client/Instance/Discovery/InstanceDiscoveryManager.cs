@@ -148,9 +148,8 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 }
 
                 requestContext.Logger.Info("[Instance Discovery] Instance discovery is enabled and will be performed");
-                entry = entry ??
-                    await _regionDiscoveryProvider.GetMetadataAsync(authorityUri, requestContext).ConfigureAwait(false) ??
-                    await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
+                entry ??= await _regionDiscoveryProvider.GetMetadataAsync(authorityUri, requestContext).ConfigureAwait(false) ??
+                          await FetchNetworkMetadataOrFallbackAsync(requestContext, authorityUri).ConfigureAwait(false);
 
                 if (entry == null)
                 {
