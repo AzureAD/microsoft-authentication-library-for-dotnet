@@ -93,18 +93,22 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         [TestMethod]
         public async Task ThrowOnNoHandleAsync()
         {
-            var pcaBuilder = PublicClientApplicationBuilder
-               .Create(TestConstants.ClientId);
+            using (var handle = base.CreateTestHarness())
+            {
+                handle.HttpManager.AddInstanceDiscoveryMockHandler();
+                var pcaBuilder = PublicClientApplicationBuilder
+                   .Create(TestConstants.ClientId)
+                   .WithHttpManager(handle.HttpManager)
+                   .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
 
-            pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+                var pca = pcaBuilder.Build();
 
-            var pca = pcaBuilder.Build();
+                // no window handle - throw
+                var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
+                    () => pca.AcquireTokenInteractive(new[] { "" }).ExecuteAsync()).ConfigureAwait(false);
 
-            // no window handle - throw
-            var ex = await AssertException.TaskThrowsAsync<MsalClientException>(
-                () => pca.AcquireTokenInteractive(new[] { "" }).ExecuteAsync()).ConfigureAwait(false);
-
-            Assert.AreEqual("window_handle_required", ex.ErrorCode);
+                Assert.AreEqual("window_handle_required", ex.ErrorCode);
+            }
            
         }
        
