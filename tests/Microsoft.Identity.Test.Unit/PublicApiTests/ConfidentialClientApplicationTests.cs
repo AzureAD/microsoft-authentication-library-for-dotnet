@@ -1785,7 +1785,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .Create(TestConstants.ClientId)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
-                    .WithLogging((LogLevel _, string message, bool _) => log = log + message)
+                    .WithLogging((LogLevel _, string message, bool _) => log += message)
                     .BuildConcrete();
 
 #pragma warning disable CS0618 // Type or member is obsolete

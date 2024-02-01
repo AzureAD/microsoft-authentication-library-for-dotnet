@@ -5,7 +5,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
     <DefineConstants>$(DefineConstants);SUPPORTS_SYSTEM_TEXT_JSON;</DefineConstants> 
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)' or '$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);SUPPORTS_OTEL;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
@@ -17,8 +17,14 @@
   <PropertyGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) Or '$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">
     <DefineConstants>$(DefineConstants);ANDROID;SUPPORTS_BROKER;IS_XAMARIN_OR_UWP</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
+    <DefineConstants>$(DefineConstants)DESKTOP;SUPPORTS_BROKER;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)'">
     <DefineConstants>$(DefineConstants);SUPPORTS_BROKER;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)' or '$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
+    <DefineConstants>$(DefineConstants);SUPPORTS_MIV2</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkIos)' Or '$(TargetFramework)' == '$(TargetFrameworkNet6Ios)' Or '$(TargetFramework)' == '$(TargetFrameworkNet6Mac)'">
     <DefineConstants>$(DefineConstants);iOS;SUPPORTS_BROKER;IS_XAMARIN_OR_UWP</DefineConstants>

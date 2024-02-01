@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 
-
 namespace MSIHelperService.AzureFunction // Name space is not required while updating this code in the function app
 {
     /// <summary>

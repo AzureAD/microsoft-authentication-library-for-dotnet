@@ -719,11 +719,7 @@ namespace Microsoft.Identity.Client
             }
 
             authenticationRequest.RequestContext.Logger.Info(
-                    () => string.Format(
-                        CultureInfo.InvariantCulture,
-                        "A token bound to the wrong key was found. Token key id: {0} Request key id: {1}",
-                        item.KeyId,
-                        requestKid));
+                    () => $"A token bound to the wrong key was found. Token key id: {item.KeyId} Request key id: {requestKid}");
             return null;
         }
         #endregion

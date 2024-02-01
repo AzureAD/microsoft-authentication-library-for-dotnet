@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.Unit
                 {
                     DateTimeOffset expectedRefreshOn = DateTimeOffset.UtcNow;
                     if (expectedRefreshIn != 0)
-                        expectedRefreshOn = expectedRefreshOn + TimeSpan.FromSeconds(expectedRefreshIn);
+                        expectedRefreshOn += TimeSpan.FromSeconds(expectedRefreshIn);
 
                     CoreAssert.IsWithinRange(
                         expectedRefreshOn,

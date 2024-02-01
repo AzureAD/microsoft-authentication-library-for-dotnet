@@ -6,9 +6,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -16,6 +18,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute.Core;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -235,22 +238,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     {
         public long LastRequestDurationInMs => 50;
 
-        public async Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
+        public Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
         {
-            // simulate delay and also add complexity due to thread context switch
-            await Task.Delay(ParallelRequestsTests.NetworkAccessPenaltyMs).ConfigureAwait(false);
-
-            if (endpoint.AbsoluteUri.StartsWith("https://login.microsoftonline.com/common/discovery/instance?api-version=1.1"))
-            {
-                return new HttpResponse()
-                {
-                    Body = TestConstants.DiscoveryJsonResponse,
-                    StatusCode = System.Net.HttpStatusCode.OK
-                };
-            }
-
             Assert.Fail("Only instance discovery is supported");
-            return null;
+            return Task.FromResult<HttpResponse>(null);
         }
 
         public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ILoggerAdapter logger, CancellationToken cancellationToken = default)
@@ -272,6 +263,49 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             return null;
         }
 
+        public async Task<HttpResponse> SendRequestAsync(
+            Uri endpoint,
+            Dictionary<string, string> headers,
+            HttpContent body,
+            HttpMethod method,
+            ILoggerAdapter logger,
+            bool doNotThrow,
+            bool retry, 
+            X509Certificate2 mtlsCertificate,
+            CancellationToken cancellationToken)
+        {
+            // simulate delay and also add complexity due to thread context switch
+            await Task.Delay(ParallelRequestsTests.NetworkAccessPenaltyMs).ConfigureAwait(false);
+
+            if (HttpMethod.Get == method &&
+                endpoint.AbsoluteUri.StartsWith("https://login.microsoftonline.com/common/discovery/instance?api-version=1.1"))
+            {
+                return new HttpResponse()
+                {
+                    Body = TestConstants.DiscoveryJsonResponse,
+                    StatusCode = System.Net.HttpStatusCode.OK
+                };
+            }
+
+            if (HttpMethod.Post == method && 
+                endpoint.AbsoluteUri.Equals("https://login.microsoftonline.com/my-utid/oauth2/v2.0/token"))
+            {
+                var bodyString = (body as FormUrlEncodedContent).ReadAsStringAsync().GetAwaiter().GetResult();
+                var bodyDict = bodyString.Replace("?", "").Split('&').ToDictionary(x => x.Split('=')[0], x => x.Split('=')[1]);
+
+                bodyDict.TryGetValue(OAuth2Parameter.RefreshToken, out string rtSecret);
+
+                return new HttpResponse()
+                {
+                    Body = GetTokenResponseForRt(rtSecret),
+                    StatusCode = System.Net.HttpStatusCode.OK
+                };
+            }
+
+            Assert.Fail("Test issue - this HttpRequest is not mocked");
+            return null;
+        }
+
         private string GetTokenResponseForRt(string rtSecret)
         {
             if (int.TryParse(rtSecret, out int i))
@@ -285,26 +319,5 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             Assert.Fail("Expecting the rt secret to be a number, to be able to craft a response");
             return null;
         }
-
-        public Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, HttpContent body, ILoggerAdapter logger, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, StringContent body, ILoggerAdapter logger, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ILoggerAdapter logger, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<HttpResponse> SendGetForceResponseAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
     }
 }
