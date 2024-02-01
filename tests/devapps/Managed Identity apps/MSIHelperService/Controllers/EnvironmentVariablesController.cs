@@ -3,16 +3,15 @@
 
 using Microsoft.AspNetCore.Mvc;
 using MSIHelperService.Helper;
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace MSIHelperService.Controllers
 {
     /// <summary>
     /// GetEnvironmentVariablesController
+    /// Gets All Environment Variables
     /// </summary>
     [ApiController]
     [Route("[controller]")]
-    [SwaggerTag(description: "Gets All Environment Variables")]
     public class EnvironmentVariablesController : ControllerBase
     {
         private readonly ILogger _logger;
@@ -37,12 +36,10 @@ namespace MSIHelperService.Controllers
         /// </summary>
         /// <param name="resource">Allowed Values :  "WebApp", "Function", "VM", "AzureArc", "ServiceFabric"</param>
         /// <returns>
-        /// Returns the environment variables of an azure resource
+        /// Returns the environment variables of an azure resource.
+        /// 400 - Returns the error object for any validation failures
+        /// 500 - Returns the error object for any Server Errors
         /// </returns>
-        [SwaggerOperation(Summary = "Gets the Environment Variables from an Azure Resource")]
-        [SwaggerResponse(200, "Returns Azure Web App Environment Variables", Type = typeof(string))]
-        [SwaggerResponse(400, "Returns the error object for any validation failures", Type = typeof(string))]
-        [SwaggerResponse(500, "Returns the error object for any Server Errors", Type = typeof(string))]
         [HttpGet]
         public async Task<Dictionary<string, string>?> EnvValues([FromQuery(Name = "resource")]
         string resource = MSIHelper.DefaultAzureResource)
