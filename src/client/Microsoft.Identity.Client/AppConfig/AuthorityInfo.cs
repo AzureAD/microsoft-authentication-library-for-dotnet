@@ -366,7 +366,7 @@ namespace Microsoft.Identity.Client
                     throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, nameof(authority));
                 }
 
-                string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split('/');
+                string[] pathSegments = path.Split('/');
                 if (pathSegments == null || pathSegments.Length == 0)
                 {
                     throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath);
