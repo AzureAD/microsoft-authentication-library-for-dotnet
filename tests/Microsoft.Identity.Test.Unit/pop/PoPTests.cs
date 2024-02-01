@@ -429,41 +429,47 @@ namespace Microsoft.Identity.Test.Unit.Pop
         }
 
         [TestMethod]
-        public async Task EnsurePopTokenIsNotretrievedFromLocalCache_Async()
+        public async Task EnsurePopTokenIsNotRetrievedFromLocalCache_Async()
         {
             // Arrange
-            var brokerAccessToken = "TokenFromBroker";
+            using (var harness = base.CreateTestHarness())
+            {
+                var brokerAccessToken = "TokenFromBroker";
 
-            var mockBroker = Substitute.For<IBroker>();
-            mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
-            mockBroker.IsPopSupported.Returns(true);
-            mockBroker.AcquireTokenSilentAsync(
-                Arg.Any<AuthenticationRequestParameters>(),
-                Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalPopTokenResponse(brokerAccessToken));
+                var mockBroker = Substitute.For<IBroker>();
+                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+                mockBroker.IsPopSupported.Returns(true);
+                mockBroker.AcquireTokenSilentAsync(
+                    Arg.Any<AuthenticationRequestParameters>(),
+                    Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalPopTokenResponse(brokerAccessToken));
 
-            var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                            .WithTestBroker(mockBroker)
-                            .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
-            PublicClientApplication pca = pcaBuilder.BuildConcrete();
+                var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                .WithTestBroker(mockBroker)
+                                .WithHttpManager(harness.HttpManager)
+                                .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
 
-            //Populate local cache with token
-            TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
+                PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
-            pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
+                //Populate local cache with token
+                TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
 
-            // Act
-            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-            var result = await pca.AcquireTokenSilent(TestConstants.s_graphScopes, accounts.FirstOrDefault())
-                .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
-                .ExecuteAsync()
-                .ConfigureAwait(false);
+                pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
 
-            //Assert
-            //Validate that access token from broker and not local cache
-            Assert.AreEqual(brokerAccessToken, result.AccessToken);
-            Assert.AreEqual(Constants.PoPAuthHeaderPrefix, result.TokenType);
-            Assert.AreEqual(TokenSource.Broker, result.AuthenticationResultMetadata.TokenSource);
+                // Act
+                var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+                var result = await pca.AcquireTokenSilent(TestConstants.s_graphScopes, accounts.FirstOrDefault())
+                    .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                //Assert
+                //Validate that access token from broker and not local cache
+                Assert.AreEqual(brokerAccessToken, result.AccessToken);
+                Assert.AreEqual(Constants.PoPAuthHeaderPrefix, result.TokenType);
+                Assert.AreEqual(TokenSource.Broker, result.AuthenticationResultMetadata.TokenSource);
+            }
         }
 
         private MsalTokenResponse CreateMsalPopTokenResponse(string accessToken = null)
