@@ -92,6 +92,7 @@ namespace Microsoft.Identity.Client.Internal
                 throw new MsalClientException(MsalError.EncodedTokenTooLong);
             }
 
+            //codeql [SM03799] Backwards Compatibility: Requires using PKCS1 padding for Identity Providers not supporting PSS (AAD, B2C, CIAM support it)
             byte[] signature = _cryptographyManager.SignWithCertificate(
                 token,
                 certificate,
