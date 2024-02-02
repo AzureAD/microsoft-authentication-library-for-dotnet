@@ -215,21 +215,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (Uri.IsWellFormedUriString(firstScope, UriKind.Absolute))
                 {
-                    var firstScopeAsUri = new Uri(firstScope);
+                    Uri firstScopeAsUri = new Uri(firstScope);
                     resource = $"{firstScopeAsUri.Scheme}://{firstScopeAsUri.Host}";
 
-                    var stringBuilder = new StringBuilder();
+                    StringBuilder stringBuilder = new StringBuilder();
 
                     foreach (string scope in AuthenticationRequestParameters.Scope)
                     {
-                        var splitString = scope.Split([firstScopeAsUri.Host], StringSplitOptions.None);
-                        var scopeToAppend = splitString.Length > 1 ? splitString[1].TrimStart('/') : splitString.FirstOrDefault();
+                        var splitString = scope.Split(new[] { firstScopeAsUri.Host }, StringSplitOptions.None);
+                        string scopeToAppend = splitString.Length > 1 ? splitString[1].TrimStart('/') + " " : splitString.FirstOrDefault();
                         stringBuilder.Append(scopeToAppend);
-                        stringBuilder.Append(' ');
                     }
 
-                    stringBuilder.Length -= 1;
-                    scopes = stringBuilder.ToString();
+                    scopes = stringBuilder.ToString().TrimEnd(' ');
                 }
                 else
                 {
