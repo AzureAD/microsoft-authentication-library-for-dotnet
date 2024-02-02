@@ -56,7 +56,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             // Arrange
             string ciamAuthority = _ciamInstance + "/";
-            string ciamTransformedInstance = _ciamInstance + "/";
             string ciamTenant = "idgciamdemo.onmicrosoft.com";
             string ciamTransformedAuthority = _ciamInstance + "/" + ciamTenant;
 

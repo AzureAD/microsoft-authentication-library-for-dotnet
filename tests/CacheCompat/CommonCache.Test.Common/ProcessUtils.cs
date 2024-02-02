@@ -22,11 +22,6 @@ namespace CommonCache.Test.Common
         private static readonly object SyncRoot = new object();
         private static readonly HashSet<ProcessHelper> CurrentRunningProcesses = new HashSet<ProcessHelper>();
 
-        public ProcessUtils()
-        {
-
-        }
-
         public async Task<string> FindProgramAsync(string findArgs, CancellationToken cancellationToken)
         {
             if (File.Exists(findArgs))
@@ -139,14 +134,6 @@ namespace CommonCache.Test.Common
             if (cancelWaitHandle != null && cancelWaitHandle.WaitOne(0))
             {
                 throw new OperationCanceledException();
-            }
-
-            if (environmentVars != null)
-            {
-                foreach (KeyValuePair<string, string> envVars in environmentVars)
-                {
-                    //_log.LogDebug("{0} : {1}", envVars.Key, envVars.Value);
-                }
             }
 
             if (successfulExitCodes == null)

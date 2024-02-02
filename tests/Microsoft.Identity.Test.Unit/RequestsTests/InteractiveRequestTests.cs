@@ -30,8 +30,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
-                var bundle = harness.ServiceBundle;
-
                 AuthenticationRequestParameters requestParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
@@ -351,9 +349,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             if (multiCloudSupportEnabled)
             {
                 expectedQueryParams.Add("instance_aware", "true");
-                authorizationResultUri = authorizationResultUri + "&cloud_instance_name=microsoftonline.us&cloud_instance_host_name=login.microsoftonline.us";
+                authorizationResultUri += "&cloud_instance_name=microsoftonline.us&cloud_instance_host_name=login.microsoftonline.us";
             }
-                
 
             using (MockHttpAndServiceBundle harness = CreateTestHarness(isMultiCloudSupportEnabled: multiCloudSupportEnabled))
             {
