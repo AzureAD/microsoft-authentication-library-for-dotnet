@@ -24,8 +24,7 @@ namespace Microsoft.Identity.Client.Extensibility
             this AbstractAcquireTokenParameterBuilder<T> builder, 
             Func<OnBeforeTokenRequestData, Task> onBeforeTokenRequestHandler) 
             where T : AbstractAcquireTokenParameterBuilder<T>
-        {
-            builder.ValidateUseOfExperimentalFeature();
+        {            
             builder.CommonParameters.OnBeforeTokenRequestHandler = onBeforeTokenRequestHandler;
 
             return builder;
