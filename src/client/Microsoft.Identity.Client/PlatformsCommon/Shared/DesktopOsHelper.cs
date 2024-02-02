@@ -184,9 +184,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         private static bool IsInteractiveSessionMac()
         {
-
             // Get information about the current session
-            int error = SecurityFramework.SessionGetInfo(SecurityFramework.CallerSecuritySession, out int id, out var sessionFlags);
+            int error = SecurityFramework.SessionGetInfo(SecurityFramework.CallerSecuritySession, out int _, out var sessionFlags);
 
             // Check if the session supports Quartz
             if (error == 0 && (sessionFlags & SessionAttributeBits.SessionHasGraphicAccess) != 0)

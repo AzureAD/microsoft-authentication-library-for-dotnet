@@ -250,7 +250,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-            DateTimeOffset ropcTokenExpiration = result.ExpiresOn;
             string ropcToken = result.AccessToken;
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);

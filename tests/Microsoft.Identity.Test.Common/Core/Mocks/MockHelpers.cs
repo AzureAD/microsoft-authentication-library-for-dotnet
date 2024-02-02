@@ -505,9 +505,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static HttpResponseMessage CreateAdfsOpenIdConfigurationResponse(string authority, string qp = "")
         {
-            var authorityUri = new Uri(authority);
-            string path = authorityUri.AbsolutePath.Substring(1);
-
             if (!string.IsNullOrEmpty(qp))
             {
                 qp = "?" + qp;

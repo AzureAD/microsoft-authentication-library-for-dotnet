@@ -30,8 +30,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
-                var bundle = harness.ServiceBundle;
-
                 AuthenticationRequestParameters requestParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
