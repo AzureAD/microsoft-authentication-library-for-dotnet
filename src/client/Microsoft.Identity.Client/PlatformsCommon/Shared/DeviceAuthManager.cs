@@ -99,9 +99,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                     return FindCertificateByCertAuthorities(challengeData, certCollection);
                 }
 
-                X509Certificate2Collection signingCert = null;
-                signingCert = certCollection.Find(X509FindType.FindByThumbprint, challengeData["CertThumbprint"],
-                    false);
+                X509Certificate2Collection signingCert = certCollection.Find(X509FindType.FindByThumbprint, challengeData["CertThumbprint"], false);
                 if (signingCert.Count == 0)
                 {
                     throw new MsalException(MsalError.DeviceCertificateNotFound,
