@@ -22,7 +22,7 @@ To test managed identities, code needs to be deployed in MI supported Azure Reso
 
 ## Solution
 
-To eliminate this problem, MSAL.NET team has built a MSI helper service ([https://service.msidlab.com/swagger](https://service.msidlab.com/swagger)) that acts as a proxy for several managed identity sources and allows to retrieve the managed identity token responses via a web API. This API accepts the same query params on a request to a managed identity endpoint which allows your test(s) to call the API just like how you would make a HTTP request to the managed identity endpoint while your code runs inside of a managed identity source.   
+To eliminate this problem, MSAL.NET team has built a MSI helper service ([https://service.msidlab.com](https://service.msidlab.com)) that acts as a proxy for several managed identity sources and allows to retrieve the managed identity token responses via a web API. This API accepts the same query params on a request to a managed identity endpoint which allows your test(s) to call the API just like how you would make a HTTP request to the managed identity endpoint while your code runs inside of a managed identity source.   
 
 This protected web service is able to send http requests to Managed Identity endpoints (for e.g. Azure Web App, Function App or a Virtual machine) and transfer the managed identity response back to you. Since Identity Labs manages all the azure resources there will be zero cost and zero maintenance for you and your service. 
 
@@ -71,7 +71,7 @@ MSAL .Net supports the following Managed Identity sources:
 
 ## How can I test these different sources?
 
-MSAL .Net team has deployed a Managed Identity helper service called the [MSIHelper service](https://service.msidlab.com/swagger/index.html), using which you should be able to test the following sources. 
+MSAL .Net team has deployed a Managed Identity helper service called the [MSIHelper service](https://service.msidlab.com/EnvironmentVariables?resource=WebApp), using which you should be able to test the following sources by passing the relevant source as a query parameter.
 
 1. Web App (version : 2019-08-01)
 2. Function App (version : 2019-08-01)
@@ -82,7 +82,7 @@ MSAL .Net team has deployed a Managed Identity helper service called the [MSIHel
 
 ## Where is this service deployed?
 
-The protected test service can be accessed by going to [https://service.msidlab.com/](https://service.msidlab.com/). You can also use the [MSI Helper Swagger](https://service.msidlab.com/swagger/index.html) to test this service. 
+The protected test service can be accessed by going to [https://service.msidlab.com/](https://service.msidlab.com/).
 
 
 ## What are the different endpoints, the MSI Helper service exposes?
@@ -178,9 +178,9 @@ Build the current project (The MSI Helper Service - MSIHelperService.csproj) and
 
 > **_NOTE:_**  You will need to have Identity Lab permissions to deploy to the helper service. Make sure to keep the settings same as how it is shown in the above screenshot
 
-- Once the service has been deployed you can test the service using the swagger or run MSAL integration tests pointing to the staging slot 
+- Once the service has been deployed you can test the service using MSAL integration tests pointing to the staging slot 
 
-- To test the service under the staging slot, you can either use the [staging slot swagger](https://msihelperservice-staging.azurewebsites.net/swagger/index.html) but we highly recommend testing using MSAL integration tests as this will tests all endpoints for all resources. To do so, edit the service base URL in the MSI integration test and change it from [https://service.msidlab.com](https://service.msidlab.com) to [https://msihelperservice-staging.azurewebsites.net/](https://msihelperservice-staging.azurewebsites.net/) and run the the tests 
+- To test the service under the staging slot, we recommend testing using MSAL integration tests as this will tests all endpoints for all resources. To do so, edit the service base URL in the MSI integration test and change it from [https://service.msidlab.com](https://service.msidlab.com) to [https://msihelperservice-staging.azurewebsites.net/](https://msihelperservice-staging.azurewebsites.net/) and run the the tests 
 <br>
 <img src="images/replace.PNG" alt="replace" width="800"/>
 
@@ -192,7 +192,7 @@ Build the current project (The MSI Helper Service - MSIHelperService.csproj) and
 <img src="images/swap.PNG" alt="swap" width="800"/>
 <br>
 
-> **_NOTE:_**  Once you have swapped the slot make sure to point the base url to the production slot again in your code and test it again with the production endpoint fron the MSAL integration testing
+> **_NOTE:_**  Once you have swapped the slot make sure to point the base url to the production slot again in your code and test it again with the production endpoint from the MSAL integration testing
 
 > **_NOTE:_**  The service uses [Azure Web App's Environment variables](https://learn.microsoft.com/en-us/azure/app-service/reference-app-settings?tabs=kudu%2Cdotnet) to store Application ID's and Secrets needed to connect to other Azure Resources and the Operations Management suite to execute runbooks. You will see more about runbooks and how they are used under the Virtual Machine and Azure ARC sections 
 

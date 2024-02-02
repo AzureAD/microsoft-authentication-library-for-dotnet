@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Test.Unit.Throttling
                                                               .BuildConcrete();
 
                 var throttlingManager = (httpManagerAndBundle.ServiceBundle.ThrottlingManager as SingletonThrottlingManager);
-                var (retryAfterProvider, _, _) = throttlingManager.GetTypedThrottlingProviders();
+                var (_, _, _) = throttlingManager.GetTypedThrottlingProviders();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 var tokenResponse = httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
