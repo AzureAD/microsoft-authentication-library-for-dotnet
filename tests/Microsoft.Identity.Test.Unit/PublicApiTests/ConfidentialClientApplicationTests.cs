@@ -1005,11 +1005,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
-                string codeVerifier = string.Empty;
                 var uri = await app
                     .GetAuthorizationRequestUrl(TestConstants.s_scope)
                     .WithLoginHint(TestConstants.DisplayableId)
-                    .WithPkce(out codeVerifier)
+                    .WithPkce(out string codeVerifier)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
