@@ -136,14 +136,6 @@ namespace CommonCache.Test.Common
                 throw new OperationCanceledException();
             }
 
-            if (environmentVars != null)
-            {
-                foreach (KeyValuePair<string, string> envVars in environmentVars)
-                {
-                    //_log.LogDebug("{0} : {1}", envVars.Key, envVars.Value);
-                }
-            }
-
             if (successfulExitCodes == null)
             {
                 successfulExitCodes = new int[]
