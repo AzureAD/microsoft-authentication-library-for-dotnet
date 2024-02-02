@@ -89,9 +89,10 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
             if (authorityInfo.IsInstanceDiscoverySupported)
             {
-                InstanceDiscoveryMetadataEntry entry = null;
-                entry = _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??  // if user provided metadata but entry is not found, fail fast
-                await _regionDiscoveryProvider.GetMetadataAsync(authorityInfo.CanonicalAuthority, requestContext).ConfigureAwait(false);
+                InstanceDiscoveryMetadataEntry entry =
+                    // if user provided metadata but entry is not found, fail fast
+                    _userMetadataProvider?.GetMetadataOrThrow(environment, requestContext.Logger) ??
+                    await _regionDiscoveryProvider.GetMetadataAsync(authorityInfo.CanonicalAuthority, requestContext).ConfigureAwait(false);
 
                 //Check if instance discovery endpoint is disabled
                 if (entry == null && requestContext.ServiceBundle.Config.IsInstanceDiscoveryEnabled)
