@@ -57,7 +57,6 @@ namespace Microsoft.Identity.Test.Unit.CacheExtension
                 _logger.TraceInformation($"Touch once");
 
                 FileIOWithRetries.TouchFile(path, new TraceSourceLogger(_logger));
-                DateTime initialLastWriteTime = File.GetLastWriteTimeUtc(path);
                 Assert.IsTrue(File.Exists(path));
 
                 // LastWriteTime is not granular enough 

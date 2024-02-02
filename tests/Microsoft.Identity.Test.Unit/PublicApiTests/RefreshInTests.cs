@@ -242,11 +242,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var refreshOnFromCache = DateTimeOffset.UtcNow - TimeSpan.FromMinutes(10);
             at = at.WithRefreshOn(refreshOnFromCache);
 
-            Func<Task<AuthenticationResult>> fetchAction = () =>
-            {
-                return Task.FromResult<AuthenticationResult>(null);
-            };
-
             List<DateTimeOffset?> refreshOnWithJitterList = new List<DateTimeOffset?>();
             for (int i = 1; i <= 10; i++)
             {

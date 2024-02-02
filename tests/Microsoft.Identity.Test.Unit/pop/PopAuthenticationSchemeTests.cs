@@ -35,9 +35,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
             using (var harness = CreateTestHarness())
             {
                 Uri uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
-                HttpMethod method = HttpMethod.Post;
-                HttpRequestMessage httpRequest = new HttpRequestMessage(method, uri);
-                var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
                 PoPAuthenticationConfiguration config = null;
 
                 AssertException.Throws<ArgumentNullException>(() => new PopAuthenticationScheme(config, harness.ServiceBundle));
