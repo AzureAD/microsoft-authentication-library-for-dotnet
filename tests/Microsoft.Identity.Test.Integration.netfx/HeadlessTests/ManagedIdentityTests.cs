@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 //Create CCA with Proxy
                 IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
 
-                AuthenticationResult result = null;
+                AuthenticationResult result;
                 //Act
                 result = await mia
                             .AcquireTokenForManagedIdentity(s_msi_scopes)

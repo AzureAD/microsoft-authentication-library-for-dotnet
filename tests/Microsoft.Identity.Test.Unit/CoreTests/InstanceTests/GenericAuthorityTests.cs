@@ -235,7 +235,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 string oidcEndpoint = authority + @"/" + Constants.WellKnownOpenIdConfigurationPath;
 
-                HttpResponseMessage responseMessage = null;
+                HttpResponseMessage responseMessage;
                 switch (badOidcResponseType)
                 {
                     case "oidc_response_not_json":
