@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706907214707,
+  "lastUpdate": 1706921031226,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -3698,6 +3698,42 @@ window.BENCHMARK_DATA = {
             "value": 361094.77419354836,
             "unit": "ns",
             "range": "± 9843.381223643555"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "simon.cropp@gmail.com",
+            "name": "Simon Cropp",
+            "username": "SimonCropp"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "96a31f9316919fafd22ad1118988a7b0758a9f0a",
+          "message": "reduce allocs in TryCreateDeviceAuthChallengeResponse (#4586)\n\n* avoid two string allocs in FormatResponseHeader\r\n\r\n* Update DeviceAuthManager.cs",
+          "timestamp": "2024-02-03T00:36:55Z",
+          "tree_id": "bc879dbeff6506c02c3df617b3b1a97d6a0ad0ff",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/96a31f9316919fafd22ad1118988a7b0758a9f0a"
+        },
+        "date": 1706921027884,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 251983.54166666666,
+            "unit": "ns",
+            "range": "± 6512.145946174377"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 337961,
+            "unit": "ns",
+            "range": "± 4262.771561392351"
           }
         ]
       }
