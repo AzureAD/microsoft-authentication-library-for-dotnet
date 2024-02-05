@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.Region
             return string.Equals(azureRegionConfig, ConfidentialClientApplication.AttemptRegionDiscovery);
         }
 
-        private void RecordTelemetry(ApiEvent apiEvent, string azureRegionConfig, RegionInfo discoveredRegion)
+        private static void RecordTelemetry(ApiEvent apiEvent, string azureRegionConfig, RegionInfo discoveredRegion)
         {
             // already emitted telemetry for this request, don't emit again as it will overwrite with "from cache"
             if (IsTelemetryRecorded(apiEvent))
@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Client.Region
             }
         }
 
-        private bool IsTelemetryRecorded(ApiEvent apiEvent)
+        private static bool IsTelemetryRecorded(ApiEvent apiEvent)
         {
             return
                 !(string.IsNullOrEmpty(apiEvent.RegionUsed) &&
@@ -242,7 +242,7 @@ namespace Microsoft.Identity.Client.Region
                     }
                 }
 
-                result = result ?? new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery, s_regionDiscoveryDetails);
+                result ??= new RegionInfo(null, RegionAutodetectionSource.FailedAutoDiscovery, s_regionDiscoveryDetails);
             }
             finally
             {
@@ -258,7 +258,7 @@ namespace Microsoft.Identity.Client.Region
 
         // returns cached region if any.
         // if nothing is cached, returns null.
-        private RegionInfo GetCachedRegion(ILoggerAdapter logger)
+        private static RegionInfo GetCachedRegion(ILoggerAdapter logger)
         {
             if (s_failedAutoDiscovery)
             {
@@ -323,7 +323,7 @@ namespace Microsoft.Identity.Client.Region
             response);
         }
 
-        private Uri BuildImdsUri(string apiVersion)
+        private static Uri BuildImdsUri(string apiVersion)
         {
             UriBuilder uriBuilder = new UriBuilder(ImdsEndpoint);
             uriBuilder.AppendQueryParameters($"api-version={apiVersion}");

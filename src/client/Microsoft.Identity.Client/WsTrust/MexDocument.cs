@@ -226,7 +226,7 @@ namespace Microsoft.Identity.Client.WsTrust
             }
         }
 
-        private IEnumerable<XElement> FindElements(XContainer mexDocument, XNamespace xNamespace, string element)
+        private static IEnumerable<XElement> FindElements(XContainer mexDocument, XNamespace xNamespace, string element)
         {
             IEnumerable<XElement> xmlElements = mexDocument.Elements()?.First()?.Elements(xNamespace + element);
 

@@ -8,6 +8,8 @@ namespace Microsoft.Identity.Client.Utils
 {
     internal static class StringExtensions
     {
+        static UTF8Encoding utf8Encoding = new();
+
         /// <summary>
         /// Create an array of bytes representing the UTF-8 encoding of the given string.
         /// </summary>
@@ -15,7 +17,7 @@ namespace Microsoft.Identity.Client.Utils
         /// <returns>Array of UTF-8 character bytes</returns>
         public static byte[] ToByteArray(this string stringInput)
         {
-            return new UTF8Encoding().GetBytes(stringInput);
+            return utf8Encoding.GetBytes(stringInput);
         }
 
         public static string NullIfEmpty(this string s)

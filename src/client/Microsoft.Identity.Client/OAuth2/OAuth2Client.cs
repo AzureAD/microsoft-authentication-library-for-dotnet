@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 AddCommonHeaders(requestContext);
             }
 
-            HttpResponse response = null;
+            HttpResponse response;
             Uri endpointUri = AddExtraQueryParams(endPoint);
 
             using (requestContext.Logger.LogBlockDuration($"[Oauth2Client] Sending {method} request "))
@@ -297,7 +297,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 return null;
             }
 
-            MsalTokenResponse msalTokenResponse = null;
+            MsalTokenResponse msalTokenResponse;
 
             try
             {

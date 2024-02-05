@@ -513,7 +513,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var users = app.GetAccountsAsync().Result;
                 Assert.AreEqual(2, users.Count());
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             }
         }
 
@@ -573,7 +573,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
                 var users = app.GetAccountsAsync().Result;
                 Assert.AreEqual(2, users.Count());
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count);
             }
         }
 
@@ -873,7 +873,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             const string tenant1 = "72f988bf-86f1-41af-91ab-2d7cd011db47";
             const string tenant2 = "49f548d0-12b7-4169-a390-bb5304d24462";
             string tenantedAuthority1 = $"https://login.microsoftonline.com/{tenant1}/";
-            string tenantedAuthority2 = $"https://login.microsoftonline.com/{tenant2}/";
 
             using (var httpManager = new MockHttpManager())
             {

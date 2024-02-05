@@ -87,12 +87,10 @@ namespace Microsoft.Identity.Client.Extensions.Msal
 
             _logger.LogInformation($"Before deleting secret from Linux keyring");
 
-            IntPtr error = IntPtr.Zero;
-
             Libsecret.secret_password_clear_sync(
                 schema: GetLibsecretSchema(),
                 cancellable: IntPtr.Zero,
-                error: out error,
+                error: out IntPtr error,
                 attribute1Type: _attributeKey1,
                 attribute1Value: _attributeValue1,
                 attribute2Type: _attributeKey2,
@@ -124,12 +122,10 @@ namespace Microsoft.Identity.Client.Extensions.Msal
 
             byte[] fileData = null;
 
-            IntPtr error = IntPtr.Zero;
-
             string secret = Libsecret.secret_password_lookup_sync(
                 schema: GetLibsecretSchema(),
                 cancellable: IntPtr.Zero,
-                error: out error,
+                error: out IntPtr error,
                 attribute1Type: _attributeKey1,
                 attribute1Value: _attributeValue1,
                 attribute2Type: _attributeKey2,
@@ -168,15 +164,13 @@ namespace Microsoft.Identity.Client.Extensions.Msal
         {
             _logger.LogInformation("Before saving to linux keyring");
 
-            IntPtr error = IntPtr.Zero;
-
             Libsecret.secret_password_store_sync(
                 schema: GetLibsecretSchema(),
                 collection: _keyringCollection,
                 label: _keyringSecretLabel,
                 password: Convert.ToBase64String(data),
                 cancellable: IntPtr.Zero,
-                error: out error,
+                error: out IntPtr error,
                 attribute1Type: _attributeKey1,
                 attribute1Value: _attributeValue1,
                 attribute2Type: _attributeKey2,

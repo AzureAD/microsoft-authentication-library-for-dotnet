@@ -150,7 +150,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             IConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority, true)
-                .WithExperimentalFeatures(true)
                 .WithTestLogging()
                 .Build();
             

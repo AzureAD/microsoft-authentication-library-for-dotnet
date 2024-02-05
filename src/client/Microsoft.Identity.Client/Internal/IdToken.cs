@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Security.Claims;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
@@ -79,6 +80,28 @@ namespace Microsoft.Identity.Client.Internal
 
         public ClaimsPrincipal ClaimsPrincipal { get; private set; }
 
+
+        private static IdToken ClaimsToToken(List<Claim> claims)
+        {
+            var principal = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            return new IdToken
+            {
+                ClaimsPrincipal = principal,
+                ObjectId = FindClaim(claims, IdTokenClaim.ObjectId),
+                Subject = FindClaim(claims, IdTokenClaim.Subject),
+                TenantId = FindClaim(claims, IdTokenClaim.TenantId),
+                PreferredUsername = FindClaim(claims, IdTokenClaim.PreferredUsername),
+                Name = FindClaim(claims, IdTokenClaim.Name),
+                Email = FindClaim(claims, IdTokenClaim.Email),
+                Upn = FindClaim(claims, IdTokenClaim.Upn),
+                GivenName = FindClaim(claims, IdTokenClaim.GivenName),
+                FamilyName = FindClaim(claims, IdTokenClaim.FamilyName)
+            };
+
+            static string FindClaim(List<Claim> claims, string type) =>
+                claims.SingleOrDefault(_ => string.Equals(_.Type, type, StringComparison.OrdinalIgnoreCase))?.Value;
+        }
+
         #region Using Newtonsoft
 #if !SUPPORTS_SYSTEM_TEXT_JSON
         // There are quite a bit of API differences, so duplicated code, ideally will need to be refactored.
@@ -104,23 +127,8 @@ namespace Microsoft.Identity.Client.Internal
                 string payload = Base64UrlHelpers.Decode(idTokenSegments[1]);
                 var idTokenClaims = JsonConvert.DeserializeObject<Dictionary<string, object>>(payload);
 
-                IdToken parsedIdToken = new IdToken();
-
                 List<Claim> claims = GetClaimsFromRawToken(idTokenClaims);
-                parsedIdToken.ClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
-
-                parsedIdToken.ObjectId = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.ObjectId)?.Value;
-                parsedIdToken.Subject = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.Subject)?.Value;
-                parsedIdToken.TenantId = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.TenantId)?.Value;
-                parsedIdToken.PreferredUsername = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.PreferredUsername)?.Value;
-                parsedIdToken.Name = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.Name)?.Value;
-                parsedIdToken.Email = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.Email)?.Value;
-                parsedIdToken.Upn = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.Upn)?.Value;
-                parsedIdToken.GivenName = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.GivenName)?.Value;
-                parsedIdToken.FamilyName = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.FamilyName)?.Value;
-
-                return parsedIdToken;
-
+                return ClaimsToToken(claims);
             }
             catch (JsonException exc)
             {
@@ -345,24 +353,8 @@ namespace Microsoft.Identity.Client.Internal
             {
                 string payload = Base64UrlHelpers.Decode(idTokenSegments[1]);
                 var idTokenClaims = JsonDocument.Parse(payload);
-
-                IdToken parsedIdToken = new IdToken();
-
                 List<Claim> claims = GetClaimsFromRawToken(idTokenClaims);
-                parsedIdToken.ClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
-
-                parsedIdToken.ObjectId = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.ObjectId)?.Value;
-                parsedIdToken.Subject = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.Subject)?.Value;
-                parsedIdToken.TenantId = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.TenantId)?.Value;
-                parsedIdToken.PreferredUsername = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.PreferredUsername)?.Value;
-                parsedIdToken.Name = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.Name)?.Value;
-                parsedIdToken.Email = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.Email)?.Value;
-                parsedIdToken.Upn = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.Upn)?.Value;
-                parsedIdToken.GivenName = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.GivenName)?.Value;
-                parsedIdToken.FamilyName = parsedIdToken.ClaimsPrincipal.FindFirst(IdTokenClaim.FamilyName)?.Value;
-
-                return parsedIdToken;
-
+                return ClaimsToToken(claims);
             }
             catch (JsonException exc)
             {

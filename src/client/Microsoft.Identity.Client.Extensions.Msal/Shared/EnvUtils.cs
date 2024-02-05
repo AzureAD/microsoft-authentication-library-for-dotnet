@@ -13,13 +13,13 @@ namespace Microsoft.Identity.Client.Extensions.Msal
 
         internal static TraceSource GetNewTraceSource(string sourceName)
         {
-            sourceName = sourceName ?? DefaultTraceSource;
+            sourceName ??= DefaultTraceSource;
 #if DEBUG
             var level = SourceLevels.Verbose;
 #else
             var level = SourceLevels.Warning;
 #endif
-            string traceSourceLevelEnvVar = Environment.GetEnvironmentVariable(EnvUtils.TraceLevelEnvVarName);
+            string traceSourceLevelEnvVar = Environment.GetEnvironmentVariable(TraceLevelEnvVarName);
             if (!string.IsNullOrEmpty(traceSourceLevelEnvVar) &&
                 Enum.TryParse(traceSourceLevelEnvVar, ignoreCase: true, result: out SourceLevels result))
             {
