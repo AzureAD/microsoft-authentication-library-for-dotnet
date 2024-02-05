@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1706921036204,
+  "lastUpdate": 1707129409287,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -3734,6 +3734,42 @@ window.BENCHMARK_DATA = {
             "value": 337961,
             "unit": "ns",
             "range": "± 4262.771561392351"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "simon.cropp@gmail.com",
+            "name": "Simon Cropp",
+            "username": "SimonCropp"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "419ac49c828c1d09e6bf1a5d7be249c3ca42cd6d",
+          "message": "better perf in MergeDifferentEntries (#4594)\n\n* better perf in MergeDifferentEntries\r\n\r\n* Update src/client/Microsoft.Identity.Client/Utils/EnumerableExtensions.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n---------\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>",
+          "timestamp": "2024-02-05T10:30:01Z",
+          "tree_id": "b7837fd87e18989f9a254ae74f1e968c7c22a861",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/419ac49c828c1d09e6bf1a5d7be249c3ca42cd6d"
+        },
+        "date": 1707129406231,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 248217.1052631579,
+            "unit": "ns",
+            "range": "± 4376.149130288673"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 345101.78125,
+            "unit": "ns",
+            "range": "± 10613.600157601733"
           }
         ]
       }
