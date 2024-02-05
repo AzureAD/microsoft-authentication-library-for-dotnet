@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
@@ -69,12 +70,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static string GetDefaultTokenResponse(string accessToken = TestConstants.ATSecret, string refreshToken = TestConstants.RTSecret)
         {
-              return
-            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
-            "\"r1/scope1 r1/scope2\",\"access_token\":\"" + accessToken + "\"" +
-            ",\"refresh_token\":\"" + refreshToken + "\",\"client_info\"" +
-            ":\"" + CreateClientInfo() + "\",\"id_token\"" +
-            ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) + "\"}";
+            return
+          "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"refresh_in\":\"2400\",\"scope\":" +
+          "\"r1/scope1 r1/scope2\",\"access_token\":\"" + accessToken + "\"" +
+          ",\"refresh_token\":\"" + refreshToken + "\",\"client_info\"" +
+          ":\"" + CreateClientInfo() + "\",\"id_token\"" +
+          ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) + "\"}";
         }
 
         public static string GetPopTokenResponse()
@@ -134,6 +135,63 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return "{\"statusCode\":\"500\",\"message\":\"An unexpected error occured while fetching the AAD Token.\",\"correlationId\":\"7d0c9763-ff1d-4842-a3f3-6d49e64f4513\"}";
         }
 
+        public static string GetSuccessfulCredentialResponse(
+            string credential = "managed-identity-credential",
+            ManagedIdentityIdType identityType = ManagedIdentityIdType.SystemAssigned,
+            string client_id = "2d0d13ad-3a4d-4cfd-98f8-f20621d55ded",
+            long expires_on = 0,
+            string regional_token_url = "https://centraluseuap.mtlsauth.microsoft.com",
+            string tenant_id = "72f988bf-86f1-41af-91ab-2d7cd011db47")
+        {
+            var identityTypeString = identityType.ToString();
+
+            if (expires_on == 0)
+            {
+                long currentUnixTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                expires_on = currentUnixTimestamp + 3600; // Add one hour (3600 seconds) for example
+            }
+
+            long refresh_in = expires_on / 2;
+
+            return "{\"client_id\":\"" + client_id + "\",\"credential\":\"" + credential + "\",\"expires_on\":" + expires_on + ",\"identity_type\":\"" + identityTypeString + "\",\"refresh_in\":" + refresh_in + ",\"regional_token_url\":\"" + regional_token_url + "\",\"tenant_id\":\"" + tenant_id + "\"}";
+        }
+
+        public static string GetSuccessfulMtlsResponse()
+        {
+            return "{\"token_type\":\"Bearer\",\"expires_in\":86399,\"ext_expires_in\":86399,\"access_token\":\"some-token\"}";
+        }
+
+        public static string GetMtlsInvalidResourceError()
+        {
+            return @"{""error"":""invalid_resource"",
+                       ""error_description"":""AADSTS500011: The resource principal named https://graph.microsoft.com/user.read was not found in the tenant named Cross Cloud B2B Test Tenant. This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant. You might have sent your authentication request to the wrong tenant. Trace ID: 9d8cb0bf-7e34-40fd-babc-f6ff018a1800 Correlation ID: 42186e1b-17eb-46fb-b5b7-4c43cae4d336 Timestamp: 2023-12-08 22:20:25Z"",
+                       ""error_codes"":[500011],
+                       ""timestamp"":""2023-12-08 22:20:25Z"",
+                       ""trace_id"":""9d8cb0bf-7e34-40fd-babc-f6ff018a1800"",
+                       ""correlation_id"":""42186e1b-17eb-46fb-b5b7-4c43cae4d336"",
+                       ""error_uri"":""https://eastus2euap.mtlsauth.microsoft.com/error?code=500011""}";
+        }
+
+        public static string GetMtlsInvalidScopeError70011()
+        {
+            return @"{""error"":""invalid_scope"",
+                   ""error_description"":""AADSTS70011: The provided request must include a 'scope' input parameter. The provided value for the input parameter 'scope' is not valid. The scope user.read/.default is not valid. Trace ID: 9e8a0bd6-fb1b-45cf-8e00-95c2c73e1400 Correlation ID: 6ce4a5ab-87a1-4985-b06d-5ab08b5fa924 Timestamp: 2023-12-08 21:56:44Z"",
+                   ""error_codes"":[70011],
+                   ""timestamp"":""2023-12-08 21:56:44Z"",
+                   ""trace_id"":""9e8a0bd6-fb1b-45cf-8e00-95c2c73e1400"",
+                   ""correlation_id"":""6ce4a5ab-87a1-4985-b06d-5ab08b5fa924""}";
+        }
+
+        public static string GetMtlsInvalidScopeError1002012()
+        {
+            return @"{""error"":""invalid_scope"",
+                    ""error_description"":""AADSTS1002012: The provided value for scope user.read is not valid. Client credential flows must have a scope value with /.default suffixed to the resource identifier (application ID URI). Trace ID: 8575f1d5-0144-4d71-87c8-2df9f1e30000 Correlation ID: a5469466-6c01-40e0-abf8-302d09c991e3 Timestamp: 2023-12-08 22:11:08Z"",
+                    ""error_codes"":[1002012],
+                    ""timestamp"":""2023-12-08 22:11:08Z"",
+                    ""trace_id"":""8575f1d5-0144-4d71-87c8-2df9f1e30000"",
+                    ""correlation_id"":""a5469466-6c01-40e0-abf8-302d09c991e3""}";
+        }
+
         public static string GetMsiImdsErrorResponse()
         {
             return "{\"error\":\"invalid_resource\"," +
@@ -143,6 +201,173 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\r\nCorrelation ID: 77145480-bc5a-4ebe-ae4d-e4a8b7d727cf\r\nTimestamp: 2022-11-10 23:12:37Z\"," +
                 "\"error_codes\":[500011],\"timestamp\":\"2022-11-10 23:12:37Z\",\"trace_id\":\"2dff494a-0226-4f41-8859-d9f560ca8903\"," +
                 "\"correlation_id\":\"77145480-bc5a-4ebe-ae4d-e4a8b7d727cf\",\"error_uri\":\"https://westus2.login.microsoft.com/error?code=500011\"}";
+        }
+
+        public static string InvalidTenantError900023()
+        {
+            return @"{
+                ""error"":""invalid_request"",
+                ""error_description"":""AADSTS900023: Specified tenant identifier 'invalid_tenant' is neither a valid DNS name, nor a valid external domain. Trace ID: f38df5f2-84c4-4195-bad6-8eca059b0b00 Correlation ID: e318f766-8581-445a-97fb-419f80d98d8b Timestamp: 2023-12-11 22:52:53Z"",
+                ""error_codes"":[900023],
+                ""timestamp"":""2023-12-11 22:52:53Z"",
+                ""trace_id"":""f38df5f2-84c4-4195-bad6-8eca059b0b00"",
+                ""correlation_id"":""e318f766-8581-445a-97fb-419f80d98d8b"",
+                ""error_uri"":""https://centraluseuap.mtlsauth.microsoft.com/error?code=900023""
+            }";
+        }
+
+        public static string WrongTenantError700016()
+        {
+            return @"{
+                ""error"":""unauthorized_client"",
+                ""error_description"":""AADSTS700016: Application with identifier '833aa854-2811-4f90-9620-c38070f595d7' was not found in the directory 'MSIDLAB4'. This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant. You may have sent your authentication request to the wrong tenant. Trace ID: 68b0d98d-52e8-4e45-9282-9b3b09fc1800 Correlation ID: 75673189-3db2-408b-8384-16860ee0c0f0 Timestamp: 2023-12-11 22:54:25Z"",
+                ""error_codes"":[700016],
+                ""timestamp"":""2023-12-11 22:54:25Z"",
+                ""trace_id"":""68b0d98d-52e8-4e45-9282-9b3b09fc1800"",
+                ""correlation_id"":""75673189-3db2-408b-8384-16860ee0c0f0"",
+                ""error_uri"":""https://centraluseuap.mtlsauth.microsoft.com/error?code=700016""
+            }";
+        }
+
+        public static string WrongMtlsUrlError50171()
+        {
+            return @"{
+                ""error"":""invalid_client"",
+                ""error_description"":""AADSTS50171: The given audience can only be used in Mutual-TLS token calls. Trace ID: e350f752-0a39-43c2-a9a2-cbd7ff4a6f00 Correlation ID: 26bb13de-d2cf-4f8f-9f36-d7611c00fecb Timestamp: 2023-12-11 22:58:32Z"",
+                ""error_codes"":[50171],
+                ""timestamp"":""2023-12-11 22:58:32Z"",
+                ""trace_id"":""e350f752-0a39-43c2-a9a2-cbd7ff4a6f00"",
+                ""correlation_id"":""26bb13de-d2cf-4f8f-9f36-d7611c00fecb""
+            }";
+        }
+
+        public static string SendTenantIdInCredentialValueError50027()
+        {
+            return @"{
+                ""error"":""invalid_request"",
+                ""error_description"":""AADSTS50027: JWT token is invalid or malformed. Trace ID: 6ca706cd-c0a1-4ec2-acb1-541b5a579a00 Correlation ID: 52955596-2fe6-43c6-b087-6038942c8254 Timestamp: 2023-12-11 23:02:08Z"",
+                ""error_codes"":[50027],
+                ""timestamp"":""2023-12-11 23:02:08Z"",
+                ""trace_id"":""6ca706cd-c0a1-4ec2-acb1-541b5a579a00"",
+                ""correlation_id"":""52955596-2fe6-43c6-b087-6038942c8254"",
+                ""error_uri"":""https://mtlsauth.microsoft.com/error?code=50027""
+            }";
+        }
+
+        public static string BadCredNoIssError90014()
+        {
+            return @"{
+                ""error"":""invalid_request"",
+                ""error_description"":""AADSTS90014: The required field 'iss' is missing from the credential. Ensure that you have all the necessary parameters for the login request. Trace ID: 605439e8-8f0e-43f5-9887-5281a05a5200 Correlation ID: abc63349-b90e-4b15-8fb7-edc9326ed3c8 Timestamp: 2023-12-11 23:14:38Z"",
+                ""error_codes"":[90014],
+                ""timestamp"":""2023-12-11 23:14:38Z"",
+                ""trace_id"":""605439e8-8f0e-43f5-9887-5281a05a5200"",
+                ""correlation_id"":""abc63349-b90e-4b15-8fb7-edc9326ed3c8"",
+                ""error_uri"":""https://mtlsauth.microsoft.com/error?code=90014""
+            }";
+        }
+
+        public static string BadCredNoAudError90014()
+        {
+            return @"{
+                ""error"":""invalid_request"",
+                ""error_description"":""AADSTS90014: The required field 'aud' is missing from the credential. Ensure that you have all the necessary parameters for the login request. Trace ID: 0b1cc102-98b7-4fa5-a11a-82520fa85a00 Correlation ID: 23811f20-96bb-4900-a1a3-6368ef8890b2 Timestamp: 2023-12-11 23:16:15Z"",
+                ""error_codes"":[90014],
+                ""timestamp"":""2023-12-11 23:16:15Z"",
+                ""trace_id"":""0b1cc102-98b7-4fa5-a11a-82520fa85a00"",
+                ""correlation_id"":""23811f20-96bb-4900-a1a3-6368ef8890b2"",
+                ""error_uri"":""https://mtlsauth.microsoft.com/error?code=90014""
+            }";
+        }
+
+        public static string BadCredBadAlgError5002738()
+        {
+            return @"{
+                ""error"":""invalid_client"",
+                ""error_description"":""AADSTS5002738: Invalid JWT token. 'HS256' is not a supported signature algorithm. Supported signing algorithms are: 'RS256,RS384,RS512' Trace ID: 2ed12465-8044-44af-bd27-b73b27e04a00 Correlation ID: bc26e294-ed13-4e6f-a225-28cdec2cc519 Timestamp: 2023-12-11 23:18:06Z"",
+                ""error_codes"":[5002738],
+                ""timestamp"":""2023-12-11 23:18:06Z"",
+                ""trace_id"":""2ed12465-8044-44af-bd27-b73b27e04a00"",
+                ""correlation_id"":""bc26e294-ed13-4e6f-a225-28cdec2cc519"",
+                ""error_uri"":""https://mtlsauth.microsoft.com/error?code=5002738""
+            }";
+        }
+
+        public static string BadCredMissingSha1Error5002723()
+        {
+            return @"{
+                ""error"":""invalid_client"",
+                ""error_description"":""AADSTS5002723: Invalid JWT token. No certificate SHA-1 thumbprint, certificate SHA-256 thumbprint, nor keyId specified in token header. Trace ID: 3ce71c90-8d35-4413-bedb-73337ec40c00 Correlation ID: 540e9fb1-db53-4b10-a0ca-047d03b97d10 Timestamp: 2023-12-11 23:51:16Z"",
+                ""error_codes"":[5002723],
+                ""timestamp"":""2023-12-11 23:51:16Z"",
+                ""trace_id"":""3ce71c90-8d35-4413-bedb-73337ec40c00"",
+                ""correlation_id"":""540e9fb1-db53-4b10-a0ca-047d03b97d10"",
+                ""error_uri"":""https://mtlsauth.microsoft.com/error?code=5002723""
+            }";
+        }
+
+        public static string BadTimeRangeError700024()
+        {
+            return @"{
+                ""error"":""invalid_client"",
+                ""error_description"":""AADSTS700024: Client assertion is not within its valid time range. Current time: 2023-12-11T23:52:19.6223401Z, assertion valid from 2018-01-18T01:30:22.0000000Z, expiry time of assertion 1970-01-01T00:00:00.0000000Z. Review the documentation at https://docs.microsoft.com/azure/active-directory/develop/active-directory-certificate-credentials . Trace ID: 2486d2c5-63a7-44f5-bb09-05e4c5494000 Correlation ID: fc5f1331-e3ef-44cb-b478-909a171010ab Timestamp: 2023-12-11 23:52:19Z"",
+                ""error_codes"":[700024],
+                ""timestamp"":""2023-12-11 23:52:19Z"",
+                ""trace_id"":""2486d2c5-63a7-44f5-bb09-05e4c5494000"",
+                ""correlation_id"":""fc5f1331-e3ef-44cb-b478-909a171010ab"",
+                ""error_uri"":""https://mtlsauth.microsoft.com/error?code=700024""
+            }";
+        }
+
+        public static string IdentifierMismatchError700021()
+        {
+            return @"{
+                ""error"":""invalid_client"",
+                ""error_description"":""AADSTS700021: Client assertion application identifier doesn't match 'client_id' parameter. Review the documentation at https://docs.microsoft.com/azure/active-directory/develop/active-directory-certificate-credentials . Trace ID: 1180e895-2f6b-4504-b0cf-f49632647100 Correlation ID: 88c237d8-7867-4e68-89e4-bc5a6d3b2159 Timestamp: 2023-12-11 23:55:14Z"",
+                ""error_codes"":[700021],
+                ""timestamp"":""2023-12-11 23:55:14Z"",
+                ""trace_id"":""1180e895-2f6b-4504-b0cf-f49632647100"",
+                ""correlation_id"":""88c237d8-7867-4e68-89e4-bc5a6d3b2159"",
+                ""error_uri"":""https://mtlsauth.microsoft.com/error?code=700021""
+            }";
+        }
+
+        public static string MissingCertError392200()
+        {
+            return @"{
+                ""error"":""invalid_request"",
+                ""error_description"":""AADSTS392200: Client certificate is missing from the request. Trace ID: 35f8d355-5be8-4028-83e5-aeb609b8d500 Correlation ID: e10c5bea-3b7e-42a2-a251-705d6e7aa48d Timestamp: 2023-12-12 00:11:34Z"",
+                ""error_codes"":[392200],
+                ""timestamp"":""2023-12-12 00:11:34Z"",
+                ""trace_id"":""35f8d355-5be8-4028-83e5-aeb609b8d500"",
+                ""correlation_id"":""e10c5bea-3b7e-42a2-a251-705d6e7aa48d"",
+                ""error_uri"":""https://mtlsauth.microsoft.com/error?code=392200""
+            }";
+        }
+
+        public static string ExpiredCertError392204()
+        {
+            return @"{
+                ""error"":""invalid_client"",
+                ""error_description"":""AADSTS392204: The provided client certificate has expired. Trace ID: 44b6984d-e6bd-4374-a9c7-5738ea6b6800 Correlation ID: 7279f188-cd3a-4f09-8236-fc7044d2080a Timestamp: 2023-12-12 00:18:55Z"",
+                ""error_codes"":[392204],
+                ""timestamp"":""2023-12-12 00:18:55Z"",
+                ""trace_id"":""44b6984d-e6bd-4374-a9c7-5738ea6b6800"",
+                ""correlation_id"":""7279f188-cd3a-4f09-8236-fc7044d2080a"",
+                ""error_uri"":""https://mtlsauth.microsoft.com/error?code=392204""
+            }";
+        }
+
+        public static string CertMismatchError500181()
+        {
+            return @"{
+                ""error"":""invalid_request"",
+                ""error_description"":""AADSTS500181: The TLS certificate provided does not match the certificate in the assertion. Trace ID: 2781e26e-d4ed-4947-9d95-11dfa81a5900 Correlation ID: e19df97b-3909-4c41-a439-91dc4ec8355b Timestamp: 2023-12-12 00:27:10Z"",
+                ""error_codes"":[500181],
+                ""timestamp"":""2023-12-12 00:27:10Z"",
+                ""trace_id"":""2781e26e-d4ed-4947-9d95-11dfa81a5900"",
+                ""correlation_id"":""e19df97b-3909-4c41-a439-91dc4ec8355b""
+            }";
         }
 
         public static string CreateClientInfo(string uid = TestConstants.Uid, string utid = TestConstants.Utid)
@@ -358,7 +583,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                                   idToken +
                                   (foci ? "\",\"foci\":\"1" : "") +
                                   "\",\"id_token_expires_in\":\"3600\",\"client_info\":\"" + CreateClientInfo(uniqueId, utid) + "\"}";
-            
+
             return stringContent;
         }
 
@@ -505,9 +730,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static HttpResponseMessage CreateAdfsOpenIdConfigurationResponse(string authority, string qp = "")
         {
-            var authorityUri = new Uri(authority);
-            string path = authorityUri.AbsolutePath.Substring(1);
-
             if (!string.IsNullOrEmpty(qp))
             {
                 qp = "?" + qp;

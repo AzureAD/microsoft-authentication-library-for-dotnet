@@ -18,16 +18,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             IDictionary<string, string> data = new Dictionary<string, string>();
             string wwwAuthenticate = responseHeaders.GetValues(PKeyAuthConstants.WwwAuthenticateHeader).SingleOrDefault();
-            wwwAuthenticate = wwwAuthenticate.Substring(PKeyAuthConstants.PKeyAuthName.Length + 1);
+            wwwAuthenticate = wwwAuthenticate?.Substring(PKeyAuthConstants.PKeyAuthName.Length + 1);
             if (string.IsNullOrEmpty(wwwAuthenticate))
             {
                 return data;
             }
 
-            List<string> headerPairs = CoreHelpers.SplitWithQuotes(wwwAuthenticate, ',');
+            var headerPairs = CoreHelpers.SplitWithQuotes(wwwAuthenticate, ',');
             foreach (string pair in headerPairs)
             {
-                List<string> keyValue = CoreHelpers.SplitWithQuotes(pair, '=');
+                var keyValue = CoreHelpers.SplitWithQuotes(pair, '=');
                 if (keyValue.Count == 2)
                 {
                     data.Add(keyValue[0].Trim(), keyValue[1].Trim().Replace("\"", ""));

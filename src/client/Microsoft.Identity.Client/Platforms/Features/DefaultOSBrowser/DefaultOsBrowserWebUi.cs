@@ -93,10 +93,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             {
                 throw new MsalClientException(
                     MsalError.LoopbackRedirectUri,
-                    string.Format(CultureInfo.InvariantCulture,
-                        "Only loopback redirect uri is supported, but {0} was found. " +
-                        "Configure http://localhost or http://localhost:port both during app registration and when you create the PublicClientApplication object. " +
-                        "See https://aka.ms/msal-net-os-browser for details", redirectUri.AbsoluteUri));
+                    $"Only loopback redirect uri is supported, but {redirectUri.AbsoluteUri} was found. Configure http://localhost or http://localhost:port both during app registration and when you create the PublicClientApplication object. See https://aka.ms/msal-net-os-browser for details");
             }
 
             // AAD does not allow https:\\localhost redirects from any port
@@ -104,10 +101,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
             {
                 throw new MsalClientException(
                     MsalError.LoopbackRedirectUri,
-                    string.Format(CultureInfo.InvariantCulture,
-                        "Only http uri scheme is supported, but {0} was found. " +
-                        "Configure http://localhost or http://localhost:port both during app registration and when you create the PublicClientApplication object. " +
-                        "See https://aka.ms/msal-net-os-browser for details", redirectUri.Scheme));
+                    $"Only http uri scheme is supported, but {redirectUri.Scheme} was found. Configure http://localhost or http://localhost:port both during app registration and when you create the PublicClientApplication object. See https://aka.ms/msal-net-os-browser for details");
             }
 
             return FindFreeLocalhostRedirectUri(redirectUri);
@@ -178,7 +172,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.Desktop.OsBrowser
                 _webViewOptions?.HtmlMessageSuccess ?? DefaultSuccessHtml);
         }
 
-        private MessageAndHttpCode GetMessage(Uri redirectUri, string message)
+        private static MessageAndHttpCode GetMessage(Uri redirectUri, string message)
         {
             if (redirectUri != null)
             {

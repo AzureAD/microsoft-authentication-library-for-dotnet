@@ -20,9 +20,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             string authority,
             RequestContext requestContext)
         {
-            OidcMetadata configuration;
-
-            if (s_cache.TryGetValue(authority, out configuration))
+            if (s_cache.TryGetValue(authority, out OidcMetadata configuration))
             {
                 requestContext.Logger.Verbose(() => $"[OIDC Discovery] OIDC discovery found a cached entry for {authority}");
                 return configuration;
@@ -41,7 +39,11 @@ namespace Microsoft.Identity.Client.Instance.Oidc
 
                 Uri oidcMetadataEndpoint = new Uri(authority + Constants.WellKnownOpenIdConfigurationPath);
 
-                var client = new OAuth2Client(requestContext.Logger, requestContext.ServiceBundle.HttpManager);
+                var client = new OAuth2Client(
+                    requestContext.Logger, 
+                    requestContext.ServiceBundle.HttpManager, 
+                    mtlsCertificate: null);
+
                 configuration = await client.DiscoverOidcMetadataAsync(oidcMetadataEndpoint, requestContext).ConfigureAwait(false);
 
                 s_cache[authority] = configuration;

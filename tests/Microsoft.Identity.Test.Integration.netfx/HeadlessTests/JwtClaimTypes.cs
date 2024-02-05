@@ -99,7 +99,7 @@ public struct JwtClaimTypes
     /// when hueristically checking for an appToken
     /// these claims should never be found
     /// </summary>
-    public static IList<string> ExcludedAppClaims = new List<string> { JwtClaimTypes.Scp, JwtClaimTypes.UniqueName };
+    public static IList<string> ExcludedAppClaims = new List<string> { Scp, UniqueName };
 
     /// <summary>
     /// http://tools.ietf.org/html/rfc7519#section-4

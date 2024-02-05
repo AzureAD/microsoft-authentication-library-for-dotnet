@@ -287,7 +287,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private async Task RunB2CHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "")
         {
             var factory = new HttpSnifferClientFactory();
-            var user = labResponse.User;
 
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(labResponse.App.AppId)
@@ -351,8 +350,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private void AssertCcsRoutingInformationIsNotSent(HttpSnifferClientFactory factory)
         {
-            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
-               x.Item2.StatusCode == HttpStatusCode.OK);
+            var (req, _) = factory.RequestsAndResponses.Single(x =>
+                x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
+                x.Item2.StatusCode == HttpStatusCode.OK);
 
             Assert.IsTrue(!req.Headers.Any(h => h.Key == Constants.CcsRoutingHintHeader));
         }
@@ -370,8 +370,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private void AssertTelemetryHeaders(HttpSnifferClientFactory factory, bool IsFailure, LabResponse labResponse)
         {
-            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri == labResponse.Lab.Authority + "organizations/oauth2/v2.0/token" &&
-            x.Item2.StatusCode == HttpStatusCode.OK);
+            var (req, _) = factory.RequestsAndResponses.Single(x =>
+                x.Item1.RequestUri.AbsoluteUri == labResponse.Lab.Authority + "organizations/oauth2/v2.0/token" &&
+                x.Item2.StatusCode == HttpStatusCode.OK);
 
             var telemetryLastValue = req.Headers.Single(h => h.Key == TelemetryConstants.XClientLastTelemetry).Value;
             var telemetryCurrentValue = req.Headers.Single(h => h.Key == TelemetryConstants.XClientCurrentTelemetry).Value;
@@ -402,7 +403,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 httpTelemetryRecorder.SplitPreviousCsv(csvPrevious);
 
                 Assert.AreEqual(UPApiId, httpTelemetryRecorder.ApiId.FirstOrDefault(e => e.Contains(UPApiId)));
-                Assert.AreEqual(1, httpTelemetryRecorder.ErrorCode.Count());
+                Assert.AreEqual(1, httpTelemetryRecorder.ErrorCode.Count);
                 Assert.AreEqual(TelemetryConstants.Zero, httpTelemetryRecorder.SilentCallSuccessfulCount);
                 Assert.IsFalse(httpTelemetryRecorder.ForceRefresh);
                 Assert.AreEqual(ApiIdAndCorrelationIdSection, httpTelemetryRecorder.ApiIdAndCorrelationIds.FirstOrDefault());

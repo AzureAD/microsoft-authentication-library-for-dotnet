@@ -30,8 +30,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
-                var bundle = harness.ServiceBundle;
-
                 AuthenticationRequestParameters requestParams = harness.CreateAuthenticationRequestParameters(
                     TestConstants.AuthorityHomeTenant,
                     TestConstants.s_scope,
@@ -103,8 +101,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AuthenticationResult result = await request.RunAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
-                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count());
-                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count);
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count);
                 Assert.AreEqual(result.AccessToken, "some-access-token");
             }
         }
@@ -166,8 +164,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 AuthenticationResult result = await request.RunAsync().ConfigureAwait(false);
 
-                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count());
-                Assert.AreEqual(2, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count);
+                Assert.AreEqual(2, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count);
                 Assert.AreEqual(result.AccessToken, "some-access-token");
             }
         }
@@ -351,9 +349,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             if (multiCloudSupportEnabled)
             {
                 expectedQueryParams.Add("instance_aware", "true");
-                authorizationResultUri = authorizationResultUri + "&cloud_instance_name=microsoftonline.us&cloud_instance_host_name=login.microsoftonline.us";
+                authorizationResultUri += "&cloud_instance_name=microsoftonline.us&cloud_instance_host_name=login.microsoftonline.us";
             }
-                
 
             using (MockHttpAndServiceBundle harness = CreateTestHarness(isMultiCloudSupportEnabled: multiCloudSupportEnabled))
             {
@@ -406,8 +403,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Assert.AreEqual("https://login.microsoftonline.us/home/oauth2/v2.0/token", result.AuthenticationResultMetadata.TokenEndpoint);
                 else
                     Assert.AreEqual("https://login.microsoftonline.com/home/oauth2/v2.0/token", result.AuthenticationResultMetadata.TokenEndpoint);
-                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count());
-                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count);
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count);
                 Assert.AreEqual(result.AccessToken, "some-access-token");
             }
         }

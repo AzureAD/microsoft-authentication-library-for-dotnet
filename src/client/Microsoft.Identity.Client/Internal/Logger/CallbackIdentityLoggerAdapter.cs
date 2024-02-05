@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
             PiiLoggingEnabled = enablePiiLogging;
             IsDefaultPlatformLoggingEnabled = isDefaultPlatformLoggingEnabled;
-            IdentityLogger = new CallbackIdentityLogger(loggingCallback, correlationId, clientName, clientVersion, enablePiiLogging, logLevel);
+            IdentityLogger = new CallbackIdentityLogger(loggingCallback, _correlationId, clientName, clientVersion, enablePiiLogging, logLevel);
         }
 
         public void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed)

@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             AuthenticationRequestParameters authenticationRequestParameters,
             ILoggerAdapter logger)
         {
-            MsalServiceException serviceException = null;
+            MsalServiceException serviceException;
             string internalErrorCode = authResult.Error.Tag.ToString(CultureInfo.InvariantCulture);
             long errorCode = authResult.Error.ErrorCode;
             string errorMessage;
@@ -265,11 +265,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 AuthenticationRequestParameters authenticationRequestParameters,
                 ILoggerAdapter logger, string errorMessage = null)
         {
-            MsalTokenResponse msalTokenResponse = null;
-
             if (TokenReceivedFromWam(authResult, logger))
             {
-                msalTokenResponse = ParseRuntimeResponse(authResult, authenticationRequestParameters, logger);
+                MsalTokenResponse msalTokenResponse = ParseRuntimeResponse(authResult, authenticationRequestParameters, logger);
                 logger.Verbose(() => "[RuntimeBroker] Successfully retrieved token.");
                 return msalTokenResponse;
             }

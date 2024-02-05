@@ -45,9 +45,9 @@ namespace Microsoft.Identity.Json.Serialization
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff", CultureInfo.InvariantCulture));
-            sb.Append(" ");
+            sb.Append(' ');
             sb.Append(level.ToString("g"));
-            sb.Append(" ");
+            sb.Append(' ');
             sb.Append(message);
 
             string s = sb.ToString();

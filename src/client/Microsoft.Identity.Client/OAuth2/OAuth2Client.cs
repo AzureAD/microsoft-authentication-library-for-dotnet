@@ -15,6 +15,8 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.Credential;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -36,12 +38,15 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly Dictionary<string, string> _headers;
         private readonly Dictionary<string, string> _queryParameters = new Dictionary<string, string>();
         private readonly IDictionary<string, string> _bodyParameters = new Dictionary<string, string>();
+        private StringContent _stringContent;
         private readonly IHttpManager _httpManager;
+        private readonly X509Certificate2 _mtlsCertificate;
 
-        public OAuth2Client(ILoggerAdapter logger, IHttpManager httpManager)
+        public OAuth2Client(ILoggerAdapter logger, IHttpManager httpManager, X509Certificate2 mtlsCertificate)
         {
             _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(logger));
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
+            _mtlsCertificate = mtlsCertificate;
         }
 
         public void AddQueryParameter(string key, string value)
@@ -57,6 +62,14 @@ namespace Microsoft.Identity.Client.OAuth2
             if (!string.IsNullOrWhiteSpace(key) && !string.IsNullOrWhiteSpace(value))
             {
                 _bodyParameters[key] = value;
+            }
+        }
+
+        public void AddBodyContent(StringContent content)
+        {
+            if (content != null)
+            {
+                _stringContent = content;
             }
         }
 
@@ -78,6 +91,12 @@ namespace Microsoft.Identity.Client.OAuth2
         public Task<OidcMetadata> DiscoverOidcMetadataAsync(Uri endpoint, RequestContext requestContext)
         {
             return ExecuteRequestAsync<OidcMetadata>(endpoint, HttpMethod.Get, requestContext);
+        }
+
+        public async Task<CredentialResponse> GetCredentialResponseAsync(Uri endpoint, RequestContext requestContext)
+        {
+            return await ExecuteRequestAsync<CredentialResponse>(endpoint, HttpMethod.Post, requestContext)
+                       .ConfigureAwait(false);
         }
 
         internal Task<MsalTokenResponse> GetTokenAsync(
@@ -109,7 +128,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 AddCommonHeaders(requestContext);
             }
 
-            HttpResponse response = null;
+            HttpResponse response;
             Uri endpointUri = AddExtraQueryParams(endPoint);
 
             using (requestContext.Logger.LogBlockDuration($"[Oauth2Client] Sending {method} request "))
@@ -124,22 +143,31 @@ namespace Microsoft.Identity.Client.OAuth2
                             await onBeforePostRequestData(requestData).ConfigureAwait(false);
                         }
 
-                        response = await _httpManager.SendPostAsync(
+                        response = await _httpManager.SendRequestAsync(
                             endpointUri,
                             _headers,
-                            _bodyParameters,
-                            requestContext.Logger,
-                            cancellationToken: requestContext.UserCancellationToken)
-                                 .ConfigureAwait(false);
+                            body: _stringContent == null ? new FormUrlEncodedContent(_bodyParameters) : _stringContent,
+                            HttpMethod.Post,
+                            logger: requestContext.Logger,
+                            doNotThrow: false,
+                            retry: true,
+                            mtlsCertificate: _mtlsCertificate,
+                            requestContext.UserCancellationToken)
+                        .ConfigureAwait(false);
                     }
                     else
                     {
-                        response = await _httpManager.SendGetAsync(
+                        response = await _httpManager.SendRequestAsync(
                             endpointUri,
                             _headers,
-                            requestContext.Logger,
-                            cancellationToken: requestContext.UserCancellationToken)
-                                .ConfigureAwait(false);
+                            body: null,
+                            HttpMethod.Get,
+                            logger: requestContext.Logger,
+                            doNotThrow: false,
+                            retry: true,
+                            mtlsCertificate: null,
+                            requestContext.UserCancellationToken)
+                        .ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
@@ -297,7 +325,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 return null;
             }
 
-            MsalTokenResponse msalTokenResponse = null;
+            MsalTokenResponse msalTokenResponse;
 
             try
             {

@@ -1,0 +1,66 @@
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Microsoft.Identity.Test.Common.Core.Mocks
+{
+    internal sealed class MockHttpClientFactoryForTest : IMsalHttpClientFactory, IDisposable
+    {
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            // This ensures we only check the mock queue on dispose when we're not in the middle of an
+            // exception flow.  Otherwise, any early assertion will cause this to likely fail
+            // even though it's not the root cause.
+#pragma warning disable CS0618 // Type or member is obsolete - this is non-production code so it's fine
+            if (Marshal.GetExceptionCode() == 0)
+#pragma warning restore CS0618 // Type or member is obsolete
+            {
+                string remainingMocks = string.Join(
+                    " ",
+                    _httpMessageHandlerQueue.Select(
+                        h => (h as MockHttpMessageHandler)?.ExpectedUrl ?? string.Empty));
+
+                Assert.IsNotNull(_httpMessageHandlerQueue);
+            }
+        }
+
+        public MockHttpMessageHandler AddMockHandler(MockHttpMessageHandler handler)
+        {
+            _httpMessageHandlerQueue.Enqueue(handler);
+            return handler;
+        }
+
+        private Queue<HttpMessageHandler> _httpMessageHandlerQueue = new Queue<HttpMessageHandler>();
+
+        public HttpClient GetHttpClient()
+        {
+            HttpMessageHandler messageHandler;
+
+            Assert.IsNotNull(_httpMessageHandlerQueue);
+            messageHandler = _httpMessageHandlerQueue.Dequeue();
+
+            var httpClient = new HttpClient(messageHandler);
+
+            httpClient.DefaultRequestHeaders.Accept.Clear();
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            return httpClient;
+        }
+    }
+}

@@ -251,15 +251,17 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             ValidateManagedIdentityResult(managedIdentityResponse);
 
-            long expiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(managedIdentityResponse.ExpiresOn);
+            long expiresOn = long.TryParse(managedIdentityResponse.ExpiresIn, out long expiresIn)
+                ? expiresIn
+                : DateTimeHelpers.GetDurationFromNowInSeconds(managedIdentityResponse.ExpiresOn);
 
             return new MsalTokenResponse
             {
                 AccessToken = managedIdentityResponse.AccessToken,
-                ExpiresIn = expiresIn,
+                ExpiresIn = expiresOn,
                 TokenType = managedIdentityResponse.TokenType,
                 TokenSource = TokenSource.IdentityProvider,
-                RefreshIn = InferManagedIdentityRefreshInValue(expiresIn)
+                RefreshIn = InferManagedIdentityRefreshInValue(expiresOn)
             };
         }
 
@@ -282,8 +284,11 @@ namespace Microsoft.Identity.Client.OAuth2
                 HandleInvalidExternalValueError(nameof(response.AccessToken));
             }
 
-            long expiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(response.ExpiresOn);
-            if (expiresIn <= 0)
+            long expiresOn = long.TryParse(response.ExpiresIn, out long expiresIn)
+                ? expiresIn
+                : DateTimeHelpers.GetDurationFromNowInSeconds(response.ExpiresOn);
+
+            if (expiresOn <= 0)
             {
                 HandleInvalidExternalValueError(nameof(response.ExpiresOn));
             }
@@ -385,38 +390,42 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             if (logger.IsLoggingEnabled(logLevel))
             {
-                StringBuilder withPii = new StringBuilder();
-                StringBuilder withoutPii = new StringBuilder();
+                var withPii =
+                    $"""
 
-                withPii.AppendLine($"{Environment.NewLine}[MsalTokenResponse]");
-                withPii.AppendLine($"Error: {Error}");
-                withPii.AppendLine($"ErrorDescription: {ErrorDescription}");
-                withPii.AppendLine($"Scopes: {Scope} ");
-                withPii.AppendLine($"ExpiresIn: {ExpiresIn}");
-                withPii.AppendLine($"RefreshIn: {RefreshIn}");
-                withPii.AppendLine($"AccessToken returned: {!string.IsNullOrEmpty(AccessToken)}");
-                withPii.AppendLine($"AccessToken Type: {TokenType}");
-                withPii.AppendLine($"RefreshToken returned: {!string.IsNullOrEmpty(RefreshToken)}");
-                withPii.AppendLine($"IdToken returned: {!string.IsNullOrEmpty(IdToken)}");
-                withPii.AppendLine($"ClientInfo: {ClientInfo}");
-                withPii.AppendLine($"FamilyId: {FamilyId}");
-                withPii.AppendLine($"WamAccountId exists: {!string.IsNullOrEmpty(WamAccountId)}");
+                     [MsalTokenResponse]
+                     Error: {Error}
+                     ErrorDescription: {ErrorDescription}
+                     Scopes: {Scope}
+                     ExpiresIn: {ExpiresIn}
+                     RefreshIn: {RefreshIn}
+                     AccessToken returned: {!string.IsNullOrEmpty(AccessToken)}
+                     AccessToken Type: {TokenType}
+                     RefreshToken returned: {!string.IsNullOrEmpty(RefreshToken)}
+                     IdToken returned: {!string.IsNullOrEmpty(IdToken)}
+                     ClientInfo: {ClientInfo}
+                     FamilyId: {FamilyId}
+                     WamAccountId exists: {!string.IsNullOrEmpty(WamAccountId)}
+                     """;
+                var withoutPii =
+                    $"""
 
-                withoutPii.AppendLine($"{Environment.NewLine}[MsalTokenResponse]");
-                withoutPii.AppendLine($"Error: {Error}");
-                withoutPii.AppendLine($"ErrorDescription: {ErrorDescription}");
-                withoutPii.AppendLine($"Scopes: {Scope} ");
-                withoutPii.AppendLine($"ExpiresIn: {ExpiresIn}");
-                withoutPii.AppendLine($"RefreshIn: {RefreshIn}");
-                withoutPii.AppendLine($"AccessToken returned: {!string.IsNullOrEmpty(AccessToken)}");
-                withoutPii.AppendLine($"AccessToken Type: {TokenType}");
-                withoutPii.AppendLine($"RefreshToken returned: {!string.IsNullOrEmpty(RefreshToken)}");
-                withoutPii.AppendLine($"IdToken returned: {!string.IsNullOrEmpty(IdToken)}");
-                withoutPii.AppendLine($"ClientInfo returned: {!string.IsNullOrEmpty(ClientInfo)}");
-                withoutPii.AppendLine($"FamilyId: {FamilyId}");
-                withoutPii.AppendLine($"WamAccountId exists: {!string.IsNullOrEmpty(WamAccountId)}");
+                     [MsalTokenResponse]
+                     Error: {Error}
+                     ErrorDescription: {ErrorDescription}
+                     Scopes: {Scope}
+                     ExpiresIn: {ExpiresIn}
+                     RefreshIn: {RefreshIn}
+                     AccessToken returned: {!string.IsNullOrEmpty(AccessToken)}
+                     AccessToken Type: {TokenType}
+                     RefreshToken returned: {!string.IsNullOrEmpty(RefreshToken)}
+                     IdToken returned: {!string.IsNullOrEmpty(IdToken)}
+                     ClientInfo returned: {!string.IsNullOrEmpty(ClientInfo)}
+                     FamilyId: {FamilyId}
+                     WamAccountId exists: {!string.IsNullOrEmpty(WamAccountId)}
+                     """;
 
-                logger.Log(logLevel, withPii.ToString(), withoutPii.ToString());
+                logger.Log(logLevel, withPii, withoutPii);
             }
         }
     }

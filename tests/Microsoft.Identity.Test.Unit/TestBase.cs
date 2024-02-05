@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit
             return new MockHttpAndServiceBundle(
                 logCallback,
                 isExtendedTokenLifetimeEnabled,
-                testContext: TestContext,
+                testName: TestContext.TestName,
                 isMultiCloudSupportEnabled: isMultiCloudSupportEnabled,
                 isInstanceDiscoveryEnabled: isInstanceDiscoveryEnabled
                 );

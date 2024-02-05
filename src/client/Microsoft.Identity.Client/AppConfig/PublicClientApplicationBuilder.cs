@@ -320,7 +320,7 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(windowFunc));
             }
 
-            return WithParentFunc(() => windowFunc());
+            return WithParentFunc(windowFunc);
         }
 #endif
 
@@ -418,7 +418,7 @@ namespace Microsoft.Identity.Client
                                                          .GetDefaultRedirectUri(Config.ClientId, Config.UseRecommendedDefaultRedirectUri);
             }
 
-            if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))
+            if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri _))
             {
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
             }
