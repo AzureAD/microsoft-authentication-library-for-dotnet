@@ -71,7 +71,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             Trace.WriteLine("Step 2. Acquire Token For Client -> HTTP 5xx error (i.e. AAD is down)");
             result = await RunAcquireTokenForClientAsync(AcquireTokenForClientOutcome.AADUnavailableError).ConfigureAwait(false);
-            Guid step2CorrelationId = result.Correlationid;
 
             // we can assert telemetry here, as it will be sent to AAD. However, AAD is down, so it will not record it.
             AssertCurrentTelemetry(result.HttpRequest, ApiIds.AcquireTokenForClient,
@@ -200,8 +199,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         private async Task<(HttpRequestMessage HttpRequest, Guid Correlationid)> RunAcquireTokenForClientAsync(
             AcquireTokenForClientOutcome outcome, bool forceRefresh = false, bool serializeCache = false)
         {
-            MockHttpMessageHandler tokenRequestHandler = null;
-            Guid correlationId = default;
+            MockHttpMessageHandler tokenRequestHandler;
+            Guid correlationId;
 
             switch (outcome)
             {
@@ -386,11 +385,11 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
            string[] expectedRegions = null,
            string[] expectedRegionSources = null)
         {
-            expectedFailedApiIds = expectedFailedApiIds ?? new ApiIds[0];
-            expectedCorrelationIds = expectedCorrelationIds ?? new Guid[0];
-            expectedErrors = expectedErrors ?? new string[0];
-            expectedRegions = expectedRegions ?? new string[0];
-            expectedRegionSources = expectedRegionSources ?? new string[0];
+            expectedFailedApiIds ??= Array.Empty<ApiIds>();
+            expectedCorrelationIds ??= Array.Empty<Guid>();
+            expectedErrors ??= Array.Empty<string>();
+            expectedRegions ??= Array.Empty<string>();
+            expectedRegionSources ??= Array.Empty<string>();
 
             var actualHeader = ParseLastRequestHeader(requestMessage);
 

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Instance;
@@ -28,7 +29,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             Uri customDiscoveryEndpoint = null, 
             string instanceMetadataContent = null)
         {
-            var authorityURI = new Uri(authority);
+            Uri authorityURI = new Uri(authority);
 
             string discoveryEndpoint;
 
@@ -53,7 +54,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static MockHttpMessageHandler AddWsTrustMockHandler(this MockHttpManager httpManager)
         {
-            var wsTrustHandler = new MockHttpMessageHandler()
+            MockHttpMessageHandler wsTrustHandler = new MockHttpMessageHandler()
             {
                 ExpectedUrl = "https://login.microsoftonline.com/common/userrealm/username",
                 ExpectedMethod = HttpMethod.Get,
@@ -345,7 +346,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             HttpStatusCode statusCode = HttpStatusCode.OK
             )
         {
-            var responseMessage = new HttpResponseMessage(statusCode);
+            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
             HttpContent content = new StringContent(response);
             responseMessage.Content = content;
 
@@ -372,9 +373,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpManager.AddMockHandler(httpMessageHandler);
         }
 
+            
         private static MockHttpMessageHandler BuildMockHandlerForManagedIdentitySource(ManagedIdentitySource managedIdentitySourceType, string resource)
         {
-            var httpMessageHandler = new MockHttpMessageHandler();
+            MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
             IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
             IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
 
@@ -410,6 +412,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     expectedQueryParams.Add("api-version", "2019-07-01-preview");
                     expectedQueryParams.Add("resource", resource);
                     break;
+                case ManagedIdentitySource.Credential:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Post;
+                    expectedRequestHeaders.Add("Server", "IMDS");
+                    expectedQueryParams.Add("cred-api-version", "1.0");
+                    break;
             }
 
             if (managedIdentitySourceType != ManagedIdentitySource.CloudShell)
@@ -427,12 +434,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string expectedUrl, 
             string filePath = null)
         {
-            var responseMessage = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.Unauthorized);
+
             if (filePath != null)
             {
                 responseMessage.Headers.Add("WWW-Authenticate", $"Basic realm={filePath}");
             }
-
+            
             httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -440,6 +448,85 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                         ExpectedUrl = expectedUrl,
                         ResponseMessage = responseMessage
                     });
+        }
+
+        public static void AddManagedIdentityCredentialMockHandler(
+            this MockHttpManager httpManager,
+            string expectedUrl,
+            string response = null,
+            string userAssignedId = null,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            HttpStatusCode statusCode = HttpStatusCode.OK)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedHeaders = new Dictionary<string, string>();
+            MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
+            
+            HttpContent content = new StringContent(response);
+            responseMessage.Content = content;
+
+            httpMessageHandler.ExpectedMethod = HttpMethod.Post;
+            
+            expectedHeaders.Add("Metadata", "true");
+            expectedQueryParams.Add("cred-api-version", "1.0");
+
+            if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
+            {
+                expectedQueryParams.Add(Constants.ManagedIdentityClientId, userAssignedId);
+            }
+
+            if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
+            {
+                expectedQueryParams.Add(Constants.ManagedIdentityResourceId, userAssignedId);
+            }
+
+            if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)
+            {
+                expectedQueryParams.Add(Constants.ManagedIdentityObjectId, userAssignedId);
+            }
+                
+            httpMessageHandler.ExpectedQueryParams = expectedQueryParams;
+
+            httpMessageHandler.ResponseMessage = responseMessage;
+            httpMessageHandler.ExpectedUrl = expectedUrl;
+
+            httpMessageHandler.ExpectedRequestHeaders = expectedHeaders;
+
+            httpManager.AddMockHandler(httpMessageHandler);
+        }
+
+        public static void AddManagedIdentityMtlsMockHandler(
+            this MockHttpManager httpManager,
+            string expectedUrl,
+            string resource,
+            string client_id = TestConstants.SystemAssignedClientId,
+            string response = null,
+            HttpStatusCode statusCode = HttpStatusCode.OK)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
+            IDictionary<string, string> expectedBodyParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
+            Guid correlationId = Guid.NewGuid();
+
+            HttpContent content = new StringContent(response);
+            responseMessage.Content = content;
+
+            httpMessageHandler.ExpectedMethod = HttpMethod.Post;
+            //expectedRequestHeaders.Add("client-request-id", correlationId.ToString("D"));
+            httpMessageHandler.ResponseMessage = responseMessage;
+            httpMessageHandler.ExpectedUrl = expectedUrl;
+
+            expectedBodyParams.Add("grant_type", "client_credentials");
+            expectedBodyParams.Add("scope", resource + "/.default");
+            expectedBodyParams.Add("client_id", client_id);
+            expectedBodyParams.Add("client_assertion", "managed-identity-credential");
+            expectedBodyParams.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
+
+            httpMessageHandler.ExpectedPostData = expectedBodyParams;
+            httpMessageHandler.ExpectedRequestHeaders = expectedRequestHeaders;
+            httpManager.AddMockHandler(httpMessageHandler);
         }
 
         public static void AddRegionDiscoveryMockHandlerNotFound(

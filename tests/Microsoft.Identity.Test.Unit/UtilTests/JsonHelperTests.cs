@@ -22,9 +22,6 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         [TestMethod]
         public void Deserialize_AdalResultWrapper()
         {
-            DateTimeOffset dateTimeOffset = DateTimeOffset.MinValue;
-            string s = JsonHelper.SerializeToJson(dateTimeOffset);
-
             string json = @"{
                            ""RawClientInfo"": ""eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"",
                            ""RefreshToken"": ""rt_secret"",

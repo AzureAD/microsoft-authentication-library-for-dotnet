@@ -52,13 +52,7 @@ namespace Microsoft.Identity.Client
                         throw new ArgumentException(MsalErrorMessage.B2cAuthorityUriInvalidPath);
                     }
 
-                    CanonicalAuthority = new Uri(string.Format(
-                        CultureInfo.InvariantCulture,
-                        "https://{0}/{1}/{2}/{3}/",
-                        authorityUri.Authority,
-                        pathSegments[0],
-                        pathSegments[1],
-                        pathSegments[2]));
+                    CanonicalAuthority = new Uri($"https://{authorityUri.Authority}/{pathSegments[0]}/{pathSegments[1]}/{pathSegments[2]}/");
                     break;
                 case AuthorityType.Dsts:
                     pathSegments = GetPathSegments(authorityUri.AbsolutePath);
@@ -68,36 +62,20 @@ namespace Microsoft.Identity.Client
                         throw new ArgumentException(MsalErrorMessage.DstsAuthorityUriInvalidPath);
                     }
 
-                    CanonicalAuthority = new Uri(string.Format(
-                        CultureInfo.InvariantCulture,
-                        "https://{0}/{1}/{2}/",
-                        authorityUri.Authority,
-                        pathSegments[0],
-                        pathSegments[1]));
+                    CanonicalAuthority = new Uri($"https://{authorityUri.Authority}/{pathSegments[0]}/{pathSegments[1]}/");
 
                     UserRealmUriPrefix = UriBuilderExtensions.GetHttpsUriWithOptionalPort(
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            "https://{0}/{1}/common/userrealm/",
-                            authorityUri.Authority,
-                            pathSegments[0]),
+                        $"https://{authorityUri.Authority}/{pathSegments[0]}/common/userrealm/",
                         authorityUri.Port);
                     break;
                 default:
                     CanonicalAuthority = new Uri(
                         UriBuilderExtensions.GetHttpsUriWithOptionalPort(
-                            string.Format(
-                                CultureInfo.InvariantCulture,
-                                "https://{0}/{1}/",
-                                authorityUri.Authority,
-                                GetFirstPathSegment(authorityUri)),
+                            $"https://{authorityUri.Authority}/{GetFirstPathSegment(authorityUri)}/",
                             authorityUri.Port));
 
                     UserRealmUriPrefix = UriBuilderExtensions.GetHttpsUriWithOptionalPort(
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            "https://{0}/common/userrealm/",
-                            Host),
+                        $"https://{Host}/common/userrealm/",
                         authorityUri.Port);
                     break;
             }
@@ -388,7 +366,7 @@ namespace Microsoft.Identity.Client
                     throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, nameof(authority));
                 }
 
-                string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split('/');
+                string[] pathSegments = path.Split('/');
                 if (pathSegments == null || pathSegments.Length == 0)
                 {
                     throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath);
@@ -406,7 +384,7 @@ namespace Microsoft.Identity.Client
             string cloudUrl = GetCloudUrl(azureCloudInstance);
             string tenantValue = GetAadAuthorityAudienceValue(authorityAudience, tenantId);
 
-            return string.Format(CultureInfo.InvariantCulture, "{0}/{1}", cloudUrl, tenantValue);
+            return $"{cloudUrl}/{tenantValue}";
         }
 
         internal static string GetFirstPathSegment(Uri authority)

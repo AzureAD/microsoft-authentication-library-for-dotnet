@@ -75,15 +75,13 @@ namespace Microsoft.Identity.Client.Utils
                 return default;
             }
 
-            using (var stream = new MemoryStream(jsonByteArray))
-            using (var reader = new StreamReader(stream, Encoding.UTF8))
-            {
+            using var stream = new MemoryStream(jsonByteArray);
 #if SUPPORTS_SYSTEM_TEXT_JSON
-                return (T)JsonSerializer.Deserialize(stream, typeof(T), MsalJsonSerializerContext.Custom);
+            return (T)JsonSerializer.Deserialize(stream, typeof(T), MsalJsonSerializerContext.Custom);
 #else
-                return (T)JsonSerializer.Create().Deserialize(reader, typeof(T));
+            using var reader = new StreamReader(stream, Encoding.UTF8);
+            return (T)JsonSerializer.Create().Deserialize(reader, typeof(T));
 #endif
-            }
         }
 
         internal static string GetExistingOrEmptyString(JObject json, string key)

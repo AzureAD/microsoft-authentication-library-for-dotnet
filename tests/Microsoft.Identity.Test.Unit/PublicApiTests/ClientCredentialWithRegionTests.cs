@@ -477,7 +477,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
-                MockHttpMessageHandler discoveryHandler = null;
+                MockHttpMessageHandler discoveryHandler;
                 if (authorityIsValid)
                 {
                     discoveryHandler = MockHelpers.CreateInstanceDiscoveryMockHandler(

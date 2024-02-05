@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client
         {
             string errorCode = msalTokenResponse.Error;
             string correlationId = msalTokenResponse.CorrelationId;
-            string subErrorCode = string.IsNullOrEmpty(msalTokenResponse.SubError)?
+            string subErrorCode = string.IsNullOrEmpty(msalTokenResponse.SubError) ?
                                                                      MsalError.UnknownBrokerError : msalTokenResponse.SubError;
             HttpResponse brokerHttpResponse = msalTokenResponse.HttpResponse;
             MsalServiceException ex = null;

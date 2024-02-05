@@ -3,6 +3,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
@@ -84,6 +85,19 @@ namespace Microsoft.Identity.Client
 
             CommonParameters.AuthenticationScheme = new PopAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
 
+            return this as T;
+        }
+
+        /// <summary>
+        /// INTERNAL for now. Will be made public in the future as part of S2S token binding.
+        /// Sends the token request over an MTLS connection, using the client certificate provided.
+        /// </summary>
+        /// <remarks>
+        /// Only the /token request will be over MTLS
+        /// </remarks>
+        internal T WithMtlsCertificate(X509Certificate2 certificate)
+        {
+            CommonParameters.MtlsCertificate = certificate;
             return this as T;
         }
     }

@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 logger.Error(MsalErrorMessage.ClientCredentialWrongAuthority);
             }
 
-            AuthenticationResult authResult = null;
+            AuthenticationResult authResult;
 
             // Skip checking cache when force refresh or claims are specified
             if (_clientParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             // Get a token from the app provider delegate
             AuthenticationResult authResult;
-            MsalAccessTokenCacheItem cachedAccessTokenItem = null;
+            MsalAccessTokenCacheItem cachedAccessTokenItem;
 
             // Allow only one call to the provider 
             logger.Verbose(() => "[ClientCredentialRequest] Entering client credential request semaphore.");

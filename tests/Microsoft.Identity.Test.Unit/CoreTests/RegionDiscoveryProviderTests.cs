@@ -92,14 +92,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
             // add the mock response only once and call it 5 times on multiple threads
             // if the http mock is called more than once, it will fail in dispose as queue will be non-empty
             AddMockedResponse(MockHelpers.CreateSuccessResponseMessage(TestConstants.Region));
-            SemaphoreSlim semaphore = new SemaphoreSlim(0);
             int threadCount = MaxThreadCount;
 #pragma warning disable VSTHRD101 // Avoid unsupported async delegates - acceptable risk (crash the test proj)
             var result = Parallel.For(0, MaxThreadCount, async (i) =>
             {
                 try
                 {
-
                     _testRequestContext.ServiceBundle.Config.AzureRegion =
                         ConfidentialClientApplication.AttemptRegionDiscovery;
 
@@ -423,7 +421,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
         private void ValidateInstanceMetadata(InstanceDiscoveryMetadataEntry entry, string region = "centralus")
         {
-            var expectedEntry = new InstanceDiscoveryMetadataEntry()
+            InstanceDiscoveryMetadataEntry expectedEntry = new InstanceDiscoveryMetadataEntry()
             {
                 Aliases = new[] { $"{region}.{RegionDiscoveryProvider.PublicEnvForRegional}", "login.microsoftonline.com" },
                 PreferredCache = "login.microsoftonline.com",

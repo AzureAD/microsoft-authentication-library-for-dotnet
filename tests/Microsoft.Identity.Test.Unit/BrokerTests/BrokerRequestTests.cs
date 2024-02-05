@@ -752,7 +752,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         [TestMethod]
         public void NoTokenFoundThrowsUIRequiredTest()
         {
-            using (var harness = CreateBrokerHelper())
+            using (CreateBrokerHelper())
             {
                 try
                 {
@@ -771,7 +771,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         [TestMethod]
         public void NoAccountFoundThrowsUIRequiredTest()
         {
-            using (var harness = CreateBrokerHelper())
+            using (CreateBrokerHelper())
             {
                 try
                 {
@@ -790,7 +790,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         [TestMethod]
         public void InvalidRefreshTokenUsedThrowsUIRequiredTest()
         {
-            using (var harness = CreateBrokerHelper())
+            using (CreateBrokerHelper())
             {
                 try
                 {
