@@ -460,7 +460,7 @@ namespace Microsoft.Identity.Json.Schema
                             throw JsonException.Create(typeToken, typeToken.Path, "Expected JSON schema type string token, got {0}.".FormatWith(CultureInfo.InvariantCulture, token.Type));
                         }
 
-                        type = type | MapType((string)typeToken);
+                        type |= MapType((string)typeToken);
                     }
 
                     return type;

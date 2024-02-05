@@ -50,8 +50,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await ResolveAuthorityAsync().ConfigureAwait(false);
             await UpdateUsernameAsync().ConfigureAwait(false);
 
-            MsalTokenResponse msalTokenResponse = null;
-                
+            MsalTokenResponse msalTokenResponse;
+
             try
             {
                 msalTokenResponse = await GetTokenResponseAsync(cancellationToken).ConfigureAwait(false);
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new MsalServiceException(MsalError.JsonParseError, MsalErrorMessage.JsonParseErrorMessage, ex);
             }
-            
+
             return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
         }
 

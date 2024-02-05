@@ -397,7 +397,7 @@ namespace Microsoft.Identity.Client.Extensions.Msal
             CacheLock = CreateCrossPlatLock(_storageCreationProperties);
 
             _logger.LogInformation($"Before access, the store has changed");
-            byte[] cachedStoreData = null;
+            byte[] cachedStoreData;
             try
             {
                 cachedStoreData = CacheStore.ReadData();
@@ -406,7 +406,6 @@ namespace Microsoft.Identity.Client.Extensions.Msal
             {
                 _logger.LogError($"Could not read the token cache. Ignoring. See previous error message.");
                 return;
-
             }
             _logger.LogInformation($"Read '{cachedStoreData?.Length}' bytes from storage");
 
@@ -438,11 +437,11 @@ namespace Microsoft.Identity.Client.Extensions.Msal
             try
             {
                 _logger.LogInformation($"After access");
-                byte[] data = null;
                 // if the access operation resulted in a cache update
                 if (args.HasStateChanged)
                 {
                     _logger.LogInformation($"After access, cache in memory HasChanged");
+                    byte[] data;
                     try
                     {
                         data = args.TokenCache.SerializeMsalV3();

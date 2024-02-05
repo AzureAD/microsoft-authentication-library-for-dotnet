@@ -316,11 +316,7 @@ namespace Microsoft.Identity.Client
         /// </example>
         public string CreateAuthorizationHeader()
         {
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "{0} {1}",
-                _authenticationScheme?.AuthorizationHeaderPrefix ?? TokenType,
-                AccessToken);
+            return $"{_authenticationScheme?.AuthorizationHeaderPrefix ?? TokenType} {AccessToken}";
         }
     }
 }

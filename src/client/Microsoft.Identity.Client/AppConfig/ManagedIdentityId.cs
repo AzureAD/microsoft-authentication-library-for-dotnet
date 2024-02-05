@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// The identifier string of the user-assigned managed identity.
         /// </value>
         internal string UserAssignedId { get; private set; }
-        
+
         /// <summary>
         /// Gets the type of identifier used for the managed identity.
         /// </summary>
@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// The enumeration value representing the managed identity identifier type.
         /// </value>
         internal ManagedIdentityIdType IdType { get; }
-        
+
         /// <summary>
         /// Gets a value indicating whether the managed identity is user-assigned.
         /// </summary>
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <summary>
         /// Create an instance of ManagedIdentityId for a system assigned managed identity.
         /// </summary>
-        public static ManagedIdentityId SystemAssigned { get; } = 
+        public static ManagedIdentityId SystemAssigned { get; } =
             new ManagedIdentityId(ManagedIdentityIdType.SystemAssigned);
 
         /// <summary>

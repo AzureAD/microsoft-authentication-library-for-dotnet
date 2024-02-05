@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Common
@@ -81,5 +82,129 @@ namespace Microsoft.Identity.Test.Common
             // Test case with claims containing an additional key and access key (different order), non-empty capabilities, and the expected merged JSON
             yield return new object[] { TestConstants.ClaimWithAdditionalKeyAndAccessKey, TestConstants.ClientCapabilities, TestConstants.MergedJsonClaimWithAdditionalKeyAndAccessKey };
         }
+
+        public static IEnumerable<object[]> GetMtlsInvalidResourceErrorData()
+        {
+            // Use Func<string> for dynamic error data
+            
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.GetMtlsInvalidResourceError()),
+                "https://graph.microsoft.com/user.read",
+                TestConstants.InvalidResourceError,
+                "invalid_resource"
+            };
+
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.GetMtlsInvalidScopeError70011()),
+                "user.read",
+                TestConstants.InvalidScopeError70011,
+                "invalid_scope"
+            };
+
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.GetMtlsInvalidScopeError1002012()),
+                "user.read",
+                TestConstants.InvalidScopeError1002012,
+                "invalid_scope"
+            };
+        }
+
+        public static IEnumerable<object[]> GetMtlsErrorData()
+        {
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.InvalidTenantError900023()),
+                TestConstants.InvalidTenantError900023,
+                "invalid_request"
+            };
+
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.WrongTenantError700016()),
+                TestConstants.WrongTenantError700016,
+                "unauthorized_client"
+            };
+
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.WrongMtlsUrlError50171()),
+                TestConstants.WrongMtlsUrlError50171,
+                "invalid_client"
+            };
+
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.SendTenantIdInCredentialValueError50027()),
+                TestConstants.SendTenantIdInCredentialValueError50027,
+                "invalid_request"
+            };
+
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.BadCredNoIssError90014()),
+                TestConstants.BadCredNoIssError90014,
+                "invalid_request"
+            };
+
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.BadCredNoAudError90014()),
+                TestConstants.BadCredNoAudError90014,
+                "invalid_request"
+            };
+
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.BadCredBadAlgError5002738()),
+                TestConstants.BadCredBadAlgError5002738,
+                "invalid_client"
+            };
+
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.BadCredMissingSha1Error5002723()),
+                TestConstants.BadCredMissingSha1Error5002723,
+                "invalid_client"
+            };
+
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.BadTimeRangeError700024()),
+                TestConstants.BadTimeRangeError700024,
+                "invalid_client"
+            };
+
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.IdentifierMismatchError700021()),
+                TestConstants.IdentifierMismatchError700021,
+                "invalid_client"
+            };
+
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.MissingCertError392200()),
+                TestConstants.MissingCertError392200,
+                "invalid_request"
+            };
+
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.ExpiredCertError392204()),
+                TestConstants.ExpiredCertError392204,
+                "invalid_client"
+            };
+
+            yield return new object[]
+            {
+                new Func<string>(() => MockHelpers.CertMismatchError500181()),
+                TestConstants.CertMismatchError500181,
+                "invalid_request"
+            };
+        }
+
     }
 }

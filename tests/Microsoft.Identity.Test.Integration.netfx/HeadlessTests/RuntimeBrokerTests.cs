@@ -23,7 +23,6 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -250,7 +249,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
-            DateTimeOffset ropcTokenExpiration = result.ExpiresOn;
             string ropcToken = result.AccessToken;
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes);

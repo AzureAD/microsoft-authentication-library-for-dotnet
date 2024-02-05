@@ -326,8 +326,6 @@ namespace Microsoft.Identity.Test.Unit
                 var appCacheAccess = app.AppTokenCache.RecordAccess();
                 var userCacheAccess = app.UserTokenCache.RecordAccess();
 
-                var userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
-
                 //Check for x5c claim
                 harness.HttpManager.AddMockHandler(
                     CreateTokenResponseHttpHandlerWithX5CValidation(false, exportedCertificate));

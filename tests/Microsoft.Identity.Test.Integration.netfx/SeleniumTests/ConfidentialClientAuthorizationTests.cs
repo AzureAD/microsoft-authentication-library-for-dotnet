@@ -13,7 +13,6 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -104,10 +103,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             var cert = await s_secretProvider.GetCertificateWithPrivateMaterialAsync(
                 CertificateName).ConfigureAwait(false);
 
-            IConfidentialClientApplication cca;
-            redirectUri = redirectUri ?? SeleniumWebUI.FindFreeLocalhostRedirectUri();
+            redirectUri ??= SeleniumWebUI.FindFreeLocalhostRedirectUri();
 
-            cca = ConfidentialClientApplicationBuilder
+            IConfidentialClientApplication cca = ConfidentialClientApplicationBuilder
                 .Create(appId)
                 .WithAuthority(authority)
                 .WithCertificate(cert)
@@ -189,8 +187,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         private void AssertExtraHTTPHeadersAreSent(HttpSnifferClientFactory factory)
         {
-            var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
-            x.Item2.StatusCode == HttpStatusCode.OK);
+            var (req, _) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
+                                                                    x.Item2.StatusCode == HttpStatusCode.OK);
 
             var ExtraHttpHeader = req.Headers.Single(h => h.Key == TestConstants.ExtraHttpHeader.Keys.FirstOrDefault());
 

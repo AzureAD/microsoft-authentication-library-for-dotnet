@@ -13,7 +13,6 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -429,8 +428,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             catch (MsalUiRequiredException)
             {
                 Assert.IsFalse(silentCallShouldSucceed, "ATS should have found a token, but it didn't");
-                string u = user.Upn;
-                string p = user.GetOrFetchPassword();
 
                 authResult = await pca
                     .AcquireTokenByUsernamePassword(s_oboServiceScope, user.Upn, user.GetOrFetchPassword())
@@ -483,8 +480,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     return;
                 }
 
-                var (req, res) = factory.RequestsAndResponses.Single(x => x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
-                x.Item2.StatusCode == HttpStatusCode.OK);
+                var (req, _) = factory.RequestsAndResponses.Single(x =>
+                    x.Item1.RequestUri.AbsoluteUri.Contains("oauth2/v2.0/token") &&
+                    x.Item2.StatusCode == HttpStatusCode.OK);
 
                 Assert.IsTrue(req.Headers.TryGetValues(Constants.CcsRoutingHintHeader, out var values));
                 Assert.AreEqual("oid:597f86cd-13f3-44c0-bece-a1e77ba43228@f645ad92-e38d-4d1a-b510-d1b09a74a8ca", values.First());

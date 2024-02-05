@@ -283,7 +283,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private bool ShouldCacheAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem, TokenSource tokenSource)
+        private static bool ShouldCacheAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem, TokenSource tokenSource)
         {
 #if iOS
             return msalAccessTokenCacheItem != null;
@@ -698,7 +698,7 @@ namespace Microsoft.Identity.Client
                 $"Filtering AT by environment");
         }
 
-        private MsalAccessTokenCacheItem FilterTokensByPopKeyId(MsalAccessTokenCacheItem item, AuthenticationRequestParameters authenticationRequest)
+        private static MsalAccessTokenCacheItem FilterTokensByPopKeyId(MsalAccessTokenCacheItem item, AuthenticationRequestParameters authenticationRequest)
         {
             if (item == null)
             {
@@ -719,11 +719,7 @@ namespace Microsoft.Identity.Client
             }
 
             authenticationRequest.RequestContext.Logger.Info(
-                    () => string.Format(
-                        CultureInfo.InvariantCulture,
-                        "A token bound to the wrong key was found. Token key id: {0} Request key id: {1}",
-                        item.KeyId,
-                        requestKid));
+                    () => $"A token bound to the wrong key was found. Token key id: {item.KeyId} Request key id: {requestKid}");
             return null;
         }
         #endregion
@@ -923,7 +919,6 @@ namespace Microsoft.Identity.Client
             var logger = requestParameters.RequestContext.Logger;
             var environment = requestParameters.AuthorityInfo.Host;
             bool filterByClientId = !_featureFlags.IsFociEnabled;
-            bool isAadAuthority = requestParameters.AuthorityInfo.AuthorityType == AuthorityType.Aad;
 
             // this will either be the home account ID or null, it can never be OBO assertion or tenant ID
             string partitionKey = CacheKeyFactory.GetKeyFromRequest(requestParameters);
@@ -1049,7 +1044,7 @@ namespace Microsoft.Identity.Client
 
                 if (logger.IsLoggingEnabled(LogLevel.Verbose))
                 {
-                    logger.Verbose(() => $"Filtered by home account id. Remaining accounts {accounts.Count()} ");
+                    logger.Verbose(() => $"Filtered by home account id. Remaining accounts {accounts.Count} ");
                 }
             }
 
@@ -1075,7 +1070,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private void UpdateWithAdalAccountsWithoutClientInfo(
+        private static void UpdateWithAdalAccountsWithoutClientInfo(
             string envFromRequest,
             IEnumerable<string> envAliases,
             AdalUsersForMsal adalUsers,
@@ -1168,7 +1163,7 @@ namespace Microsoft.Identity.Client
 
         async Task<bool> ITokenCacheInternal.StopLongRunningOboProcessAsync(string longRunningOboCacheKey, AuthenticationRequestParameters requestParameters)
         {
-            bool tokensRemoved = false;
+            bool tokensRemoved;
 
             requestParameters.RequestContext.Logger.Verbose(() => $"[StopLongRunningOboProcessAsync] Entering token cache semaphore. Count {_semaphoreSlim.GetCurrentCountLogMessage()}");
             await _semaphoreSlim.WaitAsync(requestParameters.RequestContext.UserCancellationToken).ConfigureAwait(false);

@@ -182,7 +182,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private string GetAccessTokenExpireLogMessageContent(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        private static string GetAccessTokenExpireLogMessageContent(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             return string.Format(
                 CultureInfo.InvariantCulture,

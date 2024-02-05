@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
           Uri authority,
           RequestContext requestContext)
         {
-            var client = new OAuth2Client(requestContext.Logger, _httpManager);
+            var client = new OAuth2Client(requestContext.Logger, _httpManager, mtlsCertificate: null);
 
             client.AddQueryParameter("api-version", "1.1");
             client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority));
@@ -102,10 +102,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 AadAuthority.DefaultTrustedHost;
 
             string instanceDiscoveryEndpoint =  UriBuilderExtensions.GetHttpsUriWithOptionalPort(
-                string.Format(
-                    CultureInfo.InvariantCulture, 
-                    "https://{0}/common/discovery/instance", 
-                    discoveryHost), 
+                $"https://{discoveryHost}/common/discovery/instance",
                 authority.Port);
 
             requestContext.Logger.InfoPii(

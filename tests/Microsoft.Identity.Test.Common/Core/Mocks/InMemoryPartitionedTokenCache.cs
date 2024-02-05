@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         private void RemoveKey(string cacheKey)
         {
-            bool removed = _cacheData.TryRemove(cacheKey, out _);
+            _cacheData.TryRemove(cacheKey, out _);
         }
 
         private void WriteCacheBytes(string cacheKey, byte[] bytes)

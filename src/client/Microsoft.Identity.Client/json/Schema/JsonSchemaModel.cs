@@ -111,7 +111,7 @@ namespace Microsoft.Identity.Json.Schema
 
                 model.Enum.AddRangeDistinct(schema.Enum, JToken.EqualityComparer);
             }
-            model.Disallow = model.Disallow | (schema.Disallow ?? JsonSchemaType.None);
+            model.Disallow |= (schema.Disallow ?? JsonSchemaType.None);
 
             if (schema.Pattern != null)
             {

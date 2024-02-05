@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
             _logCallback.Invoke(GetLogLevel(entry.EventLogLevel), formattedMessage, _piiLoggingEnabled);
         }
 
-        private LogLevel GetLogLevel(EventLogLevel eventLogLevel)
+        private static LogLevel GetLogLevel(EventLogLevel eventLogLevel)
         {
             //MSAL does not have a critical log level so it is combined with the error level
             if (eventLogLevel == EventLogLevel.LogAlways)

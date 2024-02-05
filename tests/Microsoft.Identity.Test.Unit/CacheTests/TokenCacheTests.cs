@@ -55,43 +55,47 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             bool serializeCache,
             bool expectToCallAdalLegacyCache)
         {
-            // Arrange
-            var legacyCachePersistence = Substitute.For<ILegacyCachePersistence>();
-            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isLegacyCacheEnabled: enableLegacyCacheCompatibility);
-            var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
-            var response = TestConstants.CreateMsalTokenResponse();
-
-            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
-            ((TokenCache)cache).LegacyCachePersistence = legacyCachePersistence;
-            if (serializeCache) // no point in invoking the Legacy ADAL cache if you're only keeping it memory
+            using (MockHttpManager mockHttpManager = new MockHttpManager())
             {
-                cache.SetBeforeAccess((_) => { });
-            }
+                // Arrange
+                var legacyCachePersistence = Substitute.For<ILegacyCachePersistence>();
+                mockHttpManager.AddInstanceDiscoveryMockHandler();
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(mockHttpManager, isLegacyCacheEnabled: enableLegacyCacheCompatibility);
+                var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+                var response = TestConstants.CreateMsalTokenResponse();
 
-            var requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle);
-            requestParams.AuthorityManager = new AuthorityManager(
-                requestContext,
-                Authority.CreateAuthorityWithTenant(
-                    requestParams.AuthorityInfo,
-                    TestConstants.Utid));
-            requestParams.Account = new Account(TestConstants.s_userIdentifier, $"1{TestConstants.DisplayableId}", TestConstants.ProductionPrefNetworkEnvironment);
+                ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
+                ((TokenCache)cache).LegacyCachePersistence = legacyCachePersistence;
+                if (serializeCache) // no point in invoking the Legacy ADAL cache if you're only keeping it memory
+                {
+                    cache.SetBeforeAccess((_) => { });
+                }
 
-            // Act
-            await cache.FindRefreshTokenAsync(requestParams).ConfigureAwait(true);
-            await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(true);
-            await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
-            await cache.RemoveAccountAsync(requestParams.Account, requestParams).ConfigureAwait(true);
+                var requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle);
+                requestParams.AuthorityManager = new AuthorityManager(
+                    requestContext,
+                    Authority.CreateAuthorityWithTenant(
+                        requestParams.AuthorityInfo,
+                        TestConstants.Utid));
+                requestParams.Account = new Account(TestConstants.s_userIdentifier, $"1{TestConstants.DisplayableId}", TestConstants.ProductionPrefNetworkEnvironment);
 
-            // Assert
-            if (expectToCallAdalLegacyCache)
-            {
-                legacyCachePersistence.ReceivedWithAnyArgs().LoadCache();
-                legacyCachePersistence.ReceivedWithAnyArgs().WriteCache(Arg.Any<byte[]>());
-            }
-            else
-            {
-                legacyCachePersistence.DidNotReceiveWithAnyArgs().LoadCache();
-                legacyCachePersistence.DidNotReceiveWithAnyArgs().WriteCache(Arg.Any<byte[]>());
+                // Act
+                await cache.FindRefreshTokenAsync(requestParams).ConfigureAwait(true);
+                await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(true);
+                await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
+                await cache.RemoveAccountAsync(requestParams.Account, requestParams).ConfigureAwait(true);
+
+                // Assert
+                if (expectToCallAdalLegacyCache)
+                {
+                    legacyCachePersistence.ReceivedWithAnyArgs().LoadCache();
+                    legacyCachePersistence.ReceivedWithAnyArgs().WriteCache(Arg.Any<byte[]>());
+                }
+                else
+                {
+                    legacyCachePersistence.DidNotReceiveWithAnyArgs().LoadCache();
+                    legacyCachePersistence.DidNotReceiveWithAnyArgs().WriteCache(Arg.Any<byte[]>());
+                }
             }
         }
 
@@ -102,36 +106,43 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             bool multiCloudSupportEnabled)
         {
             // Arrange
-            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, isMultiCloudSupportEnabled: multiCloudSupportEnabled);
-            var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
-            var response = TestConstants.CreateMsalTokenResponse();
+            using (MockHttpManager mockHttpManager = new MockHttpManager())
+            {
+                mockHttpManager.AddInstanceDiscoveryMockHandler();
 
-            ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(
+                    mockHttpManager,
+                    isMultiCloudSupportEnabled: multiCloudSupportEnabled);
+                var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
+                var response = TestConstants.CreateMsalTokenResponse();
 
-            var requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle);
-            requestParams.AuthorityManager = new AuthorityManager(
-                requestContext,
-                Authority.CreateAuthorityWithTenant(
-                    requestParams.AuthorityInfo,
-                    TestConstants.Utid));
-            requestParams.Account = new Account(TestConstants.s_userIdentifier, $"1{TestConstants.DisplayableId}", TestConstants.ProductionPrefNetworkEnvironment);
+                ITokenCacheInternal cache = new TokenCache(serviceBundle, false);
 
-            var res = await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(true);
+                var requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle);
+                requestParams.AuthorityManager = new AuthorityManager(
+                    requestContext,
+                    Authority.CreateAuthorityWithTenant(
+                        requestParams.AuthorityInfo,
+                        TestConstants.Utid));
+                requestParams.Account = new Account(TestConstants.s_userIdentifier, $"1{TestConstants.DisplayableId}", TestConstants.ProductionPrefNetworkEnvironment);
 
-            IEnumerable<IAccount> accounts = await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
-            Assert.IsNotNull(accounts);
-            Assert.IsNotNull(accounts.Single());
+                var res = await cache.SaveTokenResponseAsync(requestParams, response).ConfigureAwait(true);
 
-            MsalRefreshTokenCacheItem refreshToken = await cache.FindRefreshTokenAsync(requestParams).ConfigureAwait(true);
-            Assert.IsNotNull(refreshToken);
+                IEnumerable<IAccount> accounts = await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
+                Assert.IsNotNull(accounts);
+                Assert.IsNotNull(accounts.Single());
 
-            MsalIdTokenCacheItem idToken = cache.GetIdTokenCacheItem(res.Item1);
-            Assert.IsNotNull(idToken);
+                MsalRefreshTokenCacheItem refreshToken = await cache.FindRefreshTokenAsync(requestParams).ConfigureAwait(true);
+                Assert.IsNotNull(refreshToken);
 
-            await cache.RemoveAccountAsync(requestParams.Account, requestParams).ConfigureAwait(true);
-            accounts = await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
-            Assert.IsNotNull(accounts);
-            Assert.IsTrue(accounts.IsNullOrEmpty());
+                MsalIdTokenCacheItem idToken = cache.GetIdTokenCacheItem(res.Item1);
+                Assert.IsNotNull(idToken);
+
+                await cache.RemoveAccountAsync(requestParams.Account, requestParams).ConfigureAwait(true);
+                accounts = await cache.GetAccountsAsync(requestParams).ConfigureAwait(true);
+                Assert.IsNotNull(accounts);
+                Assert.IsTrue(accounts.IsNullOrEmpty());
+            }
         }
 
         [TestMethod]
@@ -569,7 +580,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     _homeAccountId);
 
-                string rtKey = rtItem.CacheKey;
                 cache.Accessor.SaveRefreshToken(rtItem);
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
@@ -606,7 +616,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     null,
                     _homeAccountId);
 
-                string rtKey = rtItem.CacheKey;
                 cache.Accessor.SaveRefreshToken(rtItem);
 
                 var authParams = harness.CreateAuthenticationRequestParameters(
@@ -1099,7 +1108,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 response.Scope = TestConstants.s_scope.AsSingleString();
                 response.TokenType = "Bearer";
 
-                RequestContext requestContext = new RequestContext(serviceBundle, new Guid());
                 var requestParams = TestCommon.CreateAuthenticationRequestParameters(serviceBundle, authority);
 
                 adfsCache.SaveTokenResponseAsync(requestParams, response);

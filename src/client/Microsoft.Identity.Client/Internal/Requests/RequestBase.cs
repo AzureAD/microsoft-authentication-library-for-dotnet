@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         errorCodeToLog);
         }
 
-        private void LogMsalErrorTelemetryToClient(Exception ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
+        private static void LogMsalErrorTelemetryToClient(Exception ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)
         {
             if (telemetryClients.HasEnabledClients(TelemetryConstants.AcquireTokenEventName))
             {
@@ -218,7 +218,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     foreach (string scope in AuthenticationRequestParameters.Scope)
                     {
                         var splitString = scope.Split(new[] { firstScopeAsUri.Host }, StringSplitOptions.None);
-                        string scopeToAppend = splitString.Count() > 1 ? splitString[1].TrimStart('/') + " " : splitString.FirstOrDefault();
+                        string scopeToAppend = splitString.Length > 1 ? splitString[1].TrimStart('/') + " " : splitString.FirstOrDefault();
                         stringBuilder.Append(scopeToAppend);
                     }
 
@@ -249,7 +249,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return CacheLevel.None;
         }
 
-        private void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ILoggerAdapter logger)
+        private static void LogMetricsFromAuthResult(AuthenticationResult authenticationResult, ILoggerAdapter logger)
         {
             if (logger.IsLoggingEnabled(LogLevel.Always))
             {
@@ -470,29 +470,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (authenticationRequestParameters.RequestContext.Logger.IsLoggingEnabled(LogLevel.Info))
             {
-                string logFormat = "=== Token Acquisition ({3}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\t";
                 string scopes = authenticationRequestParameters.Scope.AsSingleString();
-                string messageWithPii = string.Format(
-                    CultureInfo.InvariantCulture,
-                    logFormat,
-                    authenticationRequestParameters.AuthorityInfo?.CanonicalAuthority,
-                    scopes,
-                    authenticationRequestParameters.AppConfig.ClientId,
-                    GetType().Name);
+                var type = GetType().Name;
+                var messageWithPii = $"=== Token Acquisition ({type}) started:\n\tAuthority: {authenticationRequestParameters.AuthorityInfo?.CanonicalAuthority}\n\tScope: {scopes}\n\tClientId: {authenticationRequestParameters.AppConfig.ClientId}\n\t";
 
-                string messageWithoutPii = string.Format(
-                    CultureInfo.InvariantCulture,
-                    "=== Token Acquisition ({0}) started:\n\t Scopes: {1}",
-                    GetType().Name,
-                    scopes);
+                var messageWithoutPii = $"=== Token Acquisition ({type}) started:\n\t Scopes: {scopes}";
 
                 if (authenticationRequestParameters.AuthorityInfo != null &&
                     KnownMetadataProvider.IsKnownEnvironment(authenticationRequestParameters.AuthorityInfo?.Host))
                 {
-                    messageWithoutPii += string.Format(
-                        CultureInfo.CurrentCulture,
-                        "\n\tAuthority Host: {0}",
-                        authenticationRequestParameters.AuthorityInfo?.Host);
+                    messageWithoutPii += $"\n\tAuthority Host: {authenticationRequestParameters.AuthorityInfo?.Host}";
                 }
 
                 authenticationRequestParameters.RequestContext.Logger.InfoPii(messageWithPii, messageWithoutPii);
