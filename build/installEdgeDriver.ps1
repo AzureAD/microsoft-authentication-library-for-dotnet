@@ -1,8 +1,12 @@
 # Get the complete version of Microsoft Edge
 $edgeVersion = (Get-AppxPackage -Name *Microsoft.MicrosoftEdge.Stable* | ForEach-Object Version)
 
+$edgeVersion
+
 # Assuming the complete version can be directly used (note: this might not always work due to version differences between the browser and the driver)
 $url = "https://msedgedriver.azureedge.net/$edgeVersion/edgedriver_win64.zip"
+
+$url
 
 $fileName = "edgedriver_win64.zip"
 $source = "C:\Downloads\$fileName"
