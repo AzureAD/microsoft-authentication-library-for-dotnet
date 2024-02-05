@@ -420,6 +420,8 @@ namespace Microsoft.Identity.Client
 
             if (values.TryGetValue("authorization_uri", out string value))
             {
+                // Strip "/v2.0" and "/oauth2/authorize" to normalize the authority URL.
+                // Ensures compatibility and consistency across API versions.
                 wwwAuthenticateParameters.Authority = value.Replace("/v2.0", string.Empty).Replace("/oauth2/authorize", string.Empty);
             }
 
