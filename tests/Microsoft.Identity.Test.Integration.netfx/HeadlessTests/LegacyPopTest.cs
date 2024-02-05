@@ -33,6 +33,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var cca = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority, true)
+                .WithExperimentalFeatures(true)
                 .WithTestLogging()
                 .Build();
 
