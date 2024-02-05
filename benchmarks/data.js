@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1707129409287,
+  "lastUpdate": 1707129410698,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -8244,6 +8244,54 @@ window.BENCHMARK_DATA = {
             "value": 120802.5039876302,
             "unit": "ns",
             "range": "± 2847.462636545892"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "simon.cropp@gmail.com",
+            "name": "Simon Cropp",
+            "username": "SimonCropp"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "419ac49c828c1d09e6bf1a5d7be249c3ca42cd6d",
+          "message": "better perf in MergeDifferentEntries (#4594)\n\n* better perf in MergeDifferentEntries\r\n\r\n* Update src/client/Microsoft.Identity.Client/Utils/EnumerableExtensions.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n---------\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>",
+          "timestamp": "2024-02-05T10:30:01Z",
+          "tree_id": "b7837fd87e18989f9a254ae74f1e968c7c22a861",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/419ac49c828c1d09e6bf1a5d7be249c3ca42cd6d"
+        },
+        "date": 1707129410251,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 12192.307894025531,
+            "unit": "ns",
+            "range": "± 39.74951092549034"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 119542.25911458333,
+            "unit": "ns",
+            "range": "± 457.3162538911179"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 22858.574427678035,
+            "unit": "ns",
+            "range": "± 53.836306645296304"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 117645.70176344652,
+            "unit": "ns",
+            "range": "± 417.3598474700871"
           }
         ]
       }
