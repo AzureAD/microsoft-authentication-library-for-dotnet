@@ -62,21 +62,22 @@ namespace Microsoft.Identity.Client.Internal
             }
             else
             {
-                payload.Append("{");
+                payload.Append('{');
             }
 
             int i = 0;
             foreach (var kvp in _claimsToSign)
             {
                 payload.Append($"\"{kvp.Key}\":\"{kvp.Value}\"");
+                
                 if (i!= _claimsToSign.Count-1)
                 {
                     i++;
-                    payload.Append(",");
+                    payload.Append(',');
                 }
             }
 
-            payload.Append("}");
+            payload.Append('}');
 
             return payload.ToString();
         }
@@ -118,25 +119,12 @@ namespace Microsoft.Identity.Client.Internal
 #else
                 string x5cValue = Convert.ToBase64String(certificate.RawData);
 #endif
-                header = $$"""
-{
-"alg":"{{alg}}",
-"typ":"JWT",
-"{{thumbprintKey}}":"{{thumbprint}}",
-"x5c":"{{x5cValue}}"
-}
-""";
+                header = $$"""{"alg":"{{alg}}","typ":"JWT","{{thumbprintKey}}":"{{thumbprint}}","x5c":"{{x5cValue}}"}""";
             }
             else
             {
 
-                header = $$"""
-{
-"alg":"{{alg}}",
-"typ":"JWT",
-"{{thumbprintKey}}":"{{thumbprint}}"
-}
-""";
+                header = $$"""{"alg":"{{alg}}","typ":"JWT","{{thumbprintKey}}":"{{thumbprint}}"}""";
             }
 
             return header;

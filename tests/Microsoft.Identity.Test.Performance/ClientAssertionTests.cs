@@ -19,15 +19,14 @@ namespace Microsoft.Identity.Test.Performance
 
         string base64EncodedThumbprint = Base64UrlHelpers.Encode(s_certificate.GetCertHash());
 
-
         private static Dictionary<string, string> s_cl = new Dictionary<string, string>()
         {
             {"key1", "val1" },
             {"key2", "val2" }
         };
 
-        //[ParamsAllValues]
-        //public bool UseSha2 { get; set; }
+        [ParamsAllValues]
+        public bool UseSha2 { get; set; }
 
         [ParamsAllValues]
         public bool UseX5C { get; set; }
@@ -46,7 +45,7 @@ namespace Microsoft.Identity.Test.Performance
                 true);
 
 
-            msalJwtTokenObj.Sign(s_certificate, base64EncodedThumbprint, UseX5C);
+            msalJwtTokenObj.Sign(s_certificate, UseX5C, useSha2AndPss: true);
         }
     }
 }
