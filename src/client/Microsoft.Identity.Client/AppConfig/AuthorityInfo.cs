@@ -311,8 +311,6 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        
-
         internal Authority CreateAuthority()
         {
             switch (AuthorityType)

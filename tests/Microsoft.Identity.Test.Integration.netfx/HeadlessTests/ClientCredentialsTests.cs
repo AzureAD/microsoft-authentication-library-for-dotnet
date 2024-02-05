@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
         [DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
-        public async Task WithClientAssertion_AAD_Manual_TestAsync(Cloud cloud, TargetFrameworks runOn)
+        public async Task WithClientAssertion_Manual_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
             runOn.AssertFramework();
             await RunClientCredsAsync(cloud, CredentialType.ClientAssertion_Manual).ConfigureAwait(false);
