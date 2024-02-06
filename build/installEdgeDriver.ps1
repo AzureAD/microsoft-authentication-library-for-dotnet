@@ -3,7 +3,6 @@ $edgeVersion = $(Get-Item "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\m
 
 # Check if $edgeVersion is null or empty
 if ([string]::IsNullOrEmpty($edgeVersion)) {
-    Write-Host $errors;
     echo "##vso[task.logissue type=error]Microsoft Edge version is not found. Please ensure Microsoft Edge is installed."
     echo "##vso[task.complete result=Failed;]Failed"
     }
