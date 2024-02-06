@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1707159353025,
+  "lastUpdate": 1707209903922,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -3842,6 +3842,42 @@ window.BENCHMARK_DATA = {
             "value": 368042.6842105263,
             "unit": "ns",
             "range": "± 12403.308638478913"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8b4973936d6eeb00130e3449b7e3a5ceb729e707",
+          "message": "Updating wwwAuthenticateParsing to handle v2.0 (#4610)\n\nCo-authored-by: trwalke <trwalke@microsoft.com>",
+          "timestamp": "2024-02-06T00:51:29-08:00",
+          "tree_id": "2607cc6f713a0470a7ee2f29464033687339b109",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/8b4973936d6eeb00130e3449b7e3a5ceb729e707"
+        },
+        "date": 1707209900874,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 253223.74074074073,
+            "unit": "ns",
+            "range": "± 6003.394883106318"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 332690.3076923077,
+            "unit": "ns",
+            "range": "± 4215.794041154751"
           }
         ]
       }
