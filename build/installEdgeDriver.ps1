@@ -1,5 +1,5 @@
 # Get the complete version of Microsoft Edge
-$edgeVersion = (Get-AppxPackage -Name *Microsoft.MicrosoftEdge*)
+$edgeVersion = (Get-Item "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe").VersionInfo
 
 $edgeVersion
 
