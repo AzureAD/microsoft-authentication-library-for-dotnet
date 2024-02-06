@@ -420,14 +420,14 @@ namespace Microsoft.Identity.Client
 
             if (values.TryGetValue("authorization_uri", out string value))
             {
-                wwwAuthenticateParameters.Authority = value.Replace("/oauth2/authorize", string.Empty);
+                wwwAuthenticateParameters.Authority = value.Replace("/v2.0", string.Empty).Replace("/oauth2/authorize", string.Empty);
             }
 
             if (string.IsNullOrEmpty(wwwAuthenticateParameters.Authority))
             {
                 if (values.TryGetValue("authorization", out value))
                 {
-                    wwwAuthenticateParameters.Authority = value.Replace("/oauth2/authorize", string.Empty);
+                    wwwAuthenticateParameters.Authority = value.Replace("/v2.0", string.Empty).Replace("/oauth2/authorize", string.Empty);
                 }
             }
 
