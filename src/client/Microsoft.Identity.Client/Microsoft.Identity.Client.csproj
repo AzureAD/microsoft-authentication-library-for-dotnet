@@ -135,6 +135,8 @@
 
     <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
+
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
@@ -155,6 +157,8 @@
 
     <PackageReference Include="Microsoft.Web.WebView2" />
     <PackageReference Include="Microsoft.Identity.Client.NativeInterop" IncludeAssets="all" />
+
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
 
     <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
