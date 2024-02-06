@@ -40,13 +40,6 @@ namespace Microsoft.Identity.Client.Utils
             return unixTimestamp;
         }
 
-        public static long DateTimeToUnixTimestampMilliseconds(DateTimeOffset dateTimeOffset)
-        {
-            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            long unixTimestamp = (long)dateTimeOffset.Subtract(dateTime).TotalMilliseconds;
-            return unixTimestamp;
-        }
-
         public static long GetDurationFromWindowsTimestamp(string windowsTimestampInFuture, ILoggerAdapter logger)
         {
             if (string.IsNullOrEmpty(windowsTimestampInFuture))

@@ -75,9 +75,9 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             }
 
             var header = new JObject();
-            header[JsonWebTokenConstants.ReservedHeaderParameters.Algorithm] = _popCryptoProvider.CryptographicAlgorithm;
-            header[JsonWebTokenConstants.ReservedHeaderParameters.KeyId] = KeyId;
-            header[JsonWebTokenConstants.ReservedHeaderParameters.Type] = Constants.PoPTokenType;
+            header[JsonWebTokenConstants.Algorithm] = _popCryptoProvider.CryptographicAlgorithm;
+            header[JsonWebTokenConstants.KeyId] = KeyId;
+            header[JsonWebTokenConstants.Type] = Constants.PoPTokenType;
 
             var body = CreateBody(msalAccessTokenCacheItem);
 

@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (authenticationResult.AuthenticationResultMetadata.RefreshOn.HasValue)
                 {
-                    telemetryEventDetails.SetProperty(TelemetryConstants.RefreshOn, DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value));
+                    telemetryEventDetails.SetProperty(TelemetryConstants.RefreshOn, authenticationResult.AuthenticationResultMetadata.RefreshOn.Value.ToUnixTimeMilliseconds());
                 }
                 telemetryEventDetails.SetProperty(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
                 telemetryEventDetails.SetProperty(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
