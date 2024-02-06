@@ -157,10 +157,10 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
                 var tuple = await cacheManager.SaveTokenResponseAsync(response).ConfigureAwait(false);
 
                 _logger.InfoPii(
-                      () => $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync resolved account {webAccount.UserName} via web call? {tuple?.Item3 != null}",
-                      () => $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync resolved account via web call? {tuple?.Item3 != null}");
+                      () => $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync resolved account {webAccount.UserName} via web call? {tuple.Item3 != null}",
+                      () => $"[WAM AAD Provider] ConvertToMsalAccountOrNullAsync resolved account via web call? {tuple.Item3 != null}");
 
-                return tuple?.Item3; // Account
+                return tuple.Item3; // Account
             }
 
             return null;
