@@ -10,6 +10,7 @@ using Windows.Storage.Streams;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Internal;
+using System.Security.Cryptography;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
@@ -67,7 +68,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
 
         /// <inheritdoc/>
-        public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
+        public byte[] SignWithCertificate(string message, X509Certificate2 certificate, RSASignaturePadding signaturePadding)
         {
             // Used by Confidential Client, which is hidden on UWP
             throw new NotImplementedException();

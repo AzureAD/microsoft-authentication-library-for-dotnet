@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 #if NET_CORE
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -190,10 +191,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var manager = PlatformProxyFactory.CreatePlatformProxy(null).CryptographyManager;
 
-            var jwtToken = new Client.Internal.JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
+            var jwtToken = new JsonWebToken(manager, clientId, TestConstants.ClientCredentialAudience, claims);
             var cert = ConfidentialAppSettings.GetSettings(Cloud.Public).GetCertificate();
 
-            return jwtToken.Sign(cert, Base64UrlHelpers.Encode(cert.GetCertHash()), true);
+            return jwtToken.Sign(cert, true, true);
         }
     }
 }

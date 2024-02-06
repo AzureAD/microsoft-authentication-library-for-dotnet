@@ -1,7 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
+using System.Runtime.ConstrainedExecution;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,17 +20,20 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     {
         private readonly IDictionary<string, string> _claimsToSign;
         private readonly bool _appendDefaultClaims;
-        private readonly string _base64EncodedThumbprint; // x5t
+
         public X509Certificate2 Certificate { get; }
 
         public AssertionType AssertionType => AssertionType.CertificateWithoutSni;
 
-        public CertificateAndClaimsClientCredential(X509Certificate2 certificate, IDictionary<string, string> claimsToSign, bool appendDefaultClaims)
+        public CertificateAndClaimsClientCredential(
+            X509Certificate2 certificate,
+            IDictionary<string, string> claimsToSign, 
+            bool appendDefaultClaims)
         {
             Certificate = certificate;
             _claimsToSign = claimsToSign;
             _appendDefaultClaims = appendDefaultClaims;
-            _base64EncodedThumbprint = Base64UrlHelpers.Encode(certificate.GetCertHash());
+           
         }
 
         public Task AddConfidentialClientParametersAsync(
@@ -37,6 +43,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             string clientId, 
             string tokenEndpoint, 
             bool sendX5C, 
+            bool useSha2AndPss,
             CancellationToken cancellationToken)
         {
             var jwtToken = new JsonWebToken(
@@ -46,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
                 _claimsToSign,
                 _appendDefaultClaims);
 
-            string assertion = jwtToken.Sign(Certificate, _base64EncodedThumbprint, sendX5C);
+            string assertion = jwtToken.Sign(Certificate, sendX5C, useSha2AndPss);
 
             oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertionType, OAuth2AssertionType.JwtBearer);
             oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientAssertion, assertion);

@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         /// <remarks>AAD only supports RSA certs for client credentials </remarks>
-        public virtual byte[] SignWithCertificate(string message, X509Certificate2 certificate)
+        public virtual byte[] SignWithCertificate(string message, X509Certificate2 certificate, RSASignaturePadding signaturePadding)
         {
             // MSAL used to check min key size by looking at certificate.GetRSAPublicKey().KeySize
             // but this causes sporadic failures in the crypto stack. Rely on AAD to perform key size validations.
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             byte[] SignDataAndCacheProvider(string message)
             {
-                var signedData = rsa.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                var signedData = rsa.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, signaturePadding);
                 
                 // Cache only valid RSA crypto providers, which are able to sign data successfully
                 s_certificateToRsaMap[certificate.Thumbprint] = rsa;

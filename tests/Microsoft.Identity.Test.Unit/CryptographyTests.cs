@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Test.Unit
             var cert = new X509Certificate2(
                 ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
             var crypto = serviceBundle.PlatformProxy.CryptographyManager;
-            byte[] result = crypto.SignWithCertificate("TEST", cert);
+            byte[] result = crypto.SignWithCertificate("TEST", cert, RSASignaturePadding.Pkcs1);
             string value = Base64UrlHelpers.Encode(result);
             Assert.IsNotNull(value);
             Assert.AreEqual("MrknKHbOAVu2iuLHMFSk2SK773H1ysxaAjAPcTXYSfH4P2fUfvzP6aIb9MkBknjoE_aBYtTnQ7jOAvyQETvogdeSH7pRDPhCk2aX_8VIQw0bjo_zBZj5yJYVWQDLIu8XvbuzIGEvVaXKz4jJ1nYM6toun4tM74rEHvwa0ferafmqHWOd5puPhlKH1VVK2RPuNOoKNLWBprVBaAQVJVFOdRcd3iR0INBHykxtOsG0pgo0Q2uQBlKP7KQb7Ox8i_sw-M21BuUzdIdGs_oeUYh0B8s-eIGf34JmHRWMwWCnRWzZgY9YuIjRoaWNqlWYb8ASjKOxzvk99x8eFEYKOjgAcA", value);
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit
 
             MsalClientException ex = AssertException.Throws<MsalClientException>(() =>
             {
-                crypto.SignWithCertificate("TEST", cert);
+                crypto.SignWithCertificate("TEST", cert, RSASignaturePadding.Pkcs1);
             });
 
             Assert.AreEqual(ex.ErrorCode, MsalError.CertificateNotRsa);
