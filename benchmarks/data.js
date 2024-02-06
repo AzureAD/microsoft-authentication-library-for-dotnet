@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1707209908356,
+  "lastUpdate": 1707221648862,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -3878,6 +3878,42 @@ window.BENCHMARK_DATA = {
             "value": 332690.3076923077,
             "unit": "ns",
             "range": "± 4215.794041154751"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d2f015ad1daa38af744f66adda3cc6abec1cdc8b",
+          "message": "Use SHA2 and PSS for client assertion (#4616)\n\n* Fix tests\r\n\r\n* Remove other JSON operations\r\n\r\n* Perf tests\r\n\r\n* codeql\r\n\r\n* PR comments\r\n\r\n* fix",
+          "timestamp": "2024-02-06T12:07:23Z",
+          "tree_id": "9c4f60ead67492cd1e85f75f72313413d8c6c401",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/d2f015ad1daa38af744f66adda3cc6abec1cdc8b"
+        },
+        "date": 1707221644751,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 256228.7857142857,
+            "unit": "ns",
+            "range": "± 3537.8683592627535"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 346935.05263157893,
+            "unit": "ns",
+            "range": "± 11927.86418421819"
           }
         ]
       }
