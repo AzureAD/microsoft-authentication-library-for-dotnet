@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -108,7 +109,6 @@ namespace Microsoft.Identity.Client.Cache
                     _requestParams.RequestContext.Logger.Verbose(()=>"[Cache Session Manager] Entered cache semaphore");
 
                     TelemetryData telemetryData = new TelemetryData();
-                    Stopwatch stopwatch = new Stopwatch();
                     try
                     {
                         if (!_cacheRefreshedForRead) // double check locking
@@ -134,16 +134,11 @@ namespace Microsoft.Identity.Client.Cache
                                   piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled,
                                   telemetryData: telemetryData);
 
-                                stopwatch.Start();
-                                await TokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
-                                RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;
+                                var measureDurationResult = await TokenCacheInternal.OnBeforeAccessAsync(args).MeasureAsync().ConfigureAwait(false);
+                                RequestContext.ApiEvent.DurationInCacheInMs += measureDurationResult.Milliseconds;
                             }
                             finally
                             {
-
-                                stopwatch.Reset();
-                                stopwatch.Start();
-
                                 var args = new TokenCacheNotificationArgs(
                                   TokenCacheInternal,
                                   _requestParams.AppConfig.ClientId,
@@ -161,8 +156,8 @@ namespace Microsoft.Identity.Client.Cache
                                   piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled,
                                   telemetryData: telemetryData);
 
-                                await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
-                                RequestContext.ApiEvent.DurationInCacheInMs += stopwatch.ElapsedMilliseconds;
+                                var measureDurationResult = await TokenCacheInternal.OnAfterAccessAsync(args).MeasureAsync().ConfigureAwait(false);
+                                RequestContext.ApiEvent.DurationInCacheInMs += measureDurationResult.Milliseconds;
 
                             }
 

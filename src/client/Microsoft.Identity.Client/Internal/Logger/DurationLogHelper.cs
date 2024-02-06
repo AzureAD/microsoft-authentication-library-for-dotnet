@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
@@ -12,7 +13,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
         private readonly ILoggerAdapter _logger;
         private readonly string _measuredBlockName;
         private readonly LogLevel _logLevel;
-        private readonly Stopwatch _stopwatch;
+        private readonly long _startMilliseconds;
 
         public DurationLogHelper(
             ILoggerAdapter logger,
@@ -22,14 +23,14 @@ namespace Microsoft.Identity.Client.Internal.Logger
             _logger = logger;
             _measuredBlockName = measuredBlockName;
             _logLevel = logLevel;
-            _stopwatch = Stopwatch.StartNew();
+            _startMilliseconds = StopWatchService.CurrentElapsedMilliseconds;
 
             _logger.Log(LogLevel.Verbose, string.Empty, $"Starting {measuredBlockName}");
         }
 
         public void Dispose()
         {
-            _logger.Log(LogLevel.Verbose, string.Empty, $"Finished {_measuredBlockName} in {_stopwatch.ElapsedMilliseconds} ms");
+            _logger.Log(LogLevel.Verbose, string.Empty, $"Finished {_measuredBlockName} in {StopWatchService.CurrentElapsedMilliseconds - _startMilliseconds} ms");
         }
     }
 }

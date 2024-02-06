@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken = default)
         {
-            Stopwatch sw = Stopwatch.StartNew();
+            long currentElapsedMilliseconds = StopWatchService.CurrentElapsedMilliseconds;
 
             ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
             AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
@@ -93,10 +93,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                     AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
                     LogReturnedToken(authenticationResult);
-                    UpdateTelemetry(sw, apiEvent, authenticationResult);
+                    UpdateTelemetry(currentElapsedMilliseconds - StopWatchService.CurrentElapsedMilliseconds, apiEvent, authenticationResult);
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
                     LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails, telemetryClients);
-                    LogMsalSuccessTelemetryToOtel(authenticationResult, apiEvent.ApiId.ToString(), sw.ElapsedTicks / (TimeSpan.TicksPerMillisecond / 1000));
+                    LogMsalSuccessTelemetryToOtel(authenticationResult, apiEvent.ApiId.ToString(), (currentElapsedMilliseconds - StopWatchService.CurrentElapsedMilliseconds) * 1000);
 
                     return authenticationResult;
                 }
@@ -272,10 +272,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private void UpdateTelemetry(Stopwatch sw, ApiEvent apiEvent, AuthenticationResult authenticationResult)
+        private void UpdateTelemetry(long elapsedMilliseconds, ApiEvent apiEvent, AuthenticationResult authenticationResult)
         {
-            sw.Stop();
-            authenticationResult.AuthenticationResultMetadata.DurationTotalInMs = sw.ElapsedMilliseconds;
+            authenticationResult.AuthenticationResultMetadata.DurationTotalInMs = elapsedMilliseconds;
             authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs = apiEvent.DurationInHttpInMs;
             authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;
             authenticationResult.AuthenticationResultMetadata.TokenEndpoint = apiEvent.TokenEndpoint;
