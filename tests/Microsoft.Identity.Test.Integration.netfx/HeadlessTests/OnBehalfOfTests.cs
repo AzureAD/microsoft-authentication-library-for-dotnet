@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task OboAndClientCredentials_WithRegional_ReturnsCorrectTokens_TestAsync()
         {
             // Setup: Get lab user, create PCA and get user tokens
-            var user = (await LabUserHelper.GetDefaultUser2Async().ConfigureAwait(false)).User;
+            var user = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
 
             var pca = PublicClientApplicationBuilder
                     .Create(PublicClientID)
