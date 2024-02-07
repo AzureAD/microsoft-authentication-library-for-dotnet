@@ -18,8 +18,11 @@ namespace Microsoft.Identity.Client.Utils
         /// <summary>
         /// Singleton stopwatch.
         /// </summary>
-        internal static readonly Stopwatch Watch = Stopwatch.StartNew();
+        public static readonly Stopwatch Watch = Stopwatch.StartNew();
 
+        /// <summary>
+        /// Current elapsed miliseconds of the stop watch
+        /// </summary>
         public static long CurrentElapsedMilliseconds {
             get 
             {
@@ -28,9 +31,34 @@ namespace Microsoft.Identity.Client.Utils
         }
 
         /// <summary>
+        /// Measures the duration of a codeblock
+        /// </summary>
+        /// <param name="codeBlock"></param>
+        /// <returns></returns>
+        public static MeasureDurationResult MeasureCodeBlock(Action codeBlock)
+        {
+            _ = codeBlock ?? throw new ArgumentNullException(nameof(codeBlock));
+
+            var startMs = Watch.ElapsedMilliseconds;
+            codeBlock.Invoke();
+
+            return new MeasureDurationResult(Watch.ElapsedMilliseconds - startMs);
+        }
+
+        /// <summary>
+        /// Measures the duration of an asyncronous codeblock
+        /// </summary>
+        /// <param name="codeBlock"></param>
+        /// <returns></returns>
+        public static async Task<MeasureDurationResult> MeasureCodeBlockAsync(Func<Task> codeBlock)
+        {
+            return await codeBlock.Invoke().MeasureAsync().ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Measures duration of <paramref name="task"/> in milliseconds.
         /// </summary>
-        internal static async Task<MeasureDurationResult> MeasureAsync(this Task task)
+        public static async Task<MeasureDurationResult> MeasureAsync(this Task task)
         {
             _ = task ?? throw new ArgumentNullException(nameof(task));
 
@@ -43,7 +71,7 @@ namespace Microsoft.Identity.Client.Utils
         /// <summary>
         /// Measures duration of <paramref name="task"/> in milliseconds.
         /// </summary>
-        internal static async Task<MeasureDurationResult<TResult>> MeasureAsync<TResult>(this Task<TResult> task)
+        public static async Task<MeasureDurationResult<TResult>> MeasureAsync<TResult>(this Task<TResult> task)
         {
             _ = task ?? throw new ArgumentNullException(nameof(task));
 

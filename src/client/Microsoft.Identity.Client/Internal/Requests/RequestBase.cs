@@ -77,26 +77,36 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken = default)
         {
-            long currentElapsedMilliseconds = StopWatchService.CurrentElapsedMilliseconds;
+            ApiEvent apiEvent = null;
+            MsalTelemetryEventDetails telemetryEventDetails = null;
+            ITelemetryClient[] telemetryClients = null;
 
-            ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
-            AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
-            MsalTelemetryEventDetails telemetryEventDetails = new MsalTelemetryEventDetails(TelemetryConstants.AcquireTokenEventName);
-            ITelemetryClient[] telemetryClients = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.TelemetryClients;
+            var measureTelemetryDurationResult = StopWatchService.MeasureCodeBlock(() =>
+            {
+                apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
+                AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
+                telemetryEventDetails = new MsalTelemetryEventDetails(TelemetryConstants.AcquireTokenEventName);
+                telemetryClients = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.TelemetryClients;
+            });
 
             using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
             {
                 try
                 {
-                    AuthenticationRequestParameters.LogParameters();
-                    LogRequestStarted(AuthenticationRequestParameters);
+                    AuthenticationResult authenticationResult = null;
+                    var measureDurationResult = await StopWatchService.MeasureCodeBlockAsync(async () =>
+                    {
+                        AuthenticationRequestParameters.LogParameters();
+                        LogRequestStarted(AuthenticationRequestParameters);
 
-                    AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
-                    LogReturnedToken(authenticationResult);
-                    UpdateTelemetry(currentElapsedMilliseconds - StopWatchService.CurrentElapsedMilliseconds, apiEvent, authenticationResult);
+                        authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                        LogReturnedToken(authenticationResult);
+                    }).ConfigureAwait(false);
+
+                    UpdateTelemetry(measureDurationResult.Milliseconds + measureTelemetryDurationResult.Milliseconds, apiEvent, authenticationResult);
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
                     LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails, telemetryClients);
-                    LogMsalSuccessTelemetryToOtel(authenticationResult, apiEvent.ApiId.ToString(), (currentElapsedMilliseconds - StopWatchService.CurrentElapsedMilliseconds) * 1000);
+                    LogMsalSuccessTelemetryToOtel(authenticationResult, apiEvent.ApiId.ToString(), measureDurationResult.Milliseconds * 1000);
 
                     return authenticationResult;
                 }

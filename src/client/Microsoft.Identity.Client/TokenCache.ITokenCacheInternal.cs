@@ -190,12 +190,12 @@ namespace Microsoft.Identity.Client
                             identityLogger: requestParams.RequestContext.Logger.IdentityLogger,
                             piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled);
 
-                        var measuredResultDuration = await Task.Run( async () => 
+                        var measuredResultDuration = await StopWatchService.MeasureCodeBlockAsync( async () => 
                         {
                             await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
                             await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
 
-                        }).MeasureAsync().ConfigureAwait(false);
+                        }).ConfigureAwait(false);
 
                         requestParams.RequestContext.ApiEvent.DurationInCacheInMs += measuredResultDuration.Milliseconds;
                     }
