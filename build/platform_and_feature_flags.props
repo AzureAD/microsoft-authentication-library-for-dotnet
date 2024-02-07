@@ -2,14 +2,11 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' or '$(TargetFramework)' == '$(TargetFrameworkNet6)'">
     <DefineConstants>$(DefineConstants);NET_CORE;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_BROKER;SUPPORTS_WIN32;</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
-    <DefineConstants>$(DefineConstants);SUPPORTS_SYSTEM_TEXT_JSON;</DefineConstants> 
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)'" >
+    <DefineConstants>$(DefineConstants);SUPPORTS_SYSTEM_TEXT_JSON</DefineConstants> 
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);SUPPORTS_OTEL;</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
-    <DefineConstants>$(DefineConstants);NET6_WIN;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_BROKER;SUPPORTS_WIN32;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
     <DefineConstants>$(DefineConstants);WINDOWS_APP;SUPPORTS_BROKER;SUPPORTS_CUSTOM_CACHE;IS_XAMARIN_OR_UWP</DefineConstants>

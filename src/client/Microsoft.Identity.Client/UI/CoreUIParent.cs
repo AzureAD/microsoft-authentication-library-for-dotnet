@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client.UI
         internal bool UseCorporateNetwork { get; set; }
 #endif
 
-#if NETFRAMEWORK || NET6_WIN || NET_CORE || NETSTANDARD
+#if NETFRAMEWORK  || NET_CORE || NETSTANDARD
         internal object OwnerWindow { get; set; }       
 #endif
     }

@@ -18,7 +18,7 @@ using UIKit;
 using Android.App;
 #endif
 
-#if NETFRAMEWORK || NET6_WIN
+#if NETFRAMEWORK 
 using System.Windows.Forms;
 #endif
 
@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Client
             }
 #endif
 
-#if NET_CORE && !NET6_WIN
+#if NET_CORE 
             if (Config.BrokerCreatorFunc == null)
             {
                 throw new PlatformNotSupportedException(
@@ -178,10 +178,6 @@ namespace Microsoft.Identity.Client
                     "\n\rInstall the NuGet package Microsoft.Identity.Client.Broker and call the extension method .WithBroker(BrokerOptions). " +
                     "\n\rFor details, see https://aka.ms/msal-net-wam");
             }
-#endif
-
-#if NET6_WIN
-            Config.BrokerOptions = new BrokerOptions(enableBroker ? BrokerOptions.OperatingSystems.Windows : BrokerOptions.OperatingSystems.None);
 #endif
 
             Config.IsBrokerEnabled = enableBroker;
@@ -195,12 +191,10 @@ namespace Microsoft.Identity.Client
 #if !SUPPORTS_BROKER || __MOBILE__
         [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
-#if !NET6_WIN && !WINDOWS_APP && !__MOBILE__
+#if !WINDOWS_APP && !__MOBILE__
         [Obsolete("This API has been replaced with WithBroker(BrokerOptions), which can be found in Microsoft.Identity.Client.Broker package. See https://aka.ms/msal-net-wam for details.", false)]
 #endif
-#if NET6_WIN
-        [Obsolete("This API has been replaced with WithBroker(BrokerOptions). See https://aka.ms/msal-net-wam for details.", false)]
-#endif
+
         public PublicClientApplicationBuilder WithWindowsBrokerOptions(WindowsBrokerOptions options)
         {
             WindowsBrokerOptions.ValidatePlatformAvailability();
@@ -208,26 +202,6 @@ namespace Microsoft.Identity.Client
             Config.BrokerOptions = newOptions; 
             return this;
         }
-
-#if NET6_WIN
-        /// <summary>
-        /// Brokers enable Single-Sign-On, device identification, and enhanced security.
-        /// Use this API to enable brokers on desktop platforms.
-        /// 
-        /// See https://aka.ms/msal-net-wam for more information on platform specific settings required to enable the broker such as redirect URIs.
-        /// 
-        /// </summary>
-        /// <param name="brokerOptions">This provides cross platform options for broker.</param>
-        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
-        /// parameters, and to create a public client application instance</returns>
-        public PublicClientApplicationBuilder WithBroker(BrokerOptions brokerOptions)
-        {
-            Config.BrokerOptions = brokerOptions;
-            Config.IsBrokerEnabled = brokerOptions.IsBrokerEnabledOnCurrentOs();
-
-            return this;
-        }
-#endif
 
 #if WINDOWS_APP
         /// <summary>
@@ -305,7 +279,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if NETFRAMEWORK || NET6_WIN
+#if NETFRAMEWORK 
         /// <summary>
         /// Sets a reference to the current IWin32Window that triggers the browser to be shown.
         /// Used to center the browser that pop-up onto this window.
@@ -324,7 +298,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if NETFRAMEWORK || NET6_WIN || NET_CORE || NETSTANDARD
+#if NETFRAMEWORK || NET_CORE || NETSTANDARD
         /// <summary>
         /// Sets a reference to the IntPtr to a window that triggers the browser to be shown.
         /// Used to center the browser that pop-up onto this window.

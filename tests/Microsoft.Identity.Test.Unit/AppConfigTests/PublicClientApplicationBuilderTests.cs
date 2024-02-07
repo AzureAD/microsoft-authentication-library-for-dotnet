@@ -5,9 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Identity.Client;
-#if !NET6_WIN && !NET7_0 && !NET6_0_OR_GREATER
-using Microsoft.Identity.Client.Desktop;
-#endif
+using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -634,19 +632,19 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             pca = PublicClientApplicationBuilder.Create(Guid.NewGuid().ToString()).Build();
             Assert.IsTrue((pca.AppConfig as ApplicationConfiguration).CacheSynchronizationEnabled);
         }
-
-#if NET6_WIN
-        [TestMethod]
+// For some reason the broker doesn't load on netfx, running the test on .net only
+#if NET
+        [TestMethod]        
         public void IsBrokerAvailable_net6()
         {
             var appBuilder = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithAuthority(TestConstants.AuthorityTenant);
+                    .WithAuthority(TestConstants.AuthorityTenant)
+                    .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
 
             Assert.AreEqual(DesktopOsHelper.IsWin10OrServerEquivalent(), appBuilder.IsBrokerAvailable());
         }
 #endif
-
         [TestMethod]
         public void IsBrokerAvailable_NoAuthorityInBuilder()
         {

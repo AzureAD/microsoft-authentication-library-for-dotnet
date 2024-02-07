@@ -56,7 +56,7 @@ public partial class MainPage : ContentPage
         var pca = PublicClientApplicationBuilder.Create("4b0db8c2-9f26-4417-8bde-3f0e3656f8e0")
             .WithAuthority(s_authority)
             .WithParentActivityOrWindow(() => hwnd)
-            .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+            //.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
             .WithLogging((x, y, z) => Console.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
             .Build();
 
