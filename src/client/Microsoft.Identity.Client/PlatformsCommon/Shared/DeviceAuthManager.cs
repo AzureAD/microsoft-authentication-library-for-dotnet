@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -59,8 +60,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             DeviceAuthJWTResponse responseJwt = GetDeviceAuthJwtResponse(submitUrl, challengeData["nonce"], certificate);
 
             string responseToSign = responseJwt.GetResponseToSign();
-
-            byte[] signedResponse = SignWithCertificate(certificate, responseToSign);
+            byte[] signedResponse = _cryptographyManager.SignWithCertificate(responseToSign, certificate, RSASignaturePadding.Pkcs1);
 
             FormatResponseHeader(signedResponse, challengeData, responseToSign, out responseHeader);
 
@@ -70,11 +70,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private static DeviceAuthJWTResponse GetDeviceAuthJwtResponse(string submitUrl, string nonce, X509Certificate2 certificate)
         {
             return new DeviceAuthJWTResponse(submitUrl, nonce, Convert.ToBase64String(certificate.GetRawCertData()));
-        }
-
-        private byte[] SignWithCertificate(X509Certificate2 certificate, string responseToSign)
-        {
-            return _cryptographyManager.SignWithCertificate(responseToSign, certificate);
         }
 
         private static void FormatResponseHeader(byte[] signedResponse,

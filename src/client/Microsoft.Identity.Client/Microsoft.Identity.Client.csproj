@@ -31,7 +31,7 @@
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Mac);$(TargetFrameworkNet6)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNet6)</TargetFrameworks>
   </PropertyGroup>
-  
+
   <!-- Package excluding Windows Desktop and Mobile TFMs https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3863 -->
   <PropertyGroup Condition="'$(NET_ONLY_INTERNAL_PACKAGE)' != ''">
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetStandard);$(TargetFrameworkNet6);</TargetFrameworks>
@@ -48,12 +48,12 @@
 
     <!-- Copyright needs to be in the form of © not (c) to be compliant -->
     <Title>Microsoft Authentication Library for .NET</Title>
-   
+
     <DisableExtraReferences>true</DisableExtraReferences>
-    <!-- for https://github.com/xamarin/xamarin-macios/issues/7249 -->    
+    <!-- for https://github.com/xamarin/xamarin-macios/issues/7249 -->
   </PropertyGroup>
 
-  
+
 
   <PropertyGroup>
     <PathToMsalSources>$(MSBuildThisFileDirectory)</PathToMsalSources>
@@ -138,12 +138,12 @@
 
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
-  
+
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
     <IsTrimmable>true</IsTrimmable>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
   </PropertyGroup>
-  
+
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
     <Compile Include="$(PathToMsalSources)\Platforms\net6\**\*.cs" LinkBase="Platforms\net6" />
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
@@ -166,9 +166,9 @@
 
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
     <UseWindowsForms>true</UseWindowsForms>
-    <!-- 
-    MSAL will run on Windows 7 and 8 but requires to be built against Win10 to use WinRT APIs for WAM 
-    See https://docs.microsoft.com/en-us/dotnet/standard/analyzers/platform-compat-analyzer and 
+    <!--
+    MSAL will run on Windows 7 and 8 but requires to be built against Win10 to use WinRT APIs for WAM
+    See https://docs.microsoft.com/en-us/dotnet/standard/analyzers/platform-compat-analyzer and
     https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md for details
     -->
     <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
@@ -176,7 +176,7 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
-    
+
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
@@ -219,7 +219,7 @@
 
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkIos)'">
-    <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />    
+    <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -234,7 +234,7 @@
     <PackageReference Include="System.Runtime.Serialization.Formatters" />
     <PackageReference Include="System.Xml.XmlDocument" />
     <PackageReference Include="System.Security.SecureString" />
-  </ItemGroup> 
+  </ItemGroup>
   <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid'))">
     <Compile Include="$(PathToMsalSources)\Platforms\Android\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
@@ -267,7 +267,7 @@
     <PackageReference Include="Xamarin.AndroidX.Browser" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Ios)' Or '$(TargetFramework)' == '$(TargetFrameworkNet6Mac)'">
-    <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />    
+    <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <PackageReference Include="System.Security.SecureString" />
   </ItemGroup>
