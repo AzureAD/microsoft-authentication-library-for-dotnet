@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         public void CheckSchemaVersion(string telemetryCsv)
         {
-            Assert.IsNotNull(telemetryCsv.StartsWith(TelemetryConstants.HttpTelemetrySchemaVersion));
+            Assert.IsNotNull(telemetryCsv.StartsWith(TelemetryConstants.HttpTelemetrySchemaVersion.ToString()));
         }
 
         public void SplitCurrentCsv(string telemetryCsv)

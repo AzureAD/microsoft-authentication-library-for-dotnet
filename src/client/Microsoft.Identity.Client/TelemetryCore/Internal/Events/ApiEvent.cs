@@ -93,14 +93,14 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public bool IsTokenCacheSerialized { get; set; }
 
-        public string IsTokenCacheSerializedString
+        public char IsTokenCacheSerializedString
         {
             get => IsTokenCacheSerialized ? TelemetryConstants.One : TelemetryConstants.Zero;
         }
 
         public bool IsLegacyCacheEnabled { get; set; }
 
-        public string IsLegacyCacheEnabledString
+        public char IsLegacyCacheEnabledString
         {
             get => IsLegacyCacheEnabled ? TelemetryConstants.One : TelemetryConstants.Zero;
         }
