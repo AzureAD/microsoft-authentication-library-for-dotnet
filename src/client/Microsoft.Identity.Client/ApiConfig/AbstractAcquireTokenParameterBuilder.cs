@@ -259,7 +259,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Overrides the tenant ID specified in the authority at the application level. This operation preserves the authority host (environment).
         /// 
-        /// If an authority was not specified at the application level, the default used is https://login.microsoftonline.com/common.
+        /// If an authority was not specified at the application level, the default used is `https://login.microsoftonline.com/common`.
         /// </summary>
         /// <param name="tenantId">Tenant ID of the Microsoft Entra ID tenant
         /// or a domain associated with this Microsoft Entra ID tenant, in order to sign-in a user of a specific organization only.</param>
@@ -290,7 +290,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Extracts the tenant ID from the provided authority URI and overrides the tenant ID specified in the authority at the application level. This operation preserves the authority host (environment) provided to the application builder.
-        /// If an authority was not provided to the application builder, this method will replace the tenant ID in the default authority - https://login.microsoftonline.com/common.
+        /// If an authority was not provided to the application builder, this method will replace the tenant ID in the default authority - `https://login.microsoftonline.com/common`.
         /// </summary>
         /// <param name="authorityUri">URI from which to extract the tenant ID</param>
         /// <returns>The builder to chain the .With methods.</returns>
