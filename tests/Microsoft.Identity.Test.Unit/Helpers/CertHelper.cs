@@ -3,9 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
-using System.Text;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
@@ -38,9 +37,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             switch (knownTestCertType)
             {
                 case KnownTestCertType.ECD:
-                    string secp256r1Oid = "1.2.840.10045.3.1.7";  //oid for prime256v1(7)  other identifier: secp256r1
-
-                    using (var ecdsa = ECDsa.Create(ECCurve.CreateFromValue(secp256r1Oid)))
+                    using (var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256))
                     {
                         string subjectName = "SelfSignedEdcCert";
 
@@ -48,7 +45,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
                         X509Certificate2 generatedCert = certRequest.CreateSelfSigned(DateTimeOffset.Now.AddDays(-1), DateTimeOffset.Now.AddYears(10)); // generate the cert and sign!
 
-                        X509Certificate2 pfxGeneratedCert = new X509Certificate2(generatedCert.Export(X509ContentType.Pfx)); //has to be turned into pfx or Windows at least throws a security credentials not found during sslStream.connectAsClient or HttpClient request...
+                        X509Certificate2 pfxGeneratedCert = new X509Certificate2(generatedCert.Export(X509ContentType.Pfx)); //has to be turned into PFX or Windows at least throws a security credentials not found during sslStream.connectAsClient or HttpClient request...
 
                         return pfxGeneratedCert;
                     }
