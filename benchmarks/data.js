@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1707221655651,
+  "lastUpdate": 1707490598349,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -3914,6 +3914,42 @@ window.BENCHMARK_DATA = {
             "value": 346935.05263157893,
             "unit": "ns",
             "range": "± 11927.86418421819"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "64727760+Dickson-Mwendia@users.noreply.github.com",
+            "name": "Dickson Mwendia",
+            "username": "Dickson-Mwendia"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cc5509e122a3d2a0b9449b318671adc77f9d41be",
+          "message": "Resolve broken MS Learn links stemming from auto-generated reference. (#4623)\n\nResolve broken MS Learn links stemming from auto-generated reference",
+          "timestamp": "2024-02-09T14:49:44Z",
+          "tree_id": "2b32d983790596a7ea072bab9e51ac3cb7bb115f",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/cc5509e122a3d2a0b9449b318671adc77f9d41be"
+        },
+        "date": 1707490595233,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 254731.3076923077,
+            "unit": "ns",
+            "range": "± 6936.8222812422155"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 332538.5,
+            "unit": "ns",
+            "range": "± 8982.732418368032"
           }
         ]
       }
