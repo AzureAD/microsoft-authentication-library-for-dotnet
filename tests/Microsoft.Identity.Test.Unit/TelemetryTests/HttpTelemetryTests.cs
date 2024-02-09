@@ -673,7 +673,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(5, telemetryCategories[1].Split(',').Length); // api_id, cache_info, region_used, region_source, region_outcome
             Assert.AreEqual(3, telemetryCategories[2].Split(',').Length); // platform_fields
 
-            Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion, telemetryCategories[0]); // version
+            Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersionToString(), telemetryCategories[0]); // version
 
             Assert.AreEqual(
                 apiId.ToString("D"),
@@ -726,7 +726,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             var lastRequestParts = lastTelemetryHeader.Split('|');
 
             Assert.AreEqual(5, lastRequestParts.Length); //  2 | 1 | | |
-            Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion, lastRequestParts[0]); // version
+            Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion.ToString(), lastRequestParts[0]); // version
 
             int actualSuccessfullSilentCount = int.Parse(lastRequestParts[1], CultureInfo.InvariantCulture);
 
