@@ -673,7 +673,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(5, telemetryCategories[1].Split(',').Length); // api_id, cache_info, region_used, region_source, region_outcome
             Assert.AreEqual(3, telemetryCategories[2].Split(',').Length); // platform_fields
 
-            Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersionToString(), telemetryCategories[0]); // version
+            Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion.ToString(), telemetryCategories[0]); // version
 
             Assert.AreEqual(
                 apiId.ToString("D"),
