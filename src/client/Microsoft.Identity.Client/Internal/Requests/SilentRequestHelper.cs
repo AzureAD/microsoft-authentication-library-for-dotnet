@@ -91,7 +91,14 @@ namespace Microsoft.Identity.Client.Internal
             {
                 try
                 {
-                    await fetchAction().ConfigureAwait(false);
+                    var authResult = await fetchAction().ConfigureAwait(false);
+                    serviceBundle.PlatformProxy.OtelInstrumentation.IncrementToSuccessCounter(
+                        serviceBundle.PlatformProxy.GetProductName(),
+                        apiId,
+                        TokenSource.IdentityProvider, 
+                        CacheRefreshReason.ProactivelyRefreshed, 
+                        Cache.CacheLevel.None,
+                        logger);
                 }
                 catch (MsalServiceException ex)
                 {
@@ -109,7 +116,7 @@ namespace Microsoft.Identity.Client.Internal
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.ErrorCode,
                         apiId,
-                        true);
+                        CacheRefreshReason.ProactivelyRefreshed);
                 }
                 catch (OperationCanceledException ex)
                 {
@@ -118,7 +125,7 @@ namespace Microsoft.Identity.Client.Internal
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.GetType().Name,
                         apiId,
-                        true);
+                        CacheRefreshReason.ProactivelyRefreshed);
                 }
                 catch (Exception ex)
                 {
@@ -127,7 +134,7 @@ namespace Microsoft.Identity.Client.Internal
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.GetType().Name,
                         apiId,
-                        true);
+                        CacheRefreshReason.ProactivelyRefreshed);
                 }
             });
         }

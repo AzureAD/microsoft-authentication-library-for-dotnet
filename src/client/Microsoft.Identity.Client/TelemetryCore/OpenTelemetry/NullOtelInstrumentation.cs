@@ -25,7 +25,12 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             // No op
         }
 
-        public void LogFailedMetrics(string platform, string errorCode, ApiEvent.ApiIds apiId, bool isProactiveTokenRefresh)
+        public void LogFailedMetrics(string platform, string errorCode, ApiEvent.ApiIds apiId, CacheRefreshReason cacheRefreshReason)
+        {
+            // No op
+        }
+
+        void IOtelInstrumentation.IncrementToSuccessCounter(string platform, ApiEvent.ApiIds apiId, TokenSource tokenSource, CacheRefreshReason cacheRefreshReason, CacheLevel cacheLevel, ILoggerAdapter logger)
         {
             // No op
         }

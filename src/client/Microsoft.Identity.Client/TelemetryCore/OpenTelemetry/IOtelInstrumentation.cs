@@ -18,6 +18,14 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger);
-        internal void LogFailedMetrics(string platform, string errorCode, ApiEvent.ApiIds apiId, bool isProactiveTokenRefresh);
+
+        internal void IncrementToSuccessCounter(string platform,
+            ApiEvent.ApiIds apiId,
+            TokenSource tokenSource,
+            CacheRefreshReason cacheRefreshReason,
+            CacheLevel cacheLevel,
+            ILoggerAdapter logger);
+
+        internal void LogFailedMetrics(string platform, string errorCode, ApiEvent.ApiIds apiId, CacheRefreshReason cacheRefreshReason);
     }
 }

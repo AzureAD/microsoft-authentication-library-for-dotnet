@@ -8,6 +8,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.Platforms.Features.OpenTelemetry;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common;
@@ -67,14 +69,22 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         [Description("AT in cache, needs refresh. AAD responds well to Refresh.")]
-        public async Task ProactiveTokenRefresh_ValidResponse_Async()
+        public async Task ProactiveTokenRefresh_ValidResponse_ClientCredential_Async()
         {
             // Arrange
             using (_harness = base.CreateTestHarness())
             {
                 Trace.WriteLine("1. Setup an app");
                 CreateApplication();
-                TokenCacheHelper.PopulateCache(_cca.AppTokenCacheInternal.Accessor, addSecondAt: false);
+
+                _harness.HttpManager.AddAllMocks(TokenResponseType.Valid_ClientCredentials);
+                AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                // Assert
+                Assert.IsNotNull(result);
+
+                //TokenCacheHelper.PopulateCache(_cca.AppTokenCacheInternal.Accessor, addSecondAt: false);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
                 var refreshOn = TestCommon.UpdateATWithRefreshOn(_cca.AppTokenCacheInternal.Accessor).RefreshOn;
@@ -82,13 +92,15 @@ namespace Microsoft.Identity.Test.Unit
                 TokenCacheAccessRecorder cacheAccess = _cca.AppTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with valid token to the refresh RT flow");
-                _harness.HttpManager.AddAllMocks(TokenResponseType.Valid_ClientCredentials);
+                _harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
 
                 // Act
                 Trace.WriteLine("4. ATS - should perform an RT refresh");
-                AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
+
+                Trace.WriteLine(result.AuthenticationResultMetadata.DurationTotalInMs);
 
                 // Assert
                 TestCommon.YieldTillSatisfied(() => _harness.HttpManager.QueueSize == 0);
@@ -99,14 +111,91 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed);
                 Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == refreshOn);
 
+                Trace.WriteLine("5. ATS - should not perform an RT refresh, as the token is still valid");
                 result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
                                     .ExecuteAsync()
                                     .ConfigureAwait(false);
 
+                Trace.WriteLine(result.AuthenticationResultMetadata.DurationTotalInMs);
+
                 Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.NotApplicable);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(3, _exportedMetrics, 2, 0);
+                VerifyMetrics(3, _exportedMetrics, 4, 0);
+            }
+        }
+
+        [TestMethod]
+        [Description("AT in cache, needs refresh. AAD responds well to Refresh.")]
+        public async Task ProactiveTokenRefresh_ValidResponse_MSI_Async()
+        {
+            string appServiceEndpoint = "http://127.0.0.1:41564/msi/token";
+            string resource = "https://management.azure.com/";
+
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                ManagedIdentityTestUtil.SetEnvironmentVariables(ManagedIdentitySource.AppService, appServiceEndpoint);
+
+                Trace.WriteLine("1. Setup an app with a token cache with one AT");
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.BuildConcrete();
+
+                httpManager.AddManagedIdentityMockHandler(
+                        appServiceEndpoint,
+                        resource,
+                        MockHelpers.GetMsiSuccessfulResponse(),
+                        ManagedIdentitySource.AppService);
+
+                AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
+                var refreshOn = TestCommon.UpdateATWithRefreshOn(mi.AppTokenCacheInternal.Accessor).RefreshOn;
+                TokenCacheAccessRecorder cacheAccess = mi.AppTokenCacheInternal.RecordAccess();
+
+                Trace.WriteLine("3. Configure MSI to respond with a valid token");
+                httpManager.AddManagedIdentityMockHandler(
+                        appServiceEndpoint,
+                        resource,
+                        MockHelpers.GetMsiSuccessfulResponse(),
+                        ManagedIdentitySource.AppService);
+
+                // Act
+                Trace.WriteLine("4. ATM - should perform an RT refresh");
+                result = await mi.AcquireTokenForManagedIdentity(resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                TestCommon.YieldTillSatisfied(() => httpManager.QueueSize == 0);
+
+                Assert.IsNotNull(result);
+
+                Assert.AreEqual(0, httpManager.QueueSize,
+                    "MSAL should have refreshed the token because the original AT was marked for refresh");
+                
+                cacheAccess.WaitTo_AssertAcessCounts(1, 1);
+
+                Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, result.AuthenticationResultMetadata.CacheRefreshReason);
+
+                Assert.AreEqual(refreshOn, result.AuthenticationResultMetadata.RefreshOn);
+
+                result = await mi.AcquireTokenForManagedIdentity(resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+                
+                Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
+
+                s_meterProvider.ForceFlush();
+                VerifyMetrics(3, _exportedMetrics, 4, 0);
             }
         }
 
@@ -122,7 +211,6 @@ namespace Microsoft.Identity.Test.Unit
                 TokenCacheHelper.PopulateCache(_cca.AppTokenCacheInternal.Accessor, addSecondAt: false);
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
-
                 TestCommon.UpdateATWithRefreshOn(_cca.AppTokenCacheInternal.Accessor);
 
                 TokenCacheAccessRecorder cacheAccess = _cca.AppTokenCache.RecordAccess();
@@ -155,7 +243,7 @@ namespace Microsoft.Identity.Test.Unit
                 Thread.Sleep(1000);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(4, _exportedMetrics, 2, 1);
+                VerifyMetrics(3, _exportedMetrics, 3, 1);
             }
         }
 
@@ -170,7 +258,6 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNotNull(result);
 
             // Acquire token from the cache
-            //var account = (await _cca.GetAccountsAsync().ConfigureAwait(false)).Single();
             result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
             Assert.IsNotNull(result);
@@ -215,7 +302,7 @@ namespace Microsoft.Identity.Test.Unit
         private void VerifyMetrics(int expectedMetricCount, List<Metric> exportedMetrics, 
             long expectedSuccessfulRequests, long expectedFailedRequests)
         {
-            Assert.AreEqual(expectedMetricCount, exportedMetrics.Count);
+            Assert.AreEqual(expectedMetricCount, exportedMetrics.Count, "Count of metrics recorded is not as expected.");
 
             foreach (Metric exportedItem in exportedMetrics)
             {
@@ -226,6 +313,7 @@ namespace Microsoft.Identity.Test.Unit
                 switch (exportedItem.Name)
                 {
                     case "MsalSuccess":
+                        Trace.WriteLine("Verify the metrics captured for MsalSuccess counter.");
                         Assert.AreEqual(MetricType.LongSum, exportedItem.MetricType);
 
                         expectedTags.Add(TelemetryConstants.MsalVersion);
@@ -239,26 +327,27 @@ namespace Microsoft.Identity.Test.Unit
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
                             totalSuccessfulRequests += metricPoint.GetSumLong();
-                            AssertTags(metricPoint.Tags, 6, expectedTags);
+                            AssertTags(metricPoint.Tags, expectedTags);
                         }
 
                         Assert.AreEqual(expectedSuccessfulRequests, totalSuccessfulRequests);
 
                         break;
                     case "MsalFailure":
+                        Trace.WriteLine("Verify the metrics captured for MsalFailure counter.");
                         Assert.AreEqual(MetricType.LongSum, exportedItem.MetricType);
 
                         expectedTags.Add(TelemetryConstants.MsalVersion);
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ErrorCode);
                         expectedTags.Add(TelemetryConstants.ApiId);
-                        expectedTags.Add(TelemetryConstants.IsProactiveRefresh);
+                        expectedTags.Add(TelemetryConstants.CacheRefreshReason);
 
                         long totalFailedRequests = 0;
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
                             totalFailedRequests += metricPoint.GetSumLong();
-                            AssertTags(metricPoint.Tags, 5, expectedTags);
+                            AssertTags(metricPoint.Tags, expectedTags);
                         }
 
                         Assert.AreEqual(expectedFailedRequests, totalFailedRequests);
@@ -266,6 +355,7 @@ namespace Microsoft.Identity.Test.Unit
                         break;
 
                     case "MsalTotalDuration.1A":
+                        Trace.WriteLine("Verify the metrics captured for MsalTotalDuration.1A histogram.");
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
                         expectedTags.Add(TelemetryConstants.MsalVersion);
@@ -273,15 +363,17 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
+                        expectedTags.Add(TelemetryConstants.CacheRefreshReason);
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
-                            AssertTags(metricPoint.Tags, 5, expectedTags);
+                            AssertTags(metricPoint.Tags, expectedTags);
                         }
 
                         break;
 
                     case "MsalDurationInL1CacheInUs.1B":
+                        Trace.WriteLine("Verify the metrics captured for MsalDurationInL1CacheInUs.1B histogram.");
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
                         expectedTags.Add(TelemetryConstants.MsalVersion);
@@ -289,29 +381,33 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.ApiId);
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
+                        expectedTags.Add(TelemetryConstants.CacheRefreshReason);
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
-                            AssertTags(metricPoint.Tags, 5, expectedTags);
+                            AssertTags(metricPoint.Tags, expectedTags);
                         }
 
                         break;
 
                     case "MsalDurationInL2Cache.1A":
+                        Trace.WriteLine("Verify the metrics captured for MsalDurationInL2Cache.1A histogram.");
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
                         expectedTags.Add(TelemetryConstants.MsalVersion);
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.CacheRefreshReason);
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
-                            AssertTags(metricPoint.Tags, 3, expectedTags);
+                            AssertTags(metricPoint.Tags, expectedTags);
                         }
 
                         break;
 
                     case "MsalDurationInHttp.1A":
+                        Trace.WriteLine("Verify the metrics captured for MsalDurationInHttp.1A histogram.");
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
                         expectedTags.Add(TelemetryConstants.MsalVersion);
@@ -320,7 +416,7 @@ namespace Microsoft.Identity.Test.Unit
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
-                            AssertTags(metricPoint.Tags, 3, expectedTags);
+                            AssertTags(metricPoint.Tags, expectedTags);
                         }
 
                         break;
@@ -334,9 +430,9 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        private void AssertTags(ReadOnlyTagCollection tags, int expectedTagCount, List<string> expectedTags)
+        private void AssertTags(ReadOnlyTagCollection tags, List<string> expectedTags)
         {
-            Assert.AreEqual(expectedTagCount, tags.Count);
+            Assert.AreEqual(expectedTags.Count, tags.Count);
             IDictionary<string, object> tagDictionary = new Dictionary<string, object>();
 
             foreach (var tag in tags)

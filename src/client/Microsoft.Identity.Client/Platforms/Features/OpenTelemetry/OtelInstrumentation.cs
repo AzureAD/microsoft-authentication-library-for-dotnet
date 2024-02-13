@@ -10,6 +10,7 @@ using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 using System.Diagnostics.Metrics;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using static Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos.NativeMethods;
 
 namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 {
@@ -88,7 +89,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         }
 
         // Aggregates the successful requests based on token source and cache refresh reason.
-        void IOtelInstrumentation.LogSuccessMetrics(
+        public void LogSuccessMetrics(
             string platform,
             ApiEvent.ApiIds apiId,
             CacheLevel cacheLevel,
@@ -96,24 +97,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger)
         {
-            var tokenSource = authResultMetadata.TokenSource;
-
-            if (authResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed)
-            {
-                tokenSource = TokenSource.IdentityProvider;
-            }
-
-            if (s_successCounter.Value.Enabled)
-            {
-                s_successCounter.Value.Add(1,
-                        new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
-                        new(TelemetryConstants.Platform, platform),
-                        new(TelemetryConstants.ApiId, apiId),
-                        new(TelemetryConstants.TokenSource, tokenSource),
-                        new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason),
-                        new(TelemetryConstants.CacheLevel, cacheLevel));
-                logger.Info("[OpenTelemetry] Completed incrementing to isSuccessful counter."); 
-            }
+            IncrementToSuccessCounter(
+                platform,
+                apiId,
+                authResultMetadata.TokenSource,
+                authResultMetadata.CacheRefreshReason,
+                cacheLevel,
+                logger);
 
             if (s_durationTotal.Value.Enabled)
             {
@@ -121,8 +111,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
-                        new(TelemetryConstants.TokenSource, tokenSource),
-                        new(TelemetryConstants.CacheLevel, cacheLevel)); 
+                        new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
+                        new(TelemetryConstants.CacheLevel, cacheLevel), 
+                        new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason)); 
             }
 
             // Only log cache duration if L2 cache was used.
@@ -131,11 +122,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 s_durationInL2Cache.Value.Record(authResultMetadata.DurationInCacheInMs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
-                new(TelemetryConstants.ApiId, apiId));
+                new(TelemetryConstants.ApiId, apiId),
+                new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason));
             }
 
             // Only log duration in HTTP when token is fetched from IDP
-            if (s_durationInHttp.Value.Enabled && tokenSource == TokenSource.IdentityProvider)
+            if (s_durationInHttp.Value.Enabled && authResultMetadata.TokenSource == TokenSource.IdentityProvider)
             {
                 s_durationInHttp.Value.Record(authResultMetadata.DurationInHttpInMs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
@@ -144,19 +136,40 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             }
 
             // Only log duration in microseconds when the cache level is L1.
-            if (s_durationInL1CacheInUs.Value.Enabled && tokenSource == TokenSource.Cache
+            if (s_durationInL1CacheInUs.Value.Enabled && authResultMetadata.TokenSource == TokenSource.Cache
                 && authResultMetadata.CacheLevel.Equals(CacheLevel.L1Cache))
             {
                 s_durationInL1CacheInUs.Value.Record(totalDurationInUs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
                 new(TelemetryConstants.ApiId, apiId),
-                new(TelemetryConstants.TokenSource, tokenSource),
-                new(TelemetryConstants.CacheLevel, cacheLevel));
+                new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
+                new(TelemetryConstants.CacheLevel, authResultMetadata.CacheLevel),
+                new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason));
             }
         }
 
-        void IOtelInstrumentation.LogFailedMetrics(string platform, string errorCode, ApiEvent.ApiIds apiId, bool isProactiveTokenRefresh)
+        public void IncrementToSuccessCounter(string platform, 
+            ApiEvent.ApiIds apiId, 
+            TokenSource tokenSource,
+            CacheRefreshReason cacheRefreshReason, 
+            CacheLevel cacheLevel,
+            ILoggerAdapter logger)
+        {
+            if (s_successCounter.Value.Enabled)
+            {
+                s_successCounter.Value.Add(1,
+                        new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
+                        new(TelemetryConstants.Platform, platform),
+                        new(TelemetryConstants.ApiId, apiId),
+                        new(TelemetryConstants.TokenSource, tokenSource),
+                        new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
+                        new(TelemetryConstants.CacheLevel, cacheLevel));
+                logger.Info("[OpenTelemetry] Completed incrementing to success counter.");
+            }
+        }
+
+        public void LogFailedMetrics(string platform, string errorCode, ApiEvent.ApiIds apiId, CacheRefreshReason cacheRefreshReason)
         {
             if (s_failureCounter.Value.Enabled)
             {
@@ -165,7 +178,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ErrorCode, errorCode), 
                         new(TelemetryConstants.ApiId, apiId), 
-                        new(TelemetryConstants.IsProactiveRefresh, isProactiveTokenRefresh)); 
+                        new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason)); 
             }
         }
     }

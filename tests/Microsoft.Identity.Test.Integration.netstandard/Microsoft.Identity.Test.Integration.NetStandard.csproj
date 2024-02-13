@@ -42,6 +42,9 @@
     <PackageReference Include="MSTest.TestFramework" />
     <PackageReference Include="coverlet.collector" />
 
+    <PackageReference Include="OpenTelemetry.Exporter.Console" />
+    <PackageReference Include="OpenTelemetry.Exporter.InMemory" />
+
     <!-- Workaround for hitting exception invoking executor 'executor://nunit3testexecutor/': Could not load type 'System.Runtime.Remoting.Channels.IChannel'-->
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit3TestAdapter" />
