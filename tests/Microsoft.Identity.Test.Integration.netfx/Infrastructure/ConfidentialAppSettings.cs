@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
         private class PpeConfidentialAppSettings : IConfidentialAppSettings
         {
-            public string ClientId => UseAppIdUri? "api://microsoft.identity.9793041b-9078-4942-b1d2-babdc472cc0c" : "9793041b-9078-4942-b1d2-babdc472cc0c";
+            public string ClientId => UseAppIdUri ? "api://microsoft.identity.9793041b-9078-4942-b1d2-babdc472cc0c" : "1e999007-0c4f-4242-9ca1-8e33397236a9";
 
             public string TenantId => "19eea2f8-e17a-470f-954d-d897c47f311c";
 

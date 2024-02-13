@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client
         /// </listheader>
         /// <item>
         /// <term>.NET desktop</term>
-        /// <Description><c>https://login.microsoftonline.com/common/oauth2/nativeclient</c></Description>
+        /// <Description><c>`https://login.microsoftonline.com/common/oauth2/nativeclient`</c></Description>
         /// </item>
         /// <item>
         /// <term>UWP</term>
