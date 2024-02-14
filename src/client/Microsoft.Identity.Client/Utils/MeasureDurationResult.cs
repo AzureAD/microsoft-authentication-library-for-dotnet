@@ -14,15 +14,18 @@ namespace Microsoft.Identity.Client.Utils
     /// </summary>
     internal struct MeasureDurationResult<TResult>
     {
-        public MeasureDurationResult(TResult result, long milliseconds)
+        public MeasureDurationResult(TResult result, long ticks)
         {
             Result = result;
-            Milliseconds = milliseconds;
+            Milliseconds = ticks / TimeSpan.TicksPerMillisecond;
+            Ticks = ticks;
         }
 
         public TResult Result { get; }
 
         public long Milliseconds { get; }
+
+        public long Ticks { get; }
     }
 
     /// <summary>
@@ -30,11 +33,14 @@ namespace Microsoft.Identity.Client.Utils
     /// </summary>
     internal struct MeasureDurationResult
     {
-        public MeasureDurationResult(long milliseconds)
+        public MeasureDurationResult(long ticks)
         {
-            Milliseconds = milliseconds;
+            Milliseconds = ticks / TimeSpan.TicksPerMillisecond;
+            Ticks = ticks;
         }
 
         public long Milliseconds { get; }
+
+        public long Ticks { get; }
     }
 }
