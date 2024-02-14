@@ -17,7 +17,7 @@ body:
 - type: dropdown
   attributes:
     label: MSAL client type
-    description: Are you using PublicClientApplication (desktop and mobile apps), ConfidentialClientApplication (web apps, web APIs, service-to-service) or ManagedIdentityApplication?
+    description: Are you using PublicClientApplication (desktop, mobile apps), ConfidentialClientApplication (web apps, web APIs, service-to-service), or ManagedIdentityApplication?
     multiple: true
     options: 
       - "Public"
@@ -28,7 +28,7 @@ body:
 
 - type: textarea
   attributes:
-    label: Problem Statement
+    label: Problem statement
     description: "Describe the problem or context for this feature request."
   validations: 
     required: true
