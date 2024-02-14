@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Http
@@ -216,8 +217,12 @@ namespace Microsoft.Identity.Client.Http
                     () => $"[HttpManager] Sending request. Method: {method}. URI: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}{endpoint.AbsolutePath}")}. ",
                     () => $"[HttpManager] Sending request. Method: {method}. Host: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}")}. ");
 
-                HttpClient client = GetHttpClient();
-                MeasureDurationResult<HttpResponseMessage> measureDurationResult = await client.SendAsync(requestMessage, cancellationToken).MeasureAsync().ConfigureAwait(false);
+                var measureDurationResult = await StopWatchService.MeasureCodeBlockAsync(async () =>
+                {
+                    HttpClient client = GetHttpClient();
+                    return await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                }).ConfigureAwait(false);
+
                 using (HttpResponseMessage responseMessage = measureDurationResult.Result)
                 {
                     LastRequestDurationInMs = measureDurationResult.Milliseconds;

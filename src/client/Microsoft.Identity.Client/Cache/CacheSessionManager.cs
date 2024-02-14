@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
@@ -139,24 +141,27 @@ namespace Microsoft.Identity.Client.Cache
                             }
                             finally
                             {
-                                var args = new TokenCacheNotificationArgs(
-                                  TokenCacheInternal,
-                                  _requestParams.AppConfig.ClientId,
-                                  _requestParams.Account,
-                                  hasStateChanged: false,
-                                  isApplicationCache: TokenCacheInternal.IsApplicationCache,
-                                  suggestedCacheKey: key,
-                                  hasTokens: TokenCacheInternal.HasTokensNoLocks(),
-                                  cancellationToken: _requestParams.RequestContext.UserCancellationToken,
-                                  suggestedCacheExpiry: null,
-                                  correlationId: _requestParams.RequestContext.CorrelationId,
-                                  requestScopes: _requestParams.Scope,
-                                  requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId,
-                                  identityLogger: _requestParams.RequestContext.Logger.IdentityLogger,
-                                  piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled,
-                                  telemetryData: telemetryData);
+                                var measureDurationResult = await StopWatchService.MeasureCodeBlockAsync(async () =>
+                                {
+                                    var args = new TokenCacheNotificationArgs(
+                                      TokenCacheInternal,
+                                      _requestParams.AppConfig.ClientId,
+                                      _requestParams.Account,
+                                      hasStateChanged: false,
+                                      isApplicationCache: TokenCacheInternal.IsApplicationCache,
+                                      suggestedCacheKey: key,
+                                      hasTokens: TokenCacheInternal.HasTokensNoLocks(),
+                                      cancellationToken: _requestParams.RequestContext.UserCancellationToken,
+                                      suggestedCacheExpiry: null,
+                                      correlationId: _requestParams.RequestContext.CorrelationId,
+                                      requestScopes: _requestParams.Scope,
+                                      requestTenantId: _requestParams.AuthorityManager.OriginalAuthority.TenantId,
+                                      identityLogger: _requestParams.RequestContext.Logger.IdentityLogger,
+                                      piiLoggingEnabled: _requestParams.RequestContext.Logger.PiiLoggingEnabled,
+                                      telemetryData: telemetryData);
 
-                                var measureDurationResult = await TokenCacheInternal.OnAfterAccessAsync(args).MeasureAsync().ConfigureAwait(false);
+                                    await TokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
+                                }).ConfigureAwait(false);
                                 RequestContext.ApiEvent.DurationInCacheInMs += measureDurationResult.Milliseconds;
 
                             }

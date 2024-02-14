@@ -53,10 +53,24 @@ namespace Microsoft.Identity.Client.Utils
         internal static async Task<MeasureDurationResult> MeasureCodeBlockAsync(Func<Task> codeBlock)
         {
             _ = codeBlock ?? throw new ArgumentNullException(nameof(codeBlock));
-            var startMs = Watch.ElapsedMilliseconds;
+            var startTicks = Watch.ElapsedTicks;
             await codeBlock.Invoke().ConfigureAwait(false);
 
-            return new MeasureDurationResult(Watch.ElapsedMilliseconds - startMs);
+            return new MeasureDurationResult(Watch.ElapsedTicks - startTicks);
+        }
+
+        /// <summary>
+        /// Measures the duration of an asyncronous codeblock
+        /// </summary>
+        /// <param name="codeBlock"></param>
+        /// <returns></returns>
+        internal static async Task<MeasureDurationResult<TResult>> MeasureCodeBlockAsync<TResult>(Func<Task<TResult>> codeBlock)
+        {
+            _ = codeBlock ?? throw new ArgumentNullException(nameof(codeBlock));
+            var startTicks = Watch.ElapsedTicks;
+            var result = await codeBlock.Invoke().ConfigureAwait(false);
+
+            return new MeasureDurationResult<TResult>(result, Watch.ElapsedTicks - startTicks);
         }
 
         /// <summary>
