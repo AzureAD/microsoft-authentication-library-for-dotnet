@@ -1,4 +1,4 @@
-name: Engineering Task
+name: Engineering task
 description: New engineering task (for internal use only).
 labels: ["untriaged", "internal"]
 title : '[Engineering task]'
