@@ -1,7 +1,7 @@
 name: Feature request
 description: Suggest a new feature for MSAL.NET.
 labels: ["feature request", "untriaged", "needs attention"]
-title : '[Feature Request]     '
+title : '[Feature Request] '
 body:
 - type: markdown
   attributes:
