@@ -1,17 +1,16 @@
 name: Engineering Task
-description: New Engineering Task (For Internal Microsoft Use Only).
+description: New engineering task (for internal use only).
 labels: ["untriaged", "internal"]
-title : '[Engineering Task]'
+title : '[Engineering task]'
 body:     
 - type: markdown
   attributes:
     value: |
-      ## Engineering Task **(For Internal Use Only)**
+      ## Engineering task **(for internal use only)**
       
 - type: dropdown
   attributes:
-    label: Type of task?
-    description: Can you select a category for this task?
+    label: Task type
     multiple: true
     options: 
       - "Design"
@@ -20,12 +19,12 @@ body:
       - "Prototype"
       - "Builds"
       - "Development"
-      - "Best Practices"
+      - "Best practices"
       - "Supportability"
-      - "Engineering Excellence"
+      - "Engineering excellence"
       - "Performance"
       - "Security"
-      - "Other(s)"
+      - "Other"
   validations:
     required: true
 
