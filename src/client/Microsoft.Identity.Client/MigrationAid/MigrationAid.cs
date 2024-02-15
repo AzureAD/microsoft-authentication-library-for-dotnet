@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
         string Name { get; }
 
         /// <summary>
-        /// In MSAL.NET 1.x was the URL of the identity provider (e.g. https://login.microsoftonline.com/tenantId).
+        /// In MSAL.NET 1.x was the URL of the identity provider (e.g. `https://login.microsoftonline.com/tenantId`).
         /// From MSAL.NET 2.x use <see cref="IAccount.Environment"/> which retrieves the host only (e.g. login.microsoftonline.com).
         /// See https://aka.ms/msal-net-2-released for more details.
         /// </summary>
@@ -833,7 +833,7 @@ namespace Microsoft.Identity.Client
         #region MSAL3X deprecations
 
         /// <summary>
-        /// Constructor of the application. It will use https://login.microsoftonline.com/common as the default authority.
+        /// Constructor of the application. It will use `https://login.microsoftonline.com/common` as the default authority.
         /// </summary>
         /// <param name="clientId">Client ID (also known as App ID) of the application as registered in the
         /// application registration portal (https://aka.ms/msal-net-register-app)/. REQUIRED</param>
