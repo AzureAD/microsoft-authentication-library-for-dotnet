@@ -373,7 +373,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        public async Task ClaimsChallengeErrorLogging_TestAsync(bool piiLogging)
+        public async Task ClaimsChallengeErrorLogged_Test(bool piiLogging)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -386,8 +386,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithHttpManager(httpManager);
 
                     stringBuilder = testLogger.StringBuilder;
-                    appBuilder.WithExperimentalFeatures()
-                    .WithLogging(testLogger, piiLogging);
+                    appBuilder.WithLogging(testLogger, piiLogging);
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandler(

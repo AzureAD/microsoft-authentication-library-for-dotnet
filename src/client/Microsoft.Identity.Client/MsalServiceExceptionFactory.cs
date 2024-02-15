@@ -37,14 +37,14 @@ namespace Microsoft.Identity.Client
                     errorMessageToUse = MsalErrorMessage.AadThrottledError;
                 }
 
-                if (oAuth2Response.Claims != null)
+                if (oAuth2Response.Claims == null)
                 {
-                    errorMessageToUse = UpdateExceptionForClaimsChallenge(errorMessageToUse);
-                    ex = new MsalClaimsChallengeException(errorCode, errorMessageToUse, innerException);
+                    ex = new MsalUiRequiredException(errorCode, errorMessageToUse, innerException);
                 }
                 else
                 {
-                    ex = new MsalUiRequiredException(errorCode, errorMessageToUse, innerException);
+                    errorMessageToUse = UpdateExceptionForClaimsChallenge(errorMessageToUse);
+                    ex = new MsalClaimsChallengeException(errorCode, errorMessageToUse, innerException);
                 }
             }
 

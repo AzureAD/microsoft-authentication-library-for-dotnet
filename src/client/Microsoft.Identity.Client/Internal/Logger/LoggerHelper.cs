@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 sb.AppendLine("=== End of inner exception stack trace ===");
             }
 
-            if (ex.Message.Contains(MsalErrorMessage.ClaimsChallenge))
+            if (ex is MsalClaimsChallengeException)
             {
                 sb.AppendLine(MsalErrorMessage.ClaimsChallenge);
             }
