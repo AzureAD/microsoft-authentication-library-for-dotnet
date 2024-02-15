@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// The source of the token in the result.
         /// </summary>
-        public TokenSource TokenSource { get; internal set; }
+        public TokenSource TokenSource { get; }
 
         /// <summary>
         /// The token endpoint used to contact the Identity Provider (e.g. Azure Active Directory). 

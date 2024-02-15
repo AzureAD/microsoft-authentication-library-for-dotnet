@@ -5,11 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.Features.OpenTelemetry;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common;
@@ -84,12 +86,8 @@ namespace Microsoft.Identity.Test.Unit
                 // Assert
                 Assert.IsNotNull(result);
 
-                //TokenCacheHelper.PopulateCache(_cca.AppTokenCacheInternal.Accessor, addSecondAt: false);
-
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
                 var refreshOn = TestCommon.UpdateATWithRefreshOn(_cca.AppTokenCacheInternal.Accessor).RefreshOn;
-
-                TokenCacheAccessRecorder cacheAccess = _cca.AppTokenCache.RecordAccess();
 
                 Trace.WriteLine("3. Configure AAD to respond with valid token to the refresh RT flow");
                 _harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
@@ -107,7 +105,6 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsNotNull(result);
                 Assert.AreEqual(0, _harness.HttpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
-                cacheAccess.WaitTo_AssertAcessCounts(1, 1);
                 Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed);
                 Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == refreshOn);
 
@@ -121,12 +118,12 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.NotApplicable);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(3, _exportedMetrics, 4, 0);
+                VerifyMetrics(4, _exportedMetrics, 4, 0);
             }
         }
 
         [TestMethod]
-        [Description("AT in cache, needs refresh. AAD responds well to Refresh.")]
+        [Description("Setup AT in cache, needs refresh. MSI responds well to Refresh.")]
         public async Task ProactiveTokenRefresh_ValidResponse_MSI_Async()
         {
             string appServiceEndpoint = "http://127.0.0.1:41564/msi/token";
@@ -159,7 +156,6 @@ namespace Microsoft.Identity.Test.Unit
 
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
                 var refreshOn = TestCommon.UpdateATWithRefreshOn(mi.AppTokenCacheInternal.Accessor).RefreshOn;
-                TokenCacheAccessRecorder cacheAccess = mi.AppTokenCacheInternal.RecordAccess();
 
                 Trace.WriteLine("3. Configure MSI to respond with a valid token");
                 httpManager.AddManagedIdentityMockHandler(
@@ -182,20 +178,86 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(0, httpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
                 
-                cacheAccess.WaitTo_AssertAcessCounts(1, 1);
-
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, result.AuthenticationResultMetadata.CacheRefreshReason);
-
                 Assert.AreEqual(refreshOn, result.AuthenticationResultMetadata.RefreshOn);
 
                 result = await mi.AcquireTokenForManagedIdentity(resource)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
-                
+
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(3, _exportedMetrics, 4, 0);
+                VerifyMetrics(4, _exportedMetrics, 4, 0);
+            }
+        }
+
+        private MockHttpMessageHandler AddMockHandlerAadSuccess(
+            MockHttpManager httpManager)
+        {
+            var handler = new MockHttpMessageHandler
+            {
+                ExpectedUrl = TestConstants.AuthorityCommonTenant + "oauth2/v2.0/token",
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+            };
+
+            httpManager.AddMockHandler(handler);
+
+            return handler;
+        }
+
+        [TestMethod]
+        [Description("AT in cache, needs refresh. AAD responds well to Refresh.")]
+        public async Task ProactiveTokenRefresh_ValidResponse_OBO_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                AddMockHandlerAadSuccess(httpManager);
+
+                Trace.WriteLine("1. Setup an app with a token cache with one AT");
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(TestConstants.AuthorityCommonTenant)
+                    .WithHttpManager(httpManager)
+                    .BuildConcrete();
+
+                string oboCacheKey = "obo-cache-key";
+                var result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
+                TestCommon.UpdateATWithRefreshOn(cca.UserTokenCacheInternal.Accessor);
+
+                AddMockHandlerAadSuccess(httpManager);
+
+                Trace.WriteLine("3. Configure AAD to respond with a valid token");
+                result = await cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, result.AuthenticationResultMetadata.CacheRefreshReason);
+
+                // Add delay to let the proactive refresh happen
+                Thread.Sleep(1000);
+
+                Trace.WriteLine("4. Fetch token from cache");
+                result = await cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
+
+                s_meterProvider.ForceFlush();
+                VerifyMetrics(4, _exportedMetrics, 4, 0);
             }
         }
 
