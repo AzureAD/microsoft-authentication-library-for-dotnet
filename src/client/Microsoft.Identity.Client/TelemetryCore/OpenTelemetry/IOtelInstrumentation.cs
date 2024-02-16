@@ -19,13 +19,16 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger);
 
-        internal void IncrementToSuccessCounter(string platform,
+        internal void IncrementSuccessCounter(string platform,
             ApiEvent.ApiIds apiId,
             TokenSource tokenSource,
             CacheRefreshReason cacheRefreshReason,
             CacheLevel cacheLevel,
             ILoggerAdapter logger);
 
-        internal void LogFailedMetrics(string platform, string errorCode, ApiEvent.ApiIds apiId, CacheRefreshReason cacheRefreshReason);
+        internal void LogFailureMetrics(string platform, 
+            string errorCode, 
+            ApiEvent.ApiIds apiId, 
+            CacheRefreshReason cacheRefreshReason);
     }
 }

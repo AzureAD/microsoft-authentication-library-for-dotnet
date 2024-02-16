@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger)
         {
-            IncrementToSuccessCounter(
+            IncrementSuccessCounter(
                 platform,
                 apiId,
                 authResultMetadata.TokenSource,
@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             }
         }
 
-        public void IncrementToSuccessCounter(string platform, 
+        public void IncrementSuccessCounter(string platform, 
             ApiEvent.ApiIds apiId, 
             TokenSource tokenSource,
             CacheRefreshReason cacheRefreshReason, 
@@ -165,11 +165,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.TokenSource, tokenSource),
                         new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
                         new(TelemetryConstants.CacheLevel, cacheLevel));
-                logger.Info("[OpenTelemetry] Completed incrementing to success counter.");
+                logger.Verbose(() => "[OpenTelemetry] Completed incrementing to success counter.");
             }
         }
 
-        public void LogFailedMetrics(string platform, string errorCode, ApiEvent.ApiIds apiId, CacheRefreshReason cacheRefreshReason)
+        public void LogFailureMetrics(string platform, 
+            string errorCode, 
+            ApiEvent.ApiIds apiId, 
+            CacheRefreshReason cacheRefreshReason)
         {
             if (s_failureCounter.Value.Enabled)
             {

@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.Internal
                 try
                 {
                     var authResult = await fetchAction().ConfigureAwait(false);
-                    serviceBundle.PlatformProxy.OtelInstrumentation.IncrementToSuccessCounter(
+                    serviceBundle.PlatformProxy.OtelInstrumentation.IncrementSuccessCounter(
                         serviceBundle.PlatformProxy.GetProductName(),
                         apiId,
                         TokenSource.IdentityProvider, 
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client.Internal
                         logger.ErrorPiiWithPrefix(ex, logMsg);
                     }
 
-                    serviceBundle.PlatformProxy.OtelInstrumentation.LogFailedMetrics(
+                    serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.ErrorCode,
                         apiId,
@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Client.Internal
                 catch (OperationCanceledException ex)
                 {
                     logger.WarningPiiWithPrefix(ex, ProactiveRefreshCancellationError);
-                    serviceBundle.PlatformProxy.OtelInstrumentation.LogFailedMetrics(
+                    serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.GetType().Name,
                         apiId,
@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client.Internal
                 catch (Exception ex)
                 {
                     logger.ErrorPiiWithPrefix(ex, ProactiveRefreshGeneralError);
-                    serviceBundle.PlatformProxy.OtelInstrumentation.LogFailedMetrics(
+                    serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.GetType().Name,
                         apiId,

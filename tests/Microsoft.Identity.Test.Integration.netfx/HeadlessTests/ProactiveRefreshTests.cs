@@ -40,7 +40,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             ConfidentialClientApplication confidentialApp = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
                 .WithAuthority(settings.Authority, true)
-                .WithTestLogging()
                 .WithCertificate(settings.GetCertificate())
                 .BuildConcrete();
 

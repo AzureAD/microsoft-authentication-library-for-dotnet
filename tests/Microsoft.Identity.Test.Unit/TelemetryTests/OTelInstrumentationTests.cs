@@ -194,21 +194,6 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        private MockHttpMessageHandler AddMockHandlerAadSuccess(
-            MockHttpManager httpManager)
-        {
-            var handler = new MockHttpMessageHandler
-            {
-                ExpectedUrl = TestConstants.AuthorityCommonTenant + "oauth2/v2.0/token",
-                ExpectedMethod = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
-            };
-
-            httpManager.AddMockHandler(handler);
-
-            return handler;
-        }
-
         [TestMethod]
         [Description("AT in cache, needs refresh. AAD responds well to Refresh.")]
         public async Task ProactiveTokenRefresh_ValidResponse_OBO_Async()
@@ -217,7 +202,7 @@ namespace Microsoft.Identity.Test.Unit
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                AddMockHandlerAadSuccess(httpManager);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost();
 
                 Trace.WriteLine("1. Setup an app with a token cache with one AT");
                 var cca = ConfidentialClientApplicationBuilder
@@ -237,7 +222,7 @@ namespace Microsoft.Identity.Test.Unit
                 Trace.WriteLine("2. Configure AT so that it shows it needs to be refreshed");
                 TestCommon.UpdateATWithRefreshOn(cca.UserTokenCacheInternal.Accessor);
 
-                AddMockHandlerAadSuccess(httpManager);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost();
 
                 Trace.WriteLine("3. Configure AAD to respond with a valid token");
                 result = await cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
