@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class ProactiveRefreshTests
     {
         [TestMethod]
-        public async Task TestProactiveTokenWithTelemetry()
+        public async Task ProactiveRefreshTriggers_WithTelemetry_Test()
         {
             Trace.WriteLine("Add exporter to test the metrics for proactive token refresh");
             List<Metric> exportedMetrics = new();
