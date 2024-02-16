@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1708058903440,
+  "lastUpdate": 1708058904796,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -13594,6 +13594,54 @@ window.BENCHMARK_DATA = {
             "value": 172628.5439860026,
             "unit": "ns",
             "range": "± 1382.0237569890533"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3cb6fae544629d3392ea2170847ee124468a8f75",
+          "message": "Updating stopwatch operations to use singleton (#4615)\n\n* Updating stopwatch operations to use singleton\r\n\r\n* Updating implementation to better encapsulate the measurement of codeblocks\r\n\r\n* Adding tics to measurement result\r\n\r\n* Resolving test issues\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>",
+          "timestamp": "2024-02-15T20:41:28-08:00",
+          "tree_id": "d366b3f66d11c25dcd87e26cc72d80082b63deb5",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/3cb6fae544629d3392ea2170847ee124468a8f75"
+        },
+        "date": 1708058904366,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 22312.546480618992,
+            "unit": "ns",
+            "range": "± 32.5225024991671"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 169369.340625,
+            "unit": "ns",
+            "range": "± 1339.713398742811"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 33057.27973937988,
+            "unit": "ns",
+            "range": "± 92.48396183890098"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 174142.51005859376,
+            "unit": "ns",
+            "range": "± 1663.783945200269"
           }
         ]
       }
