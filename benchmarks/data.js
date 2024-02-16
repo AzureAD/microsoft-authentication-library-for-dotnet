@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1708003335503,
+  "lastUpdate": 1708058902051,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -3986,6 +3986,42 @@ window.BENCHMARK_DATA = {
             "value": 334421.875,
             "unit": "ns",
             "range": "± 4703.767396105664"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3cb6fae544629d3392ea2170847ee124468a8f75",
+          "message": "Updating stopwatch operations to use singleton (#4615)\n\n* Updating stopwatch operations to use singleton\r\n\r\n* Updating implementation to better encapsulate the measurement of codeblocks\r\n\r\n* Adding tics to measurement result\r\n\r\n* Resolving test issues\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>",
+          "timestamp": "2024-02-15T20:41:28-08:00",
+          "tree_id": "d366b3f66d11c25dcd87e26cc72d80082b63deb5",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/3cb6fae544629d3392ea2170847ee124468a8f75"
+        },
+        "date": 1708058899040,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 258305.22727272726,
+            "unit": "ns",
+            "range": "± 6007.049524808872"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 334580.3846153846,
+            "unit": "ns",
+            "range": "± 8971.609431208753"
           }
         ]
       }
