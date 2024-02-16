@@ -133,12 +133,13 @@ namespace Microsoft.Identity.Client.Internal
         private static string ComputeCertThumbprint(X509Certificate2 certificate, bool useSha2)
         {
             string thumbprint = null;
-
-            if (useSha2)
+            try
             {
+                if (useSha2)
+                {
 #if NET6_0_OR_GREATER
 
-                thumbprint = Base64UrlHelpers.Encode(certificate.GetCertHash(HashAlgorithmName.SHA256));
+                    thumbprint = Base64UrlHelpers.Encode(certificate.GetCertHash(HashAlgorithmName.SHA256));
 #else
                 using (var hasher = SHA256.Create())
                 {
@@ -146,12 +147,16 @@ namespace Microsoft.Identity.Client.Internal
                     thumbprint = Base64UrlHelpers.Encode(hash);
                 }
 #endif
+                }
+                else
+                {
+                    thumbprint = Base64UrlHelpers.Encode(certificate.GetCertHash());
+                }
             }
-            else
+            catch (CryptographicException ex)
             {
-                thumbprint = Base64UrlHelpers.Encode(certificate.GetCertHash());
+                throw new MsalClientException(MsalError.CryptographicError, MsalErrorMessage.CryptographicError, ex);
             }
-
             return thumbprint;
         }
 
