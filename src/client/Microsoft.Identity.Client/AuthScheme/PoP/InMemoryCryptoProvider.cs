@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Security.Cryptography;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Utils;
@@ -27,7 +28,14 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         private void InitializeSigningKey()
         {
+#if NETFRAMEWORK
+            // This method was obsolete in .NET,
+            // but Create() on .NET FWK defaults to PKCS1 padding.
+            _signingKey = RSA.Create("RSAPSS");
+#else
             _signingKey = RSA.Create();
+#endif
+
             _signingKey.KeySize = RsaKeySize;
             RSAParameters publicKeyInfo = _signingKey.ExportParameters(false);
 
@@ -36,7 +44,10 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         public byte[] Sign(byte[] payload)
         {
-            return _signingKey.SignData(payload, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            return _signingKey.SignData(
+                payload,
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pss);
         }
 
         /// <summary>
