@@ -6,6 +6,7 @@ using Microsoft.Identity.Client;
 
 [assembly: InternalsVisibleTo("Microsoft.Identity.Client.Desktop" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("Microsoft.Identity.Client.Broker" + KeyTokens.MSAL)]
+[assembly: InternalsVisibleTo("Microsoft.Identity.Client.SsoPolicy" + KeyTokens.MSAL)]
 
 [assembly: InternalsVisibleTo("Microsoft.Identity.Test.Unit" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("Microsoft.Identity.Test.Common" + KeyTokens.MSAL)]
