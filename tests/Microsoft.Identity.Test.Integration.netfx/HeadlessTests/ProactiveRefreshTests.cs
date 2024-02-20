@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
-            Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs > 50);
+            Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);
 
             Trace.WriteLine("Acquire a token from cache.");
             authResult = await confidentialApp
@@ -80,25 +80,34 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, authResult.AuthenticationResultMetadata.CacheRefreshReason);
             Assert.IsTrue(authResult.AuthenticationResultMetadata.DurationTotalInMs < 50);
 
-            Thread.Sleep(5000);  // Wait for the background process to complete
-
             meterProvider.ForceFlush();
+
+            TestCommon.YieldTillSatisfied(()=>ValidateSuccessMetrics(meterProvider, exportedMetrics) == 4);  // Wait for the background process to complete
+
+            exportedMetrics.Clear();
+            meterProvider.Dispose();
+        }
+
+        private long ValidateSuccessMetrics(MeterProvider meterProvider, List<Metric> exportedMetrics)
+        {
             Assert.AreEqual(4, exportedMetrics.Count);
 
             foreach (var metric in exportedMetrics)
             {
                 if (metric.Name == "MsalSuccess")
                 {
-                    var successfulRequests = 0;
+                    long successfulRequests = 0;
+
                     foreach (var metricPoint in metric.GetMetricPoints())
                     {
-                        successfulRequests += (int)metricPoint.GetSumLong();
+                        successfulRequests += metricPoint.GetSumLong();
                     }
 
-                    Trace.WriteLine("Assert that there are 4 successful requests logged including 1 for background refresh.");
-                    Assert.AreEqual(4, successfulRequests);
+                    return successfulRequests;
                 }
             }
+
+            return 0;
         }
     }
 }

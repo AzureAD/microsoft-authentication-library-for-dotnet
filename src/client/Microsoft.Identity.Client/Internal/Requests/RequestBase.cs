@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     UpdateTelemetry(measureDurationResult.Milliseconds + measureTelemetryDurationResult.Milliseconds, apiEvent, authenticationResult);
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
                     LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails, telemetryClients);
-                    LogSuccessTelemetryToOtel(authenticationResult, apiEvent.ApiId, sw.ElapsedTicks / (TimeSpan.TicksPerMillisecond / 1000));
+                    LogSuccessTelemetryToOtel(authenticationResult, apiEvent.ApiId, measureDurationResult.Ticks / (TimeSpan.TicksPerMillisecond / 1000));
 
                     return authenticationResult;
                 }
