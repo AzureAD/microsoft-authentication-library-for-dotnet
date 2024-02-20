@@ -22,7 +22,6 @@ using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
@@ -220,11 +219,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                              OtherProtectedUrl,
                              HttpMethod.Post,
                              result).ConfigureAwait(false);
-        }
-
-        public async Task RunTestWithClientSecretAsync(string clientID, string authority, string secret)
-        {
-          
         }
 
         [TestMethod]

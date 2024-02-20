@@ -190,11 +190,14 @@ namespace Microsoft.Identity.Client
                             identityLogger: requestParams.RequestContext.Logger.IdentityLogger,
                             piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled);
 
-                        Stopwatch sw = Stopwatch.StartNew();
+                        var measuredResultDuration = await StopWatchService.MeasureCodeBlockAsync( async () => 
+                        {
+                            await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
+                            await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
 
-                        await tokenCacheInternal.OnBeforeAccessAsync(args).ConfigureAwait(false);
-                        await tokenCacheInternal.OnBeforeWriteAsync(args).ConfigureAwait(false);
-                        requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
+                        }).ConfigureAwait(false);
+
+                        requestParams.RequestContext.ApiEvent.DurationInCacheInMs += measuredResultDuration.Milliseconds;
                     }
 
                     // Don't cache access tokens from broker
@@ -262,9 +265,8 @@ namespace Microsoft.Identity.Client
                             identityLogger: requestParams.RequestContext.Logger.IdentityLogger,
                             piiLoggingEnabled: requestParams.RequestContext.Logger.PiiLoggingEnabled);
 
-                        Stopwatch sw = Stopwatch.StartNew();
-                        await tokenCacheInternal.OnAfterAccessAsync(args).ConfigureAwait(false);
-                        requestParams.RequestContext.ApiEvent.DurationInCacheInMs += sw.ElapsedMilliseconds;
+                        var measuredTimeDuration = await tokenCacheInternal.OnAfterAccessAsync(args).MeasureAsync().ConfigureAwait(false);
+                        requestParams.RequestContext.ApiEvent.DurationInCacheInMs += measuredTimeDuration.Milliseconds;
 
                         LogCacheContents(requestParams);
                     }
