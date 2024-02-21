@@ -610,6 +610,63 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        [TestMethod]
+        [Description("Check if the certificate is disposed and throw proper exception")]
+        public async Task DisposedCert_ThrowsSpecificException_Test()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                SetupMocks(harness.HttpManager);
+
+                ConfidentialClientApplication app = null;
+                //initialize client app with cert then dispose of it
+                using (var certificate = new X509Certificate2(
+                    ResourceHelper.GetTestResourceRelativePath("RSATestCertDotNet.pfx")))
+                {
+                    app = ConfidentialClientApplicationBuilder
+                        .Create(TestConstants.ClientId)
+                        .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
+                        .WithRedirectUri(TestConstants.RedirectUri)
+                        .WithHttpManager(harness.HttpManager)
+                        .WithCertificate(certificate)
+                        .BuildConcrete();
+                }
+
+                //Testing client credential flow
+                var exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                {
+                    await app.AcquireTokenForClient(TestConstants.s_scope)
+                             .ExecuteAsync(CancellationToken.None)
+                             .ConfigureAwait(false);
+                }).ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.CryptographicError, exception.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.CryptographicError, exception.Message);
+
+                //Testing auth code flow
+                exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                {
+                    await app.AcquireTokenByAuthorizationCode(TestConstants.s_scope, TestConstants.DefaultAuthorizationCode)
+                             .ExecuteAsync(CancellationToken.None)
+                             .ConfigureAwait(false);
+                }).ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.CryptographicError, exception.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.CryptographicError, exception.Message);
+
+                //Testing OBO flow
+                exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                {
+                    await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.UserAssertion))
+                             .ExecuteAsync(CancellationToken.None)
+                             .ConfigureAwait(false);
+                }).ConfigureAwait(false);
+
+                Assert.AreEqual(MsalError.CryptographicError, exception.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.CryptographicError, exception.Message);
+            }
+        }
+
         private static string ComputeCertThumbprint(X509Certificate2 certificate, bool useSha2)
         {
             string thumbprint = null;
