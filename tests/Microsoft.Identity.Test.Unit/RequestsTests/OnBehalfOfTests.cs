@@ -227,6 +227,49 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
+        [TestMethod]
+        public async Task ClaimsChallengeErrorHandling_TestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage(claims: TestConstants.ClaimsChallenge)
+                    });
+
+                var cca = BuildCCA(httpManager);
+                UserAssertion userAssertion = new UserAssertion(TestConstants.DefaultAccessToken);
+
+                //Throw exception with claims for OBO:
+                var ex = await Assert.ThrowsExceptionAsync<MsalClaimsChallengeException>(async () =>
+                {
+                    await cca.AcquireTokenOnBehalfOf(TestConstants.s_scope, userAssertion).ExecuteAsync().ConfigureAwait(false);
+                }).ConfigureAwait(false);
+
+                Assert.AreEqual(TestConstants.ClaimsChallenge, ex.Claims);
+                Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.ClaimsChallenge));
+
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage(claims: TestConstants.ClaimsChallenge)
+                    });
+
+                //Throw exception with claims without OBO:
+                ex = await Assert.ThrowsExceptionAsync<MsalClaimsChallengeException>(async () =>
+                {
+                    await cca.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
+                }).ConfigureAwait(false);
+
+                Assert.AreEqual(TestConstants.ClaimsChallenge, ex.Claims);
+                Assert.IsTrue(ex.Message.Contains(MsalErrorMessage.ClaimsChallenge));
+            }
+        }
+
         private ConfidentialClientApplication BuildCCA(IHttpManager httpManager)
         {
             return ConfidentialClientApplicationBuilder

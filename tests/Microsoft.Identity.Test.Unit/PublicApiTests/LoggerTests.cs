@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics.Tracing;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -367,6 +368,43 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             Assert.IsNotNull(result);
 
+        }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task ClaimsChallengeErrorLogged_Test(bool piiLogging)
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                TestIdentityLogger testLogger = new TestIdentityLogger();
+                StringBuilder stringBuilder;
+
+                var appBuilder = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret("secret")
+                    .WithHttpManager(httpManager);
+
+                    stringBuilder = testLogger.StringBuilder;
+                    appBuilder.WithLogging(testLogger, piiLogging);
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        ExpectedMethod = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage(claims: TestConstants.ClaimsChallenge)
+                    });
+
+                var app = appBuilder.Build();
+
+                var ex = await Assert.ThrowsExceptionAsync<MsalClaimsChallengeException>(async () =>
+                {
+                    await app.AcquireTokenForClient(TestConstants.s_scope).ExecuteAsync().ConfigureAwait(false);
+                }).ConfigureAwait(false);
+
+                Assert.IsTrue(stringBuilder.ToString().Contains(MsalErrorMessage.ClaimsChallenge));
+            }
         }
 
         private void BeforeCacheAccessWithLogging(TokenCacheNotificationArgs args)

@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var msalException = MsalServiceExceptionFactory.FromHttpResponse(ExCode, ExMessage, httpResponse);
 
             Assert.AreEqual(ExCode, msalException.ErrorCode);
-            Assert.AreEqual(ExMessage, msalException.Message);
+            Assert.IsTrue(msalException.Message.Contains(ExMessage));
             Assert.AreEqual("some_claims", msalException.Claims);
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalException.CorrelationId);
             Assert.AreEqual(suberror ?? "", msalException.SubError);
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             // Assert
             var msalServiceException = msalException;
             Assert.AreEqual(ExCode, msalServiceException.ErrorCode);
-            Assert.AreEqual(ExMessage, msalServiceException.Message);
+            Assert.AreEqual(ExMessage + " " + MsalErrorMessage.ClaimsChallenge, msalServiceException.Message);
             Assert.AreEqual("some_claims", msalServiceException.Claims);
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalServiceException.CorrelationId);
             Assert.AreEqual("some_suberror", msalServiceException.SubError);
@@ -230,8 +230,8 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var msalException = MsalServiceExceptionFactory.FromHttpResponse(ExCode, ExMessage, httpResponse);
 
             // Assert
-            Assert.AreEqual(typeof(MsalUiRequiredException), msalException.GetType());
-            Assert.AreEqual(MsalErrorMessage.AadThrottledError, msalException.Message);
+            Assert.AreEqual(typeof(MsalClaimsChallengeException), msalException.GetType());
+            Assert.AreEqual(MsalErrorMessage.AadThrottledError + " " + MsalErrorMessage.ClaimsChallenge, msalException.Message);
             ValidateExceptionProductInformation(msalException);
         }
 
@@ -257,7 +257,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual(innerException, msalServiceException.InnerException);
             Assert.AreEqual(ExCode, msalServiceException.ErrorCode);
             Assert.AreEqual(JsonError, msalServiceException.ResponseBody);
-            Assert.AreEqual(ExMessage, msalServiceException.Message);
+            Assert.AreEqual(ExMessage + " " + MsalErrorMessage.ClaimsChallenge, msalServiceException.Message);
             Assert.AreEqual(statusCode, msalServiceException.StatusCode);
 
             Assert.AreEqual("some_claims", msalServiceException.Claims);
@@ -271,7 +271,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             // Assert
             Assert.IsFalse(string.IsNullOrEmpty(piiMessage));
             Assert.IsTrue(
-                piiMessage.Contains(typeof(MsalUiRequiredException).Name),
+                piiMessage.Contains(typeof(MsalClaimsChallengeException).Name),
                 "The pii message should contain the exception type");
             Assert.IsTrue(
                 piiMessage.Contains(typeof(NotImplementedException).Name),
@@ -346,7 +346,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var msalServiceException = msalException;
             Assert.AreEqual(ExCode, msalServiceException.ErrorCode);
             Assert.AreEqual(responseBody, msalServiceException.ResponseBody);
-            Assert.AreEqual(ExMessage, msalServiceException.Message);
+            Assert.AreEqual(ExMessage + " " + MsalErrorMessage.ClaimsChallenge, msalServiceException.Message);
             Assert.AreEqual((int)statusCode, msalServiceException.StatusCode);
             Assert.AreEqual("some_suberror", msalServiceException.SubError);
 

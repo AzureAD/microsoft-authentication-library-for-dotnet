@@ -46,7 +46,7 @@ namespace NetFx
     },  
   }";
         // This app has http://localhost redirect uri registered
-        private static readonly string s_clientIdForPublicApp = "1d18b3b0-251b-4714-a02a-9956cec86c2d";
+        private static readonly string s_clientIdForPublicApp = "fe67c0cf-caae-49f0-9f75-e3f7e1e28724";
 
         private const string PoPValidatorEndpoint = "https://signedhttprequest.azurewebsites.net/api/validateSHR";
         private const string PoPUri = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
@@ -102,7 +102,8 @@ namespace NetFx
 
         private static string GetAuthority()
         {
-            return s_authorities[s_currentAuthority];
+            //return s_authorities[s_currentAuthority];
+            return "sammyciam.ciamextensibility.com/4710d5e4-43bb-4ff9-89af-30ed8fe31c6d/";
         }
 
         private static IConfidentialClientApplication CreateCca()
