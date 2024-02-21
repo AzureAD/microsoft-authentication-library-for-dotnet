@@ -14,6 +14,7 @@ namespace Microsoft.Identity.Client.Utils
     /// Singleton timer used to measure the duration tasks.
     /// </summary>
     internal static class StopWatchService
+
     {
         /// <summary>
         /// Singleton stopwatch.
@@ -21,7 +22,7 @@ namespace Microsoft.Identity.Client.Utils
         internal static readonly Stopwatch Watch = Stopwatch.StartNew();
 
         /// <summary>
-        /// Current elapsed miliseconds of the stop watch
+        /// Current elapsed milliseconds of the stopwatch
         /// </summary>
         internal static long CurrentElapsedMilliseconds {
             get 
@@ -31,7 +32,7 @@ namespace Microsoft.Identity.Client.Utils
         }
 
         /// <summary>
-        /// Measures the duration of a codeblock
+        /// Measures the duration of a code block
         /// </summary>
         /// <param name="codeBlock"></param>
         /// <returns></returns>
@@ -39,14 +40,14 @@ namespace Microsoft.Identity.Client.Utils
         {
             _ = codeBlock ?? throw new ArgumentNullException(nameof(codeBlock));
 
-            var startMs = Watch.ElapsedMilliseconds;
+            var startTicks = Watch.ElapsedTicks;
             codeBlock.Invoke();
 
-            return new MeasureDurationResult(Watch.ElapsedMilliseconds - startMs);
+            return new MeasureDurationResult(Watch.ElapsedTicks - startTicks);
         }
 
         /// <summary>
-        /// Measures the duration of an asyncronous codeblock
+        /// Measures the duration of an asyncronous code block
         /// </summary>
         /// <param name="codeBlock"></param>
         /// <returns></returns>
@@ -60,7 +61,7 @@ namespace Microsoft.Identity.Client.Utils
         }
 
         /// <summary>
-        /// Measures the duration of an asyncronous codeblock
+        /// Measures the duration of an asyncronous code block
         /// </summary>
         /// <param name="codeBlock"></param>
         /// <returns></returns>
