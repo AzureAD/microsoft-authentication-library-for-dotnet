@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 MsalRefreshTokenCacheItem refreshToken = await cache.FindRefreshTokenAsync(requestParams).ConfigureAwait(true);
                 Assert.IsNotNull(refreshToken);
 
-                MsalIdTokenCacheItem idToken = cache.GetIdTokenCacheItem(res.Item1);
+                MsalIdTokenCacheItem idToken = cache.GetIdTokenCacheItem(res.accessTokenCacheItem);
                 Assert.IsNotNull(idToken);
 
                 await cache.RemoveAccountAsync(requestParams.Account, requestParams).ConfigureAwait(true);

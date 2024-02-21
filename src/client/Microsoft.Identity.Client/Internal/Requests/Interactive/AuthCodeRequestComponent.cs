@@ -47,8 +47,8 @@ namespace Microsoft.Identity.Client.Internal
             string authEndpoint = await _requestParams.Authority.GetAuthorizationEndpointAsync(
                 _requestParams.RequestContext).ConfigureAwait(false);
 
-            var result = CreateAuthorizationUri(authEndpoint, false);
-            return result.Item1;
+            (Uri uri, _, _) = CreateAuthorizationUri(authEndpoint, false);
+            return uri;
         }
 
         public async Task<Uri> GetAuthorizationUriWithPkceAsync(string codeVerifier, CancellationToken cancellationToken)
@@ -56,8 +56,8 @@ namespace Microsoft.Identity.Client.Internal
             string authEndpoint = await _requestParams.Authority.GetAuthorizationEndpointAsync(_requestParams.RequestContext)
                 .ConfigureAwait(false);
 
-            var result = CreateAuthorizationUriWithCodeChallenge(authEndpoint, codeVerifier);
-            return result.Item1;
+            (Uri uri, _) = CreateAuthorizationUriWithCodeChallenge(authEndpoint, codeVerifier);
+            return uri;
         }
 
         private async Task<(AuthorizationResult result, string codeVerifier)> FetchAuthCodeAndPkceInternalAsync(

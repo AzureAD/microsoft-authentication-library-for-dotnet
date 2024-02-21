@@ -132,13 +132,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     _requestParams,
                     _interactiveParameters);
 
-            var result = await authorizationFetcher.FetchAuthCodeAndPkceVerifierAsync(cancellationToken)
-                .ConfigureAwait(false);
+            (AuthorizationResult authResult, string pkceCodeVerifier) = 
+                await authorizationFetcher.FetchAuthCodeAndPkceVerifierAsync(cancellationToken).ConfigureAwait(false);
 
             _logger.Info("An authorization code was retrieved from the /authorize endpoint. ");
-            AuthorizationResult authResult = result.Item1;
-            string authCode = authResult.Code;
-            string pkceCodeVerifier = result.Item2;
+            string authCode = authResult.Code;            
 
             if (BrokerInteractiveRequestComponent.IsBrokerRequiredAuthCode(authCode, out string brokerInstallUri))
             {

@@ -18,7 +18,7 @@ namespace Microsoft.Identity.Client.Cache
         RequestContext RequestContext { get; }
         ITokenCacheInternal TokenCacheInternal { get; }
         Task<MsalAccessTokenCacheItem> FindAccessTokenAsync();
-        Task<(MsalAccessTokenCacheItem accessCacheItem, MsalIdTokenCacheItem tokenCacheItem, Account account)> SaveTokenResponseAsync(MsalTokenResponse tokenResponse);
+        Task<(MsalAccessTokenCacheItem accessTokenCacheItem, MsalIdTokenCacheItem idTokenCacheItem, Account account)> SaveTokenResponseAsync(MsalTokenResponse tokenResponse);
         Task<MsalIdTokenCacheItem> GetIdTokenCacheItemAsync(MsalAccessTokenCacheItem accessTokenCacheItem);
         Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync();
         Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId);

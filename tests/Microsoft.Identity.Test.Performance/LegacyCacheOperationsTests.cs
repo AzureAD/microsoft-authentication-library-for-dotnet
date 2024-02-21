@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Test.Performance
         [Benchmark(Description = "SaveToken")]
         public async Task<string> SaveTokenResponseTestAsync()
         {
-            return (await _cache.SaveTokenResponseAsync(_requestParams, _response).ConfigureAwait(true)).Item1.ClientId;
+            return (await _cache.SaveTokenResponseAsync(_requestParams, _response).ConfigureAwait(true)).accessTokenCacheItem.ClientId;
         }
 
         [Benchmark(Description = "FindToken")]

@@ -202,15 +202,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 telemetryEventDetails.SetProperty(TelemetryConstants.CacheLevel, (int)authenticationResult.AuthenticationResultMetadata.CacheLevel);
               
-                (string resource, string scopes) resourceAndScopes  = ParseScopesForTelemetry();
-                if (resourceAndScopes.Item1 != null)
+                (string resource, string scopes)  = ParseScopesForTelemetry();
+                if (resource != null)
                 {
-                    telemetryEventDetails.SetProperty(TelemetryConstants.Resource, resourceAndScopes.Item1);
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Resource, resource);
                 }
 
-                if (resourceAndScopes.Item2 != null)
+                if (scopes != null)
                 {
-                    telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, resourceAndScopes.Item2);
+                    telemetryEventDetails.SetProperty(TelemetryConstants.Scopes, scopes);
                 }
             }
         }
@@ -369,10 +369,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             AuthenticationRequestParameters.RequestContext.Logger.Info("Saving token response to cache..");
 
-            var tuple = await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);
-            var atItem = tuple.Item1;
-            var idtItem = tuple.Item2;
-            Account account = tuple.Item3;
+            (MsalAccessTokenCacheItem atItem, MsalIdTokenCacheItem idtItem, Account account) =
+                await CacheManager.SaveTokenResponseAsync(msalTokenResponse).ConfigureAwait(false);          
 
             return new AuthenticationResult(
                 atItem,

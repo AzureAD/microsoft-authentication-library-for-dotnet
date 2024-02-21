@@ -23,9 +23,8 @@ namespace Microsoft.Identity.Client
         Task<bool> StopLongRunningOboProcessAsync(string longRunningOboCacheKey, AuthenticationRequestParameters requestParameters);
         Task<IEnumerable<IAccount>> GetAccountsAsync(AuthenticationRequestParameters requestParameters);
 
-        Task<(MsalAccessTokenCacheItem accessCacheItem, MsalIdTokenCacheItem tokenCacheItem, Account account)> SaveTokenResponseAsync(
-            AuthenticationRequestParameters requestParams,
-            MsalTokenResponse response);
+        Task<(MsalAccessTokenCacheItem accessTokenCacheItem, MsalIdTokenCacheItem idTokenCacheItem, Account account)> 
+            SaveTokenResponseAsync(AuthenticationRequestParameters requestParams, MsalTokenResponse response);
 
         Task<MsalAccessTokenCacheItem> FindAccessTokenAsync(AuthenticationRequestParameters requestParams);
         MsalIdTokenCacheItem GetIdTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem);
