@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1708496626086,
+  "lastUpdate": 1708496627544,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -19556,6 +19556,66 @@ window.BENCHMARK_DATA = {
             "value": 142499.65789473685,
             "unit": "ns",
             "range": "± 9952.448527250466"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "77cf218624c1f2989796ef193aa8d7789afa01f9",
+          "message": "Updating cryptographic error when cert is disposed. (#4629)\n\n* Updating cryptographic error when cert is disposed.\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>",
+          "timestamp": "2024-02-20T22:16:19-08:00",
+          "tree_id": "58d3fe1e0f27b0a21368eae8beacf67af8bf9500",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/77cf218624c1f2989796ef193aa8d7789afa01f9"
+        },
+        "date": 1708496627058,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (1, 10))",
+            "value": 17771.221425374348,
+            "unit": "ns",
+            "range": "± 39.77675946615396"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (10000, 10))",
+            "value": 28723.258682250977,
+            "unit": "ns",
+            "range": "± 180.677930273745"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 9147.09612601144,
+            "unit": "ns",
+            "range": "± 55.87686938123956"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 20280.62529602051,
+            "unit": "ns",
+            "range": "± 149.05589486646582"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 37671.34782608696,
+            "unit": "ns",
+            "range": "± 952.1230635076755"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 143191.93,
+            "unit": "ns",
+            "range": "± 16885.82385726219"
           }
         ]
       }
