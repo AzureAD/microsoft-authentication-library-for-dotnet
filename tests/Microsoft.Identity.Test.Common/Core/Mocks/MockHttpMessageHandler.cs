@@ -19,6 +19,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
     internal class MockHttpMessageHandler : HttpMessageHandler
     {
         public HttpResponseMessage ResponseMessage { get; set; }
+
+        // no query params
         public string ExpectedUrl { get; set; }
         public IDictionary<string, string> ExpectedQueryParams { get; set; }
         public IDictionary<string, string> ExpectedPostData { get; set; }
@@ -51,7 +53,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             if (!string.IsNullOrEmpty(ExpectedUrl))
             {
                 Assert.AreEqual(
-                    ExpectedUrl,
+                    ExpectedUrl.Split('?')[0],
                     uri.AbsoluteUri.Split('?')[0]);
             }
 

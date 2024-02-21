@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 
@@ -9,6 +10,15 @@ namespace Net5TestApp
 {
     class Program
     {
+        private const string AuthorityV1 = "https://sammyciam.ciamextensibility.com/4710d5e4-43bb-4ff9-89af-30ed8fe31c6d/";
+        private const string AuthorityV2 = "https://sammyciam.ciamextensibility.com/4710d5e4-43bb-4ff9-89af-30ed8fe31c6d/v2.0/";
+
+        private const string AuthorityV1DC = "https://sammyciam.ciamextensibility.com/4710d5e4-43bb-4ff9-89af-30ed8fe31c6d?DC=ESTS-PUB-SCUS-LZ1-FD000-TEST1";
+        private const string AuthorityV2DC = "https://sammyciam.ciamextensibility.com/4710d5e4-43bb-4ff9-89af-30ed8fe31c6d/v2.0?DC=ESTS-PUB-SCUS-LZ1-FD000-TEST1";
+
+        private const string DC = "dc=ESTS-PUB-SCUS-LZ1-FD000-TEST1";
+        private const string Scope = "api://2a247857-5770-477e-a9c0-a5f6bc8e66db/Scope2";
+
         static async Task Main(string[] args)
         {
             try
@@ -20,7 +30,6 @@ namespace Net5TestApp
             }
             catch (MsalException e)
             {
-                Console.BackgroundColor = ConsoleColor.DarkRed;
                 Console.WriteLine("Error: ErrorCode=" + e.ErrorCode + "ErrorMessage=" + e.Message);
                 Console.ResetColor();
             }
@@ -30,22 +39,33 @@ namespace Net5TestApp
 
         private static async Task<AuthenticationResult> TryAuthAsync()
         {
-            var pca = PublicClientApplicationBuilder.Create("04b07795-8ddb-461a-bbee-02f9e1bf7b46")
-                 .WithTenantId("72f988bf-86f1-41af-91ab-2d7cd011db47")
-                 .WithDefaultRedirectUri()
-                 .WithLogging(MyLoggingMethod, LogLevel.Info, true, false)
-                 .Build();
+            var pca = PublicClientApplicationBuilder.
+                Create("fe67c0cf-caae-49f0-9f75-e3f7e1e28724")
+                .WithExperimentalFeatures(true)
+                //.WithAuthority(AuthorityV1)
+                .WithExtraQueryParameters(DC)
+                .WithGenericAuthority(AuthorityV2DC)
+                //.WithInstanceDiscovery(false)                
+                .WithRedirectUri("http://localhost")
+                .Build();
 
-            var result = await pca.AcquireTokenInteractive(new[] { "https://storage.azure.com/.default" })
+            var result = await pca.AcquireTokenInteractive(new[] { Scope })
                 .WithUseEmbeddedWebView(true)
-                .ExecuteAsync().ConfigureAwait(false);
+                .WithPrompt(Prompt.Create)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            var account = (await pca.GetAccountsAsync().ConfigureAwait(false)).First();
+
+            var result2 = await pca.AcquireTokenSilent(new[] { Scope }, account)
+               .WithForceRefresh(true)
+               .ExecuteAsync()
+               .ConfigureAwait(false);
+
 
             return result;
         }
 
-        static void MyLoggingMethod(LogLevel level, string message, bool containsPii)
-        {
-            Console.WriteLine($"MSALTest {level} {containsPii} {message}");
-        }
+        
     }
 }

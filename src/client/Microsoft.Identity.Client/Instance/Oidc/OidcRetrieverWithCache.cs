@@ -27,7 +27,8 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             }
 
             await s_lockOidcRetrieval.WaitAsync().ConfigureAwait(false);
-
+            
+            Uri oidcMetadataEndpoint = null;
             try
             {
                 // try again in critical section
@@ -37,13 +38,16 @@ namespace Microsoft.Identity.Client.Instance.Oidc
                     return configuration;
                 }
 
-                Uri oidcMetadataEndpoint = new Uri(authority + Constants.WellKnownOpenIdConfigurationPath);
+                // preserve any query parameters in the authority
+                UriBuilder builder = new UriBuilder(authority);
+                string existingPath = builder.Path;
+                builder.Path = existingPath.TrimEnd('/') + "/" + Constants.WellKnownOpenIdConfigurationPath;
 
-                var client = new OAuth2Client(requestContext.Logger, requestContext.ServiceBundle.HttpManager);
+                oidcMetadataEndpoint = builder.Uri;
+                var client = new OAuth2Client(requestContext.Logger, requestContext.ServiceBundle.HttpManager);                             
                 configuration = await client.DiscoverOidcMetadataAsync(oidcMetadataEndpoint, requestContext).ConfigureAwait(false);
 
                 s_cache[authority] = configuration;
-
                 requestContext.Logger.Verbose(() => $"[OIDC Discovery] OIDC discovery retrieved metadata from the network for {authority}");
 
                 return configuration;
@@ -57,7 +61,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
 
                 throw new MsalServiceException(
                     "oidc_failure",
-                    $"Failed to retrieve OIDC configuration from {authority + Constants.WellKnownOpenIdConfigurationPath}. See inner exception. ",
+                    $"Failed to retrieve OIDC configuration from {oidcMetadataEndpoint}. See inner exception. ",
                     ex);
             }
             finally
