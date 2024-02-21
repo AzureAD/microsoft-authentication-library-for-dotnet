@@ -124,6 +124,64 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             }
         }
 
+        [TestMethod]
+        public async Task ExtraQueryParametersArePresevedTest()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                const string QP = "key1=val1&key2=val2";
+                const string Authority = "https://demo.duendesoftware.com";
+                const string AuthorityWithQP = $"{Authority}?{QP}";
+
+                var requestedScopes = new[] { "all:catchreport", "email" };
+
+                var cca = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithExperimentalFeatures(true)
+                    .WithRedirectUri("http://some_redirect_uri")
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithHttpManager(httpManager)
+                    .WithLegacyCacheCompatibility(false)
+                    .WithGenericAuthority(AuthorityWithQP)
+                    .Build();
+
+                string oidcDocument = TestConstants.GenericOidcResponse;
+                oidcDocument = oidcDocument.Replace(
+                    "https://demo.duendesoftware.com/connect/authorize", 
+                    $"https://demo.duendesoftware.com/connect/authorize?{QP}");
+
+                oidcDocument = oidcDocument.Replace(
+                   "https://demo.duendesoftware.com/connect/token",
+                   $"https://demo.duendesoftware.com/connect/token?{QP}");
+
+                var oidcHandler = new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = HttpMethod.Get,                    
+                    ResponseMessage = MockHelpers.CreateSuccessResponseMessage(oidcDocument)
+                };
+
+                var oidcHttpResult = httpManager.AddMockHandler(oidcHandler);
+
+                var tokenHttpResult = httpManager.AddMockHandler(
+                     CreateTokenResponseHttpHandler(
+                          $"{Authority}/connect/token?{QP}",  // notice the QP
+                         scopesInRequest: string.Join(" ", requestedScopes),
+                         scopesInResponse: "openid profile email all:catchreport offline_access",
+                         grant: "authorization_code"));
+
+                Debug.WriteLine("Scopes returned: openid profile email all:catchreport offline_access");
+                var result = await cca.AcquireTokenByAuthorizationCode(requestedScopes, "auth_code")
+                                        .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.AreEqual(
+                    $"{Authority}/connect/token?{QP}", 
+                    tokenHttpResult.ActualRequestMessage.RequestUri.ToString());
+                Assert.AreEqual(
+                    $"{Authority}/.well-known/openid-configuration?{QP}",
+                    oidcHttpResult.ActualRequestMessage.RequestUri.ToString());
+            }
+        }
+
         // Test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4474
         [TestMethod]
         public async Task UserAuth_ScopeOrder_Async()
