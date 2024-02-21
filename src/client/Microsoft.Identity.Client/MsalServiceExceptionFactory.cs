@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client
 
             if (IsInvalidGrant(oAuth2Response?.Error, oAuth2Response?.SubError) || IsInteractionRequired(oAuth2Response?.Error))
             {
-                var errorMessageToUse;
+                var errorMessageToUse = null;
 
                 if (IsThrottled(oAuth2Response))
                 {
