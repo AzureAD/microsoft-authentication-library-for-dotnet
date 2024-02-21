@@ -397,6 +397,8 @@ namespace Microsoft.Identity.Client
 
         public const string ClientCredentialWrongAuthority = "The current authority is targeting the /common or /organizations endpoint which is not recommended. See https://aka.ms/msal-net-client-credentials for more details.";
 
+        public const string OnBehalfOfWrongAuthority = "The current authority is targeting the /common or /organizations endpoint which is not recommended. See https://aka.ms/msal-net-on-behalf-of for more details.";
+
         public const string TenantOverrideNonAad = "WithTenantId can only be used when an AAD authority is specified at the application level.";
 
         public const string RegionalAndAuthorityOverride = "You configured WithAuthority at the request level, and also WithAzureRegion. This is not supported when the environment changes from application to request. Use WithTenantId at the request level instead.";
