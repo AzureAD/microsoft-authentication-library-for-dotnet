@@ -13,8 +13,8 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// This exception indicates that claims have been returned from the endpoint that need to be resolved. This can be achieved by using them in the next authentication request.
-    /// See <see href="https://learn.microsoft.com/entra/msal/dotnet/advanced/exceptions/msal-error-handling#conditional-access-and-claims-challenges">Conditional Access and claims challenges</see>
-    /// See <see href="https://learn.microsoft.com/entra/msal/dotnet/acquiring-tokens/web-apps-apis/on-behalf-of-flow#handling-multi-factor-auth-mfa-conditional-access-and-incremental-consent">Handling multi-factor auth (MFA), conditional access and incremental consent</see>
+    /// See <see href="https://aka.ms/msal-conditional-access-claims">Conditional Access and claims challenges</see>.
+    /// See <see href="https://aka.ms/msal-conditional-access-claims-obo">Handling multifactor auth (MFA), Conditional Access, and incremental consent</see>.
     /// </summary>
     public class MsalClaimsChallengeException : MsalUiRequiredException
     {
