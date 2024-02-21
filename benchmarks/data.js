@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1708496624458,
+  "lastUpdate": 1708496626086,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -13726,6 +13726,54 @@ window.BENCHMARK_DATA = {
             "value": 174142.51005859376,
             "unit": "ns",
             "range": "± 1663.783945200269"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "77cf218624c1f2989796ef193aa8d7789afa01f9",
+          "message": "Updating cryptographic error when cert is disposed. (#4629)\n\n* Updating cryptographic error when cert is disposed.\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>",
+          "timestamp": "2024-02-20T22:16:19-08:00",
+          "tree_id": "58d3fe1e0f27b0a21368eae8beacf67af8bf9500",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/77cf218624c1f2989796ef193aa8d7789afa01f9"
+        },
+        "date": 1708496625616,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 21698.682912973258,
+            "unit": "ns",
+            "range": "± 53.40866721028789"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 167970.35832868304,
+            "unit": "ns",
+            "range": "± 964.7836152122673"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 32581.37407023112,
+            "unit": "ns",
+            "range": "± 196.37398239157284"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 172294.85428059896,
+            "unit": "ns",
+            "range": "± 1827.4030752727533"
           }
         ]
       }
