@@ -30,13 +30,26 @@ namespace Microsoft.Identity.Client
 
             if (IsInvalidGrant(oAuth2Response?.Error, oAuth2Response?.SubError) || IsInteractionRequired(oAuth2Response?.Error))
             {
+                string errorMessageToUse = null;
+
                 if (IsThrottled(oAuth2Response))
                 {
-                    ex = new MsalUiRequiredException(errorCode, MsalErrorMessage.AadThrottledError, innerException);
+                    errorMessageToUse = MsalErrorMessage.AadThrottledError;
+                }
+                else  
+                {  
+                    errorMessageToUse  = errorMessage;  
+                }  
+
+                if (oAuth2Response.Claims == null)
+                {
+                    ex = new MsalUiRequiredException(errorCode, errorMessageToUse, innerException);
                 }
                 else
                 {
-                    ex = new MsalUiRequiredException(errorCode, errorMessage, innerException);
+                    //Update error message with claims challenge error
+                    errorMessageToUse += " " + MsalErrorMessage.ClaimsChallenge;
+                    ex = new MsalClaimsChallengeException(errorCode, errorMessageToUse, innerException);
                 }
             }
 
