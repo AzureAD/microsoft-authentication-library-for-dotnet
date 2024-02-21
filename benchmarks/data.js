@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1708502509533,
+  "lastUpdate": 1708502510991,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -19748,6 +19748,66 @@ window.BENCHMARK_DATA = {
             "value": 143191.93,
             "unit": "ns",
             "range": "± 16885.82385726219"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "72da56174131be0571b83d5b273ec0dd57c9411c",
+          "message": "Trwalke/claims challenge error update (#4628)\n\n* Adding Claims challenge exception and error messages\r\n\r\n* Updating error message to be more generic.\r\nAdding claims message to scrubbed log.\r\n\r\n* Clean Up\r\n\r\n* Updating claims challenge exception to inheret from UiRequired Exception\r\n\r\n* Addressing feedback\r\n\r\n* Fixing tests\r\n\r\n* Updates\r\n\r\n* Update src/client/Microsoft.Identity.Client/MsalClaimsChallengeException.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update MsalServiceExceptionFactory.cs\r\n\r\n* Update MsalServiceExceptionFactory.cs\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>",
+          "timestamp": "2024-02-20T23:55:04-08:00",
+          "tree_id": "5bdd084d5a5ab4d6cb57589dccfe9bac3897b41e",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/72da56174131be0571b83d5b273ec0dd57c9411c"
+        },
+        "date": 1708502510521,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (1, 10))",
+            "value": 17858.60885823568,
+            "unit": "ns",
+            "range": "± 58.252931758451034"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (10000, 10))",
+            "value": 28816.861381022136,
+            "unit": "ns",
+            "range": "± 201.7323457616629"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 8987.55712890625,
+            "unit": "ns",
+            "range": "± 22.90766638772948"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 19613.808854323168,
+            "unit": "ns",
+            "range": "± 39.17413956599153"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 37802.53846153846,
+            "unit": "ns",
+            "range": "± 298.7112918813681"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 133743.52631578947,
+            "unit": "ns",
+            "range": "± 9827.060625057497"
           }
         ]
       }
