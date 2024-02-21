@@ -1,4 +1,13 @@
-$url = "https://msedgedriver.azureedge.net/119.0.2151.72/edgedriver_win64.zip" #Chrome Driver from https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
+# Get the installed version of Microsoft Edge
+$edgeVersion = $(Get-Item "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe").VersionInfo.ProductVersion
+
+# Check if $edgeVersion is null or empty
+if ([string]::IsNullOrEmpty($edgeVersion)) {
+    echo "##vso[task.logissue type=error]Microsoft Edge version is not found. Please ensure Microsoft Edge is installed."
+    echo "##vso[task.complete result=Failed;]Failed"
+    }
+
+$url = "https://msedgedriver.azureedge.net/$edgeVersion/edgedriver_win64.zip" #Edge Driver from https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
 $fileName = "edgedriver_win64.zip"
 $source = "C:\Downloads\$fileName"
 $destination = "C:\Program Files\dotnet\"

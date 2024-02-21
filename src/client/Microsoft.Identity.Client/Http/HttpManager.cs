@@ -11,6 +11,8 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Http
 {
@@ -215,14 +217,15 @@ namespace Microsoft.Identity.Client.Http
                     () => $"[HttpManager] Sending request. Method: {method}. URI: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}{endpoint.AbsolutePath}")}. ",
                     () => $"[HttpManager] Sending request. Method: {method}. Host: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}")}. ");
 
-                Stopwatch sw = Stopwatch.StartNew();
-
-                HttpClient client = GetHttpClient();
-
-                using (HttpResponseMessage responseMessage =
-                    await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
+                var measureDurationResult = await StopWatchService.MeasureCodeBlockAsync(async () =>
                 {
-                    LastRequestDurationInMs = sw.ElapsedMilliseconds;
+                    HttpClient client = GetHttpClient();
+                    return await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+                }).ConfigureAwait(false);
+
+                using (HttpResponseMessage responseMessage = measureDurationResult.Result)
+                {
+                    LastRequestDurationInMs = measureDurationResult.Milliseconds;
                     logger.Verbose(()=>$"[HttpManager] Received response. Status code: {responseMessage.StatusCode}. ");
 
                     HttpResponse returnValue = await CreateResponseAsync(responseMessage).ConfigureAwait(false);

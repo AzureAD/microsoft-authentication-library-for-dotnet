@@ -27,6 +27,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
               string clientId,
               string tokenEndpoint,
               bool sendX5C,
+              bool useSha2,
               CancellationToken cancellationToken);
     }
 }

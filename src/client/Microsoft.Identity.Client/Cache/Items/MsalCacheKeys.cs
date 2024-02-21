@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
 {
     internal partial class MsalCacheKeys
     {
-        public const string CacheKeyDelimiter = "-";
+        public const char CacheKeyDelimiter = '-';
 
         public static string GetCredentialKey(
             string homeAccountId, 

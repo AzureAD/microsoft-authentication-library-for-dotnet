@@ -8,7 +8,8 @@ body:
     value: |
       ## Before submitting your issue
       Please make sure that your question or issue is not already covered in existing issues, [MSAL docs](https://learn.microsoft.com/en-us/entra/msal/dotnet/), or [samples](https://learn.microsoft.com/en-us/azure/active-directory/develop/sample-v2-code?tabs=apptype).
-
+      If your issue is related to Microsoft.Authentication.WebAssembly.Msal, create an issue in [MSAL.js repo](https://github.com/AzureAD/microsoft-authentication-library-for-js/issues).
+      
       **Logs and network traces**
       Without logs or traces, it is unlikely that the team can investigate your issue. Capturing logs and network traces is described in our [Docs](https://learn.microsoft.com/azure/active-directory/develop/msal-logging-dotnet).
 
@@ -109,7 +110,7 @@ body:
         
 - type: markdown
   attributes:
-    value: "## Security Reporting"
+    value: "## Security reporting"
 - type: markdown
   attributes:
     value: |

@@ -77,26 +77,36 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public async Task<AuthenticationResult> RunAsync(CancellationToken cancellationToken = default)
         {
-            Stopwatch sw = Stopwatch.StartNew();
+            ApiEvent apiEvent = null;
+            MsalTelemetryEventDetails telemetryEventDetails = null;
+            ITelemetryClient[] telemetryClients = null;
 
-            ApiEvent apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
-            AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
-            MsalTelemetryEventDetails telemetryEventDetails = new MsalTelemetryEventDetails(TelemetryConstants.AcquireTokenEventName);
-            ITelemetryClient[] telemetryClients = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.TelemetryClients;
+            var measureTelemetryDurationResult = StopWatchService.MeasureCodeBlock(() =>
+            {
+                apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
+                AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
+                telemetryEventDetails = new MsalTelemetryEventDetails(TelemetryConstants.AcquireTokenEventName);
+                telemetryClients = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.TelemetryClients;
+            });
 
             using (AuthenticationRequestParameters.RequestContext.CreateTelemetryHelper(apiEvent))
             {
                 try
                 {
-                    AuthenticationRequestParameters.LogParameters();
-                    LogRequestStarted(AuthenticationRequestParameters);
+                    AuthenticationResult authenticationResult = null;
+                    var measureDurationResult = await StopWatchService.MeasureCodeBlockAsync(async () =>
+                    {
+                        AuthenticationRequestParameters.LogParameters();
+                        LogRequestStarted(AuthenticationRequestParameters);
 
-                    AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
-                    LogReturnedToken(authenticationResult);
-                    UpdateTelemetry(sw, apiEvent, authenticationResult);
+                        authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                        LogReturnedToken(authenticationResult);
+                    }).ConfigureAwait(false);
+
+                    UpdateTelemetry(measureDurationResult.Milliseconds + measureTelemetryDurationResult.Milliseconds, apiEvent, authenticationResult);
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
                     LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails, telemetryClients);
-                    LogMsalSuccessTelemetryToOtel(authenticationResult, apiEvent.ApiId.ToString(), sw.ElapsedTicks / (TimeSpan.TicksPerMillisecond / 1000));
+                    LogMsalSuccessTelemetryToOtel(authenticationResult, apiEvent.ApiId.ToString(), measureDurationResult.Ticks / (TimeSpan.TicksPerMillisecond / 1000));
 
                     return authenticationResult;
                 }
@@ -185,7 +195,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (authenticationResult.AuthenticationResultMetadata.RefreshOn.HasValue)
                 {
-                    telemetryEventDetails.SetProperty(TelemetryConstants.RefreshOn, DateTimeHelpers.DateTimeToUnixTimestampMilliseconds(authenticationResult.AuthenticationResultMetadata.RefreshOn.Value));
+                    telemetryEventDetails.SetProperty(TelemetryConstants.RefreshOn, authenticationResult.AuthenticationResultMetadata.RefreshOn.Value.ToUnixTimeMilliseconds());
                 }
                 telemetryEventDetails.SetProperty(TelemetryConstants.AssertionType, (int)AuthenticationRequestParameters.RequestContext.ApiEvent.AssertionType);
                 telemetryEventDetails.SetProperty(TelemetryConstants.Endpoint, AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority.ToString());
@@ -272,10 +282,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private void UpdateTelemetry(Stopwatch sw, ApiEvent apiEvent, AuthenticationResult authenticationResult)
+        private void UpdateTelemetry(long elapsedMilliseconds, ApiEvent apiEvent, AuthenticationResult authenticationResult)
         {
-            sw.Stop();
-            authenticationResult.AuthenticationResultMetadata.DurationTotalInMs = sw.ElapsedMilliseconds;
+            authenticationResult.AuthenticationResultMetadata.DurationTotalInMs = elapsedMilliseconds;
             authenticationResult.AuthenticationResultMetadata.DurationInHttpInMs = apiEvent.DurationInHttpInMs;
             authenticationResult.AuthenticationResultMetadata.DurationInCacheInMs = apiEvent.DurationInCacheInMs;
             authenticationResult.AuthenticationResultMetadata.TokenEndpoint = apiEvent.TokenEndpoint;

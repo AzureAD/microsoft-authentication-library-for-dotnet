@@ -332,7 +332,6 @@ namespace NetFx
                             const string PersonalTenantIdV2AAD = "9188040d-6c67-4c5b-b112-36a304b66dad";
 
                             // these are per cloud
-                            string publicCloudEnv = "https://login.microsoftonline.com/";
                             string msaTenantIdPublicCloud = "f8cdef31-a31e-4b4a-93e4-5f571e91255a";
 
                             if (account != null && account.HomeAccountId.TenantId == PersonalTenantIdV2AAD)

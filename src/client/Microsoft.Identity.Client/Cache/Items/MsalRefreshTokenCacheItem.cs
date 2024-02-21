@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             // FRT
             if (!string.IsNullOrWhiteSpace(FamilyId))
             {
-                string d = MsalCacheKeys.CacheKeyDelimiter;
+                char d = MsalCacheKeys.CacheKeyDelimiter;
                 key = $"{HomeAccountId}{d}{Environment}{d}{StorageJsonValues.CredentialTypeRefreshToken}{d}{FamilyId}{d}{d}".ToLowerInvariant();
 
             }
