@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1708516874987,
+  "lastUpdate": 1708516876493,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -9084,6 +9084,54 @@ window.BENCHMARK_DATA = {
             "value": 120194.1845703125,
             "unit": "ns",
             "range": "± 1326.6869404312495"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "distinct": true,
+          "id": "1444def5c3dfccd9309a324a13617ad7bd30356a",
+          "message": "Fix for #4633 - use PSS padding for SHR POP memory crypto provider",
+          "timestamp": "2024-02-21T11:53:40Z",
+          "tree_id": "ee717824f580a5d7557aedcf6c6194dadbce9ca0",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/1444def5c3dfccd9309a324a13617ad7bd30356a"
+        },
+        "date": 1708516876110,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 12564.049131266276,
+            "unit": "ns",
+            "range": "± 104.67398155803697"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 119834.75743689903,
+            "unit": "ns",
+            "range": "± 534.6233135545917"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 23354.91792649489,
+            "unit": "ns",
+            "range": "± 103.66642986271088"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 120484.81632777622,
+            "unit": "ns",
+            "range": "± 982.7095328616086"
           }
         ]
       }
