@@ -612,7 +612,7 @@ namespace Microsoft.Identity.Test.Unit
 
         [TestMethod]
         [Description("Check if the certificate is disposed and throw proper exception")]
-        public async Task DisposedCertExceptionForCCAsync()
+        public async Task DisposedCert_ThrowsSpecificException_Test()
         {
             using (var harness = CreateTestHarness())
             {
@@ -654,7 +654,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(MsalError.CryptographicError, exception.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.CryptographicError, exception.Message);
 
-                //Testing OBO flwo
+                //Testing OBO flow
                 exception = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
                 {
                     await app.AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.UserAssertion))
