@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1708516876493,
+  "lastUpdate": 1708516878101,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -13990,6 +13990,54 @@ window.BENCHMARK_DATA = {
             "value": 171374.29326171876,
             "unit": "ns",
             "range": "± 1733.4497032052918"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "distinct": true,
+          "id": "1444def5c3dfccd9309a324a13617ad7bd30356a",
+          "message": "Fix for #4633 - use PSS padding for SHR POP memory crypto provider",
+          "timestamp": "2024-02-21T11:53:40Z",
+          "tree_id": "ee717824f580a5d7557aedcf6c6194dadbce9ca0",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/1444def5c3dfccd9309a324a13617ad7bd30356a"
+        },
+        "date": 1708516877606,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 21676.02362467448,
+            "unit": "ns",
+            "range": "± 47.89759494404937"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 167949.35764723556,
+            "unit": "ns",
+            "range": "± 396.9304914037248"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 34856.85728102464,
+            "unit": "ns",
+            "range": "± 106.66418204427806"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 171207.44721679686,
+            "unit": "ns",
+            "range": "± 1302.1347966737267"
           }
         ]
       }
