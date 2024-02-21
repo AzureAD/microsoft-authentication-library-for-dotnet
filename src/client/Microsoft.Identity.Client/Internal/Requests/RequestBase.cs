@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalTelemetryEventDetails telemetryEventDetails = null;
             ITelemetryClient[] telemetryClients = null;
 
-            var measureTelemetryDurationResult = StopWatchService.MeasureCodeBlock(() =>
+            var measureTelemetryDurationResult = StopwatchService.MeasureCodeBlock(() =>
             {
                 apiEvent = InitializeApiEvent(AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier);
                 AuthenticationRequestParameters.RequestContext.ApiEvent = apiEvent;
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 try
                 {
                     AuthenticationResult authenticationResult = null;
-                    var measureDurationResult = await StopWatchService.MeasureCodeBlockAsync(async () =>
+                    var measureDurationResult = await StopwatchService.MeasureCodeBlockAsync(async () =>
                     {
                         AuthenticationRequestParameters.LogParameters();
                         LogRequestStarted(AuthenticationRequestParameters);

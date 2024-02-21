@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.Utils
     /// <summary>
     /// Singleton timer used to measure the duration tasks.
     /// </summary>
-    internal static class StopWatchService
+    internal static class StopwatchService
 
     {
         /// <summary>
