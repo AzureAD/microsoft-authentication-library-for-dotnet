@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1708502510991,
+  "lastUpdate": 1708516874987,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -4094,6 +4094,42 @@ window.BENCHMARK_DATA = {
             "value": 338791.07692307694,
             "unit": "ns",
             "range": "± 3998.2754503564506"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "distinct": true,
+          "id": "1444def5c3dfccd9309a324a13617ad7bd30356a",
+          "message": "Fix for #4633 - use PSS padding for SHR POP memory crypto provider",
+          "timestamp": "2024-02-21T11:53:40Z",
+          "tree_id": "ee717824f580a5d7557aedcf6c6194dadbce9ca0",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/1444def5c3dfccd9309a324a13617ad7bd30356a"
+        },
+        "date": 1708516871879,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 270331.22222222225,
+            "unit": "ns",
+            "range": "± 7357.019449443313"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 361306.1785714286,
+            "unit": "ns",
+            "range": "± 8352.225709370201"
           }
         ]
       }
