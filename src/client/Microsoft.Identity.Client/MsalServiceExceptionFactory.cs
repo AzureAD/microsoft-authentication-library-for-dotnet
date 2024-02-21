@@ -30,12 +30,16 @@ namespace Microsoft.Identity.Client
 
             if (IsInvalidGrant(oAuth2Response?.Error, oAuth2Response?.SubError) || IsInteractionRequired(oAuth2Response?.Error))
             {
-                var errorMessageToUse = errorMessage;
+                var errorMessageToUse;
 
                 if (IsThrottled(oAuth2Response))
                 {
                     errorMessageToUse = MsalErrorMessage.AadThrottledError;
                 }
+                else  
+                {  
+                    errorMessageToUse  = errorMessage;  
+                }  
 
                 if (oAuth2Response.Claims == null)
                 {
@@ -43,7 +47,8 @@ namespace Microsoft.Identity.Client
                 }
                 else
                 {
-                    errorMessageToUse = UpdateExceptionForClaimsChallenge(errorMessageToUse);
+                    //Update error message with claims challenge error
+                    errorMessageToUse += " " + MsalErrorMessage.ClaimsChallenge;
                     ex = new MsalClaimsChallengeException(errorCode, errorMessageToUse, innerException);
                 }
             }
@@ -228,11 +233,6 @@ namespace Microsoft.Identity.Client
             }
 
             return !s_nonUiSubErrors.Contains(subError);
-        }
-
-        private static string UpdateExceptionForClaimsChallenge(string message)
-        {
-            return message += " " + MsalErrorMessage.ClaimsChallenge;
         }
     }
 }
