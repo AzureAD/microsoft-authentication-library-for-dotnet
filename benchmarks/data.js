@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1708516878101,
+  "lastUpdate": 1708516879766,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -19940,6 +19940,66 @@ window.BENCHMARK_DATA = {
             "value": 133743.52631578947,
             "unit": "ns",
             "range": "± 9827.060625057497"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "distinct": true,
+          "id": "1444def5c3dfccd9309a324a13617ad7bd30356a",
+          "message": "Fix for #4633 - use PSS padding for SHR POP memory crypto provider",
+          "timestamp": "2024-02-21T11:53:40Z",
+          "tree_id": "ee717824f580a5d7557aedcf6c6194dadbce9ca0",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/1444def5c3dfccd9309a324a13617ad7bd30356a"
+        },
+        "date": 1708516879286,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (1, 10))",
+            "value": 17552.8210471017,
+            "unit": "ns",
+            "range": "± 59.45868735201704"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (10000, 10))",
+            "value": 28625.276108805338,
+            "unit": "ns",
+            "range": "± 169.1216399946866"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 9198.542202289287,
+            "unit": "ns",
+            "range": "± 73.77674774128971"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 19551.28301180326,
+            "unit": "ns",
+            "range": "± 20.769637926428693"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 38399.22222222222,
+            "unit": "ns",
+            "range": "± 990.9398155027973"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 147311.19,
+            "unit": "ns",
+            "range": "± 17382.976393496847"
           }
         ]
       }
