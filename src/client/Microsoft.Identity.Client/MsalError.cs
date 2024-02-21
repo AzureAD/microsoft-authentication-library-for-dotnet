@@ -1150,5 +1150,10 @@ namespace Microsoft.Identity.Client
         /// Setting the CIAM authority (ex. "{tenantName}.ciamlogin.com") at the request level is not supported. The CIAM authority must be set during application creation.
         /// </summary>
         public const string SetCiamAuthorityAtRequestLevelNotSupported = "set_ciam_authority_at_request_level_not_supported";
+
+        /// <summary>
+        /// A cryptographic exception occurred when trying to use the provided certificate
+        /// </summary>
+        public const string CryptographicError = "cryptographic_error";
     }
 }

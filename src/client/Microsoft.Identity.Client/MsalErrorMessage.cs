@@ -429,5 +429,6 @@ namespace Microsoft.Identity.Client
         public const string JsonParseErrorMessage = "There was an error parsing the response from the token endpoint, see inner exception for details. Verify that your app is configured correctly. If this is a B2C app, one possible cause is acquiring a token for Microsoft Graph, which is not supported. See https://aka.ms/msal-net-up";
         public const string SetCiamAuthorityAtRequestLevelNotSupported = "Setting the CIAM authority (ex. \"{tenantName}.ciamlogin.com\") at the request level is not supported. The CIAM authority must be set during application creation";
         public const string ClaimsChallenge = "The returned error contains a claims challenge. For additional info on how to handle claims related to multifactor authentication, Conditional Access, and incremental consent, see https://aka.ms/msal-conditional-access-claims. If you are using the On-Behalf-Of flow, see https://aka.ms/msal-conditional-access-claims-obo for details.";
+        public const string CryptographicError = "A cryptographic exception occurred. Possible cause: the certificate has been disposed. See inner exception for full details.";
     }
 }
