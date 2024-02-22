@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 {
@@ -14,8 +16,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
     {
         public void LogSuccessMetrics(
             string platform,
-            string apiId,
-            string cacheLevel,
+            ApiEvent.ApiIds apiId,
+            CacheLevel cacheLevel,
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger)
@@ -23,7 +25,20 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
             // No op
         }
 
-        public void LogFailedMetrics(string platform, string errorCode)
+        public void LogFailureMetrics(string platform, 
+            string errorCode, 
+            ApiEvent.ApiIds apiId, 
+            CacheRefreshReason cacheRefreshReason)
+        {
+            // No op
+        }
+
+        void IOtelInstrumentation.IncrementSuccessCounter(string platform, 
+            ApiEvent.ApiIds apiId, 
+            TokenSource tokenSource, 
+            CacheRefreshReason cacheRefreshReason, 
+            CacheLevel cacheLevel, 
+            ILoggerAdapter logger)
         {
             // No op
         }

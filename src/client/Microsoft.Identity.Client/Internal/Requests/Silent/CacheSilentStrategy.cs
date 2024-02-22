@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                             // Use a linked token source, in case the original cancellation token source is disposed before this background task completes.
                             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                             return RefreshRtOrFailAsync(tokenSource.Token);
-                        }, logger);
+                        }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent.ApiId);
                     }
                 }
 

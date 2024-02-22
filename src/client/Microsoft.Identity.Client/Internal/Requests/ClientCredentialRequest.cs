@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             // Use a linked token source, in case the original cancellation token source is disposed before this background task completes.
                             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                             return GetAccessTokenAsync(tokenSource.Token, logger);
-                        }, logger);
+                        }, logger, ServiceBundle, AuthenticationRequestParameters.RequestContext.ApiEvent.ApiId);
                     }
                 }
                 catch (MsalServiceException e)

@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 #if iOS
 using Microsoft.Identity.Client.Platforms.iOS;
 #endif
@@ -82,13 +83,22 @@ namespace Microsoft.Identity.Client.Internal
         internal static void ProcessFetchInBackground(
             MsalAccessTokenCacheItem oldAccessToken,
             Func<Task<AuthenticationResult>> fetchAction,
-            ILoggerAdapter logger)
+            ILoggerAdapter logger, 
+            IServiceBundle serviceBundle, 
+            ApiEvent.ApiIds apiId)
         {
             _ = Task.Run(async () =>
             {
                 try
                 {
-                    await fetchAction().ConfigureAwait(false);
+                    var authResult = await fetchAction().ConfigureAwait(false);
+                    serviceBundle.PlatformProxy.OtelInstrumentation.IncrementSuccessCounter(
+                        serviceBundle.PlatformProxy.GetProductName(),
+                        apiId,
+                        TokenSource.IdentityProvider, 
+                        CacheRefreshReason.ProactivelyRefreshed, 
+                        Cache.CacheLevel.None,
+                        logger);
                 }
                 catch (MsalServiceException ex)
                 {
@@ -101,14 +111,30 @@ namespace Microsoft.Identity.Client.Internal
                     {
                         logger.ErrorPiiWithPrefix(ex, logMsg);
                     }
+
+                    serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
+                        serviceBundle.PlatformProxy.GetProductName(),
+                        ex.ErrorCode,
+                        apiId,
+                        CacheRefreshReason.ProactivelyRefreshed);
                 }
                 catch (OperationCanceledException ex)
                 {
                     logger.WarningPiiWithPrefix(ex, ProactiveRefreshCancellationError);
+                    serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
+                        serviceBundle.PlatformProxy.GetProductName(),
+                        ex.GetType().Name,
+                        apiId,
+                        CacheRefreshReason.ProactivelyRefreshed);
                 }
                 catch (Exception ex)
                 {
                     logger.ErrorPiiWithPrefix(ex, ProactiveRefreshGeneralError);
+                    serviceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
+                        serviceBundle.PlatformProxy.GetProductName(),
+                        ex.GetType().Name,
+                        apiId,
+                        CacheRefreshReason.ProactivelyRefreshed);
                 }
             });
         }
