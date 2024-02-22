@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1708634304701,
+  "lastUpdate": 1708634306626,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -14254,6 +14254,54 @@ window.BENCHMARK_DATA = {
             "value": 170485.65852864584,
             "unit": "ns",
             "range": "± 1584.9495134320823"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "61847233+neha-bhargava@users.noreply.github.com",
+            "name": "Neha Bhargava",
+            "username": "neha-bhargava"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "13a7778d51617f3f8faf8d35806e9772400b066f",
+          "message": "For proactive refresh log error to otel and change token source to IDP (#4561)\n\n* For proactive refresh log error to otel and change token source to IDP\r\n\r\n* Address comments\r\n\r\n* Update as discussed in doc\r\n\r\n* Add tests for OBO to validate telemetry\r\n\r\n* Address comments\r\n\r\n* Update tests/Microsoft.Identity.Test.Integration.netfx/HeadlessTests/ProactiveRefreshTests.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Address comments\r\n\r\n---------\r\n\r\nCo-authored-by: Simon Cropp <simon.cropp@gmail.com>\r\nCo-authored-by: Bogdan Gavril <bogavril@microsoft.com>\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>",
+          "timestamp": "2024-02-22T12:31:28-08:00",
+          "tree_id": "ae39476393bc22de8688d76cdbf38cebe112bca1",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/13a7778d51617f3f8faf8d35806e9772400b066f"
+        },
+        "date": 1708634306036,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 22025.737666538782,
+            "unit": "ns",
+            "range": "± 152.41946721362717"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 168950.1873046875,
+            "unit": "ns",
+            "range": "± 888.3263824337905"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 33654.09837559291,
+            "unit": "ns",
+            "range": "± 96.18715859445527"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 171920.16860351563,
+            "unit": "ns",
+            "range": "± 1390.4397538863154"
           }
         ]
       }
