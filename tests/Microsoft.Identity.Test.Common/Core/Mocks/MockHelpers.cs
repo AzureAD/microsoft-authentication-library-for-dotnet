@@ -155,8 +155,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return "{\"error\":\"invalid_resource\"," +
                 "\"error_description\":\"AADSTS500011: The resource principal named user.read was not found in the tenant named Microsoft. " +
                 "This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant. " +
-                "You might have sent your authentication request to the wrong tenant.\r\nTrace ID: 2dff494a-0226-4f41-8859-d9f560ca8903" +
-                "\r\nCorrelation ID: 77145480-bc5a-4ebe-ae4d-e4a8b7d727cf\r\nTimestamp: 2022-11-10 23:12:37Z\"," +
+                "You might have sent your authentication request to the wrong tenant.\\r\\nTrace ID: 2dff494a-0226-4f41-8859-d9f560ca8903" +
+                "\\r\\nCorrelation ID: 77145480-bc5a-4ebe-ae4d-e4a8b7d727cf\\r\\nTimestamp: 2022-11-10 23:12:37Z\"," +
                 "\"error_codes\":[500011],\"timestamp\":\"2022-11-10 23:12:37Z\",\"trace_id\":\"2dff494a-0226-4f41-8859-d9f560ca8903\"," +
                 "\"correlation_id\":\"77145480-bc5a-4ebe-ae4d-e4a8b7d727cf\",\"error_uri\":\"https://westus2.login.microsoft.com/error?code=500011\"}";
         }

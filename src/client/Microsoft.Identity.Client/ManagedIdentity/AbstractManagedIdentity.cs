@@ -126,49 +126,76 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return MsalErrorMessage.ManagedIdentityNoResponseReceived;
             }
 
-            ManagedIdentityErrorResponse managedIdentityErrorResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
-
-            if (managedIdentityErrorResponse == null)
+            try
+            {
+                ManagedIdentityErrorResponse managedIdentityErrorResponse = JsonHelper.DeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
+                return ExtractErrorMessageFromManagedIdentityErrorResponse(managedIdentityErrorResponse);
+            }
+            catch
             {
                 return TryGetMessageFromNestedErrorResponse(response.Body);
+            } 
+        }
+
+        private string ExtractErrorMessageFromManagedIdentityErrorResponse(ManagedIdentityErrorResponse managedIdentityErrorResponse)
+        {
+            StringBuilder stringBuilder = new StringBuilder("[Managed Identity] ");
+
+            if (!string.IsNullOrEmpty(managedIdentityErrorResponse.Error))
+            {
+                stringBuilder.Append($"Error Code: {managedIdentityErrorResponse.Error} ");
             }
 
             if (!string.IsNullOrEmpty(managedIdentityErrorResponse.Message))
-            { 
-                return $"[Managed Identity] Error Message: {managedIdentityErrorResponse.Message} Managed Identity Correlation ID: {managedIdentityErrorResponse.CorrelationId} Use this Correlation ID for further investigation.";
+            {
+                stringBuilder.Append($"Error Message: {managedIdentityErrorResponse.Message} ");
             }
 
-            return $"[Managed Identity] Error Code: {managedIdentityErrorResponse.Error} Error Message: {managedIdentityErrorResponse.ErrorDescription}";
+            if (!string.IsNullOrEmpty(managedIdentityErrorResponse.ErrorDescription))
+            {
+                stringBuilder.Append($"Error Message: {managedIdentityErrorResponse.ErrorDescription} ");
+            }
+
+            if (!string.IsNullOrEmpty(managedIdentityErrorResponse.CorrelationId))
+            {
+                stringBuilder.Append($"Managed Identity Correlation ID: {managedIdentityErrorResponse.CorrelationId} Use this Correlation ID for further investigation.");
+            }
+
+            return stringBuilder.ToString();
         }
 
         // Try to get the error message from the nested error response in case of cloud shell.
         private string TryGetMessageFromNestedErrorResponse(string response)
         {
-            var json = JsonHelper.ParseIntoJsonObject(response);
-
-            JsonHelper.TryGetValue(json, "error", out var error);
-            JsonHelper.TryGetValue(JsonHelper.ToJsonObject(error), "message", out var message);
-            JsonHelper.TryGetValue(JsonHelper.ToJsonObject(error), "code", out var errorCode);
-
-            if (message == null && errorCode == null)
+            try
             {
-                _requestContext.Logger.Error(MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse + $"Error response received from the server: {response}.");
-                return MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse + $"Error response received from the server: {response}.";
+                var json = JsonHelper.ParseIntoJsonObject(response);
+
+                JsonHelper.TryGetValue(json, "error", out var error);
+
+                StringBuilder errorMessage = new StringBuilder("[Managed Identity] ");
+
+                if (JsonHelper.TryGetValue(JsonHelper.ToJsonObject(error), "code", out var errorCode))
+                {
+                    errorMessage.Append($"Error Code: {errorCode} ");
+                }
+
+                if (JsonHelper.TryGetValue(JsonHelper.ToJsonObject(error), "message", out var message))
+                {
+                    errorMessage.Append($"Error Message: {message}");
+                }
+
+                if (message != null || errorCode != null)
+                {
+                    return errorMessage.ToString();
+                }
+            } catch
+            {
+                // Ignore any exceptions that occur during parsing and send the error message.
             }
 
-            StringBuilder errorMessage = new StringBuilder("[Managed Identity] ");
-
-            if (errorCode != null)
-            {
-                errorMessage.Append($"Error Code: {errorCode} ");
-            }
-
-            if (message != null)
-            {
-                errorMessage.Append($"[Managed Identity] Error Message: {message}");
-            }
-
-            return errorMessage.ToString();
+            _requestContext.Logger.Error($"{MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse}. Error response received from the server: {response}.");
+            return $"{MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse}. Error response received from the server: {response}.";
         }
 
         private void HandleException(Exception ex, 
