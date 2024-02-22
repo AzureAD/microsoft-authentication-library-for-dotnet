@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (!string.IsNullOrEmpty(managedIdentityErrorResponse.ErrorDescription))
             {
-                stringBuilder.Append($"Error Message: {managedIdentityErrorResponse.ErrorDescription} ");
+                stringBuilder.Append($"Error Description: {managedIdentityErrorResponse.ErrorDescription} ");
             }
 
             if (!string.IsNullOrEmpty(managedIdentityErrorResponse.CorrelationId))
