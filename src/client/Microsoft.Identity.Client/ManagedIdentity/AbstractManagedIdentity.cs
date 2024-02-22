@@ -11,7 +11,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Core;
 using System.Net;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using System.Collections.Generic;
+using System.Text;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -119,13 +119,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return managedIdentityResponse;
         }
 
-        internal static string GetMessageFromErrorResponse(HttpResponse response)
+        internal string GetMessageFromErrorResponse(HttpResponse response)
         {
+            if (string.IsNullOrEmpty(response?.Body))
+            {
+                return MsalErrorMessage.ManagedIdentityNoResponseReceived;
+            }
+
             ManagedIdentityErrorResponse managedIdentityErrorResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
 
             if (managedIdentityErrorResponse == null)
             {
-                return MsalErrorMessage.ManagedIdentityNoResponseReceived;
+                return TryGetMessageFromNestedErrorResponse(response.Body);
             }
 
             if (!string.IsNullOrEmpty(managedIdentityErrorResponse.Message))
@@ -134,6 +139,36 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             return $"[Managed Identity] Error Code: {managedIdentityErrorResponse.Error} Error Message: {managedIdentityErrorResponse.ErrorDescription}";
+        }
+
+        // Try to get the error message from the nested error response in case of cloud shell.
+        private string TryGetMessageFromNestedErrorResponse(string response)
+        {
+            var json = JsonHelper.ParseIntoJsonObject(response);
+
+            JsonHelper.TryGetValue(json, "error", out var error);
+            JsonHelper.TryGetValue(JsonHelper.ToJsonObject(error), "message", out var message);
+            JsonHelper.TryGetValue(JsonHelper.ToJsonObject(error), "code", out var errorCode);
+
+            if (message == null && errorCode == null)
+            {
+                _requestContext.Logger.Error(MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse + $"Error response received from the server: {response}.");
+                return MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse + $"Error response received from the server: {response}.";
+            }
+
+            StringBuilder errorMessage = new StringBuilder("[Managed Identity] ");
+
+            if (errorCode != null)
+            {
+                errorMessage.Append($"Error Code: {errorCode} ");
+            }
+
+            if (message != null)
+            {
+                errorMessage.Append($"[Managed Identity] Error Message: {message}");
+            }
+
+            return errorMessage.ToString();
         }
 
         private void HandleException(Exception ex, 
