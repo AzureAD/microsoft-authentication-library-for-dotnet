@@ -12,8 +12,13 @@ jobs:
         name: Call OneBranch ADO Pipeline (CI)
         runs-on: ubuntu-latest
         steps:
+        - name: Harden Runner
+          uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+          with:
+            egress-policy: audit
+
         - name: Azure Pipelines Action
-          uses: Azure/pipelines@v1
+          uses: Azure/pipelines@354dddefceb0b503a61338ca81e4091eae3bc84f # v1
           with:
             azure-devops-project-url: https://identitydivision.visualstudio.com/IDDP
             azure-pipeline-name: 'MSAL.NET-OneBranch-Release-Official'
