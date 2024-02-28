@@ -397,7 +397,7 @@ namespace Microsoft.Identity.Client
 
         public const string ClientCredentialWrongAuthority = "The current authority is targeting the /common or /organizations endpoint which is not recommended. See https://aka.ms/msal-net-client-credentials for more details.";
 
-        public const string OnBehalfOfWrongAuthority = "The current authority is targeting the /common or /organizations endpoint which is not recommended. See https://aka.ms/msal-net-on-behalf-of for more details.";
+        public const string OnBehalfOfWrongAuthority = "The current authority is targeting the /common or /organizations endpoint. Instead, it should target the same tenant as the client, which can be found in the 'tid' claim of the incoming client token. See https://aka.ms/msal-net-on-behalf-of for more details.";
 
         public const string TenantOverrideNonAad = "WithTenantId can only be used when an AAD authority is specified at the application level.";
 

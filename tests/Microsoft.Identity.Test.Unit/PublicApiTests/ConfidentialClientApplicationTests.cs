@@ -1809,7 +1809,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task AcquireTokenOboAuthorityCheckTestAsync()
+        public async Task AcquireTokenObo_WithCommonOrOrganizationsAuthority_LogsError()
         {
             using (var httpManager = new MockHttpManager())
             {
