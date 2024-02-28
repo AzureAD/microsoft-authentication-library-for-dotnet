@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
@@ -430,6 +431,24 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             AssertPropertyHasPublicGetAndSet(typeof(MsalServiceException), "Headers");
             AssertPropertyHasPublicGetAndSet(typeof(MsalServiceException), "ResponseBody");
             AssertPropertyHasPublicGetAndSet(typeof(MsalServiceException), "CorrelationId");
+        }
+
+        [TestMethod]
+        public async Task CorrelationIdInExceptions()
+        {
+            var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(async () =>
+                {
+                    var app = PublicClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithDefaultRedirectUri()
+                    .Build();
+
+                    await app.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.s_user).ExecuteAsync().ConfigureAwait(false);
+                }
+            ).ConfigureAwait(false);
+
+            Assert.IsFalse(string.IsNullOrEmpty(ex.CorrelationId));
+            Assert.IsFalse(string.IsNullOrEmpty(((MsalException)ex).CorrelationId));
         }
 
         private void AssertPropertyHasPublicGetAndSet(Type t, string propertyName)
