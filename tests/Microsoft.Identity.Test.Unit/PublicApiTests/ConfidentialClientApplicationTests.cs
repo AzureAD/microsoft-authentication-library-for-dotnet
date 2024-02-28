@@ -1809,7 +1809,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public async Task AcquireTokenObo_WithCommonOrOrganizationsAuthority_LogsError()
+        [DataRow(TestConstants.AuthorityCommonTenant)]
+        [DataRow(TestConstants.AuthorityOrganizationsTenant)]
+        public async Task AcquireTokenOboAuthorityCheckTestAsync(string tenant)
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -1818,34 +1820,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 string log = string.Empty;
 
-                //Check for common authority
                 var app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithClientSecret(TestConstants.ClientSecret)
-                    .WithAuthority(TestConstants.AuthorityCommonTenant, true)
+                    .WithAuthority(tenant, true)
                     .WithHttpManager(httpManager)
                     .WithLogging((LogLevel _, string message, bool _) => log += message)
                     .BuildConcrete();
 
                 var result = await app
-                    .AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.UserAssertion))
-                    .ExecuteAsync(CancellationToken.None)
-                    .ConfigureAwait(false);
-
-                Assert.IsTrue(log.Contains(MsalErrorMessage.OnBehalfOfWrongAuthority));
-
-                //Check for organizations authority
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
-
-                app = ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithClientSecret(TestConstants.ClientSecret)
-                    .WithAuthority(TestConstants.AuthorityOrganizationsTenant, true)
-                    .WithHttpManager(httpManager)
-                    .WithLogging((LogLevel _, string message, bool _) => log += message)
-                    .BuildConcrete();
-
-                result = await app
                     .AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.UserAssertion))
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
