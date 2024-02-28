@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 
 namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 {
@@ -11,11 +13,22 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
     {
         internal void LogSuccessMetrics(
             string platform,
-            string apiId,
-            string cacheLevel,
+            ApiEvent.ApiIds apiId,
+            CacheLevel cacheLevel,
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
             ILoggerAdapter logger);
-        internal void LogFailedMetrics(string platform, string errorCode);
+
+        internal void IncrementSuccessCounter(string platform,
+            ApiEvent.ApiIds apiId,
+            TokenSource tokenSource,
+            CacheRefreshReason cacheRefreshReason,
+            CacheLevel cacheLevel,
+            ILoggerAdapter logger);
+
+        internal void LogFailureMetrics(string platform, 
+            string errorCode, 
+            ApiEvent.ApiIds apiId, 
+            CacheRefreshReason cacheRefreshReason);
     }
 }
