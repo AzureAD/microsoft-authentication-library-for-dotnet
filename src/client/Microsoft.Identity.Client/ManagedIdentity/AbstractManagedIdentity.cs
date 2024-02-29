@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 stringBuilder.Append($"Managed Identity Correlation ID: {managedIdentityErrorResponse.CorrelationId} Use this Correlation ID for further investigation.");
             }
 
-            if (stringBuilder.Equals(ManagedIdentityPrefix))
+            if (stringBuilder.Length == ManagedIdentityPrefix.Length)
             {
                 return $"{MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse}.";
             }
