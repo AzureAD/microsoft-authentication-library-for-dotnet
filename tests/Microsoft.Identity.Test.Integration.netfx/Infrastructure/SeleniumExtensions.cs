@@ -42,9 +42,10 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 driver = new EdgeDriver(env, options);
             }
 
+            driver.Manage().Timeouts().ImplicitWait = ImplicitTimespan;
+
             try
             {
-                driver.Manage().Timeouts().ImplicitWait = ImplicitTimespan;
                 driver.Manage().Window.Maximize();
             }
             catch (WebDriverException e)
