@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         protected readonly RequestContext _requestContext;
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
         internal readonly ManagedIdentitySource _sourceType;
+        private const string ManagedIdentityPrefix = "[Managed Identity] ";
 
         protected AbstractManagedIdentity(RequestContext requestContext, ManagedIdentitySource sourceType)
         {
@@ -139,7 +140,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         private string ExtractErrorMessageFromManagedIdentityErrorResponse(ManagedIdentityErrorResponse managedIdentityErrorResponse)
         {
-            StringBuilder stringBuilder = new StringBuilder("[Managed Identity] ");
+            StringBuilder stringBuilder = new StringBuilder(ManagedIdentityPrefix);
 
             if (!string.IsNullOrEmpty(managedIdentityErrorResponse.Error))
             {
@@ -161,7 +162,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 stringBuilder.Append($"Managed Identity Correlation ID: {managedIdentityErrorResponse.CorrelationId} Use this Correlation ID for further investigation.");
             }
 
-            if (stringBuilder.Length == "[Managed Identity] ".Length)
+            if (stringBuilder.Equals(ManagedIdentityPrefix))
             {
                 return $"{MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse}.";
             }
@@ -178,7 +179,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 JsonHelper.TryGetValue(json, "error", out var error);
 
-                StringBuilder errorMessage = new StringBuilder("[Managed Identity] ");
+                StringBuilder errorMessage = new StringBuilder(ManagedIdentityPrefix);
 
                 if (JsonHelper.TryGetValue(JsonHelper.ToJsonObject(error), "code", out var errorCode))
                 {
