@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             }
             catch
             {
-                Trace.WriteLine("No accept prompt found accept prompt");
+                Trace.WriteLine("Next button not found. Moving on.");
             }
         }
 
