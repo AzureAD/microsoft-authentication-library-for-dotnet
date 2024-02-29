@@ -43,8 +43,16 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             }
 
             driver.Manage().Timeouts().ImplicitWait = ImplicitTimespan;
-            driver.Manage().Window.Maximize();
 
+            try
+            {
+                driver.Manage().Window.Maximize();
+            }
+            catch (WebDriverException e)
+            {
+                Trace.WriteLine("Failed to maximize the window: " + e.Message);
+            }
+            
             return driver;
         }
 
@@ -181,10 +189,28 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             UserInformationFieldIds fields = new UserInformationFieldIds(user);
 
             EnterUsername(driver, user, withLoginHint, adfsOnly, fields);
+            HandleConfirmation(driver);
             EnterPassword(driver, user, fields);
 
             HandleConsent(driver, user, fields, prompt);
             HandleStaySignedIn(driver);
+        }
+
+        private static void HandleConfirmation(IWebDriver driver)
+        {
+            try
+            {
+                Trace.WriteLine("Finding next prompt");
+                var nextBtn = driver.WaitForElementToBeVisibleAndEnabled(
+                    ByIds(CoreUiTestConstants.NextButton),
+                    waitTime: ShortExplicitTimespan,
+                    ignoreFailures: true);
+                nextBtn?.Click();
+            }
+            catch
+            {
+                Trace.WriteLine("Next button not found. Moving on.");
+            }
         }
 
         private static void HandleStaySignedIn(IWebDriver driver)
