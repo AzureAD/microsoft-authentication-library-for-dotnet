@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1708634308603,
+  "lastUpdate": 1709279845155,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -4202,6 +4202,42 @@ window.BENCHMARK_DATA = {
             "value": 343993.5740740741,
             "unit": "ns",
             "range": "± 9560.197611917725"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "70c06f4fb45b625f40bb9602634d83cb31cf4856",
+          "message": "Stopwatch Updates (#4639)\n\n* Refactoring.\r\nAdding comments\r\nfixing issue\r\n\r\n* Rename\r\n\r\n* Clean up\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>\r\nCo-authored-by: Neha Bhargava <61847233+neha-bhargava@users.noreply.github.com>",
+          "timestamp": "2024-02-29T23:50:18-08:00",
+          "tree_id": "2e8585ef7f40ece37885ade2e4b7252f223d95c7",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/70c06f4fb45b625f40bb9602634d83cb31cf4856"
+        },
+        "date": 1709279841904,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 255275.03846153847,
+            "unit": "ns",
+            "range": "± 3281.08228118367"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 326436.92307692306,
+            "unit": "ns",
+            "range": "± 3756.4498413071365"
           }
         ]
       }
