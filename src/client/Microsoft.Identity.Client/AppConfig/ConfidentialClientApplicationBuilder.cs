@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -315,19 +316,25 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        [Obsolete("This method has been renamed to WithOidcAuthority.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public ConfidentialClientApplicationBuilder WithGenericAuthority(string authorityUri)
+        {
+            return WithOidcAuthority(authorityUri);
+        }
+
         /// <summary>
         /// Adds a known authority corresponding to a generic OpenIdConnect Identity Provider. 
         /// MSAL will append ".well-known/openid-configuration" to the authority and retrieve the OIDC 
         /// metadata from there, to figure out the endpoints.
         /// See https://openid.net/specs/openid-connect-core-1_0.html#Terminology
         /// </summary>
-        /// <param name="authorityUri">OpenIdConnect authority</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        /// <remarks>This is an experimental API and only available on Confidential Client flows.</remarks>        
-        public ConfidentialClientApplicationBuilder WithGenericAuthority(string authorityUri)
+        /// <remarks>
+        /// Do not use this method with Entra Id authorities (e.g. https://login.microsfoftonline.com/common).
+        /// Use WithAuthority(string) instead.
+        /// </remarks>
+        public ConfidentialClientApplicationBuilder WithOidcAuthority(string authorityUri)
         {
-            ValidateUseOfExperimentalFeature("WithGenericAuthority");
-
             var authorityInfo = AuthorityInfo.FromGenericAuthority(authorityUri);
             Config.Authority = Authority.CreateAuthority(authorityInfo);
 

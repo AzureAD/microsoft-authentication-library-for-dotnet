@@ -34,8 +34,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
-                    .WithGenericAuthority(authority)
+                    .WithOidcAuthority(authority)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build();
 
@@ -83,12 +82,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 var cca = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures(true)
                     .WithRedirectUri("http://some_redirect_uri")
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
                     .WithLegacyCacheCompatibility(false)
-                    .WithGenericAuthority(authority)
+                    .WithOidcAuthority(authority)
                     .Build();
 
                 httpManager.AddMockHandler(
@@ -137,12 +135,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 var cca = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures(true)
                     .WithRedirectUri("http://some_redirect_uri")
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
                     .WithLegacyCacheCompatibility(false)
-                    .WithGenericAuthority(AuthorityWithQP)
+                    .WithOidcAuthority(AuthorityWithQP)
                     .Build();
 
                 string oidcDocument = TestConstants.GenericOidcResponse;
@@ -193,12 +190,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 var cca = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithExperimentalFeatures(true)
                     .WithRedirectUri("http://some_redirect_uri")
                     .WithClientSecret(TestConstants.ClientSecret)
                     .WithHttpManager(httpManager)
                     .WithLegacyCacheCompatibility(false)
-                    .WithGenericAuthority(authority)
+                    .WithOidcAuthority(authority)
                     .Build();
 
                 httpManager.AddMockHandler(
@@ -269,8 +265,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             // Tenant and authority modifiers
             ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
-                .WithExperimentalFeatures()
-                .WithGenericAuthority(malformedAuthority)
+                .WithOidcAuthority(malformedAuthority)
                 .WithClientSecret(TestConstants.ClientSecret)
                 .Build();
         }
@@ -286,8 +281,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(httpManager)
-                    .WithExperimentalFeatures(true)
-                    .WithGenericAuthority(authority)
+                    .WithOidcAuthority(authority)
                     .WithClientSecret(TestConstants.ClientSecret)
                     .Build();
 
