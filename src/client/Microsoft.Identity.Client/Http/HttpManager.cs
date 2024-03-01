@@ -217,7 +217,7 @@ namespace Microsoft.Identity.Client.Http
                     () => $"[HttpManager] Sending request. Method: {method}. URI: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}{endpoint.AbsolutePath}")}. ",
                     () => $"[HttpManager] Sending request. Method: {method}. Host: {(endpoint == null ? "NULL" : $"{endpoint.Scheme}://{endpoint.Authority}")}. ");
 
-                var measureDurationResult = await StopWatchService.MeasureCodeBlockAsync(async () =>
+                var measureDurationResult = await StopwatchService.MeasureCodeBlockAsync(async () =>
                 {
                     HttpClient client = GetHttpClient();
                     return await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);

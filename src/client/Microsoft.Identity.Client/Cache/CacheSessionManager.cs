@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client.Cache
                             }
                             finally
                             {
-                                var measureDurationResult = await StopWatchService.MeasureCodeBlockAsync(async () =>
+                                var measureDurationResult = await StopwatchService.MeasureCodeBlockAsync(async () =>
                                 {
                                     var args = new TokenCacheNotificationArgs(
                                       TokenCacheInternal,
