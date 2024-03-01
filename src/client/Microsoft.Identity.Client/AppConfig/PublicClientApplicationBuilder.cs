@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using System.Runtime.CompilerServices;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Instance;
 
 #if iOS
 using UIKit;
@@ -52,6 +53,8 @@ namespace Microsoft.Identity.Client
                 .WithOptions(options)
                 .WithKerberosTicketClaim(options.KerberosServicePrincipalName, options.TicketContainer);
         }
+
+       
 
         /// <summary>
         /// Creates a PublicClientApplicationBuilder from a clientID.
@@ -265,6 +268,27 @@ namespace Microsoft.Identity.Client
         private PublicClientApplicationBuilder WithParentFunc(Func<object> parentFunc)
         {
             Config.ParentActivityOrWindowFunc = parentFunc;
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a known authority corresponding to a generic OpenIdConnect Identity Provider. 
+        /// MSAL will append ".well-known/openid-configuration" to the authority and retrieve the OIDC 
+        /// metadata from there, to figure out the endpoints.
+        /// See https://openid.net/specs/openid-connect-core-1_0.html#Terminology
+        /// </summary>
+        /// <remarks>
+        /// Experiemental on public clients.
+        /// Do not use this method with Entra Id authorities (e.g. https://login.microsfoftonline.com/common).
+        /// Use WithAuthority(string) instead.
+        /// </remarks>
+        public PublicClientApplicationBuilder WithOidcAuthority(string authorityUri) // TODO: do not merge this
+        {
+            ValidateUseOfExperimentalFeature("WithOidcAuthority");
+
+            var authorityInfo = AuthorityInfo.FromGenericAuthority(authorityUri);
+            Config.Authority = Authority.CreateAuthority(authorityInfo);
+
             return this;
         }
 
