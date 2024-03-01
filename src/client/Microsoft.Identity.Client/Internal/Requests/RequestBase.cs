@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     UpdateTelemetry(measureDurationResult.Milliseconds + measureTelemetryDurationResult.Milliseconds, apiEvent, authenticationResult);
                     LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
                     LogSuccessfulTelemetryToClient(authenticationResult, telemetryEventDetails, telemetryClients);
-                    LogMsalSuccessTelemetryToOtel(authenticationResult, apiEvent.ApiId.ToString(), measureDurationResult.Ticks / (TimeSpan.TicksPerMillisecond / 1000));
+                    LogSuccessTelemetryToOtel(authenticationResult, apiEvent.ApiId, measureDurationResult.Ticks / (TimeSpan.TicksPerMillisecond / 1000));
 
                     return authenticationResult;
                 }
@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
 
-                    LogMsalFailedTelemetryToOtel(ex.ErrorCode);
+                    LogFailureTelemetryToOtel(ex.ErrorCode, apiEvent.ApiId, apiEvent.CacheInfo);
                     throw;
                 }
                 catch (Exception ex)
@@ -128,8 +128,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     apiEvent.ApiErrorCode = ex.GetType().Name;
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
-
-                    LogMsalFailedTelemetryToOtel(ex.GetType().Name);
+                    
+                    LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent.ApiId, apiEvent.CacheInfo);
                     throw;
                 }
                 finally
@@ -139,24 +139,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private void LogMsalSuccessTelemetryToOtel(AuthenticationResult authenticationResult, string apiId, long durationInUs)
+        private void LogSuccessTelemetryToOtel(AuthenticationResult authenticationResult, ApiEvent.ApiIds apiId, long durationInUs)
         {
             // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogSuccessMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
                         apiId,
-                        GetCacheLevel(authenticationResult).ToString(),
+                        GetCacheLevel(authenticationResult),
                         durationInUs,
                         authenticationResult.AuthenticationResultMetadata,
                         AuthenticationRequestParameters.RequestContext.Logger);
         }
 
-        private void LogMsalFailedTelemetryToOtel(string errorCodeToLog)
+        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent.ApiIds apiId, CacheRefreshReason cacheRefreshReason)
         {
             // Log metrics
-            ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailedMetrics(
+            ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
-                        errorCodeToLog);
+                        errorCodeToLog,
+                        apiId, 
+                        cacheRefreshReason);
         }
 
         private static void LogMsalErrorTelemetryToClient(Exception ex, MsalTelemetryEventDetails telemetryEventDetails, ITelemetryClient[] telemetryClients)

@@ -44,6 +44,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string ClientId = "ClientId";
         public const string Platform = "Platform";
         public const string ApiId = "ApiId";
+        public const string IsProactiveRefresh = "IsProactiveRefresh";
 
 #endregion
     }
