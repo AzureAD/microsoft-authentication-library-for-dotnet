@@ -182,8 +182,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 ConfidentialClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithTenantId(TestConstants.TenantId2)
-                    .WithExperimentalFeatures(true)
-                    .WithGenericAuthority(TestConstants.GenericAuthority)
+                    .WithOidcAuthority(TestConstants.GenericAuthority)
                     .Build()
             );
 
