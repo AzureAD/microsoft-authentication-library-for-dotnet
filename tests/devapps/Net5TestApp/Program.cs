@@ -21,6 +21,7 @@ namespace Net5TestApp
             }
             catch (MsalException e)
             {
+                Console.BackgroundColor = ConsoleColor.DarkRed;
                 Console.WriteLine("Error: ErrorCode=" + e.ErrorCode + "ErrorMessage=" + e.Message);
                 Console.ResetColor();
             }
@@ -30,30 +31,22 @@ namespace Net5TestApp
 
         private static async Task<AuthenticationResult> TryAuthAsync()
         {
-            var pca = PublicClientApplicationBuilder.
-                Create("fe67c0cf-caae-49f0-9f75-e3f7e1e28724")
-                .WithExperimentalFeatures(true)
-                .WithExtraQueryParameters(DC)
-                .WithRedirectUri("http://localhost")
-                .Build();
+            var pca = PublicClientApplicationBuilder.Create("04b07795-8ddb-461a-bbee-02f9e1bf7b46")
+                 .WithTenantId("72f988bf-86f1-41af-91ab-2d7cd011db47")
+                 .WithDefaultRedirectUri()
+                 .WithLogging(MyLoggingMethod, LogLevel.Info, true, false)
+                 .Build();
 
-            var result = await pca.AcquireTokenInteractive(new[] { Scope })
+            var result = await pca.AcquireTokenInteractive(new[] { "https://storage.azure.com/.default" })
                 .WithUseEmbeddedWebView(true)
-                .WithPrompt(Prompt.Create)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            var account = (await pca.GetAccountsAsync().ConfigureAwait(false)).First();
-
-            var result2 = await pca.AcquireTokenSilent(new[] { Scope }, account)
-               .WithForceRefresh(true)
-               .ExecuteAsync()
-               .ConfigureAwait(false);
-
+                .ExecuteAsync().ConfigureAwait(false);
 
             return result;
         }
 
-        
+        static void MyLoggingMethod(LogLevel level, string message, bool containsPii)
+        {
+            Console.WriteLine($"MSALTest {level} {containsPii} {message}");
+        }
     }
 }
