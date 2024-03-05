@@ -11,7 +11,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Core;
 using System.Net;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using System.Collections.Generic;
+using System.Text;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         protected readonly RequestContext _requestContext;
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
         internal readonly ManagedIdentitySource _sourceType;
+        private const string ManagedIdentityPrefix = "[Managed Identity] ";
 
         protected AbstractManagedIdentity(RequestContext requestContext, ManagedIdentitySource sourceType)
         {
@@ -119,21 +120,88 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return managedIdentityResponse;
         }
 
-        internal static string GetMessageFromErrorResponse(HttpResponse response)
+        internal string GetMessageFromErrorResponse(HttpResponse response)
         {
-            ManagedIdentityErrorResponse managedIdentityErrorResponse = JsonHelper.TryToDeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
-
-            if (managedIdentityErrorResponse == null)
+            if (string.IsNullOrEmpty(response?.Body))
             {
                 return MsalErrorMessage.ManagedIdentityNoResponseReceived;
             }
 
-            if (!string.IsNullOrEmpty(managedIdentityErrorResponse.Message))
-            { 
-                return $"[Managed Identity] Error Message: {managedIdentityErrorResponse.Message} Managed Identity Correlation ID: {managedIdentityErrorResponse.CorrelationId} Use this Correlation ID for further investigation.";
+            try
+            {
+                ManagedIdentityErrorResponse managedIdentityErrorResponse = JsonHelper.DeserializeFromJson<ManagedIdentityErrorResponse>(response?.Body);
+                return ExtractErrorMessageFromManagedIdentityErrorResponse(managedIdentityErrorResponse);
+            }
+            catch
+            {
+                return TryGetMessageFromNestedErrorResponse(response.Body);
+            } 
+        }
+
+        private string ExtractErrorMessageFromManagedIdentityErrorResponse(ManagedIdentityErrorResponse managedIdentityErrorResponse)
+        {
+            StringBuilder stringBuilder = new StringBuilder(ManagedIdentityPrefix);
+
+            if (!string.IsNullOrEmpty(managedIdentityErrorResponse.Error))
+            {
+                stringBuilder.Append($"Error Code: {managedIdentityErrorResponse.Error} ");
             }
 
-            return $"[Managed Identity] Error Code: {managedIdentityErrorResponse.Error} Error Message: {managedIdentityErrorResponse.ErrorDescription}";
+            if (!string.IsNullOrEmpty(managedIdentityErrorResponse.Message))
+            {
+                stringBuilder.Append($"Error Message: {managedIdentityErrorResponse.Message} ");
+            }
+
+            if (!string.IsNullOrEmpty(managedIdentityErrorResponse.ErrorDescription))
+            {
+                stringBuilder.Append($"Error Description: {managedIdentityErrorResponse.ErrorDescription} ");
+            }
+
+            if (!string.IsNullOrEmpty(managedIdentityErrorResponse.CorrelationId))
+            {
+                stringBuilder.Append($"Managed Identity Correlation ID: {managedIdentityErrorResponse.CorrelationId} Use this Correlation ID for further investigation.");
+            }
+
+            if (stringBuilder.Length == ManagedIdentityPrefix.Length)
+            {
+                return $"{MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse}.";
+            }
+
+            return stringBuilder.ToString();
+        }
+
+        // Try to get the error message from the nested error response in case of cloud shell.
+        private string TryGetMessageFromNestedErrorResponse(string response)
+        {
+            try
+            {
+                var json = JsonHelper.ParseIntoJsonObject(response);
+
+                JsonHelper.TryGetValue(json, "error", out var error);
+
+                StringBuilder errorMessage = new StringBuilder(ManagedIdentityPrefix);
+
+                if (JsonHelper.TryGetValue(JsonHelper.ToJsonObject(error), "code", out var errorCode))
+                {
+                    errorMessage.Append($"Error Code: {errorCode} ");
+                }
+
+                if (JsonHelper.TryGetValue(JsonHelper.ToJsonObject(error), "message", out var message))
+                {
+                    errorMessage.Append($"Error Message: {message}");
+                }
+
+                if (message != null || errorCode != null)
+                {
+                    return errorMessage.ToString();
+                }
+            } catch
+            {
+                // Ignore any exceptions that occur during parsing and send the error message.
+            }
+
+            _requestContext.Logger.Error($"{MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse}. Error response received from the server: {response}.");
+            return $"{MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse}. Error response received from the server: {response}.";
         }
 
         private void HandleException(Exception ex, 
