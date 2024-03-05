@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.Net.Http;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
@@ -48,6 +49,24 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             requestContext.Logger.Verbose(() => "[Managed Identity] Creating Service Fabric managed identity. Endpoint URI: " + identityEndpoint);
+
+            if (Environment.GetEnvironmentVariable("ValidateServiceFabricCertificate") == "true")
+            {
+                requestContext.Logger.Verbose(() => "[Managed Identity] Updating the http client to validate the server certificate.");
+
+                HttpClientHandler handler = new HttpClientHandler();
+                handler.ServerCertificateCustomValidationCallback = (message, certificate, chain, sslPolicyErrors) =>
+                {
+                    if (sslPolicyErrors != System.Net.Security.SslPolicyErrors.None)
+                    {
+                        return 0 == string.Compare(certificate.Thumbprint, identityServerThumbprint, StringComparison.OrdinalIgnoreCase);
+                    }
+
+                    return true;
+                };
+
+                requestContext.ServiceBundle.HttpManager.HttpClientHandler = handler;
+            }
             return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, identityHeader);
         }
 

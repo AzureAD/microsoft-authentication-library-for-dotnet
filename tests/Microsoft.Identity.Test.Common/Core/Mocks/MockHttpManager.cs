@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public long LastRequestDurationInMs => 3000;
 
-        
+        public HttpClientHandler Handler { get => _httpManager.Handler; set => _httpManager.Handler = value; }
 
         private string GetExpectedUrlFromHandler(HttpMessageHandler handler)
         {
