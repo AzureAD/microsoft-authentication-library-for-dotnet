@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709668167331,
+  "lastUpdate": 1709715887478,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -4310,6 +4310,42 @@ window.BENCHMARK_DATA = {
             "value": 341393,
             "unit": "ns",
             "range": "± 3040.44823250544"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "10a64d4b26337c89171e2d6ca7d616907cde6961",
+          "message": "Adding correlation id to MSAL Exception (#4649)\n\n* Adding correlation id to MSAL Exception\r\n\r\n* Updating exception test\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>",
+          "timestamp": "2024-03-06T00:57:40-08:00",
+          "tree_id": "fcbd929faa60d15477bc92c010a83a32db8bdfe8",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/10a64d4b26337c89171e2d6ca7d616907cde6961"
+        },
+        "date": 1709715883327,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 251703.27272727274,
+            "unit": "ns",
+            "range": "± 6057.384098152776"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 343045,
+            "unit": "ns",
+            "range": "± 5549.510175890093"
           }
         ]
       }
