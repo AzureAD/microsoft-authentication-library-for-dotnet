@@ -46,11 +46,6 @@ namespace Microsoft.Identity.Client.Http
             return new HttpClient(HttpClientHandler);
         }
 
-        protected virtual HttpClient GetHttpClient(HttpClientHandler httpClientHandler)
-        {
-            return new HttpClient(httpClientHandler) ?? throw new ArgumentNullException(nameof(httpClientHandler));
-        }
-
         public async Task<HttpResponse> SendPostAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
