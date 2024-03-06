@@ -54,8 +54,6 @@ namespace Microsoft.Identity.Client
                 .WithKerberosTicketClaim(options.KerberosServicePrincipalName, options.TicketContainer);
         }
 
-       
-
         /// <summary>
         /// Creates a PublicClientApplicationBuilder from a clientID.
         /// See https://aka.ms/msal-net-application-configuration
@@ -279,11 +277,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>
         /// Experimental on public clients.
-
-        /// Do not use this method with Entra Id authorities (e.g. https://login.microsfoftonline.com/common).
+        /// Do not use this method with Entra ID authorities (e.g. https://login.microsfoftonline.com/common).
         /// Use WithAuthority(string) instead.
         /// </remarks>
-        public PublicClientApplicationBuilder WithOidcAuthority(string authorityUri) // TODO: do not merge this
+        public PublicClientApplicationBuilder WithOidcAuthority(string authorityUri) 
         {
             ValidateUseOfExperimentalFeature("WithOidcAuthority");
 
