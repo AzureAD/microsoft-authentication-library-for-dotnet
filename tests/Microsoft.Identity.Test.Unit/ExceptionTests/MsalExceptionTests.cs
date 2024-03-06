@@ -6,6 +6,9 @@ using System.Data.SqlClient;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
@@ -14,13 +17,15 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.ExceptionTests
 {
 
     [TestClass]
-    public class MsalExceptionTests
+    [DeploymentItem(@"Resources\RSATestCertDotNet.pfx")]
+    public class MsalExceptionTests : TestBase
     {
         private const string ExCode = "exCode";
         private const string ExMessage = "exMessage";
@@ -430,6 +435,78 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             AssertPropertyHasPublicGetAndSet(typeof(MsalServiceException), "Headers");
             AssertPropertyHasPublicGetAndSet(typeof(MsalServiceException), "ResponseBody");
             AssertPropertyHasPublicGetAndSet(typeof(MsalServiceException), "CorrelationId");
+        }
+
+        [TestMethod]
+        public async Task CorrelationIdInServiceExceptions()
+        {
+            var app = PublicClientApplicationBuilder
+                        .Create(TestConstants.ClientId)
+                        .WithDefaultRedirectUri()
+                        .Build();
+            var ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(async () =>
+                {
+                    await app.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.s_user).ExecuteAsync().ConfigureAwait(false);
+                }
+            ).ConfigureAwait(false);
+
+            Assert.IsFalse(string.IsNullOrEmpty(ex.CorrelationId));
+            Assert.IsFalse(string.IsNullOrEmpty(((MsalException)ex).CorrelationId));
+
+            Guid guid = Guid.NewGuid();
+            ex = await AssertException.TaskThrowsAsync<MsalUiRequiredException>(async () =>
+                {
+                    await app.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.s_user).WithCorrelationId(guid).ExecuteAsync().ConfigureAwait(false);
+                }
+            ).ConfigureAwait(false);
+
+            Assert.AreEqual(guid.ToString(), ex.CorrelationId);
+            Assert.AreEqual(guid.ToString(), ((MsalException)ex).CorrelationId);
+        }
+
+        [TestMethod]
+        public async Task CorrelationIdInClientExceptions()
+        {
+            using (var harness = CreateTestHarness())
+            {
+                harness.HttpManager.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.AuthorityCommonTenant + TestConstants.DiscoveryEndPoint));
+
+                ConfidentialClientApplication app = null;
+                using (var certificate = new X509Certificate2(
+                    ResourceHelper.GetTestResourceRelativePath("RSATestCertDotNet.pfx")))
+                {
+                    app = ConfidentialClientApplicationBuilder
+                        .Create(TestConstants.ClientId)
+                        .WithAuthority(new System.Uri(ClientApplicationBase.DefaultAuthority), true)
+                        .WithRedirectUri(TestConstants.RedirectUri)
+                        .WithHttpManager(harness.HttpManager)
+                        .WithCertificate(certificate)
+                        .BuildConcrete();
+                }
+
+                var ex = await Assert.ThrowsExceptionAsync<MsalClientException>(async () =>
+                {
+                    await app.AcquireTokenForClient(TestConstants.s_scope)
+                             .ExecuteAsync(CancellationToken.None)
+                             .ConfigureAwait(false);
+                }).ConfigureAwait(false);
+
+                Assert.IsFalse(string.IsNullOrEmpty(ex.CorrelationId));
+                Assert.IsFalse(string.IsNullOrEmpty(((MsalException)ex).CorrelationId));
+
+                Guid guid = Guid.NewGuid();
+                ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
+                {
+                    await app.AcquireTokenForClient(TestConstants.s_scope)
+                                                 .WithCorrelationId(guid)
+                                                 .ExecuteAsync(CancellationToken.None)
+                                                 .ConfigureAwait(false);
+                }
+                ).ConfigureAwait(false);
+
+                Assert.AreEqual(guid.ToString(), ex.CorrelationId);
+                Assert.AreEqual(guid.ToString(), ((MsalException)ex).CorrelationId);
+            }
         }
 
         private void AssertPropertyHasPublicGetAndSet(Type t, string propertyName)
