@@ -57,6 +57,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         private static void ValidateServerCertificate(RequestContext requestContext)
         {
+#if !NET462
             requestContext.Logger.Verbose(() => "[Managed Identity] Updating the http client to validate the server certificate.");
 
             HttpClientHandler handler = new HttpClientHandler();
@@ -71,6 +72,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             };
 
             requestContext.ServiceBundle.HttpManager.HttpClientHandler = handler;
+#endif
         }
 
         private ServiceFabricManagedIdentitySource(RequestContext requestContext, Uri endpoint, string identityHeaderValue) : 
