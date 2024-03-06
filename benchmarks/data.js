@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709715985798,
+  "lastUpdate": 1709715988287,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -21284,6 +21284,66 @@ window.BENCHMARK_DATA = {
             "value": 145861.6313131313,
             "unit": "ns",
             "range": "± 16594.29437822387"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "563f2f5280165e2a01658d1a988c4ab033af7d6a",
+          "message": "Adding error log for common/organizations on OBO flow (#4642)\n\n* Adding error log for common/organizations on OBO flow\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Refactoring tests\r\n\r\n# Conflicts:\r\n#\ttests/Microsoft.Identity.Test.Unit/PublicApiTests/ConfidentialClientApplicationTests.cs\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>",
+          "timestamp": "2024-03-06T00:58:33-08:00",
+          "tree_id": "e6ddb37c385bed2dd23fca1df36b0820d8b3e840",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/563f2f5280165e2a01658d1a988c4ab033af7d6a"
+        },
+        "date": 1709715987389,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (1, 10))",
+            "value": 17929.198573521204,
+            "unit": "ns",
+            "range": "± 39.47099494149543"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (10000, 10))",
+            "value": 29949.507291666665,
+            "unit": "ns",
+            "range": "± 128.9968722486344"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 9324.208393096924,
+            "unit": "ns",
+            "range": "± 27.90510631518678"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 20791.171264648438,
+            "unit": "ns",
+            "range": "± 53.23873814790466"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 47150.357142857145,
+            "unit": "ns",
+            "range": "± 524.0773001032543"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 134399.82417582418,
+            "unit": "ns",
+            "range": "± 9155.129732187675"
           }
         ]
       }
