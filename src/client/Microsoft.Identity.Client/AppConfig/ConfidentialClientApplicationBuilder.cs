@@ -330,7 +330,7 @@ namespace Microsoft.Identity.Client
         /// See https://openid.net/specs/openid-connect-core-1_0.html#Terminology
         /// </summary>
         /// <remarks>
-        /// Do not use this method with Entra Id authorities (e.g. https://login.microsfoftonline.com/common).
+        /// Do not use this method with Entra ID authorities (e.g. https://login.microsfoftonline.com/common).
         /// Use WithAuthority(string) instead.
         /// </remarks>
         public ConfidentialClientApplicationBuilder WithOidcAuthority(string authorityUri)
