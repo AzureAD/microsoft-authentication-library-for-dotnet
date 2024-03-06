@@ -23,14 +23,14 @@ namespace Microsoft.Identity.Client.Internal.Logger
             _logger = logger;
             _measuredBlockName = measuredBlockName;
             _logLevel = logLevel;
-            _startMilliseconds = StopWatchService.CurrentElapsedMilliseconds;
+            _startMilliseconds = StopwatchService.CurrentElapsedMilliseconds;
 
             _logger.Log(LogLevel.Verbose, string.Empty, $"Starting {measuredBlockName}");
         }
 
         public void Dispose()
         {
-            _logger.Log(LogLevel.Verbose, string.Empty, $"Finished {_measuredBlockName} in {StopWatchService.CurrentElapsedMilliseconds - _startMilliseconds} ms");
+            _logger.Log(LogLevel.Verbose, string.Empty, $"Finished {_measuredBlockName} in {StopwatchService.CurrentElapsedMilliseconds - _startMilliseconds} ms");
         }
     }
 }

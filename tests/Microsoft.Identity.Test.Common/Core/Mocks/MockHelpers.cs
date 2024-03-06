@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.ManagedIdentity;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
@@ -129,9 +130,24 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
           "\"ext_expires_in\":\"12345\",\"token_type\":\"Bearer\"}";
         }
 
-        public static string GetMsiErrorResponse()
+        public static string GetMsiErrorResponse(ManagedIdentitySource source)
         {
-            return "{\"statusCode\":\"500\",\"message\":\"An unexpected error occured while fetching the AAD Token.\",\"correlationId\":\"7d0c9763-ff1d-4842-a3f3-6d49e64f4513\"}";
+            switch (source)
+            {
+                case ManagedIdentitySource.AppService:
+                    return "{\"statusCode\":500,\"message\":\"An unexpected error occured while fetching the AAD Token.\",\"correlationId\":\"4ce26535-1769-4001-96e3-9019ce00922d\"}";
+
+                case ManagedIdentitySource.Imds:
+                case ManagedIdentitySource.AzureArc:
+                case ManagedIdentitySource.ServiceFabric:
+                    return "{\"error\":\"invalid_resource\",\"error_description\":\"AADSTS500011: The resource principal named scope was not found in the tenant named Microsoft. This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant. You might have sent your authentication request to the wrong tenant.\\r\\nTrace ID: GUID\\r\\nCorrelation ID: GUID\\r\\nTimestamp: 2024-02-14 23:11:50Z\",\"error_codes\":\"[500011]\",\"timestamp\":\"2022-11-10 23:11:50Z\",\"trace_id\":\"GUID\",\"correlation_id\":\"GUID\",\"error_uri\":\"errorUri\"}";
+
+                case ManagedIdentitySource.CloudShell:
+                    return "{\"error\":{\"code\":\"AudienceNotSupported\",\"message\":\"Audience scope is not a supported MSI token audience.Supported audiences:https://management.core.windows.net/,https://management.azure.com/,https://graph.windows.net/,https://vault.azure.net,https://datalake.azure.net/,https://outlook.office365.com/,https://graph.microsoft.com/,https://batch.core.windows.net/,https://analysis.windows.net/powerbi/api,https://storage.azure.com/,https://rest.media.azure.net,https://api.loganalytics.io,https://ossrdbms-aad.database.windows.net,https://www.yammer.com,https://digitaltwins.azure.net,0b07f429-9f4b-4714-9392-cc5e8e80c8b0,822c8694-ad95-4735-9c55-256f7db2f9b4,https://dev.azuresynapse.net,https://database.windows.net,https://quantum.microsoft.com,https://iothubs.azure.net,2ff814a6-3304-4ab8-85cb-cd0e6f879c1d,https://azuredatabricks.net/,ce34e7e5-485f-4d76-964f-b3d2b16d1e4f,https://azure-devices-provisioning.net,https://managedhsm.azure.net,499b84ac-1321-427f-aa17-267ca6975798,https://api.adu.microsoft.com/,https://purview.azure.net/,6dae42f8-4368-4678-94ff-3960e28e3630\"}}";
+
+                default:
+                    return "";
+            }
         }
 
         public static string GetMsiImdsErrorResponse()
@@ -139,8 +155,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return "{\"error\":\"invalid_resource\"," +
                 "\"error_description\":\"AADSTS500011: The resource principal named user.read was not found in the tenant named Microsoft. " +
                 "This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant. " +
-                "You might have sent your authentication request to the wrong tenant.\r\nTrace ID: 2dff494a-0226-4f41-8859-d9f560ca8903" +
-                "\r\nCorrelation ID: 77145480-bc5a-4ebe-ae4d-e4a8b7d727cf\r\nTimestamp: 2022-11-10 23:12:37Z\"," +
+                "You might have sent your authentication request to the wrong tenant.\\r\\nTrace ID: 2dff494a-0226-4f41-8859-d9f560ca8903" +
+                "\\r\\nCorrelation ID: 77145480-bc5a-4ebe-ae4d-e4a8b7d727cf\\r\\nTimestamp: 2022-11-10 23:12:37Z\"," +
                 "\"error_codes\":[500011],\"timestamp\":\"2022-11-10 23:12:37Z\",\"trace_id\":\"2dff494a-0226-4f41-8859-d9f560ca8903\"," +
                 "\"correlation_id\":\"77145480-bc5a-4ebe-ae4d-e4a8b7d727cf\",\"error_uri\":\"https://westus2.login.microsoft.com/error?code=500011\"}";
         }
