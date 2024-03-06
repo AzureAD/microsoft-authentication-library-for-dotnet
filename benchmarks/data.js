@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1709715894899,
+  "lastUpdate": 1709715980862,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -4346,6 +4346,42 @@ window.BENCHMARK_DATA = {
             "value": 343045,
             "unit": "ns",
             "range": "± 5549.510175890093"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "563f2f5280165e2a01658d1a988c4ab033af7d6a",
+          "message": "Adding error log for common/organizations on OBO flow (#4642)\n\n* Adding error log for common/organizations on OBO flow\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Refactoring tests\r\n\r\n# Conflicts:\r\n#\ttests/Microsoft.Identity.Test.Unit/PublicApiTests/ConfidentialClientApplicationTests.cs\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>",
+          "timestamp": "2024-03-06T00:58:33-08:00",
+          "tree_id": "e6ddb37c385bed2dd23fca1df36b0820d8b3e840",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/563f2f5280165e2a01658d1a988c4ab033af7d6a"
+        },
+        "date": 1709715976683,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 256196.23333333334,
+            "unit": "ns",
+            "range": "± 4694.200197609609"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 363659.775862069,
+            "unit": "ns",
+            "range": "± 15930.915658580663"
           }
         ]
       }
