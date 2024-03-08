@@ -113,6 +113,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 catch (MsalException ex)
                 {
                     apiEvent.ApiErrorCode = ex.ErrorCode;
+                    if (string.IsNullOrWhiteSpace(ex.CorrelationId))
+                    {
+                        ex.CorrelationId = AuthenticationRequestParameters.CorrelationId.ToString();
+                    }
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     LogMsalErrorTelemetryToClient(ex, telemetryEventDetails, telemetryClients);
 

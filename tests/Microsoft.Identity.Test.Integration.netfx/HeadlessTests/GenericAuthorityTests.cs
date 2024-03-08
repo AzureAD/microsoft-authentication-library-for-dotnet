@@ -27,8 +27,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task ShouldSupportClientCredentialsWithDuendeDemoInstanceAsync()
         {
             var app = ConfidentialClientApplicationBuilder.Create("m2m")
-                .WithExperimentalFeatures(true)
-                .WithGenericAuthority(DemoDuendeSoftwareDotCom)                
+                .WithOidcAuthority(DemoDuendeSoftwareDotCom)                
                 .WithClientSecret("secret")
                 .Build();
 
@@ -51,8 +50,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public async Task BadSecret_Duende_Async()
         {
             var app = ConfidentialClientApplicationBuilder.Create("m2m")
-                .WithExperimentalFeatures(true)
-                .WithGenericAuthority(DemoDuendeSoftwareDotCom)
+                .WithOidcAuthority(DemoDuendeSoftwareDotCom)
                 .WithClientSecret("bad_secret")
                 .Build();
 
@@ -72,8 +70,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             string authority = DemoDuendeSoftwareDotCom + "/"; // for when the app developer adds / at the end.
             var app = builder
-                .WithExperimentalFeatures(true)
-                .WithGenericAuthority(authority)
+                .WithOidcAuthority(authority)
                 .WithClientId("m2m.jwt")
                 .WithClientAssertion(options => GetPrivateKeyJwtClientAssertionAsync(options.ClientID, options.TokenEndpoint, options.CancellationToken))
                 .Build();

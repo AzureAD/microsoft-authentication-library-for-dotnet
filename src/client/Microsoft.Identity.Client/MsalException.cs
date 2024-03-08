@@ -143,6 +143,11 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// An ID that can used to piece up a single authentication flow.
+        /// </summary>
+        public string CorrelationId { get; set; }
+
+        /// <summary>
         /// A property bag with extra details for this exception.
         /// </summary>
         public IReadOnlyDictionary<string, string> AdditionalExceptionData { get; set; }

@@ -210,11 +210,6 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        /// <summary>
-        /// An ID that can used to piece up a single authentication flow.
-        /// </summary>
-        public string CorrelationId { get; set; }
-
         #endregion
 
         /// <remarks>

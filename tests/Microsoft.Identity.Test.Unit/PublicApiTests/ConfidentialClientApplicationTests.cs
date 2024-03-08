@@ -1809,6 +1809,35 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        [DataRow(TestConstants.AuthorityCommonTenant)]
+        [DataRow(TestConstants.AuthorityOrganizationsTenant)]
+        public async Task AcquireTokenOboAuthorityCheckTestAsync(string tenant)
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                string log = string.Empty;
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .WithAuthority(tenant, true)
+                    .WithHttpManager(httpManager)
+                    .WithLogging((LogLevel _, string message, bool _) => log += message)
+                    .BuildConcrete();
+
+                var result = await app
+                    .AcquireTokenOnBehalfOf(TestConstants.s_scope, new UserAssertion(TestConstants.UserAssertion))
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsTrue(log.Contains(MsalErrorMessage.OnBehalfOfWrongAuthority));
+            }
+        }
+
+        [TestMethod]
         [DataRow("")]
         [DataRow(null)]
         public async Task ValidateGetAccountAsyncWithNullEmptyAccountIdAsync(string accountId)
