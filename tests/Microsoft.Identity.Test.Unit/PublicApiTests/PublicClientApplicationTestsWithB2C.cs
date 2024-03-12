@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
     [TestCategory(TestCategories.B2C)]
-    public class PublicClientApplicationTestsWithB2C : TestBase
+    public class B2C_E2E_Tests : TestBase
     {
         [TestInitialize]
         public override void TestInitialize()
@@ -272,6 +272,37 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.AreEqual(MsalError.ScopesRequired, ex.ErrorCode);
                 Assert.AreEqual(UiRequiredExceptionClassification.AcquireTokenSilentFailed, ex.Classification);
+            }
+        }
+
+        /// <summary>
+        /// If no scopes are passed in, B2C does not return a AT. MSAL must be able to 
+        /// persist the data to the cache and return an AuthenticationResult.
+        /// This behavior has been seen on B2C, as AAD will return an access token for the implicit scopes.
+        /// </summary>
+        [TestMethod]
+        public async Task B2C_ClientId_Async()
+        {
+
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(TestConstants.B2CLoginAuthority), true)
+                                                                            .WithClientSecret(TestConstants.ClientSecret)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
+
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.B2CLoginAuthority);
+
+                // Act 
+                AuthenticationResult result = await app
+                    .AcquireTokenByAuthorizationCode(new[] { TestConstants.ClientId }, "code" ) 
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.IsNotNull(result.AccessToken);
+
             }
         }
 
