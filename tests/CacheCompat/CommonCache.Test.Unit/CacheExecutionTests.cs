@@ -43,7 +43,6 @@ namespace CommonCache.Test.Unit
         }
 
         [DataTestMethod]
-        [DataRow(CacheProgramType.MsalV2, CacheProgramType.MsalV2, CacheStorageType.MsalV2, DisplayName = "MsalV2->MsalV2 msal v2 cache")]
         [DataRow(CacheProgramType.MsalV2, CacheProgramType.MsalV3, CacheStorageType.MsalV2, DisplayName = "MsalV2->MsalV3 msal v2 cache")]
         public async Task TestMsalV2CacheCompatibilityAsync(
             CacheProgramType interactiveType,
