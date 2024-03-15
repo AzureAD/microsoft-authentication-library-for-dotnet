@@ -23,15 +23,6 @@
 
   <Target Name="CopyFiles" AfterTargets="$(BuildDependsOn)">
     <ItemGroup>
-      <AdalV3Files Include="$(SolutionDir)\tests\CacheCompat\CommonCache.Test.AdalV3\bin\$(Configuration)\**\*.*">
-        <InProject>false</InProject>
-      </AdalV3Files>
-      <AdalV4Files Include="$(SolutionDir)\tests\CacheCompat\CommonCache.Test.AdalV4\bin\$(Configuration)\**\*.*">
-        <InProject>false</InProject>
-      </AdalV4Files>
-      <AdalV5Files Include="$(SolutionDir)\tests\CacheCompat\CommonCache.Test.AdalV5\bin\$(Configuration)\**\*.*">
-        <InProject>false</InProject>
-      </AdalV5Files>
       <MsalV2Files Include="$(SolutionDir)\tests\CacheCompat\CommonCache.Test.MsalV2\bin\$(Configuration)\**\*.*">
         <InProject>false</InProject>
       </MsalV2Files>
@@ -54,9 +45,6 @@
 
     <Message Text="COPYING CACHECOMPAT DEPENDENCY FILES @(MsalNodeFiles)" Importance="high" />
     
-    <Copy SourceFiles="@(AdalV3Files)" DestinationFolder="$(OutputPath)\AdalV3" />
-    <Copy SourceFiles="@(AdalV4Files)" DestinationFolder="$(OutputPath)\AdalV4" />
-    <Copy SourceFiles="@(AdalV5Files)" DestinationFolder="$(OutputPath)\AdalV5" />
     <Copy SourceFiles="@(MsalV2Files)" DestinationFolder="$(OutputPath)\MsalV2" />
     <Copy SourceFiles="@(MsalV3Files)" DestinationFolder="$(OutputPath)\MsalV3" />
     <Copy SourceFiles="@(MsalJavaFiles)" DestinationFolder="$(OutputPath)\MsalJava" />

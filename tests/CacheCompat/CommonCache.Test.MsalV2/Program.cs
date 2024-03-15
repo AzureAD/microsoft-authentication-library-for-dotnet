@@ -37,7 +37,6 @@ namespace CommonCache.Test.MsalV2
                 FileBasedTokenCacheHelper.ConfigureUserCache(
                     testInputData.StorageType,
                     tokenCache,
-                    CommonCacheTestUtils.AdalV3CacheFilePath,
                     CommonCacheTestUtils.MsalV2CacheFilePath);
 
                 var results = new List<CacheExecutorAccountResult>();
