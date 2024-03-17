@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-namespace Microsoft.Identity.Client.Internal.Broker
+namespace Microsoft.Identity.Client.Internal.MsalCppRuntime
 {
     /// <summary>
     /// For Android there are from: https://github.com/AzureAD/microsoft-authentication-library-common-for-android/blob/dev/common/src/main/java/com/microsoft/identity/common/internal/broker/BrokerResult.java
     /// </summary>
-    internal static class BrokerResponseConst
+    internal static class RuntimeResponseConst
     {
         public const string ErrorMetadata = "error_metadata";
         public const string BrokerErrorDomain = "broker_error_domain";

@@ -31,8 +31,8 @@
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\Microsoft.Identity.Client\Platforms\Features\RuntimeBroker\RuntimeBroker.cs" Link="RuntimeBroker.cs" />
-    <Compile Include="..\Microsoft.Identity.Client\Platforms\Features\RuntimeBroker\WamAdapters.cs" Link="WamAdapters.cs" />
+    <Compile Include="..\Microsoft.Identity.Client\Platforms\Features\MsalCppRuntime\MsalCppRuntime.cs" Link="MsalCppRuntime.cs" />
+    <Compile Include="..\Microsoft.Identity.Client\Platforms\Features\MsalCppRuntime\WamAdapters.cs" Link="WamAdapters.cs" />
     <Compile Include="..\Microsoft.Identity.Client\Properties\InternalsVisibleTo.cs" Link="Properties\InternalsVisibleTo.cs" />
   </ItemGroup>
     <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">

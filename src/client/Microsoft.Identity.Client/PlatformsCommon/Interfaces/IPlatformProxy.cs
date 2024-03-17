@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
-using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Internal.MsalCppRuntime;
 using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 using Microsoft.Identity.Client.UI;
 
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         /// </summary>
         Task StartDefaultOsBrowserAsync(string url, bool isBrokerConfigured);
 
-        IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent);
+        IMsalCppRuntime CreateRuntime(ApplicationConfiguration appConfig, CoreUIParent uiParent);
 
         IDeviceAuthManager CreateDeviceAuthManager();
 

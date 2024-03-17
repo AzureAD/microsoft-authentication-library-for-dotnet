@@ -3,7 +3,7 @@
 
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Internal.MsalCppRuntime;
 using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
 using Microsoft.Identity.Client.Platforms.netcore;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
@@ -25,20 +25,20 @@ namespace Microsoft.Identity.Client.Platforms.net6win
 #if NET6_WIN
         [System.Runtime.Versioning.SupportedOSPlatform("windows10.0.17763.0")]
 #endif
-        public override IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
+        public override IMsalCppRuntime CreateRuntime(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {
             if (DesktopOsHelper.IsWin10OrServerEquivalent())
             {
                 Logger.Info("WAM supported OS. ");
 
-                return appConfig.BrokerCreatorFunc != null ?
-                    appConfig.BrokerCreatorFunc(uiParent, appConfig, Logger) :
-                    new Features.RuntimeBroker.RuntimeBroker(uiParent, appConfig, Logger);
+                return appConfig.RuntimeBrokerCreatorFunc != null ?
+                    appConfig.RuntimeBrokerCreatorFunc(uiParent, appConfig, Logger) :
+                    new Features.MsalCppRuntime.MsalCppRuntime(uiParent, appConfig, Logger);
             }
             else
             {
                 Logger.Info("WAM is not available. WAM is supported only on Windows 10+ or Windows Server 2019+");
-                return new NullBroker(Logger);
+                return new NullRuntime(Logger);
             }
         }
 

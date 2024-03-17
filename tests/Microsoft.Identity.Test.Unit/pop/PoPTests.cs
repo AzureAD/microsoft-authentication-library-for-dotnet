@@ -19,10 +19,10 @@ using Microsoft.Identity.Client.Broker;
 #endif
 
 #if NET6_WIN
-using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
+using Microsoft.Identity.Client.Platforms.Features.MsalCppRuntime;
 #endif
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Internal.MsalCppRuntime;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -287,19 +287,19 @@ namespace Microsoft.Identity.Test.Unit.Pop
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
-                var mockBroker = Substitute.For<IBroker>();
-                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(false);
-                mockBroker.IsPopSupported.Returns(true);
+                var mockRuntime = Substitute.For<IMsalCppRuntime>();
+                mockRuntime.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(false);
+                mockRuntime.IsPopSupported.Returns(true);
 
                 var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithTestBroker(mockBroker)
+                    .WithTestBroker(mockRuntime)
                     .WithHttpManager(harness.HttpManager);
 
                 pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
 
                 PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
-                pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
+                pca.ServiceBundle.Config.RuntimeBrokerCreatorFunc = (_, _, _) => mockRuntime;
 
                 pca.ServiceBundle.ConfigureMockWebUI();
 
@@ -321,7 +321,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
         public async Task PopWhenBrokerDoesNotSupportPop_Async()
         {
             // Arrange
-            var mockBroker = Substitute.For<IBroker>();
+            var mockBroker = Substitute.For<IMsalCppRuntime>();
             mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
             mockBroker.IsPopSupported.Returns(false);
 
@@ -332,7 +332,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
             PublicClientApplication pca = pcaBuilder.BuildConcrete();
 
-            pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
+            pca.ServiceBundle.Config.RuntimeBrokerCreatorFunc = (_, _, _) => mockBroker;
 
             // Act
             MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
@@ -352,14 +352,14 @@ namespace Microsoft.Identity.Test.Unit.Pop
             // Arrange
             using (var harness = CreateTestHarness())
             {
-                var mockBroker = Substitute.For<IBroker>();
-                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
-                mockBroker.IsPopSupported.Returns(true);
-                mockBroker.AcquireTokenSilentAsync(Arg.Any<AuthenticationRequestParameters>(), Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalPopTokenResponse());
+                var mockRuntime = Substitute.For<IMsalCppRuntime>();
+                mockRuntime.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+                mockRuntime.IsPopSupported.Returns(true);
+                mockRuntime.AcquireTokenSilentAsync(Arg.Any<AuthenticationRequestParameters>(), Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalPopTokenResponse());
 
                 var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithAdfsAuthority(TestConstants.ADFSAuthority, false)
-                    .WithTestBroker(mockBroker)
+                    .WithTestBroker(mockRuntime)
                     .WithHttpManager(harness.HttpManager);
 
                 pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
@@ -370,7 +370,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                                                environment: "fs.msidlab8.com");
                 TokenCacheHelper.ExpireAllAccessTokens(pca.UserTokenCacheInternal);
 
-                pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
+                pca.ServiceBundle.Config.RuntimeBrokerCreatorFunc = (_, _, _) => mockRuntime;
 
                 // Act
                 MsalClientException ex = await AssertException.TaskThrowsAsync<MsalClientException>(async () =>
@@ -393,16 +393,16 @@ namespace Microsoft.Identity.Test.Unit.Pop
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
-                var mockBroker = Substitute.For<IBroker>();
-                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
-                mockBroker.IsPopSupported.Returns(true);
-                mockBroker.AcquireTokenSilentAsync(
+                var mockRuntime = Substitute.For<IMsalCppRuntime>();
+                mockRuntime.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+                mockRuntime.IsPopSupported.Returns(true);
+                mockRuntime.AcquireTokenSilentAsync(
                     Arg.Any<AuthenticationRequestParameters>(),
                     Arg.Any<AcquireTokenSilentParameters>()).Returns(
                         MockHelpers.CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
 
                 var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithTestBroker(mockBroker)
+                    .WithTestBroker(mockRuntime)
                     .WithHttpManager(harness.HttpManager);
 
                 pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
@@ -412,7 +412,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
                 TokenCacheHelper.ExpireAllAccessTokens(pca.UserTokenCacheInternal);
 
-                pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
+                pca.ServiceBundle.Config.RuntimeBrokerCreatorFunc = (_, _, _) => mockRuntime;
 
                 // Act
                 var result = await pca.AcquireTokenSilent(TestConstants.s_graphScopes, TestConstants.DisplayableId)
@@ -436,17 +436,17 @@ namespace Microsoft.Identity.Test.Unit.Pop
             {
                 var brokerAccessToken = "TokenFromBroker";
 
-                var mockBroker = Substitute.For<IBroker>();
-                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
-                mockBroker.IsPopSupported.Returns(true);
-                mockBroker.AcquireTokenSilentAsync(
+                var mockRuntime = Substitute.For<IMsalCppRuntime>();
+                mockRuntime.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+                mockRuntime.IsPopSupported.Returns(true);
+                mockRuntime.AcquireTokenSilentAsync(
                     Arg.Any<AuthenticationRequestParameters>(),
                     Arg.Any<AcquireTokenSilentParameters>()).Returns(CreateMsalPopTokenResponse(brokerAccessToken));
 
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
                 var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                                .WithTestBroker(mockBroker)
+                                .WithTestBroker(mockRuntime)
                                 .WithHttpManager(harness.HttpManager)
                                 .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
 
@@ -455,7 +455,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 //Populate local cache with token
                 TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
 
-                pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
+                pca.ServiceBundle.Config.RuntimeBrokerCreatorFunc = (_, _, _) => mockRuntime;
 
                 // Act
                 var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);

@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Client
 #endif
         public bool IsBrokerAvailable()
         {
-            return ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null)
+            return ServiceBundle.PlatformProxy.CreateRuntime(ServiceBundle.Config, null)
                     .IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority?.AuthorityInfo?.AuthorityType ?? AuthorityType.Aad);
         }
 
@@ -174,11 +174,11 @@ namespace Microsoft.Identity.Client
         {
             if (ServiceBundle.Config.IsBrokerEnabled)
             {
-                var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+                var msalCppRuntime = ServiceBundle.PlatformProxy.CreateRuntime(ServiceBundle.Config, null);
 
-                if (broker.IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType))
+                if (msalCppRuntime.IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType))
                 {
-                    return broker.IsPopSupported;
+                    return msalCppRuntime.IsPopSupported;
                 }
             }
 

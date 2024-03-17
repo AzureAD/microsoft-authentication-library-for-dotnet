@@ -365,7 +365,7 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.BrokerRequiredForPop, MsalErrorMessage.BrokerRequiredForPop);
             }
 
-            var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+            var broker = ServiceBundle.PlatformProxy.CreateRuntime(ServiceBundle.Config, null);
 
             if (!broker.IsPopSupported)
             {

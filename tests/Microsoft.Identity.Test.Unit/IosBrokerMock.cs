@@ -3,11 +3,11 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Internal.MsalCppRuntime;
 
 namespace Microsoft.Identity.Test.Unit
 {
-    internal class IosBrokerMock : NullBroker
+    internal class IosBrokerMock : NullRuntime
     {
         public IosBrokerMock(ILoggerAdapter logger) : base(logger)
         {

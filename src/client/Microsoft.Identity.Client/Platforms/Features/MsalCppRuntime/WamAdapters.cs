@@ -12,14 +12,14 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Internal.MsalCppRuntime;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
+namespace Microsoft.Identity.Client.Platforms.Features.MsalCppRuntime
 {
     internal class WamAdapters
     {
@@ -352,7 +352,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     Scope = authResult.GrantedScopes,
                     ExpiresIn = (long)(DateTime.SpecifyKind(authResult.ExpiresOn, DateTimeKind.Utc) - DateTimeOffset.UtcNow).TotalSeconds,
                     ClientInfo = authResult.Account.ClientInfo,
-                    TokenType = authResult.IsPopAuthorization ? Constants.PoPAuthHeaderPrefix : BrokerResponseConst.Bearer,
+                    TokenType = authResult.IsPopAuthorization ? Constants.PoPAuthHeaderPrefix : RuntimeResponseConst.Bearer,
                     WamAccountId = authResult.Account.AccountId,
                     TokenSource = TokenSource.Broker
                 };

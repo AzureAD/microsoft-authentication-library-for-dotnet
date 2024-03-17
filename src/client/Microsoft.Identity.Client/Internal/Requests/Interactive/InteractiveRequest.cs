@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Internal.MsalCppRuntime;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.UI;
 
@@ -72,16 +72,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<MsalTokenResponse> FetchTokensFromBrokerAsync(string brokerInstallUrl, CancellationToken cancellationToken)
         {
-            IBroker broker = _serviceBundle.PlatformProxy.CreateBroker(
+            IMsalCppRuntime msalCppRuntime = _serviceBundle.PlatformProxy.CreateRuntime(
                 _serviceBundle.Config,
                 _interactiveParameters.UiParent);
 
             ITokenRequestComponent brokerInteractiveRequest =
                 _brokerInteractiveComponent ??
-                new BrokerInteractiveRequestComponent(
+                new RuntimeInteractiveRequestComponent(
                     _requestParams,
                     _interactiveParameters,
-                    broker,
+                    msalCppRuntime,
                     brokerInstallUrl);
 
             return await brokerInteractiveRequest.FetchTokensAsync(cancellationToken)
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string authCode = authResult.Code;
             string pkceCodeVerifier = result.Item2;
 
-            if (BrokerInteractiveRequestComponent.IsBrokerRequiredAuthCode(authCode, out string brokerInstallUri))
+            if (RuntimeInteractiveRequestComponent.IsBrokerRequiredAuthCode(authCode, out string brokerInstallUri))
             {
                 return await RunBrokerWithInstallUriAsync(brokerInstallUri, cancellationToken).ConfigureAwait(false);
             }

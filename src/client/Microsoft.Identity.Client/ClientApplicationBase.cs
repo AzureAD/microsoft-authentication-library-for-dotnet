@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Client
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+                var broker = ServiceBundle.PlatformProxy.CreateRuntime(ServiceBundle.Config, null);
                 if (broker.IsBrokerInstalledAndInvokable(authority.AuthorityInfo.AuthorityType))
                 {
                     await broker.RemoveAccountAsync(ServiceBundle.Config, account).ConfigureAwait(false);
@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Client
         {
             if (AppConfig.IsBrokerEnabled && ServiceBundle.PlatformProxy.CanBrokerSupportSilentAuth())
             {
-                var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
+                var broker = ServiceBundle.PlatformProxy.CreateRuntime(ServiceBundle.Config, null);
                 if (broker.IsBrokerInstalledAndInvokable(ServiceBundle.Config.Authority.AuthorityInfo.AuthorityType))
                 {
                     var brokerAccounts =

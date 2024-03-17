@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                                                                                                serviceBundle,
                                                                                                authenticationRequestParameters,
                                                                                                silentParameters,
-                                                                                               serviceBundle.PlatformProxy.CreateBroker(
+                                                                                               serviceBundle.PlatformProxy.CreateRuntime(
                                                                                                    serviceBundle.Config, null)));
             _clientStrategy = clientStrategyOverride ?? new CacheSilentStrategy(this, serviceBundle, authenticationRequestParameters, silentParameters);
 

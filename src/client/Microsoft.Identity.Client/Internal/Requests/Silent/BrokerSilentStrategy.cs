@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Internal.MsalCppRuntime;
 using Microsoft.Identity.Client.Internal.Requests.Silent;
 using Microsoft.Identity.Client.OAuth2;
 
@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected IServiceBundle _serviceBundle;
         private readonly AcquireTokenSilentParameters _silentParameters;
         private readonly SilentRequest _silentRequest;
-        internal IBroker Broker { get; }
+        internal IMsalCppRuntime Broker { get; }
         private readonly ILoggerAdapter _logger;
 
         public BrokerSilentStrategy(
@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenSilentParameters silentParameters,
-            IBroker broker)
+            IMsalCppRuntime broker)
         {
             _authenticationRequestParameters = authenticationRequestParameters;
             _silentParameters = silentParameters;
@@ -96,9 +96,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 _logger.Info(() => LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
 
-                if (msalTokenResponse.Error == BrokerResponseConst.AndroidNoTokenFound ||
-                    msalTokenResponse.Error == BrokerResponseConst.AndroidNoAccountFound ||
-                    msalTokenResponse.Error == BrokerResponseConst.AndroidInvalidRefreshToken)
+                if (msalTokenResponse.Error == RuntimeResponseConst.AndroidNoTokenFound ||
+                    msalTokenResponse.Error == RuntimeResponseConst.AndroidNoAccountFound ||
+                    msalTokenResponse.Error == RuntimeResponseConst.AndroidInvalidRefreshToken)
                 {
                     throw new MsalUiRequiredException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription);
                 }

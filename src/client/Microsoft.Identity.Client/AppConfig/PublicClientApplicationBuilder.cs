@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client
 #pragma warning disable CS0162 // Unreachable code detected
 
 #if NET462
-            if (Config.BrokerCreatorFunc == null)
+            if (Config.RuntimeBrokerCreatorFunc == null)
             {
                 throw new PlatformNotSupportedException(
                     "The Windows broker is not directly available on MSAL for .NET Framework. " +
@@ -172,7 +172,7 @@ namespace Microsoft.Identity.Client
 #endif
 
 #if NET_CORE && !NET6_WIN
-            if (Config.BrokerCreatorFunc == null)
+            if (Config.RuntimeBrokerCreatorFunc == null)
             {
                 throw new PlatformNotSupportedException(
                     "The desktop broker is not directly available in the MSAL package. "+
@@ -397,7 +397,7 @@ namespace Microsoft.Identity.Client
         public bool IsBrokerAvailable()
         {
             return PlatformProxyFactory.CreatePlatformProxy(null)
-                    .CreateBroker(Config, null).IsBrokerInstalledAndInvokable(Config.Authority?.AuthorityInfo?.AuthorityType ?? AuthorityType.Aad);
+                    .CreateRuntime(Config, null).IsBrokerInstalledAndInvokable(Config.Authority?.AuthorityInfo?.AuthorityType ?? AuthorityType.Aad);
         }
 
         /// <summary>
