@@ -47,13 +47,65 @@ namespace Microsoft.Identity.Client.Broker
         /// parameters, and to create a public client application instance</returns>
         public static PublicClientApplicationBuilder WithBroker(this PublicClientApplicationBuilder builder, BrokerOptions brokerOptions)
         {
-            AddRuntimeSupportForWam(builder);
             builder.Config.BrokerOptions = brokerOptions;
             builder.Config.IsBrokerEnabled = brokerOptions.IsBrokerEnabledOnCurrentOs();
+            AddRuntimeSupport(builder);
             return builder;
         }
 
-        private static void AddRuntimeSupportForWam(PublicClientApplicationBuilder builder)
+        /// <summary>
+        /// Brokers enable Single-Sign-On, device identification,and application identification verification, 
+        /// while increasing the security of applications. Use this API to enable brokers on desktop platforms.
+        /// 
+        /// See https://aka.ms/msal-net-wam for more information on platform specific settings required to enable the broker such as redirect URIs.
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="brokerOptions">This provides cross platform options for broker.</param>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
+        public static PublicClientApplicationBuilder WithSsoPolicy(this PublicClientApplicationBuilder builder)
+        {
+            builder.Config.IsSsoPolicyEnabled = true;
+            AddRuntimeSupport(builder);
+            return builder;
+        }
+
+        private static void AddRuntimeSupport(PublicClientApplicationBuilder builder)
+        {
+            if (DesktopOsHelper.IsWin10OrServerEquivalent())
+            {
+                if (builder.Config.IsSsoPolicyEnabled)
+                {
+                    builder.Config.SsoPolicyCreatorFunc =
+                         (appConfig, logger) =>
+                         {
+                             logger.Info("[RuntimeBroker] Runtime supported OS.");
+                             return new RuntimeBroker(appConfig, logger);
+                         };
+                }
+                else
+                {
+                    builder.Config.BrokerCreatorFunc =
+                         (uiParent, appConfig, logger) =>
+                         {
+                             logger.Info("[RuntimeBroker] Runtime supported OS.");
+                             return new RuntimeBroker(uiParent, appConfig, logger);
+                         };
+                }
+            }
+            else
+            {
+                builder.Config.BrokerCreatorFunc =
+                   (uiParent, appConfig, logger) =>
+                   {
+                       logger.Info("[RuntimeBroker] Not a Windows 10 or Server equivalent machine. Runtime is not available.");
+                       return new NullBroker(logger);
+                   };
+            }
+        }
+
+        private static void AddRuntimeSupportForSsoPolicy(PublicClientApplicationBuilder builder)
         {
             if (DesktopOsHelper.IsWin10OrServerEquivalent())
             {

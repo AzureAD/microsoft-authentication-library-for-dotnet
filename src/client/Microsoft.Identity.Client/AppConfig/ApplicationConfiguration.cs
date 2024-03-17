@@ -25,11 +25,11 @@ namespace Microsoft.Identity.Client
 {
     internal sealed class ApplicationConfiguration : IAppConfig
     {
-        public ApplicationConfiguration(MsalClientType applicationType) 
+        public ApplicationConfiguration(MsalClientType applicationType)
         {
             switch (applicationType)
             {
-                case MsalClientType.ConfidentialClient: 
+                case MsalClientType.ConfidentialClient:
                     IsConfidentialClient = true;
                     break;
 
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
                     break;
             }
         }
-        
+
         public const string DefaultClientName = "UnknownClient";
         public const string DefaultClientVersion = "0.0.0.0";
 
@@ -67,14 +67,16 @@ namespace Microsoft.Identity.Client
 
         public bool IsBrokerEnabled { get; internal set; }
 
+        public bool IsSsoPolicyEnabled { get; internal set; }
+
         // Legacy options for UWP. .NET broker options are in BrokerOptions
-        public WindowsBrokerOptions UwpBrokerOptions { get; set; } 
+        public WindowsBrokerOptions UwpBrokerOptions { get; set; }
 
         public BrokerOptions BrokerOptions { get; set; }
 
         public Func<CoreUIParent, ApplicationConfiguration, ILoggerAdapter, IBroker> BrokerCreatorFunc { get; set; }
 
-        public Func<ApplicationConfiguration, ILoggerAdapter, ISsoPolicy> SsoPolicyCreatorFunc { get; set; }
+        public Func<ApplicationConfiguration, ILoggerAdapter, IBroker> SsoPolicyCreatorFunc { get; set; }
 
         public Func<IWebUIFactory> WebUiFactoryCreator { get; set; }
 
@@ -128,7 +130,7 @@ namespace Microsoft.Identity.Client
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
-#region ClientCredentials
+        #region ClientCredentials
 
         public IClientCredential ClientCredential { get; internal set; }
 
@@ -159,17 +161,17 @@ namespace Microsoft.Identity.Client
                 {
                     return cred.Certificate;
                 }
-               
+
                 return null;
             }
         }
-#endregion
+        #endregion
 
-#region Region
+        #region Region
         public string AzureRegion { get; set; }
-#endregion
+        #endregion
 
-#region Authority
+        #region Authority
         // These are all used to create the Authority when the app is built.
 
         public string TenantId { get; internal set; }
@@ -197,9 +199,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool ValidateAuthority { get; set; }
 
-#endregion
+        #endregion
 
-#region Test Hooks
+        #region Test Hooks
         public ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
 
         public ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }

@@ -85,6 +85,18 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             }
         }
 
+        public RuntimeBroker(
+            ApplicationConfiguration appConfig,
+            ILoggerAdapter logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+            if (_logger.PiiLoggingEnabled)
+            {
+                s_lazyCore.Value.EnablePii(_logger.PiiLoggingEnabled);
+            }
+        }
+
         /// <summary>
         /// Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See DesktopOsHelper.IsWin10
         /// </summary>
