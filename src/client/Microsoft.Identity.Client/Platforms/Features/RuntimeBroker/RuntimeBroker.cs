@@ -564,6 +564,37 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 }
             }
         }
+        public Dictionary<string, string> GetSsoPolicyHeaders()
+        {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
+            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
+
+            NativeInterop.SsoPolicy ssoPolicy = new SsoPolicy();
+            _logger.Info(() => $"[RuntimeBroker] Broker returned SsoPolicyType {ssoPolicy._ssoPolicyType} and errorCode {ssoPolicy._errorCode}.");
+
+            var ssoPolicyHeaders = new Dictionary<string, string>();
+            if (ssoPolicy._ssoPolicyType == SsoPolicyType.PermissionRequired)
+            {
+                ssoPolicyHeaders.Add("x-ms-SsoFlags", "SsoRestr");
+            }
+            else if (ssoPolicy._ssoPolicyType == SsoPolicyType.Error)
+            {
+                ssoPolicyHeaders.Add("x-ms-SsoFlags", "SsoPolicyError");
+                string subStatusValue = "SsoRestrError:" + ssoPolicy._errorCode.ToString();
+                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(subStatusValue);
+                string base64UrlEncoded = System.Convert.ToBase64String(bytes)
+                                                        .Replace('+', '-')
+                                                        .Replace('/', '_')
+                                                        .TrimEnd('=');
+                ssoPolicyHeaders.Add("x-ms-SsoFlagsSubstatus", base64UrlEncoded);
+            }
+            else if (ssoPolicy._ssoPolicyType == SsoPolicyType.Unknown)
+            {
+                ssoPolicyHeaders.Add("x-ms-SsoFlags", "SsoRestrUndefined ");
+            }
+
+            return ssoPolicyHeaders;
+        }
 
         public void HandleInstallUrl(string appLink)
         {

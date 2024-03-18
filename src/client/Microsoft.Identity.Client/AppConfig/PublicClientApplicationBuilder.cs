@@ -444,6 +444,11 @@ namespace Microsoft.Identity.Client
             {
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
             }
+
+            if (Config.IsBrokerEnabled && Config.IsSsoPolicyEnabled)
+            {
+                throw new InvalidOperationException(MsalErrorMessage.BrokerAndSsoPolicyConfigurationError);
+            }
         }
     }
 }

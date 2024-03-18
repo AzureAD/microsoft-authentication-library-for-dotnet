@@ -80,5 +80,10 @@ namespace Microsoft.Identity.Client.Internal.Broker
             _logger.Info("NullBroker - returning null on ROPC request.");
             return Task.FromResult<MsalTokenResponse>(null);
         }
+
+        public Dictionary<string, string> GetSsoPolicyHeaders()
+        {
+            return new Dictionary<string, string>();
+        }
     }
 }

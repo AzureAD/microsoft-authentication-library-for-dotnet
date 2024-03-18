@@ -15,6 +15,8 @@ using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Internal.Broker;
+
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -108,6 +110,7 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 AddCommonHeaders(requestContext);
             }
+            AddSsoPolicyHeaders(requestContext);
 
             HttpResponse response;
             Uri endpointUri = AddExtraQueryParams(endPoint);
@@ -215,6 +218,16 @@ namespace Microsoft.Identity.Client.OAuth2
             if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientVersion))
             {
                 _headers.Add(OAuth2Header.AppVer, requestContext.Logger.ClientVersion);
+            }
+        }
+
+        private void AddSsoPolicyHeaders(RequestContext requestContext)
+        {
+            IBroker broker = requestContext.ServiceBundle.Config.BrokerCreatorFunc(null, requestContext.ServiceBundle.Config, requestContext.Logger);
+            var ssoPolicyHeaders = broker.GetSsoPolicyHeaders();
+            foreach (KeyValuePair<string, string> kvp in ssoPolicyHeaders)
+            {
+                _headers.Add(kvp.Key, kvp.Value);
             }
         }
 
