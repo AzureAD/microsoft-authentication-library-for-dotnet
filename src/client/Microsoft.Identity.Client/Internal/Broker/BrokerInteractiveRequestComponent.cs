@@ -11,35 +11,35 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Internal.MsalCppRuntime
+namespace Microsoft.Identity.Client.Internal.Broker
 {
 
-    internal class RuntimeInteractiveRequestComponent : ITokenRequestComponent
+    internal class BrokerInteractiveRequestComponent : ITokenRequestComponent
     {
-        internal IMsalCppRuntime MsalCppRuntime { get; }
+        internal IBroker Broker { get; }
         private readonly AcquireTokenInteractiveParameters _interactiveParameters;
         private readonly string _optionalBrokerInstallUrl; // can be null
         private readonly AuthenticationRequestParameters _authenticationRequestParameters;
         private readonly IServiceBundle _serviceBundle;
         private readonly ILoggerAdapter _logger;
 
-        public RuntimeInteractiveRequestComponent(
+        public BrokerInteractiveRequestComponent(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters,
-            IMsalCppRuntime msalCppRuntime,
+            IBroker broker,
             string optionalBrokerInstallUrl)
         {
             _authenticationRequestParameters = authenticationRequestParameters;
             _interactiveParameters = acquireTokenInteractiveParameters;
             _serviceBundle = authenticationRequestParameters.RequestContext.ServiceBundle;
-            MsalCppRuntime = msalCppRuntime;
+            Broker = broker;
             _optionalBrokerInstallUrl = optionalBrokerInstallUrl;
             _logger = _authenticationRequestParameters.RequestContext.Logger;
         }
 
         public async Task<MsalTokenResponse> FetchTokensAsync(CancellationToken cancellationToken)
         {
-            if (MsalCppRuntime.IsBrokerInstalledAndInvokable(_authenticationRequestParameters.AuthorityInfo.AuthorityType))
+            if (Broker.IsBrokerInstalledAndInvokable(_authenticationRequestParameters.AuthorityInfo.AuthorityType))
             {
                 _logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
             }
@@ -52,10 +52,10 @@ namespace Microsoft.Identity.Client.Internal.MsalCppRuntime
                 }
 
                 _logger.Info(LogMessages.AddBrokerInstallUrlToPayload);
-                MsalCppRuntime.HandleInstallUrl(_optionalBrokerInstallUrl);                
+                Broker.HandleInstallUrl(_optionalBrokerInstallUrl);                
             }
 
-            var tokenResponse = await MsalCppRuntime.AcquireTokenInteractiveAsync(
+            var tokenResponse = await Broker.AcquireTokenInteractiveAsync(
                 _authenticationRequestParameters, 
                 _interactiveParameters)
                 .ConfigureAwait(false);
@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.Internal.MsalCppRuntime
         // msauth://wpj?username=joe@contoso.onmicrosoft.com&app_link=itms%3a%2f%2fitunes.apple.com%2fapp%2fazure-authenticator%2fid983156458%3fmt%3d8
         public static bool IsBrokerRequiredAuthCode(string authCode, out string installationUri)
         {
-            if (authCode.StartsWith(RuntimeParameter.AuthCodePrefixForEmbeddedWebviewBrokerInstallRequired, StringComparison.OrdinalIgnoreCase))
+            if (authCode.StartsWith(BrokerParameter.AuthCodePrefixForEmbeddedWebviewBrokerInstallRequired, StringComparison.OrdinalIgnoreCase))
             //|| authCode.StartsWith(_serviceBundle.Config.RedirectUri, StringComparison.OrdinalIgnoreCase) // TODO: what is this?!
             {
                 installationUri = ExtractAppLink(authCode);
@@ -115,12 +115,12 @@ namespace Microsoft.Identity.Client.Internal.MsalCppRuntime
 
             Dictionary<string, string> queryDict = CoreHelpers.ParseKeyValueList(query, '&', true, true, null);
 
-            if (!queryDict.ContainsKey(RuntimeParameter.AppLink))
+            if (!queryDict.ContainsKey(BrokerParameter.AppLink))
             {
                 return null;
             }
 
-            return queryDict[RuntimeParameter.AppLink];
+            return queryDict[BrokerParameter.AppLink];
         }
     }
 }

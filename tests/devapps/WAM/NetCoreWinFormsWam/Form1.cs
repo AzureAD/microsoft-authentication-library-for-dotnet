@@ -126,12 +126,10 @@ namespace NetDesktopWinForms
                 case AuthMethod.SystemBrowser:
                     builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
                     builder = builder.WithBroker(false);
-                    builder = builder.WithSsoPolicy();
                     break;
                 case AuthMethod.EmbeddedBrowser:
                     builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
                     builder = builder.WithBroker(false);
-                    builder = builder.WithSsoPolicy();
 
                     break;
                 default:

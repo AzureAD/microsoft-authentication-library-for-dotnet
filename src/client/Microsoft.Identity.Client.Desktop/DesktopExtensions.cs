@@ -5,8 +5,8 @@ using System;
 using System.ComponentModel;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal.MsalCppRuntime;
-using Microsoft.Identity.Client.Platforms.Features.MsalCppRuntime;
+using Microsoft.Identity.Client.Internal.Broker;
+using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
 using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
@@ -72,20 +72,20 @@ namespace Microsoft.Identity.Client.Desktop
         {
             if (DesktopOsHelper.IsWin10OrServerEquivalent())
             {
-                builder.Config.RuntimeBrokerCreatorFunc =
+                builder.Config.BrokerCreatorFunc =
                      (uiParent, appConfig, logger) =>
                      {
                          logger.Info("[RuntimeBroker] WAM supported OS.");
-                         return new MsalCppRuntime(uiParent, appConfig, logger);
+                         return new RuntimeBroker(uiParent, appConfig, logger);
                      };
             }
             else
             {
-                builder.Config.RuntimeBrokerCreatorFunc =
+                builder.Config.BrokerCreatorFunc =
                    (_, _, logger) =>
                    {
                        logger.Info("[RuntimeBroker] Not a Windows 10 or Server equivalent machine. WAM is not available.");
-                       return new NullRuntime(logger);
+                       return new NullBroker(logger);
                    };
             }
         }

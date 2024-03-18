@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal.MsalCppRuntime;
+using Microsoft.Identity.Client.Internal.Broker;
 #if SUPPORTS_OTEL
 using Microsoft.Identity.Client.Platforms.Features.OpenTelemetry;
 #endif
@@ -206,11 +206,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             throw new NotImplementedException();
         }
 
-        public virtual IMsalCppRuntime CreateRuntime(ApplicationConfiguration appConfig, CoreUIParent uiParent)
+        public virtual IBroker CreateBroker(ApplicationConfiguration appConfig, CoreUIParent uiParent)
         {
-            return appConfig.RuntimeBrokerCreatorFunc != null ?
-                appConfig.RuntimeBrokerCreatorFunc(uiParent, appConfig, Logger) :
-                new NullRuntime(Logger);
+            return appConfig.BrokerCreatorFunc != null ?
+                appConfig.BrokerCreatorFunc(uiParent, appConfig, Logger) :
+                new NullBroker(Logger);
         }
 
         public virtual bool CanBrokerSupportSilentAuth()

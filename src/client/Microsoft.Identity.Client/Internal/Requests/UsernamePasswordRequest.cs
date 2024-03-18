@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal.MsalCppRuntime;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.WsTrust;
@@ -70,13 +70,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 _logger.Info("Broker is configured. Starting broker flow. ");
 
-                IMsalCppRuntime msalCppRuntime = _requestParameters.RequestContext.ServiceBundle.PlatformProxy.CreateRuntime(_requestParameters.RequestContext.ServiceBundle.Config, null);
+                IBroker broker = _requestParameters.RequestContext.ServiceBundle.PlatformProxy.CreateBroker(_requestParameters.RequestContext.ServiceBundle.Config, null);
 
-                if (msalCppRuntime.IsBrokerInstalledAndInvokable(_requestParameters.AuthorityInfo.AuthorityType))
+                if (broker.IsBrokerInstalledAndInvokable(_requestParameters.AuthorityInfo.AuthorityType))
                 {
                     _logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
 
-                    MsalTokenResponse brokerTokenResponse = await msalCppRuntime.AcquireTokenByUsernamePasswordAsync(
+                    MsalTokenResponse brokerTokenResponse = await broker.AcquireTokenByUsernamePasswordAsync(
                         _requestParameters,
                         _usernamePasswordParameters)
                         .ConfigureAwait(false);

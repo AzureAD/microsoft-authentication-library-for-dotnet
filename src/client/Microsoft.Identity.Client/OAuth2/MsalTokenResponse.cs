@@ -8,7 +8,7 @@ using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Internal.MsalCppRuntime;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
         internal static MsalTokenResponse CreateFromiOSBrokerResponse(Dictionary<string, string> responseDictionary)
         {
-            if (responseDictionary.TryGetValue(RuntimeResponseConst.BrokerErrorCode, out string errorCode))
+            if (responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorCode, out string errorCode))
             {
                 string metadataOriginal = responseDictionary.TryGetValue(MsalTokenResponse.iOSBrokerErrorMetadata, out string iOSBrokerErrorMetadata) ? iOSBrokerErrorMetadata : null;
                 Dictionary<string, string> metadataDictionary = null;
@@ -209,29 +209,29 @@ namespace Microsoft.Identity.Client.OAuth2
                 return new MsalTokenResponse
                 {
                     Error = errorCode,
-                    ErrorDescription = responseDictionary.TryGetValue(RuntimeResponseConst.BrokerErrorDescription, out string brokerErrorDescription) ? CoreHelpers.UrlDecode(brokerErrorDescription) : string.Empty,
+                    ErrorDescription = responseDictionary.TryGetValue(BrokerResponseConst.BrokerErrorDescription, out string brokerErrorDescription) ? CoreHelpers.UrlDecode(brokerErrorDescription) : string.Empty,
                     SubError = responseDictionary.TryGetValue(OAuth2ResponseBaseClaim.SubError, out string subError) ? subError : string.Empty,
                     AccountUserId = homeAcctId != null ? AccountId.ParseFromString(homeAcctId).ObjectId : null,
                     TenantId = homeAcctId != null ? AccountId.ParseFromString(homeAcctId).TenantId : null,
                     Upn = (metadataDictionary?.ContainsKey(TokenResponseClaim.Upn) ?? false) ? metadataDictionary[TokenResponseClaim.Upn] : null,
-                    CorrelationId = responseDictionary.TryGetValue(RuntimeResponseConst.CorrelationId, out string correlationId) ? correlationId : null,
+                    CorrelationId = responseDictionary.TryGetValue(BrokerResponseConst.CorrelationId, out string correlationId) ? correlationId : null,
                 };
             }
 
             var response = new MsalTokenResponse
             {
-                AccessToken = responseDictionary[RuntimeResponseConst.AccessToken],
-                RefreshToken = responseDictionary.TryGetValue(RuntimeResponseConst.RefreshToken, out string refreshToken)
+                AccessToken = responseDictionary[BrokerResponseConst.AccessToken],
+                RefreshToken = responseDictionary.TryGetValue(BrokerResponseConst.RefreshToken, out string refreshToken)
                     ? refreshToken
                     : null,
-                IdToken = responseDictionary[RuntimeResponseConst.IdToken],
-                TokenType = RuntimeResponseConst.Bearer,
-                CorrelationId = responseDictionary[RuntimeResponseConst.CorrelationId],
-                Scope = responseDictionary[RuntimeResponseConst.Scope],
-                ExpiresIn = responseDictionary.TryGetValue(RuntimeResponseConst.ExpiresOn, out string expiresOn) ?
+                IdToken = responseDictionary[BrokerResponseConst.IdToken],
+                TokenType = BrokerResponseConst.Bearer,
+                CorrelationId = responseDictionary[BrokerResponseConst.CorrelationId],
+                Scope = responseDictionary[BrokerResponseConst.Scope],
+                ExpiresIn = responseDictionary.TryGetValue(BrokerResponseConst.ExpiresOn, out string expiresOn) ?
                                 DateTimeHelpers.GetDurationFromNowInSeconds(expiresOn) :
                                 0,
-                ClientInfo = responseDictionary.TryGetValue(RuntimeResponseConst.ClientInfo, out string clientInfo)
+                ClientInfo = responseDictionary.TryGetValue(BrokerResponseConst.ClientInfo, out string clientInfo)
                                 ? clientInfo
                                 : null,
                 TokenSource = TokenSource.Broker
@@ -298,7 +298,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 AccessToken = tokenProviderResponse.AccessToken,
                 RefreshToken = null,
                 IdToken = null,
-                TokenType = RuntimeResponseConst.Bearer,
+                TokenType = BrokerResponseConst.Bearer,
                 ExpiresIn = tokenProviderResponse.ExpiresInSeconds,
                 ClientInfo = null,
                 TokenSource = TokenSource.IdentityProvider,
@@ -346,36 +346,36 @@ namespace Microsoft.Identity.Client.OAuth2
         internal static MsalTokenResponse CreateFromAndroidBrokerResponse(string jsonResponse, string correlationId)
         {
             var authResult = JsonHelper.ParseIntoJsonObject(jsonResponse);
-            var errorCode = authResult[RuntimeResponseConst.BrokerErrorCode]?.ToString();
+            var errorCode = authResult[BrokerResponseConst.BrokerErrorCode]?.ToString();
 
             if (!string.IsNullOrEmpty(errorCode))
             {
                 return new MsalTokenResponse
                 {
                     Error = errorCode,
-                    ErrorDescription = authResult[RuntimeResponseConst.BrokerErrorMessage]?.ToString(),
-                    AuthorityUrl = authResult[RuntimeResponseConst.Authority]?.ToString(),
-                    TenantId = authResult[RuntimeResponseConst.TenantId]?.ToString(),
-                    Upn = authResult[RuntimeResponseConst.UserName]?.ToString(),
-                    AccountUserId = authResult[RuntimeResponseConst.LocalAccountId]?.ToString(),
+                    ErrorDescription = authResult[BrokerResponseConst.BrokerErrorMessage]?.ToString(),
+                    AuthorityUrl = authResult[BrokerResponseConst.Authority]?.ToString(),
+                    TenantId = authResult[BrokerResponseConst.TenantId]?.ToString(),
+                    Upn = authResult[BrokerResponseConst.UserName]?.ToString(),
+                    AccountUserId = authResult[BrokerResponseConst.LocalAccountId]?.ToString(),
                 };
             }
 
             MsalTokenResponse msalTokenResponse = new MsalTokenResponse()
             {
-                AccessToken = authResult[RuntimeResponseConst.AccessToken].ToString(),
-                IdToken = authResult[RuntimeResponseConst.IdToken].ToString(),
+                AccessToken = authResult[BrokerResponseConst.AccessToken].ToString(),
+                IdToken = authResult[BrokerResponseConst.IdToken].ToString(),
                 CorrelationId = correlationId, // Android response does not expose Correlation ID
-                Scope = authResult[RuntimeResponseConst.AndroidScopes].ToString(), // sadly for iOS this is "scope" and for Android "scopes"
-                ExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(authResult[RuntimeResponseConst.ExpiresOn].ToString()),
-                ExtendedExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(authResult[RuntimeResponseConst.ExtendedExpiresOn].ToString()),
-                ClientInfo = authResult[RuntimeResponseConst.ClientInfo].ToString(),
-                TokenType = authResult[RuntimeResponseConst.TokenType]?.ToString() ?? "Bearer",
+                Scope = authResult[BrokerResponseConst.AndroidScopes].ToString(), // sadly for iOS this is "scope" and for Android "scopes"
+                ExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExpiresOn].ToString()),
+                ExtendedExpiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(authResult[BrokerResponseConst.ExtendedExpiresOn].ToString()),
+                ClientInfo = authResult[BrokerResponseConst.ClientInfo].ToString(),
+                TokenType = authResult[BrokerResponseConst.TokenType]?.ToString() ?? "Bearer",
                 TokenSource = TokenSource.Broker,
-                AuthorityUrl = authResult[RuntimeResponseConst.Authority]?.ToString(),
-                TenantId = authResult[RuntimeResponseConst.TenantId]?.ToString(),
-                Upn = authResult[RuntimeResponseConst.UserName]?.ToString(),
-                AccountUserId = authResult[RuntimeResponseConst.LocalAccountId]?.ToString(),
+                AuthorityUrl = authResult[BrokerResponseConst.Authority]?.ToString(),
+                TenantId = authResult[BrokerResponseConst.TenantId]?.ToString(),
+                Upn = authResult[BrokerResponseConst.UserName]?.ToString(),
+                AccountUserId = authResult[BrokerResponseConst.LocalAccountId]?.ToString(),
             };
 
             return msalTokenResponse;

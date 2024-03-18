@@ -14,7 +14,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.Internal.MsalCppRuntime;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Internal.Requests.Silent;
 using Microsoft.Identity.Client.OAuth2;
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
     [TestCategory(TestCategories.Broker)]
     public class BrokerTests : TestBase
     {
-        private RuntimeInteractiveRequestComponent _runtimeInteractiveRequest;
+        private BrokerInteractiveRequestComponent _brokerInteractiveRequest;
         private BrokerSilentStrategy _brokerSilentAuthStrategy;
         private AuthenticationRequestParameters _parameters;
         private AcquireTokenSilentParameters _acquireTokenSilentParameters;
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 };
 
                 // Act
-                _runtimeInteractiveRequest.ValidateResponseFromBroker(response);
+                _brokerInteractiveRequest.ValidateResponseFromBroker(response);
 
                 // Assert
                 Assert.IsNotNull(response);
@@ -192,17 +192,17 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     TestConstants.ExtraQueryParameters);
 
                 // Act
-                IMsalCppRuntime msalCppRuntime = harness.ServiceBundle.PlatformProxy.CreateRuntime(harness.ServiceBundle.Config, null);
-                _runtimeInteractiveRequest =
-                    new RuntimeInteractiveRequestComponent(
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(harness.ServiceBundle.Config, null);
+                _brokerInteractiveRequest =
+                    new BrokerInteractiveRequestComponent(
                         parameters,
                         null,
-                        msalCppRuntime,
+                        broker,
                         "install_url");
 #if NET6_WIN 
-                Assert.AreEqual(true, _runtimeInteractiveRequest.MsalCppRuntime.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
+                Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #else
-                Assert.AreEqual(false, _runtimeInteractiveRequest.MsalCppRuntime.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
+                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #endif
             }
         }
@@ -214,23 +214,23 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
             using (var harness = CreateBrokerHelper())
             {
-                IMsalCppRuntime msalCppRuntime = harness.ServiceBundle.PlatformProxy.CreateRuntime(harness.ServiceBundle.Config, null);
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(harness.ServiceBundle.Config, null);
                 _brokerSilentAuthStrategy =
                     new BrokerSilentStrategy(
                         new SilentRequest(harness.ServiceBundle, _parameters, _acquireTokenSilentParameters),
                         harness.ServiceBundle,
                         _parameters,
                         _acquireTokenSilentParameters,
-                        msalCppRuntime);
-                Assert.IsFalse(_runtimeInteractiveRequest.MsalCppRuntime.IsBrokerInstalledAndInvokable(AuthorityType.Adfs));
-                Assert.IsFalse(_runtimeInteractiveRequest.MsalCppRuntime.IsBrokerInstalledAndInvokable(AuthorityType.B2C));
-                Assert.IsFalse(_runtimeInteractiveRequest.MsalCppRuntime.IsBrokerInstalledAndInvokable(AuthorityType.Generic));
-                Assert.IsFalse(_runtimeInteractiveRequest.MsalCppRuntime.IsBrokerInstalledAndInvokable(AuthorityType.Dsts));
+                        broker);
+                Assert.IsFalse(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Adfs));
+                Assert.IsFalse(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.B2C));
+                Assert.IsFalse(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Generic));
+                Assert.IsFalse(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Dsts));
 
 #if NET6_WIN || NET7_0
-                Assert.IsTrue(_runtimeInteractiveRequest.MsalCppRuntime.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
+                Assert.IsTrue(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #else
-                Assert.AreEqual(false, _runtimeInteractiveRequest.MsalCppRuntime.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
+                Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
 #endif
             }
         }
@@ -244,7 +244,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
 
-                builder.Config.RuntimeBrokerCreatorFunc = (_, _, logger) => { return new NullRuntime(logger); };
+                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
 
                 var app = builder.WithBroker(true).BuildConcrete();
 
@@ -267,10 +267,10 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             using (var harness = CreateTestHarness())
             {
-                IMsalCppRuntime msalCppRuntime = harness.ServiceBundle.PlatformProxy.CreateRuntime(harness.ServiceBundle.Config, null);
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(harness.ServiceBundle.Config, null);
 
                 AssertException.TaskThrowsAsync<PlatformNotSupportedException>(
-                    () => msalCppRuntime.GetAccountsAsync(
+                    () => broker.GetAccountsAsync(
                         TestConstants.ClientId,
                         TestConstants.RedirectUri,
                         null,
@@ -285,7 +285,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             using (var harness = CreateTestHarness())
             {
-                IMsalCppRuntime broker = harness.ServiceBundle.PlatformProxy.CreateRuntime(harness.ServiceBundle.Config, null);
+                IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(harness.ServiceBundle.Config, null);
 
                 AssertException.TaskThrowsAsync<PlatformNotSupportedException>(() => broker.RemoveAccountAsync(
                     harness.ServiceBundle.Config, new Account("test", "test", "test"))).ConfigureAwait(false);
@@ -300,19 +300,19 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 .Create(TestConstants.ClientId)
                 .BuildConcrete();
 
-            var runtime = Substitute.For<IMsalCppRuntime>();
+            var broker = Substitute.For<IBroker>();
             var expectedAccount = TestConstants.s_user;
-            runtime.GetAccountsAsync(
+            broker.GetAccountsAsync(
                 TestConstants.ClientId,
                 TestConstants.RedirectUri,
                 Arg.Any<AuthorityInfo>(),
                 Arg.Any<ICacheSessionManager>(),
                 Arg.Any<IInstanceDiscoveryManager>()).Returns(new[] { expectedAccount, expectedAccount });
-            runtime.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+            broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
 
             var platformProxy = Substitute.For<IPlatformProxy>();
             platformProxy.CanBrokerSupportSilentAuth().Returns(true);
-            platformProxy.CreateRuntime(Arg.Any<ApplicationConfiguration>(), Arg.Any<CoreUIParent>()).ReturnsForAnyArgs(runtime);
+            platformProxy.CreateBroker(Arg.Any<ApplicationConfiguration>(), Arg.Any<CoreUIParent>()).ReturnsForAnyArgs(broker);
 
             app.ServiceBundle.SetPlatformProxyForTest(platformProxy);
             app.ServiceBundle.Config.IsBrokerEnabled = true;
@@ -330,9 +330,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // Arrange
             Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
             responseDictionary[TestConstants.iOSBrokerErrorMetadata] = TestConstants.iOSBrokerErrorMetadataValue;
-            responseDictionary[RuntimeResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
+            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
             responseDictionary[OAuth2ResponseBaseClaim.SubError] = TestConstants.iOSBrokerSuberrCode;
-            responseDictionary[RuntimeResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
+            responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
 
             // act
             var token = MsalTokenResponse.CreateFromiOSBrokerResponse(responseDictionary);
@@ -351,8 +351,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // Arrange
             Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
             responseDictionary[TestConstants.iOSBrokerErrorMetadata] = TestConstants.iOSBrokerErrorMetadataValue;
-            responseDictionary[RuntimeResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
-            responseDictionary[RuntimeResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
+            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
+            responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
 
             // act
             var token = MsalTokenResponse.CreateFromiOSBrokerResponse(responseDictionary);
@@ -371,7 +371,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // Arrange
             Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
             responseDictionary[TestConstants.iOSBrokerErrorMetadata] = TestConstants.iOSBrokerErrorMetadataValue;
-            responseDictionary[RuntimeResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
+            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
             responseDictionary[OAuth2ResponseBaseClaim.SubError] = TestConstants.iOSBrokerSuberrCode;
 
             // act
@@ -390,9 +390,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             // Arrange
             Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
-            responseDictionary[RuntimeResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
+            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
             responseDictionary[OAuth2ResponseBaseClaim.SubError] = TestConstants.iOSBrokerSuberrCode;
-            responseDictionary[RuntimeResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
+            responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
 
             // act
             var token = MsalTokenResponse.CreateFromiOSBrokerResponse(responseDictionary);
@@ -412,8 +412,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // Arrange
             Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
             responseDictionary[TestConstants.iOSBrokerErrorMetadata] = @"{""username"" : """ + TestConstants.Username + @""" }";
-            responseDictionary[RuntimeResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
-            responseDictionary[RuntimeResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
+            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
+            responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
 
             // act
             var token = MsalTokenResponse.CreateFromiOSBrokerResponse(responseDictionary);
@@ -432,8 +432,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // Arrange
             Dictionary<string, string> responseDictionary = new Dictionary<string, string>();
             responseDictionary["error_metadata"] = @"{""home_account_id"":""test_home"" }";
-            responseDictionary[RuntimeResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
-            responseDictionary[RuntimeResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
+            responseDictionary[BrokerResponseConst.BrokerErrorCode] = TestConstants.TestErrCode;
+            responseDictionary[BrokerResponseConst.BrokerErrorDescription] = TestConstants.iOSBrokerErrDescr;
 
             // act
             var token = MsalTokenResponse.CreateFromiOSBrokerResponse(responseDictionary);
@@ -447,20 +447,20 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [DataTestMethod]
-        [DataRow(typeof(NullRuntime))]
+        [DataRow(typeof(NullBroker))]
         [DataRow(typeof(IosBrokerMock))]
         [TestCategory(TestCategories.Regression)] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2706
-        public async Task NullAndIosBroker_GetAccounts_Async(Type runtimeType)
+        public async Task NullAndIosBroker_GetAccounts_Async(Type brokerType)
         {
             using (var harness = CreateTestHarness())
             {
                 // Arrange
-                var runtime = CreateRuntime(runtimeType);
+                var broker = CreateBroker(brokerType);
                 var builder = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
 
-                builder.Config.RuntimeBrokerCreatorFunc = (_, _, logger) => { return new NullRuntime(logger); };
+                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
 
                 var app = builder.WithBroker(true).BuildConcrete();
 
@@ -473,20 +473,20 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
         [DataTestMethod]
-        [DataRow(typeof(NullRuntime))]
+        [DataRow(typeof(NullBroker))]
         [DataRow(typeof(IosBrokerMock))]
         [TestCategory(TestCategories.Regression)] //https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2706
         public async Task NullAndIosBroker_RemoveAccounts_Async(Type brokerType)
         {
             using (var harness = CreateTestHarness())
             {
-                var broker = CreateRuntime(brokerType);
+                var broker = CreateBroker(brokerType);
 
                 var builder = PublicClientApplicationBuilder
                      .Create(TestConstants.ClientId)
                      .WithHttpManager(harness.HttpManager);
 
-                builder.Config.RuntimeBrokerCreatorFunc = (_, _, _) => { return broker; };
+                builder.Config.BrokerCreatorFunc = (_, _, _) => { return broker; };
 
                 var app = builder.WithBroker(true).BuildConcrete();
 
@@ -513,7 +513,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
 
-                builder.Config.RuntimeBrokerCreatorFunc = (_, _, logger) => { return new NullRuntime(logger); };
+                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
 
                 var app = builder.WithBroker(true).BuildConcrete();
 
@@ -559,7 +559,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
 
-                builder.Config.RuntimeBrokerCreatorFunc = (_, _, logger) => { return new IosBrokerMock(logger); };
+                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new IosBrokerMock(logger); };
                 builder.Config.PlatformProxy = platformProxy;
 
                 var app = builder.WithBroker(true).BuildConcrete();
@@ -597,18 +597,18 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 .WithPlatformProxy(platformProxy)
                 .Build();
 
-            var mockRuntime = Substitute.For<IMsalCppRuntime>();
+            var mockBroker = Substitute.For<IBroker>();
             var expectedAccount = new Account("a.b", "user", "login.windows.net");
-            mockRuntime.GetAccountsAsync(
+            mockBroker.GetAccountsAsync(
                 TestConstants.ClientId,
                 TestConstants.RedirectUri,
                 (pca.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo,
                 Arg.Any<ICacheSessionManager>(),
                 Arg.Any<IInstanceDiscoveryManager>())
                 .Returns(new[] { expectedAccount });
-            mockRuntime.IsBrokerInstalledAndInvokable((pca.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.AuthorityType).Returns(true);
+            mockBroker.IsBrokerInstalledAndInvokable((pca.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.AuthorityType).Returns(true);
 
-            platformProxy.CreateRuntime(null, null).ReturnsForAnyArgs(mockRuntime);
+            platformProxy.CreateBroker(null, null).ReturnsForAnyArgs(mockBroker);
 
             // Act
             var actualAccount = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -627,7 +627,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 //are thrown.
 
                 // Arrange
-                var mockBroker = Substitute.For<IMsalCppRuntime>();
+                var mockBroker = Substitute.For<IBroker>();
                 var expectedAccount = Substitute.For<IAccount>();
                 mockBroker.GetAccountsAsync(
                     TestConstants.ClientId,
@@ -639,7 +639,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
 
                 var platformProxy = Substitute.For<IPlatformProxy>();
                 platformProxy.CanBrokerSupportSilentAuth().Returns(true);
-                platformProxy.CreateRuntime(null, null).ReturnsForAnyArgs(mockBroker);
+                platformProxy.CreateBroker(null, null).ReturnsForAnyArgs(mockBroker);
 
                 harness.ServiceBundle.SetPlatformProxyForTest(platformProxy);
 
@@ -688,12 +688,12 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             using (var harness = CreateBrokerHelper())
             {
                 // Arrange
-                var mockBroker = Substitute.For<IMsalCppRuntime>();
+                var mockBroker = Substitute.For<IBroker>();
                 mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(false);
 
                 var platformProxy = Substitute.For<IPlatformProxy>();
                 platformProxy.CanBrokerSupportSilentAuth().Returns(true);
-                platformProxy.CreateRuntime(null, null).ReturnsForAnyArgs(mockBroker);
+                platformProxy.CreateBroker(null, null).ReturnsForAnyArgs(mockBroker);
 
                 harness.ServiceBundle.SetPlatformProxyForTest(platformProxy);
 
@@ -727,7 +727,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 var tokenResponse = CreateTokenResponseForTest();
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
-                IMsalCppRuntime broker = Substitute.For<IMsalCppRuntime>();
+                IBroker broker = Substitute.For<IBroker>();
                 _acquireTokenSilentParameters.Account = PublicClientApplication.OperatingSystemAccount;
                 var brokerSilentAuthStrategy =
                     new BrokerSilentStrategy(
@@ -756,11 +756,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 try
                 {
-                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(CreateErrorResponse(RuntimeResponseConst.AndroidNoTokenFound));
+                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(CreateErrorResponse(BrokerResponseConst.AndroidNoTokenFound));
                 }
                 catch (MsalUiRequiredException ex)
                 {
-                    Assert.IsTrue(ex.ErrorCode == RuntimeResponseConst.AndroidNoTokenFound);
+                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.AndroidNoTokenFound);
                     return;
                 }
 
@@ -775,11 +775,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 try
                 {
-                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(CreateErrorResponse(RuntimeResponseConst.AndroidNoAccountFound));
+                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(CreateErrorResponse(BrokerResponseConst.AndroidNoAccountFound));
                 }
                 catch (MsalUiRequiredException ex)
                 {
-                    Assert.IsTrue(ex.ErrorCode == RuntimeResponseConst.AndroidNoAccountFound);
+                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.AndroidNoAccountFound);
                     return;
                 }
 
@@ -794,11 +794,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 try
                 {
-                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(CreateErrorResponse(RuntimeResponseConst.AndroidInvalidRefreshToken));
+                    _brokerSilentAuthStrategy.ValidateResponseFromBroker(CreateErrorResponse(BrokerResponseConst.AndroidInvalidRefreshToken));
                 }
                 catch (MsalUiRequiredException ex)
                 {
-                    Assert.IsTrue(ex.ErrorCode == RuntimeResponseConst.AndroidInvalidRefreshToken);
+                    Assert.IsTrue(ex.ErrorCode == BrokerResponseConst.AndroidInvalidRefreshToken);
                     return;
                 }
 
@@ -811,7 +811,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         {
             ProtectionPolicyNotEnabled_Throws_Exception_Common((msalToken) =>
             {
-                _runtimeInteractiveRequest.ValidateResponseFromBroker(msalToken);
+                _brokerInteractiveRequest.ValidateResponseFromBroker(msalToken);
             });
         }
 
@@ -838,8 +838,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                    .WithMultiCloudSupport(true)
                    .WithHttpManager(harness.HttpManager);
 
-                var broker = Substitute.For<IMsalCppRuntime>();
-                builder.Config.RuntimeBrokerCreatorFunc = (_, _, _) => broker;
+                var broker = Substitute.For<IBroker>();
+                builder.Config.BrokerCreatorFunc = (_, _, _) => broker;
 
                 var globalPca = builder.WithBroker(true).BuildConcrete();
 
@@ -871,8 +871,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 try
                 {
                     // Arrange
-                    MsalTokenResponse msalTokenResponse = CreateErrorResponse(RuntimeResponseConst.AndroidUnauthorizedClient);
-                    msalTokenResponse.SubError = RuntimeResponseConst.AndroidProtectionPolicyRequired;
+                    MsalTokenResponse msalTokenResponse = CreateErrorResponse(BrokerResponseConst.AndroidUnauthorizedClient);
+                    msalTokenResponse.SubError = BrokerResponseConst.AndroidProtectionPolicyRequired;
                     msalTokenResponse.TenantId = TestConstants.TenantId;
                     msalTokenResponse.Upn = TestConstants.Username;
                     msalTokenResponse.AccountUserId = TestConstants.LocalAccountId;
@@ -884,8 +884,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 catch (MsalServiceException ex) // Since IntuneAppProtectionPolicyRequiredException is throw only on Android and iOS platforms, this is the workaround
                 {
                     // Assert
-                    Assert.AreEqual(RuntimeResponseConst.AndroidUnauthorizedClient, ex.ErrorCode);
-                    Assert.AreEqual(RuntimeResponseConst.AndroidProtectionPolicyRequired, ex.SubError);
+                    Assert.AreEqual(BrokerResponseConst.AndroidUnauthorizedClient, ex.ErrorCode);
+                    Assert.AreEqual(BrokerResponseConst.AndroidProtectionPolicyRequired, ex.SubError);
 
                     return;
                 }
@@ -911,7 +911,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             try
             {
                 //Testing interactive response
-                _runtimeInteractiveRequest.ValidateResponseFromBroker(msalTokenResponse);
+                _brokerInteractiveRequest.ValidateResponseFromBroker(msalTokenResponse);
 
                 Assert.Fail("MsalServiceException should have been thrown here");
             }
@@ -949,9 +949,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters();
             _acquireTokenSilentParameters = new AcquireTokenSilentParameters();
 
-            IMsalCppRuntime broker = harness.ServiceBundle.PlatformProxy.CreateRuntime(harness.ServiceBundle.Config, null);
-            _runtimeInteractiveRequest =
-                new RuntimeInteractiveRequestComponent(
+            IBroker broker = harness.ServiceBundle.PlatformProxy.CreateBroker(harness.ServiceBundle.Config, null);
+            _brokerInteractiveRequest =
+                new BrokerInteractiveRequestComponent(
                     _parameters,
                     interactiveParameters,
                     broker,
@@ -991,11 +991,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
         }
 
        
-        internal static IMsalCppRuntime CreateRuntime(Type brokerType)
+        internal static IBroker CreateBroker(Type brokerType)
         {
-            if (brokerType == typeof(NullRuntime))
+            if (brokerType == typeof(NullBroker))
             {
-                return new NullRuntime(null);
+                return new NullBroker(null);
             }
 
             if (brokerType == typeof(IosBrokerMock))

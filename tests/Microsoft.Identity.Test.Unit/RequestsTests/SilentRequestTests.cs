@@ -18,7 +18,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Internal.MsalCppRuntime;
+using Microsoft.Identity.Client.Internal.Broker;
 using NSubstitute;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests.Silent;
@@ -110,10 +110,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TestConstants.ProductionPrefCacheEnvironment,
                     brokerID);
 
-                IMsalCppRuntime mockRuntime = Substitute.For<IMsalCppRuntime>();
-                mockRuntime.IsBrokerInstalledAndInvokable(AuthorityType.Aad).ReturnsForAnyArgs(brokerIsInstalledAndInvokable);
+                IBroker mockBroker = Substitute.For<IBroker>();
+                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).ReturnsForAnyArgs(brokerIsInstalledAndInvokable);
 
-                harness.ServiceBundle.Config.RuntimeBrokerCreatorFunc = (_, _, _) => mockRuntime;
+                harness.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
 
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,
@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(brokerID, result.Account.Username);
                 if (!brokerConfiguredByUser)
                 {
-                    await mockRuntime.DidNotReceiveWithAnyArgs().AcquireTokenSilentAsync(null, null).ConfigureAwait(false);
+                    await mockBroker.DidNotReceiveWithAnyArgs().AcquireTokenSilentAsync(null, null).ConfigureAwait(false);
                 }
             }
         }
@@ -198,11 +198,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public async Task IosBrokerSilentRequestLocalCacheTestAsync()
         {
             string brokerID = "Broker@broker.com";
-            IMsalCppRuntime mockRuntime = Microsoft.Identity.Test.Unit.BrokerTests.BrokerTests.CreateRuntime(typeof(IosBrokerMock));
+            IBroker mockBroker = Microsoft.Identity.Test.Unit.BrokerTests.BrokerTests.CreateBroker(typeof(IosBrokerMock));
             IPlatformProxy platformProxy = Substitute.For<IPlatformProxy>();
             platformProxy.CanBrokerSupportSilentAuth().Returns(false); //Ios sets this to false so local cache should be used
             platformProxy.CreateTokenCacheAccessor(Arg.Any<CacheOptions>()).Returns(PlatformProxyFactory.CreatePlatformProxy(null).CreateTokenCacheAccessor(null));
-            platformProxy.CreateRuntime(Arg.Any<ApplicationConfiguration>(), Arg.Any<CoreUIParent>()).ReturnsForAnyArgs(mockRuntime);
+            platformProxy.CreateBroker(Arg.Any<ApplicationConfiguration>(), Arg.Any<CoreUIParent>()).ReturnsForAnyArgs(mockBroker);
 
             using (var harness = new MockHttpTestHarness(TestConstants.AuthorityHomeTenant, platformProxy))
             {
@@ -214,7 +214,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TestConstants.ProductionPrefCacheEnvironment,
                     brokerID);
 
-                harness.ServiceBundle.Config.RuntimeBrokerCreatorFunc = (_, _, _) => mockRuntime;
+                harness.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
 
                 var parameters = harness.CreateRequestParams(
                     harness.Cache,

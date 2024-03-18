@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Client
             }
 
             ClientApplicationBase.GuardMobileFrameworks();
-            var broker = ServiceBundle.PlatformProxy.CreateRuntime(ServiceBundle.Config, null);
+            var broker = ServiceBundle.PlatformProxy.CreateBroker(ServiceBundle.Config, null);
 
             if (ServiceBundle.Config.IsBrokerEnabled)
             {

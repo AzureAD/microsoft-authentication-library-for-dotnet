@@ -14,18 +14,18 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Internal.MsalCppRuntime
+namespace Microsoft.Identity.Client.Internal.Broker
 {
     /// <summary>
     /// For platforms that do not support a broker
     /// </summary>
-    internal class NullRuntime : IMsalCppRuntime
+    internal class NullBroker : IBroker
     {
         private readonly ILoggerAdapter _logger;
 
         public bool IsPopSupported => false;
 
-        public NullRuntime(ILoggerAdapter logger)
+        public NullBroker(ILoggerAdapter logger)
         {
             _logger = logger ?? new NullLogger();
         }

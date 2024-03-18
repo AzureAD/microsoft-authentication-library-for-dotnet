@@ -11,7 +11,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance.Discovery;
-using Microsoft.Identity.Client.Internal.MsalCppRuntime;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.NativeInterop;
 using Microsoft.Identity.Client.OAuth2;
@@ -19,9 +19,9 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.Platforms.Features.MsalCppRuntime
+namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 {
-    internal class MsalCppRuntime : IMsalCppRuntime
+    internal class RuntimeBroker : IBroker
     {
         private readonly ILoggerAdapter _logger;
         private readonly IntPtr _parentHandle = IntPtr.Zero;
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.MsalCppRuntime
             }
         }
 
-        public MsalCppRuntime(
+        public RuntimeBroker(
             ApplicationConfiguration appConfig,
             ILoggerAdapter logger)
         {
@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.MsalCppRuntime
         /// <summary>
         /// Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See DesktopOsHelper.IsWin10
         /// </summary>
-        public MsalCppRuntime(
+        public RuntimeBroker(
             CoreUIParent uiParent,
             ApplicationConfiguration appConfig,
             ILoggerAdapter logger)
@@ -599,12 +599,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.MsalCppRuntime
         internal class LogEventWrapper : IDisposable
         {
             private bool _disposedValue;
-            MsalCppRuntime _msalCppRuntime;
+            RuntimeBroker _broker;
 
-            public LogEventWrapper(MsalCppRuntime msalCppRuntime)
+            public LogEventWrapper(RuntimeBroker broker)
             {
-                _msalCppRuntime = msalCppRuntime;
-                s_lazyCore.Value.LogEvent += _msalCppRuntime.LogEventRaised;
+                _broker = broker;
+                s_lazyCore.Value.LogEvent += _broker.LogEventRaised;
             }
 
             protected virtual void Dispose(bool disposing)
@@ -614,7 +614,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.MsalCppRuntime
                     if (disposing)
                     {
                         // dispose managed state (managed objects)
-                        s_lazyCore.Value.LogEvent -= _msalCppRuntime.LogEventRaised;
+                        s_lazyCore.Value.LogEvent -= _broker.LogEventRaised;
                     }
 
                     _disposedValue = true;

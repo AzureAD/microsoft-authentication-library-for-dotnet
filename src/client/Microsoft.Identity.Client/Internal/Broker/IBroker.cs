@@ -9,10 +9,9 @@ using Microsoft.Identity.Client.OAuth2;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Internal.MsalCppRuntime
+namespace Microsoft.Identity.Client.Internal.Broker
 {
-
-    internal interface IMsalCppRuntime
+    internal interface IBroker
     {
         bool IsBrokerInstalledAndInvokable(AuthorityType authorityType);
 
@@ -31,8 +30,6 @@ namespace Microsoft.Identity.Client.Internal.MsalCppRuntime
         Task<MsalTokenResponse> AcquireTokenByUsernamePasswordAsync(
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters);
-
-        //bool GetSsoPolicy();
 
         /// <summary>
         /// If device auth is required but the broker is not enabled, AAD will

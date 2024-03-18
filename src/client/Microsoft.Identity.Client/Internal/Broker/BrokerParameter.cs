@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-namespace Microsoft.Identity.Client.Internal.MsalCppRuntime
+namespace Microsoft.Identity.Client.Internal.Broker
 {
-    internal class RuntimeParameter
+    internal class BrokerParameter
     {
         public const string Authority = "authority";
         public const string ClientId = "client_id";

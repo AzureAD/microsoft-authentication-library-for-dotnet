@@ -10,11 +10,11 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AuthScheme;
 #if !NET6_0
-using Microsoft.Identity.Client.Platforms.Features.MsalCppRuntime;
+using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
 #endif
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.MsalCppRuntime;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
@@ -104,20 +104,20 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
-                var mockRuntime = Substitute.For<IMsalCppRuntime>();
-                mockRuntime.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
-                mockRuntime.IsPopSupported.Returns(true);
-                mockRuntime.AcquireTokenInteractiveAsync(
+                var mockBroker = Substitute.For<IBroker>();
+                mockBroker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
+                mockBroker.IsPopSupported.Returns(true);
+                mockBroker.AcquireTokenInteractiveAsync(
                     Arg.Any<AuthenticationRequestParameters>(),
                     Arg.Any<AcquireTokenInteractiveParameters>()).Returns(
                     MockHelpers.CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
-                mockRuntime.AcquireTokenSilentAsync(
+                mockBroker.AcquireTokenSilentAsync(
                     Arg.Any<AuthenticationRequestParameters>(), 
                     Arg.Any<AcquireTokenSilentParameters>()).Returns(
                     MockHelpers.CreateMsalRunTimeBrokerTokenResponse(null, Constants.PoPAuthHeaderPrefix));
 
                 var pcaBuilder = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                    .WithTestBroker(mockRuntime)
+                    .WithTestBroker(mockBroker)
                     .WithHttpManager(harness.HttpManager);
 
 #if NET6_WIN
@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);
                 TokenCacheHelper.ExpireAllAccessTokens(pca.UserTokenCacheInternal);
 
-                pca.ServiceBundle.Config.RuntimeBrokerCreatorFunc = (_, _, _) => mockRuntime;
+                pca.ServiceBundle.Config.BrokerCreatorFunc = (_, _, _) => mockBroker;
 
                 var resultForATI = await pca.AcquireTokenInteractive(TestConstants.s_graphScopes)
                     .WithProofOfPossession(TestConstants.Nonce, HttpMethod.Get, new Uri(TestConstants.AuthorityCommonTenant))
