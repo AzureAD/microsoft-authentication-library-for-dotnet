@@ -82,15 +82,6 @@ namespace CommonCache.Test.Unit.Utils
 
         private static void PrintCacheInfo()
         {
-            if (File.Exists(CommonCacheTestUtils.AdalV3CacheFilePath))
-            {
-                Console.WriteLine($"Adal Cache Exists at: {CommonCacheTestUtils.AdalV3CacheFilePath}");
-                Console.WriteLine("Adal Cache Size: " + Convert.ToInt32(new FileInfo(CommonCacheTestUtils.AdalV3CacheFilePath).Length));
-            }
-            else
-            {
-                Console.WriteLine($"Adal Cache DOES NOT EXIST at: {CommonCacheTestUtils.AdalV3CacheFilePath}");
-            }
 
             if (File.Exists(CommonCacheTestUtils.MsalV2CacheFilePath))
             {
