@@ -110,7 +110,6 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 AddCommonHeaders(requestContext);
             }
-            AddSsoPolicyHeaders(requestContext);
 
             HttpResponse response;
             Uri endpointUri = AddExtraQueryParams(endPoint);
@@ -218,16 +217,6 @@ namespace Microsoft.Identity.Client.OAuth2
             if (!string.IsNullOrWhiteSpace(requestContext.Logger.ClientVersion))
             {
                 _headers.Add(OAuth2Header.AppVer, requestContext.Logger.ClientVersion);
-            }
-        }
-
-        private void AddSsoPolicyHeaders(RequestContext requestContext)
-        {
-            IBroker broker = requestContext.ServiceBundle.Config.BrokerCreatorFunc(null, requestContext.ServiceBundle.Config, requestContext.Logger);
-            var ssoPolicyHeaders = broker.GetSsoPolicyHeaders();
-            foreach (KeyValuePair<string, string> kvp in ssoPolicyHeaders)
-            {
-                _headers.Add(kvp.Key, kvp.Value);
             }
         }
 
