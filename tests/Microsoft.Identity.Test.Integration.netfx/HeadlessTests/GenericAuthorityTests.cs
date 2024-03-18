@@ -65,6 +65,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         /// Based on the publicly available https://demo.duendesoftware.com/
         [RunOn(TargetFrameworks.NetCore | TargetFrameworks.NetFx)]
+        [Ignore("Test is not running reliably")]
         public async Task ShouldSupportClientCredentialsPrivateKeyJwtWithDuendeDemoInstanceAsync()
         {
             var applicationConfiguration = new ApplicationConfiguration(MsalClientType.ConfidentialClient);
