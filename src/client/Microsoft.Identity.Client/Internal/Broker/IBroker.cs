@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenByUsernamePasswordParameters acquireTokenByUsernamePasswordParameters);
 
-        Dictionary<string, string> GetSsoPolicyHeaders();
+        IReadOnlyDictionary<string, string> GetSsoPolicyHeaders();
         /// <summary>
         /// If device auth is required but the broker is not enabled, AAD will
         /// signal this by returning an URL pointing to the broker app that needs to be installed.

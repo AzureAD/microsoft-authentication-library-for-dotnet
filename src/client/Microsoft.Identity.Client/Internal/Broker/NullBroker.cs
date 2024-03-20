@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Internal.Broker
@@ -81,9 +82,9 @@ namespace Microsoft.Identity.Client.Internal.Broker
             return Task.FromResult<MsalTokenResponse>(null);
         }
 
-        public Dictionary<string, string> GetSsoPolicyHeaders()
+        public IReadOnlyDictionary<string, string> GetSsoPolicyHeaders()
         {
-            return new Dictionary<string, string>();
+            return CollectionHelpers.GetEmptyDictionary<string, string>();
         }
     }
 }

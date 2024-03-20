@@ -85,18 +85,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             }
         }
 
-        public RuntimeBroker(
-            ApplicationConfiguration appConfig,
-            ILoggerAdapter logger)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-            if (_logger.PiiLoggingEnabled)
-            {
-                s_lazyCore.Value.EnablePii(_logger.PiiLoggingEnabled);
-            }
-        }
-
         /// <summary>
         /// Ctor. Only call if on Win10, otherwise a TypeLoadException occurs. See DesktopOsHelper.IsWin10
         /// </summary>
@@ -564,7 +552,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 }
             }
         }
-        public Dictionary<string, string> GetSsoPolicyHeaders()
+        public IReadOnlyDictionary<string, string> GetSsoPolicyHeaders()
         {
             using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");

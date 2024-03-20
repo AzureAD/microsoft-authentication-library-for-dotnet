@@ -447,7 +447,7 @@ namespace Microsoft.Identity.Client
 
             if (Config.IsBrokerEnabled && Config.IsSsoPolicyEnabled)
             {
-                throw new InvalidOperationException(MsalErrorMessage.BrokerAndSsoPolicyConfigurationError);
+                throw new MsalClientException(MsalErrorMessage.BrokerAndSsoPolicyConfigurationError);
             }
         }
     }
