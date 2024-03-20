@@ -590,7 +590,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             }
             else if (ssoPolicy._ssoPolicyType == SsoPolicyType.Unknown)
             {
-                ssoPolicyHeaders.Add("x-ms-SsoFlags", "SsoRestrUndefined ");
+                ssoPolicyHeaders.Add("x-ms-SsoFlags", "SsoRestrUndefined");
             }
 
             return ssoPolicyHeaders;
