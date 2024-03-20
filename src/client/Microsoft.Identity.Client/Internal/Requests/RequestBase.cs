@@ -435,7 +435,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void InjectPcaSsoPolicyHeader(TokenClient tokenClient)
         {
-            if (ServiceBundle.Config.IsPublicClient)
+            if (ServiceBundle.Config.IsPublicClient && ServiceBundle.Config.IsWebviewSsoPolicyEnabled)
             {
                 IBroker broker = ServiceBundle.Config.BrokerCreatorFunc(
                     null,
@@ -445,7 +445,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 var ssoPolicyHeaders = broker.GetSsoPolicyHeaders();
                 foreach (KeyValuePair<string, string> kvp in ssoPolicyHeaders)
                 {
-                    tokenClient.AddHeaderToClient.Add(kvp.Key, kvp.Value);
+                    tokenClient.AddHeaderToClient(kvp.Key, kvp.Value);
                 }
             }
         }

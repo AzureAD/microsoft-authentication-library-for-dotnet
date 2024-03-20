@@ -445,7 +445,7 @@ namespace Microsoft.Identity.Client
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
             }
 
-            if (Config.IsBrokerEnabled && Config.IsSsoPolicyEnabled)
+            if (Config.IsBrokerEnabled && Config.IsWebviewSsoPolicyEnabled)
             {
                 throw new MsalClientException(MsalErrorMessage.BrokerAndSsoPolicyConfigurationError);
             }

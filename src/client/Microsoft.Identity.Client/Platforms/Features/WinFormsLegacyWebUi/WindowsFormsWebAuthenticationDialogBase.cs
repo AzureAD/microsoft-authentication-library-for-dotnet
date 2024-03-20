@@ -281,7 +281,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             _webBrowser.Navigated += WebBrowserNavigatedHandler;
             _webBrowser.NavigateError += WebBrowserNavigateErrorHandler;
 
-            if(RequestContext.ServiceBundle.Config.IsSsoPolicyEnabled)
+            if(RequestContext.ServiceBundle.Config.IsWebviewSsoPolicyEnabled)
             {
                 IBroker broker = RequestContext.ServiceBundle.Config.BrokerCreatorFunc(null, RequestContext.ServiceBundle.Config, RequestContext.Logger);
                 var ssoPolicyHeaders = broker.GetSsoPolicyHeaders();

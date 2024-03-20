@@ -66,7 +66,10 @@ namespace Microsoft.Identity.Client
 
         public bool IsBrokerEnabled { get; internal set; }
 
-        public bool IsSsoPolicyEnabled { get; internal set; }
+        /// <summary>
+        /// Applicable to only public client applications to enforce SSO policy with embedded webview.
+        /// </summary>
+        public bool IsWebviewSsoPolicyEnabled { get; internal set; }
 
         // Legacy options for UWP. .NET broker options are in BrokerOptions
         public WindowsBrokerOptions UwpBrokerOptions { get; set; } 
