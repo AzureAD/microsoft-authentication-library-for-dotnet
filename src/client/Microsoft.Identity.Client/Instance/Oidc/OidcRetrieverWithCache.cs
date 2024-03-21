@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
             }
 
             await s_lockOidcRetrieval.WaitAsync().ConfigureAwait(false);
-            
+
             Uri oidcMetadataEndpoint = null;
             try
             {
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Instance.Oidc
                 builder.Path = existingPath.TrimEnd('/') + "/" + Constants.WellKnownOpenIdConfigurationPath;
 
                 oidcMetadataEndpoint = builder.Uri;
-                var client = new OAuth2Client(requestContext.Logger, requestContext.ServiceBundle.HttpManager);                             
+                var client = new OAuth2Client(requestContext.Logger, requestContext.ServiceBundle.HttpManager, null);
                 configuration = await client.DiscoverOidcMetadataAsync(oidcMetadataEndpoint, requestContext).ConfigureAwait(false);
 
                 s_cache[authority] = configuration;
