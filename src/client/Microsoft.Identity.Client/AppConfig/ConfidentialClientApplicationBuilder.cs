@@ -317,7 +317,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
+        /// Call <see cref="WithOidcAuthority(string)"/> instead.
+
         /// </summary>
         /// <param name="authorityUri"></param>
         /// <returns></returns>
