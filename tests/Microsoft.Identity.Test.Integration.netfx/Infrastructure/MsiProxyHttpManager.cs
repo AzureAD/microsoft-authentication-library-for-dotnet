@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
         }
 
         public long LastRequestDurationInMs { get; private set; }
+        HttpClientHandler IHttpManager.Handler { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public Task<HttpResponse> SendPostAsync(
             Uri endpoint,

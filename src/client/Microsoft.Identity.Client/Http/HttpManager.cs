@@ -28,6 +28,7 @@ namespace Microsoft.Identity.Client.Http
     {
         protected readonly IMsalHttpClientFactory _httpClientFactory;
         public long LastRequestDurationInMs { get; private set; }
+        public HttpClientHandler HttpClientHandler { get; set; }
 
         public HttpManager(IMsalHttpClientFactory httpClientFactory)
         {
@@ -37,7 +38,12 @@ namespace Microsoft.Identity.Client.Http
 
         protected virtual HttpClient GetHttpClient()
         {
-            return _httpClientFactory.GetHttpClient();
+            if (HttpClientHandler == null)
+            {
+                return _httpClientFactory.GetHttpClient();
+            }
+            
+            return new HttpClient(HttpClientHandler);
         }
 
         public async Task<HttpResponse> SendPostAsync(
