@@ -91,6 +91,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             string itemKey = item.CacheKey;
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
 
+            if (partitionKey == null)
+            {
+                return;
+            }
+
             IdTokenCacheDictionary
                 .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalIdTokenCacheItem>())[itemKey] = item;
         }
@@ -99,6 +104,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             string itemKey = item.CacheKey;
             string partitionKey = CacheKeyFactory.GetKeyFromCachedItem(item);
+
+            if (partitionKey == null)
+            {
+                return;
+            }
 
             AccountCacheDictionary
                 .GetOrAdd(partitionKey, new ConcurrentDictionary<string, MsalAccountCacheItem>())[itemKey] = item;
