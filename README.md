@@ -7,24 +7,6 @@ The MSAL library for .NET is part of the [Microsoft identity platform for develo
 | [Conceptual documentation](https://aka.ms/msalnet) | [Getting Started](https://learn.microsoft.com/entra/msal/dotnet/getting-started/choosing-msal-dotnet) | [Sample Code](https://aka.ms/aaddevsamplesv2) | [API Reference](https://learn.microsoft.com/dotnet/api/overview/) | [Support](README.md#community-help-and-support) | [Feedback](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues)
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 
-## NuGet packages
-
-**Microsoft.Identity.Client**  
-[![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/)
-
-**Microsoft.Identity.Client.Desktop**  
-[![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.Desktop.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client.Desktop/)
-
-**Microsoft.Identity.Client.Broker**  
-[![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.Broker.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client.Broker/)
-
-**Microsoft.Identity.Client.Extensions.Msal**  
-[![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.Extensions.Msal.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client.Extensions.Msal/)  
-
-## Build Status
-
-[![Build Status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/CI/DotNet/.NET%20MSAL%20CI%20(YAML)?branchName=main)](https://identitydivision.visualstudio.com/IDDP/_build/latest?definitionId=922&branchName=main)
-
 ### Performance perspectives
 
 [Our documentation](https://learn.microsoft.com/entra/msal/dotnet/advanced/performance-testing) describes the approach to performance testing.
@@ -45,10 +27,6 @@ MSAL.NET became Generally Available with MSAL.NET 3.0.8. Since MSAL.NET moved to
 
 - Guides, tutorials, and detailed walkthroughs are available [on Microsoft Learn](https://learn.microsoft.com/entra/msal/dotnet/getting-started/choosing-msal-dotnet).
 - API documentation is available [on Microsoft Learn](https://learn.microsoft.com/dotnet/api/microsoft.identity.client)
-- A number of quickstarts are available for:
-  - [.NET desktop application](https://learn.microsoft.com/azure/active-directory/develop/desktop-app-quickstart?pivots=devlang-windows-desktop)
-  - [Universal Windows Platform (UWP)](https://learn.microsoft.com/azure/active-directory/develop/desktop-app-quickstart?pivots=devlang-uwp)
-  - [.NET Core daemon console](https://learn.microsoft.com/azure/active-directory/develop/console-app-quickstart?pivots=devlang-dotnet-core)
 - Code samples are available from our [Samples](https://aka.ms/aaddevsamplesv2) page.
 
 ## Where do I file issues

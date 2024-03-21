@@ -19,18 +19,6 @@ namespace CommonCache.Test.Unit.Utils
 
             switch (cacheProgramType)
             {
-                case CacheProgramType.AdalV3:
-                    executablePath = Path.Combine(BaseExecutablePath, "AdalV3", "CommonCache.Test.AdalV3.exe");
-                    resultsFilePath = Path.Combine(CommonCacheTestUtils.CacheFileDirectory, "adalv3results.json");
-                    break;
-                case CacheProgramType.AdalV4:
-                    executablePath = Path.Combine(BaseExecutablePath, "AdalV4", "CommonCache.Test.AdalV4.exe");
-                    resultsFilePath = Path.Combine(CommonCacheTestUtils.CacheFileDirectory, "adalv4results.json");
-                    break;
-                case CacheProgramType.AdalV5:
-                    executablePath = Path.Combine(BaseExecutablePath, "AdalV5", "CommonCache.Test.AdalV5.exe");
-                    resultsFilePath = Path.Combine(CommonCacheTestUtils.CacheFileDirectory, "adalv5results.json");
-                    break;
                 case CacheProgramType.MsalV2:
                     executablePath = Path.Combine(BaseExecutablePath, "MsalV2", "CommonCache.Test.MsalV2.exe");
                     resultsFilePath = Path.Combine(CommonCacheTestUtils.CacheFileDirectory, "msalv2results.json");

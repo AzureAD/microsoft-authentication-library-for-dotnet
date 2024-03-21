@@ -17,13 +17,11 @@ namespace CommonCache.Test.MsalV2
     {
         private static readonly object s_fileLock = new object();
         private static CacheStorageType s_cacheStorage = CacheStorageType.None;
-        public static string AdalV3CacheFileName { get; private set; }
         public static string UnifiedCacheFileName { get; private set; }
 
-        public static void ConfigureUserCache(CacheStorageType cacheStorageType, TokenCache tokenCache, string adalV3CacheFileName, string unifiedCacheFileName)
+        public static void ConfigureUserCache(CacheStorageType cacheStorageType, TokenCache tokenCache, string unifiedCacheFileName)
         {
             s_cacheStorage = cacheStorageType;
-            AdalV3CacheFileName = adalV3CacheFileName;
             UnifiedCacheFileName = unifiedCacheFileName;
             if (tokenCache != null)
             {
@@ -36,10 +34,7 @@ namespace CommonCache.Test.MsalV2
         {
             lock (s_fileLock)
             {
-                var adalv3State = CacheFileUtils.ReadFromFileIfExists(AdalV3CacheFileName);
                 var unifiedState = CacheFileUtils.ReadFromFileIfExists(UnifiedCacheFileName);
-
-                args.TokenCache.DeserializeUnifiedAndAdalCache(new CacheData { AdalV3State = adalv3State, UnifiedState = unifiedState });
             }
         }
 
@@ -53,13 +48,6 @@ namespace CommonCache.Test.MsalV2
                     var cacheData = args.TokenCache.SerializeUnifiedAndAdalCache();
 
                     // reflect changes in the persistent store
-                    if ((s_cacheStorage & CacheStorageType.Adal) == CacheStorageType.Adal)
-                    {
-                        if (!string.IsNullOrWhiteSpace(AdalV3CacheFileName))
-                        {
-                            CacheFileUtils.WriteToFileIfNotNull(AdalV3CacheFileName, cacheData.AdalV3State);
-                        }
-                    }
 
                     if ((s_cacheStorage & CacheStorageType.MsalV2) == CacheStorageType.MsalV2)
                     {
