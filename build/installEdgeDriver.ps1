@@ -1,5 +1,9 @@
 # Get the installed version of Microsoft Edge
-$edgeVersion = $(Get-Item "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe").VersionInfo.ProductVersion
+$edgeVersion = $null
+$edgePath = "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
+if (Test-Path $edgePath) {
+    $edgeVersion = $(Get-Item $edgePath).VersionInfo.ProductVersion
+}
 
 # Check if $edgeVersion is null or empty, and install Edge if necessary
 if ([string]::IsNullOrEmpty($edgeVersion)) {
