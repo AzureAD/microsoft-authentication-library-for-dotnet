@@ -1,11 +1,16 @@
 # Get the installed version of Microsoft Edge
 $edgeVersion = $(Get-Item "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe").VersionInfo.ProductVersion
 
-# Check if $edgeVersion is null or empty
+# Check if $edgeVersion is null or empty, and install Edge if necessary
 if ([string]::IsNullOrEmpty($edgeVersion)) {
-    echo "##vso[task.logissue type=error]Microsoft Edge version is not found. Please ensure Microsoft Edge is installed."
-    echo "##vso[task.complete result=Failed;]Failed"
+    Write-Host "Microsoft Edge version is not found. Installing Microsoft Edge..."
+    choco install microsoft-edge --ignore-checksums -y
+    if ($LASTEXITCODE -ne 0) {
+        echo "##vso[task.logissue type=error]Failed to install Microsoft Edge."
+        echo "##vso[task.complete result=Failed;]Failed"
     }
+    $edgeVersion = $(Get-Item $edgePath).VersionInfo.ProductVersion
+}
 
 $url = "https://msedgedriver.azureedge.net/$edgeVersion/edgedriver_win64.zip" #Edge Driver from https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
 $fileName = "edgedriver_win64.zip"
