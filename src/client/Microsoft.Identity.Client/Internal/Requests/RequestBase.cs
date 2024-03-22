@@ -51,7 +51,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 throw new ArgumentNullException(nameof(acquireTokenParameters));
             }
 
-            ValidateScopeInput(authenticationRequestParameters.Scope);
             acquireTokenParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
         }
 
@@ -63,15 +62,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected virtual SortedSet<string> GetOverriddenScopes(ISet<string> inputScopes)
         {
             return null;
-        }
-
-        private void ValidateScopeInput(ISet<string> scopesToValidate)
-        {
-            if (scopesToValidate.Contains(AuthenticationRequestParameters.AppConfig.ClientId))
-            {
-                throw new ArgumentException("API does not accept client id as a user-provided scope");
-            }
-        }
+        }       
 
         protected abstract Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken);
 
