@@ -316,6 +316,12 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+        /// <summary>
+        /// Call <see cref="WithOidcAuthority(string)"/> instead.
+
+        /// </summary>
+        /// <param name="authorityUri"></param>
+        /// <returns></returns>
         [Obsolete("This method has been renamed to WithOidcAuthority.", false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public ConfidentialClientApplicationBuilder WithGenericAuthority(string authorityUri)

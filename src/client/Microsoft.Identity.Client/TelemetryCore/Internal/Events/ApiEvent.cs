@@ -38,6 +38,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
             // MSAL 4.54.0+
             InitiateLongRunningObo = 1017,
             AcquireTokenInLongRunningObo = 1018,
+
+            // "2002" is reserved for 1p OTEL signal that telemetry is disabled
         }
 
         public ApiEvent(Guid correlationId)
