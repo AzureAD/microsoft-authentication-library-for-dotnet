@@ -13,9 +13,6 @@ steps:
   inputs:
     script: 'nuget locals all -clear'
 
-- powershell: 'powershell.exe -File "$(MsalSourceDir)build\InstallAndroid.ps1" -ExecutionPolicy Bypass'
-  displayName: 'Install Android'
-
 # Task to disable an public NuGet source
 - task: CmdLine@2
   displayName: 'Disable Public NuGet source'
@@ -28,6 +25,12 @@ steps:
   inputs:
     script: |
       dotnet nuget add source "https://identitydivision.pkgs.visualstudio.com/IDDP/_packaging/authsdkinternalfeed/nuget/v3/index.json" --name authsdkinternalfeed
+      
+- task: PowerShell@2
+  displayName: 'Install Android'
+  inputs:
+    filePath: '$(MsalSourceDir)build\InstallAndroid.ps1'
+    arguments: '-ExecutionPolicy Bypass'
       
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
