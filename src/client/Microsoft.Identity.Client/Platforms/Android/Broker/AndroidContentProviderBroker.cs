@@ -400,5 +400,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             return Task.FromResult<MsalTokenResponse>(null); // nop
         }
+
+        public IReadOnlyDictionary<string, string> GetSsoPolicyHeaders()
+        {
+            return CollectionHelpers.GetEmptyDictionary<string, string>();
+        }
     }
 }

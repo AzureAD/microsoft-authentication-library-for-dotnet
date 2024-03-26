@@ -552,6 +552,32 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                 }
             }
         }
+        public IReadOnlyDictionary<string, string> GetSsoPolicyHeaders()
+        {
+            using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
+            Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
+
+            NativeInterop.SsoPolicy ssoPolicy = new SsoPolicy();
+            _logger.Info(() => $"[RuntimeBroker] Broker returned SsoPolicyType {ssoPolicy.SsoPolicyType} and errorCode {ssoPolicy.ErrorCode}.");
+
+            var ssoPolicyHeaders = new Dictionary<string, string>();
+            if (ssoPolicy.SsoPolicyType == SsoPolicyType.PermissionRequired)
+            {
+                ssoPolicyHeaders.Add("x-ms-SsoFlags", "SsoRestr");
+            }
+            else if (ssoPolicy.SsoPolicyType == SsoPolicyType.Error)
+            {
+                ssoPolicyHeaders.Add("x-ms-SsoFlags", "SsoPolicyError");
+                string subStatusValue = "SsoRestrError:" + ssoPolicy.ErrorCode.ToString();
+                ssoPolicyHeaders.Add("x-ms-SsoFlagsSubstatus", Base64UrlHelpers.Encode(subStatusValue));
+            }
+            else if (ssoPolicy.SsoPolicyType == SsoPolicyType.Unknown)
+            {
+                ssoPolicyHeaders.Add("x-ms-SsoFlags", "SsoRestrUndefined");
+            }
+
+            return ssoPolicyHeaders;
+        }
 
         public void HandleInstallUrl(string appLink)
         {

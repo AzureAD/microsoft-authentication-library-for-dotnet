@@ -66,6 +66,11 @@ namespace Microsoft.Identity.Client
 
         public bool IsBrokerEnabled { get; internal set; }
 
+        /// <summary>
+        /// Applicable to only public client applications to enforce SSO policy with embedded webview.
+        /// </summary>
+        public bool IsWebviewSsoPolicyEnabled { get; internal set; }
+
         // Legacy options for UWP. .NET broker options are in BrokerOptions
         public WindowsBrokerOptions UwpBrokerOptions { get; set; } 
 
@@ -121,6 +126,9 @@ namespace Microsoft.Identity.Client
         public ManagedIdentityId ManagedIdentityId { get; internal set; }
 
         public bool IsManagedIdentity { get; }
+        public bool IsConfidentialClient { get; }
+        public bool IsPublicClient => !IsConfidentialClient && !IsManagedIdentity;
+
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
@@ -201,8 +209,7 @@ namespace Microsoft.Identity.Client
         public ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
         public ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
-        public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
-        public bool IsConfidentialClient { get; }
+        public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }        
         public bool IsInstanceDiscoveryEnabled { get; internal set; } = true;
         #endregion
 
