@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
             {
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(TestConstants.AuthorityCommonTenant);
 
-                OAuth2Client client = new OAuth2Client(harness.ServiceBundle.ApplicationLogger, harness.HttpManager);
+                OAuth2Client client = new OAuth2Client(harness.ServiceBundle.ApplicationLogger, harness.HttpManager, null);
 
                 Task<MsalTokenResponse> task = client.GetTokenAsync(
                     new Uri(TestConstants.AuthorityCommonTenant + "oauth2/v2.0/token"),

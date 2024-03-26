@@ -137,7 +137,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 _requestContext.Logger.Verbose(() => "[Managed Identity] Adding authorization header to the request.");
                 request.Headers.Add("Authorization", authHeaderValue);
 
-                response = await _requestContext.ServiceBundle.HttpManager.SendGetAsync(request.ComputeUri(), request.Headers, _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
+                response = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
+                     request.ComputeUri(),
+                     request.Headers,
+                     body: null,
+                     System.Net.Http.HttpMethod.Get,
+                     logger: _requestContext.Logger,
+                     doNotThrow: false,
+                     retry: true,
+                     mtlsCertificate: null,
+                     cancellationToken)
+                        .ConfigureAwait(false);
 
                 return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
             }

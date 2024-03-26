@@ -43,7 +43,8 @@ namespace Microsoft.Identity.Client.OAuth2
 
             _oAuth2Client = new OAuth2Client(
                _serviceBundle.ApplicationLogger,
-               _serviceBundle.HttpManager);
+               _serviceBundle.HttpManager,
+               requestParams.MtlsCertificate);
         }
 
         public async Task<MsalTokenResponse> SendTokenRequestAsync(
@@ -141,6 +142,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 var tokenEndpoint = await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
 
                 bool useSha2 = _requestParams.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported;
+
                 await _serviceBundle.Config.ClientCredential.AddConfidentialClientParametersAsync(
                     _oAuth2Client,
                     _requestParams.RequestContext.Logger,
@@ -282,10 +284,11 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 if (ex.StatusCode == (int)HttpStatusCode.Unauthorized)
                 {
+                    string responseHeader = string.Empty;
                     var isChallenge = _serviceBundle.DeviceAuthManager.TryCreateDeviceAuthChallengeResponse(
                         ex.Headers,
                         new Uri(tokenEndpoint), // do not add query params to PKeyAuth https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2359
-                        out string responseHeader);
+                        out responseHeader);
                     if (isChallenge)
                     {
                         //Injecting PKeyAuth response here and replaying request to attempt device auth

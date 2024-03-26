@@ -219,9 +219,6 @@ namespace Microsoft.Identity.Test.Unit
                 Debug.WriteLine($"Total Identity Hits: {identityProviderHits}");
                 Debug.WriteLine($"Total Cache Hits: {cacheHits}");
                 Assert.IsTrue(cacheHits == 9);
-
-                harness.HttpManager.ClearQueue();
-
             }
         }
 
