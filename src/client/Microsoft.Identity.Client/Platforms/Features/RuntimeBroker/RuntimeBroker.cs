@@ -569,12 +569,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             {
                 ssoPolicyHeaders.Add("x-ms-SsoFlags", "SsoPolicyError");
                 string subStatusValue = "SsoRestrError:" + ssoPolicy.ErrorCode.ToString();
-                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(subStatusValue);
-                string base64UrlEncoded = System.Convert.ToBase64String(bytes)
-                                                        .Replace('+', '-')
-                                                        .Replace('/', '_')
-                                                        .TrimEnd('=');
-                ssoPolicyHeaders.Add("x-ms-SsoFlagsSubstatus", base64UrlEncoded);
+                ssoPolicyHeaders.Add("x-ms-SsoFlagsSubstatus", Base64UrlHelpers.Encode(subStatusValue));
             }
             else if (ssoPolicy.SsoPolicyType == SsoPolicyType.Unknown)
             {
