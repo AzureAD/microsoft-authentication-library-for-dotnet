@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1711035587141,
+  "lastUpdate": 1711447231614,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -4526,6 +4526,42 @@ window.BENCHMARK_DATA = {
             "value": 337107.5333333333,
             "unit": "ns",
             "range": "± 5066.629548422934"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "distinct": true,
+          "id": "e065471bb87c8fcc1d7433ef99569d24edc5b639",
+          "message": "Make URL settable in extensibility point to allow setting query params",
+          "timestamp": "2024-03-26T09:53:33Z",
+          "tree_id": "bdd9552e0501519c38134e625b8c3636e11f17bc",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/e065471bb87c8fcc1d7433ef99569d24edc5b639"
+        },
+        "date": 1711447227197,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 258025.84615384616,
+            "unit": "ns",
+            "range": "± 2160.5586023894316"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 362325.78571428574,
+            "unit": "ns",
+            "range": "± 4553.507598604559"
           }
         ]
       }
