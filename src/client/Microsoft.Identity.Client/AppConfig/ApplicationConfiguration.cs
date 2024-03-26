@@ -127,8 +127,8 @@ namespace Microsoft.Identity.Client
 
         public bool IsManagedIdentity { get; }
         public bool IsConfidentialClient { get; }
-
         public bool IsPublicClient => !IsConfidentialClient && !IsManagedIdentity;
+
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
