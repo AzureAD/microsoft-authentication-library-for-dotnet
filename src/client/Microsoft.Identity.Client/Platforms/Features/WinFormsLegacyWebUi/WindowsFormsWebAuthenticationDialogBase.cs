@@ -288,7 +288,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
                 string ssoPolicyHeadersString="";
                 foreach (KeyValuePair<string, string> kvp in ssoPolicyHeaders)
                 {
-                    ssoPolicyHeadersString += kvp.Key + ":" + kvp.Value + "\r\n";
+                    ssoPolicyHeadersString += kvp.Key + ":" + kvp.Value + Environment.NewLine;
                 }
                 _webBrowser.Navigate(requestUri, null, null, ssoPolicyHeadersString);
             }
