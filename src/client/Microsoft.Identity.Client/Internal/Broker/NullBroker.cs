@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
             return Task.FromResult<MsalTokenResponse>(null);
         }
 
-        public ReadOnlyDictionary<string, string> GetSsoPolicyHeaders()
+        public IReadOnlyDictionary<string, string> GetSsoPolicyHeaders()
         {
             return CollectionHelpers.GetEmptyDictionary<string, string>();
         }

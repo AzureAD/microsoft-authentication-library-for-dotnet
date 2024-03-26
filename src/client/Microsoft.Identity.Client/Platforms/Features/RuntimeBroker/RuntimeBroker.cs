@@ -558,17 +558,17 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
 
             NativeInterop.SsoPolicy ssoPolicy = new SsoPolicy();
-            _logger.Info(() => $"[RuntimeBroker] Broker returned SsoPolicyType {ssoPolicy._ssoPolicyType} and errorCode {ssoPolicy._errorCode}.");
+            _logger.Info(() => $"[RuntimeBroker] Broker returned SsoPolicyType {ssoPolicy.SsoPolicyType} and errorCode {ssoPolicy.ErrorCode}.");
 
             var ssoPolicyHeaders = new Dictionary<string, string>();
-            if (ssoPolicy._ssoPolicyType == SsoPolicyType.PermissionRequired)
+            if (ssoPolicy.SsoPolicyType == SsoPolicyType.PermissionRequired)
             {
                 ssoPolicyHeaders.Add("x-ms-SsoFlags", "SsoRestr");
             }
-            else if (ssoPolicy._ssoPolicyType == SsoPolicyType.Error)
+            else if (ssoPolicy.SsoPolicyType == SsoPolicyType.Error)
             {
                 ssoPolicyHeaders.Add("x-ms-SsoFlags", "SsoPolicyError");
-                string subStatusValue = "SsoRestrError:" + ssoPolicy._errorCode.ToString();
+                string subStatusValue = "SsoRestrError:" + ssoPolicy.ErrorCode.ToString();
                 byte[] bytes = System.Text.Encoding.UTF8.GetBytes(subStatusValue);
                 string base64UrlEncoded = System.Convert.ToBase64String(bytes)
                                                         .Replace('+', '-')
@@ -576,7 +576,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                                                         .TrimEnd('=');
                 ssoPolicyHeaders.Add("x-ms-SsoFlagsSubstatus", base64UrlEncoded);
             }
-            else if (ssoPolicy._ssoPolicyType == SsoPolicyType.Unknown)
+            else if (ssoPolicy.SsoPolicyType == SsoPolicyType.Unknown)
             {
                 ssoPolicyHeaders.Add("x-ms-SsoFlags", "SsoRestrUndefined");
             }

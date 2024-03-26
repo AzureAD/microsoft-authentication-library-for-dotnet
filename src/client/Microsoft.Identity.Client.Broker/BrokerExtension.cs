@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Broker
         public static PublicClientApplicationBuilder WithSsoPolicy(this PublicClientApplicationBuilder builder)
         {
             AddRuntimeSupport(builder);
-            builder.Config.IsSsoPolicyEnabled = true;
+            builder.Config.IsWebviewSsoPolicyEnabled = true;
             return builder;
         }
 

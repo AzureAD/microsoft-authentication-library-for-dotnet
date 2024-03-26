@@ -22,7 +22,6 @@ using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 using Microsoft.Identity.Client.Internal.Broker;
-using System.Reflection.PortableExecutable;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {

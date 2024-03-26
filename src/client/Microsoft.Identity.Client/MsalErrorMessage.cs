@@ -407,10 +407,6 @@ namespace Microsoft.Identity.Client
 
         public const string MultiCloudSupportUnavailable = "Multi cloud support unavailable with broker.";
 
-        public const string BrokerAndSsoPolicyConfigurationError = "WithBroker and WithSsoPolicy cannot be used together. Broker by default supports SsoPolicy. Use WithSsoPolicy only when using embedded or system webview";
-
-
-
         public const string RequestFailureErrorMessage = "=== Token Acquisition ({0}) failed.\n\tHost: {1}.";
 
         public const string RequestFailureErrorMessagePii = "=== Token Acquisition ({0}) failed:\n\tAuthority: {1}\n\tClientId: {2}.";
