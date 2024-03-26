@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1711462265506,
+  "lastUpdate": 1711462267576,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -15706,6 +15706,54 @@ window.BENCHMARK_DATA = {
             "value": 175550.84664481026,
             "unit": "ns",
             "range": "± 758.4653416811203"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "83938949+ashok672@users.noreply.github.com",
+            "name": "Ashok Kumar Ramakrishnan",
+            "username": "ashok672"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "80faef7a08b9385709e507fbbfd970d996ed5865",
+          "message": "SsoPolicy support for PCA. (#4659)\n\n* SsoPolicy initial\r\n\r\n* Remove SSOPolicy project\r\n\r\n* Update LibsAndSamples.sln\r\n\r\n* Delete files not needed\r\n\r\n* Introduce WithSSoPolicy in broker project and rename RuntimeBroker to MsalCppRuntime\r\n\r\n* Revert \"Introduce WithSSoPolicy in broker project and rename RuntimeBroker to MsalCppRuntime\"\r\n\r\nThis reverts commit 5e9f79457c2bb33ce1f5aedc0175dc9860754178.\r\n\r\n* Update ApplicationConfiguration.cs\r\n\r\n* Update InternalsVisibleTo.cs\r\n\r\n* Hook up the E2E for adding SsoPolicy headers in OAuth2 implementation\r\n\r\n* Update NuGet.Config\r\n\r\n* Inject headers in RequestBase\r\n\r\n* Update src/client/Microsoft.Identity.Client/Platforms/Features/RuntimeBroker/RuntimeBroker.cs\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/MsalErrorMessage.cs\r\n\r\nCo-authored-by: Bogdan Gavril <bogavril@microsoft.com>\r\n\r\n* Fix for review comments\r\n\r\n* Fix for review comments\r\n\r\n* Update src/client/Microsoft.Identity.Client/MsalErrorMessage.cs\r\n\r\nCo-authored-by: Bogdan Gavril <bogavril@microsoft.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/ApplicationConfiguration.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/Platforms/Features/WinFormsLegacyWebUi/WindowsFormsWebAuthenticationDialogBase.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/Internal/Broker/NullBroker.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Fix for review comments\r\n\r\n* Update RuntimeBroker.cs\r\n\r\n* Fix mobile build breaks\r\n\r\n---------\r\n\r\nCo-authored-by: Bogdan Gavril <bogavril@microsoft.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>",
+          "timestamp": "2024-03-26T14:04:05Z",
+          "tree_id": "4451af55905330d1bd07c3906773cb78857a0f28",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/80faef7a08b9385709e507fbbfd970d996ed5865"
+        },
+        "date": 1711462266914,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 22475.767488919773,
+            "unit": "ns",
+            "range": "± 101.05605741495519"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 172287.78344726562,
+            "unit": "ns",
+            "range": "± 490.2081010489612"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 33937.06239420573,
+            "unit": "ns",
+            "range": "± 112.8905740966236"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 172020.87317708333,
+            "unit": "ns",
+            "range": "± 1510.7218799377936"
           }
         ]
       }
