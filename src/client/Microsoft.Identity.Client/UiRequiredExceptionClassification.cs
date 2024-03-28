@@ -11,9 +11,9 @@ namespace Microsoft.Identity.Client
     {
         /// <summary>
         /// No details are provided. It is possible that the user will be able to resolve the issue by launching interactive authentication.
+        /// This is also the classification when no account or valid login hint is passed to <see cref="AcquireTokenSilentParameterBuilder"/>.
         /// See <see href="https://aka.ms/msal-net-UiRequiredException">Understanding MsalUiRequiredException</see> for details.
         /// </summary>
-        /// <remarks>This is also the classification when no account or valid login hint is passed to AcquireTokenSilent</remarks>
         None,
 
         /// <summary>
