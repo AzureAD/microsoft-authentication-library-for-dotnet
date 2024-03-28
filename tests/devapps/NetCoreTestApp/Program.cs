@@ -75,6 +75,7 @@ namespace NetCoreTestApp
 
         private static IPublicClientApplication CreatePca(bool withWamBroker = false)
         {
+            // <PCABootstrapSample>
             var pcaBuilder = PublicClientApplicationBuilder
                             .Create(s_clientIdForPublicApp)
                             .WithAuthority(GetAuthority())
@@ -108,6 +109,7 @@ namespace NetCoreTestApp
                     File.WriteAllBytes(CacheFilePath, notificationArgs.TokenCache.SerializeMsalV3());
                 }
             });
+            // </PCABootstrapSample>
             return pca;
         }
 
