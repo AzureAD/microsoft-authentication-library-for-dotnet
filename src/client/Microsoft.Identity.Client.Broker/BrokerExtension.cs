@@ -57,7 +57,8 @@ namespace Microsoft.Identity.Client.Broker
         /// Use this API to enable SsoPolicy enforcement. 
         /// Should only be utilized by Microsoft 1st party applications.
         /// This is applicable only when broker is not enabled and embedded webview is the preferred choice.
-        /// By default, the broker supports SsoPolicy, and system webview SsoPolicy is also supported at the OS level. 
+        /// By default, the broker supports SsoPolicy, and system webview SsoPolicy is also supported at the OS level.
+        /// </summary>
         /// <param name="builder"></param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
