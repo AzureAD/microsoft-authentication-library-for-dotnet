@@ -14,8 +14,8 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Standard OAuth2 protocol error code. It indicates that the application needs to expose the UI to the user
         /// so that the user does an interactive action in order to get a new token.
-        /// <para>Mitigation:</para> If your application is a <see cref="T:IPublicClientApplication"/> call <c>AcquireTokenInteractive</c>
-        /// perform an interactive authentication. If your application is a <see cref="T:ConfidentialClientApplication"/> chances are that the Claims member
+        /// <para>Mitigation:</para> If your application is a <see cref="IPublicClientApplication"/> call <c>AcquireTokenInteractive</c>
+        /// perform an interactive authentication. If your application is a <see cref="ConfidentialClientApplication"/> chances are that the Claims member
         /// of the exception is not empty. See <see cref="P:MsalServiceException.Claims"/> for the right mitigation
         /// </summary>
         public const string InvalidGrantError = "invalid_grant";
@@ -23,9 +23,9 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Standard OAuth2 protocol error code. It indicates that the application needs to expose the UI to the user
         /// so the user can do an interactive log-in to get a token with updated claims.
-        /// <para>Mitigation:</para> If your application is a <see cref="T:IPublicClientApplication"/> call <c>AcquireTokenInteractive</c>
-        /// perform an interactive authentication. If your application is a <see cref="T:ConfidentialClientApplication"/> chances are that the Claims member
-        /// of the exception is not empty. See <see cref="P:MsalServiceException.Claims"/> for the right mitigation
+        /// <para>Mitigation:</para> If your application is a <see cref="IPublicClientApplication"/> call <c>AcquireTokenInteractive</c>
+        /// perform an interactive authentication. If your application is a <see cref="ConfidentialClientApplication"/> chances are that the Claims member
+        /// of the exception is not empty. See <see cref="MsalServiceException.Claims"/> for the right mitigation
         /// </summary>
         public const string InteractionRequired = "interaction_required";
 
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// loginHint should be a UPN
-        /// <para>What happens?</para> An override of a token acquisition operation was called in <see cref="T:IPublicClientApplication"/> which
+        /// <para>What happens?</para> An override of a token acquisition operation was called in <see cref="IPublicClientApplication"/> which
         /// takes a <c>loginHint</c> as a parameters, but this login hint was not using the UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c>
         /// expected by the service
         /// <para>Remediation</para> Make sure in your code that you enforce <c>loginHint</c> to be a UPN
