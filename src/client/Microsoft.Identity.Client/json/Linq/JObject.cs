@@ -837,7 +837,7 @@ namespace Microsoft.Identity.Json.Linq
 
             public override bool TrySetMember(JObject instance, SetMemberBinder binder, object value)
             {
-                // this throws an error if value isn't a valid for a JValue
+                // this can throw an error if value isn't a valid for a JValue
                 if (!(value is JToken v))
                 {
                     v = new JValue(value);
