@@ -9,7 +9,7 @@
 ### Bug Fixes
 - MSAL.Net now logs an error when OBO is performed over common or organizations. See [4606](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4606)
 - MSAL.Net now handles the v2.0 authorization endpoint. See [4416](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4416)
-- Improved logging and error message when the web api received claims challenge. See [4496](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4496)
+- Improved logging and error message when the web api receives a claims challenge. See [4496](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4496)
 - Cloud shell error message from the managed identity endpoint is parsed correctly. See [4402](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4402)
 - Improved error message when CCA certificate is disposed before MSAL can use it. See [4602](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4602)
 - Client id is now accepted as a scope. See [4652](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4652)
