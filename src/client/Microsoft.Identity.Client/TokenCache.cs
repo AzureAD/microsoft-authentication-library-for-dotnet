@@ -110,7 +110,9 @@ namespace Microsoft.Identity.Client
             LegacyCachePersistence = legacyCachePersistenceForTest;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Sets the security group to be used with the iOS Keychain. This function should not be used by external customers - it <see href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2121">will be removed</see> in a future version of MSAL.
+        /// </summary>
         public void SetIosKeychainSecurityGroup(string securityGroup)
         {
 #if iOS

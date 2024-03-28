@@ -75,7 +75,10 @@ namespace Microsoft.Identity.Client.Kerberos
             this.ErrorMessage = errorMessage;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Creates a string representation of the data captured in the Kerberos supplemental ticket.
+        /// </summary>
+        /// <returns>A string containing the realm, service principal name, client name, and key type.</returns>
         public override string ToString()
         {
             return $"[ Realm: {Realm}, sp: {ServicePrincipalName}, cn: {ClientName}, KeyType: {KeyType} ]";
