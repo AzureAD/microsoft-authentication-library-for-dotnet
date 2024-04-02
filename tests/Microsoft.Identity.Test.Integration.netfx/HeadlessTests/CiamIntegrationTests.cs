@@ -12,7 +12,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -29,6 +28,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataRow("https://{0}.ciamlogin.com/", 0)] //https://tenantName.ciamlogin.com/
         [DataRow("https://{0}.ciamlogin.com/{1}.onmicrosoft.com", 1)] //https://tenantName.ciamlogin.com/tenantName.onmicrosoft.com
         [DataRow("https://{0}.ciamlogin.com/{1}", 2)] //https://tenantName.ciamlogin.com/tenantId
+        [DataRow("https://login.msidlabsciam.com/fe362aec-5d43-45d1-b730-9755e60dc3b9/v2.0/", 3)] //CIAM CUD
         public async Task ROPC_Ciam_Async(string authorityFormat, int authorityVersion)
         {
             //Get lab details
@@ -39,33 +39,44 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 PublicClient = PublicClient.no
             }).ConfigureAwait(false);
 
-            string authority = string.Empty;
-
-            //Compute authority from format and lab response
-            switch (authorityVersion)
-            {
-                case 0:
-                    authority = string.Format(authorityFormat, labResponse.User.LabName);
-                    break;
-
-                case 1:
-                    authority = string.Format(authorityFormat, labResponse.User.LabName, labResponse.User.LabName);
-                    break;
-
-                case 2:
-                    authority = string.Format(authorityFormat, labResponse.User.LabName, labResponse.Lab.TenantId);
-                    break;
-            }
+            string authority = ComputeCiamAuthority(authorityFormat, authorityVersion, labResponse);
 
             //Acquire tokens
-            var msalPublicClient = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithAuthority(authority, false)
+            string appId;
+            string email;
+            string credential;
+
+            if (authorityVersion < 3)
+            {
+                appId = labResponse.App.AppId;
+                email = labResponse.User.Upn;
+                credential = labResponse.User.GetOrFetchPassword();
+            }
+            else
+            {
+                appId = "b244c86f-ed88-45bf-abda-6b37aa482c79";
+                email = "idlab@msidlabciam6.onmicrosoft.com";
+                credential = LabUserHelper.FetchUserPassword("msidlabciam6");
+            }
+
+            var msalPublicClientBuilder = PublicClientApplicationBuilder
+                .Create(appId)
                 .WithRedirectUri(_ciamRedirectUri)
-                .Build();
+                .WithExperimentalFeatures();
+
+            if (authorityVersion < 3)
+            {
+                msalPublicClientBuilder.WithAuthority(authority, false);
+            }
+            else
+            {
+                msalPublicClientBuilder.WithOidcAuthority(authority);
+            }
+
+            var msalPublicClient = msalPublicClientBuilder.Build();
 
             var result = await msalPublicClient
-                .AcquireTokenByUsernamePassword(_ciamScopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+                .AcquireTokenByUsernamePassword(_ciamScopes, email, credential)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -90,6 +101,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataRow("https://{0}.ciamlogin.com/", 0)] //https://tenantName.ciamlogin.com/
         [DataRow("https://{0}.ciamlogin.com/{1}.onmicrosoft.com", 1)] //https://tenantName.ciamlogin.com/tenantName.onmicrosoft.com
         [DataRow("https://{0}.ciamlogin.com/{1}", 2)] //https://tenantName.ciamlogin.com/tenantId
+        [DataRow("https://login.msidlabsciam.com/fe362aec-5d43-45d1-b730-9755e60dc3b9/v2.0/", 3)] //CIAM CUD
         public async Task ClientCredentialWithClientSecret_Ciam_Async(string authorityFormat, int authorityVersion)
         {
             //Get lab details
@@ -100,31 +112,29 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 PublicClient = PublicClient.no
             }).ConfigureAwait(false);
 
-            string authority = string.Empty;
-
-            //Compute authority from format and lab response
-            switch (authorityVersion)
-            {
-                case 0:
-                    authority = string.Format(authorityFormat, labResponse.User.LabName);
-                    break;
-
-                case 1:
-                    authority = string.Format(authorityFormat, labResponse.User.LabName, labResponse.User.LabName);
-                    break;
-
-                case 2:
-                    authority = string.Format(authorityFormat, labResponse.User.LabName, labResponse.Lab.TenantId);
-                    break;
-            }
+            string authority = ComputeCiamAuthority(authorityFormat, authorityVersion, labResponse);
 
             //Acquire tokens
-            var msalConfidentialClient = ConfidentialClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithClientSecret(GetCiamSecret())
-                .WithAuthority(authority, false)
-                .WithRedirectUri(_ciamRedirectUri)
-                .Build();
+            string appId = authorityVersion < 3 ? labResponse.App.AppId : "b244c86f-ed88-45bf-abda-6b37aa482c79";
+
+            //Acquire tokens
+            var msalConfidentialClientBuilder = ConfidentialClientApplicationBuilder
+                .Create(appId)
+                .WithExperimentalFeatures();
+
+            if (authorityVersion < 3)
+            {
+                msalConfidentialClientBuilder.WithClientSecret(GetCiamSecret())
+                                             .WithAuthority(authority, false);
+            }
+            else
+            {
+                msalConfidentialClientBuilder.WithCertificate(CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName))
+                                             .WithOidcAuthority(authority);
+            }
+
+
+            var msalConfidentialClient = msalConfidentialClientBuilder.Build();
 
             var result = await msalConfidentialClient
                 .AcquireTokenForClient(new[] { TestConstants.DefaultGraphScope })
@@ -142,6 +152,31 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+        }
+
+        private string ComputeCiamAuthority(string authorityFormat, int authorityVersion, LabResponse labResponse)
+        {
+            string authority = string.Empty;
+            //Compute authority from format and lab response
+            switch (authorityVersion)
+            {
+                case 0:
+                    authority = string.Format(authorityFormat, labResponse.User.LabName);
+                    break;
+
+                case 1:
+                    authority = string.Format(authorityFormat, labResponse.User.LabName, labResponse.User.LabName);
+                    break;
+
+                case 2:
+                    authority = string.Format(authorityFormat, labResponse.User.LabName, labResponse.Lab.TenantId);
+                    break;
+                case 3:
+                    authority = authorityFormat;
+                    break;
+            }
+
+            return authority;
         }
 
         private string GetCiamSecret()
