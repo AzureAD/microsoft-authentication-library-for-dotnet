@@ -927,5 +927,10 @@ namespace Microsoft.Identity.Client.Platforms.uap.WamBroker
         {
             return Task.FromResult<MsalTokenResponse>(null); // nop
         }
+
+        public IReadOnlyDictionary<string, string> GetSsoPolicyHeaders()
+        {
+            return CollectionHelpers.GetEmptyDictionary<string, string>();
+        }
     }
 }

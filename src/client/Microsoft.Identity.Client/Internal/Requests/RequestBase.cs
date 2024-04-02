@@ -21,6 +21,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
+using Microsoft.Identity.Client.Internal.Broker;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -422,11 +423,30 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 tokenClient.AddHeaderToClient(CcsHeader.Value.Key, CcsHeader.Value.Value);
             }
 
+            InjectPcaSsoPolicyHeader(tokenClient);
+
             return tokenClient.SendTokenRequestAsync(
                 additionalBodyParameters,
                 scopes,
                 tokenEndpoint,
                 cancellationToken);
+        }
+
+        private void InjectPcaSsoPolicyHeader(TokenClient tokenClient)
+        {
+            if (ServiceBundle.Config.IsPublicClient && ServiceBundle.Config.IsWebviewSsoPolicyEnabled)
+            {
+                IBroker broker = ServiceBundle.Config.BrokerCreatorFunc(
+                    null,
+                    ServiceBundle.Config,
+                    AuthenticationRequestParameters.RequestContext.Logger);
+
+                var ssoPolicyHeaders = broker.GetSsoPolicyHeaders();
+                foreach (KeyValuePair<string, string> kvp in ssoPolicyHeaders)
+                {
+                    tokenClient.AddHeaderToClient(kvp.Key, kvp.Value);
+                }
+            }
         }
 
         //The AAD backup authentication system header is used by the AAD backup authentication system service
@@ -570,6 +590,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.RegionOutcome,
                 apiEvent.RegionUsed,
                 apiEvent.RegionDiscoveryFailureReason);
-        }
+        }       
     }
 }

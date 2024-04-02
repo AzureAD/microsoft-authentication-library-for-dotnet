@@ -47,20 +47,36 @@ namespace Microsoft.Identity.Client.Broker
         /// parameters, and to create a public client application instance</returns>
         public static PublicClientApplicationBuilder WithBroker(this PublicClientApplicationBuilder builder, BrokerOptions brokerOptions)
         {
-            AddRuntimeSupportForWam(builder);
+            AddRuntimeSupport(builder);
             builder.Config.BrokerOptions = brokerOptions;
             builder.Config.IsBrokerEnabled = brokerOptions.IsBrokerEnabledOnCurrentOs();
             return builder;
         }
 
-        private static void AddRuntimeSupportForWam(PublicClientApplicationBuilder builder)
+        /// <summary>
+        /// Use this API to enable SsoPolicy enforcement. 
+        /// Should only be utilized by Microsoft 1st party applications.
+        /// This is applicable only when broker is not enabled and embedded webview is the preferred choice.
+        /// By default, the broker supports SsoPolicy, and system webview SsoPolicy is also supported at the OS level.
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
+        public static PublicClientApplicationBuilder WithSsoPolicy(this PublicClientApplicationBuilder builder)
+        {
+            AddRuntimeSupport(builder);
+            builder.Config.IsWebviewSsoPolicyEnabled = true;
+            return builder;
+        }
+
+        private static void AddRuntimeSupport(PublicClientApplicationBuilder builder)
         {
             if (DesktopOsHelper.IsWin10OrServerEquivalent())
             {
-                builder.Config.BrokerCreatorFunc =
+                 builder.Config.BrokerCreatorFunc =
                      (uiParent, appConfig, logger) =>
                      {
-                         logger.Info("[RuntimeBroker] WAM supported OS.");
+                         logger.Info("[Runtime] WAM supported OS.");
                          return new RuntimeBroker(uiParent, appConfig, logger);
                      };
             }
@@ -69,7 +85,7 @@ namespace Microsoft.Identity.Client.Broker
                 builder.Config.BrokerCreatorFunc =
                    (uiParent, appConfig, logger) =>
                    {
-                       logger.Info("[RuntimeBroker] Not a Windows 10 or Server equivalent machine. WAM is not available.");
+                       logger.Info("[RuntimeBroker] Not a Windows 10 or Server equivalent machine. Runtime broker or SsoPolicy support is not available.");
                        return new NullBroker(logger);
                    };
             }
