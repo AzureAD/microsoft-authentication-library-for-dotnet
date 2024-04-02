@@ -15,6 +15,7 @@ using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -28,7 +29,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataRow("https://{0}.ciamlogin.com/", 0)] //https://tenantName.ciamlogin.com/
         [DataRow("https://{0}.ciamlogin.com/{1}.onmicrosoft.com", 1)] //https://tenantName.ciamlogin.com/tenantName.onmicrosoft.com
         [DataRow("https://{0}.ciamlogin.com/{1}", 2)] //https://tenantName.ciamlogin.com/tenantId
-        [DataRow("https://login.msidlabsciam.com/fe362aec-5d43-45d1-b730-9755e60dc3b9/v2.0/", 3)] //CIAM CUD
         public async Task ROPC_Ciam_Async(string authorityFormat, int authorityVersion)
         {
             //Get lab details
@@ -42,41 +42,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string authority = ComputeCiamAuthority(authorityFormat, authorityVersion, labResponse);
 
             //Acquire tokens
-            string appId;
-            string email;
-            string credential;
-
-            if (authorityVersion < 3)
-            {
-                appId = labResponse.App.AppId;
-                email = labResponse.User.Upn;
-                credential = labResponse.User.GetOrFetchPassword();
-            }
-            else
-            {
-                appId = "b244c86f-ed88-45bf-abda-6b37aa482c79";
-                email = "idlab@msidlabciam6.onmicrosoft.com";
-                credential = LabUserHelper.FetchUserPassword("msidlabciam6");
-            }
-
-            var msalPublicClientBuilder = PublicClientApplicationBuilder
-                .Create(appId)
+            var msalPublicClient = PublicClientApplicationBuilder
+                .Create(labResponse.App.AppId)
+                .WithAuthority(authority, false)
                 .WithRedirectUri(_ciamRedirectUri)
-                .WithExperimentalFeatures();
-
-            if (authorityVersion < 3)
-            {
-                msalPublicClientBuilder.WithAuthority(authority, false);
-            }
-            else
-            {
-                msalPublicClientBuilder.WithOidcAuthority(authority);
-            }
-
-            var msalPublicClient = msalPublicClientBuilder.Build();
+                .Build();
 
             var result = await msalPublicClient
-                .AcquireTokenByUsernamePassword(_ciamScopes, email, credential)
+                .AcquireTokenByUsernamePassword(_ciamScopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
@@ -152,6 +125,77 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+        }
+
+        [TestMethod]
+        public async Task Ciam_Cud_Obo_Test_Async()
+        {
+            string authorityNonCud = "https://MSIDLABCIAM6.ciamlogin.com";
+            string authorityCud = "https://login.msidlabsciam.com/fe362aec-5d43-45d1-b730-9755e60dc3b9/v2.0/";
+            string ciamWebapp = "b244c86f-ed88-45bf-abda-6b37aa482c79";
+            string ciamWebApi = "634de702-3173-4a71-b336-a4fab786a479";
+            string ciamEmail = "idlab@msidlabciam6.onmicrosoft.com";
+
+            //Get lab details
+            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
+            {
+                FederationProvider = FederationProvider.CIAM,
+                SignInAudience = SignInAudience.AzureAdMyOrg,
+                PublicClient = PublicClient.no
+            }).ConfigureAwait(false);
+
+            //Acquire tokens
+            var msalPublicClient = PublicClientApplicationBuilder
+                .Create(ciamWebapp)
+                //.Create(ciamWebApi)
+                .WithAuthority(authorityNonCud, false)
+                .WithRedirectUri(_ciamRedirectUri)
+                //.WithRedirectUri("https://login.microsoftonline.com/common/oauth2/nativeclient")
+                .Build();
+
+            var result = await msalPublicClient
+                .AcquireTokenByUsernamePassword(new[] { $"api://{ciamWebApi}/.default" }, ciamEmail, LabUserHelper.FetchUserPassword("msidlabciam6"))
+                //.AcquireTokenInteractive(new[] { "User.Read" })
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(result.AccessToken);
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+            string appToken = result.AccessToken;
+            var userAssertion = new UserAssertion(appToken);
+            string atHash = userAssertion.AssertionHash;
+
+            //Acquire tokens for OBO
+            var msalConfidentialClient = ConfidentialClientApplicationBuilder
+                .Create(ciamWebApi)
+                .WithCertificate(CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName))
+                .WithAuthority(authorityCud, false)
+                .WithRedirectUri(_ciamRedirectUri)
+                .BuildConcrete();
+
+            var userCacheRecorder = msalConfidentialClient.UserTokenCache.RecordAccess();
+
+            var resultObo = await msalConfidentialClient.AcquireTokenOnBehalfOf(new[] { "User.Read" }, userAssertion)
+                                  .ExecuteAsync(CancellationToken.None)
+                                  .ConfigureAwait(false);
+
+            Assert.IsNotNull(resultObo.AccessToken);
+            Assert.IsFalse(userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
+            Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(TokenSource.IdentityProvider, resultObo.AuthenticationResultMetadata.TokenSource);
+
+            //Fetch cached tokens
+            resultObo = await msalConfidentialClient.AcquireTokenOnBehalfOf(new[] { "User.Read" }, userAssertion)
+                                  .ExecuteAsync(CancellationToken.None)
+                                  .ConfigureAwait(false);
+
+            Assert.IsNotNull(resultObo.AccessToken);
+            Assert.IsFalse(userCacheRecorder.LastAfterAccessNotificationArgs.IsApplicationCache);
+            Assert.IsTrue(userCacheRecorder.LastAfterAccessNotificationArgs.HasTokens);
+            Assert.AreEqual(atHash, userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
+            Assert.AreEqual(TokenSource.Cache, resultObo.AuthenticationResultMetadata.TokenSource);
         }
 
         private string ComputeCiamAuthority(string authorityFormat, int authorityVersion, LabResponse labResponse)
