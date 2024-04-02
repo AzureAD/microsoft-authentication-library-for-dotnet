@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1711643610846,
+  "lastUpdate": 1712017580004,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -4634,6 +4634,42 @@ window.BENCHMARK_DATA = {
             "value": 337990.5,
             "unit": "ns",
             "range": "± 7684.934431114316"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "463c98518cafc2515dba97b8ffa21f8e28b15bb4",
+          "message": "Temporary Workaround for AAD JWT Token Signing Algorithm Issue (#4692)\n\nforce set IsSha2CredentialSupported to false\r\n\r\nCo-authored-by: Gladwin Johnson <gljohns@microsoft.com>",
+          "timestamp": "2024-04-01T17:18:44-07:00",
+          "tree_id": "140b2b57d0200bf603df80b35c4365dae4c4dc03",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/463c98518cafc2515dba97b8ffa21f8e28b15bb4"
+        },
+        "date": 1712017575797,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 258105.14583333334,
+            "unit": "ns",
+            "range": "± 10156.610598552088"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 346048,
+            "unit": "ns",
+            "range": "± 9778.24872835358"
           }
         ]
       }
