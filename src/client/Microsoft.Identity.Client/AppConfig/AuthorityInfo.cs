@@ -141,10 +141,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// True if SHA2 and PSS can be used for creating the client credential from a certificate 
         /// </summary>
-        internal bool IsSha2CredentialSupported =>
-            AuthorityType != AuthorityType.Dsts &&
-            AuthorityType != AuthorityType.Generic &&
-            AuthorityType != AuthorityType.Adfs;
+        internal bool IsSha2CredentialSupported => false; 
 
         #region Builders
         internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)
