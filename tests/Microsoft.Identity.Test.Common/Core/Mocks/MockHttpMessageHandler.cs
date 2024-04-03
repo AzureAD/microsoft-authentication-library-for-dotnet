@@ -30,12 +30,15 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public Exception ExceptionToThrow { get; set; }
         public Action<HttpRequestMessage> AdditionalRequestValidation { get; set; }
 
+        /// <summary>
+        /// Once the http message is executed, this property holds the request message
+        /// </summary>
         public HttpRequestMessage ActualRequestMessage { get; private set; }
         public Dictionary<string, string> ActualRequestPostData { get; private set; }
         public HttpRequestHeaders ActualRequestHeaders { get; private set; }
         public X509Certificate2 ExpectedMtlsBindingCertificate { get; set; }
 
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             ActualRequestMessage = request;
 
@@ -44,26 +47,32 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 throw ExceptionToThrow;
             }
 
+            Uri uri = request.RequestUri;
+
             if (!string.IsNullOrEmpty(ExpectedUrl))
             {
-                Assert.AreEqual(ExpectedUrl.Split('?')[0], request.RequestUri.AbsoluteUri.Split('?')[0]);
+                Assert.AreEqual(
+                    ExpectedUrl,
+                    uri.AbsoluteUri.Split('?')[0]);
             }
 
             if (ExpectedMtlsBindingCertificate != null)
             {
-                Assert.AreEqual(1, ClientCertificates.Count, "Expected one client certificate.");
-                Assert.AreEqual(ExpectedMtlsBindingCertificate, ClientCertificates[0], "The client certificate did not match the expected certificate.");
+                Assert.AreEqual(1, base.ClientCertificates.Count);
+                Assert.AreEqual(ExpectedMtlsBindingCertificate, base.ClientCertificates[0]);
             }
 
             Assert.AreEqual(ExpectedMethod, request.Method);
 
-            ValidateQueryParams(request.RequestUri);
-            await ValidatePostDataAsync(request).ConfigureAwait(false);
+            ValidateQueryParams(uri);
+
+            ValidatePostDataAsync(request);
+
             ValidateHeaders(request);
 
             AdditionalRequestValidation?.Invoke(request);
 
-            return ResponseMessage;
+            return new TaskFactory().StartNew(() => ResponseMessage, cancellationToken);
         }
 
         private void ValidateQueryParams(Uri uri)
@@ -83,20 +92,24 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         private async Task ValidatePostDataAsync(HttpRequestMessage request)
         {
-            if (ExpectedPostData != null && request.Content != null)
+            if (request.Method != HttpMethod.Get && request.Content != null)
             {
                 string postData = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
                 ActualRequestPostData = CoreHelpers.ParseKeyValueList(postData, '&', true, null);
-                foreach (var key in ExpectedPostData.Keys)
+            }
+
+            if (ExpectedPostData != null)
+            {
+                foreach (string key in ExpectedPostData.Keys)
                 {
-                    Assert.IsTrue(ActualRequestPostData.ContainsKey(key), $"Post data does not contain expected key: {key}.");
+                    Assert.IsTrue(ActualRequestPostData.ContainsKey(key));
                     if (key.Equals(OAuth2Parameter.Scope, StringComparison.OrdinalIgnoreCase))
                     {
                         CoreAssert.AreScopesEqual(ExpectedPostData[key], ActualRequestPostData[key]);
                     }
                     else
                     {
-                        Assert.AreEqual(ExpectedPostData[key], ActualRequestPostData[key], $"Value mismatch for post data key: {key}.");
+                        Assert.AreEqual(ExpectedPostData[key], ActualRequestPostData[key]);
                     }
                 }
             }
