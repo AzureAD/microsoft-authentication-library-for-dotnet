@@ -86,6 +86,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public int QueueSize => _httpMessageHandlerQueue.Count;
 
+        /// <summary>
+        /// For use only in tests that spin many threads. Not thread safe.
+        /// </summary>
+        public void ClearQueue()
+        {
+            while (_httpMessageHandlerQueue.TryDequeue(out _));
+        }
+
         public long LastRequestDurationInMs => 3000;
 
         private string GetExpectedUrlFromHandler(HttpMessageHandler handler)
