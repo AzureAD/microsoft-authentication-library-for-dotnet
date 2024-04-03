@@ -147,15 +147,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Acquire tokens
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(ciamWebapp)
-                //.Create(ciamWebApi)
                 .WithAuthority(authorityNonCud, false)
                 .WithRedirectUri(_ciamRedirectUri)
-                //.WithRedirectUri("https://login.microsoftonline.com/common/oauth2/nativeclient")
                 .Build();
 
             var result = await msalPublicClient
                 .AcquireTokenByUsernamePassword(new[] { $"api://{ciamWebApi}/.default" }, ciamEmail, LabUserHelper.FetchUserPassword("msidlabciam6"))
-                //.AcquireTokenInteractive(new[] { "User.Read" })
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
