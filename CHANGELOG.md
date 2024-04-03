@@ -1,3 +1,8 @@
+4.60.1
+==========
+### Bug Fixes
+Resolved an issue where MSAL attempts to acquire a token via certificate authentication using SHA2 and PSS resulting in a `MsalServiceException' (Error code: AADSTS5002730). See [4690](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4690)
+
 4.60.0
 ==========
 ### New Features
