@@ -32,7 +32,9 @@ namespace Microsoft.Identity.Test.Unit
         public static readonly string[] s_graphScopes = new[] { "user.read" };
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
         public const string ClientCredentialAudience = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0";
-        public const string AutomationTestCertName = "AzureADIdentityDivisionTestAgentCert";
+        public const string AutomationTestCertName = "LabVaultAccessCert";
+        public static Dictionary<string, string> AdditionalAssertionClaims =>
+            new Dictionary<string, string>() { { "Key1", "Val1" }, { "Key2", "Val2" } };
 
         public static readonly SortedSet<string> s_scopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" }, StringComparer.OrdinalIgnoreCase);
         public static readonly SortedSet<string> s_cacheMissScope = new SortedSet<string>(new[] { "r3/scope1", "r3/scope2" }, StringComparer.OrdinalIgnoreCase);
@@ -226,7 +228,7 @@ namespace Microsoft.Identity.Test.Unit
 
 
         public const string MsalCCAKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/";
-        public const string MsalCCAKeyVaultSecretName = "AzureADIdentityDivisionTestAgentSecret";
+        public const string MsalCCAKeyVaultSecretName = "MSIDLABAccessSecret";
         public const string MsalOBOKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/";
         public const string MsalOBOKeyVaultSecretName = "IdentityDivisionDotNetOBOServiceSecret";
         public const string MsalArlingtonOBOKeyVaultUri = "https://msidlabs.vault.azure.net:443/secrets/ARLMSIDLAB1-IDLASBS-App-CC-Secret";
