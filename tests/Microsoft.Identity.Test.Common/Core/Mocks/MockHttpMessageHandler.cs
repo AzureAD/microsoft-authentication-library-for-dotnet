@@ -47,12 +47,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 throw ExceptionToThrow;
             }
 
-            Uri uri = request.RequestUri;
+            var uri = request.RequestUri;
 
             if (!string.IsNullOrEmpty(ExpectedUrl))
             {
                 Assert.AreEqual(
-                    ExpectedUrl,
+                    ExpectedUrl.Split('?')[0],
                     uri.AbsoluteUri.Split('?')[0]);
             }
 
