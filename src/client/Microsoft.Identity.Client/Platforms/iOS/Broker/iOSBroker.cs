@@ -392,6 +392,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             s_brokerResponseReady?.Release();
         }
 
+        public IReadOnlyDictionary<string, string> GetSsoPolicyHeaders()
+        {
+            return CollectionHelpers.GetEmptyDictionary<string, string>();
+        }
+
         #region Silent Flow - not supported
         /// <summary>
         /// iOS broker does not handle silent flow

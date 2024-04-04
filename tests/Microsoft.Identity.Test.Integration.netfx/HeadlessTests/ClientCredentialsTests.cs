@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
         private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };
-        private const string PublicCloudConfidentialClientID = "16dab2ba-145d-4b1b-8569-bf4b9aed4dc8";
+        private const string PublicCloudConfidentialClientID = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
 
         private enum CredentialType
         {

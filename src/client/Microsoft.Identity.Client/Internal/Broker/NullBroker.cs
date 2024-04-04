@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Internal.Broker
@@ -79,6 +80,11 @@ namespace Microsoft.Identity.Client.Internal.Broker
         {
             _logger.Info("NullBroker - returning null on ROPC request.");
             return Task.FromResult<MsalTokenResponse>(null);
+        }
+
+        public IReadOnlyDictionary<string, string> GetSsoPolicyHeaders()
+        {
+            return CollectionHelpers.GetEmptyDictionary<string, string>();
         }
     }
 }

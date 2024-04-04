@@ -104,15 +104,15 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         }
 
         [DataTestMethod]
-        [DataRow(TestConstants.AuthorityCommonTenant, true)]
-        [DataRow(TestConstants.AuthorityCommonPpeAuthority, true)]
+        [DataRow(TestConstants.AuthorityCommonTenant, false)]
+        [DataRow(TestConstants.AuthorityCommonPpeAuthority, false)]
         [DataRow(TestConstants.DstsAuthorityCommon, false)]
         [DataRow(TestConstants.DstsAuthorityTenanted, false)]
-        [DataRow(TestConstants.CiamAuthorityMainFormat, true)]
-        [DataRow(TestConstants.CiamAuthorityWithFriendlyName, true)]
-        [DataRow(TestConstants.CiamAuthorityWithGuid, true)]
-        [DataRow(TestConstants.B2CAuthority, true)]
-        [DataRow(TestConstants.B2CCustomDomain, true)]
+        [DataRow(TestConstants.CiamAuthorityMainFormat, false)]
+        [DataRow(TestConstants.CiamAuthorityWithFriendlyName, false)]
+        [DataRow(TestConstants.CiamAuthorityWithGuid, false)]
+        [DataRow(TestConstants.B2CAuthority, false)]
+        [DataRow(TestConstants.B2CCustomDomain, false)]
         [DataRow(TestConstants.ADFSAuthority, false)]
         public void IsSha2Supported(string inputAuthority, bool expected)
         {

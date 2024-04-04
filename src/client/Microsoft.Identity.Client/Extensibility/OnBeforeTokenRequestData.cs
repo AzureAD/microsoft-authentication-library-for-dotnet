@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <summary>
         /// The token endpoint, including any query parameters, where the request is being sent to.
         /// </summary>
-        public Uri RequestUri { get; }
+        public Uri RequestUri { get; set; }
 
         /// <summary>
         /// The cancellation token associated with the request

@@ -188,28 +188,29 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         {
             UserInformationFieldIds fields = new UserInformationFieldIds(user);
 
+            HandlePrompt(driver, "otherTile");
             EnterUsername(driver, user, withLoginHint, adfsOnly, fields);
-            HandleConfirmation(driver);
+            HandlePrompt(driver, CoreUiTestConstants.NextButton);
             EnterPassword(driver, user, fields);
 
             HandleConsent(driver, user, fields, prompt);
             HandleStaySignedIn(driver);
         }
 
-        private static void HandleConfirmation(IWebDriver driver)
+        private static void HandlePrompt(IWebDriver driver, string id)
         {
             try
             {
                 Trace.WriteLine("Finding next prompt");
                 var nextBtn = driver.WaitForElementToBeVisibleAndEnabled(
-                    ByIds(CoreUiTestConstants.NextButton),
+                    ByIds(id),
                     waitTime: ShortExplicitTimespan,
                     ignoreFailures: true);
                 nextBtn?.Click();
             }
             catch
             {
-                Trace.WriteLine("Next button not found. Moving on.");
+                Trace.WriteLine($"{id} not found. Moving on.");
             }
         }
 

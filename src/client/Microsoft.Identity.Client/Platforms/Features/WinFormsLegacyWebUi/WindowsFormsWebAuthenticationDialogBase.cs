@@ -2,15 +2,20 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
@@ -276,7 +281,21 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             _webBrowser.Navigated += WebBrowserNavigatedHandler;
             _webBrowser.NavigateError += WebBrowserNavigateErrorHandler;
 
-            _webBrowser.Navigate(requestUri);
+            if(RequestContext.ServiceBundle.Config.IsWebviewSsoPolicyEnabled)
+            {
+                IBroker broker = RequestContext.ServiceBundle.Config.BrokerCreatorFunc(null, RequestContext.ServiceBundle.Config, RequestContext.Logger);
+                var ssoPolicyHeaders = broker.GetSsoPolicyHeaders();
+                string ssoPolicyHeadersString="";
+                foreach (KeyValuePair<string, string> kvp in ssoPolicyHeaders)
+                {
+                    ssoPolicyHeadersString += kvp.Key + ":" + kvp.Value + Environment.NewLine;
+                }
+                _webBrowser.Navigate(requestUri, null, null, ssoPolicyHeadersString);
+            }
+            else
+            {
+                _webBrowser.Navigate(requestUri);
+            }
             OnAuthenticate(cancellationToken);
 
             return Result;
