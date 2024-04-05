@@ -48,8 +48,6 @@ namespace WebApi.Misc
         {
             // As per https://learn.microsoft.com/dotnet/api/system.collections.concurrent.concurrentdictionary-2?view=net-5.0#remarks
             // the indexer is ok to store a key/value pair unconditionally
-
-
             _logger.LogInformation($"[InMemoryPartitionedTokenCache] WriteCacheBytes with cacheKey {cacheKey}. Cache partitions: {CachePartition.Count}"); // note: Count is expensive
             
             CachePartition[cacheKey] = bytes;
