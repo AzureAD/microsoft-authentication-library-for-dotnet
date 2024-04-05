@@ -90,7 +90,8 @@ namespace Microsoft.Identity.Client.Kerberos
         /// <param name="ticket">Kerberos ticket object to save.</param>
         /// <param name="logonId">The Logon Id of the user owning the ticket cache.
         /// The default of 0 represents the currently logged on user.</param>
-        /// <remarks>Throws <see cref="ArgumentException"/> when given ticket parameter is not a valid Kerberos Supplemental Ticket.
+        /// <remarks>Throws <see cref="ArgumentException"/> when given ticket parameter is not a valid Kerberos supplemental ticket.
+
         /// Throws <see cref="Win32Exception"/> if error occurs while saving ticket information into Ticket Cache.
         /// </remarks>
         public static void SaveToWindowsTicketCache(KerberosSupplementalTicket ticket, long logonId)
