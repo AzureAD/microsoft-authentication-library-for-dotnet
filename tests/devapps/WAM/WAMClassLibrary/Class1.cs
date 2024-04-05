@@ -33,7 +33,7 @@ namespace WAMClassLibrary
                           .WithParentActivityOrWindow(consoleWindowHandleProvider)
                           .Build();
 
-            // Add a token cache, see https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-net-token-cache-serialization?tabs=desktop
+            // Add a token cache, see https://learn.microsoft.com/entra/msal/dotnet/how-to/token-cache-serialization?tabs=desktop
 
             // 2. GetAccounts
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);

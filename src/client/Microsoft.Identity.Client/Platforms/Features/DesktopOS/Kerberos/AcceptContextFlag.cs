@@ -8,7 +8,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
     /// <summary>
     /// Flags that specify the attributes required by the AcceptSecurityContext (CredSSP) function
     /// for a server to establish the context.
-    /// https://docs.microsoft.com/en-us/windows/win32/api/sspi/nf-sspi-acceptsecuritycontext
+    /// https://learn.microsoft.com/windows/win32/api/sspi/nf-sspi-acceptsecuritycontext
     /// </summary>
     [Flags]
     internal enum AcceptContextFlag

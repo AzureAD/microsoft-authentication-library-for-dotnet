@@ -5,7 +5,6 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using static System.Net.WebRequestMethods;
 
 namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
 {

@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.OAuth2
         // disable this functionality (better fix would be to move to System.Text.Json)
 #if !__MOBILE__
         // All properties not explicitly defined are added to this dictionary
-        // See JSON overflow https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/handle-overflow?pivots=dotnet-7-0
+        // See JSON overflow https://learn.microsoft.com/dotnet/standard/serialization/system-text-json/handle-overflow?pivots=dotnet-7-0
 #if SUPPORTS_SYSTEM_TEXT_JSON
         [JsonExtensionData]
         public Dictionary<string, JsonElement> ExtensionData { get; set; }

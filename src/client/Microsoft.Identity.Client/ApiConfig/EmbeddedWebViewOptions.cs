@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// It is possible for applications to bundle a fixed version of the runtime, and ship it side-by-side.
         /// For this you need to tell MSAL (so it can tell WebView2) where to find the runtime bits by setting this property. If you don't set it, MSAL will attempt to use a system-wide "evergreen" installation of the runtime."
-        /// For more details see: https://docs.microsoft.com/en-us/dotnet/api/microsoft.web.webview2.core.corewebview2environment.createasync?view=webview2-dotnet-1.0.705.50
+        /// For more details see <see href="https://learn.microsoft.com/dotnet/api/microsoft.web.webview2.core.corewebview2environment.createasync?view=webview2-dotnet-1.0.705.50">CoreWebView2Environment.CreateAsync Method</see>.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("In case when WebView2 is not available, MSAL.NET will fallback to legacy WebView.", true)]

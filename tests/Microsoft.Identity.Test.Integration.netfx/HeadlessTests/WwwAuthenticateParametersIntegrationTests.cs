@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         /// <summary>
-        /// Makes unauthorized call to Azure Resource Manager REST API https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/get.
+        /// Makes unauthorized call to Azure Resource Manager REST API https://learn.microsoft.com/rest/api/resources/subscriptions/get?view=rest-resources-2022-12-01&tabs=HTTP.
         /// Expects response 401 Unauthorized. Analyzes the WWW-Authenticate header values.
         /// </summary>
         /// <param name="hostName">ARM endpoint, e.g. Production or Dogfood</param>

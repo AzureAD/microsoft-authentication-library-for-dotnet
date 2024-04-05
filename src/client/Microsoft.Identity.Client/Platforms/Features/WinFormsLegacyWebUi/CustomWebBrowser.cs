@@ -197,7 +197,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
             {
                 switch (dwID)
                 {
-                    // http://msdn.microsoft.com/en-us/library/aa753264(v=vs.85).aspx
+                    // https://learn.microsoft.com/previous-versions/windows/internet-explorer/ie-developer/platform-apis/aa753264(v=vs.85)
                     case 0x2: // this is edit CONTEXT_MENU_CONTROL
                     case 0x4: // selected text CONTEXT_MENU_TEXTSELECT
                     case 0x9: // CONTEXT_MENU_VSCROLL

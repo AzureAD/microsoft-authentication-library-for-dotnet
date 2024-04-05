@@ -1028,8 +1028,8 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// <para>What happens?</para>The embedded browser cannot be started because a runtime component is missing.
-        /// <para>Mitigation</para>"The embedded browser needs WebView2 runtime to be installed. An end user of the app can download and install the WebView2 runtime from https://go.microsoft.com/fwlink/p/?LinkId=2124703 and restart the app.
-        ///  or the app developer can install the WebView2 runtime https://docs.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution
+        /// <para>Mitigation</para>The embedded browser needs WebView2 runtime to be installed. An end user of the app can download and install the WebView2 runtime from https://go.microsoft.com/fwlink/p/?LinkId=2124703 and restart the app.
+        ///  The app developer can <see href="https://learn.microsoft.com/microsoft-edge/webview2/concepts/distribution">get the distributable version of the WebView2 runtime</see>.
         /// </summary>
         public const string WebView2NotInstalled = "webview2_runtime_not_installed";
 

@@ -415,7 +415,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             // Acquire token using username password with POP on a valid resource
             // CA policy enforces token issuance to popUser only for SPO
-            // https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/concept-token-protection
+            // https://learn.microsoft.com/azure/active-directory/conditional-access/concept-token-protection
             var result = await pca.AcquireTokenByUsernamePassword(scopes, popUser, labResponse.User.GetOrFetchPassword())
                 .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
                 .ExecuteAsync()
@@ -450,7 +450,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             // Acquire token using username password with POP on a resource not in the CA policy
             // CA policy enforces token issuance to popUser only for SPO this call will fail with UI Required Exception
-            // https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/concept-token-protection
+            // https://learn.microsoft.com/azure/active-directory/conditional-access/concept-token-protection
             var result = await pca.AcquireTokenByUsernamePassword(scopes, popUser, labResponse.User.GetOrFetchPassword())
                 .WithProofOfPossession("some_nonce", System.Net.Http.HttpMethod.Get, new Uri(pca.Authority))
                 .ExecuteAsync()

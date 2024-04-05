@@ -5,7 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <Configurations>Debug;Release</Configurations>
     <!-- Uncomment only when running EtwProfiler diagnoser on Release-->
-    <!-- https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/code-generation#debugtype -->
+    <!-- https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-options/code-generation#debugtype -->
     <!--<DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>-->
     <IsPackable>false</IsPackable>
