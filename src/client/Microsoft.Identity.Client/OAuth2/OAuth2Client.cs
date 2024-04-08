@@ -124,6 +124,7 @@ namespace Microsoft.Identity.Client.OAuth2
                         {
                             var requestData = new OnBeforeTokenRequestData(_bodyParameters, _headers, endpointUri, requestContext.UserCancellationToken);
                             await onBeforePostRequestData(requestData).ConfigureAwait(false);
+                            endpointUri = requestData.RequestUri;
                         }
 
                         response = await _httpManager.SendPostAsync(
