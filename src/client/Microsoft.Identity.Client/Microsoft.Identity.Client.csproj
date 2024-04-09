@@ -8,19 +8,18 @@
   </PropertyGroup>
 
   <!-- Mobile and legacy targets are disabled by default to speed up dev box -->
-  <PropertyGroup Condition="'$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != '123'">
-    <!--<TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
-    <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>-->
-    <!--<TargetFrameworkNet6Android>net6.0-android</TargetFrameworkNet6Android>
-    <TargetFrameworkNet6Ios>net6.0-ios15.4</TargetFrameworkNet6Ios>-->
-    <!--<TargetFrameworkUap>uap10.0.17763</TargetFrameworkUap>-->
+  <PropertyGroup Condition="'$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
+    <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
+    <TargetFrameworkAndroid10>MonoAndroid10.0</TargetFrameworkAndroid10>
+    <TargetFrameworkNet6Android>net6.0-android</TargetFrameworkNet6Android>
+    <TargetFrameworkNet6Ios>net6.0-ios15.4</TargetFrameworkNet6Ios>
+    <TargetFrameworkUap>uap10.0.17763</TargetFrameworkUap>
   </PropertyGroup>
 
   <!-- net6.0 (MAUI) -->
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Ios)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Mac)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">
     <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
     <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Ios)'">14.2</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Mac)'">14.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">21.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
