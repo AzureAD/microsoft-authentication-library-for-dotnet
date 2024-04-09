@@ -76,7 +76,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		build\pipeline-ci.yaml = build\pipeline-ci.yaml
 		build\pipeline-perf-tests-automation.yaml = build\pipeline-perf-tests-automation.yaml
 		build\pipeline-pullrequest.yaml = build\pipeline-pullrequest.yaml
-		build\pipeline-releasebuild-netonly.yaml = build\pipeline-releasebuild-netonly.yaml
 		build\pipeline-releasebuild.yaml = build\pipeline-releasebuild.yaml
 		build\template-build-and-prep-automation.yaml = build\template-build-and-prep-automation.yaml
 		build\template-build-and-run-all-tests.yaml = build\template-build-and-run-all-tests.yaml
