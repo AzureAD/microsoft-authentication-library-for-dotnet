@@ -1,3 +1,8 @@
+4.60.2
+==========
+### Bug Fixes
+When `OnBeforeTokenRequest` extensibility API is used, MSAL now correctly uses the user-provided `OnBeforeTokenRequestData.RequestUri` to set the token request endpoint. See [4701](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4701).
+
 4.60.1
 ==========
 ### Bug Fixes
