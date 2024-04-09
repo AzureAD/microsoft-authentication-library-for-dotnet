@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1712017587158,
+  "lastUpdate": 1712652615128,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -4670,6 +4670,42 @@ window.BENCHMARK_DATA = {
             "value": 346048,
             "unit": "ns",
             "range": "± 9778.24872835358"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "distinct": true,
+          "id": "894758f5dd778b53171ff8f0d25c5ff438091b5e",
+          "message": "Fix for #4701 - OnBeforeTokenRequest can change the URI",
+          "timestamp": "2024-04-09T09:43:08+01:00",
+          "tree_id": "6fc30f96f8998073748af90491aeeb4706db01dd",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/894758f5dd778b53171ff8f0d25c5ff438091b5e"
+        },
+        "date": 1712652610756,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 246585.86486486485,
+            "unit": "ns",
+            "range": "± 8267.006502296283"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 351096,
+            "unit": "ns",
+            "range": "± 4008.764551675395"
           }
         ]
       }
