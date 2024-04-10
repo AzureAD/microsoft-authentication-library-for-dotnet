@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Utils
             return string.IsNullOrWhiteSpace(s) ? null : s;
         }
 
-#if NETSTANDARD2_0 || NETFRAMEWORK || WINDOWS_APP
+#if NETSTANDARD2_0 || NETFRAMEWORK
         /// <summary>
         /// Culture aware Contains
         /// </summary>

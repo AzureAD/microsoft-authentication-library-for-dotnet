@@ -71,9 +71,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public bool IsWebviewSsoPolicyEnabled { get; internal set; }
 
-        // Legacy options for UWP. .NET broker options are in BrokerOptions
-        public WindowsBrokerOptions UwpBrokerOptions { get; set; } 
-
         public BrokerOptions BrokerOptions { get; set; }
 
         public Func<CoreUIParent, ApplicationConfiguration, ILoggerAdapter, IBroker> BrokerCreatorFunc { get; set; }

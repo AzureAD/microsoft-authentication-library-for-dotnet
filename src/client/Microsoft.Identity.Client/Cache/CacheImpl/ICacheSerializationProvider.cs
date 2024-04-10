@@ -3,7 +3,7 @@
 
 namespace Microsoft.Identity.Client.Cache.CacheImpl
 {
-    internal interface ICacheSerializationProvider
+    internal interface ICacheSerializationProvider // TODO: bogavri - uwp / uap removal
     {
         // Important - do not use SetBefore / SetAfter methods, as these are reserved for app developers
         // Instead, use AfterAccess = x, BeforeAccess = y

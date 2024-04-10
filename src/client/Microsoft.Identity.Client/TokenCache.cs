@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
         internal ILegacyCachePersistence LegacyCachePersistence { get; set; }
 
         /// <summary>
-        /// Set to true on some platforms (UWP) where MSAL adds a serializer on its own.
+        /// Set to true on some platforms where MSAL adds a serializer on its own.
         /// </summary>
         internal bool UsesDefaultSerialization { get; set; } = false;
 

@@ -86,11 +86,7 @@ namespace Microsoft.Identity.Client
         /// <item>
         /// <term>.NET desktop</term>
         /// <Description><c>`https://login.microsoftonline.com/common/oauth2/nativeclient`</c></Description>
-        /// </item>
-        /// <item>
-        /// <term>UWP</term>
-        /// <Description>value of <c>WebAuthenticationBroker.GetCurrentApplicationCallbackUri()</c></Description>
-        /// </item>
+        /// </item>     
         /// <item>
         /// <term>For system browser on .NET Core</term>
         /// <Description><c>http://localhost</c></Description>
@@ -189,7 +185,7 @@ namespace Microsoft.Identity.Client
 #if !SUPPORTS_BROKER || __MOBILE__
         [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
-#if !WINDOWS_APP && !__MOBILE__
+#if !__MOBILE__
         [Obsolete("This API has been replaced with WithBroker(BrokerOptions), which can be found in Microsoft.Identity.Client.Broker package. See https://aka.ms/msal-net-wam for details.", false)]
 #endif
 
@@ -200,20 +196,6 @@ namespace Microsoft.Identity.Client
             Config.BrokerOptions = newOptions; 
             return this;
         }
-
-#if WINDOWS_APP
-        /// <summary>
-        /// Flag to enable authentication with the user currently signed-in on Windows.
-        /// </summary>
-        /// <param name="useCorporateNetwork">When set to true, the application will try to connect to the corporate network using Windows Integrated Authentication.</param>
-        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
-        /// parameters, and to create a public client application instance</returns>
-        public PublicClientApplicationBuilder WithUseCorporateNetwork(bool useCorporateNetwork)
-        {
-            Config.UseCorporateNetwork = useCorporateNetwork;
-            return this;
-        }
-#endif
 
         /// <summary>
         ///  Sets a reference to the ViewController (if using iOS), Activity (if using Android)
@@ -361,7 +343,7 @@ namespace Microsoft.Identity.Client
         /// <item><description>In mobile apps, the device must be Intune joined and Authenticator or Company Portal must be installed. See https://aka.ms/msal-brokers </description></item>
         /// </list>
         /// </remarks>
-#if ANDROID || iOS || WINDOWS_APP
+#if ANDROID || iOS 
         [Obsolete("This method is obsolete. Applications should rely on the library automatically falling back to a browser if the broker is not available. ", false)]
 #endif
         public bool IsBrokerAvailable()
@@ -397,7 +379,7 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
             }
 
-#if __MOBILE__ || WINDOWS_UWP
+#if __MOBILE__ 
             if (Config.IsBrokerEnabled && Config.MultiCloudSupportEnabled)
             {
                 // TODO: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3139

@@ -68,12 +68,9 @@ namespace Microsoft.Identity.Client
             }
 
             string message = JsonHelper.JsonObjectToString(jsonObject);
-#if WINDOWS_APP
-            Debug.WriteLine(message);
-#else
+
             Trace.TraceInformation(message);
             Trace.Flush();
-#endif
         };
 
         /// <summary>

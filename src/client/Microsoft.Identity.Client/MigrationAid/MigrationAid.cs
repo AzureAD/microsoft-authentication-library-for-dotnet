@@ -384,15 +384,6 @@ namespace Microsoft.Identity.Client
 
     public partial interface IPublicClientApplication
     {
-#if WINDOWS_APP
-        /// <summary>
-        /// Flag to enable authentication with the user currently signed-in on Windows.
-        /// When set to true, the application will try to connect to the corporate network using Windows Integrated Authentication.
-        /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("PublicClientApplication is now immutable, you can set this property using the PublicClientApplicationBuilder and read it using IAppConfig.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration", true)]
-        bool UseCorporateNetwork { get; set; }
-#endif // WINDOWS_APP
 
         #region MSAL3X deprecations
 
@@ -798,16 +789,6 @@ namespace Microsoft.Identity.Client
 
     public partial class PublicClientApplication
     {
-#if WINDOWS_APP
-        /// <summary>
-        /// Flag to enable authentication with the user currently signed-in on Windows.
-        /// When set to true, the application will try to connect to the corporate network using Windows Integrated Authentication.
-        /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("PublicClientApplication is now immutable, you can set this property using the PublicClientApplicationBuilder and read it using IAppConfig.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration", true)]
-        public bool UseCorporateNetwork { get; set; }
-#endif
-
 #if iOS
         /// <summary>
         /// Xamarin iOS specific property enabling the application to share the token cache with other applications sharing the same keychain security group.
@@ -1314,7 +1295,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// On Windows Universal Platform, the following capabilities need to be provided:
         /// Enterprise Authentication, Private Networks (Client and Server), User Account Information
-        /// Supported on .net desktop and UWP
+        /// Supported on .net desktop 
         /// </remarks>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the currently signed-in user in Windows</returns>

@@ -175,13 +175,13 @@ namespace Microsoft.Identity.Client
         /// https://aka.ms/msal-net-token-cache-serialization
         /// </summary>
         /// <param name="options">Options for the internal MSAL token caches. </param>
-#if !SUPPORTS_CUSTOM_CACHE || WINDOWS_APP
+#if !SUPPORTS_CUSTOM_CACHE 
     [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
         public T WithCacheOptions(CacheOptions options)
         {
-#if !SUPPORTS_CUSTOM_CACHE || WINDOWS_APP
-            throw new PlatformNotSupportedException("WithCacheOptions is supported only on platforms where MSAL stores tokens in memory and not on mobile platforms or UWP.");
+#if !SUPPORTS_CUSTOM_CACHE 
+            throw new PlatformNotSupportedException("WithCacheOptions is supported only on platforms where MSAL stores tokens in memory and not on mobile platforms.");
 #else
 
             Config.AccessorOptions = options;

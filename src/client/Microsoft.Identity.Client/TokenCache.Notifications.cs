@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client
 #endif
         }
 
-        // In some cases MSAL brings its own serializer (UWP, Confidential Client App cache)
+        // In some cases MSAL brings its own serializer (Confidential Client App cache)
         // so reset them all if the user customizes the serializer
         private void ResetDefaultDelegates()
         {

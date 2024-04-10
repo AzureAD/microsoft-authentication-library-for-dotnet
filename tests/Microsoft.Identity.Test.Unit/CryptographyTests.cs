@@ -12,7 +12,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit
 {
-#if !WINDOWS_APP // not available on UWP
     [TestClass]
     [DeploymentItem(@"Resources\testCert.crtfile")]
     public class CryptographyTests
@@ -59,5 +58,4 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(ex.Message, MsalErrorMessage.CertMustBeRsa(cert.PublicKey.Oid.FriendlyName));
         }
     }
-#endif
 }

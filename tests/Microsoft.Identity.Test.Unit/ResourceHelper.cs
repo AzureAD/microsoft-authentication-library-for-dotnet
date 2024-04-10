@@ -22,7 +22,6 @@ namespace Microsoft.Identity.Test.Unit
         }
     }
 
-#if WINDOWS_APP
     /// <summary>
     /// On .net, this attribute is needed to copy resources to the test, which are
     /// placed in a directory similar to TestRun/date/out
@@ -45,5 +44,4 @@ namespace Microsoft.Identity.Test.Unit
             // deployment happens by way of copying resources to the bin folder
         }
     }
-#endif
 }

@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client
         bool HasTokensNoLocks();
 
         /// <summary>
-        /// True when MSAL has been configured to fire the serialization events. This can be done by the app developer or by MSAL itself (on UWP).
+        /// True when MSAL has been configured to fire the serialization events. This can be done by the app developer.
         /// </summary>
         bool IsAppSubscribedToSerializationEvents();
 

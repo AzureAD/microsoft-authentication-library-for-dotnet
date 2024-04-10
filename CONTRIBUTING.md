@@ -181,7 +181,7 @@ The steps above should enable you to compile `Libs.sln`. You will need a develop
 
 MSAL.NET supports several target frameworks, but most of the time contributors are only interested in one or two. To get MSAL to build for all frameworks, contributors will need a [hefty Visual Studio installation as well as several SDKs](#prerequisites-to-build-msalnet).
 
-To work around this requirement, open [`Microsoft.Identity.Client.csproj`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj) and comment out the targets you are not interested in. Keeping the pure .NET targets and eliminating UWP and Xamarin results in a fast build as well as the ability to run all unit tests.
+To work around this requirement, open [`Microsoft.Identity.Client.csproj`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj) and comment out the targets you are not interested in. Keeping the pure .NET targets and eliminating mobile results in a fast build as well as the ability to run all unit tests.
 
 Visual Studio may need to be restarted to ensure that updated target frameworks take effect.
 
