@@ -8,9 +8,9 @@
   </PropertyGroup>
 
   <!-- Mobile and legacy targets are disabled by default to speed up dev box -->
-  <PropertyGroup Condition="'$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != ''">
-    <TargetFrameworkNet6Android>net7.0-android</TargetFrameworkNet6Android>
-    <TargetFrameworkNet6Ios>net7.0-ios15.4</TargetFrameworkNet6Ios>
+  <PropertyGroup Condition="'$(INCLUDE_MOBILE_AND_LEGACY_TFM)' != '111'">
+    <TargetFrameworkNet6Android>net6.0-android</TargetFrameworkNet6Android>
+    <TargetFrameworkNet6Ios>net6.0-ios15.4</TargetFrameworkNet6Ios>
     <TargetFrameworkUap>uap10.0.17763</TargetFrameworkUap>
   </PropertyGroup>
 
