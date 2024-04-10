@@ -10,7 +10,6 @@ using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
-#if !XAMARINMAC20
     internal class IdentityLoggerAdapter : ILoggerAdapter
     {
         private string _correlationId;
@@ -79,4 +78,3 @@ namespace Microsoft.Identity.Client.Internal.Logger
         }
     }
 }
-#endif

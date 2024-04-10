@@ -218,9 +218,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
         {
             try
             {
+#pragma warning disable CS0618 // Type or member is obsolete - https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1854
+
                 PackageInfo info = Application.Context.PackageManager.GetPackageInfo(packageName,
                     PackageInfoFlags.Signatures);
-#pragma warning disable CS0618 // Type or member is obsolete - https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1854
                 if (info != null && info.Signatures != null && info.Signatures.Count > 0)
                 {
                     Signature signature = info.Signatures[0];
@@ -352,13 +353,14 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
 
         private List<X509Certificate2> ReadCertDataForBrokerApp(string brokerPackageName)
         {
+#pragma warning disable CS0618 // Type or member is obsolete https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1854
+
             PackageInfo packageInfo = _androidContext.PackageManager.GetPackageInfo(brokerPackageName,
                 PackageInfoFlags.Signatures);
             if (packageInfo == null)
             {
                 throw new MsalClientException(MsalError.AndroidBrokerSignatureVerificationFailed, "No broker package found");
             }
-#pragma warning disable CS0618 // Type or member is obsolete https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1854
 
             if (packageInfo.Signatures == null || packageInfo.Signatures.Count == 0)
             {
