@@ -187,4 +187,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="MigrationAid\" />
+  </ItemGroup>
 </Project>
