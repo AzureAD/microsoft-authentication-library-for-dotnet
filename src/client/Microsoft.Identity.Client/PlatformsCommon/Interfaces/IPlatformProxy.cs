@@ -74,8 +74,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 
         ITokenCacheAccessor CreateTokenCacheAccessor(CacheOptions accessorOptions, bool isApplicationTokenCache = false);
 
-        ICacheSerializationProvider CreateTokenCacheBlobStorage();
-
         ICryptographyManager CryptographyManager { get; }
 
         IPlatformLogger PlatformLogger { get; }

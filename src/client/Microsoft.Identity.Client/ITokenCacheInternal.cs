@@ -63,14 +63,9 @@ namespace Microsoft.Identity.Client
         bool HasTokensNoLocks();
 
         /// <summary>
-        /// True when MSAL has been configured to fire the serialization events. This can be done by the app developer.
+        /// True when MSAL has been configured to fire the serialization events i.e. external token caching is enabled.
         /// </summary>
         bool IsAppSubscribedToSerializationEvents();
-
-        /// <summary>
-        /// True when the app developer subscribed to token cache serialization events.
-        /// </summary>
-        bool IsExternalSerializationConfiguredByUser();
 
         #endregion
     }

@@ -43,11 +43,6 @@ namespace Microsoft.Identity.Client
         internal IServiceBundle ServiceBundle { get; }
         internal ILegacyCachePersistence LegacyCachePersistence { get; set; }
 
-        /// <summary>
-        /// Set to true on some platforms where MSAL adds a serializer on its own.
-        /// </summary>
-        internal bool UsesDefaultSerialization { get; set; } = false;
-
         internal string ClientId => ServiceBundle.Config.ClientId;
 
         ITokenCacheAccessor ITokenCacheInternal.Accessor => Accessor;
@@ -66,11 +61,11 @@ namespace Microsoft.Identity.Client
         /// </summary>
         [Obsolete("The recommended way to get a cache is by using IClientApplicationBase.UserTokenCache or IClientApplicationBase.AppTokenCache")]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public TokenCache() : this((IServiceBundle)null, false, null)
+        public TokenCache() : this((IServiceBundle)null, false)
         {
         }
 
-        internal TokenCache(IServiceBundle serviceBundle, bool isApplicationTokenCache, ICacheSerializationProvider optionalDefaultSerializer = null)
+        internal TokenCache(IServiceBundle serviceBundle, bool isApplicationTokenCache)
         {
             if (serviceBundle == null)
                 throw new ArgumentNullException(nameof(serviceBundle));
@@ -81,9 +76,6 @@ namespace Microsoft.Identity.Client
             var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
             Accessor = proxy.CreateTokenCacheAccessor(serviceBundle.Config.AccessorOptions, isApplicationTokenCache);
             _featureFlags = proxy.GetFeatureFlags();
-
-            UsesDefaultSerialization = optionalDefaultSerializer != null;
-            optionalDefaultSerializer?.Initialize(this);
 
             LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
 
@@ -103,9 +95,8 @@ namespace Microsoft.Identity.Client
         internal TokenCache(
             IServiceBundle serviceBundle,
             ILegacyCachePersistence legacyCachePersistenceForTest,
-            bool isApplicationTokenCache,
-            ICacheSerializationProvider optionalDefaultCacheSerializer = null)
-            : this(serviceBundle, isApplicationTokenCache, optionalDefaultCacheSerializer)
+            bool isApplicationTokenCache)
+            : this(serviceBundle, isApplicationTokenCache)
         {
             LegacyCachePersistence = legacyCachePersistenceForTest;
         }

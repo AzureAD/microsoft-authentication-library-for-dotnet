@@ -186,11 +186,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #endif
         }
 
-        public virtual ICacheSerializationProvider CreateTokenCacheBlobStorage()
-        {
-            return null;
-        }
-
         public virtual IFeatureFlags GetFeatureFlags()
         {
             return OverloadFeatureFlags ?? CreateFeatureFlags();

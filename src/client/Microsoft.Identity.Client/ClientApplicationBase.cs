@@ -39,8 +39,6 @@ namespace Microsoft.Identity.Client
 
         internal ClientApplicationBase(ApplicationConfiguration config) : base(config)
         {
-            ICacheSerializationProvider defaultCacheSerialization = ServiceBundle.PlatformProxy.CreateTokenCacheBlobStorage();
-
             if (config.UserTokenLegacyCachePersistenceForTest != null)
             {
                 UserTokenCacheInternal = new TokenCache(ServiceBundle, config.UserTokenLegacyCachePersistenceForTest, false, defaultCacheSerialization);
