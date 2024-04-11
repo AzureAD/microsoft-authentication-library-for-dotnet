@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 #endif
 
             Trace.WriteLine($"Saving picture to {failurePicturePath}");
-            ss.SaveAsFile(failurePicturePath, ScreenshotImageFormat.Png);
+            ss.SaveAsFile(failurePicturePath);
 
 #if NETFRAMEWORK // Can't attach a file to the logs on netcore because mstest doesn't support it
             testContext.AddResultFile(failurePicturePath);
