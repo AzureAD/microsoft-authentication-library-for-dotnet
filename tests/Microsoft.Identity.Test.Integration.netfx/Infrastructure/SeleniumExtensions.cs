@@ -26,7 +26,6 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         public static IWebDriver CreateDefaultWebDriver()
         {
             EdgeOptions options = new EdgeOptions();
-            options.AddArgument("no-sandbox");
             EdgeDriver driver;
 
             // ~2x faster, no visual rendering
