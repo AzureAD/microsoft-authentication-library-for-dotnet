@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1713202550907,
+  "lastUpdate": 1713216569662,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -4742,6 +4742,42 @@ window.BENCHMARK_DATA = {
             "value": 339765.64705882355,
             "unit": "ns",
             "range": "± 6978.368908107901"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "413e319472ccf48c86647f19fa2aa49ff6038488",
+          "message": "Ashok's fix (#4714)\n\nUpdate AuthenticationAgentActivity.cs\r\n\r\nCo-authored-by: Ashok Kumar Ramakrishnan <83938949+ashok672@users.noreply.github.com>",
+          "timestamp": "2024-04-15T14:22:06-07:00",
+          "tree_id": "97db6020d5ef9d055902d46c43140f36b455788b",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/413e319472ccf48c86647f19fa2aa49ff6038488"
+        },
+        "date": 1713216566151,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 237735.92307692306,
+            "unit": "ns",
+            "range": "± 2625.3077109023006"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 339060.3125,
+            "unit": "ns",
+            "range": "± 6541.965848466346"
           }
         ]
       }
