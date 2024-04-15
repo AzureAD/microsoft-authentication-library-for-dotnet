@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1713202546175,
+  "lastUpdate": 1713202548534,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -16234,6 +16234,54 @@ window.BENCHMARK_DATA = {
             "value": 171208.39174804688,
             "unit": "ns",
             "range": "± 1279.0796646280396"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "53200638+localden@users.noreply.github.com",
+            "name": "Den Delimarsky",
+            "username": "localden"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0876d2bc701b382eb30053372f2ff94ee51540b1",
+          "message": "Start updating the documentation comments (QOL) (#4689)\n\n* Start updating the documentation comments (QOL)\r\n\r\n* No inheritdoc for ToString in KerberosSupplementalTicket.cs\r\n\r\n* Update JObject.cs\r\n\r\n* Update based on build suggestions\r\n\r\n* Remarks cannot be used on an enum\r\n\r\n* Update TokenCache.cs\r\n\r\n* Create a PCA bootstrap sample in the docs\r\n\r\n* Update JObject.cs\r\n\r\n* Update src/client/Microsoft.Identity.Client/UiRequiredExceptionClassification.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Remove locales and update links to Microsoft Learn.\r\n\r\n* Update src/client/Microsoft.Identity.Client/Kerberos/KerberosSupplementalTicketManager.cs\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/Kerberos/KerberosSupplementalTicketManager.cs\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Update InMemoryPartitionedCacheSerializer.cs\r\n\r\n* MSDN redirect query string is not needed\r\n\r\n* Update SECURITY.md\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Update SECURITY.md\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n---------\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-04-15T18:28:34+01:00",
+          "tree_id": "3e55a7da58fd6b1eaff2def1a25618df14e382bc",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/0876d2bc701b382eb30053372f2ff94ee51540b1"
+        },
+        "date": 1713202547684,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 22492.626846313477,
+            "unit": "ns",
+            "range": "± 56.510477947130184"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 169899.44398716517,
+            "unit": "ns",
+            "range": "± 520.7318408461786"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 33914.024963378906,
+            "unit": "ns",
+            "range": "± 93.6057230327342"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 174246.32911783856,
+            "unit": "ns",
+            "range": "± 2158.9895091239882"
           }
         ]
       }
