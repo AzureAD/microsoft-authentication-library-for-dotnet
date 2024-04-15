@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1713202548534,
+  "lastUpdate": 1713202550907,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -23204,6 +23204,66 @@ window.BENCHMARK_DATA = {
             "value": 136358.04545454544,
             "unit": "ns",
             "range": "± 15545.600803844949"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "53200638+localden@users.noreply.github.com",
+            "name": "Den Delimarsky",
+            "username": "localden"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0876d2bc701b382eb30053372f2ff94ee51540b1",
+          "message": "Start updating the documentation comments (QOL) (#4689)\n\n* Start updating the documentation comments (QOL)\r\n\r\n* No inheritdoc for ToString in KerberosSupplementalTicket.cs\r\n\r\n* Update JObject.cs\r\n\r\n* Update based on build suggestions\r\n\r\n* Remarks cannot be used on an enum\r\n\r\n* Update TokenCache.cs\r\n\r\n* Create a PCA bootstrap sample in the docs\r\n\r\n* Update JObject.cs\r\n\r\n* Update src/client/Microsoft.Identity.Client/UiRequiredExceptionClassification.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Remove locales and update links to Microsoft Learn.\r\n\r\n* Update src/client/Microsoft.Identity.Client/Kerberos/KerberosSupplementalTicketManager.cs\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/Kerberos/KerberosSupplementalTicketManager.cs\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Update InMemoryPartitionedCacheSerializer.cs\r\n\r\n* MSDN redirect query string is not needed\r\n\r\n* Update SECURITY.md\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Update SECURITY.md\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n---------\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-04-15T18:28:34+01:00",
+          "tree_id": "3e55a7da58fd6b1eaff2def1a25618df14e382bc",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/0876d2bc701b382eb30053372f2ff94ee51540b1"
+        },
+        "date": 1713202550008,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (1, 10))",
+            "value": 18097.654703776043,
+            "unit": "ns",
+            "range": "± 106.41635396963076"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (10000, 10))",
+            "value": 29082.232775006974,
+            "unit": "ns",
+            "range": "± 81.98733492935813"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 9704.777328491211,
+            "unit": "ns",
+            "range": "± 25.255019166864486"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 20345.870115007674,
+            "unit": "ns",
+            "range": "± 153.7995051482111"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 38661.28571428572,
+            "unit": "ns",
+            "range": "± 159.9919125703299"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 140039.0105263158,
+            "unit": "ns",
+            "range": "± 13522.95802849042"
           }
         ]
       }
