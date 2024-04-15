@@ -46,7 +46,7 @@ There are two types of managed identities, and both are supported by this servic
     - By design, only that Azure resource can use this identity to request tokens from Azure AD.
     - Using the MSI Helper service you will be able to test this type
 
-- **User-assigned**. You may also create a managed identity as a standalone Azure resource. You can [create a user-assigned managed identity](https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-manage-ua-identity-portal) and assign it to one or more Azure Resources. When you enable a user-assigned managed identity:      
+- **User-assigned**. You may also create a managed identity as a standalone Azure resource. You can [create a user-assigned managed identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/how-to-manage-ua-identity-portal) and assign it to one or more Azure Resources. When you enable a user-assigned managed identity:      
     - A service principal of a special type is created in Azure AD for the identity. The service principal is managed separately from the resources that use it. 
     - User-assigned identities can be used by multiple resources.
     - MSI Helper service uses a single user identity shared across all azure resources
@@ -55,7 +55,7 @@ Identity Labs has setup a [single shared User Assigned Identity](https://github.
 
 ## What Azure services support the feature?<a name="which-azure-services-support-managed-identity"></a>
 
-Managed identities for Azure resources can be used to authenticate to services that support Azure AD authentication. For a list of supported Azure services, see [services that support managed identities for Azure resources](https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/services-support-managed-identities).
+Managed identities for Azure resources can be used to authenticate to services that support Azure AD authentication. For a list of supported Azure services, see [services that support managed identities for Azure resources](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/services-support-managed-identities).
 
 
 ## What managed identity sources does MSAL .Net support?
@@ -194,7 +194,7 @@ Build the current project (The MSI Helper Service - MSIHelperService.csproj) and
 
 > **_NOTE:_**  Once you have swapped the slot make sure to point the base url to the production slot again in your code and test it again with the production endpoint from the MSAL integration testing
 
-> **_NOTE:_**  The service uses [Azure Web App's Environment variables](https://learn.microsoft.com/en-us/azure/app-service/reference-app-settings?tabs=kudu%2Cdotnet) to store Application ID's and Secrets needed to connect to other Azure Resources and the Operations Management suite to execute runbooks. You will see more about runbooks and how they are used under the Virtual Machine and Azure ARC sections 
+> **_NOTE:_**  The service uses [Azure Web App's Environment variables](https://learn.microsoft.com/azure/app-service/reference-app-settings?tabs=kudu%2Cdotnet) to store Application ID's and Secrets needed to connect to other Azure Resources and the Operations Management suite to execute runbooks. You will see more about runbooks and how they are used under the Virtual Machine and Azure ARC sections 
 
 ## How to build and deploy the Function App 
 
@@ -241,7 +241,7 @@ Identity Labs has an extensive OMS solution. The MSI Helper Service takes advant
 <img src="images/OMS_Admin.PNG" alt="OMSADMIN" width="800"/>
 <br>
 
-The OMS Admin Account executes pre-created Azure Runbooks. You can learn more about Runbooks [here](https://learn.microsoft.com/en-us/azure/automation/manage-runbooks)
+The OMS Admin Account executes pre-created Azure Runbooks. You can learn more about Runbooks [here](https://learn.microsoft.com/azure/automation/manage-runbooks)
 
 There are two runbooks created to be used with the Helper Service. One to execute code in a Virtual Machine and the other for Azure ARC. 
 
@@ -280,7 +280,7 @@ This result is read by the MSI Helper Service and given back to the app that is 
 
 Azure ARC setup uses the same logic as described above for the Virtual Machine. For, Azure ARC we need an on-premise machine. Currently there is a physical machine in Studio A that is corp connected. 
 
-The Azure ARC Machine runbook simply executes the following lines of code in a the physically CORP connected machine (VM Name: Gladwin-Backup). This Machine has been setup with the [Azure ARC Agent](https://learn.microsoft.com/en-us/azure/azure-arc/servers/agent-overview) which will help in getting a System Assigned Managed Identity Token on the On-Premise server. Learn more about Azure Arc [here](https://learn.microsoft.com/en-us/azure/azure-arc/servers/managed-identity-authentication)
+The Azure ARC Machine runbook simply executes the following lines of code in a the physically CORP connected machine (VM Name: Gladwin-Backup). This Machine has been setup with the [Azure ARC Agent](https://learn.microsoft.com/azure/azure-arc/servers/agent-overview) which will help in getting a System Assigned Managed Identity Token on the On-Premise server. Learn more about Azure Arc [here](https://learn.microsoft.com/azure/azure-arc/servers/managed-identity-authentication)
 
 ```powershell
         try 

@@ -239,7 +239,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="args">Arguments related to the cache item impacted</param>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use Microsoft.Identity.Client.TokenCacheCallback instead. See https://aka.msa/msal-net-3x-cache-breaking-change", true)]
+        [Obsolete("Use Microsoft.Identity.Client.TokenCacheCallback instead. See https://aka.ms/msal-net-3x-cache-breaking-change", true)]
         public delegate void TokenCacheNotification(TokenCacheNotificationArgs args);
 
         /// <summary>

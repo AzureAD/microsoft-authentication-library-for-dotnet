@@ -12,7 +12,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Contains parameters used by the MSAL call accessing the cache.
-    /// See also <see cref="T:ITokenCacheSerializer"/> which contains methods
+    /// See also <see cref="ITokenCacheSerializer"/> which contains methods
     /// to customize the cache serialization.
     /// For more details about the token cache see https://aka.ms/msal-net-web-token-cache
     /// </summary>

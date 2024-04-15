@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client
         /// "TryAutoDetect" and MSAL.NET will attempt to auto-detect the region. 
         /// </summary>
         /// <remarks>
-        /// Region names as per https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.resourcemanager.fluent.core.region?view=azure-dotnet.
+        /// Region names as per <see href="https://learn.microsoft.com/dotnet/api/microsoft.azure.management.resourcemanager.fluent.core.region?view=azure-dotnet-legacy">Region class documentation</see>.
         /// Not all auth flows can use the regional token service. 
         /// Service To Service (client credential flow) tokens can be obtained from the regional service.
         /// Requires configuration at the tenant level.
