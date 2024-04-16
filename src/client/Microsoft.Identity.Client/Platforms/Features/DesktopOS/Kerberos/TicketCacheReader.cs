@@ -23,9 +23,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
         /// Creates a <see cref="TicketCacheReader"/> object to read a Kerberos Ticket from Ticket Cache.
         /// </summary>
         /// <param name="spn">Service principal name of ticket to read out from Ticket Cache.</param>
-        /// <param name="logonId">The Logon Id of the user owning the ticket cache.
-        /// The default of 0 represents the currently logged on user.</param>
-        /// <param name="package">The name of the LSA authentication package that will be interacted with.</param>
+        /// <param name="logonId">The Logon ID of the user owning the ticket cache.
+        /// The default of 0 represents the currently logged in user.</param>
+        /// <param name="package">The name of the <see href="https://learn.microsoft.com/windows/win32/secauthn/lsa-authentication">Local Security Authority (LSA)</see> authentication package that will be interacted with.</param>
         public TicketCacheReader(string spn, long logonId = 0, string package = "Kerberos")
         {
 
@@ -36,9 +36,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
         /// <summary>
         /// Read out a Kerberos Ticket.
         /// </summary>
-        /// <returns>Byte stream of Kerberos Ticket if exists. Null otherwise.</returns>
+        /// <returns>Byte stream of Kerberos Ticket, if exists. Null otherwise.</returns>
         /// <remarks>
-        /// Can throws <see cref="Win32Exception"/> if any error occurs while interfacing with Ticket Cache.
+        /// Throws <see cref="Win32Exception"/> if any error occurs while interfacing with Ticket Cache.
         /// </remarks>
         public byte[] RequestToken()
         {
@@ -52,7 +52,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
             return clientRequest;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Clean up all data members used for interaction with Ticket Cache.
+        /// </summary>
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposedValue)

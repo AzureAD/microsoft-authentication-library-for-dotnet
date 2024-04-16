@@ -31,8 +31,8 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         /// <summary>
         /// Algorithm used to sign proof of possession request. 
-        /// See https://docs.microsoft.com/en-us/azure/key-vault/keys/about-keys#signverify for ECD
-        /// See https://docs.microsoft.com/en-us/azure/key-vault/keys/about-keys#signverify-1 for RSA
+        /// See <see href="https://learn.microsoft.com/azure/key-vault/keys/about-keys-details#signverify">EC algorithms</see> for ECD.
+        /// See <see href="https://learn.microsoft.com/azure/key-vault/keys/about-keys-details#signverify-1">RSA algorithms</see> for RSA.
         /// </summary>
         string CryptographicAlgorithm { get; }
 

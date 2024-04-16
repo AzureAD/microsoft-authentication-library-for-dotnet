@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>  
 
 <!-- Customised run settings file to exclude test assemblies from coverage.
-    See https://msdn.microsoft.com/en-us/library/jj159530.aspx for more info. -->
+    See https://learn.microsoft.com/previous-versions/visualstudio/visual-studio-2015/test/customizing-code-coverage-analysis?view=vs-2015 for more info. -->
 
 <!-- File name extension must be .runsettings -->  
 <RunSettings>  
@@ -34,4 +34,3 @@ Included items must then not match any entries in the exclude list to remain inc
     </DataCollectors>  
   </DataCollectionRunSettings>  
 </RunSettings>  
-  

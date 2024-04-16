@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop
 
         protected override string InternalGetRuntimeVersion()
         {
-            // https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#query-the-registry-using-code
+            // https://learn.microsoft.com/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#query-the-registry-using-code
             try
             {
                 string subkey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\";

@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client
         /// Display a custom text in the broker UI controls which support it. 
         /// </summary>
         /// <remarks>
-        /// Currently only the WAM account picker allows for this customization, see <see href="https://docs.microsoft.com/en-us/windows/uwp/security/web-account-manager#add-a-custom-header">WAM documentation</see>.
+        /// Currently only the WAM account picker allows for this customization, see <see href="https://learn.microsoft.com/windows/uwp/security/web-account-manager#add-a-custom-header">WAM documentation</see>.
         /// </remarks>
         public string HeaderText { get; set; }
 
