@@ -39,14 +39,10 @@ namespace Microsoft.Identity.Client
 
         internal ClientApplicationBase(ApplicationConfiguration config) : base(config)
         {
-            if (config.UserTokenLegacyCachePersistenceForTest != null)
-            {
-                UserTokenCacheInternal = new TokenCache(ServiceBundle, config.UserTokenLegacyCachePersistenceForTest, false, defaultCacheSerialization);
-            }
-            else
-            {
-                UserTokenCacheInternal = config.UserTokenCacheInternalForTest ?? new TokenCache(ServiceBundle, false, defaultCacheSerialization);
-            }
+            UserTokenCacheInternal = new TokenCache(
+                ServiceBundle,
+                config.UserTokenLegacyCachePersistenceForTest,
+                isApplicationTokenCache: false);
         }
 
         #region Accounts

@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client
         internal ITokenCacheAccessor Accessor { get; set; }
 
         internal IServiceBundle ServiceBundle { get; }
-        internal ILegacyCachePersistence LegacyCachePersistence { get; set; }
+        internal ILegacyCachePersistence LegacyCachePersistence { get; }
 
         internal string ClientId => ServiceBundle.Config.ClientId;
 
