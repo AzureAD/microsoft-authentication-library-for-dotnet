@@ -79,7 +79,12 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Specifies if the public client application should used an embedded web browser
-        /// or the system default browser
+        /// or the system default browser. If the broker (WAM, Authenticator, Company Portal) is configured, 
+        /// this setting is only used when the broker is not installed.
+        /// 
+        /// On .NET, including net8-windows, app developers must reference Microsoft.Identity.Client.Desktop
+        /// and call PublicClientApplicationBuilder.WithDesktopFeatures() to enabled the embedded web browser.
+        /// 
         /// </summary>
         /// <param name="useEmbeddedWebView">If <c>true</c>, will use an embedded web browser,
         /// otherwise will attempt to use a system web browser. The default depends on the platform:
