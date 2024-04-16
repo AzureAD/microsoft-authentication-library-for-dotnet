@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string _ciamRedirectUri = "http://localhost";
 
         [TestMethod]
-        public async Task ROPC_Ciam_Async()
+        public async Task ROPC_Ciam_StandardDomains_CompletesSuccessfully()
         {
             string authority;
             //Get lab details
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task ClientCredentialWithClientSecret_Ciam_Async()
+        public async Task ClientCredentialCiam_WithClientSecret_ReturnsValidTokens()
         {
             string authority;
             //Get lab details
@@ -150,25 +150,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task Ciam_Cud_Obo_Test_Async()
+        public async Task OBOCiam_CustomDomain_ReturnsValidTokens()
         {
             string authorityNonCud = "https://MSIDLABCIAM6.ciamlogin.com";
             string authorityCud = "https://login.msidlabsciam.com/fe362aec-5d43-45d1-b730-9755e60dc3b9/v2.0/";
-            string ciamWebapp = "b244c86f-ed88-45bf-abda-6b37aa482c79";
+            string ciamClient = "b244c86f-ed88-45bf-abda-6b37aa482c79";
             string ciamWebApi = "634de702-3173-4a71-b336-a4fab786a479";
             string ciamEmail = "idlab@msidlabciam6.onmicrosoft.com";
 
-            //Get lab details
-            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
-            {
-                FederationProvider = FederationProvider.CIAM,
-                SignInAudience = SignInAudience.AzureAdMyOrg,
-                PublicClient = PublicClient.no
-            }).ConfigureAwait(false);
-
             //Acquire tokens
             var msalPublicClient = PublicClientApplicationBuilder
-                .Create(ciamWebapp)
+                .Create(ciamClient)
                 .WithAuthority(authorityNonCud, false)
                 .WithRedirectUri(_ciamRedirectUri)
                 .Build();
