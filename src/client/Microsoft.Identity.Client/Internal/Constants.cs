@@ -43,6 +43,7 @@ namespace Microsoft.Identity.Client.Internal
         public const string ManagedIdentityResourceId = "mi_res_id";
         public const string ManagedIdentityDefaultClientId = "system_assigned_managed_identity";
         public const string ManagedIdentityDefaultTenant = "managed_identity";
+        public const string CredentialEndpoint = "http://169.254.169.254/metadata/identity/credential";
         public const string CiamAuthorityHostSuffix = ".ciamlogin.com";
 
         public static string FormatEnterpriseRegistrationOnPremiseUri(string domain)

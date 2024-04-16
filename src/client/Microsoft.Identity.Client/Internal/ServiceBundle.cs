@@ -13,8 +13,13 @@ using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.TelemetryCore.Http;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.WsTrust;
+#if NETSTANDARD
+using Microsoft.Identity.Client.Platforms.netstandard;
+#endif
+#if NET451_OR_GREATER
+using Microsoft.Identity.Client.Platforms.netdesktop;
+#endif
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -45,6 +50,7 @@ namespace Microsoft.Identity.Client.Internal
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             ThrottlingManager = SingletonThrottlingManager.GetInstance();
             DeviceAuthManager = config.DeviceAuthManagerForTest ?? PlatformProxy.CreateDeviceAuthManager();
+            KeyMaterialManager = config.KeyMaterialManagerForTest ?? PlatformProxy.GetKeyMaterialManager();
 
             if (shouldClearCaches) // for test
             {
@@ -74,6 +80,7 @@ namespace Microsoft.Identity.Client.Internal
         public ApplicationConfiguration Config { get; }
 
         public IDeviceAuthManager DeviceAuthManager { get; }
+        public IKeyMaterialManager KeyMaterialManager { get; }
 
         public IHttpTelemetryManager HttpTelemetryManager { get; }
 

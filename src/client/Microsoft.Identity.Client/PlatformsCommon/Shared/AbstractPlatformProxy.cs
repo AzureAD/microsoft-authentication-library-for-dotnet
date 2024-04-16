@@ -154,6 +154,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
         }
 
+        public virtual IKeyMaterialManager GetKeyMaterialManager()
+        {
+            return NullKeyMaterialManager.Instance;
+        }
+
         /// <inheritdoc/>
         public ICryptographyManager CryptographyManager => _cryptographyManager.Value;
 

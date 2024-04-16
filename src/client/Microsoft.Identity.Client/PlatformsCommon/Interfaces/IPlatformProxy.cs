@@ -110,5 +110,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         bool BrokerSupportsWamAccounts { get; }
 
         IMsalHttpClientFactory CreateDefaultHttpClientFactory();
+
+        IKeyMaterialManager GetKeyMaterialManager();
     }
 }

@@ -3,6 +3,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
@@ -84,6 +85,24 @@ namespace Microsoft.Identity.Client
 
             CommonParameters.AuthenticationScheme = new PopAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
 
+            return this as T;
+        }
+
+        /// <summary>
+        /// Sends a token request over an MTLS (Mutual TLS) connection using the provided client certificate.
+        /// This method is public and part of the S2S (server-to-server) token binding process, 
+        /// allowing external clients to securely establish a mutual TLS connection.
+        /// </summary>
+        /// <remarks>
+        /// This method should be used when setting up a secure token exchange via MTLS.
+        /// It's important to ensure that the provided X509Certificate2 is valid and secure.
+        /// Note that only the /token request will be transmitted over this MTLS connection.
+        /// </remarks>
+        /// <param name="certificate">An X509Certificate2 object representing the client certificate for MTLS.</param>
+        /// <returns>An instance of the class, allowing for method chaining in a fluent interface style.</returns>
+        public T WithMtlsCertificate(X509Certificate2 certificate)
+        {
+            CommonParameters.MtlsCertificate = certificate;
             return this as T;
         }
     }
