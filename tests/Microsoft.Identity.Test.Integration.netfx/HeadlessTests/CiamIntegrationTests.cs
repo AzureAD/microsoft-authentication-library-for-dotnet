@@ -19,6 +19,13 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
+    /// <summary>
+    /// Tests for customer identity and access management (CIAM).
+    /// </summary>
+    /// <remarks>
+    /// Custom user domain (CUD): <c>https://login.{customhost}}.com/{tenant}/v2.0/</c>.
+    /// Standard: <c>https://{tenant}.ciamlogin.com</c>, <c>https://{tenant}.ciamlogin.com/{tenant}</c>, <c>https://{tenant}.ciamlogin.com/{tenantGuid}</c>
+    /// </remarks>
     [TestClass]
     public class CiamIntegrationTests
     {
@@ -45,7 +52,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             authority = string.Format("https://{0}.ciamlogin.com/{1}.onmicrosoft.com", labResponse.User.LabName, labResponse.User.LabName);
             await RunCiamRopcTest(authority, labResponse).ConfigureAwait(false);
 
-            //https://tenantName.ciamlogin.com/
+            //https://tenantName.ciamlogin.com/tenantGuid
             authority = string.Format("https://{0}.ciamlogin.com/{1}", labResponse.User.LabName, labResponse.Lab.TenantId);
             await RunCiamRopcTest(authority, labResponse).ConfigureAwait(false);
         }
@@ -101,7 +108,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             authority = string.Format("https://{0}.ciamlogin.com/{1}.onmicrosoft.com", labResponse.User.LabName, labResponse.User.LabName);
             await RunCiamCCATest(authority, labResponse).ConfigureAwait(false);
 
-            //https://tenantName.ciamlogin.com/
+            //https://tenantName.ciamlogin.com/tenantGuid
             authority = string.Format("https://{0}.ciamlogin.com/{1}", labResponse.User.LabName, labResponse.Lab.TenantId);
             await RunCiamCCATest(authority, labResponse).ConfigureAwait(false);
 
@@ -117,7 +124,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Create(labResponse.App.AppId)
                 .WithExperimentalFeatures();
 
-            if (authority.Contains("ciamlogin.com"))
+            if (authority.Contains(Constants.CiamAuthorityHostSuffix))
             {
                 msalConfidentialClientBuilder.WithClientSecret(GetCiamSecret())
                                              .WithAuthority(authority, false);
@@ -173,8 +180,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-            string appToken = result.AccessToken;
-            var userAssertion = new UserAssertion(appToken);
+            var userAssertion = new UserAssertion(result.AccessToken);
             string atHash = userAssertion.AssertionHash;
 
             //Acquire tokens for OBO
