@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task ClientCredentialCiam_WithClientSecret_ReturnsValidTokens()
+        public async Task ClientCredentialCiam_WithClientCredentials_ReturnsValidTokens()
         {
             string authority;
             //Get lab details
