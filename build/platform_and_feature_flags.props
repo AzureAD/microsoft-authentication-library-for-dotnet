@@ -17,7 +17,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)'">
     <DefineConstants>$(DefineConstants);SUPPORTS_BROKER;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Ios)' Or '$(TargetFramework)' == '$(TargetFrameworkNet6Mac)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Ios)'">
     <DefineConstants>$(DefineConstants);iOS;SUPPORTS_BROKER</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
