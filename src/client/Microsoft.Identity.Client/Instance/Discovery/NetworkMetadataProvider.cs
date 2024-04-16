@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public NetworkMetadataProvider(
             IHttpManager httpManager,
-            INetworkCacheMetadataProvider networkCacheMetadataProvider, 
+            INetworkCacheMetadataProvider networkCacheMetadataProvider,
             Uri userProvidedInstanceDiscoveryUri = null)
         {
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
@@ -34,17 +34,17 @@ namespace Microsoft.Identity.Client.Instance.Discovery
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
         {
-            var logger = requestContext.Logger;
+            ILoggerAdapter logger = requestContext.Logger;
 
             string environment = authority.Host;
-            var cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
+            InstanceDiscoveryMetadataEntry cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
             if (cachedEntry != null)
             {
                 logger.Verbose(() => $"[Instance Discovery] The network provider found an entry for {environment}. ");
                 return cachedEntry;
             }
 
-            var discoveryResponse = await FetchAllDiscoveryMetadataAsync(authority, requestContext).ConfigureAwait(false);
+            InstanceDiscoveryResponse discoveryResponse = await FetchAllDiscoveryMetadataAsync(authority, requestContext).ConfigureAwait(false);
             CacheInstanceDiscoveryMetadata(discoveryResponse);
 
             cachedEntry = _networkCacheMetadataProvider.GetMetadata(environment, logger);
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Instance.Discovery
           Uri authority,
           RequestContext requestContext)
         {
-            var client = new OAuth2Client(requestContext.Logger, _httpManager);
+            var client = new OAuth2Client(requestContext.Logger, _httpManager, mtlsCertificate: null);
 
             client.AddQueryParameter("api-version", "1.1");
             client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority));
@@ -101,8 +101,11 @@ namespace Microsoft.Identity.Client.Instance.Discovery
                 authority.Host :
                 AadAuthority.DefaultTrustedHost;
 
-            string instanceDiscoveryEndpoint =  UriBuilderExtensions.GetHttpsUriWithOptionalPort(
-                $"https://{discoveryHost}/common/discovery/instance",
+            string instanceDiscoveryEndpoint = UriBuilderExtensions.GetHttpsUriWithOptionalPort(
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    "https://{0}/common/discovery/instance",
+                    discoveryHost),
                 authority.Port);
 
             requestContext.Logger.InfoPii(

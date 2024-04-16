@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Credential;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Instance.Oidc;
 using Microsoft.Identity.Client.Instance.Validation;
@@ -40,6 +41,7 @@ namespace Microsoft.Identity.Client.Platforms.net6
     [JsonSerializable(typeof(ManagedIdentityResponse))]
     [JsonSerializable(typeof(ManagedIdentityErrorResponse))]
     [JsonSerializable(typeof(OidcMetadata))]
+    [JsonSerializable(typeof(CredentialResponse))]
     [JsonSourceGenerationOptions]
     internal partial class MsalJsonSerializerContext : JsonSerializerContext
     {

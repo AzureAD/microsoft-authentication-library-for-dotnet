@@ -123,9 +123,16 @@ namespace Microsoft.Identity.Client
 
         public bool RetryOnServerErrors { get; set; } = true;
 
+#region ManagedIdentity
         public ManagedIdentityId ManagedIdentityId { get; internal set; }
-
         public bool IsManagedIdentity { get; }
+
+        public CryptoKeyType ManagedIdentityCredentialKeyType { get; internal set; }
+
+        public X509Certificate2 ManagedIdentityClientCertificate { get; internal set; }
+
+#endregion
+
         public bool IsConfidentialClient { get; }
         public bool IsPublicClient => !IsConfidentialClient && !IsManagedIdentity;
 
@@ -209,7 +216,8 @@ namespace Microsoft.Identity.Client
         public ITokenCacheInternal UserTokenCacheInternalForTest { get; set; }
         public ITokenCacheInternal AppTokenCacheInternalForTest { get; set; }
 
-        public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }        
+        public IDeviceAuthManager DeviceAuthManagerForTest { get; set; }
+        public IKeyMaterialManager KeyMaterialManagerForTest { get; set; }
         public bool IsInstanceDiscoveryEnabled { get; internal set; } = true;
         #endregion
 
