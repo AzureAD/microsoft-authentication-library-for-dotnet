@@ -612,7 +612,7 @@ namespace CommonCache.Test.Common
                 }
 
                 // Note that earlier, we called Process.WaitForExit(1000).
-                // https://msdn.microsoft.com/en-us/library/fb4aw7b8(v=vs.110).aspx
+                // https://learn.microsoft.com/dotnet/api/system.diagnostics.process.waitforexit?view=net-8.0#System_Diagnostics_Process_WaitForExit
                 // According to msdn documentation, that overload has a caveat:
                 //   When standard output has been redirected to asynchronous event handlers,
                 //   it is possible that output processing will not have completed when this method returns.

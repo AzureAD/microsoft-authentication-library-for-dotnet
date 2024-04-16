@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -11,8 +11,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     public static class LabUserHelper
     {
         private static readonly LabServiceApi s_labService;
-        private static readonly IDictionary<UserQuery, LabResponse> s_userCache =
-            new Dictionary<UserQuery, LabResponse>();
+        private static readonly ConcurrentDictionary<UserQuery, LabResponse> s_userCache =
+            new ConcurrentDictionary<UserQuery, LabResponse>();
 
         public static KeyVaultSecretsProvider KeyVaultSecretsProviderMsal { get; }
         public static KeyVaultSecretsProvider KeyVaultSecretsProviderMsid { get; }
@@ -38,8 +38,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 throw new LabUserNotFoundException(query, "Found no users for the given query.");
             }
 
-            s_userCache.Add(query, response);
+            bool added = s_userCache.TryAdd(query, response);
             Debug.WriteLine("User cache miss. Returning user from lab: " + response.User.Upn);
+            Debug.WriteLine("User cache updated: " + added);
 
             return response;
         }

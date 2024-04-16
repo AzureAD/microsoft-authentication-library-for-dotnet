@@ -16,7 +16,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 {
-    [Activity(ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize, Exported=true)]
+    [Activity(ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize, Exported=false)]
     internal class AuthenticationAgentActivity : Activity
     {
         private const string AboutBlankUri = "about:blank";
