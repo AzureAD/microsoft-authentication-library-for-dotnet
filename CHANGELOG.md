@@ -1,3 +1,8 @@
+4.60.3
+==========
+### Bug Fixes
+Updated Android webview attribute.
+
 4.60.2
 ==========
 ### Bug Fixes
