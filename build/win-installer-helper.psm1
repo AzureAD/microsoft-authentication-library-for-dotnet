@@ -2057,7 +2057,7 @@ function Get-PackageFullName
         Gets the latest installed version of the .NET Framework.
     .DESCRIPTION
         Retrieves information from the registry based on the documentation at this link:
-        https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#net_b.
+        https://learn.microsoft.com/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed#net_b.
         Returns the entire child object from the registry.
     .OUTPUTS
         The child registry entry for the .NET framework installation.

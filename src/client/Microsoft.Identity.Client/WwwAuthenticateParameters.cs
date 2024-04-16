@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client
         public string Nonce { get; private set; }
 
         /// <summary>
-        /// Return the <see cref="RawParameters"/> of key <paramref name="key"/>.
+        /// Return the <c>RawParameters</c> of key <paramref name="key"/>.
         /// </summary>
         /// <param name="key">Name of the raw parameter to retrieve.</param>
         /// <returns>The raw parameter if it exists,

@@ -46,24 +46,24 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// framework-based Modern Authentication by default. Starting with build 16.0.7967, Microsoft 365 apps use 
         /// Web Account Manager (WAM) for sign-in workflows on Windows builds that are later than 15000 
         /// (Windows 10, version 1703, build 15063.138).
-        /// https://docs.microsoft.com/en-us/office365/troubleshoot/administration/disabling-adal-wam-not-recommended
+        /// https://learn.microsoft.com/microsoft-365/troubleshoot/administration/disabling-adal-wam-not-recommended
         /// </summary>
         private const int WamSupportedWindows10BuildNumber = 15063;
 
         /// <summary>
         /// Windows Server 2019 (version 1809, Build Number 17763)
         /// Editions : Datacenter, Essentials, Standard
-        /// https://docs.microsoft.com/en-us/windows-server/get-started/windows-server-release-info
+        /// https://learn.microsoft.com/windows-server/get-started/windows-server-release-info
         /// For MultiSession Window 10 Build Number is same as Windows 2019 Server Build Number
         /// MultiSession Windows 10 is supported from Windows 10 multi-session, version 1903
-        /// https://docs.microsoft.com/en-us/mem/intune/fundamentals/azure-virtual-desktop-multi-session
+        /// https://learn.microsoft.com/mem/intune/fundamentals/azure-virtual-desktop-multi-session
         /// </summary>
         private const int Windows2019BuildNumber = 17763;
 
         /// <summary>
         /// RtlGetVersion is the kernel-mode equivalent of the user-mode GetVersionEx function in the Windows SDK
         /// The RtlGetVersion routine returns version information about the currently running operating system.
-        /// https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-rtlgetversion
+        /// https://learn.microsoft.com/windows-hardware/drivers/ddi/wdm/nf-wdm-rtlgetversion
         /// When using RtlGetVersion to determine whether a particular version of the operating system is running, 
         /// a caller should check for version numbers that are greater than or equal to the required version number. 
         /// This ensures that a version test succeeds for later versions of Windows.
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                         case VER_NT_WORKSTATION:
                             switch (OsVersionInfo.dwMajorVersion)
                             {
-                                //https://docs.microsoft.com/en-us/windows/win32/sysinfo/operating-system-version
+                                //https://learn.microsoft.com/windows/win32/sysinfo/operating-system-version
                                 //For Client (Windows 10 and 11) and for Server (Windows 2016 and above) Major version is 10.*
                                 //Windows 10 Build Number 15063 is the minimum version where WAM is supported
                                 case 10:
@@ -181,12 +181,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
                             }
 
                         //For server operating systems that are not domain controllers and for Windows 10 and Windows 11 multi-session, use ProductType="3". 
-                        //https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-firewall/create-wmi-filters-for-the-gpo
+                        //https://learn.microsoft.com/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/jj717288(v=ws.11)
                         case VER_NT_SERVER:
                         case VER_NT_DOMAIN_CONTROLLER:
                             switch (OsVersionInfo.dwMajorVersion)
                             {
-                                //https://docs.microsoft.com/en-us/windows/win32/sysinfo/operating-system-version
+                                //https://learn.microsoft.com/windows/win32/sysinfo/operating-system-version
                                 //For Client (Windows 10 and 11) and for Server (Windows 2016 and above) Major version is 10.*
                                 //Windows Server 2019 minimum build number is 17763
                                 case 10:

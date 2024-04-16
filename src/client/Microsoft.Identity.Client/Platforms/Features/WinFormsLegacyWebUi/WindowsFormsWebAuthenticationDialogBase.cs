@@ -47,7 +47,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi
         /// </summary>
         protected WindowsFormsWebAuthenticationDialogBase(object ownerWindow)
         {
-            // From MSDN (http://msdn.microsoft.com/en-us/library/ie/dn720860(v=vs.85).aspx):
             // The net session count tracks the number of instances of the web browser control.
             // When a web browser control is created, the net session count is incremented. When the control
             // is destroyed, the net session count is decremented. When the net session count reaches zero,

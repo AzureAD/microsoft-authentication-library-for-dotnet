@@ -172,7 +172,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <!--
     MSAL will run on Windows 7 and 8 but requires to be built against Win10 to use WinRT APIs for WAM
-    See https://docs.microsoft.com/en-us/dotnet/standard/analyzers/platform-compat-analyzer and
+    See https://learn.microsoft.com/dotnet/standard/analyzers/platform-compat-analyzer and
     https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md for details
     -->
     <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>

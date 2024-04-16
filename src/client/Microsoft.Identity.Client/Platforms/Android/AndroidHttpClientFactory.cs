@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             // https://forums.xamarin.com/discussion/144802/do-you-use-singleton-httpclient-or-dispose-create-new-instance-every-time
 
             var httpClient = new HttpClient(
-            // As per Xamarin guidance https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/http-stack?tabs=windows
+            // As per Xamarin guidance https://learn.microsoft.com/xamarin/android/app-fundamentals/http-stack?tabs=windows
 #if NET6_0
                 new Xamarin.Android.Net.AndroidMessageHandler());
 #else

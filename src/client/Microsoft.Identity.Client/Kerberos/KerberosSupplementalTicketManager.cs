@@ -76,8 +76,9 @@ namespace Microsoft.Identity.Client.Kerberos
         /// Save current Kerberos Ticket to current user's Ticket Cache.
         /// </summary>
         /// <param name="ticket">Kerberos ticket object to save.</param>
-        /// <remarks>Can throws <see cref="ArgumentException"/> when given ticket parameter is not a valid Kerberos Supplemental Ticket.
-        /// Can throws <see cref="Win32Exception"/> if error occurs while saving ticket information into Ticket Cache.
+        /// <remarks>Throws <see cref="ArgumentException"/> when given ticket parameter is not a valid Kerberos supplemental ticket.
+
+        /// Throws <see cref="Win32Exception"/> if error occurs while saving ticket information into Ticket Cache.
         /// </remarks>
         public static void SaveToWindowsTicketCache(KerberosSupplementalTicket ticket)
         {
@@ -90,8 +91,9 @@ namespace Microsoft.Identity.Client.Kerberos
         /// <param name="ticket">Kerberos ticket object to save.</param>
         /// <param name="logonId">The Logon Id of the user owning the ticket cache.
         /// The default of 0 represents the currently logged on user.</param>
-        /// <remarks>Can throw <see cref="ArgumentException"/> when given ticket parameter is not a valid Kerberos Supplemental Ticket.
-        /// Can throw <see cref="Win32Exception"/> if error occurs while saving ticket information into Ticket Cache.
+        /// <remarks>Throws <see cref="ArgumentException"/> when given ticket parameter is not a valid Kerberos supplemental ticket.
+
+        /// Throws <see cref="Win32Exception"/> if error occurs while saving ticket information into Ticket Cache.
         /// </remarks>
         public static void SaveToWindowsTicketCache(KerberosSupplementalTicket ticket, long logonId)
         {
@@ -124,7 +126,7 @@ namespace Microsoft.Identity.Client.Kerberos
         /// <param name="servicePrincipalName">Service principal name to find associated Kerberos Ticket.</param>
         /// <returns>Byte stream of searched Kerberos Ticket information if exists. Null, otherwise.</returns>
         /// <remarks>
-        /// Can throws <see cref="Win32Exception"/> if error occurs while searching ticket information from Ticket Cache.
+        /// Throws <see cref="Win32Exception"/> if error occurs while searching ticket information from Ticket Cache.
         /// </remarks>
         public static byte[] GetKerberosTicketFromWindowsTicketCache(string servicePrincipalName)
         {
@@ -140,7 +142,7 @@ namespace Microsoft.Identity.Client.Kerberos
         /// The default of 0 represents the currently logged on user.</param>
         /// <returns>Byte stream of searched Kerberos Ticket information if exists. Null, otherwise.</returns>
         /// <remarks>
-        /// Can throws <see cref="Win32Exception"/> if error occurs while searching ticket information from Ticket Cache.
+        /// Throws <see cref="Win32Exception"/> if error occurs while searching ticket information from Ticket Cache.
         /// </remarks>
         public static byte[] GetKerberosTicketFromWindowsTicketCache(string servicePrincipalName, long logonId)
         {
