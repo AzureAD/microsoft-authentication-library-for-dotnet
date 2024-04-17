@@ -149,8 +149,7 @@ namespace Microsoft.Identity.Client
         #region Public Properties
         /// <summary>
         /// Gets the status code returned from HTTP layer. This status code is either the <c>HttpStatusCode</c> in the inner
-        /// <see cref="System.Net.Http.HttpRequestException"/> response or the NavigateError Event Status Code in a browser based flow (See
-        /// http://msdn.microsoft.com/en-us/library/bb268233(v=vs.85).aspx).
+        /// <see cref="System.Net.Http.HttpRequestException"/> response or the NavigateError Event Status Code in a browser based flow (see <see href="https://learn.microsoft.com/previous-versions/bb268233(v=vs.85)">NavigateError Event Status Codes</see>).
         /// You can use this code for purposes such as implementing retry logic or error investigation.
         /// </summary>
         public int StatusCode
@@ -232,7 +231,7 @@ namespace Microsoft.Identity.Client
                     StatusCode == 429 || // too many requests
                     StatusCode == (int)HttpStatusCode.RequestTimeout ||
                     string.Equals(ErrorCode, MsalError.RequestTimeout, StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(ErrorCode, "temporarily_unavailable", StringComparison.OrdinalIgnoreCase); // as per https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes#handling-error-codes-in-your-application
+                    string.Equals(ErrorCode, "temporarily_unavailable", StringComparison.OrdinalIgnoreCase); // as per https://learn.microsoft.com/entra/identity-platform/reference-error-codes#handling-error-codes-in-your-application
         }
 
         /// <summary>

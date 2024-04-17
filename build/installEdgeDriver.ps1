@@ -7,7 +7,7 @@ if ([string]::IsNullOrEmpty($edgeVersion)) {
     echo "##vso[task.complete result=Failed;]Failed"
     }
 
-$url = "https://msedgedriver.azureedge.net/$edgeVersion/edgedriver_win64.zip" #Edge Driver from https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
+$url = "https://msedgedriver.azureedge.net/$edgeVersion/edgedriver_win64.zip" #Edge Driver from https://developer.microsoft.com/microsoft-edge/tools/webdriver/
 $fileName = "edgedriver_win64.zip"
 $source = "C:\Downloads\$fileName"
 $destination = "C:\Program Files\dotnet\"

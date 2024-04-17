@@ -16,7 +16,7 @@ workflow GetMSITokenFromVM {
     	
 	)
 	# Converter: Wrapping initial script in an InlineScript activity, and passing any parameters for use within the InlineScript
-	# Converter: If you want this InlineScript to execute on another host rather than the Automation worker, simply add some combination of -PSComputerName, -PSCredential, -PSConnectionURI, or other workflow common parameters (http://technet.microsoft.com/en-us/library/jj129719.aspx) as parameters of the InlineScript
+	# Converter: If you want this InlineScript to execute on another host rather than the Automation worker, simply add some combination of -PSComputerName, -PSCredential, -PSConnectionURI, or other workflow common parameters (https://learn.microsoft.com/powershell/module/psworkflow/about/about_workflowcommonparameters?view=powershell-5.1) as parameters of the InlineScript
 	inlineScript {
 		$WebhookData = $using:WebhookData
 		$msi_uri = $using:msi_uri

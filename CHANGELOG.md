@@ -1,3 +1,13 @@
+4.60.3
+==========
+### Bug Fixes
+Updated Android webview attribute.
+
+4.60.2
+==========
+### Bug Fixes
+When `OnBeforeTokenRequest` extensibility API is used, MSAL now correctly uses the user-provided `OnBeforeTokenRequestData.RequestUri` to set the token request endpoint. See [4701](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4701).
+
 4.60.1
 ==========
 ### Bug Fixes
@@ -197,7 +207,7 @@ Resolved an issue where MSAL attempts to acquire a token via certificate authent
 - Added new APIs to acquire authentication data from WWW-Authenticate and Authentication-Info request headers. This will provide additional support for Proof-of-Possession. See [3026](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3026)
 
 ### Experimental Features
-- [Managed identities for Azure resources](https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) provide Azure services with an automatically managed identity in Azure Active Directory. You can use this identity to authenticate to any service that supports Azure AD authentication, without having credentials in your code. MSAL now supports acquiring token for managed identities for Azure App Services and Azure Virtual Machines. Use `WithManagedIdentity()` method on the `AcquireTokenForClient` API to get an MSI token. This is an experimental feature and may change in the future versions of MSAL. See [3754](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3754) and [3829](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3829)
+- [Managed identities for Azure resources](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview) provide Azure services with an automatically managed identity in Azure Active Directory. You can use this identity to authenticate to any service that supports Azure AD authentication, without having credentials in your code. MSAL now supports acquiring token for managed identities for Azure App Services and Azure Virtual Machines. Use `WithManagedIdentity()` method on the `AcquireTokenForClient` API to get an MSI token. This is an experimental feature and may change in the future versions of MSAL. See [3754](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3754) and [3829](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3829)
 
 ### Supportability
 - Enabled more logging for new WAM broker. See [3575](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3575)
@@ -719,7 +729,7 @@ Logs are now consistent when you use several .NET authentication libraries from 
 
 ### Fundamentals:
 **Added additional code analyzers**. See issue [#2419](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2419) for details.  
-**Improved documentation to support Android 11**. See [Xamarin Android 11](https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-net-xamarin-android-considerations#android-11-support) docs.
+**Improved documentation to support Android 11**. See [Xamarin Android 11](https://learn.microsoft.com/entra/identity-platform/msal-net-xamarin-android-considerations#android-11-support) docs.
 
 4.27.0
 ==========
@@ -1184,7 +1194,7 @@ Bug Fixes:
 3.0.6-preview
 =============
 New Features:
-- **MSAL.NET now creates an HttpClient that uses the AndroidClientHandler** for Android 4.1 and higher. See [documentation for more information](https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/http-stack?tabs=windows). [MSAL issue #1076](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1076)
+- **MSAL.NET now creates an HttpClient that uses the AndroidClientHandler** for Android 4.1 and higher. See [documentation for more information](https://learn.microsoft.com/xamarin/android/app-fundamentals/http-stack?tabs=windows). [MSAL issue #1076](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1076)
 
 Bug Fixes:
 - **When doing the ADAL.NET fallback from MSAL.NET, MSAL.NET was doing the lookup based on the account.HomeAccountId or requestParameters.LoginHint**. In ADAL.NET an account will never have a HomeAccountId (by design), so lookup needs to happen by Account.UserName instead. [MSAL.NET issue #1100](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1100)

@@ -643,7 +643,6 @@ namespace Microsoft.Identity.Json.Utilities
             targetMembers.AddRange(GetProperties(type, bindingAttr));
 
             // for some reason .NET returns multiple members when overriding a generic member on a base class
-            // http://social.msdn.microsoft.com/Forums/en-US/b5abbfee-e292-4a64-8907-4e3f0fb90cd9/reflection-overriden-abstract-generic-properties?forum=netfxbcl
             // filter members to only return the override on the topmost class
             // update: I think this is fixed in .NET 3.5 SP1 - leave this in for now...
             List<MemberInfo> distinctMembers = new List<MemberInfo>(targetMembers.Count);

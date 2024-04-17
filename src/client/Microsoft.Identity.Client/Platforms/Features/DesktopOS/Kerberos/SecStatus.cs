@@ -5,7 +5,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
 {
     /// <summary>
     /// Status code returned from SSPI functions.
-    /// https://docs.microsoft.com/en-us/windows/win32/api/sspi/nf-sspi-initializesecuritycontexta
+    /// https://learn.microsoft.com/windows/win32/api/sspi/nf-sspi-initializesecuritycontexta
     /// </summary>
     internal enum SecStatus : uint
     {

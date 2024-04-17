@@ -199,7 +199,7 @@ namespace WebApi.Misc
         {
             await Task.Delay(_cacheAccessPenaltyMs).ConfigureAwait(false);
 
-            // As per https://docs.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentdictionary-2?redirectedfrom=MSDN&view=net-5.0#remarks
+            // As per https://learn.microsoft.com/dotnet/api/system.collections.concurrent.concurrentdictionary-2?view=net-5.0#remarks
             // the indexer is ok to store a key/value pair unconditionally          
             _data[cacheKey] = bytes;
         }
