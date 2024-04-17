@@ -100,28 +100,30 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 PublicClient = PublicClient.no
             }).ConfigureAwait(false);
 
+
             //https://tenantName.ciamlogin.com/
             authority = string.Format("https://{0}.ciamlogin.com/", labResponse.User.LabName);
-            await RunCiamCCATest(authority, labResponse).ConfigureAwait(false);
+            await RunCiamCCATest(authority, labResponse.App.AppId).ConfigureAwait(false);
 
             //https://tenantName.ciamlogin.com/tenantName.onmicrosoft.com
             authority = string.Format("https://{0}.ciamlogin.com/{1}.onmicrosoft.com", labResponse.User.LabName, labResponse.User.LabName);
-            await RunCiamCCATest(authority, labResponse).ConfigureAwait(false);
+            await RunCiamCCATest(authority, labResponse.App.AppId).ConfigureAwait(false);
 
             //https://tenantName.ciamlogin.com/tenantGuid
             authority = string.Format("https://{0}.ciamlogin.com/{1}", labResponse.User.LabName, labResponse.Lab.TenantId);
-            await RunCiamCCATest(authority, labResponse).ConfigureAwait(false);
+            await RunCiamCCATest(authority, labResponse.App.AppId).ConfigureAwait(false);
 
             //Ciam CUD
             authority = "https://login.msidlabsciam.com/fe362aec-5d43-45d1-b730-9755e60dc3b9/v2.0/";
-            await RunCiamCCATest(authority, labResponse).ConfigureAwait(false);
+            string ciamClient = "b244c86f-ed88-45bf-abda-6b37aa482c79";
+            await RunCiamCCATest(authority, ciamClient).ConfigureAwait(false);
         }
 
-        private async Task RunCiamCCATest(string authority, LabResponse labResponse)
+        private async Task RunCiamCCATest(string authority, string appId)
         {
             //Acquire tokens
             var msalConfidentialClientBuilder = ConfidentialClientApplicationBuilder
-                .Create(labResponse.App.AppId)
+                .Create(appId)
                 .WithExperimentalFeatures();
 
             if (authority.Contains(Constants.CiamAuthorityHostSuffix))
