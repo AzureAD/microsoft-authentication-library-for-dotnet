@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1713216575464,
+  "lastUpdate": 1713445050205,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -4778,6 +4778,42 @@ window.BENCHMARK_DATA = {
             "value": 339060.3125,
             "unit": "ns",
             "range": "± 6541.965848466346"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3f0348f71b0ad4c2b5a4ddb143913b1d2102e736",
+          "message": "Remove net6win (#4567)\n\n* Attempt\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* Remove NET_ONLY\r\n\r\n* Adress PR comments\r\n\r\n* Address PRs\r\n\r\n* Update src/client/Microsoft.Identity.Client/ApiConfig/AcquireTokenInteractiveParameterBuilder.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/PublicClientApplicationBuilder.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n---------\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>",
+          "timestamp": "2024-04-18T13:50:16+01:00",
+          "tree_id": "11fde162c3cb59bf3d65434448aaef863dfa5eaf",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/3f0348f71b0ad4c2b5a4ddb143913b1d2102e736"
+        },
+        "date": 1713445046305,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 256190.27272727274,
+            "unit": "ns",
+            "range": "± 5150.224583007159"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 342069.5,
+            "unit": "ns",
+            "range": "± 3277.109410884704"
           }
         ]
       }
