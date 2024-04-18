@@ -31,6 +31,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using NSubstitute.Extensions;
+using Microsoft.Identity.Client.Broker;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -199,11 +200,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                         null,
                         broker,
                         "install_url");
-#if NET6_WIN 
-                Assert.AreEqual(true, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
-#else
                 Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
-#endif
             }
         }
 
@@ -227,11 +224,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 Assert.IsFalse(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Generic));
                 Assert.IsFalse(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Dsts));
 
-#if NET6_WIN || NET7_0
-                Assert.IsTrue(_brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
-#else
                 Assert.AreEqual(false, _brokerInteractiveRequest.Broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad));
-#endif
+
             }
         }
 
@@ -578,7 +572,6 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             }
         }
 
-#if NET6_WIN
         [TestMethod]
         public async Task BrokerGetAccountsWithBrokerInstalledTestAsync()
         {
@@ -591,9 +584,8 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             platformProxy.CreateTokenCacheAccessor(Arg.Any<CacheOptions>(), false)
                 .Returns(new InMemoryPartitionedUserTokenCacheAccessor(Substitute.For<ILoggerAdapter>(), null));
 
-            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
-                .WithExperimentalFeatures(true)
-                .WithBroker(true)
+            var pca = PublicClientApplicationBuilder.Create(TestConstants.ClientId)                
+                .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
                 .WithPlatformProxy(platformProxy)
                 .Build();
 
@@ -616,7 +608,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             // Assert that MSAL acquires an account from the broker cache
             Assert.AreSame(expectedAccount, actualAccount.Single());
         }       
-#endif
+
 
         [TestMethod]
         public async Task SilentAuthStrategyFallbackTestAsync()
