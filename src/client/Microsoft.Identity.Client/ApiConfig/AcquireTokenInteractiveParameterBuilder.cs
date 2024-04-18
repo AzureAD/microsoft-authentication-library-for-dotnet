@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client
         /// this setting is only used when the broker is not installed.
         /// 
         /// On .NET, including net8-windows, app developers must reference Microsoft.Identity.Client.Desktop
-        /// and call PublicClientApplicationBuilder.WithDesktopFeatures() to enabled the embedded web browser.
+        /// and call PublicClientApplicationBuilder.WithDesktopFeatures() to enable the embedded web browser.
         /// 
         /// </summary>
         /// <param name="useEmbeddedWebView">If <c>true</c>, will use an embedded web browser,
