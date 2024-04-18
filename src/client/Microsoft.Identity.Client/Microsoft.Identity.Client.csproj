@@ -35,10 +35,10 @@
 
     <!-- Copyright needs to be in the form of © not (c) to be compliant -->
     <Title>Microsoft Authentication Library for .NET</Title>
-    
+
     <!-- Readme-->
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    
+
   </PropertyGroup>
 
   <PropertyGroup>
@@ -114,7 +114,7 @@
 
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
-  
+
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' ">
     <IsTrimmable>true</IsTrimmable>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
