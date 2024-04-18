@@ -82,14 +82,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                         .ConfigureAwait(false);
 
                 }
+
+                return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 HandleException(ex);
                 throw;
             }
-
-            return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
         }
 
         protected virtual Task<ManagedIdentityResponse> HandleResponseAsync(
