@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if NET6_WIN
+#if NET
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -29,6 +29,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Account = Microsoft.Identity.Client.Account;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Broker;
 
 namespace Microsoft.Identity.Test.Unit.BrokerTests
 {
@@ -72,7 +73,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAuthority(TestConstants.AuthorityTenant);
 
-            pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+            pcaBuilder = pcaBuilder.WithBroker(
+                new BrokerOptions(
+                    BrokerOptions.OperatingSystems.Windows));
 
             Assert.IsTrue(pcaBuilder.IsBrokerAvailable());
 
@@ -85,7 +88,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                .Create("d3adb33f-c0de-ed0c-c0de-deadb33fc0d3")
                .WithAdfsAuthority(TestConstants.ADFSAuthority);
 
-            pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+            pcaBuilder = pcaBuilder.WithBroker(
+                new BrokerOptions(
+                    BrokerOptions.OperatingSystems.Windows));
 
             Assert.IsFalse(pcaBuilder.IsBrokerAvailable());
         }
