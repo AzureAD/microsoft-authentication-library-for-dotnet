@@ -3,9 +3,8 @@
   <PropertyGroup>
     <TargetFrameworkNetDesktop48>net48</TargetFrameworkNetDesktop48>
     <TargetFrameworkNet6>net6.0</TargetFrameworkNet6>
-    <TargetFrameworkNet6Win>net6.0-windows</TargetFrameworkNet6Win>
 
-    <TargetFrameworks>$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet6);$(TargetFrameworkNet6Win)</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworkNetDesktop48);$(TargetFrameworkNet6)</TargetFrameworks>
     <IsPackable>false</IsPackable>
 
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
@@ -15,7 +14,8 @@
 </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop48)'" />
+    <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj" Condition="$(TargetFramework)==$(TargetFrameworkNetDesktop48)" />
+    <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Extensions.Msal\Microsoft.Identity.Client.Extensions.Msal.csproj" />
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
@@ -67,18 +67,11 @@
     <PackageReference Include="System.Windows.Forms" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop48)'">
-    <PackageReference Include="Microsoft.Windows.SDK.Contracts" />
-    <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj" />
-  </ItemGroup>
-
   <ItemGroup>
     <Folder Include="CacheExtension\" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
-    <DefineConstants>$(DefineConstants);NET6_WIN</DefineConstants>
-  </PropertyGroup>
+
 </Project>

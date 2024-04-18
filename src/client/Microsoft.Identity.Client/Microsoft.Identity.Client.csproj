@@ -4,7 +4,6 @@
     <TargetFrameworkNetDesktop462>net462</TargetFrameworkNetDesktop462>
     <TargetFrameworkNetStandard>netstandard2.0</TargetFrameworkNetStandard>
     <TargetFrameworkNet6>net6.0</TargetFrameworkNet6>
-    <TargetFrameworkNet6Win>net6.0-windows</TargetFrameworkNet6Win>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
 
@@ -21,28 +20,20 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Ios)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Mac)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">
     <DefineConstants>$(DefineConstants);MAUI</DefineConstants>
     <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Ios)'">14.2</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Mac)'">14.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">21.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
-  <!-- Package that includes all the TFMs https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3863 -->
-  <PropertyGroup Condition="'$(NET_ONLY_INTERNAL_PACKAGE)' == ''">
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetStandard);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Mac);$(TargetFrameworkNet6);$(TargetFrameworkNet6Win);</TargetFrameworks>
+  <PropertyGroup>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetStandard);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Mac);$(TargetFrameworkNet6);</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Mac);$(TargetFrameworkNet6)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNet6)</TargetFrameworks>
-  </PropertyGroup>
-
-  <!-- Package excluding Windows Desktop and Mobile TFMs https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3863 -->
-  <PropertyGroup Condition="'$(NET_ONLY_INTERNAL_PACKAGE)' != ''">
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetStandard);$(TargetFrameworkNet6);</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!--This should be passed from the VSTS build-->
     <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">$(MsalInternalVersion)</MsalClientSemVer>
     <!--This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion-->
-    <Version Condition="'$(NET_ONLY_INTERNAL_PACKAGE)' == ''">$(MsalClientSemVer)</Version>
-    <Version Condition="'$(NET_ONLY_INTERNAL_PACKAGE)' != ''">$(MsalClientSemVer)-netonly</Version>
+    <Version>$(MsalClientSemVer)</Version>
 
     <!-- Copyright needs to be in the form of © not (c) to be compliant -->
     <Title>Microsoft Authentication Library for .NET</Title>
@@ -114,7 +105,7 @@
     <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
     <Compile Remove="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
-    <None Include="$(PathToMsalSources)\..\..\..\README.md" Pack="true" PackagePath="\"/>
+    <None Include="$(PathToMsalSources)\..\..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
@@ -139,40 +130,10 @@
 
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
+  
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' ">
     <IsTrimmable>true</IsTrimmable>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
-    <Compile Include="$(PathToMsalSources)\Platforms\net6\**\*.cs" LinkBase="Platforms\net6" />
-    <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
-    <Compile Include="$(PathToMsalSources)\Platforms\net6win\**\*.cs" LinkBase="Platforms\net6win" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\RuntimeBroker\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\WebView2WebUi\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
-
-    <PackageReference Include="Microsoft.Web.WebView2" />
-    <PackageReference Include="Microsoft.Identity.Client.NativeInterop" IncludeAssets="all" />
-
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
-
-    <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
-    <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
-  </ItemGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Win)'">
-    <UseWindowsForms>true</UseWindowsForms>
-    <!--
-    MSAL will run on Windows 7 and 8 but requires to be built against Win10 to use WinRT APIs for WAM
-    See https://learn.microsoft.com/dotnet/standard/analyzers/platform-compat-analyzer and
-    https://github.com/dotnet/designs/blob/main/accepted/2020/platform-checks/platform-checks.md for details
-    -->
-    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' ">

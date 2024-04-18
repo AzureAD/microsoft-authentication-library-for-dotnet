@@ -23,7 +23,7 @@ using UIKit;
 using Android.App;
 #endif
 
-#if NETFRAMEWORK || NET6_WIN
+#if NETFRAMEWORK 
 using System.Windows.Forms;
 #endif
 
@@ -79,7 +79,12 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Specifies if the public client application should used an embedded web browser
-        /// or the system default browser
+        /// or the system default browser. If the broker (WAM, Authenticator, Company Portal) is configured, 
+        /// this setting is only used when the broker is not installed.
+        /// 
+        /// On .NET, including net8-windows, app developers must reference Microsoft.Identity.Client.Desktop
+        /// and call PublicClientApplicationBuilder.WithDesktopFeatures() to enable the embedded web browser.
+        /// 
         /// </summary>
         /// <param name="useEmbeddedWebView">If <c>true</c>, will use an embedded web browser,
         /// otherwise will attempt to use a system web browser. The default depends on the platform:
@@ -223,14 +228,14 @@ namespace Microsoft.Identity.Client
                 Parameters.UiParent.CallerWindow = nsWindow;
             }
 
-#elif NETFRAMEWORK || NET6_WIN
+#elif NETFRAMEWORK 
             if (parent is IWin32Window win32Window)
             {
                 Parameters.UiParent.OwnerWindow = win32Window.Handle;
                 return this;
             }
 #endif
-#if NETFRAMEWORK || NET6_WIN || NET_CORE || NETSTANDARD
+#if NETFRAMEWORK ||  NET_CORE || NETSTANDARD
 
             if (parent is IntPtr intPtrWindow)
             {
@@ -277,7 +282,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if NETFRAMEWORK || NET6_WIN
+#if NETFRAMEWORK 
         /// <summary>
         /// Sets a reference to the current IWin32Window that triggers the browser to be shown.
         /// Used to center the browser (embedded web view and Windows broker) that pop-up onto this window.        
@@ -296,7 +301,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if NETFRAMEWORK || NET6_WIN || NET_CORE || NETSTANDARD
+#if NETFRAMEWORK || NET_CORE || NETSTANDARD
 
         /// <summary>
         /// Sets a reference to the IntPtr to a window that triggers the browser to be shown.

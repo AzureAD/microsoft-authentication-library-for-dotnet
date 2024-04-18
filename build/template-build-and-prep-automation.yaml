@@ -108,10 +108,7 @@ steps:
                          'MSIX\WPF.Package\bin\AnyCPU\Release\WPF\', 
                          'NetCoreWinFormsWam\bin\Release\net6.0-windows10.0.17763.0\', 
                          'NetDesktopWpf\bin\Release\', 
-                         'NetFrameworkWam\bin\Release\',
-                         'TestBrokerApp\bin\Release\net6.0\',
-                         'TestBrokerApp\bin\Release\net6.0-windows10.0.17763.0\',
-                         'TestBrokerApp\bin\Release\net48\',
+                         'NetFrameworkWam\bin\Release\',                        
                          'WAMClassLibrary\bin\Release\',
                          'WAMCallsIntoClassLibrary\bin\Release\');
 
