@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop
 
         private static string GetUserPrincipalName(int nameFormat)
         {
-            // TODO: there is discrepancy between the implementation of this method on net45 - throws if upn not found - and uap and
+            // there is discrepancy between the implementation of this method on net45 - throws if upn not found - and uap and
             // the rest of the platforms - returns ""
 
             uint userNameSize = 0;

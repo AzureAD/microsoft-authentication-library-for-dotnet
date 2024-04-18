@@ -35,11 +35,6 @@ namespace Microsoft.Identity.Client
                 AsyncBeforeAccess != null || AsyncAfterAccess != null || AsyncBeforeWrite != null;
         }
 
-        bool ITokenCacheInternal.IsExternalSerializationConfiguredByUser()
-        {
-            return (this as ITokenCacheInternal).IsAppSubscribedToSerializationEvents();
-        }
-
         async Task ITokenCacheInternal.OnAfterAccessAsync(TokenCacheNotificationArgs args)
         {
             AfterAccess?.Invoke(args);
