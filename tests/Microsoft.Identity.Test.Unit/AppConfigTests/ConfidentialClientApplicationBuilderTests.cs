@@ -230,6 +230,17 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
+        public void TestConstructor_WithMtlsHttpClientFactory()
+        {
+            IMsalMtlsHttpClientFactory httpClientFactory = NSubstitute.Substitute.For<IMsalMtlsHttpClientFactory>();
+            var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                .WithHttpClientFactory(httpClientFactory)
+                                                                .WithClientSecret("mustang")
+                                                                .Build();
+            Assert.AreEqual(httpClientFactory, cca.AppConfig.HttpClientFactory);
+        }
+
+        [TestMethod]
         public void TestConstructor_WithLogging()
         {
             var cca = ConfidentialClientApplicationBuilder

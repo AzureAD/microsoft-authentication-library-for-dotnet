@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Instance;
@@ -23,9 +24,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
     internal static class MockHttpManagerExtensions
     {
         public static MockHttpMessageHandler AddInstanceDiscoveryMockHandler(
-            this MockHttpManager httpManager, 
-            string authority = TestConstants.AuthorityCommonTenant, 
-            Uri customDiscoveryEndpoint = null, 
+            this MockHttpManager httpManager,
+            string authority = TestConstants.AuthorityCommonTenant,
+            Uri customDiscoveryEndpoint = null,
             string instanceMetadataContent = null)
         {
             Uri authorityURI = new Uri(authority);
@@ -47,7 +48,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
             return httpManager.AddMockHandler(
                 MockHelpers.CreateInstanceDiscoveryMockHandler(
-                    discoveryEndpoint, 
+                    discoveryEndpoint,
                     instanceMetadataContent ?? TestConstants.DiscoveryJsonResponse));
         }
 
@@ -85,7 +86,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static MockHttpMessageHandler AddFailureTokenEndpointResponse(
            this MockHttpManager httpManager,
            string error,
-           string authority = TestConstants.AuthorityCommonTenant, 
+           string authority = TestConstants.AuthorityCommonTenant,
            string correlationId = null)
         {
             var handler = new MockHttpMessageHandler()
@@ -93,7 +94,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 ExpectedUrl = authority + "oauth2/v2.0/token",
                 ExpectedMethod = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateFailureTokenResponseMessage(
-                    error, 
+                    error,
                     correlationId: correlationId)
             };
             httpManager.AddMockHandler(handler);
@@ -105,7 +106,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string authority = TestConstants.AuthorityCommonTenant,
             IDictionary<string, string> bodyParameters = null,
             IDictionary<string, string> queryParameters = null,
-            bool foci = false, 
+            bool foci = false,
             HttpResponseMessage responseMessage = null,
             IDictionary<string, string> expectedHttpHeaders = null)
         {
@@ -140,7 +141,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static HttpResponseMessage AddResiliencyMessageMockHandler(
             this MockHttpManager httpManager,
             HttpMethod httpMethod,
-            HttpStatusCode httpStatusCode, 
+            HttpStatusCode httpStatusCode,
             int? retryAfter = null)
         {
             var response = MockHelpers.CreateServerErrorMessage(httpStatusCode, retryAfter);
@@ -179,8 +180,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public static MockHttpMessageHandler AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
-            this MockHttpManager httpManager, 
-            string token = "header.payload.signature", 
+            this MockHttpManager httpManager,
+            string token = "header.payload.signature",
             string expiresIn = "3599",
             string tokenType = "Bearer",
             IList<string> unexpectedHttpHeaders = null)
@@ -247,7 +248,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             });
         }
 
-       
+
 
         public static MockHttpMessageHandler AddAllMocks(this MockHttpManager httpManager, TokenResponseType aadResponse)
         {
@@ -256,8 +257,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public static MockHttpMessageHandler AddTokenResponse(
-            this MockHttpManager httpManager, 
-            TokenResponseType responseType, 
+            this MockHttpManager httpManager,
+            TokenResponseType responseType,
             IDictionary<string, string> expectedRequestHeaders = null)
         {
             HttpResponseMessage responseMessage;
@@ -269,7 +270,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                        TestConstants.Uid,
                        TestConstants.DisplayableId,
                        TestConstants.s_scope.ToArray());
-                   
+
                     break;
                 case TokenResponseType.Valid_ClientCredentials:
                     responseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage();
@@ -278,12 +279,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 case TokenResponseType.Invalid_AADUnavailable503:
                     responseMessage = MockHelpers.CreateFailureMessage(
                             System.Net.HttpStatusCode.ServiceUnavailable, "service down");
-                   
+
                     break;
                 case TokenResponseType.InvalidGrant:
-                    responseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage();                   
+                    responseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage();
                     break;
-                case TokenResponseType.InvalidClient:                    
+                case TokenResponseType.InvalidClient:
 
                     responseMessage = MockHelpers.CreateInvalidClientResponseMessage();
                     break;
@@ -295,7 +296,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 ExpectedMethod = HttpMethod.Post,
                 ExpectedRequestHeaders = expectedRequestHeaders,
-                ResponseMessage = responseMessage, 
+                ResponseMessage = responseMessage,
             };
             httpManager.AddMockHandler(responseHandler);
 
@@ -303,8 +304,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         }
 
         public static HttpResponseMessage AddTokenErrorResponse(
-            this MockHttpManager httpManager, 
-            string error, 
+            this MockHttpManager httpManager,
+            string error,
             HttpStatusCode? customStatusCode)
         {
             var responseMessage = MockHelpers.CreateFailureTokenResponseMessage(error, customStatusCode: customStatusCode);
@@ -372,7 +373,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpManager.AddMockHandler(httpMessageHandler);
         }
 
-            
+
         private static MockHttpMessageHandler BuildMockHandlerForManagedIdentitySource(ManagedIdentitySource managedIdentitySourceType, string resource)
         {
             MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
@@ -411,21 +412,26 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     expectedQueryParams.Add("api-version", "2019-07-01-preview");
                     expectedQueryParams.Add("resource", resource);
                     break;
+                case ManagedIdentitySource.Credential:
+                    httpMessageHandler.ExpectedMethod = HttpMethod.Post;
+                    expectedRequestHeaders.Add("Server", "IMDS");
+                    expectedQueryParams.Add("cred-api-version", "1.0");
+                    break;
             }
 
             if (managedIdentitySourceType != ManagedIdentitySource.CloudShell)
             {
                 httpMessageHandler.ExpectedQueryParams = expectedQueryParams;
             }
-            
+
             httpMessageHandler.ExpectedRequestHeaders = expectedRequestHeaders;
 
             return httpMessageHandler;
         }
 
         public static void AddManagedIdentityWSTrustMockHandler(
-            this MockHttpManager httpManager, 
-            string expectedUrl, 
+            this MockHttpManager httpManager,
+            string expectedUrl,
             string filePath = null)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.Unauthorized);
@@ -433,7 +439,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             {
                 responseMessage.Headers.Add("WWW-Authenticate", $"Basic realm={filePath}");
             }
-            
+
             httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -441,6 +447,85 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                         ExpectedUrl = expectedUrl,
                         ResponseMessage = responseMessage
                     });
+        }
+
+        public static void AddManagedIdentityCredentialMockHandler(
+            this MockHttpManager httpManager,
+            string expectedUrl,
+            string response = null,
+            string userAssignedId = null,
+            UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None,
+            HttpStatusCode statusCode = HttpStatusCode.OK)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
+            IDictionary<string, string> expectedQueryParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedHeaders = new Dictionary<string, string>();
+            MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
+
+            HttpContent content = new StringContent(response);
+            responseMessage.Content = content;
+
+            httpMessageHandler.ExpectedMethod = HttpMethod.Post;
+
+            expectedHeaders.Add("Metadata", "true");
+            expectedQueryParams.Add("cred-api-version", "1.0");
+
+            if (userAssignedIdentityId == UserAssignedIdentityId.ClientId)
+            {
+                expectedQueryParams.Add(Constants.ManagedIdentityClientId, userAssignedId);
+            }
+
+            if (userAssignedIdentityId == UserAssignedIdentityId.ResourceId)
+            {
+                expectedQueryParams.Add(Constants.ManagedIdentityResourceId, userAssignedId);
+            }
+
+            if (userAssignedIdentityId == UserAssignedIdentityId.ObjectId)
+            {
+                expectedQueryParams.Add(Constants.ManagedIdentityObjectId, userAssignedId);
+            }
+
+            httpMessageHandler.ExpectedQueryParams = expectedQueryParams;
+
+            httpMessageHandler.ResponseMessage = responseMessage;
+            httpMessageHandler.ExpectedUrl = expectedUrl;
+
+            httpMessageHandler.ExpectedRequestHeaders = expectedHeaders;
+
+            httpManager.AddMockHandler(httpMessageHandler);
+        }
+
+        public static void AddManagedIdentityMtlsMockHandler(
+            this MockHttpManager httpManager,
+            string expectedUrl,
+            string resource,
+            string client_id = TestConstants.SystemAssignedClientId,
+            string response = null,
+            HttpStatusCode statusCode = HttpStatusCode.OK)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
+            IDictionary<string, string> expectedBodyParams = new Dictionary<string, string>();
+            IDictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>();
+            MockHttpMessageHandler httpMessageHandler = new MockHttpMessageHandler();
+            Guid correlationId = Guid.NewGuid();
+
+            HttpContent content = new StringContent(response);
+            responseMessage.Content = content;
+
+            httpMessageHandler.ExpectedMethod = HttpMethod.Post;
+            //expectedRequestHeaders.Add("client-request-id", correlationId.ToString("D"));
+            httpMessageHandler.ResponseMessage = responseMessage;
+            httpMessageHandler.ExpectedUrl = expectedUrl;
+
+            expectedBodyParams.Add("grant_type", "client_credentials");
+            expectedBodyParams.Add("scope", resource + "/.default");
+            expectedBodyParams.Add("client_id", client_id);
+            expectedBodyParams.Add("client_assertion", "managed-identity-credential");
+            expectedBodyParams.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
+
+            httpMessageHandler.ExpectedPostData = expectedBodyParams;
+            httpMessageHandler.ExpectedRequestHeaders = expectedRequestHeaders;
+            httpManager.AddMockHandler(httpMessageHandler);
         }
 
         public static void AddRegionDiscoveryMockHandlerNotFound(
@@ -468,11 +553,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// <summary>
         /// Results in a UI Required Exception
         /// </summary>
-        InvalidGrant, 
+        InvalidGrant,
 
         /// <summary>
         /// Normal server exception
         /// </summary>
         InvalidClient
     }
- }
+}
