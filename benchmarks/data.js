@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1713445057675,
+  "lastUpdate": 1713518980583,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -4814,6 +4814,42 @@ window.BENCHMARK_DATA = {
             "value": 342069.5,
             "unit": "ns",
             "range": "± 3277.109410884704"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d3d64bae321c4cec104ede78cbc4b479df435d53",
+          "message": "Remove Xamarin (#4706)",
+          "timestamp": "2024-04-19T10:22:28+01:00",
+          "tree_id": "21c54e8182497c44f19a28100700dcfeb3e1fde4",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/d3d64bae321c4cec104ede78cbc4b479df435d53"
+        },
+        "date": 1713518977143,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 235589.83333333334,
+            "unit": "ns",
+            "range": "± 3561.881623098906"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 329920.9583333333,
+            "unit": "ns",
+            "range": "± 8276.573358788393"
           }
         ]
       }
