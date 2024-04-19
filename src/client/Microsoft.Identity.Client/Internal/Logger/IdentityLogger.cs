@@ -6,7 +6,6 @@ using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client.Internal.Logger
 {
-#if !XAMARINMAC20
     //This class is used to wrap the functionality of the configured IIdentityLogger to add additional MSAL client information when logging messages.
     internal class IdentityLogger : IIdentityLogger
     {
@@ -41,5 +40,4 @@ namespace Microsoft.Identity.Client.Internal.Logger
             _identityLogger.Log(entry);
         }
     }
-#endif
 }

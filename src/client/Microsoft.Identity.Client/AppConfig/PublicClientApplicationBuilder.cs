@@ -216,7 +216,7 @@ namespace Microsoft.Identity.Client
 #endif
 
         /// <summary>
-        ///  Sets a reference to the ViewController (if using Xamarin.iOS), Activity (if using Xamarin.Android)
+        ///  Sets a reference to the ViewController (if using iOS), Activity (if using Android)
         ///  IWin32Window or IntPtr (if using .Net Framework). Used for invoking the browser.
         /// </summary>
         /// <remarks>
@@ -264,7 +264,7 @@ namespace Microsoft.Identity.Client
 #if ANDROID
         /// <summary>
         /// Sets a reference to the current Activity that triggers the browser to be shown. Required
-        /// for MSAL to be able to show the browser when using Xamarin.Android
+        /// for MSAL to be able to show the browser when using Android
         /// </summary>
         /// <param name="activityFunc">A function to return the current Activity</param>
         /// <returns>The builder to chain the .With methods</returns>
@@ -397,7 +397,7 @@ namespace Microsoft.Identity.Client
                 throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
             }
 
-#if IS_XAMARIN_OR_UWP
+#if __MOBILE__ || WINDOWS_UWP
             if (Config.IsBrokerEnabled && Config.MultiCloudSupportEnabled)
             {
                 // TODO: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3139

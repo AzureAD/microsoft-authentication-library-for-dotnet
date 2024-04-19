@@ -11,17 +11,12 @@ namespace Microsoft.Identity.Client.Platforms.Android
     {
         public HttpClient GetHttpClient()
         {
-            // For Mono, continue to create HttpClient for each PublicClientApplication
+            // Continue to create HttpClient for each PublicClientApplication
             // as static instance seems to have problems 
             // https://forums.xamarin.com/discussion/144802/do-you-use-singleton-httpclient-or-dispose-create-new-instance-every-time
 
             var httpClient = new HttpClient(
-            // As per Xamarin guidance https://learn.microsoft.com/xamarin/android/app-fundamentals/http-stack?tabs=windows
-#if NET6_0
                 new Xamarin.Android.Net.AndroidMessageHandler());
-#else
-                new Xamarin.Android.Net.AndroidClientHandler());
-#endif
             HttpClientConfig.ConfigureRequestHeadersAndSize(httpClient);
             return httpClient;
         }
