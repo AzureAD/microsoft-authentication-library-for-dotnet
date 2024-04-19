@@ -51,11 +51,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
                 return CallbackIdentityLoggerAdapter.Create(correlationId, config);
             }
 
-#if XAMARINMAC20
-            throw new NotImplementedException();
-#else
             return IdentityLoggerAdapter.Create(correlationId, config);
-#endif
         }
 
         public static ILoggerAdapter NullLogger => s_nullLogger.Value;
