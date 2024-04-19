@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var requestContext = new RequestContext(serviceBundle, Guid.NewGuid());
                 var response = TestConstants.CreateMsalTokenResponse();
 
-                ITokenCacheInternal cache = new TokenCache(serviceBundle, legacyCachePersistence, false);                
+                ITokenCacheInternal cache = new TokenCache(serviceBundle, false, legacyCachePersistence);                
                 if (serializeCache) // no point in invoking the Legacy ADAL cache if you're only keeping it memory
                 {
                     cache.SetBeforeAccess((_) => { });
