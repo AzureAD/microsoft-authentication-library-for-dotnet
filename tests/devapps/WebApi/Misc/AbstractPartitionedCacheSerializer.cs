@@ -9,9 +9,6 @@ namespace WebApi.Misc
 {
     internal interface ICacheSerializationProvider
     {
-        // Important - do not use SetBefore / SetAfter methods, as these are reserved for app developers
-        // Instead, use AfterAccess = x, BeforeAccess = y
-        // See UapTokenCacheBlobStorage for an example
         void Initialize(ITokenCache tokenCache);
     }
 

@@ -163,8 +163,4 @@
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Cache\CacheImpl\" />
-    <Folder Include="MigrationAid\" />
-  </ItemGroup>
 </Project>

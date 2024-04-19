@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
 
         internal ClientApplicationBase(ApplicationConfiguration config) : base(config)
         {
-            UserTokenCacheInternal = new TokenCache(
+            UserTokenCacheInternal = config.UserTokenCacheInternalForTest ?? new TokenCache(
                 ServiceBundle,
                 config.UserTokenLegacyCachePersistenceForTest,
                 isApplicationTokenCache: false);
