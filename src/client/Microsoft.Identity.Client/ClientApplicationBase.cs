@@ -38,22 +38,12 @@ namespace Microsoft.Identity.Client
 
         internal ClientApplicationBase(ApplicationConfiguration config) : base(config)
         {
-            if (config.UserTokenLegacyCachePersistenceForTest != null)
-            {
-                UserTokenCacheInternal = new TokenCache(
+            UserTokenCacheInternal = 
+                config.UserTokenCacheInternalForTest ?? 
+                new TokenCache(
                     ServiceBundle,
                     false,
                     config.UserTokenLegacyCachePersistenceForTest);
-            }
-            else
-            {
-                UserTokenCacheInternal = new TokenCache(ServiceBundle, false);
-            }
-
-            //UserTokenCacheInternal = config.UserTokenCacheInternalForTest ?? new TokenCache(
-            //    ServiceBundle,
-            //    config.UserTokenLegacyCachePersistenceForTest,
-            //    isApplicationTokenCache: false);
         }
 
         #region Accounts
