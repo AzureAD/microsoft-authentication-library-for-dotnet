@@ -16,6 +16,7 @@ using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.ManagedIdentity;
+using System.Linq;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -116,6 +117,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 var baseUri = new Uri(credentialResponse.RegionalTokenUrl);
                 var tokenUrl = new Uri(baseUri, $"{credentialResponse.TenantId}/oauth2/v2.0/token");
+
+                //tokenUrl = new Uri("https://mtlsauth.microsoft.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c/oauth2/v2.0/token");
+
+                logger.Verbose(() => $"[CredentialBasedMsiAuthRequest] Token endpoint : { tokenUrl }.");
 
                 OAuth2Client client = CreateClientRequest(
                     keyMaterial,
@@ -246,11 +251,45 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             credentialEndpointUri = null;
 
-            // If Managed Identity CredentialKeyType is set to None, indicate unavailability.
-            if (requestContext.ServiceBundle.Config.ManagedIdentityCredentialKeyType == CryptoKeyType.None)
+            CryptoKeyType credentialKeyType = requestContext.ServiceBundle.Config.ManagedIdentityCredentialKeyType;
+
+            // CredentialKeyType will be None, if no keys are provisioned.
+            if (credentialKeyType == CryptoKeyType.None)
             {
-                requestContext.Logger.Verbose(() => "[Managed Identity] Credential based managed identity is unavailable.");
-                return false;
+                // Check to see if CAE or POP APIs are used.
+                bool isCaeOrPopRequested = requestContext.ServiceBundle.Config.ClientCapabilities?.Any() == true ||
+                                           requestContext.ServiceBundle.Config.ManagedIdentityPopSupported;
+
+                if (isCaeOrPopRequested)
+                {
+                    // Determine the specific unsupported feature to provide a clearer error message
+                    if (requestContext.ServiceBundle.Config.ClientCapabilities?.Any() == true)
+                    {
+                        requestContext.Logger.Verbose(() => "[Managed Identity] Claims-based authentication is not " +
+                        "supported with Managed Identity on the current Azure Resource.");
+
+                        throw new MsalClientException(
+                            MsalError.ClaimsNotSupportedOnMiResource, 
+                            MsalErrorMessage.ResourceDoesNotSupportClaims);
+                    }
+
+                    if (requestContext.ServiceBundle.Config.ManagedIdentityPopSupported)
+                    {
+                        requestContext.Logger.Verbose(() => "[Managed Identity] Proof of Possession is not " +
+                        "supported with Managed Identity on the current Azure Resource.");
+
+                        throw new MsalClientException(
+                            MsalError.PopNotSupportedOnMiResource, 
+                            MsalErrorMessage.ResourceDoesNotSupportPop);
+                    }
+                }
+                else
+                {
+                    // Log the unavailability of credential based managed identity for a basic request.
+                    // Proceed to use Legacy MSI flow.
+                    requestContext.Logger.Verbose(() => "[Managed Identity] Credential based managed identity is unavailable without specific client capabilities.");
+                    return false;
+                }
             }
 
             // Initialize the credentialUri with the constant CredentialEndpoint and API version.

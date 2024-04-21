@@ -4,7 +4,7 @@
 using System.Security.Cryptography.X509Certificates;
 using System;
 using Microsoft.Identity.Client.Core;
-#if SUPPORTS_MIV2
+#if SUPPORTS_MTLS
 using Microsoft.Identity.Client.Platforms.netcore;
 #endif
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     public class KeyMaterialTests : TestBase
     {
         private readonly ILoggerAdapter _logger = new NullLogger();
-#if SUPPORTS_MIV2
+#if SUPPORTS_MTLS
         [TestMethod]
         public void GetOrCreateCertificateFromCryptoKeyInfo_NoKey_ReturnsNoCertificate()
         {
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             var provider = new ManagedIdentityCertificateProvider(_logger);
 
             // Act
-            ECDsaCng result = provider.GetCngKey();
+            ECDsa result = provider.GetCngKey();
 
             // Assert
             Assert.IsNull(result, "Expected no key to be returned.");

@@ -112,13 +112,32 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public ManagedIdentityApplicationBuilder WithClientCapabilities(IEnumerable<string> clientCapabilities)
         {
-            ValidateUseOfExperimentalFeature("WithClientCapabilities");
+            ValidateUseOfExperimentalFeature();
 
             if (clientCapabilities != null && clientCapabilities.Any())
             {
                 Config.ClientCapabilities = clientCapabilities;
             }
 
+            return this;
+        }
+
+        /// <summary>
+        /// Microsoft Identity specific OIDC extension that allows resource challenges to be resolved without interaction. 
+        /// Allows configuration of one or more client capabilities, e.g. "llt"
+        /// </summary>
+        /// <remarks>
+        /// MSAL will transform these into special claims request. See https://openid.net/specs/openid-connect-core-1_0-final.html#ClaimsParameter for
+        /// details on claim requests. This is an experimental API. The method signature may change in the future 
+        /// without involving a major version upgrade.
+        /// For more details see https://aka.ms/msal-net-claims-request
+        /// </remarks>
+        public ManagedIdentityApplicationBuilder WithProofOfPossession()
+        {
+            ValidateUseOfExperimentalFeature();
+
+            Config.ManagedIdentityPopSupported = true;
+            
             return this;
         }
 

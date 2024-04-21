@@ -134,6 +134,8 @@ namespace Microsoft.Identity.Client
         public const string BrokerRequiredForPop = "The request has Proof-of-Possession configured but does not have broker enabled. Broker is required to use Proof-of-Possession on public clients. Use IPublicClientApplication.IsProofOfPossessionSupportedByClient to ensure Proof-of-Possession can be performed before using WithProofOfPossession.";
         public const string NonceRequiredForPop = "The request has Proof-of-Possession configured for public clients but does not have a nonce provided. A nonce is required for Proof-of-Possession on public clients.";
         public const string AdfsNotSupportedWithBroker = "Broker does not support ADFS environments. If using Proof-of-Possession, use IPublicClientApplication.IsProofOfPossessionSupportedByClient to ensure Proof-of-Possession can be performed before calling WithProofOfPossession.";
+        public const string ResourceDoesNotSupportPop = "There is no support for Proof-of-Possession on the current platform or Azure Resource.";
+        public const string ResourceDoesNotSupportClaims = "There is no support for Client Capabilities on the current platform or Azure Resource.";
 
         public const string NullIntentReturnedFromBroker = "Broker returned a null intent. Check the Xamarin Android app settings and logs for more information. ";
         public const string NoAccountForLoginHint = "You are trying to acquire a token silently using a login hint. No account was found in the token cache having this login hint. ";

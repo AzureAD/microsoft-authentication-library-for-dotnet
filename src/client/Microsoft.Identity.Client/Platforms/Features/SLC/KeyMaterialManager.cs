@@ -98,11 +98,11 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                 }
 
                 // The cached certificate needs to be rotated or does not exist
-                ECDsaCng cngkey = GetCngKey();
+                ECDsa eCDsaKey = GetCngKey();
 
-                if (cngkey != null)
+                if (eCDsaKey != null)
                 {
-                    s_bindingCertificate = CreateCngCertificate(cngkey);
+                    s_bindingCertificate = CreateBindingCertificate(eCDsaKey);
                     _isInitialized = true;
                     return s_bindingCertificate;
                 }
@@ -138,28 +138,34 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         }
 
         /// <summary>
-        /// Initializes and retrieves the ECDsaCng key for Managed Identity.
+        /// Initializes and retrieves the cng key for Managed Identity.
         /// </summary>
         /// <returns>
-        /// The initialized ECDsaCng key if successful, otherwise null.
+        /// The initialized key if successful, otherwise null.
         /// </returns>
-        public ECDsaCng GetCngKey()
+        public ECDsa GetCngKey()
         {
             _logger.Verbose(() => "[Managed Identity] Initializing Cng Key.");
 
             // Try to get the key material from machine key
-            if (TryGetKeyMaterial(KeyProviderName, MachineKeyName, CngKeyOpenOptions.MachineKey, out ECDsaCng eCDsaCng))
+            if (TryGetKeyMaterial(KeyProviderName, MachineKeyName, CngKeyOpenOptions.MachineKey, out ECDsa ecdsaKey))
             {
                 _logger.Verbose(() => $"[Managed Identity] A machine key was found. Key Name : {MachineKeyName}. ");
-                return eCDsaCng;
+                return ecdsaKey;
             }
 
             // If machine key is not available, fall back to software key
-            if (TryGetKeyMaterial(KeyProviderName, SoftwareKeyName, CngKeyOpenOptions.None, out eCDsaCng))
+            if (TryGetKeyMaterial(KeyProviderName, SoftwareKeyName, CngKeyOpenOptions.None, out ecdsaKey))
             {
                 _logger.Verbose(() => $"[Managed Identity] A non-machine key was found. Key Name : {SoftwareKeyName}. ");
-                return eCDsaCng;
+                return ecdsaKey;
             }
+
+            _logger.Info("[Managed Identity] Machine / Software keys are not setup. " +
+                "Attempting to create a new key for Managed Identity.");
+
+            // Attempt to create a new key if none are available
+            //return CreateNewCngKey();
 
             s_cryptoKeyType = CryptoKeyType.None;
 
@@ -176,7 +182,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// <param name="keyProviderName">The name of the key provider.</param>
         /// <param name="keyName">The name of the key.</param>
         /// <param name="cngKeyOpenOptions">The options for opening the CNG key.</param>
-        /// <param name="eCDsaCng">The resulting ECDsaCng instance containing the key material.</param>
+        /// <param name="ecdsaKey">The resulting key material.</param>
         /// <returns>
         ///   <c>true</c> if the key material is successfully retrieved; otherwise, <c>false</c>.
         /// </returns>
@@ -184,7 +190,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             string keyProviderName,
             string keyName,
             CngKeyOpenOptions cngKeyOpenOptions,
-            out ECDsaCng eCDsaCng)
+            out ECDsa ecdsaKey)
         {
             try
             {
@@ -193,14 +199,10 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                 options |= CngKeyOpenOptions.Silent;
 
                 // Open the key with the specified options
-                using (CngKey cngKey = CngKey.Open(keyName, new CngProvider(keyProviderName), options))
-                {
-                    DetermineKeyType(cngKey);
-
-                    eCDsaCng = new ECDsaCng(cngKey);
-
-                    return true;
-                }
+                var cngKey = CngKey.Open(keyName, new CngProvider(keyProviderName), options);
+                ecdsaKey = new ECDsaCng(cngKey);
+                DetermineKeyType(cngKey);
+                return true;
             }
             catch (CryptographicException ex)
             {
@@ -217,7 +219,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                 }
             }
 
-            eCDsaCng = null;
+            ecdsaKey = null;
             return false;
         }
 
@@ -288,13 +290,13 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         }
 
         /// <summary>
-        /// Creates a binding certificate with a CNG key for use in Managed Identity scenarios.
+        /// Creates a binding certificate with a the key material for use in Managed Identity scenarios.
         /// </summary>
-        /// <param name="eCDsaCngKey">The CNG key used for creating the certificate.</param>
+        /// <param name="eCDsaKey">The key used for creating the certificate.</param>
         /// <returns>The created binding certificate.</returns>
-        private X509Certificate2 CreateCngCertificate(ECDsaCng eCDsaCngKey)
+        private X509Certificate2 CreateBindingCertificate(ECDsa eCDsaKey)
         {
-            string certSubjectname = eCDsaCngKey.Key.KeyName;
+            string certSubjectname = "ManagedIdentitySlcCertificate";
 
             try
             {
@@ -304,7 +306,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                     "with CNG key for credential endpoint.");
 
                     // Create a certificate request
-                    CertificateRequest request = CreateCertificateRequest(certSubjectname, eCDsaCngKey);
+                    CertificateRequest request = CreateCertificateRequest(certSubjectname, eCDsaKey);
 
                     // Create a self-signed X.509 certificate
                     DateTimeOffset startDate = DateTimeOffset.UtcNow;
@@ -313,16 +315,19 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                     //Create the self signed cert
                     X509Certificate2 selfSigned = request.CreateSelfSigned(startDate, endDate);
 
-                    //create the cert with just the public key
-                    X509Certificate2 publicKeyOnlyCertificate = new X509Certificate2(selfSigned.Export(X509ContentType.Cert));
+                    if (!selfSigned.HasPrivateKey)
+                    {
+                        _logger.Error("[Managed Identity] The ECDsa key does not have a private key.");
+                        throw new InvalidOperationException("The provided ECDsa key must include a private key.");
+                    }
+                    else
+                    {
+                        _logger.Info("[Managed Identity] The ECDsa Cert does have a private key. BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+                    }
 
-                    //now copy the private key to the cert
-                    //this is needed for mtls schannel to work with in-memory certificates
-                    X509Certificate2 authCertificate = AssociatePrivateKeyInfo(publicKeyOnlyCertificate, eCDsaCngKey);
+                    _logger.Verbose(() => $"[Managed Identity] Binding certificate (with cng key) created successfully. Has Private Key ? : {selfSigned.HasPrivateKey}");
 
-                    _logger.Verbose(() => $"[Managed Identity] Binding certificate (with cng key) created successfully. Has Private Key ? : {authCertificate.HasPrivateKey}");
-
-                    return authCertificate;
+                    return selfSigned;
                 }
             }
             catch (CryptographicException ex)
@@ -341,7 +346,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// <param name="subjectName">The subject name for the certificate (e.g., Common Name).</param>
         /// <param name="ecdsaKey">The ECDsa key to be associated with the certificate request.</param>
         /// <returns>The certificate request for the binding certificate.</returns>
-        private CertificateRequest CreateCertificateRequest(string subjectName, ECDsaCng ecdsaKey)
+        private CertificateRequest CreateCertificateRequest(string subjectName, ECDsa ecdsaKey)
         {
             CertificateRequest certificateRequest = null;
 
@@ -351,20 +356,6 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                     $"CN={subjectName}", // Common Name 
                     ecdsaKey, // ECDsa key
                     HashAlgorithmName.SHA256); // Hash algorithm for the certificate
-        }
-
-        /// <summary>
-        /// Associates the private key information with the provided public key-only certificate.
-        /// </summary>
-        /// <param name="publicKeyOnlyCertificate">The public key-only certificate.</param>
-        /// <param name="eCDsaCngKey">The ECDsa key used for associating the private key.</param>
-        /// <returns>The certificate with the private key information associated.</returns>
-        private X509Certificate2 AssociatePrivateKeyInfo(X509Certificate2 publicKeyOnlyCertificate, ECDsaCng eCDsaCngKey)
-        {
-            _logger.Verbose(() => "[Managed Identity] Associating private key with the binding certificate.");
-
-            // Copy the private key information to the public key-only certificate
-            return publicKeyOnlyCertificate.CopyWithPrivateKey(eCDsaCngKey);
         }
     }
 }

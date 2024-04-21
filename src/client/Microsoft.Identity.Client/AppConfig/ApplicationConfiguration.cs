@@ -131,7 +131,9 @@ namespace Microsoft.Identity.Client
 
         public X509Certificate2 ManagedIdentityClientCertificate { get; internal set; }
 
-#endregion
+        public bool ManagedIdentityPopSupported { get; set; } = false;
+
+        #endregion
 
         public bool IsConfidentialClient { get; }
         public bool IsPublicClient => !IsConfidentialClient && !IsManagedIdentity;

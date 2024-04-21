@@ -921,6 +921,19 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para>Provide a nonce when Proof-of-Possession is configured for public clients.
         /// </summary>
         public const string NonceRequiredForPopOnPCA = "nonce_required_for_pop_on_pca";
+
+        /// <summary>
+        /// <para>What happens?</para>The request has Proof-of-Possession configured but the platform does not support Proof-of-Possession.
+        /// <para>Mitigation</para>Remove the Proof-of-Possession API from the request.
+        /// </summary>
+        public const string PopNotSupportedOnMiResource = "mi_pop_not_supported_platform";
+
+        /// <summary>
+        /// <para>What happens?</para>The request has client capabilities configured but the platform does not support claims.
+        /// <para>Mitigation</para>Remove the Client Capabilities API from the request.
+        /// </summary>
+        public const string ClaimsNotSupportedOnMiResource = "mi_claims_not_supported_platform";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not been enabled for the application.
