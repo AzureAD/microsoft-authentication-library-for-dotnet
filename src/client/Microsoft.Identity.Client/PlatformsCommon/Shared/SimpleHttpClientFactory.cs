@@ -20,6 +20,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     {
         //Please see (https://aka.ms/msal-httpclient-info) for important information regarding the HttpClient.
         private static readonly ConcurrentDictionary<string, HttpClient> s_httpClient = new ConcurrentDictionary<string, HttpClient>();
+        private static readonly object s_cacheLock = new object();
 
         private static HttpClient CreateNonMtlsClient()
         {
@@ -36,12 +37,12 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private static HttpClient CreateMtlsHttpClient(X509Certificate2 bindingCertificate)
         {
             if (s_httpClient.Count > 1000)
-                s_httpClient.Clear();
+                CheckAndClearCache();
 
             //Create an HttpClientHandler and configure it to use the client certificate
             HttpClientHandler handler = new();
-            //To-Do need to refine this when Managed Identity V2 TFMs are defined
-#if SUPPORTS_MIV2
+            
+#if SUPPORTS_MTLS
             handler.ClientCertificates.Add(bindingCertificate);
 #endif
             var httpClient = new HttpClient(handler);
@@ -64,6 +65,17 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             string key = x509Certificate2.Thumbprint;
             return s_httpClient.GetOrAdd(key, CreateMtlsHttpClient(x509Certificate2));
+        }
+
+        private static void CheckAndClearCache()
+        {
+            lock (s_cacheLock)
+            {
+                if (s_httpClient.Count > 1000)
+                {
+                    s_httpClient.Clear();
+                }
+            }
         }
     }
 }

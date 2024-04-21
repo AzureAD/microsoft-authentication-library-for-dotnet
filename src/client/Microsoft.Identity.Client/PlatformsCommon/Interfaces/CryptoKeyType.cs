@@ -14,11 +14,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
     /// </summary>
     internal enum CryptoKeyType
     {
-        None,         // No specific crypto key type.
-        KeyGuard,     // KeyGuard-protected key.
-        Machine,      // Machine key.
-        User,         // User Key.
-        Ephemeral,    // Ephemeral (short-lived) key.
-        InMemory      // In-memory key.
+        None = 0,         // No specific crypto key type.
+        KeyGuard = 1,     // KeyGuard-protected key.
+        Machine = 2,      // Machine key.
+        User = 3,         // User Key.
+        Ephemeral = 4,    // Ephemeral (short-lived) key.
+        InMemory = 5     // In-memory key.
     }
 }

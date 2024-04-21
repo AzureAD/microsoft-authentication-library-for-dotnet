@@ -126,7 +126,7 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
     <Compile Include="$(PathToMsalSources)\Platforms\netdesktop\**\*.cs" LinkBase="Platforms\netdesktop" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
