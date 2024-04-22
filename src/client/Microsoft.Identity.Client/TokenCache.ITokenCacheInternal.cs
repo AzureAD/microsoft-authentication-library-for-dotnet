@@ -336,7 +336,7 @@ namespace Microsoft.Identity.Client
             }
 
             if (ServiceBundle.PlatformProxy.LegacyCacheRequiresSerialization &&
-               !(this as ITokenCacheInternal).IsExternalSerializationConfiguredByUser())
+               !(this as ITokenCacheInternal).IsAppSubscribedToSerializationEvents())
             {
                 // serialization is not configured but is required
                 return false;
@@ -348,7 +348,7 @@ namespace Microsoft.Identity.Client
                 return false;
             }
 
-            if (requestParams.AuthorityInfo.AuthorityType == AuthorityType.B2C)
+            if (requestParams.AuthorityInfo.AuthorityType != AuthorityType.Aad)
             {
                 // ADAL did not support B2C
                 return false;

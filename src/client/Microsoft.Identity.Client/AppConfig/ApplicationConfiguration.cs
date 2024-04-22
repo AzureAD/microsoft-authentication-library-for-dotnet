@@ -61,7 +61,6 @@ namespace Microsoft.Identity.Client
 
         public Func<object> ParentActivityOrWindowFunc { get; internal set; }
 
-        public bool UseCorporateNetwork { get; internal set; }
         public string IosKeychainSecurityGroup { get; internal set; }
 
         public bool IsBrokerEnabled { get; internal set; }
@@ -70,9 +69,6 @@ namespace Microsoft.Identity.Client
         /// Applicable to only public client applications to enforce SSO policy with embedded webview.
         /// </summary>
         public bool IsWebviewSsoPolicyEnabled { get; internal set; }
-
-        // Legacy options for UWP. .NET broker options are in BrokerOptions
-        public WindowsBrokerOptions UwpBrokerOptions { get; set; } 
 
         public BrokerOptions BrokerOptions { get; set; }
 

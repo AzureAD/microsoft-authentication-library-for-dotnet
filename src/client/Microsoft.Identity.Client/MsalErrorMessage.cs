@@ -188,12 +188,6 @@ namespace Microsoft.Identity.Client
         public const string UpnRequiredForAuthorityValidation = "UPN is required for ADFS authority validation. ";
         public const string CannotFindTheAuthEndpoint = "Cannot find the auth endpoint. ";
 
-        public const string UapCannotFindUpn =
-           "Cannot find the user logged into Windows, but found a domain the name. Possible cause: the UWP application does not request the Enterprise Authentication capability. ";
-
-        public const string UapCannotFindDomainUser =
-            "Cannot find the user logged into Windows. Possible causes: the application does not request the User Account Information, Enterprise Authentication and Private Networks (Client & Server) capabilities or the user is not AD or AAD joined. ";
-
         public const string PlatformNotSupported = "Platform Not Supported";
 
         public const string FederatedServiceReturnedErrorTemplate = "Federated service at {0} returned error: {1} ";

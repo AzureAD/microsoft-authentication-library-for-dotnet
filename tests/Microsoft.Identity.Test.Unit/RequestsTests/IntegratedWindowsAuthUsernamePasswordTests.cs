@@ -415,7 +415,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
-#if !WINDOWS_APP // U/P flow not enabled on UWP
+
         [TestMethod]
         [DeploymentItem(@"Resources\TestMex.xml")]
         [DeploymentItem(@"Resources\WsTrustResponse.xml")]
@@ -851,6 +851,5 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
             }
         }
-#endif
     }
 }

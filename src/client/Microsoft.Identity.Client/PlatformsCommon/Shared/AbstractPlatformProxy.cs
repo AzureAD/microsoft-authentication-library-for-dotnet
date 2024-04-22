@@ -6,7 +6,6 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
 #if SUPPORTS_OTEL
@@ -191,11 +190,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #endif
         }
 
-        public virtual ICacheSerializationProvider CreateTokenCacheBlobStorage()
-        {
-            return null;
-        }
-
         public virtual IFeatureFlags GetFeatureFlags()
         {
             return OverloadFeatureFlags ?? CreateFeatureFlags();
@@ -241,7 +235,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         /// <summary>
-        /// On Android, iOS and UWP, MSAL will save the legacy ADAL cache in a known location.
+        /// On Android and iOS, MSAL will save the legacy ADAL cache in a known location.
         /// On other platforms, the app developer must use the serialization callbacks
         /// </summary>
         public virtual bool LegacyCacheRequiresSerialization => true;

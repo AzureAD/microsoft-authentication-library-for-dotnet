@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
-#if !ANDROID && !iOS && !WINDOWS_APP // custom token cache serialization not available 
+#if !ANDROID && !iOS  // custom token cache serialization not available 
     [TestClass]
     public class LoadingProjectsTests
     {

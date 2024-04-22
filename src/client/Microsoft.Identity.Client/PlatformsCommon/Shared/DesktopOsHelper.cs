@@ -6,7 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Identity.Client.Utils;
 
-#if SUPPORTS_WIN32 && !WINDOWS_APP
+#if SUPPORTS_WIN32 
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 #endif
 
@@ -21,9 +21,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public static bool IsWindows()
         {
-#if WINDOWS_APP
-        return true;
-#else
 
 #if NETFRAMEWORK
             return Environment.OSVersion.Platform == PlatformID.Win32NT;
@@ -32,23 +29,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #else
             return false;
 #endif
-
-#endif
-        }
-
-        public static bool IsWin32()
-        {
-#if WINDOWS_APP
-            return false;
-#else
-
-            return IsWindows();
-#endif
         }
 
         public static bool IsLinux()
         {
-#if __MOBILE__ || WINDOWS_UWP
+#if __MOBILE__ 
             return false;
 #elif NETFRAMEWORK
             return Environment.OSVersion.Platform == PlatformID.Unix;
@@ -63,7 +48,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return true;
 #elif NETFRAMEWORK
             return Environment.OSVersion.Platform == PlatformID.MacOSX;
-#elif !(__MOBILE__ || WINDOWS_UWP)
+#elif !__MOBILE__ 
             return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 #else
             return false;
@@ -77,9 +62,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         /// <returns>Returns <c>true</c> if the Windows Version has WAM support</returns>
         private static bool IsWamSupportedOSInternal()
         {
-#if WINDOWS_APP
-            return true;
-#elif SUPPORTS_WIN32
+#if SUPPORTS_WIN32
             if (IsWindows() && Win32VersionApi.IsWamSupportedOs())
             {
                 return true;

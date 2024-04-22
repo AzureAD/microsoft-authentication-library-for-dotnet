@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Cache.CacheImpl;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
@@ -41,12 +40,7 @@ namespace Microsoft.Identity.Client
         internal ITokenCacheAccessor Accessor { get; set; }
 
         internal IServiceBundle ServiceBundle { get; }
-        internal ILegacyCachePersistence LegacyCachePersistence { get; set; }
-
-        /// <summary>
-        /// Set to true on some platforms (UWP) where MSAL adds a serializer on its own.
-        /// </summary>
-        internal bool UsesDefaultSerialization { get; set; } = false;
+        internal ILegacyCachePersistence LegacyCachePersistence { get; }
 
         internal string ClientId => ServiceBundle.Config.ClientId;
 
@@ -66,11 +60,14 @@ namespace Microsoft.Identity.Client
         /// </summary>
         [Obsolete("The recommended way to get a cache is by using IClientApplicationBase.UserTokenCache or IClientApplicationBase.AppTokenCache")]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public TokenCache() : this((IServiceBundle)null, false, null)
+        public TokenCache() : this((IServiceBundle)null, false)
         {
         }
 
-        internal TokenCache(IServiceBundle serviceBundle, bool isApplicationTokenCache, ICacheSerializationProvider optionalDefaultSerializer = null)
+        internal TokenCache(
+            IServiceBundle serviceBundle, 
+            bool isApplicationTokenCache,
+            ILegacyCachePersistence legacyCachePersistenceForTest=null)
         {
             if (serviceBundle == null)
                 throw new ArgumentNullException(nameof(serviceBundle));
@@ -82,10 +79,7 @@ namespace Microsoft.Identity.Client
             Accessor = proxy.CreateTokenCacheAccessor(serviceBundle.Config.AccessorOptions, isApplicationTokenCache);
             _featureFlags = proxy.GetFeatureFlags();
 
-            UsesDefaultSerialization = optionalDefaultSerializer != null;
-            optionalDefaultSerializer?.Initialize(this);
-
-            LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
+            LegacyCachePersistence = legacyCachePersistenceForTest ?? proxy.CreateLegacyCachePersistence();
 
 #if iOS
             SetIosKeychainSecurityGroup(serviceBundle.Config.IosKeychainSecurityGroup);
@@ -95,20 +89,7 @@ namespace Microsoft.Identity.Client
 
             // Must happen last, this code can access things like _accessor and such above.
             ServiceBundle = serviceBundle;
-        }
-
-        /// <summary>
-        /// This method is so we can inject test ILegacyCachePersistence...
-        /// </summary>
-        internal TokenCache(
-            IServiceBundle serviceBundle,
-            ILegacyCachePersistence legacyCachePersistenceForTest,
-            bool isApplicationTokenCache,
-            ICacheSerializationProvider optionalDefaultCacheSerializer = null)
-            : this(serviceBundle, isApplicationTokenCache, optionalDefaultCacheSerializer)
-        {
-            LegacyCachePersistence = legacyCachePersistenceForTest;
-        }
+        }      
 
         /// <summary>
         /// Sets the security group to be used with the iOS Keychain. This function should not be used by external customers. It <see href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2121">will be removed</see> in a future version of MSAL.

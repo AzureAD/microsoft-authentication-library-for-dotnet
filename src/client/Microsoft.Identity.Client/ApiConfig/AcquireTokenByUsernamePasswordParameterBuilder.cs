@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client
         /// <item><description>Broker is required to use Proof-of-Possession on public clients.</description></item>
         /// </list>
         /// </remarks>
-#if iOS || ANDROID || WINDOWS_UWP
+#if iOS || ANDROID 
         [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
         public AcquireTokenByUsernamePasswordParameterBuilder WithProofOfPossession(string nonce, HttpMethod httpMethod, Uri requestUri)
