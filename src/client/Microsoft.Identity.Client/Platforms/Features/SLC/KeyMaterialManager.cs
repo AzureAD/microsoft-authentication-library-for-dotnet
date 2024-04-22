@@ -5,6 +5,7 @@ using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Platforms.Windows;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Platforms.netcore
@@ -18,16 +19,14 @@ namespace Microsoft.Identity.Client.Platforms.netcore
     /// </summary>
     internal class ManagedIdentityCertificateProvider : IKeyMaterialManager
     {
-        // The name of the key guard isolation property
-        private const string IsKeyGuardEnabledProperty = "Virtual Iso";
-
         // Field to store the current crypto key type
         private static CryptoKeyType s_cryptoKeyType = CryptoKeyType.None;
 
-        // Constants specifying the names for the key storage provider and key names
+        // Name for the key storage provider and key names on Windows
         private const string KeyProviderName = "Microsoft Software Key Storage Provider";
-        private const string MachineKeyName = "ManagedIdentityCredentialKey";
-        private const string SoftwareKeyName = "ResourceBindingKey";
+
+        // Subject name for the binding certificate
+        private const string CertSubjectname = "ManagedIdentitySlcCertificate";
 
         // Cache the binding certificate across instances
         private static X509Certificate2 s_bindingCertificate;
@@ -37,6 +36,8 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         // Logger instance for capturing log information
         private readonly ILoggerAdapter _logger;
+
+        private readonly KeyGuardManager _keyGuardManager; // Use KeyGuardManager
 
         private bool _isInitialized = false;
 
@@ -72,6 +73,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         public ManagedIdentityCertificateProvider(ILoggerAdapter logger)
         {
             _logger = logger;
+            _keyGuardManager = new KeyGuardManager(logger); 
         }
 
         /// <summary>
@@ -98,7 +100,8 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                 }
 
                 // The cached certificate needs to be rotated or does not exist
-                ECDsa eCDsaKey = GetCngKey();
+                ECDsa eCDsaKey = _keyGuardManager.LoadCngKeyWithProvider(KeyProviderName);
+                s_cryptoKeyType = _keyGuardManager.CryptoKeyType;
 
                 if (eCDsaKey != null)
                 {
@@ -138,166 +141,12 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         }
 
         /// <summary>
-        /// Initializes and retrieves the cng key for Managed Identity.
-        /// </summary>
-        /// <returns>
-        /// The initialized key if successful, otherwise null.
-        /// </returns>
-        public ECDsa GetCngKey()
-        {
-            _logger.Verbose(() => "[Managed Identity] Initializing Cng Key.");
-
-            // Try to get the key material from machine key
-            if (TryGetKeyMaterial(KeyProviderName, MachineKeyName, CngKeyOpenOptions.MachineKey, out ECDsa ecdsaKey))
-            {
-                _logger.Verbose(() => $"[Managed Identity] A machine key was found. Key Name : {MachineKeyName}. ");
-                return ecdsaKey;
-            }
-
-            // If machine key is not available, fall back to software key
-            if (TryGetKeyMaterial(KeyProviderName, SoftwareKeyName, CngKeyOpenOptions.None, out ecdsaKey))
-            {
-                _logger.Verbose(() => $"[Managed Identity] A non-machine key was found. Key Name : {SoftwareKeyName}. ");
-                return ecdsaKey;
-            }
-
-            _logger.Info("[Managed Identity] Machine / Software keys are not setup. " +
-                "Attempting to create a new key for Managed Identity.");
-
-            // Attempt to create a new key if none are available
-            //return CreateNewCngKey();
-
-            s_cryptoKeyType = CryptoKeyType.None;
-
-            // Both attempts failed, return null and do not alter the crypto key so it remains as none
-            // Now we should follow the legacy managed identity flow
-            _logger.Info("[Managed Identity] Machine / Software keys are not setup. " +
-                "Proceed to check for legacy managed identity sources.");
-            return null;
-        }
-
-        /// <summary>
-        /// Attempts to retrieve cryptographic key material for a specified key name and provider.
-        /// </summary>
-        /// <param name="keyProviderName">The name of the key provider.</param>
-        /// <param name="keyName">The name of the key.</param>
-        /// <param name="cngKeyOpenOptions">The options for opening the CNG key.</param>
-        /// <param name="ecdsaKey">The resulting key material.</param>
-        /// <returns>
-        ///   <c>true</c> if the key material is successfully retrieved; otherwise, <c>false</c>.
-        /// </returns>
-        public bool TryGetKeyMaterial(
-            string keyProviderName,
-            string keyName,
-            CngKeyOpenOptions cngKeyOpenOptions,
-            out ECDsa ecdsaKey)
-        {
-            try
-            {
-                // Specify the optional flags for opening the key
-                CngKeyOpenOptions options = cngKeyOpenOptions;
-                options |= CngKeyOpenOptions.Silent;
-
-                // Open the key with the specified options
-                var cngKey = CngKey.Open(keyName, new CngProvider(keyProviderName), options);
-                ecdsaKey = new ECDsaCng(cngKey);
-                DetermineKeyType(cngKey);
-                return true;
-            }
-            catch (CryptographicException ex)
-            {
-                // Check if the error message contains "Keyset does not exist"
-                if (ex.Message.IndexOf("Keyset does not exist", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    _logger.Info($"[Managed Identity] Key with name : {keyName} does not exist.");
-                }
-                else
-                {
-                    // Handle other cryptographic errors
-                    _logger.Verbose(() => $"[Managed Identity] Exception caught during key operations. " +
-                    $"Error Mesage : {ex.Message}.");
-                }
-            }
-
-            ecdsaKey = null;
-            return false;
-        }
-
-        /// <summary>
-        /// Checks if the specified CNG key is protected by KeyGuard.
-        /// </summary>
-        /// <param name="cngKey">The CNG key to check for KeyGuard protection.</param>
-        /// <returns>
-        ///   <c>true</c> if the key is protected by KeyGuard; otherwise, <c>false</c>.
-        /// </returns>
-        public bool IsKeyGuardProtected(CngKey cngKey)
-        {
-            //Check to see if the KeyGuard Isolation flag was set in the key
-            if (!cngKey.HasProperty(IsKeyGuardEnabledProperty, CngPropertyOptions.None))
-            {
-                return false;
-            }
-
-            //if key guard isolation flag exist, check for the key guard property value existence
-            CngProperty property = cngKey.GetProperty(IsKeyGuardEnabledProperty, CngPropertyOptions.None);
-
-            // Retrieve the key guard property value
-            var keyGuardProperty = property.GetValue();
-
-            // Check if the key guard property exists and has a non-zero value
-            if (keyGuardProperty != null && keyGuardProperty.Length > 0)
-            {
-                if (keyGuardProperty[0] != 0)
-                {
-                    // KeyGuard key is available; set the cryptographic key type accordingly
-                    _logger.Info("[Managed Identity] KeyGuard key is available. ");
-                    s_cryptoKeyType = CryptoKeyType.KeyGuard;
-                    return true;
-                }
-            }
-
-            // KeyGuard key is not available
-            return false;
-        }
-
-        /// <summary>
-        /// Determines the cryptographic key type based on the characteristics of the specified CNG key.
-        /// </summary>
-        /// <param name="cngKey">The CNG key for which to determine the cryptographic key type.</param>
-        private void DetermineKeyType(CngKey cngKey)
-        {
-            switch (true)
-            {
-                case var _ when cngKey.IsMachineKey:
-                    s_cryptoKeyType = CryptoKeyType.Machine;
-                    // Determine whether the key is KeyGuard protected
-                    _ = IsKeyGuardProtected(cngKey);
-                    break;
-
-                case var _ when !cngKey.IsEphemeral && !cngKey.IsMachineKey:
-                    s_cryptoKeyType = CryptoKeyType.User;
-                    break;
-
-                case var _ when cngKey.IsEphemeral:
-                    s_cryptoKeyType = CryptoKeyType.Ephemeral;
-                    break;
-
-                default:
-                    // Handle other cases if needed
-                    s_cryptoKeyType = CryptoKeyType.InMemory;
-                    break;
-            }
-        }
-
-        /// <summary>
         /// Creates a binding certificate with a the key material for use in Managed Identity scenarios.
         /// </summary>
         /// <param name="eCDsaKey">The key used for creating the certificate.</param>
         /// <returns>The created binding certificate.</returns>
         private X509Certificate2 CreateBindingCertificate(ECDsa eCDsaKey)
         {
-            string certSubjectname = "ManagedIdentitySlcCertificate";
-
             try
             {
                 lock (_keyInfoLock) // Lock to ensure thread safety
@@ -306,7 +155,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
                     "with CNG key for credential endpoint.");
 
                     // Create a certificate request
-                    CertificateRequest request = CreateCertificateRequest(certSubjectname, eCDsaKey);
+                    CertificateRequest request = CreateCertificateRequest(CertSubjectname, eCDsaKey);
 
                     // Create a self-signed X.509 certificate
                     DateTimeOffset startDate = DateTimeOffset.UtcNow;
@@ -317,12 +166,8 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
                     if (!selfSigned.HasPrivateKey)
                     {
-                        _logger.Error("[Managed Identity] The ECDsa key does not have a private key.");
-                        throw new InvalidOperationException("The provided ECDsa key must include a private key.");
-                    }
-                    else
-                    {
-                        _logger.Info("[Managed Identity] The ECDsa Cert does have a private key. BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+                        _logger.Error("[Managed Identity] The Certificate is missing the private key.");
+                        throw new InvalidOperationException("The MTLS Certificate must include a private key.");
                     }
 
                     _logger.Verbose(() => $"[Managed Identity] Binding certificate (with cng key) created successfully. Has Private Key ? : {selfSigned.HasPrivateKey}");

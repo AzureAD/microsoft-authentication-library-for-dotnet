@@ -25,8 +25,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetDesktop472);$(TargetFrameworkNetStandard);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Mac);$(TargetFrameworkNet6);</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkIos);$(TargetFrameworkAndroid9);$(TargetFrameworkAndroid10);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6Mac);$(TargetFrameworkNet6)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop462);$(TargetFrameworkNetDesktop472);$(TargetFrameworkNetStandard);$(TargetFrameworkUap);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6);</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNet6Ios);$(TargetFrameworkNet6Android);$(TargetFrameworkNet6)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux')) Or '$(NetCoreOnly)' !='' ">$(TargetFrameworkNetStandard);$(TargetFrameworkNet6)</TargetFrameworks>
   </PropertyGroup>
 
@@ -71,10 +71,6 @@
     <AndroidResgenClass>Resource</AndroidResgenClass>
     <!-- Ensures that the Resources.designer.cs do not end up in the dll, see #1449 -->
     <AndroidUseIntermediateDesignerFile>false</AndroidUseIntermediateDesignerFile>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkAndroid10)'">
-    <!-- Corresponds to API level 31 -->
-    <TargetFrameworkVersion>v12.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
     <!-- These are for MSAL json/* build infra -->
@@ -126,6 +122,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\SLC\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Windows\**\*.cs" />
 
     <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
@@ -149,6 +146,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Windows\**\*.cs" />
 
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -254,5 +252,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Platforms\Windows\" />
   </ItemGroup>
 </Project>
