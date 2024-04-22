@@ -45,7 +45,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Allow the Windows broker to list Work and School accounts as part of the <see cref="ClientApplicationBase.GetAccountsAsync()"/>
         /// </summary>
-        /// <remarks>On UWP, accounts are not listed due to privacy concerns</remarks>
         public bool ListWindowsWorkAndSchoolAccounts { get; set; } = false;
 
         /// <summary>

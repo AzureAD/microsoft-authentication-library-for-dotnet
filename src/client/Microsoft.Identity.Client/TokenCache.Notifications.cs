@@ -35,12 +35,6 @@ namespace Microsoft.Identity.Client
                 AsyncBeforeAccess != null || AsyncAfterAccess != null || AsyncBeforeWrite != null;
         }
 
-        bool ITokenCacheInternal.IsExternalSerializationConfiguredByUser()
-        {
-            return !this.UsesDefaultSerialization &&
-                (this as ITokenCacheInternal).IsAppSubscribedToSerializationEvents();
-        }
-
         async Task ITokenCacheInternal.OnAfterAccessAsync(TokenCacheNotificationArgs args)
         {
             AfterAccess?.Invoke(args);
@@ -90,7 +84,6 @@ namespace Microsoft.Identity.Client
         public void SetBeforeAccess(TokenCacheCallback beforeAccess)
         {
             Validate();
-            ResetDefaultDelegates();
             BeforeAccess = beforeAccess;
         }
 
@@ -109,7 +102,6 @@ namespace Microsoft.Identity.Client
         public void SetAfterAccess(TokenCacheCallback afterAccess)
         {
             Validate();
-            ResetDefaultDelegates();
             AfterAccess = afterAccess;
         }
 
@@ -125,7 +117,6 @@ namespace Microsoft.Identity.Client
         public void SetBeforeWrite(TokenCacheCallback beforeWrite)
         {
             Validate();
-            ResetDefaultDelegates();
             BeforeWrite = beforeWrite;
         }
 
@@ -139,7 +130,6 @@ namespace Microsoft.Identity.Client
         public void SetBeforeAccessAsync(Func<TokenCacheNotificationArgs, Task> beforeAccess)
         {
             Validate();
-            ResetDefaultDelegates();
             AsyncBeforeAccess = beforeAccess;
         }
 
@@ -153,7 +143,6 @@ namespace Microsoft.Identity.Client
         public void SetAfterAccessAsync(Func<TokenCacheNotificationArgs, Task> afterAccess)
         {
             Validate();
-            ResetDefaultDelegates();
             AsyncAfterAccess = afterAccess;
         }
 
@@ -167,7 +156,6 @@ namespace Microsoft.Identity.Client
         public void SetBeforeWriteAsync(Func<TokenCacheNotificationArgs, Task> beforeWrite)
         {
             Validate();
-            ResetDefaultDelegates();
             AsyncBeforeWrite = beforeWrite;
         }
 
@@ -186,23 +174,6 @@ namespace Microsoft.Identity.Client
             "On mobile platforms, MSAL.NET implements a secure and performant storage mechanism. " +
             "For more details about custom token cache serialization, visit https://aka.ms/msal-net-serialization");
 #endif
-        }
-
-        // In some cases MSAL brings its own serializer (UWP, Confidential Client App cache)
-        // so reset them all if the user customizes the serializer
-        private void ResetDefaultDelegates()
-        {
-            if (UsesDefaultSerialization)
-            {
-                BeforeAccess = null;
-                AfterAccess = null;
-                BeforeWrite = null;
-
-                AsyncBeforeAccess = null;
-                AsyncAfterAccess = null;
-                AsyncBeforeWrite = null;
-                UsesDefaultSerialization = false;
-            }
         }
     }
 }

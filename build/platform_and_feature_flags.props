@@ -8,9 +8,6 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6)' or '$(TargetFramework)' == '$(TargetFrameworkNetDesktop462)' or '$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);SUPPORTS_OTEL;</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
-    <DefineConstants>$(DefineConstants);WINDOWS_APP;SUPPORTS_BROKER;SUPPORTS_CUSTOM_CACHE</DefineConstants>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Android)'">
     <DefineConstants>$(DefineConstants);ANDROID;SUPPORTS_BROKER</DefineConstants>
   </PropertyGroup>

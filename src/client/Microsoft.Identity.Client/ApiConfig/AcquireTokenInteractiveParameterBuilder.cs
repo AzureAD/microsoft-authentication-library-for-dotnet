@@ -88,8 +88,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="useEmbeddedWebView">If <c>true</c>, will use an embedded web browser,
         /// otherwise will attempt to use a system web browser. The default depends on the platform:
-        /// <c>false</c> for iOS and Android, and <c>true</c> for .NET Framework,
-        /// and UWP</param>
+        /// <c>false</c> for iOS and Android, and <c>true</c> for .NET Framework</param>
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithUseEmbeddedWebView(bool useEmbeddedWebView)
         {
@@ -101,16 +100,13 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
-        // Remark: Default browser WebUI is not available on mobile (Android, UWP), but allow it at runtime
+        // Remark: Default browser WebUI is not available on mobile, but allow it at runtime
         // to avoid MissingMethodException
         /// <summary>
         /// Specifies options for using the system OS browser handle interactive authentication.
         /// </summary>
         /// <param name="options">Data object with options</param>
         /// <returns>The builder to chain the .With methods</returns>
-#if WINDOWS_APP
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)] 
-#endif
         public AcquireTokenInteractiveParameterBuilder WithSystemWebViewOptions(SystemWebViewOptions options)
         {
             SystemWebViewOptions.ValidatePlatformAvailability();
@@ -358,7 +354,7 @@ namespace Microsoft.Identity.Client
         /// <item><description>Broker is required to use Proof-of-Possession on public clients.</description></item>
         /// </list>
         /// </remarks>
-#if iOS || ANDROID || WINDOWS_UWP
+#if iOS || ANDROID 
         [EditorBrowsable(EditorBrowsableState.Never)]
 #endif
         public AcquireTokenInteractiveParameterBuilder WithProofOfPossession(string nonce, HttpMethod httpMethod, Uri requestUri)
