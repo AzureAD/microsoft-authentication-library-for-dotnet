@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1713518985935,
+  "lastUpdate": 1713820500922,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -4850,6 +4850,42 @@ window.BENCHMARK_DATA = {
             "value": 329920.9583333333,
             "unit": "ns",
             "range": "± 8276.573358788393"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "26199abff67559553954bd389c22e280fe77d200",
+          "message": "Remove UWP (#4707)\n\n* Attempt\r\n\r\n* Adress PR comments\r\n\r\n* Remove Xamarin support\r\n\r\n* address CA\r\n\r\n* PR comments\r\n\r\n* Rebase fixes\r\n\r\n* Attempt\r\n\r\n* Adress PR comments\r\n\r\n* Remove Xamarin support\r\n\r\n* Remove UWP - simple removal\r\n\r\n* Remove \"blob storage\" abstrction that only UWP uses\r\n\r\n* Address PR comments\r\n\r\n* PR\r\n\r\n* address comments\r\n\r\n* Update src/Directory.Build.props\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* 1\r\n\r\n* fix\r\n\r\n* f\r\n\r\n---------\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-04-22T22:07:38+01:00",
+          "tree_id": "2598b14b8a33b7c378cab8e6635793c66aa06340",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/26199abff67559553954bd389c22e280fe77d200"
+        },
+        "date": 1713820496690,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 256355.5,
+            "unit": "ns",
+            "range": "± 3357.320079376498"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 370008.5714285714,
+            "unit": "ns",
+            "range": "± 4175.833637901368"
           }
         ]
       }
