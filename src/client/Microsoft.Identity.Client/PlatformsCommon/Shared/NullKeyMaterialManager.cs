@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -25,5 +26,15 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public X509Certificate2 BindingCertificate => null;
         CryptoKeyType IKeyMaterialManager.CryptoKeyType => CryptoKeyType.None;
+
+        public X509Certificate2 GetOrCreateCertificateFromCryptoKeyInfo()
+        {
+            return null;
+        }
+
+        public ECDsa GetCngKey()
+        {
+            return null;
+        }
     }
 }

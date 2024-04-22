@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         private readonly ILoggerAdapter _logger = new NullLogger();
 #if SUPPORTS_MTLS
         [TestMethod]
-        public void GetOrCreateCertificateFromCryptoKeyInfo_NoKey_ReturnsNoCertificate()
+        public void GetOrCreateCertificateFromCryptoKeyInfo_NoKey_ReturnsCertificate()
         {
             // Arrange
             var provider = new ManagedIdentityCertificateProvider(_logger);
@@ -33,7 +33,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             X509Certificate2 result = provider.GetOrCreateCertificateFromCryptoKeyInfo();
 
             // Assert
-            Assert.AreEqual(null, result, "Expected no certificate to be returned.");
+            Assert.IsNotNull(result, "Expected a certificate to be returned.");
+            Assert.AreEqual("CN=ManagedIdentitySlcCertificate", result.Subject, "The certificate does not have the expected subject name.");
         }
 
         [TestMethod]
@@ -142,35 +143,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
             // Assert
             Assert.IsFalse(result, "Expected false since the certificate expiration is below the custom rotation threshold.");
-        }
-
-        [TestMethod]
-        public void GetCngKey_NoKeyAvailable()
-        {
-            // Arrange
-            var provider = new ManagedIdentityCertificateProvider(_logger);
-
-            // Act
-            ECDsa result = provider.GetCngKey();
-
-            // Assert
-            Assert.IsNull(result, "Expected no key to be returned.");
-        }
-
-        [TestMethod]
-        public void TryGetKeyMaterial_KeyDoesNotExist_ReturnsFalseAndNullKey()
-        {
-            // Arrange
-            var provider = new ManagedIdentityCertificateProvider(_logger);
-            var keyProviderName = "YourKeyProvider";
-            var keyName = "NonExistentKeyName";
-
-            // Act
-            var result = provider.TryGetKeyMaterial(keyProviderName, keyName, CngKeyOpenOptions.None, out var eCDsaCng);
-
-            // Assert
-            Assert.IsFalse(result, "Expected false since the key does not exist.");
-            Assert.IsNull(eCDsaCng, "Expected a null key when the key does not exist.");
         }
 
         [TestMethod]

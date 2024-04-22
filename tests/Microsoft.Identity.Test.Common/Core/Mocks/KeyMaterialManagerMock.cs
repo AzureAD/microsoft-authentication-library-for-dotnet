@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
@@ -31,5 +32,15 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         /// Gets the type of cryptographic key used.
         /// </summary>
         public CryptoKeyType CryptoKeyType { get; }
+
+        public ECDsa GetCngKey()
+        {
+            return null;
+        }
+
+        public X509Certificate2 GetOrCreateCertificateFromCryptoKeyInfo()
+        {
+            return null;
+        }
     }
 }

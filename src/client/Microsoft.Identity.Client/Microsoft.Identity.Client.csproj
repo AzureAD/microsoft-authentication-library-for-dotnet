@@ -108,6 +108,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\OpenTelemetry\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\SLC\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Windows\**\*.cs" />
 
     <!--System.Text.Json replaces internal NewtonSoft for NET 6-->
     <Compile Remove="$(PathToMsalSources)\json\**\*.*" />
@@ -131,6 +132,7 @@
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DefaultOSBrowser\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\Windows\**\*.cs" />
 
     <Reference Include="System" />
     <Reference Include="System.Core" />

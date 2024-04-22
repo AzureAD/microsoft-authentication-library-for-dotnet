@@ -118,8 +118,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 var baseUri = new Uri(credentialResponse.RegionalTokenUrl);
                 var tokenUrl = new Uri(baseUri, $"{credentialResponse.TenantId}/oauth2/v2.0/token");
 
-                //tokenUrl = new Uri("https://mtlsauth.microsoft.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c/oauth2/v2.0/token");
-
                 logger.Verbose(() => $"[CredentialBasedMsiAuthRequest] Token endpoint : { tokenUrl }.");
 
                 OAuth2Client client = CreateClientRequest(
