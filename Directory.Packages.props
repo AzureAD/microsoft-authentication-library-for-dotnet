@@ -4,7 +4,7 @@
     <!-- Version of the Microsoft.Identity.Client.NativeInterop package. -->
     <MSALRuntimeNativeInteropVersion>0.16.0</MSALRuntimeNativeInteropVersion>
     <!-- Version of MSAL if not defined by the CI-->
-    <MsalInternalVersion>4.51.0</MsalInternalVersion>
+    <MsalInternalVersion>4.61.0</MsalInternalVersion>
   </PropertyGroup>
   <!-- Add packages, then highlight all lines and go to Edit > Advanced > Sort Lines -->
   <ItemGroup>
@@ -29,7 +29,6 @@
     <PackageVersion Include="System.ServiceModel.Security" Version="4.5.3" />
     <PackageVersion Include="System.Xml.XDocument" Version="4.3.0" />
     <PackageVersion Include="System.Xml.XmlDocument" Version="4.3.0" />
-    <PackageVersion Include="Xamarin.Android.Support.CustomTabs" Version="28.0.0.3" />
     <PackageVersion Include="Xamarin.AndroidX.Browser" Version="1.4.0" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
@@ -80,6 +79,5 @@
     <PackageVersion Include="System.Threading.Thread" Version="4.3.0" />
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
     <PackageVersion Include="System.Windows.Forms" Version="4.0.0" />
-    <PackageVersion Include="Xamarin.UITest" Version="3.2.8" />
   </ItemGroup>
 </Project>

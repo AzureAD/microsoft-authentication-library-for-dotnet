@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client
         public const string ResourceDoesNotSupportPop = "There is no support for Proof-of-Possession on the current platform or Azure Resource.";
         public const string ResourceDoesNotSupportClaims = "There is no support for Client Capabilities on the current platform or Azure Resource.";
 
-        public const string NullIntentReturnedFromBroker = "Broker returned a null intent. Check the Xamarin Android app settings and logs for more information. ";
+        public const string NullIntentReturnedFromBroker = "Broker returned a null intent. Check the Android app settings and logs for more information. ";
         public const string NoAccountForLoginHint = "You are trying to acquire a token silently using a login hint. No account was found in the token cache having this login hint. ";
         public const string MultipleAccountsForLoginHint = "You are trying to acquire a token silently using a login hint. Multiple accounts were found in the token cache having this login hint. Please choose an account manually an pass it in to AcquireTokenSilently. ";
 
@@ -234,7 +234,7 @@ namespace Microsoft.Identity.Client
         public const string ClientApplicationBaseExecutorNotImplemented =
             "ClientApplicationBase implementation does not implement IClientApplicationBaseExecutor. ";
 
-        public const string ActivityRequiredForParentObjectAndroid = "On Xamarin.Android, you have to specify the current Activity from which the browser pop-up will be displayed using the WithParentActivityOrWindow method. ";
+        public const string ActivityRequiredForParentObjectAndroid = "On Android, you have to specify the current Activity from which the browser pop-up will be displayed using the WithParentActivityOrWindow method. ";
 
         public const string LoggingCallbackAlreadySet = "LoggingCallback has already been set. ";
         public const string TelemetryCallbackAlreadySet = "TelemetryCallback has already been set. ";
@@ -337,7 +337,7 @@ namespace Microsoft.Identity.Client
         }
 
         public const string NoAndroidBrokerAccountFound = "Android account manager could not find an account that matched the provided account information. ";
-        public const string AndroidBrokerCannotBeInvoked = "The current version of the broker may not support MSAL.Xamarin or power optimization is turned on. In order to perform brokered authentication on android you need to ensure that you have installed either Intune Company Portal (5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater). See https://aka.ms/Brokered-Authentication-for-Android. ";
+        public const string AndroidBrokerCannotBeInvoked = "The current version of the broker may not support MSAL or power optimization is turned on. In order to perform brokered authentication on android you need to ensure that you have installed either Intune Company Portal (5.0.4689.0 or greater) or Microsoft Authenticator (6.2001.0140 or greater). See https://aka.ms/Brokered-Authentication-for-Android. ";
         public const string CustomMetadataInstanceOrUri = "You have configured your own instance metadata using both an Uri and a string. Only one is supported. " +
             "See https://aka.ms/msal-net-custom-instance-metadata for more details. ";
 

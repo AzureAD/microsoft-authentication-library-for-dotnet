@@ -46,18 +46,9 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #endif
         }
 
-        public static bool IsXamarinOrUwp()
-        {
-#if IS_XAMARIN_OR_UWP
-            return true;
-#else
-            return false;
-#endif
-        }
-
         public static bool IsLinux()
         {
-#if IS_XAMARIN_OR_UWP
+#if __MOBILE__ || WINDOWS_UWP
             return false;
 #elif NETFRAMEWORK
             return Environment.OSVersion.Platform == PlatformID.Unix;
@@ -72,7 +63,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             return true;
 #elif NETFRAMEWORK
             return Environment.OSVersion.Platform == PlatformID.MacOSX;
-#elif !IS_XAMARIN_OR_UWP
+#elif !(__MOBILE__ || WINDOWS_UWP)
             return RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 #else
             return false;

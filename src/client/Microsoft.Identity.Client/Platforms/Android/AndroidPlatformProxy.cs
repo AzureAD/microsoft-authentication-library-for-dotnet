@@ -92,7 +92,9 @@ namespace Microsoft.Identity.Client.Platforms.Android
         /// <returns>Version of the calling application</returns>
         protected override string InternalGetCallingApplicationVersion()
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             return global::Android.App.Application.Context.PackageManager.GetPackageInfo(global::Android.App.Application.Context.PackageName, 0)?.VersionName;
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         /// <summary>

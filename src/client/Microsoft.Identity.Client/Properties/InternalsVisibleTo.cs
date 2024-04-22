@@ -31,4 +31,3 @@ using Microsoft.Identity.Client;
 [assembly: InternalsVisibleTo("NetCoreWinFormsWAM" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("DesktopTestApp" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("UWP standalone" + KeyTokens.MSAL)]
-[assembly: InternalsVisibleTo("XamarinDev" + KeyTokens.MSAL)]

@@ -108,10 +108,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.Broker
             br.Scopes = EnumerableExtensions.AsSingleString(authenticationRequestParameters.Scope);
             br.ClientId = authenticationRequestParameters.AppConfig.ClientId;
             br.CorrelationId = authenticationRequestParameters.RequestContext.CorrelationId.ToString();
-            
+#pragma warning disable CS0618  
             br.ClientAppVersion = Application.Context.PackageManager.GetPackageInfo(
                 Application.Context.PackageName,
                 PackageInfoFlags.MatchAll).VersionName;
+#pragma warning restore CS0618  
             br.ClientAppName = Application.Context.PackageName;
             br.ClientVersion = MsalIdHelper.GetMsalVersion();
 

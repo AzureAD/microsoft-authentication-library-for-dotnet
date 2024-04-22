@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="useEmbeddedWebView">If <c>true</c>, will use an embedded web browser,
         /// otherwise will attempt to use a system web browser. The default depends on the platform:
-        /// <c>false</c> for Xamarin.iOS and Xamarin.Android, and <c>true</c> for .NET Framework,
+        /// <c>false</c> for iOS and Android, and <c>true</c> for .NET Framework,
         /// and UWP</param>
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithUseEmbeddedWebView(bool useEmbeddedWebView)
@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Client
          */
 
         /// <summary>
-        ///  Sets a reference to the ViewController (if using Xamarin.iOS), Activity (if using Xamarin.Android)
+        ///  Sets a reference to the ViewController (if using iOS), Activity (if using Android)
         ///  IWin32Window or IntPtr (if using .Net Framework). Used for invoking the browser.
         /// </summary>
         /// <remarks>Mandatory only on Android. Can also be set via the PublicClientApplication builder.</remarks>
@@ -248,7 +248,7 @@ namespace Microsoft.Identity.Client
 #if ANDROID
         /// <summary>
         /// Sets a reference to the current Activity that triggers the browser to be shown. Required
-        /// for MSAL to be able to show the browser when using Xamarin.Android
+        /// for MSAL to be able to show the browser when using Android
         /// </summary>
         /// <param name="activity">The current Activity</param>
         /// <returns>The builder to chain the .With methods</returns>
