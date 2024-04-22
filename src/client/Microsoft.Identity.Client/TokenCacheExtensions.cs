@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="tokenCache">Either the UserTokenCache or the AppTokenCache, for which these options apply.</param>
         /// <param name="options">Options for the internal MSAL token caches. </param>
-#if !SUPPORTS_CUSTOM_CACHE || WINDOWS_APP
+#if !SUPPORTS_CUSTOM_CACHE 
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
         public static void SetCacheOptions(this ITokenCache tokenCache, CacheOptions options)
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
 
         private static void ValidatePlatform()
         {
-#if !SUPPORTS_CUSTOM_CACHE || WINDOWS_APP
+#if !SUPPORTS_CUSTOM_CACHE 
             throw new System.PlatformNotSupportedException("You should not use these TokenCache methods on mobile platforms. " +
                 "They are meant to allow applications to define their own storage strategy on .NET desktop and non-mobile platforms such as .NET Core. " +
                 "On mobile platforms, MSAL.NET implements a secure and performant storage mechanism. " +

@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client
         /// If both WithLogging apis are set, the other one will override the this one
         /// </param>
         /// <param name="enableDefaultPlatformLogging">Flag to enable/disable logging to platform defaults.
-        /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
+        /// In Desktop, Event Tracing is used. In iOS, NSLog is used.
         /// In android, Logcat is used. The default value is <c>false</c>
         /// </param>
         /// <returns>The builder to chain the .With methods</returns>
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Client
         /// You can set it to <c>true</c> for advanced debugging requiring PII
         /// </param>
         /// <param name="withDefaultPlatformLoggingEnabled">Flag to enable/disable logging to platform defaults.
-        /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
+        /// In Desktop, Event Tracing is used. In iOS, NSLog is used.
         /// In android, logcat is used. The default value is <c>false</c>
         /// </param>
         /// <returns>The builder to chain the .With methods</returns>

@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             finally
             {
 
-#if NETSTANDARD || WINDOWS_APP
+#if NETSTANDARD 
                 store.Dispose();
 #else
                 store.Close();

@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client
         /// cache (see <see cref="IConfidentialClientApplication.AppTokenCache"/>).
         /// </summary>
         /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.
-        /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on mobile platforms and on UWP.
+        /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on mobile platforms.
         /// It is recommended to use token cache serialization for web site and web api scenarios.
         /// </remarks>
         ITokenCache UserTokenCache { get; }

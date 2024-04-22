@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client
         public bool EnablePiiLogging { get; set; }
 
         /// <summary>
-        /// Flag to enable/disable logging to platform defaults. In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
+        /// Flag to enable/disable logging to platform defaults. In Desktop, Event Tracing is used. In iOS, NSLog is used.
         /// In Android, logcat is used. The default value is <c>false</c>. See https://aka.ms/msal-net-logging
         /// </summary>
         /// <seealso cref="EnablePiiLogging"/>

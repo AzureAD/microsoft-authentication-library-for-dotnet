@@ -4,15 +4,11 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache.CacheImpl;
 
 namespace WebApi.Misc
 {
     internal interface ICacheSerializationProvider
     {
-        // Important - do not use SetBefore / SetAfter methods, as these are reserved for app developers
-        // Instead, use AfterAccess = x, BeforeAccess = y
-        // See UapTokenCacheBlobStorage for an example
         void Initialize(ITokenCache tokenCache);
     }
 

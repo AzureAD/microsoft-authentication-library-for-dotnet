@@ -7,7 +7,7 @@ using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client
 {
-    // Default browser WebUI is not available on mobile (Android, iOS, UWP), but allow it at runtime
+    // Default browser WebUI is not available on mobile (Android, iOS), but allow it at runtime
     // to avoid MissingMethodException
 
     /// <summary>
@@ -16,9 +16,6 @@ namespace Microsoft.Identity.Client
     /// It can however respond with a 200 OK message or a 302 Redirect, which can be configured here.
     /// For more details see https://aka.ms/msal-net-os-browser
     /// </summary>
-#if WINDOWS_APP
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-#endif
     public partial class SystemWebViewOptions
     {
         /// <summary>
@@ -58,9 +55,6 @@ namespace Microsoft.Identity.Client
         /// This hides the privacy prompt displayed on iOS Devices (ver 13.0+) when set to true.
         /// By default, it is false and displays the prompt.
         /// </summary>
-        #if WINDOWS_APP
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        #endif
         public bool iOSHidePrivacyPrompt { get; set; } = false;
 
         /// <summary>

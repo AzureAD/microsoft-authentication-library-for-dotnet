@@ -133,76 +133,11 @@ Have a feature request for MSAL? Complete a [Feature request](https://github.com
 
 ## Building and testing MSAL.NET
 
-### Prerequisites to build MSAL.NET
-
-The following are instructions to setup Visual Studio to build various MSAL.NET solution files on Windows and Mac platforms.
-
-#### Windows
-
-##### Minimal Visual Studio installation
-
-* Install or update Visual Studio 2022. Any edition, such as Community, Pro, or Enterprise will work.
-* Install the following workloads:
-  * .NET desktop development
-  * Universal Windows Platform development
-  * Mobile Development with .NET
-  * .NET Core cross-platform development
-* From the **Individual Components** tab, make sure these items are selected:
-  * .NET Framework 4.5.2 targeting pack
-  * .NET Framework 4.6.1 SDK
-  * .NET Framework 4.6.1 targeting pack
-  * .NET Framework 4.6.2 targeting pack
-  * Android SDK setup (API level 29)
-  * Windows 10 SDK 10.0.17134.0
-  * Windows 10 SDK 10.0.17763.0
-* Android 9.0 Pie and Android 8.1 Oreo are required. These are not installed through the Visual Studio Installer. Instead, use the Android SDK Manager (**Visual Studio** > **Tools** > **Android** > **Android SDK Manager…**)
-
-With the setup above, you should be able to open and compile `Libs.sln` and `LibsAndSamples.sln` from the [MSAL.NET repository](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet).
-
-##### Troubleshooting
-
-* If you get an exception similar to `"System.InvalidOperationException: Could not determine Android SDK location"` while restoring NuGet packages, make sure you have the latest Android SDK installed. If you do, you probably hit a bug with the Visual Studio Installer - uninstall and reinstall the SDK from the Visual Studio Installer.
-* If you get an exception similar to `"System.TypeLoadException: Could not set up parent class, due to: Could not load type of field 'Microsoft.Identity.Core.UI.WebviewBase:asWebAuthenticationSession' (5) due to: Could not resolve type with token 0100004c from typeref (expected class AuthenticationServices.ASWebAuthenticationSession in assembly 'Xamarin.iOS)"` when running on an iOS simulator, **make sure that you have installed the latest Visual Studio 2022 release and the latest version of [Xcode](https://developer.apple.com/xcode/) on your Mac** to get the classes needed to run `ASWebAuthenticationSession` (e.g., `AuthenticationServices`).
-
-#### macOS
-
-##### [Install Visual Studio for Mac](https://visualstudio.microsoft.com/vs/mac/)
-
-* During setup, install
-  * .NET Core
-  * Android
-  * iOS
-  * MacOS
-* In Visual Studio for Mac, select **Tools** > **SDK Manager** and install Android SDK with API 29.
-
-The steps above should enable you to compile `Libs.sln`. You will need a developer certificate to compile `LibsMacOS.sln`.
-
-### Fast build
-
-MSAL.NET supports several target frameworks, but most of the time contributors are only interested in one or two. To get MSAL to build for all frameworks, contributors will need a [hefty Visual Studio installation as well as several SDKs](#prerequisites-to-build-msalnet).
-
-To work around this requirement, open [`Microsoft.Identity.Client.csproj`](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/main/src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj) and comment out the targets you are not interested in. Keeping the pure .NET targets and eliminating UWP and Xamarin results in a fast build as well as the ability to run all unit tests.
-
-Visual Studio may need to be restarted to ensure that updated target frameworks take effect.
-
-### Visual Studio for Mac
-
-MSAL is a multi-target library and at the time of writing, Visual Studio for Mac is not able to understand and layout this project correctly. The library can still be built from the command line on macOS.
 
 ### Visual Studio
 
-1. Load `LibsAndSamples.sln` for a bigger solution with lots of apps that showcase and exercise MSAL.
-2. Build in Visual Studio (if configured) or via the command line with `msbuild /t:restore` and `msbuild`. If using the command line, developers might need to use the [Visual Studio Developer Command Prompt](/visualstudio/ide/reference/command-prompt-powershell).
-
->**Note**
->If you run into strong name validation issues, please [log a bug](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues). Workaround is to disable strong name validation on your dev box by running the following command in the Visual Studio Developer Command Prompt with Administrator permissions:
->
->```bash
->sn -Vr *
->```
-
->**Note**
->You won't be able to run the integration or automation tests because they require access to a Azure Key Vault instance which is only accessible to the MSAL.NET engineering team. These tests will run as part of our automation pipelines in GitHub.
+Use the latest Visual Studio. It will guide you on the components needed to be installed. 
+For MAUI, edit the .csproj and enable the MAUI targets.
 
 ### Package
 
@@ -211,13 +146,3 @@ You can create a package from Visual Studio or from the command line with custom
 ```bash
 msbuild <msal>.csproj /t:pack /p:MsalClientSemVer=1.2.3-preview
 ```
-
-### Command Line
-
-You can use `msbuild` commands to build the solution. Use `msbuild /t:restore` and `msbuild`.
-
->**Note**
->Do not use the `dotnet` command line because it is only for .NET and .NET Core - this library has many other targets that are not possible to build with the .NET tooling.
-
->**Note**
->To enable the library to target Xamarin as well as .NET and .NET Core, there is a dependency on [MsBuild SDK Extras](https://github.com/novotnyllc/MSBuildSdkExtras). See the ["Support for command line dotnet build or dotnet msbuild"](https://github.com/novotnyllc/MSBuildSdkExtras/issues/102) issue in regards to using `dotnet` CLI commands.
