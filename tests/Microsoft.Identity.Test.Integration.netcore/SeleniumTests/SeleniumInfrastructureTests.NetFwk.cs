@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -11,7 +10,6 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
@@ -39,7 +37,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         // This test checks that MSAL.netcore / MSAL.netfx / MSAL.netstandard DLLs are actually used
         [DataTestMethod()]
-        [DataRow(TargetFrameworks.NetStandard)]
         [DataRow(TargetFrameworks.NetCore)]
         [DataRow(TargetFrameworks.NetFx)]
         public void AssertTfm(TargetFrameworks targetFwk)
@@ -59,9 +56,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                     break;
                 case TargetFrameworks.NetCore:
                     Assert.AreEqual("MSAL.NetCore", sku);
-                    break;
-                case TargetFrameworks.NetStandard:
-                    Assert.AreEqual("MSAL.CoreCLR", sku);
                     break;
                 default:
                     break;

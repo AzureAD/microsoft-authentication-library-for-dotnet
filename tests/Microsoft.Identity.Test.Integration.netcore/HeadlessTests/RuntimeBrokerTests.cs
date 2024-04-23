@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
         // This test should fail locally but succeed in a CI build.
         [IgnoreOnOneBranch]
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task WamSilentAuthUserInteractionRequiredAsync()
         {
             string[] scopes = new[]
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task ExtractNonceWithAuthParserAndValidateShrAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -105,15 +105,15 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes, true);
 
-            await PoPValidator.VerifyPoPTokenAsync(
+            PoPValidator.VerifyPoPToken(
                 labResponse.App.AppId,
                 requestUri.AbsoluteUri,
                 HttpMethod.Get,
-                result).ConfigureAwait(false);
+                result);
         }
 
         [IgnoreOnOneBranch]
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task WamInvalidROPC_ThrowsException_TestAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task WamSilentAuthLoginHintNoAccontInCacheAsync()
         {
             string[] scopes = new[]
@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task WamUsernamePasswordRequestAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -274,7 +274,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordRequestAsync_WithPiiAsync()
         {
@@ -328,7 +328,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task WamListWindowsWorkAndSchoolAccountsAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -368,7 +368,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [IgnoreOnOneBranch]
         [DataTestMethod]
         [DataRow(null)]
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task WamAddDefaultScopesWhenNoScopesArePassedAsync(string scopes)
         {
             IntPtr intPtr = GetForegroundWindow();
@@ -392,7 +392,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnValidResourceAsync()
         {
             //Arrange
@@ -426,7 +426,7 @@ namespace Microsoft.Identity.Test.Integration.Broker
         }
 
         [IgnoreOnOneBranch]
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         [ExpectedException(typeof(MsalUiRequiredException))]
         public async Task WamUsernamePasswordPopTokenEnforcedWithCaOnInValidResourceAsync()
         {

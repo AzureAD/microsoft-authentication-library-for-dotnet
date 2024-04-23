@@ -25,6 +25,7 @@ using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
+    // Runs on .NET and .NET Fwk
     [TestClass]
     public class ManagedIdentityTests
     {
@@ -134,6 +135,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataRow(MsiAzureResource.VM, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_VM")]
         public async Task ManagedIdentityRequestFailureCheckAsync(MsiAzureResource azureResource, string userIdentity, UserAssignedIdentityId userAssignedIdentityId)
         {
+            RunOnHelper.AssertFramework(TargetFrameworks.NetCore);
+
             //Arrange
             using (new EnvVariableContext())
             {
