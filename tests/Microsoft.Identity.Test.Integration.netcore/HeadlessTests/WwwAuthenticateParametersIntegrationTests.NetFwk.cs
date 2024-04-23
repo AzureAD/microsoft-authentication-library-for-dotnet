@@ -57,11 +57,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// <param name="subscriptionId">Well-known subscription ID</param>
         /// <param name="authority">AAD endpoint, e.g. Production or PPE</param>
         /// <param name="tenantId">Expected Tenant ID</param>
-        [RunOn(TargetFrameworks.NetCore)]
+        [DataTestMethod]
         [DataRow("management.azure.com", "c1686c51-b717-4fe0-9af3-24a20a41fb0c", "login.windows.net", "72f988bf-86f1-41af-91ab-2d7cd011db47")]
         [DataRow("api-dogfood.resources.windows-int.net", "1835ad3d-4585-4c5f-b55a-b0c3cbda1103", "login.windows-ppe.net", "94430a9c-83e9-4f08-bbb0-64fccd0661fc")]
         public async Task CreateWwwAuthenticateResponseFromAzureResourceManagerUrlAsync(string hostName, string subscriptionId, string authority, string tenantId)
         {
+            RunOnHelper.AssertFramework(TargetFrameworks.NetCore);
+
             const string apiVersion = "2020-08-01"; // current latest API version for /subscriptions/get
             var url = $"https://{hostName}/subscriptions/{subscriptionId}?api-version={apiVersion}";
 
