@@ -322,8 +322,8 @@ namespace Microsoft.Identity.Client
         /// Sets the parameters required to get a Kerberos Ticket from Azure AD service.
         /// </summary>
         /// <param name="servicePrincipalName">Service principal name to get Kerberos Service Ticket.</param>
-        /// <param name="ticketContainer">Specify where the Kerberos ticket will be returned - as a claim in the id token or as a claim in the access token. 
-        /// If the ticket is for the client application, use the IdToken. If the ticket is for the downstream api, use the access token.</param>
+        /// <param name="ticketContainer">Specify where the Kerberos ticket will be returned - as a claim in the ID token or as a claim in the access token. 
+        /// If the ticket is for the client application, use the ID token. If the ticket is for the downstream API, use the access token.</param>
         /// <remarks>
         /// The expiry of the Kerberos ticket is tied to the expiry of the token that contains it.
         /// MSAL provides several helper APIs to read and write Kerberos tickets from the Windows Ticket Cache - see <see cref="KerberosSupplementalTicketManager"/>.
