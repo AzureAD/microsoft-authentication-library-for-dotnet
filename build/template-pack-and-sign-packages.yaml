@@ -24,6 +24,7 @@ steps:
 
 - task: Bash@3
   displayName: Install MAUI
+  condition: eq(variables['INCLUDE_MOBILE_AND_LEGACY_TFM'], 'True')  
   inputs:
     targetType: 'inline'
     script: |
@@ -32,6 +33,7 @@ steps:
 
 - task: JavaToolInstaller@0
   displayName: 'Use Java 11'
+  condition: eq(variables['INCLUDE_MOBILE_AND_LEGACY_TFM'], 'True')  
   inputs:
     versionSpec: 11
     jdkArchitectureOption: x64

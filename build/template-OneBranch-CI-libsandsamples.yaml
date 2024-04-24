@@ -42,7 +42,7 @@ steps:
 
 - task: VSTest@2
   displayName: 'Run cache compat tests'
-  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+  condition: and(succeeded(), eq(variables['RunCacheCompatTests'], 'true'))
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\CacheCompat\CommonCache.Test.Unit\bin\**\CommonCache.Test.Unit.dll'
