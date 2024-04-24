@@ -55,6 +55,19 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         //non existent Resource ID of the User Assigned Identity 
         private const string Non_Existent_UamiResourceId = "/subscriptions/userAssignedIdentities/NO_ID";
 
+        [TestMethod]
+        public void MyTestMethod()
+        {
+                var mia = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId("4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6"))
+                    .WithLogging((_, m, _) => { Trace.WriteLine(m); }, LogLevel.Verbose, true)
+                    .Build();
+
+                var result = mia.AcquireTokenForManagedIdentity( "https://vault.azure.net/.default")
+                .ExecuteAsync().ConfigureAwait(false);
+
+            Assert.IsNotNull(result);
+        }
+
         [DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
         [DataRow(MsiAzureResource.Function, "", DisplayName = "System_Identity_Function_App")]
