@@ -10,6 +10,8 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Azure.Core;
+using Azure.Security.KeyVault.Secrets;
 using Castle.Core.Internal;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -56,16 +58,31 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private const string Non_Existent_UamiResourceId = "/subscriptions/userAssignedIdentities/NO_ID";
 
         [TestMethod]
-        public void MyTestMethod()
+        public async Task MyTestMethodAsync()
         {
                 var mia = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId("4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6"))
                     .WithLogging((_, m, _) => { Trace.WriteLine(m); }, LogLevel.Verbose, true)
                     .Build();
 
-                var result = mia.AcquireTokenForManagedIdentity( "https://vault.azure.net/.default")
+            var result = await mia.AcquireTokenForManagedIdentity("https://vault.azure.net/.default")
                 .ExecuteAsync().ConfigureAwait(false);
 
+            Trace.WriteLine("got a token!");
+
             Assert.IsNotNull(result);
+            var credential = DelegatedTokenCredential.Create(
+                (_, __) => new AccessToken(result.AccessToken, result.ExpiresOn));
+
+            Trace.WriteLine("buildautomation");
+
+            var secretClient = new SecretClient(new Uri(KeyVaultInstance.MsalTeam), credential);
+            var s = secretClient.GetSecret("automation-foci-app1");
+            Assert.IsNotNull(s);
+
+            Trace.WriteLine("msidlab");
+            var secretClient2 = new SecretClient(new Uri(KeyVaultInstance.MSIDLab), credential);
+            var s2 = secretClient2.GetSecret("B2CApp");
+            Assert.IsNotNull(s2);
         }
 
         [DataTestMethod]
@@ -90,7 +107,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             using (new EnvVariableContext())
             {
                 // Fetch the env variables from the resource and set them locally
-                Dictionary<string, string> envVariables = 
+                Dictionary<string, string> envVariables =
                     await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
 
                 //Set the Environment Variables
@@ -131,7 +148,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.IsTrue(result.Scopes.All(s_msi_scopes.Contains));
 
                 //5. Validate the second call to token endpoint gets returned from the cache
-                Assert.AreEqual(TokenSource.Cache, 
+                Assert.AreEqual(TokenSource.Cache,
                     result.AuthenticationResultMetadata.TokenSource);
             }
         }
@@ -284,7 +301,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             switch (userAssignedIdentityId)
             {
-                case UserAssignedIdentityId.ClientId: 
+                case UserAssignedIdentityId.ClientId:
                     builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(userAssignedId));
                     break;
 
