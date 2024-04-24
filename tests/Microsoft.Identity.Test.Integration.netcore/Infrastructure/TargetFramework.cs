@@ -20,9 +20,8 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         public override TestResult[] Execute(ITestMethod testMethod)
         {
-            if (RunOnHelper.IsNetClassic() && (_tfms & TargetFrameworks.NetFx) != TargetFrameworks.NetFx ||
-                RunOnHelper.IsNetCore() && (_tfms & TargetFrameworks.NetCore) != TargetFrameworks.NetCore ||
-                RunOnHelper.IsNetStandard() && (_tfms & TargetFrameworks.NetStandard) != TargetFrameworks.NetStandard)
+            if (RunOnHelper.IsNetFwk() && (_tfms & TargetFrameworks.NetFx) != TargetFrameworks.NetFx ||
+                RunOnHelper.IsNetCore() && (_tfms & TargetFrameworks.NetCore) != TargetFrameworks.NetCore)
             {
                 return new[]
                 {
@@ -46,15 +45,14 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
     public enum TargetFrameworks
     {
         NetFx = 1,
-        NetCore = 2,
-        NetStandard = 4
+        NetCore = 2        
     }
 
     public static class RunOnHelper
     {
         public static void AssertFramework(this TargetFrameworks runOn)
         {
-            if (IsNetClassic() && (runOn & TargetFrameworks.NetFx) != TargetFrameworks.NetFx)
+            if (IsNetFwk() && (runOn & TargetFrameworks.NetFx) != TargetFrameworks.NetFx)
             {
                 Assert.Inconclusive("Test not configured to run on .Net Fx");
             }
@@ -63,14 +61,9 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             {
                 Assert.Inconclusive("Test not configured to run on .Net Core");
             }
-
-            if (IsNetStandard() && (runOn & TargetFrameworks.NetStandard) != TargetFrameworks.NetStandard)
-            {
-                Assert.Inconclusive("Test not configured to run on NetStandard");
-            }
         }
 
-        public static bool IsNetClassic()
+        public static bool IsNetFwk()
         {
 #if NETFRAMEWORK 
             return true;
@@ -92,17 +85,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             throw new NotImplementedException();
 #endif
 
-        }
-
-        public static bool IsNetStandard()
-        {
-#if NETFRAMEWORK || NET_CORE
-            return false;
-#elif NETSTANDARD
-            return true;
-#else
-            throw new NotImplementedException();
-#endif
         }
     }
 }

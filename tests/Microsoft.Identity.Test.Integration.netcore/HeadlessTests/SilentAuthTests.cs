@@ -3,8 +3,6 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -29,7 +27,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private IPublicClientApplication pca = null;
 
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task SilentAuth_ForceRefresh_Async()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -49,7 +47,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await ValidateAuthResultAsync(authResult, labResponse).ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetFx)]
+        [TestMethod]
         public async Task SilentAuth_TokenCacheRemainsPersistent_Async()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
@@ -103,7 +101,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         private async Task ValidateAuthResultAsync(
-            AuthenticationResult authResult, 
+            AuthenticationResult authResult,
             LabResponse labResponse)
         {
             MsalAssert.AssertAuthResult(authResult, labResponse.User);
@@ -119,9 +117,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
             MsalAssert.AssertAuthResult(authResult, labResponse.User);
             var at2 = authResult.AccessToken;
-            
+
             string tenantId = labResponse.User.UserType == UserType.MSA ?
-                Constants.MsaTenantId : 
+                Constants.MsaTenantId :
                 labResponse.User.TenantId;
 
             Assert.AreEqual(
