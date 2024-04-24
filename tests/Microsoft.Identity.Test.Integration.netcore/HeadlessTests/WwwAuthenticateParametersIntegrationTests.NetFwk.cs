@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// <param name="subscriptionId">Well-known subscription ID</param>
         /// <param name="authority">AAD endpoint, e.g. Production or PPE</param>
         /// <param name="tenantId">Expected Tenant ID</param>
-        [RunOn(TargetFrameworks.NetFx)]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task CreateWwwAuthenticateResponseFromAzureResourceManagerUrlAsync()
         {
             await RunTestForSettingsAsync(
