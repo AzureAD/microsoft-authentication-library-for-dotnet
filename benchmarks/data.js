@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1713820508056,
+  "lastUpdate": 1713958585603,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -4886,6 +4886,42 @@ window.BENCHMARK_DATA = {
             "value": 370008.5714285714,
             "unit": "ns",
             "range": "± 4175.833637901368"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9076aa6d57db55ee09523f89201f17ada5c89a3b",
+          "message": "Remove some integration tests (#4716)\n\n* Refactor integration tests and remove netstandard tests\r\n\r\n* csproj\r\n\r\n* fix\r\n\r\n* fix",
+          "timestamp": "2024-04-24T12:29:08+01:00",
+          "tree_id": "09caba1ec35503c35a4f6726f0234184d6f144fb",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/9076aa6d57db55ee09523f89201f17ada5c89a3b"
+        },
+        "date": 1713958582250,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 251500.20588235295,
+            "unit": "ns",
+            "range": "± 8041.727217342439"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 356875.1538461539,
+            "unit": "ns",
+            "range": "± 1608.1389785584374"
           }
         ]
       }
