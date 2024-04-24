@@ -61,6 +61,7 @@ steps:
 
 - task: PowerShell@2
   displayName: 'Verify Existence of Runtime Dlls'
+  condition: eq(variables['INCLUDE_MOBILE_AND_LEGACY_TFM'], 'True')  
   inputs:
     targetType: 'inline'
     script: |
