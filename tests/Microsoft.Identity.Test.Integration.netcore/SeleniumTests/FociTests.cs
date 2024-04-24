@@ -10,14 +10,12 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
-#if NETFRAMEWORK
     [TestClass]
     public class FociTests
     {
@@ -35,7 +33,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Tests: 
@@ -161,5 +159,4 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             });
         }
     }
-#endif
 }

@@ -23,7 +23,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
     [TestClass]
-    public partial class InteractiveFlowTests
+    public class InteractiveFlowTests
     {
         private readonly TimeSpan _interactiveAuthTimeout = TimeSpan.FromMinutes(5);
         private static readonly string[] s_scopes = new[] { "user.read" };

@@ -44,16 +44,3 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
-
-- task: VSTest@2
-  displayName: 'Run integration tests (.NET Standard)'
-  inputs:
-    testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\Microsoft.Identity.Test.Integration.netstandard\bin\**\Microsoft.Identity.Test.Integration.NetStandard.dll'
-    searchFolder: '$(System.DefaultWorkingDirectory)'
-    rerunFailedTests: true
-    rerunMaxAttempts: '3'
-    runInParallel: false
-    codeCoverageEnabled: false
-    failOnMinTestsNotRun: true
-    minimumExpectedTests: '1'

@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
         // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
         // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task ROPC_B2C_Async()
         {
             var labResponse = await LabUserHelper.GetB2CLocalAccountAsync().ConfigureAwait(false);

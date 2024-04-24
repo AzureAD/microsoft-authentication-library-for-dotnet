@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// For details see https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO, which explains
         /// the structure of the access token received from OBO.
         /// </remarks>
-        [RunOn(TargetFrameworks.NetCore | TargetFrameworks.NetFx | TargetFrameworks.NetStandard)]
+        [TestMethod]
         public async Task NormalObo_TestAsync()
         {
             //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         // Will need to be updated.
         // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3913
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task LongRunningObo_TestAsync()
         {
             //An explanation of the OBO for service principal scenario can be found here https://aadwiki.windows-int.net/index.php?title=App_OBO_aka._Service_Principal_OBO

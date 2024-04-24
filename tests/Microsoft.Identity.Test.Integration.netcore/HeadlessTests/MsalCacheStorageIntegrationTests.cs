@@ -19,7 +19,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     /// </summary>
     [TestClass]
     public class MsalCacheStorageIntegrationTests
-
     {
         public static readonly string CacheFilePath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
         private readonly TraceSource _logger = new TraceSource("TestSource", SourceLevels.All);

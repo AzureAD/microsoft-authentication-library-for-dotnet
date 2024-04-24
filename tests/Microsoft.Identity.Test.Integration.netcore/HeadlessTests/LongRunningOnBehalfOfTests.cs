@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// Should be different partitions: by user-provided and by assertion hash 
         /// (if the user-provided key is not assertion hash)
         /// </summary>
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task LongRunningAndNormalObo_WithDifferentKeys_TestAsync()
         {
             var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// Both methods should return the same tokens, since the cache key is the same.
         /// Should be the same partition: by assertion hash.
         /// </summary>
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task LongRunningThenNormalObo_WithTheSameKey_TestAsync()
         {
             var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// Both methods should return the same tokens, since the cache key is the same.
         /// Should be the same partition: by assertion hash.
         /// </summary>
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task NormalOboThenLongRunningAcquire_WithTheSameKey_TestAsync()
         {
             var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// Both methods should return the same tokens, since the cache key is the same.
         /// Should be the same partition: by assertion hash.
         /// </summary>
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task NormalOboThenLongRunningInitiate_WithTheSameKey_TestAsync()
         {
             var user1 = (await LabUserHelper.GetSpecificUserAsync("idlab1@msidlab4.onmicrosoft.com").ConfigureAwait(false)).User;
@@ -297,7 +297,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(1, cca.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task WithDifferentScopes_TestAsync()
         {
             string[] scopes2 = { "api://eec635da-5760-452d-940a-448220db047c/access_as_user" };
@@ -332,7 +332,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(CacheRefreshReason.NoCachedAccessToken, result.AuthenticationResultMetadata.CacheRefreshReason);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task AcquireTokenInLongRunningObo_WithNoTokensFound_TestAsync()
         {
             var cca = BuildCCA(Guid.NewGuid().ToString());

@@ -13,7 +13,6 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -170,7 +169,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// Reuse the same CCA with regional for OBO and for client calls in different orders.
         /// Client calls should go to regional, OBO calls should go to global
         /// </summary>
-        [RunOn(TargetFrameworks.NetCore | TargetFrameworks.NetFx)]
+        [TestMethod]
         public async Task OboAndClientCredentials_WithRegional_ReturnsCorrectTokens_TestAsync()
         {
             // Setup: Get lab user, create PCA and get user tokens
@@ -220,7 +219,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.Cache, clientResult.AuthenticationResultMetadata.TokenSource);
         }
 
-        [RunOn(TargetFrameworks.NetFx)]
+        [TestMethod]
         public async Task WithMultipleUsers_TestAsync()
         {
             var aadUser1 = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;
@@ -236,7 +235,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await RunOnBehalfOfTestAsync(aadUser2, false, true).ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         [TestCategory(TestCategories.Arlington)]
         public async Task ArlingtonWebAPIAccessingGraphOnBehalfOfUserTestAsync()
         {
@@ -285,7 +284,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsNull(userCacheRecorder.LastAfterAccessNotificationArgs.SuggestedCacheKey);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         public async Task WithCache_TestAsync()
         {
             LabUser user = (await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false)).User;

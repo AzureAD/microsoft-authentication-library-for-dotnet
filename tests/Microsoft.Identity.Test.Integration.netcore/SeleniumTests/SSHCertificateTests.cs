@@ -13,14 +13,20 @@ using Microsoft.Identity.Client.SSHCertificates;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
-    public partial class InteractiveFlowTests
+    [TestClass]
+    public class SSHCertTests
     {
+        /// Initialized by MSTest (do not make private or readonly)
+        /// </summary>
+        public TestContext TestContext { get; set; }
+
+        private readonly TimeSpan _interactiveAuthTimeout = TimeSpan.FromMinutes(5);
+
         //This client id is for Azure CLI which is one of the only 2 clients that have PreAuth to use ssh cert feature
         string _SSH_ClientId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46";
         //SSH User impersonation scope required for this test
@@ -93,14 +99,13 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             return jwk;
         }
 
-        private Dictionary<string, string> GetTestSliceParams()
+        private SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, Prompt prompt, bool withLoginHint = false, bool adfsOnly = false)
         {
-            return new Dictionary<string, string>()
+            return new SeleniumWebUI((driver) =>
             {
-                { "dc", "prod-wst-test1" },
-                { "slice", "test" },
-                { "sshcrt", "true" }
-            };
+                Trace.WriteLine("Starting Selenium automation");
+                driver.PerformLogin(user, prompt, withLoginHint, adfsOnly);
+            }, TestContext);
         }
     }
 }
