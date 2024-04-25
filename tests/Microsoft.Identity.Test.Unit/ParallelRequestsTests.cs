@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             const int NumberOfRequests = 10;
 
             // The typical HttpMockHandler used by other tests can't deal with parallel request
-            ParallelRequestMockHanler httpManager = new ParallelRequestMockHanler();
+            ParallelRequestMockHandler httpManager = new ParallelRequestMockHandler();
 
             PublicClientApplication pca = PublicClientApplicationBuilder
                 .Create(TestConstants.ClientId)
@@ -234,9 +234,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     /// - provides a standard response for discovery calls
     /// - responds with valid tokens based on a naming convention (uid = "uid" + rtSecret, upn = "user_" + rtSecret)
     /// </summary>
-    internal class ParallelRequestMockHanler : IHttpManager
+    internal class ParallelRequestMockHandler : IHttpManager
     {
         public long LastRequestDurationInMs => 50;
+
+        public HttpClientHandler HttpClientHandler { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
         {

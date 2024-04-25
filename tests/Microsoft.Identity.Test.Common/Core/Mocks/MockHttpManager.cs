@@ -96,6 +96,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public long LastRequestDurationInMs => 3000;
 
+        public HttpClientHandler HttpClientHandler { get => _httpManager.HttpClientHandler; set => _httpManager.HttpClientHandler = value; }
+
         private string GetExpectedUrlFromHandler(HttpMessageHandler handler)
         {
             return (handler as MockHttpMessageHandler)?.ExpectedUrl ?? "";

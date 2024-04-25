@@ -28,6 +28,7 @@ namespace Microsoft.Identity.Client.Http
         protected readonly IMsalHttpClientFactory _httpClientFactory;
         private readonly Func<HttpResponse, bool> _retryCondition;
         public long LastRequestDurationInMs { get; private set; }
+        public HttpClientHandler HttpClientHandler { get; set; }
 
         /// <summary>
         /// A new instance of the HTTP manager with a retry *condition*. The retry policy hardcodes: 
@@ -154,8 +155,14 @@ namespace Microsoft.Identity.Client.Http
                 return msalMtlsHttpClientFactory.GetHttpClient(x509Certificate2);
             }
 
-            // If the factory is not an IMsalMtlsHttpClientFactory, use it to get a default HttpClient
-            return _httpClientFactory.GetHttpClient();
+            // If the factory is not an IMsalMtlsHttpClientFactory and there is no handler, use the factory to get a default HttpClient
+            if (HttpClientHandler == null)
+            {
+                return _httpClientFactory.GetHttpClient();
+            }
+
+            // If there is a handler, use it to create an HttpClient. The factory is not used in this case.
+            return new HttpClient(HttpClientHandler);
         }
 
         private static HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
