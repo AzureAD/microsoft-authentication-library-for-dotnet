@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Platforms.Features.OpenTelemetry;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

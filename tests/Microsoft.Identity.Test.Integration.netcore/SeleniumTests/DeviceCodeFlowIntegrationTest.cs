@@ -1,14 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 using System.Diagnostics;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
@@ -37,7 +35,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         #endregion MSTest Hooks
 
-        [RunOn(TargetFrameworks.NetFx)]
+        [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         public async Task DeviceCodeFlowTestAsync()
         {
@@ -45,7 +43,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user").ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.Arlington)]
         public async Task ArlingtonDeviceCodeFlowTestAsync()
@@ -54,7 +52,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user").ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.ADFS)]
         public async Task DeviceCodeFlowAdfsTestAsync()
@@ -64,7 +62,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user").ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.Arlington)]
         public async Task ArlingtonDeviceCodeFlowAdfsTestAsync()
@@ -73,7 +71,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "adfs user").ConfigureAwait(false);
         }
 
-        [RunOn(TargetFrameworks.NetCore)]
+        [TestMethod]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.MSA)]
         public async Task DeviceCodeFlowMsaTestAsync()

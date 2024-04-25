@@ -27,8 +27,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         public TestContext TestContext { get; set; }
 
-#if NET_CORE
-
         [TestMethod]
         public async Task AuthorityMigrationAsync()
         {
@@ -176,7 +174,5 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 throw new NotImplementedException();
             }
         }
-
-        #endif
     }
 }
