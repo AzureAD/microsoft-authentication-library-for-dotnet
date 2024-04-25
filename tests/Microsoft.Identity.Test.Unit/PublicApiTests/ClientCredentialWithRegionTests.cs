@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if !ANDROID && !iOS && !WINDOWS_APP 
+#if !ANDROID && !iOS 
 using System;
 using System.IO;
 using System.Net;

@@ -12,7 +12,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit
 {
-#if !WINDOWS_APP // not available on UWP
     [TestClass]
     [DeploymentItem(@"Resources\testCert.crtfile")]
     public class CryptographyTests
@@ -30,8 +29,8 @@ namespace Microsoft.Identity.Test.Unit
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             // Tests the cryptography libraries used by MSAL to sign with certificates
-            var cert = new X509Certificate2(
-                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
+            string resource = ResourceHelper.GetTestResourceRelativePath("testCert.crtfile");
+            var cert = new X509Certificate2(resource, TestConstants.TestCertPassword);
             var crypto = serviceBundle.PlatformProxy.CryptographyManager;
             byte[] result = crypto.SignWithCertificate("TEST", cert, RSASignaturePadding.Pkcs1);
             string value = Base64UrlHelpers.Encode(result);
@@ -59,5 +58,4 @@ namespace Microsoft.Identity.Test.Unit
             Assert.AreEqual(ex.Message, MsalErrorMessage.CertMustBeRsa(cert.PublicKey.Oid.FriendlyName));
         }
     }
-#endif
 }

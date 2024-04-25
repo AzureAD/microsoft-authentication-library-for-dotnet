@@ -28,8 +28,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
             return new Microsoft.Identity.Client.Platforms.iOS.iOSPlatformProxy(finalLogger);
 #elif MAC
             return new Platforms.Mac.MacPlatformProxy(finalLogger);
-#elif WINDOWS_APP
-            return new Microsoft.Identity.Client.Platforms.uap.UapPlatformProxy(finalLogger);
 #elif NETSTANDARD
             return new Microsoft.Identity.Client.Platforms.netstandard.NetStandardPlatformProxy(finalLogger);
 #elif NETFRAMEWORK

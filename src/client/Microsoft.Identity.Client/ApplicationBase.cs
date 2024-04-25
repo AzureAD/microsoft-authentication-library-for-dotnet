@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client
 
         internal static void GuardMobileFrameworks()
         {
-#if ANDROID || iOS || WINDOWS_APP || MAC
+#if ANDROID || iOS || MAC
             throw new PlatformNotSupportedException(
                 "Confidential client and managed identity flows are not available on mobile platforms and on Mac." +
                 "See https://aka.ms/msal-net-confidential-availability and https://aka.ms/msal-net-managed-identity for details.");

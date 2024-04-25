@@ -30,4 +30,3 @@ using Microsoft.Identity.Client;
 [assembly: InternalsVisibleTo("NetFxConsoleApp" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("NetCoreWinFormsWAM" + KeyTokens.MSAL)]
 [assembly: InternalsVisibleTo("DesktopTestApp" + KeyTokens.MSAL)]
-[assembly: InternalsVisibleTo("UWP standalone" + KeyTokens.MSAL)]

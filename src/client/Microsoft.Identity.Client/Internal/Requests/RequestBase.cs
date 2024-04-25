@@ -306,8 +306,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 ApiId = AuthenticationRequestParameters.ApiId,
             };
 
-            apiEvent.IsTokenCacheSerialized = AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.IsExternalSerializationConfiguredByUser();
-            apiEvent.IsLegacyCacheEnabled = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
+            apiEvent.IsTokenCacheSerialized = 
+                AuthenticationRequestParameters.CacheSessionManager.TokenCacheInternal.IsAppSubscribedToSerializationEvents();
+
+            apiEvent.IsLegacyCacheEnabled = 
+                AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
+
             apiEvent.CacheInfo = CacheRefreshReason.NotApplicable;
             apiEvent.TokenType = AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
             apiEvent.AssertionType = GetAssertionType();

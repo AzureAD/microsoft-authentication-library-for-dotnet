@@ -52,7 +52,6 @@
     <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.35.0" />
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.SignedHttpRequest" Version="6.35.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-    <PackageVersion Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
     <PackageVersion Include="MSTest.TestAdapter" Version="3.1.1" />
     <PackageVersion Include="MSTest.TestFramework" Version="3.1.1" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />

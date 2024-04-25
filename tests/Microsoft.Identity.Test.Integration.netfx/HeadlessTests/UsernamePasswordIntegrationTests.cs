@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-#if !WINDOWS_APP && !ANDROID && !iOS // U/P not available on UWP, Android and iOS
+#if !ANDROID && !iOS // U/P not available on Android and iOS
 using System;
 using System.Collections.Generic;
 using System.IO;

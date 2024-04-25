@@ -129,13 +129,9 @@ namespace Microsoft.Identity.Client.UI
         public Activity CallerActivity { get; set; }
 #endif
 
-#if NETFRAMEWORK || WINDOWS_APP
+#if NETFRAMEWORK 
         //hidden webview can be used in both WinRT and desktop applications.
         internal bool UseHiddenBrowser { get; set; }
-#endif
-
-#if WINDOWS_APP
-        internal bool UseCorporateNetwork { get; set; }
 #endif
 
 #if NETFRAMEWORK  || NET_CORE || NETSTANDARD

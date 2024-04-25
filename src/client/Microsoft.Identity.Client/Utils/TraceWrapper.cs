@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Client.Utils
     {
         public static void WriteLine(string message) 
         {
-#if !NETSTANDARD && !WINDOWS_APP
+#if !NETSTANDARD 
             Trace.WriteLine(message);
 #endif
         }

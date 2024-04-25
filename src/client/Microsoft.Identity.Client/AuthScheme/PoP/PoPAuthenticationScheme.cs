@@ -121,11 +121,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         private static string CreateSimpleNonce()
         {
             // Guid with no hyphens
-#if WINDOWS_APP
-            return Guid.NewGuid().ToString("N");
-#else
             return Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);
-#endif
         }
 
         private string ComputeReqCnf()
@@ -142,7 +138,6 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// </summary>
         private static byte[] ComputeThumbprint(string canonicalJwk)
         {
-            // Cannot be easily generalized in UAP and NetStandard 1.3
             using (SHA256 hash = SHA256.Create())
             {
                 return hash.ComputeHash(Encoding.UTF8.GetBytes(canonicalJwk));
