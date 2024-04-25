@@ -9,6 +9,7 @@
   <!-- Add packages, then highlight all lines and go to Edit > Advanced > Sort Lines -->
   <ItemGroup>
     <!-- Packages for the main MSAL code -->
+    <PackageVersion Include="Azure.Identity" Version="1.11.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.RulesetToEditorconfigConverter" Version="3.3.3" PrivateAssets="All" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageVersion Include="Microsoft.Identity.Client.NativeInterop" Version="$(MSALRuntimeNativeInteropVersion)" IncludeAssets="all" />

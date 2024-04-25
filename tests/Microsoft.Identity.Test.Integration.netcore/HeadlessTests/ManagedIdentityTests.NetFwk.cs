@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Azure.Core;
+using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Castle.Core.Internal;
 using Microsoft.Identity.Client;
@@ -92,244 +93,275 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestContext.WriteLine("s2");
 
             TestContext.WriteLine("done");
+
+            Assert.Fail();
         }
 
-//        [DataTestMethod]
-//        [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
-//        [DataRow(MsiAzureResource.Function, "", DisplayName = "System_Identity_Function_App")]
-//        [DataRow(MsiAzureResource.VM, "", DisplayName = "System_Identity_Virtual_Machine")]
-//        [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
-//        [DataRow(MsiAzureResource.Function, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Function_App")]
-//        [DataRow(MsiAzureResource.VM, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Virtual_Machine")]
-//        [DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
-//        [DataRow(MsiAzureResource.Function, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Function_App")]
-//        [DataRow(MsiAzureResource.VM, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Virtual_Machine")]
-//        [DataRow(MsiAzureResource.WebApp, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectID_Web_App")]
-//        [DataRow(MsiAzureResource.Function, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectID_Function_App")]
-//        [DataRow(MsiAzureResource.VM, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectID_Virtual_Machine")]
-//#if ENABLE_AZURE_ARC_TESTS
-//        [DataRow(MsiAzureResource.AzureArc, "", DisplayName = "Azure_ARC")]
-//#endif
-//        public async Task AcquireMSITokenAsync(MsiAzureResource azureResource, string userIdentity, UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
-//        {
-//            //Arrange
-//            using (new EnvVariableContext())
-//            {
-//                // Fetch the env variables from the resource and set them locally
-//                Dictionary<string, string> envVariables =
-//                    await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
+        [TestMethod]
+        public async Task MyTestMethod2Async()
+        {
+            DefaultAzureCredential defaultAzureCredential = new DefaultAzureCredential();
+            AccessToken t = await defaultAzureCredential.GetTokenAsync(
+                new TokenRequestContext(new[] { "https://vault.azure.net/.default" })).ConfigureAwait(false);
 
-//                //Set the Environment Variables
-//                SetEnvironmentVariables(envVariables);
+            TestContext.WriteLine("got a token with default cred!");
 
-//                //form the http proxy URI 
-//                string uri = s_baseURL + $"MSIToken?" +
-//                    $"azureresource={azureResource}&uri=";
 
-//                //Create CCA with Proxy
-//                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
+            TestContext.WriteLine("buildautomation");
 
-//                AuthenticationResult result;
-//                //Act
-//                result = await mia
-//                            .AcquireTokenForManagedIdentity(s_msi_scopes)
-//                            .ExecuteAsync().ConfigureAwait(false);
+            var secretClient = new SecretClient(new Uri(KeyVaultInstance.MsalTeam), defaultAzureCredential);
+            var s = secretClient.GetSecret("automation-foci-app1");
+            Assert.IsNotNull(s);
 
-//                //Assert
-//                //1. Token Type
-//                Assert.AreEqual("Bearer", result.TokenType);
+            TestContext.WriteLine("s");
 
-//                //2. First token response is from the MSI Endpoint
-//                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            Trace.WriteLine("msidlab");
+            var secretClient2 = new SecretClient(new Uri(KeyVaultInstance.MSIDLab), defaultAzureCredential);
+            var s2 = secretClient2.GetSecret("B2CApp");
+            Assert.IsNotNull(s2);
+            TestContext.WriteLine($"s2 {s2.Value.Name}");
 
-//                //3. Validate the ExpiresOn falls within a 24 hour range from now
-//                CoreAssert.IsWithinRange(
-//                                DateTimeOffset.UtcNow + TimeSpan.FromHours(0),
-//                                result.ExpiresOn,
-//                                TimeSpan.FromHours(24));
+            TestContext.WriteLine("done");
 
-//                result = await mia
-//                    .AcquireTokenForManagedIdentity(s_msi_scopes)
-//                    .ExecuteAsync()
-//                    .ConfigureAwait(false);
+            Assert.Fail();
+        }
 
-//                //4. Validate the scope
-//                Assert.IsTrue(result.Scopes.All(s_msi_scopes.Contains));
+        //        [DataTestMethod]
+        //        [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
+        //        [DataRow(MsiAzureResource.Function, "", DisplayName = "System_Identity_Function_App")]
+        //        [DataRow(MsiAzureResource.VM, "", DisplayName = "System_Identity_Virtual_Machine")]
+        //        [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
+        //        [DataRow(MsiAzureResource.Function, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Function_App")]
+        //        [DataRow(MsiAzureResource.VM, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Virtual_Machine")]
+        //        [DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
+        //        [DataRow(MsiAzureResource.Function, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Function_App")]
+        //        [DataRow(MsiAzureResource.VM, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Virtual_Machine")]
+        //        [DataRow(MsiAzureResource.WebApp, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectID_Web_App")]
+        //        [DataRow(MsiAzureResource.Function, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectID_Function_App")]
+        //        [DataRow(MsiAzureResource.VM, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectID_Virtual_Machine")]
+        //#if ENABLE_AZURE_ARC_TESTS
+        //        [DataRow(MsiAzureResource.AzureArc, "", DisplayName = "Azure_ARC")]
+        //#endif
+        //        public async Task AcquireMSITokenAsync(MsiAzureResource azureResource, string userIdentity, UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
+        //        {
+        //            //Arrange
+        //            using (new EnvVariableContext())
+        //            {
+        //                // Fetch the env variables from the resource and set them locally
+        //                Dictionary<string, string> envVariables =
+        //                    await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
 
-//                //5. Validate the second call to token endpoint gets returned from the cache
-//                Assert.AreEqual(TokenSource.Cache,
-//                    result.AuthenticationResultMetadata.TokenSource);
-//            }
-//        }
+        //                //Set the Environment Variables
+        //                SetEnvironmentVariables(envVariables);
 
-//        [DataTestMethod]
-//        [DataRow(MsiAzureResource.WebApp, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
-//        [DataRow(MsiAzureResource.WebApp, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_Web_App")]
-//        [DataRow(MsiAzureResource.WebApp, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
-//        [DataRow(MsiAzureResource.Function, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Function_App")]
-//        [DataRow(MsiAzureResource.Function, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_Function_App")]
-//        [DataRow(MsiAzureResource.Function, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Function_App")]
-//        [DataRow(MsiAzureResource.VM, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_VM")]
-//        [DataRow(MsiAzureResource.VM, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_VM")]
-//        [DataRow(MsiAzureResource.VM, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_VM")]
-//        public async Task ManagedIdentityRequestFailureCheckAsync(MsiAzureResource azureResource, string userIdentity, UserAssignedIdentityId userAssignedIdentityId)
-//        {
-//            RunOnHelper.AssertFramework(TargetFrameworks.NetCore);
+        //                //form the http proxy URI 
+        //                string uri = s_baseURL + $"MSIToken?" +
+        //                    $"azureresource={azureResource}&uri=";
 
-//            //Arrange
-//            using (new EnvVariableContext())
-//            {
-//                //Get the Environment Variables
-//                Dictionary<string, string> envVariables =
-//                    await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
+        //                //Create CCA with Proxy
+        //                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
 
-//                //Set the Environment Variables
-//                SetEnvironmentVariables(envVariables);
+        //                AuthenticationResult result;
+        //                //Act
+        //                result = await mia
+        //                            .AcquireTokenForManagedIdentity(s_msi_scopes)
+        //                            .ExecuteAsync().ConfigureAwait(false);
 
-//                //form the http proxy URI 
-//                string uri = s_baseURL + $"MSIToken?" +
-//                    $"azureresource={azureResource}&uri=";
+        //                //Assert
+        //                //1. Token Type
+        //                Assert.AreEqual("Bearer", result.TokenType);
 
-//                //Create ManagedIdentityApplication with Proxy
-//                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
+        //                //2. First token response is from the MSI Endpoint
+        //                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
-//                //Act
-//                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
-//                {
-//                    await mia
-//                    .AcquireTokenForManagedIdentity(s_msi_scopes)
-//                    .ExecuteAsync().ConfigureAwait(false);
-//                }).ConfigureAwait(false);
+        //                //3. Validate the ExpiresOn falls within a 24 hour range from now
+        //                CoreAssert.IsWithinRange(
+        //                                DateTimeOffset.UtcNow + TimeSpan.FromHours(0),
+        //                                result.ExpiresOn,
+        //                                TimeSpan.FromHours(24));
 
-//                //set the expected resource
-//                ManagedIdentitySource expectedResource = azureResource == MsiAzureResource.VM ?
-//                    ManagedIdentitySource.Imds : ManagedIdentitySource.AppService;
+        //                result = await mia
+        //                    .AcquireTokenForManagedIdentity(s_msi_scopes)
+        //                    .ExecuteAsync()
+        //                    .ConfigureAwait(false);
 
-//                //Assert
-//                Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
-//                Assert.AreEqual(expectedResource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
-//            }
-//        }
+        //                //4. Validate the scope
+        //                Assert.IsTrue(result.Scopes.All(s_msi_scopes.Contains));
 
-//        [DataTestMethod]
-//        [DataRow(MsiAzureResource.WebApp, "", UserAssignedIdentityId.None, DisplayName = "System_Identity_Web_App")]
-//        [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
-//        [DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceId_Web_App")]
-//        [DataRow(MsiAzureResource.WebApp, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_Web_App")]
-//        public async Task MSIWrongScopesAsync(MsiAzureResource azureResource, string userIdentity, UserAssignedIdentityId userAssignedIdentityId)
-//        {
-//            //Arrange
-//            using (new EnvVariableContext())
-//            {
-//                //Get the Environment Variables
-//                Dictionary<string, string> envVariables =
-//                    await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
+        //                //5. Validate the second call to token endpoint gets returned from the cache
+        //                Assert.AreEqual(TokenSource.Cache,
+        //                    result.AuthenticationResultMetadata.TokenSource);
+        //            }
+        //        }
 
-//                //Set the Environment Variables
-//                SetEnvironmentVariables(envVariables);
+        //        [DataTestMethod]
+        //        [DataRow(MsiAzureResource.WebApp, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
+        //        [DataRow(MsiAzureResource.WebApp, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_Web_App")]
+        //        [DataRow(MsiAzureResource.WebApp, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
+        //        [DataRow(MsiAzureResource.Function, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Function_App")]
+        //        [DataRow(MsiAzureResource.Function, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_Function_App")]
+        //        [DataRow(MsiAzureResource.Function, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Function_App")]
+        //        [DataRow(MsiAzureResource.VM, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_VM")]
+        //        [DataRow(MsiAzureResource.VM, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_VM")]
+        //        [DataRow(MsiAzureResource.VM, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_VM")]
+        //        public async Task ManagedIdentityRequestFailureCheckAsync(MsiAzureResource azureResource, string userIdentity, UserAssignedIdentityId userAssignedIdentityId)
+        //        {
+        //            RunOnHelper.AssertFramework(TargetFrameworks.NetCore);
 
-//                //form the http proxy URI 
-//                string uri = s_baseURL + $"MSIToken?" +
-//                    $"azureresource={azureResource}&uri=";
+        //            //Arrange
+        //            using (new EnvVariableContext())
+        //            {
+        //                //Get the Environment Variables
+        //                Dictionary<string, string> envVariables =
+        //                    await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
 
-//                //Create CCA with Proxy
-//                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
+        //                //Set the Environment Variables
+        //                SetEnvironmentVariables(envVariables);
 
-//                //Act
-//                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
-//                {
-//                    await mia
-//                    .AcquireTokenForManagedIdentity(s_wrong_msi_scopes)
-//                    .ExecuteAsync().ConfigureAwait(false);
-//                }).ConfigureAwait(false);
+        //                //form the http proxy URI 
+        //                string uri = s_baseURL + $"MSIToken?" +
+        //                    $"azureresource={azureResource}&uri=";
 
-//                //Assert
-//                Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
-//                Assert.AreEqual(ManagedIdentitySource.AppService.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
-//            }
-//        }
+        //                //Create ManagedIdentityApplication with Proxy
+        //                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
 
-//        /// <summary>
-//        /// Gets the environment variable
-//        /// </summary>
-//        /// <param name="resource"></param>
-//        /// <returns></returns>
-//        private async Task<Dictionary<string, string>> GetEnvironmentVariablesAsync(
-//            MsiAzureResource resource)
-//        {
-//            Dictionary<string, string> environmentVariables = new Dictionary<string, string>();
+        //                //Act
+        //                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
+        //                {
+        //                    await mia
+        //                    .AcquireTokenForManagedIdentity(s_msi_scopes)
+        //                    .ExecuteAsync().ConfigureAwait(false);
+        //                }).ConfigureAwait(false);
 
-//            //Get the Environment Variables from the MSI Helper Service
-//            string uri = s_baseURL + "EnvironmentVariables?resource=" + resource;
+        //                //set the expected resource
+        //                ManagedIdentitySource expectedResource = azureResource == MsiAzureResource.VM ?
+        //                    ManagedIdentitySource.Imds : ManagedIdentitySource.AppService;
 
-//            var environmentVariableResponse = await LabUserHelper
-//                .GetMSIEnvironmentVariablesAsync(uri)
-//                .ConfigureAwait(false);
+        //                //Assert
+        //                Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
+        //                Assert.AreEqual(expectedResource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
+        //            }
+        //        }
 
-//            //process the response
-//            if (!string.IsNullOrEmpty(environmentVariableResponse))
-//            {
-//#if NET6_0_OR_GREATER
-//                environmentVariables = System.Text.Json.JsonSerializer.Deserialize
-//                    <Dictionary<string, string>>(environmentVariableResponse);
-//#else
-//                environmentVariables = Microsoft.Identity.Json.JsonConvert.DeserializeObject
-//                    <Dictionary<string, string>>(environmentVariableResponse);
-//#endif
-//            }
+        //        [DataTestMethod]
+        //        [DataRow(MsiAzureResource.WebApp, "", UserAssignedIdentityId.None, DisplayName = "System_Identity_Web_App")]
+        //        [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
+        //        [DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceId_Web_App")]
+        //        [DataRow(MsiAzureResource.WebApp, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_Web_App")]
+        //        public async Task MSIWrongScopesAsync(MsiAzureResource azureResource, string userIdentity, UserAssignedIdentityId userAssignedIdentityId)
+        //        {
+        //            //Arrange
+        //            using (new EnvVariableContext())
+        //            {
+        //                //Get the Environment Variables
+        //                Dictionary<string, string> envVariables =
+        //                    await GetEnvironmentVariablesAsync(azureResource).ConfigureAwait(false);
 
-//            return environmentVariables;
-//        }
+        //                //Set the Environment Variables
+        //                SetEnvironmentVariables(envVariables);
 
-//        /// <summary>
-//        /// Sets the Environment Variables
-//        /// </summary>
-//        /// <param name="envVariables"></param>
-//        private void SetEnvironmentVariables(Dictionary<string, string> envVariables)
-//        {
-//            //Set the environment variables
-//            foreach (KeyValuePair<string, string> kvp in envVariables)
-//            {
-//                Environment.SetEnvironmentVariable(kvp.Key, kvp.Value);
-//            }
-//        }
+        //                //form the http proxy URI 
+        //                string uri = s_baseURL + $"MSIToken?" +
+        //                    $"azureresource={azureResource}&uri=";
 
-//        /// <summary>
-//        /// Create the MIA with the http proxy
-//        /// </summary>
-//        /// <param name="url"></param>
-//        /// <param name="userAssignedId"></param>
-//        /// <returns></returns>
-//        private IManagedIdentityApplication CreateMIAWithProxy(string url, string userAssignedId = "", UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
-//        {
-//            //Proxy the MSI token request 
-//            MsiProxyHttpManager proxyHttpManager = new MsiProxyHttpManager(url);
+        //                //Create CCA with Proxy
+        //                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, userIdentity, userAssignedIdentityId);
 
-//            var builder = ManagedIdentityApplicationBuilder
-//               .Create(ManagedIdentityId.SystemAssigned);
+        //                //Act
+        //                MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(async () =>
+        //                {
+        //                    await mia
+        //                    .AcquireTokenForManagedIdentity(s_wrong_msi_scopes)
+        //                    .ExecuteAsync().ConfigureAwait(false);
+        //                }).ConfigureAwait(false);
 
-//            switch (userAssignedIdentityId)
-//            {
-//                case UserAssignedIdentityId.ClientId:
-//                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(userAssignedId));
-//                    break;
+        //                //Assert
+        //                Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
+        //                Assert.AreEqual(ManagedIdentitySource.AppService.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
+        //            }
+        //        }
 
-//                case UserAssignedIdentityId.ResourceId:
-//                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedResourceId(userAssignedId));
-//                    break;
+        //        /// <summary>
+        //        /// Gets the environment variable
+        //        /// </summary>
+        //        /// <param name="resource"></param>
+        //        /// <returns></returns>
+        //        private async Task<Dictionary<string, string>> GetEnvironmentVariablesAsync(
+        //            MsiAzureResource resource)
+        //        {
+        //            Dictionary<string, string> environmentVariables = new Dictionary<string, string>();
 
-//                case UserAssignedIdentityId.ObjectId:
-//                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedObjectId(userAssignedId));
-//                    break;
-//            }
+        //            //Get the Environment Variables from the MSI Helper Service
+        //            string uri = s_baseURL + "EnvironmentVariables?resource=" + resource;
 
-//            // Disabling shared cache options to avoid cross test pollution.
-//            builder.Config.AccessorOptions = null;
+        //            var environmentVariableResponse = await LabUserHelper
+        //                .GetMSIEnvironmentVariablesAsync(uri)
+        //                .ConfigureAwait(false);
 
-//            IManagedIdentityApplication mia = builder
-//                .WithHttpManager(proxyHttpManager).Build();
+        //            //process the response
+        //            if (!string.IsNullOrEmpty(environmentVariableResponse))
+        //            {
+        //#if NET6_0_OR_GREATER
+        //                environmentVariables = System.Text.Json.JsonSerializer.Deserialize
+        //                    <Dictionary<string, string>>(environmentVariableResponse);
+        //#else
+        //                environmentVariables = Microsoft.Identity.Json.JsonConvert.DeserializeObject
+        //                    <Dictionary<string, string>>(environmentVariableResponse);
+        //#endif
+        //            }
 
-//            return mia;
-//        }
+        //            return environmentVariables;
+        //        }
+
+        //        /// <summary>
+        //        /// Sets the Environment Variables
+        //        /// </summary>
+        //        /// <param name="envVariables"></param>
+        //        private void SetEnvironmentVariables(Dictionary<string, string> envVariables)
+        //        {
+        //            //Set the environment variables
+        //            foreach (KeyValuePair<string, string> kvp in envVariables)
+        //            {
+        //                Environment.SetEnvironmentVariable(kvp.Key, kvp.Value);
+        //            }
+        //        }
+
+        //        /// <summary>
+        //        /// Create the MIA with the http proxy
+        //        /// </summary>
+        //        /// <param name="url"></param>
+        //        /// <param name="userAssignedId"></param>
+        //        /// <returns></returns>
+        //        private IManagedIdentityApplication CreateMIAWithProxy(string url, string userAssignedId = "", UserAssignedIdentityId userAssignedIdentityId = UserAssignedIdentityId.None)
+        //        {
+        //            //Proxy the MSI token request 
+        //            MsiProxyHttpManager proxyHttpManager = new MsiProxyHttpManager(url);
+
+        //            var builder = ManagedIdentityApplicationBuilder
+        //               .Create(ManagedIdentityId.SystemAssigned);
+
+        //            switch (userAssignedIdentityId)
+        //            {
+        //                case UserAssignedIdentityId.ClientId:
+        //                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId(userAssignedId));
+        //                    break;
+
+        //                case UserAssignedIdentityId.ResourceId:
+        //                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedResourceId(userAssignedId));
+        //                    break;
+
+        //                case UserAssignedIdentityId.ObjectId:
+        //                    builder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedObjectId(userAssignedId));
+        //                    break;
+        //            }
+
+        //            // Disabling shared cache options to avoid cross test pollution.
+        //            builder.Config.AccessorOptions = null;
+
+        //            IManagedIdentityApplication mia = builder
+        //                .WithHttpManager(proxyHttpManager).Build();
+
+        //            return mia;
+        //        }
     }
 }

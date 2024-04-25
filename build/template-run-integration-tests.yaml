@@ -44,5 +44,5 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'      
-    testFiltercriteria: 'ClassName~MyTestClassName'
+    testFiltercriteria: 'ClassName~ManagedIdentityTests'
 
