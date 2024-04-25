@@ -35,6 +35,7 @@
     <PackageReference Include="Selenium.WebDriver" />
     <PackageReference Include="StrongNamer" />
     <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="Azure.Identity" />
 
     <PackageReference Include="coverlet.collector" />
   </ItemGroup>
