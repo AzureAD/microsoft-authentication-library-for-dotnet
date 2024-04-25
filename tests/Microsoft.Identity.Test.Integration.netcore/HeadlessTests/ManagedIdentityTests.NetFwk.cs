@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core;
@@ -67,7 +68,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task DirectMSI_MSAL_Async()
         {
-            var mia = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId("4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6"))
+            var mia = ManagedIdentityApplicationBuilder.Create(
+                ManagedIdentityId.WithUserAssignedClientId("4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6"))
                 .WithLogging((_, m, _) => { Trace.WriteLine(m); }, LogLevel.Verbose, true)
                 .Build();
 
@@ -134,12 +136,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task MyTestMethod3Async()
         {
+            StringBuilder sb = new StringBuilder();
             // get all environment variables and print 
             foreach (DictionaryEntry e in System.Environment.GetEnvironmentVariables())
             {
-                TestContext.WriteLine(e.Key + ":" + e.Value);
-                Console.WriteLine(e.Key + ":" + e.Value);
+                sb.Append($"{e.Key}={e.Value}");
             }
+
+            Assert.Fail(sb.ToString());
 
 
             WorkloadIdentityCredential workloadIdentityCredential = new WorkloadIdentityCredential(
