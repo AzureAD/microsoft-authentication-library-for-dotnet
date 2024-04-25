@@ -3,7 +3,7 @@
 
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Credential
+namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal interface IManagedIdentityCredentialResponse
     {

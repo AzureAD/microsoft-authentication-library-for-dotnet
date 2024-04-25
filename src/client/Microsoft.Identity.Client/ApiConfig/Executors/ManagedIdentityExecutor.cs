@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
-            if (_managedIdentityApplication.KeyMaterialManager.CryptoKeyType != CryptoKeyType.None)
+            if (_managedIdentityApplication.KeyMaterialManager.CryptoKeyType != CryptoKeyType.Undefined)
             {
                 // managed identity resource 
                 string miResource = managedIdentityParameters.Resource;
@@ -65,10 +65,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 _managedIdentityApplication.AppTokenCacheInternal).ConfigureAwait(false);
 
             // MSI factory logic - decide if we need to use the legacy or the new MSI flow
-
             RequestBase handler = null;
 
-            // May or may not be initialized, depending on the state of the machine
+            // May or may not be initialized, depending on the state of the Azure resource
             handler = CredentialBasedMsiAuthRequest.TryCreate(
                 ServiceBundle,
                 requestParams,

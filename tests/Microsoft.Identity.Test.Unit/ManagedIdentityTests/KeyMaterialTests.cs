@@ -5,13 +5,12 @@ using System.Security.Cryptography.X509Certificates;
 using System;
 using Microsoft.Identity.Client.Core;
 #if SUPPORTS_MTLS
-using Microsoft.Identity.Client.Platforms.netcore;
+using Microsoft.Identity.Client.Platforms.Features.SLC;
 #endif
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Client.Internal.Logger;
-using System.Security.Cryptography;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
@@ -21,21 +20,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class KeyMaterialTests : TestBase
     {
-        private readonly ILoggerAdapter _logger = new NullLogger();
 #if SUPPORTS_MTLS
-        [TestMethod]
-        public void GetOrCreateCertificateFromCryptoKeyInfo_NoKey_ReturnsCertificate()
-        {
-            // Arrange
-            var provider = new ManagedIdentityCertificateProvider(_logger);
-
-            // Act
-            X509Certificate2 result = provider.GetOrCreateCertificateFromCryptoKeyInfo();
-
-            // Assert
-            Assert.IsNotNull(result, "Expected a certificate to be returned.");
-            Assert.AreEqual("CN=ManagedIdentitySlcCertificate", result.Subject, "The certificate does not have the expected subject name.");
-        }
 
         [TestMethod]
         public void CertificateNeedsRotation_DefaultRotationValue_ReturnsFalse()

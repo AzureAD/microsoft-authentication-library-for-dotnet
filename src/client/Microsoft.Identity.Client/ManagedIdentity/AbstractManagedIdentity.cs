@@ -233,7 +233,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             if (ex is HttpRequestException httpRequestException)
             {
-                CreateAndThrowException(MsalError.ManagedIdentityUnreachableNetwork, httpRequestException.Message, httpRequestException, source);
+                CreateAndThrowException(MsalError.CredentialUnreachableNetwork, httpRequestException.Message, httpRequestException, source);
             }
             else if (ex is TaskCanceledException)
             {

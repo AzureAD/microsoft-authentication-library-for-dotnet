@@ -1,10 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Platforms.Windows
 {
@@ -35,10 +33,5 @@ namespace Microsoft.Identity.Client.Platforms.Windows
         /// </summary>
         /// <returns>True if virtualization-based security is available</returns>
         bool IsVBSEnabled();
-
-        /// <summary>
-        /// Determine the KeyType of the given CngKey
-        /// </summary>
-        void DetermineKeyType(CngKey cngKey);
     }
 }

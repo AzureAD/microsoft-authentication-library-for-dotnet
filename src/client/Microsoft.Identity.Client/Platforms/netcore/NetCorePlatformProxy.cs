@@ -15,8 +15,8 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
-#if NETSTANDARD
-using Microsoft.Identity.Client.Platforms.netstandard;
+#if !NETSTANDARD
+using Microsoft.Identity.Client.Platforms.Features.SLC;
 #endif
 using Microsoft.Identity.Client.Platforms.Shared.NetStdCore;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;

@@ -8,14 +8,13 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.Identity.Client.Credential
+namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal class ManagedIdentityCredentialResponse : IManagedIdentityCredentialResponse
     {
@@ -99,7 +98,7 @@ namespace Microsoft.Identity.Client.Credential
 
                 // Throw an exception indicating that the CredentialResponse is invalid
                 MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
-                    MsalError.ManagedIdentityRequestFailed,
+                    MsalError.CredentialRequestFailed,
                     MsalErrorMessage.ManagedIdentityInvalidResponse,
                     null,
                     ManagedIdentitySource.Credential,

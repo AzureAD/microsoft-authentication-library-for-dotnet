@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Platforms.Windows
         /// <summary>
         /// cryptographic key type
         /// </summary>
-        public CryptoKeyType CryptoKeyType { get; private set; } = CryptoKeyType.None;
+        public CryptoKeyType CryptoKeyType { get; private set; } = CryptoKeyType.Undefined;
 
         internal KeyGuardManager(ILoggerAdapter logger)
         {
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Platforms.Windows
                 }
 
                 // If machine key is not available, fall back to software key
-                if (TryGetKeyMaterial(KeyProviderName, SoftwareKeyName, CngKeyOpenOptions.None, out ecdsaKey))
+                if (TryGetKeyMaterial(KeyProviderName, MsalKeyGuardKeyName, CngKeyOpenOptions.None, out ecdsaKey))
                 {
                     _logger.Verbose(() => $"[Managed Identity] A non-machine key was found. Key Name : {SoftwareKeyName}. ");
                     return ecdsaKey;
@@ -66,10 +66,10 @@ namespace Microsoft.Identity.Client.Platforms.Windows
                     "Attempting to create a new key for Managed Identity.");
 
                 // Attempt to create a new key if none are available
-                if (TryCreateKeyMaterial(MsalKeyGuardKeyName, out ecdsaKey))
-                {
-                    return ecdsaKey;
-                }
+                //if (TryCreateKeyMaterial(MsalKeyGuardKeyName, out ecdsaKey))
+                //{
+                //    return ecdsaKey;
+                //}
 
                 // All attempts for getting keys failed
                 // Now we should follow the legacy managed identity flow
@@ -110,8 +110,13 @@ namespace Microsoft.Identity.Client.Platforms.Windows
                 // Open the key with the specified options
                 var cngKey = CngKey.Open(keyName, new CngProvider(keyProviderName), options);
                 ecdsaKey = new ECDsaCng(cngKey);
-                DetermineKeyType(cngKey);
-                return true;
+
+                //check if the key is protected by KeyGuard
+                if (IsKeyGuardProtected(cngKey))
+                {
+                    CryptoKeyType = CryptoKeyType.KeyGuard;
+                    return true;
+                }
             }
             catch (CryptographicException ex)
             {
@@ -160,42 +165,12 @@ namespace Microsoft.Identity.Client.Platforms.Windows
                 {
                     // KeyGuard key is available; set the cryptographic key type accordingly
                     _logger.Info("[Managed Identity] KeyGuard key is available. ");
-                    CryptoKeyType = CryptoKeyType.KeyGuard;
                     return true;
                 }
             }
 
             // KeyGuard key is not available
             return false;
-        }
-
-        /// <summary>
-        /// Determines the cryptographic key type based on the characteristics of the specified CNG key.
-        /// </summary>
-        /// <param name="cngKey">The CNG key for which to determine the cryptographic key type.</param>
-        public void DetermineKeyType(CngKey cngKey)
-        {
-            switch (true)
-            {
-                case var _ when cngKey.IsMachineKey:
-                    CryptoKeyType = CryptoKeyType.Machine;
-                    // Determine whether the key is KeyGuard protected
-                    _ = IsKeyGuardProtected(cngKey);
-                    break;
-
-                case var _ when !cngKey.IsEphemeral && !cngKey.IsMachineKey:
-                    CryptoKeyType = CryptoKeyType.User;
-                    break;
-
-                case var _ when cngKey.IsEphemeral:
-                    CryptoKeyType = CryptoKeyType.Ephemeral;
-                    break;
-
-                default:
-                    // Handle other cases if needed
-                    CryptoKeyType = CryptoKeyType.InMemory;
-                    break;
-            }
         }
 
         /// <summary>
@@ -246,7 +221,7 @@ namespace Microsoft.Identity.Client.Platforms.Windows
                 using var cngKey = CngKey.Create(CngAlgorithm.ECDsaP256, keyName, keyParams);
                 ecdsaKey = new ECDsaCng(cngKey);
                 _logger.Info($"[Managed Identity] Key '{keyName}' created successfully with Virtual Isolation.");
-
+                CryptoKeyType = CryptoKeyType.User;
                 return true; // Key creation was successful
             }
             catch (Exception ex)

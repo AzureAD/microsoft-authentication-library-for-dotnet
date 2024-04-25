@@ -1140,6 +1140,11 @@ namespace Microsoft.Identity.Client
         public const string ManagedIdentityUnreachableNetwork = "managed_identity_unreachable_network";
 
         /// <summary>
+        /// Credential endpoint is not reachable.
+        /// </summary>
+        public const string CredentialUnreachableNetwork = "credential_endpoint_unreachable_network";
+
+        /// <summary>
         /// Unknown error response received.
         /// </summary>
         public const string UnknownManagedIdentityError = "unknown_managed_identity_error";

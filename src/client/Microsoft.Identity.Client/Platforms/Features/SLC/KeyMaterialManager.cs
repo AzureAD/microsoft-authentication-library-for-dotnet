@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Platforms.Windows;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
-namespace Microsoft.Identity.Client.Platforms.netcore
+namespace Microsoft.Identity.Client.Platforms.Features.SLC
 {
     /// <summary>
     /// Provides X509_2 certificates and cryptographic key information for a Credential based 
@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
     internal class ManagedIdentityCertificateProvider : IKeyMaterialManager
     {
         // Field to store the current crypto key type
-        private static CryptoKeyType s_cryptoKeyType = CryptoKeyType.None;
+        private static CryptoKeyType s_cryptoKeyType = CryptoKeyType.Undefined;
 
         // Name for the key storage provider and key names on Windows
         private const string KeyProviderName = "Microsoft Software Key Storage Provider";
