@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -63,7 +64,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
 
         [TestMethod]        
-        public async Task MyTestMethodAsync()
+        public async Task DirectMSI_MSAL_Async()
         {
             var mia = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.WithUserAssignedClientId("4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6"))
                 .WithLogging((_, m, _) => { Trace.WriteLine(m); }, LogLevel.Verbose, true)
@@ -98,8 +99,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task MyTestMethod2Async()
+        public async Task DefaultAzureCredential_Async()
         {
+            // This will try a bunch of methods to get a token: 
+            // - Managed Identity (won't work)
+            // - Wokload Identity (won't work) ... not configured?
             DefaultAzureCredential defaultAzureCredential = new DefaultAzureCredential();
             AccessToken t = await defaultAzureCredential.GetTokenAsync(
                 new TokenRequestContext(new[] { "https://vault.azure.net/.default" })).ConfigureAwait(false);
@@ -123,6 +127,29 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             TestContext.WriteLine("done");
 
+            Assert.Fail();
+        }
+
+        [TestMethod]
+        public async Task MyTestMethod3Async()
+        {
+            // get all environment variables and print 
+            foreach (DictionaryEntry e in System.Environment.GetEnvironmentVariables())
+            {
+                TestContext.WriteLine(e.Key + ":" + e.Value);
+                Console.WriteLine(e.Key + ":" + e.Value);
+            }
+
+
+            WorkloadIdentityCredential workloadIdentityCredential = new WorkloadIdentityCredential(
+                new WorkloadIdentityCredentialOptions()
+                {
+                    ClientId = "4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6",
+                    TenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47"
+                });
+
+
+            var t = workloadIdentityCredential.GetToken(new TokenRequestContext(new[] { "https://vault.azure.net/.default" }));
             Assert.Fail();
         }
 
