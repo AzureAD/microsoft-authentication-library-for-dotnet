@@ -17,7 +17,8 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.Credential;
+using Microsoft.Identity.Client.ManagedIdentity;
+
 
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;

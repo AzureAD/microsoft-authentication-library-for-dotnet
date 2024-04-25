@@ -2,23 +2,31 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 {
     /// <summary>
-    /// Enumerates various types of crypto keys used in the application.
+    /// Defines an enumeration of different types of cryptographic keys that can be used within the application.
+    /// Each member of this enum represents a specific type of cryptographic key with a unique purpose.
     /// </summary>
     internal enum CryptoKeyType
     {
-        None = 0,         // No specific crypto key type.
-        KeyGuard = 1,     // KeyGuard-protected key.
-        Machine = 2,      // Machine key.
-        User = 3,         // User Key.
-        Ephemeral = 4,    // Ephemeral (short-lived) key.
-        InMemory = 5     // In-memory key.
+        /// <summary>
+        /// Represents an undefined cryptographic key type when MSAL is not able to identify the key type. 
+        /// Used as a default value when no specific key type is applicable.
+        /// </summary>
+        Undefined = 0,
+
+        /// <summary>
+        /// Represents a cryptographic machine key protected by KeyGuard. This key is typically used for operations 
+        /// requiring higher security enforced by system hardware for e.g. to acquire a POP token.
+        /// </summary>
+        KeyGuard = 1,
+
+        /// <summary>
+        /// Represents a cryptographic user key protected by KeyGuard. This key is user-specific and provides 
+        /// the same security measures like a machine key, but is only used to acquire cae based tokens.
+        /// </summary>
+        User = 2,
     }
 }

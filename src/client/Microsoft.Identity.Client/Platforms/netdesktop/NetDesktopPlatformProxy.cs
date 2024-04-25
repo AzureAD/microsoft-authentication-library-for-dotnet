@@ -15,13 +15,13 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
-#if NET472_OR_GREATER
-using Microsoft.Identity.Client.Platforms.netcore;
-#endif
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Win32;
+#if NET472_OR_GREATER
+using Microsoft.Identity.Client.Platforms.Features.SLC;
+#endif
 
 namespace Microsoft.Identity.Client.Platforms.netdesktop
 {

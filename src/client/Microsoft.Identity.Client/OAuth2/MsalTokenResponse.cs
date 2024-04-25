@@ -251,17 +251,15 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             ValidateManagedIdentityResult(managedIdentityResponse);
 
-            long expiresOn = long.TryParse(managedIdentityResponse.ExpiresIn, out long expiresIn)
-                ? expiresIn
-                : DateTimeHelpers.GetDurationFromNowInSeconds(managedIdentityResponse.ExpiresOn);
+            long expiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(managedIdentityResponse.ExpiresOn);
 
             return new MsalTokenResponse
             {
                 AccessToken = managedIdentityResponse.AccessToken,
-                ExpiresIn = expiresOn,
+                ExpiresIn = expiresIn,
                 TokenType = managedIdentityResponse.TokenType,
                 TokenSource = TokenSource.IdentityProvider,
-                RefreshIn = InferManagedIdentityRefreshInValue(expiresOn)
+                RefreshIn = InferManagedIdentityRefreshInValue(expiresIn)
             };
         }
 
@@ -284,11 +282,8 @@ namespace Microsoft.Identity.Client.OAuth2
                 HandleInvalidExternalValueError(nameof(response.AccessToken));
             }
 
-            long expiresOn = long.TryParse(response.ExpiresIn, out long expiresIn)
-                ? expiresIn
-                : DateTimeHelpers.GetDurationFromNowInSeconds(response.ExpiresOn);
-
-            if (expiresOn <= 0)
+            long expiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(response.ExpiresOn);
+            if (expiresIn <= 0)
             {
                 HandleInvalidExternalValueError(nameof(response.ExpiresOn));
             }

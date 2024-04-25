@@ -33,10 +33,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         /// Test the Public APIs for Credential endpoint support for http client customizations.
         /// </summary>
         [DataTestMethod]
-        [DataRow(CryptoKeyType.Machine)]
         [DataRow(CryptoKeyType.User)]
-        [DataRow(CryptoKeyType.InMemory)]
-        [DataRow(CryptoKeyType.Ephemeral)]
         [DataRow(CryptoKeyType.KeyGuard)]
         public void CredentialPublicApi(int keyType)
         {
@@ -108,7 +105,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpClientFactory(mockHttpClient);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.User);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -150,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpClientFactory(mockHttpClient as IMsalMtlsHttpClientFactory);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.User);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.

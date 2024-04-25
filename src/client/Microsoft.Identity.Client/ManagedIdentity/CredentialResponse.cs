@@ -9,7 +9,7 @@ using JsonProperty = System.Text.Json.Serialization.JsonPropertyNameAttribute;
 using Microsoft.Identity.Json;
 #endif
 
-namespace Microsoft.Identity.Client.Credential
+namespace Microsoft.Identity.Client.ManagedIdentity
 {
     [JsonObject]
     [Preserve(AllMembers = true)]

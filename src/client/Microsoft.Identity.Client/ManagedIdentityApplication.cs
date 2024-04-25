@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Boolean indicating if Claims is supported</returns>
         public bool IsClaimsSupportedByClient()
         {
-            return KeyMaterialManager.CryptoKeyType != CryptoKeyType.None;
+            return KeyMaterialManager.CryptoKeyType != CryptoKeyType.Undefined;
         }
 
         /// <summary>
