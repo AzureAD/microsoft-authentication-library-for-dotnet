@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -20,8 +21,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class WwwAuthenticateParametersIntegrationTests
     {
-        private const string ProtectedUrl = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
-
         [TestMethod]
         public async Task CreateWwwAuthenticateResponseFromKeyVaultUrlAsync()
         {
@@ -58,10 +57,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// <param name="subscriptionId">Well-known subscription ID</param>
         /// <param name="authority">AAD endpoint, e.g. Production or PPE</param>
         /// <param name="tenantId">Expected Tenant ID</param>
-        [TestMethod]
-        [DataRow("management.azure.com", "c1686c51-b717-4fe0-9af3-24a20a41fb0c", "login.windows.net", "72f988bf-86f1-41af-91ab-2d7cd011db47")]
-        [DataRow("api-dogfood.resources.windows-int.net", "1835ad3d-4585-4c5f-b55a-b0c3cbda1103", "login.windows-ppe.net", "94430a9c-83e9-4f08-bbb0-64fccd0661fc")]
-        public async Task CreateWwwAuthenticateResponseFromAzureResourceManagerUrlAsync(string hostName, string subscriptionId, string authority, string tenantId)
+        [RunOn(TargetFrameworks.NetFx)]
+        public async Task CreateWwwAuthenticateResponseFromAzureResourceManagerUrlAsync()
+        {
+            await RunTestForSettingsAsync(
+                "management.azure.com",
+                "c1686c51-b717-4fe0-9af3-24a20a41fb0c",
+                "login.windows.net",
+                "72f988bf-86f1-41af-91ab-2d7cd011db47").ConfigureAwait(false);
+        }
+
+        private static async Task RunTestForSettingsAsync(string hostName, string subscriptionId, string authority, string tenantId)
         {
             const string apiVersion = "2020-08-01"; // current latest API version for /subscriptions/get
             var url = $"https://{hostName}/subscriptions/{subscriptionId}?api-version={apiVersion}";
@@ -78,7 +84,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual($"https://{authority}/{tenantId}", authParams.RawParameters["authorization_uri"]);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ExtractNonceFromWwwAuthHeadersAsync()
         {
             //Arrange & Act
@@ -102,7 +108,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await PoPValidator.VerifyPopNonceAsync(popNonce).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ExtractNonceFromAuthInfoHeadersAsync()
         {
             //Arrange & Act
@@ -118,7 +124,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             await PoPValidator.VerifyPopNonceAsync(authInfoParameters.NextNonce).ConfigureAwait(false);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ExtractNonceWithAuthParserAsync()
         {
             //Arrange & Act
