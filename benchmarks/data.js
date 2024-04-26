@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1714137961385,
+  "lastUpdate": 1714137963214,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -17026,6 +17026,54 @@ window.BENCHMARK_DATA = {
             "value": 174154.2980143229,
             "unit": "ns",
             "range": "± 889.0506608599816"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1107c3e157bfa6efc50ae6419ae9da38d309ae89",
+          "message": "Update Kerberos docs and make some api internal (#4726)\n\n* Update Kerberos docs and make some api internal\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/PublicClientApplicationBuilder.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/PublicClientApplicationBuilder.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n---------\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>",
+          "timestamp": "2024-04-26T13:18:27Z",
+          "tree_id": "3775a4e97ef28edfd7f1922b83d7050b580f8cd9",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/1107c3e157bfa6efc50ae6419ae9da38d309ae89"
+        },
+        "date": 1714137962672,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 22319.21274312337,
+            "unit": "ns",
+            "range": "± 31.83854807387164"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 172200.78885323662,
+            "unit": "ns",
+            "range": "± 925.5106076354805"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 33845.05089518229,
+            "unit": "ns",
+            "range": "± 352.1963142353376"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 173573.33332170759,
+            "unit": "ns",
+            "range": "± 1151.0855588316292"
           }
         ]
       }
