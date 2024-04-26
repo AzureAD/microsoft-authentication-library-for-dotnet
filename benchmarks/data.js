@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1713958591021,
+  "lastUpdate": 1714137959618,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -4922,6 +4922,42 @@ window.BENCHMARK_DATA = {
             "value": 356875.1538461539,
             "unit": "ns",
             "range": "± 1608.1389785584374"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1107c3e157bfa6efc50ae6419ae9da38d309ae89",
+          "message": "Update Kerberos docs and make some api internal (#4726)\n\n* Update Kerberos docs and make some api internal\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/PublicClientApplicationBuilder.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/PublicClientApplicationBuilder.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n---------\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>",
+          "timestamp": "2024-04-26T13:18:27Z",
+          "tree_id": "3775a4e97ef28edfd7f1922b83d7050b580f8cd9",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/1107c3e157bfa6efc50ae6419ae9da38d309ae89"
+        },
+        "date": 1714137956317,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 247727.86666666667,
+            "unit": "ns",
+            "range": "± 4473.050826364271"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 328345.5,
+            "unit": "ns",
+            "range": "± 4718.735044805644"
           }
         ]
       }
