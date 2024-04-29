@@ -123,6 +123,61 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
+        [TestMethod]
+        public async Task AcquireMSITokenForTokenExchangeResourceAsync()
+        {
+            string resource = "api://AzureAdTokenExchange";
+        
+            //Arrange
+            using (new EnvVariableContext())
+            {
+                // Fetch the env variables from the resource and set them locally
+                Dictionary<string, string> envVariables =
+                    await GetEnvironmentVariablesAsync(MsiAzureResource.WebApp).ConfigureAwait(false);
+        
+                //Set the Environment Variables
+                SetEnvironmentVariables(envVariables);
+        
+                //form the http proxy URI 
+                string uri = s_baseURL + $"MSIToken?" +
+                    $"azureresource={MsiAzureResource.WebApp}&uri=";
+        
+                //Create CCA with Proxy
+                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, "", UserAssignedIdentityId.None);
+        
+                AuthenticationResult result;
+                //Act
+                result = await mia
+                            .AcquireTokenForManagedIdentity(resource)
+                            .ExecuteAsync().ConfigureAwait(false);
+        
+                //Assert
+                //1. Token Type
+                Assert.AreEqual("Bearer", result.TokenType);
+        
+                //2. First token response is from the MSI Endpoint
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+        
+                //3. Validate the ExpiresOn falls within a 24 hour range from now
+                CoreAssert.IsWithinRange(
+                                DateTimeOffset.UtcNow + TimeSpan.FromHours(0),
+                                result.ExpiresOn,
+                                TimeSpan.FromHours(24));
+        
+                result = await mia
+                    .AcquireTokenForManagedIdentity(resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+        
+                //4. Validate the scope
+                Assert.IsTrue(result.Scopes.All(resource.Contains));
+        
+                //5. Validate the second call to token endpoint gets returned from the cache
+                Assert.AreEqual(TokenSource.Cache,
+                    result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
         [DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
         [DataRow(MsiAzureResource.WebApp, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_Web_App")]
