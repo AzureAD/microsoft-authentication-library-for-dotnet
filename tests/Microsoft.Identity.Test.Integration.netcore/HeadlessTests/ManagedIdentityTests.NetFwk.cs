@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        public async Task AcquireMSITokenForTokenExchangeResourceAsync()
+        public async Task AcquireMsiToken_ForTokenExchangeResource_Successfully()
         {
             string resource = "api://AzureAdTokenExchange";
         
