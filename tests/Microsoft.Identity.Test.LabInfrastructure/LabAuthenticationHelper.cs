@@ -38,16 +38,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             }
         }
         
-        public static async Task<AccessToken> GetAccessTokenForLabAPIAsync(string labAccessClientId, string labAccessSecret)
+        public static async Task<AccessToken> GetAccessTokenForLabAPIAsync(string labAccessClientId)
         {
             string[] scopes = new string[] { "https://msidlab.com/.default" };
 
             return await GetLabAccessTokenAsync(
                 "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/", 
-                scopes, 
-                LabAccessAuthenticationType.ClientSecret, 
-                labAccessClientId, 
-                labAccessSecret).ConfigureAwait(false);
+                scopes,  
+                labAccessClientId).ConfigureAwait(false);
         }
 
         public static async Task<AccessToken> GetLabAccessTokenAsync(string authority, string[] scopes)
@@ -55,74 +53,35 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return await GetLabAccessTokenAsync(
                 authority,
                 scopes,
-                s_defaultAuthType,
-                String.Empty,
                 String.Empty).ConfigureAwait(false);
         }
 
-        public static async Task<AccessToken> GetLabAccessTokenAsync(string authority, string[] scopes, LabAccessAuthenticationType authType, string clientId, string clientSecret)
+        public static async Task<AccessToken> GetLabAccessTokenAsync(string authority, string[] scopes, string clientId)
         {
             AuthenticationResult authResult;
             IConfidentialClientApplication confidentialApp;
             X509Certificate2 cert;
 
-            switch (authType)
+            var clientIdForCertAuth = String.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
+
+            cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+            if (cert == null)
             {
-                case LabAccessAuthenticationType.ClientCertificate:
-                    var clientIdForCertAuth = String.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
-
-                    cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-                    if (cert == null)
-                    {
-                        throw new InvalidOperationException(
-                            "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
-                    }
-
-                    confidentialApp = ConfidentialClientApplicationBuilder
-                        .Create(clientIdForCertAuth)
-                        .WithAuthority(new Uri(authority), true)
-                        .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
-                        .WithCertificate(cert)
-                        .Build();
-
-                    authResult = await confidentialApp
-                        .AcquireTokenForClient(scopes)
-                        .ExecuteAsync(CancellationToken.None)
-                        .ConfigureAwait(false);
-                    break;
-                case LabAccessAuthenticationType.ClientSecret:
-                    var clientIdForSecretAuth = string.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
-                    var clientSecretForLab = String.IsNullOrEmpty(clientId) ? s_secret : clientSecret;
-
-                    confidentialApp = ConfidentialClientApplicationBuilder
-                        .Create(clientIdForSecretAuth)
-                        .WithAuthority(new Uri(authority), true)
-                        .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
-                        .WithClientSecret(clientSecretForLab)
-                        .Build();
-
-                    authResult = await confidentialApp
-                        .AcquireTokenForClient(scopes)
-                        .ExecuteAsync(CancellationToken.None)
-                        .ConfigureAwait(false);
-                    break;
-                case LabAccessAuthenticationType.UserCredential:
-                    var clientIdForPublicClientAuth = String.IsNullOrEmpty(clientId) ? LabAccessPublicClientId : clientId;
-                    var publicApp = PublicClientApplicationBuilder
-                        .Create(clientIdForPublicClientAuth)
-                        .WithAuthority(new Uri(authority), true)
-                        .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
-                        .Build();
-
-                    authResult = await publicApp
-                        .AcquireTokenByIntegratedWindowsAuth(scopes)
-                        .ExecuteAsync(CancellationToken.None)
-                        .ConfigureAwait(false);
-
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                throw new InvalidOperationException(
+                    "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
             }
+
+            confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(clientIdForCertAuth)
+                .WithAuthority(new Uri(authority), true)
+                .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
+                .WithCertificate(cert)
+                .Build();
+
+            authResult = await confidentialApp
+                .AcquireTokenForClient(scopes)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
 
             return new AccessToken(authResult.AccessToken, authResult.ExpiresOn);
         }
