@@ -17,26 +17,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     {
         private const string LabAccessConfidentialClientId = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
         private const string LabAccessPublicClientId = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
-        private static LabAccessAuthenticationType s_defaultAuthType = LabAccessAuthenticationType.ClientCertificate;
-        private static string s_secret;
-        private const string DataFileName = "data.txt";
-        
-        static LabAuthenticationHelper()
-        {
-            //The data.txt is a place holder for the keyvault secret. It will only be written to during build time when testing appcenter.
-            //After the tests are finished in appcenter, the file will be deleted from the appcenter servers.
-            //The file will then be deleted locally Via VSTS task.
-            if (File.Exists(DataFileName))
-            {
-                var data = File.ReadAllText(DataFileName);
-
-                if (!string.IsNullOrWhiteSpace(data))
-                {
-                    s_defaultAuthType = LabAccessAuthenticationType.ClientSecret;
-                    s_secret = data;
-                }
-            }
-        }
         
         public static async Task<AccessToken> GetAccessTokenForLabAPIAsync(string labAccessClientId)
         {
