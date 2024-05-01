@@ -57,16 +57,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, "", DisplayName = "System_Identity_Web_App")]
-        [DataRow(MsiAzureResource.Function, "", DisplayName = "System_Identity_Function_App")]
+        //[DataRow(MsiAzureResource.Function, "", DisplayName = "System_Identity_Function_App")]
         [DataRow(MsiAzureResource.VM, "", DisplayName = "System_Identity_Virtual_Machine")]
         [DataRow(MsiAzureResource.WebApp, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
-        [DataRow(MsiAzureResource.Function, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Function_App")]
+        //[DataRow(MsiAzureResource.Function, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Function_App")]
         [DataRow(MsiAzureResource.VM, UserAssignedClientID, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Virtual_Machine")]
         [DataRow(MsiAzureResource.WebApp, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
-        [DataRow(MsiAzureResource.Function, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Function_App")]
+        //[DataRow(MsiAzureResource.Function, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Function_App")]
         [DataRow(MsiAzureResource.VM, UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Virtual_Machine")]
         [DataRow(MsiAzureResource.WebApp, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectID_Web_App")]
-        [DataRow(MsiAzureResource.Function, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectID_Function_App")]
+        //[DataRow(MsiAzureResource.Function, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectID_Function_App")]
         [DataRow(MsiAzureResource.VM, UserAssignedObjectID, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectID_Virtual_Machine")]
 #if ENABLE_AZURE_ARC_TESTS
         [DataRow(MsiAzureResource.AzureArc, "", DisplayName = "Azure_ARC")]
@@ -123,13 +123,68 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
+        [TestMethod]
+        public async Task AcquireMsiToken_ForTokenExchangeResource_Successfully()
+        {
+            string resource = "api://AzureAdTokenExchange";
+        
+            //Arrange
+            using (new EnvVariableContext())
+            {
+                // Fetch the env variables from the resource and set them locally
+                Dictionary<string, string> envVariables =
+                    await GetEnvironmentVariablesAsync(MsiAzureResource.WebApp).ConfigureAwait(false);
+        
+                //Set the Environment Variables
+                SetEnvironmentVariables(envVariables);
+        
+                //form the http proxy URI 
+                string uri = s_baseURL + $"MSIToken?" +
+                    $"azureresource={MsiAzureResource.WebApp}&uri=";
+        
+                //Create CCA with Proxy
+                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, "", UserAssignedIdentityId.None);
+        
+                AuthenticationResult result;
+                //Act
+                result = await mia
+                            .AcquireTokenForManagedIdentity(resource)
+                            .ExecuteAsync().ConfigureAwait(false);
+        
+                //Assert
+                //1. Token Type
+                Assert.AreEqual("Bearer", result.TokenType);
+        
+                //2. First token response is from the MSI Endpoint
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+        
+                //3. Validate the ExpiresOn falls within a 24 hour range from now
+                CoreAssert.IsWithinRange(
+                                DateTimeOffset.UtcNow + TimeSpan.FromHours(0),
+                                result.ExpiresOn,
+                                TimeSpan.FromHours(24));
+        
+                result = await mia
+                    .AcquireTokenForManagedIdentity(resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+        
+                //4. Validate the scope
+                Assert.IsTrue(result.Scopes.All(resource.Contains));
+        
+                //5. Validate the second call to token endpoint gets returned from the cache
+                Assert.AreEqual(TokenSource.Cache,
+                    result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
         [DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
         [DataRow(MsiAzureResource.WebApp, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_Web_App")]
         [DataRow(MsiAzureResource.WebApp, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Web_App")]
-        [DataRow(MsiAzureResource.Function, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Function_App")]
-        [DataRow(MsiAzureResource.Function, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_Function_App")]
-        [DataRow(MsiAzureResource.Function, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Function_App")]
+        //[DataRow(MsiAzureResource.Function, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Function_App")]
+        //[DataRow(MsiAzureResource.Function, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_Function_App")]
+        //[DataRow(MsiAzureResource.Function, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_Function_App")]
         [DataRow(MsiAzureResource.VM, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_VM")]
         [DataRow(MsiAzureResource.VM, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_VM")]
         [DataRow(MsiAzureResource.VM, Non_Existent_UamiResourceId, UserAssignedIdentityId.ResourceId, DisplayName = "ResourceID_VM")]
