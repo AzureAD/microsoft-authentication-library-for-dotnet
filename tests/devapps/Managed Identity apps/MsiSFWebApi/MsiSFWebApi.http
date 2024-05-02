@@ -1,0 +1,6 @@
+@MsiSFWebApi_HostAddress = http://localhost:5099
+
+GET {{MsiSFWebApi_HostAddress}}/acquiretoken/
+Accept: application/json
+
+###
