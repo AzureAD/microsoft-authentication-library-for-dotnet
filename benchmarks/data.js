@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1714137964967,
+  "lastUpdate": 1714671723327,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -4958,6 +4958,42 @@ window.BENCHMARK_DATA = {
             "value": 328345.5,
             "unit": "ns",
             "range": "± 4718.735044805644"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d9ac2c1483befc1208b7244fda086005391ccde3",
+          "message": "re-enabling the use of SHA2 and PSS for creating client credentials from certificate (#4740)\n\nenable\r\n\r\nCo-authored-by: Gladwin Johnson <gljohns@microsoft.com>",
+          "timestamp": "2024-05-02T10:34:47-07:00",
+          "tree_id": "6a5bb1b371a068b658a56f072a2b6515d9bce526",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/d9ac2c1483befc1208b7244fda086005391ccde3"
+        },
+        "date": 1714671719779,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 257350.6081081081,
+            "unit": "ns",
+            "range": "± 8554.220205332647"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 358858.6666666667,
+            "unit": "ns",
+            "range": "± 4361.368099228692"
           }
         ]
       }
