@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1714671725340,
+  "lastUpdate": 1714671728371,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -17158,6 +17158,54 @@ window.BENCHMARK_DATA = {
             "value": 173573.33332170759,
             "unit": "ns",
             "range": "± 1151.0855588316292"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d9ac2c1483befc1208b7244fda086005391ccde3",
+          "message": "re-enabling the use of SHA2 and PSS for creating client credentials from certificate (#4740)\n\nenable\r\n\r\nCo-authored-by: Gladwin Johnson <gljohns@microsoft.com>",
+          "timestamp": "2024-05-02T10:34:47-07:00",
+          "tree_id": "6a5bb1b371a068b658a56f072a2b6515d9bce526",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/d9ac2c1483befc1208b7244fda086005391ccde3"
+        },
+        "date": 1714671727687,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 22558.8403523763,
+            "unit": "ns",
+            "range": "± 145.02761176308454"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 171318.44011579241,
+            "unit": "ns",
+            "range": "± 631.9982344507844"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 32966.82141113281,
+            "unit": "ns",
+            "range": "± 91.27421828826644"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 172928.18244280134,
+            "unit": "ns",
+            "range": "± 1277.4620951023146"
           }
         ]
       }
