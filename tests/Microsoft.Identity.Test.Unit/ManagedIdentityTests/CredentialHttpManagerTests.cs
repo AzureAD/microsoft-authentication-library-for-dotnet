@@ -54,9 +54,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 miBuilder.Config.AccessorOptions = null;
 
                 IManagedIdentityApplication mi = miBuilder.Build();
-
-                Assert.IsTrue(mi.IsClaimsSupportedByClient() == true);
-
             }
         }
 

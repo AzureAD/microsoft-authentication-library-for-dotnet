@@ -7,10 +7,17 @@ using Microsoft.IdentityModel.Abstractions;
 
 IIdentityLogger identityLogger = new IdentityLogger();
 
+string claims = @"{""access_token"":{""nbf"":{""essential"":true, ""value"":""1701477303""}}}";
+
+Console.WriteLine($"Binding Certificate - { ManagedIdentityApplication.GetBindingCertificate() }");
+
+Console.WriteLine($"Claims supported in MI ?  - { ManagedIdentityApplication.IsClaimsSupportedByClient() }");
+
 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder
-                //.Create(ManagedIdentityId.SystemAssigned)
-                .Create(ManagedIdentityId.WithUserAssignedClientId("8a7c2bc8-7041-4eb9-b49a-a70aeb68fdae"))
-                .WithExperimentalFeatures(true)
+    //.Create(ManagedIdentityId.SystemAssigned)
+    //.Create(ManagedIdentityId.WithUserAssignedClientId("8a7c2bc8-7041-4eb9-b49a-a70aeb68fdae")) // CAE VM 
+    .Create(ManagedIdentityId.WithUserAssignedClientId("3b57c42c-3201-4295-ae27-d6baec5b7027")) //MSAL SLC VM
+    .WithExperimentalFeatures(true)
                 .WithClientCapabilities(new string[] { "CP1" })
                 .WithLogging(identityLogger, true)
                 .Build();
@@ -24,7 +31,9 @@ do
     try
     {
         var result = await mi.AcquireTokenForManagedIdentity(scope)
-            .ExecuteAsync().ConfigureAwait(false);
+            .WithClaims(claims)
+            .ExecuteAsync()
+            .ConfigureAwait(false);
 
         Console.WriteLine("Success");
         Console.ReadLine();
