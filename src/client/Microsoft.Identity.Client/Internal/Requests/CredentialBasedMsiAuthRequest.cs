@@ -60,9 +60,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
 
             //allow only one call to the provider 
-            logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Entering token acquire for managed identity credential request semaphore.");
+            logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Entering acquire token for managed identity credential request semaphore.");
             await s_semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
-            logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Entered token acquire for managed identity credential request semaphore.");
+            logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Entered acquire token for managed identity credential request semaphore.");
 
             try
             {
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             finally
             {
                 s_semaphoreSlim.Release();
-                logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Released token acquire for managed identity credential request semaphore.");
+                logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Released acquire token for managed identity credential request semaphore.");
             }
         }
 
@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             catch (Exception e) when (e is not MsalServiceException)
             {
-                logger.Error($"[Managed Identity] Exception: {e.Message}");
+                logger.Error($"[CredentialBasedMsiAuthRequest] Exception: {e.Message}");
                 exception = e;
                 message = MsalErrorMessage.CredentialEndpointNoResponseReceived;
             }
@@ -189,13 +189,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             CancellationToken cancellationToken
             )
         {
-            var managedIdentityCredentialResponse = new ManagedIdentityCredentialResponse(
+            var msiCredentialService = new ManagedIdentityCredentialService(
                 _credentialEndpoint,
                 keyMaterial.BindingCertificate,
                 AuthenticationRequestParameters.RequestContext,
                 cancellationToken);
 
-            CredentialResponse credentialResponse = await managedIdentityCredentialResponse.GetCredentialAsync().ConfigureAwait(false);
+            CredentialResponse credentialResponse = await msiCredentialService.GetCredentialAsync().ConfigureAwait(false);
 
             logger.Verbose(() => "[CredentialBasedMsiAuthRequest] A credential was successfully fetched.");
 
@@ -250,7 +250,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             CryptoKeyType credentialKeyType = requestContext.ServiceBundle.Config.ManagedIdentityCredentialKeyType;
             bool isClaimsRequested = requestContext.ServiceBundle.Config.ClientCapabilities?.Any() == true;
-            bool isPopRequested = requestContext.ServiceBundle.Config.ManagedIdentityPopSupported;
 
             // CredentialKeyType will be Undefined, if no keys are provisioned.
             if (credentialKeyType == CryptoKeyType.Undefined)
@@ -258,36 +257,24 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // If new CAE APIs are used when no keys are defined, throw an exception.
                 if (isClaimsRequested)
                 {
-                    requestContext.Logger.Verbose(() => "[Managed Identity] Claims-based authentication is not " +
+                    requestContext.Logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Claims-based authentication is not " +
                     "supported with Managed Identity on the current Azure Resource.");
 
                     throw new MsalClientException(
                         MsalError.ClaimsNotSupportedOnMiResource,
                         MsalErrorMessage.ResourceDoesNotSupportClaims);
                 }
-
-                //If new POP APIs are used when no keys are defined, throw an exception.
-                if (isPopRequested)
-                {
-                    requestContext.Logger.Verbose(() => "[Managed Identity] Proof of Possession is not " +
-                    "supported with Managed Identity on the current Azure Resource.");
-
-                    throw new MsalClientException(
-                        MsalError.PopNotSupportedOnMiResource,
-                        MsalErrorMessage.ResourceDoesNotSupportPop);
-                }
-
                 // Log the unavailability of credential based managed identity for a basic request.
                 // Proceed to use Legacy MSI flow.
-                requestContext.Logger.Verbose(() => "[Managed Identity] Credential based managed identity is unavailable without specific client capabilities.");
+                requestContext.Logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Credential based managed identity is unavailable without specific client capabilities.");
                 return false;
             }
 
-            if (credentialKeyType == CryptoKeyType.User && !isClaimsRequested)
+            if (credentialKeyType == CryptoKeyType.KeyGuardUser && !isClaimsRequested)
             {
                 // MSAL will setup a user key in public preview and try to fetch a credential if claims are requested.
                 // Even if MSAL was able to setup a user key and no claims where requested proceed to use Legacy MSI flow.
-                requestContext.Logger.Verbose(() => "[Managed Identity] Credential based managed identity is unavailable without specific client capabilities.");
+                requestContext.Logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Credential based managed identity is unavailable without specific client capabilities.");
                 return false;
             }
 
@@ -300,19 +287,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 // If the ID is of type ClientId, add user assigned client id to the request.
                 case ManagedIdentityIdType.ClientId:
-                    requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
+                    requestContext.Logger.Info("[CredentialBasedMsiAuthRequest] Adding user assigned client id to the request.");
                     credentialUri += $"&{Constants.ManagedIdentityClientId}={requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
                     break;
 
                 // If the ID is of type ResourceId, add user assigned resource id to the request.
                 case ManagedIdentityIdType.ResourceId:
-                    requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
+                    requestContext.Logger.Info("[CredentialBasedMsiAuthRequest] Adding user assigned resource id to the request.");
                     credentialUri += $"&{Constants.ManagedIdentityResourceId}={requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
                     break;
 
                 // If the ID is of type ObjectId, add user assigned object id to the request.
                 case ManagedIdentityIdType.ObjectId:
-                    requestContext.Logger.Info("[Managed Identity] Adding user assigned object id to the request.");
+                    requestContext.Logger.Info("[CredentialBasedMsiAuthRequest] Adding user assigned object id to the request.");
                     credentialUri += $"&{Constants.ManagedIdentityObjectId}={requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
                     break;
             }
@@ -321,7 +308,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             credentialEndpointUri = new Uri(credentialUri);
 
             // Log information about creating Credential based managed identity.
-            requestContext.Logger.Info($"[Managed Identity] Creating Credential based managed identity.");
+            requestContext.Logger.Info($"[CredentialBasedMsiAuthRequest] Creating Credential based managed identity.");
             return true;
         }
     }

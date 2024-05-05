@@ -33,9 +33,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         /// Test the Public APIs for Credential endpoint support for http client customizations.
         /// </summary>
         [DataTestMethod]
-        [DataRow(CryptoKeyType.User)]
-        [DataRow(CryptoKeyType.KeyGuard)]
-        public void CredentialPublicApi(int keyType)
+        [DataRow(CryptoKeyType.KeyGuardUser)]
+        [DataRow(CryptoKeyType.KeyGuardMachine)]
+        public void CredentialPublicApiCheck(int keyType)
         {
             // Arrange
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
@@ -57,15 +57,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsTrue(mi.IsClaimsSupportedByClient() == true);
 
-                // Check IsProofOfPossessionSupportedByClient only if CryptoKeyType is KeyGuard
-                if (cryptoKeyType == CryptoKeyType.KeyGuard)
-                {
-                    Assert.IsTrue(mi.IsProofOfPossessionSupportedByClient() == true);
-                }
-                else
-                {
-                    Assert.IsTrue(mi.IsProofOfPossessionSupportedByClient() == false);
-                }
             }
         }
 
@@ -105,7 +96,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpClientFactory(mockHttpClient);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -147,7 +138,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpClientFactory(mockHttpClient as IMsalMtlsHttpClientFactory);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.

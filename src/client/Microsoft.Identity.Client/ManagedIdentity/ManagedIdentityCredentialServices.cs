@@ -16,7 +16,7 @@ using System.Linq;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-    internal class ManagedIdentityCredentialResponse : IManagedIdentityCredentialResponse
+    internal class ManagedIdentityCredentialService : IManagedIdentityCredentialService
     {
         private readonly Uri _uri;
         private readonly X509Certificate2 _bindingCertificate;
@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private readonly CancellationToken _cancellationToken;
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
 
-        public ManagedIdentityCredentialResponse(
+        public ManagedIdentityCredentialService(
             Uri uri,
             X509Certificate2 bindingCertificate,
             RequestContext requestContext,
@@ -45,8 +45,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             CredentialResponse credentialResponse = await FetchFromServiceAsync(
                 _requestContext.ServiceBundle.HttpManager,
-                _cancellationToken
-            ).ConfigureAwait(false);
+                _cancellationToken)
+                .ConfigureAwait(false);
 
             ValidateCredentialResponse(credentialResponse);
 
@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             client.AddHeader("Metadata", "true");
             client.AddHeader("x-ms-client-request-id", _requestContext.CorrelationId.ToString("D"));
-            string jsonPayload = GetCredentialPayload(_bindingCertificate);
+            string jsonPayload = GetCredentialPayload();
             client.AddBodyContent(new StringContent(jsonPayload, System.Text.Encoding.UTF8, "application/json"));
 
             return client;
@@ -150,25 +150,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// <summary>
         /// Creates the payload for the managed identity credential request.
         /// </summary>
-        /// <param name="x509Certificate2"></param>
-        /// <returns></returns>
-        private static string GetCredentialPayload(X509Certificate2 x509Certificate2)
+        private string GetCredentialPayload()
         {
-            string certificateBase64 = Convert.ToBase64String(x509Certificate2.Export(X509ContentType.Cert));
+            string certificateBase64 = Convert.ToBase64String(_bindingCertificate.Export(X509ContentType.Cert));
 
-            return @"
-                    {
-                        ""cnf"": {
-                            ""jwk"": {
-                                ""kty"": ""RSA"", 
-                                ""use"": ""sig"",
-                                ""alg"": ""RS256"",
-                                ""kid"": """ + x509Certificate2.Thumbprint + @""",
-                                ""x5c"": [""" + certificateBase64 + @"""]
-                            }
-                        },
-                        ""latch_key"": false    
-                    }";
+            return @"{""cnf"":{""jwk"":{""kty"":""RSA"",""use"":""sig"",""alg"":""RS256"",""kid"":""" + _bindingCertificate.Thumbprint +
+                @""",""x5c"":[""" + certificateBase64 + @"""]}},""latch_key"":false}";
         }
+
     }
 }
