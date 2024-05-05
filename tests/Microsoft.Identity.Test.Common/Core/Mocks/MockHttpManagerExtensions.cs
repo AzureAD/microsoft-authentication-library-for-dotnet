@@ -412,7 +412,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     expectedQueryParams.Add("api-version", "2019-07-01-preview");
                     expectedQueryParams.Add("resource", resource);
                     break;
-                case ManagedIdentitySource.Credential:
+                case ManagedIdentitySource.SlcCredential:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Post;
                     expectedRequestHeaders.Add("Server", "IMDS");
                     expectedQueryParams.Add("cred-api-version", "1.0");

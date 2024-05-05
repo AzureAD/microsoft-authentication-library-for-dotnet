@@ -229,7 +229,6 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-
         public const string MsalCCAKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/AzureADIdentityDivisionTestAgentSecret/";
         public const string MsalCCAKeyVaultSecretName = "MSIDLABAccessSecret";
         public const string MsalOBOKeyVaultUri = "https://buildautomation.vault.azure.net/secrets/IdentityDivisionDotNetOBOServiceSecret/";

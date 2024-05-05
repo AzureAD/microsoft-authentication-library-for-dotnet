@@ -74,7 +74,6 @@ namespace Microsoft.Identity.Client
             ValidateUseOfExperimentalFeature("WithClaims");
 
             CommonParameters.Claims = claims;
-            Parameters.Claims = claims;
             return this;
         }
 

@@ -18,8 +18,6 @@ using Microsoft.Identity.Client.Utils;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.ManagedIdentity;
-
-
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -96,9 +94,9 @@ namespace Microsoft.Identity.Client.OAuth2
             return ExecuteRequestAsync<OidcMetadata>(endpoint, HttpMethod.Get, requestContext);
         }
 
-        public async Task<CredentialResponse> GetCredentialResponseAsync(Uri endpoint, RequestContext requestContext)
+        public async Task<SlcCredentialResponse> GetCredentialResponseAsync(Uri endpoint, RequestContext requestContext)
         {
-            return await ExecuteRequestAsync<CredentialResponse>(endpoint, HttpMethod.Post, requestContext)
+            return await ExecuteRequestAsync<SlcCredentialResponse>(endpoint, HttpMethod.Post, requestContext)
                        .ConfigureAwait(false);
         }
 
@@ -329,7 +327,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 return null;
             }
 
-            MsalTokenResponse msalTokenResponse = null;
+            MsalTokenResponse msalTokenResponse;
 
             try
             {

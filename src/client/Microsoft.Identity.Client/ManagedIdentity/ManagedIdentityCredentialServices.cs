@@ -41,9 +41,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// </summary>
         /// <returns></returns>
         /// <exception cref="MsalManagedIdentityException"></exception>
-        public async Task<CredentialResponse> GetCredentialAsync()
+        public async Task<SlcCredentialResponse> GetCredentialAsync()
         {
-            CredentialResponse credentialResponse = await FetchFromServiceAsync(
+            SlcCredentialResponse credentialResponse = await FetchFromServiceAsync(
                 _requestContext.ServiceBundle.HttpManager,
                 _cancellationToken)
                 .ConfigureAwait(false);
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// Validates the properties of a CredentialResponse to ensure it meets the necessary criteria for authentication.
         /// </summary>
         /// <param name="credentialResponse">The CredentialResponse to be validated.</param>
-        private void ValidateCredentialResponse(CredentialResponse credentialResponse)
+        private void ValidateCredentialResponse(SlcCredentialResponse credentialResponse)
         {
             var errorMessages = new List<string>();
 
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     MsalError.CredentialRequestFailed,
                     MsalErrorMessage.ManagedIdentityInvalidResponse,
                     null,
-                    ManagedIdentitySource.Credential,
+                    ManagedIdentitySource.SlcCredential,
                     null);
 
                 throw exception;
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="MsalManagedIdentityException"></exception>
-        private async Task<CredentialResponse> FetchFromServiceAsync(
+        private async Task<SlcCredentialResponse> FetchFromServiceAsync(
             IHttpManager httpManager,
             CancellationToken cancellationToken)
         {
@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             OAuth2Client client = CreateClientRequest(httpManager);
 
-            CredentialResponse credentialResponse = await client
+            SlcCredentialResponse credentialResponse = await client
                 .GetCredentialResponseAsync(_uri, _requestContext)
                 .ConfigureAwait(false);
 

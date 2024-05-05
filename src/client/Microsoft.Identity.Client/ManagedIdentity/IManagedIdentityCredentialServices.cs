@@ -7,6 +7,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     internal interface IManagedIdentityCredentialService
     {
-        Task<CredentialResponse> GetCredentialAsync();
+        Task<SlcCredentialResponse> GetCredentialAsync();
     }
 }

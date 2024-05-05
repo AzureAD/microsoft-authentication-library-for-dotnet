@@ -24,13 +24,14 @@ IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder
 
 string? scope = "https://management.azure.com";
 
+string? resource = "api://AzureAdTokenExchange";
 do
 {
     Console.WriteLine($"Acquiring token with scope {scope}");
 
     try
     {
-        var result = await mi.AcquireTokenForManagedIdentity(scope)
+        var result = await mi.AcquireTokenForManagedIdentity(resource)
             .WithClaims(claims)
             .ExecuteAsync()
             .ConfigureAwait(false);

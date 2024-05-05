@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     [JsonObject]
     [Preserve(AllMembers = true)]
-    internal class CredentialResponse
+    internal class SlcCredentialResponse
     {
         [JsonProperty("client_id")]
         public string ClientId { get; set; }
