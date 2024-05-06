@@ -93,6 +93,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             byte[] SignDataAndCacheProvider(string message)
             {
+                //codeql [SM03799] Backwards Compatibility: Requires using PKCS1 padding for Identity Providers not supporting PSS (older ADFS, non-Microsoft identity providers)
                 var signedData = rsa.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, signaturePadding);
                 
                 // Cache only valid RSA crypto providers, which are able to sign data successfully
