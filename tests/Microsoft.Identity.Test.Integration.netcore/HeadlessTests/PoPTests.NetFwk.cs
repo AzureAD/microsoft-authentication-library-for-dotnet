@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             if (_keyVault == null)
             {
-                _keyVault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
+                _keyVault = new KeyVaultSecretsProvider(KeyVaultInstance.MSIDLab);
                 s_publicCloudCcaSecret = _keyVault.GetSecretByName(TestConstants.MsalCCAKeyVaultSecretName).Value;
             }
         }
