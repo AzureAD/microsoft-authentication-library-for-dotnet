@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1714671730461,
+  "lastUpdate": 1715016441929,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -4994,6 +4994,42 @@ window.BENCHMARK_DATA = {
             "value": 358858.6666666667,
             "unit": "ns",
             "range": "± 4361.368099228692"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "aa06e26f744d8a0c22aae9371ac2d9d0762ab978",
+          "message": "Update CommonCryptographyManager.cs (#4743)",
+          "timestamp": "2024-05-06T18:20:06+01:00",
+          "tree_id": "3875f5b4ba219ebf19a9f43a74a3169fc5e949a1",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/aa06e26f744d8a0c22aae9371ac2d9d0762ab978"
+        },
+        "date": 1715016438628,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 237674.92307692306,
+            "unit": "ns",
+            "range": "± 2541.9162870276455"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 356289.9275362319,
+            "unit": "ns",
+            "range": "± 16784.085012751217"
           }
         ]
       }
