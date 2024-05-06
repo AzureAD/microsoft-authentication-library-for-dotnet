@@ -475,11 +475,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string token = Base64UrlHelpers.Encode(headerBytes) + "." + Base64UrlHelpers.Encode(claimsBytes);
 
             //codeql [SM03799] Backwards Compatibility: Requires accepting PKCS1 for supporting ADFS 
-            string signature = Base64UrlHelpers.Encode(
-                rsa.SignData(
+            byte[] signatureBytes = rsa.SignData(
                     Encoding.UTF8.GetBytes(token),
                     HashAlgorithmName.SHA256,
-                    useSha2AndPss ? RSASignaturePadding.Pss : RSASignaturePadding.Pkcs1));
+                    useSha2AndPss ? RSASignaturePadding.Pss : RSASignaturePadding.Pkcs1);
+            string signature = Base64UrlHelpers.Encode(signatureBytes);
+
             return string.Concat(token, ".", signature);
         }
     }
