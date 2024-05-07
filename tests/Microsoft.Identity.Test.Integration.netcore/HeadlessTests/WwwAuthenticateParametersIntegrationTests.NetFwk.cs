@@ -69,7 +69,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static async Task RunTestForSettingsAsync(string hostName, string subscriptionId, string authority, string tenantId)
         {
-            const string apiVersion = "2020-08-01"; // current latest API version for /subscriptions/get
+            // see the latest API version at https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/get
+            const string apiVersion = "2022-12-01";
             var url = $"https://{hostName}/subscriptions/{subscriptionId}?api-version={apiVersion}";
 
             WwwAuthenticateParameters authParams = await WwwAuthenticateParameters
