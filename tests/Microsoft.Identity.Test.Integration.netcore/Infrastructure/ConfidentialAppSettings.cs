@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
     {
         private class PublicCloudConfidentialAppSettings : IConfidentialAppSettings
         {
-            public string ClientId => UseAppIdUri? "https://request.msidlab.com" : "88f91eac-c606-4c67-a0e2-a5e8a186854f";
+            public string ClientId => UseAppIdUri? "api://88f91eac-c606-4c67-a0e2-a5e8a186854f" : "88f91eac-c606-4c67-a0e2-a5e8a186854f";
 
             public string TenantId => "f645ad92-e38d-4d1a-b510-d1b09a74a8ca";
 
