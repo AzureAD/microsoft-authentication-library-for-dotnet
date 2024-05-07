@@ -45,8 +45,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };
 
-        private const string PublicCloudConfidentialClientID = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
-        private const string PublicCloudTestAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
+        private const string PublicCloudConfidentialClientID = "88f91eac-c606-4c67-a0e2-a5e8a186854f";
+        private const string PublicCloudTestAuthority = "https://login.windows.net/f645ad92-e38d-4d1a-b510-d1b09a74a8ca";
         private const string ProtectedUrl = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
         private static string s_publicCloudCcaSecret;
         private KeyVaultSecretsProvider _keyVault;
