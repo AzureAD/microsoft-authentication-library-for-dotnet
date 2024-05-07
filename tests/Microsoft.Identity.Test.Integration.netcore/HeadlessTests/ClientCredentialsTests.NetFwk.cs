@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore )]
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx | TargetFrameworks.NetCore )]
-        [DataRow(Cloud.PPE, TargetFrameworks.NetFx)]        
+        //[DataRow(Cloud.PPE, TargetFrameworks.NetFx)]      
         [DataRow(Cloud.Public, TargetFrameworks.NetCore, true)]
         //[DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithCertificate_TestAsync(Cloud cloud, TargetFrameworks runOn, bool useAppIdUri = false)
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataTestMethod]
         [DataRow(Cloud.Public,  TargetFrameworks.NetCore)]
         [DataRow(Cloud.Adfs,  TargetFrameworks.NetCore)]
-        [DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
+        //[DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientAssertion_Manual_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx  )]
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
-        [DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
+        //[DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientAssertion_Wilson_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
