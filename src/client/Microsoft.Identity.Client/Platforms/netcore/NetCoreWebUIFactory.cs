@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Platforms.Shared.NetStdCore
             if (webViewPreference == WebViewPreference.Embedded)
             {
                 throw new MsalClientException(MsalError.WebviewUnavailable,
-                    "To enable the embedded webview on Windows, reference Microsoft.Identity.Client.Desktop and call the extension method .WithEmbeddedBrowserSupport().");
+                    "To enable the embedded webview on Windows, reference Microsoft.Identity.Client.Desktop and call the extension method .WithWindowsEmbeddedBrowserSupport().");
             }
 
             requestContext.Logger.Info("Using system browser.");
