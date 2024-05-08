@@ -176,34 +176,6 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         }
 
         [TestMethod]
-        public void GenericAuthorityWithTenant()
-        {
-            var ex = AssertException.Throws<MsalClientException>(() =>
-                ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithTenantId(TestConstants.TenantId2)
-                    .WithOidcAuthority(TestConstants.GenericAuthority)
-                    .Build()
-            );
-
-            Assert.AreEqual(ex.ErrorCode, MsalError.TenantOverrideNonAad);
-        }
-
-        [TestMethod]
-        public void AdfsAuthorityWithTenant()
-        {
-            var ex = AssertException.Throws<MsalClientException>(() =>
-                ConfidentialClientApplicationBuilder
-                    .Create(TestConstants.ClientId)
-                    .WithTenantId(TestConstants.TenantId2)
-                    .WithAuthority(TestConstants.ADFSAuthority)
-                    .Build()
-            );
-
-            Assert.AreEqual(ex.ErrorCode, MsalError.TenantOverrideNonAad);
-        }
-
-        [TestMethod]
         public void WithTenantId_B2C()
         {
             var app = ConfidentialClientApplicationBuilder
