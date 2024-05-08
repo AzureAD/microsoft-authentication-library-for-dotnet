@@ -377,15 +377,6 @@ namespace Microsoft.Identity.Client
         {
             base.Validate();
 
-            // ADFS and generic authority do not require client id to be in the form of a GUID.
-            bool isGuidFormatMandatory = 
-                Config.Authority.AuthorityInfo?.AuthorityType != AuthorityType.Adfs &&
-                Config.Authority.AuthorityInfo?.AuthorityType != AuthorityType.Generic;
-            if (isGuidFormatMandatory && !Guid.TryParse(Config.ClientId, out _))
-            {
-                throw new MsalClientException(MsalError.ClientIdMustBeAGuid, MsalErrorMessage.ClientIdMustBeAGuid);
-            }
-
 #if __MOBILE__ 
             if (Config.IsBrokerEnabled && Config.MultiCloudSupportEnabled)
             {
