@@ -3,22 +3,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Net;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenQA.Selenium;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -26,15 +21,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     public class GenericAuthorityTests
     {
         private const string DemoDuendeSoftwareDotCom = "https://demo.duendesoftware.com";
-
-        #region MSTest Hooks
-
-        /// <summary>
-        /// Initialized by MSTest (do not make private or readonly)
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #endregion MSTest Hooks
 
         /// Based on the publicly available https://demo.duendesoftware.com/
         [TestMethod]
@@ -57,36 +43,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual("api", response.Scopes.AsSingleString());
             Assert.AreEqual("Bearer", response.TokenType);
             Assert.AreEqual(TokenSource.Cache, response2.AuthenticationResultMetadata.TokenSource);
-        }
-
-        /// Based on the publicly available https://demo.duendesoftware.com/
-        [TestMethod]
-        public async Task ShouldSupportAcquireTokenInteractiveWithDuendeDemoInstanceAsync()
-        {
-            string[] scopes = new[] { "openid profile email api offline_access" };
-            const string username = "bob", password = "bob";
-
-            var pca = PublicClientApplicationBuilder
-                .Create("interactive.public")
-                .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
-                .WithExperimentalFeatures()
-                .WithOidcAuthority(DemoDuendeSoftwareDotCom)
-                .Build();
-
-            AcquireTokenInteractiveParameterBuilder builder = pca
-                .AcquireTokenInteractive(scopes)
-                .WithCustomWebUi(CreateSeleniumCustomWebUI(username, password));
-
-            AuthenticationResult result = await builder
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(result.Scopes);
-            Assert.IsNotNull(result.AccessToken);
-            Assert.IsNotNull(result.IdToken);
-            Assert.AreEqual(5, result.Scopes.Count());
-            Assert.AreEqual("Bearer", result.TokenType);
         }
 
         /// Based on the publicly available https://demo.duendesoftware.com/
@@ -153,20 +109,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                                                                    );
             var assertion = tokenHandler.WriteToken(securityToken);
             return Task.FromResult(assertion);
-        }
-
-        private SeleniumWebUI CreateSeleniumCustomWebUI(string username, string password)
-        {
-            return new SeleniumWebUI((driver) =>
-            {
-                Trace.WriteLine("Starting Selenium automation");
-
-                driver.FindElementById("Input_Username").SendKeys(username);
-                driver.FindElementById("Input_Password").SendKeys(password);
-
-                var loginBtn = driver.WaitForElementToBeVisibleAndEnabled(By.Name("Input.Button"));
-                loginBtn?.Click();
-            }, TestContext);
         }
     }
 }

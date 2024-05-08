@@ -189,6 +189,36 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(authResult.AccessToken);
         }
 
+        /// Based on the publicly available https://demo.duendesoftware.com/
+        [RunOn(TargetFrameworks.NetCore)]
+        public async Task Interactive_GenericAuthority_DuendeDemoInstanceAsync()
+        {
+            string[] scopes = new[] { "openid profile email api offline_access" };
+            const string username = "bob", password = "bob";
+            const string demoDuendeSoftwareDotCom = "https://demo.duendesoftware.com";
+
+            var pca = PublicClientApplicationBuilder
+                .Create("interactive.public")
+                .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                .WithTestLogging()
+                .WithExperimentalFeatures()
+                .WithOidcAuthority(demoDuendeSoftwareDotCom)
+                .Build();
+
+            AuthenticationResult authResult = await pca
+                .AcquireTokenInteractive(scopes)
+                .WithCustomWebUi(CreateSeleniumCustomWebUIForDuende(username, password))
+                .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
+                .ConfigureAwait(false);
+
+            Assert.IsNotNull(authResult);
+            Assert.IsNotNull(authResult.Scopes);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
+            Assert.AreEqual(5, authResult.Scopes.Count());
+            Assert.AreEqual("Bearer", authResult.TokenType);
+        }
+
         private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, bool directToAdfs = false)
         {
             HttpSnifferClientFactory factory = null;
@@ -350,6 +380,20 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             {
                 Trace.WriteLine("Starting Selenium automation");
                 driver.PerformLogin(user, prompt, withLoginHint, adfsOnly);
+            }, TestContext);
+        }
+
+        private SeleniumWebUI CreateSeleniumCustomWebUIForDuende(string username, string password)
+        {
+            return new SeleniumWebUI((driver) =>
+            {
+                Trace.WriteLine("Starting Selenium automation");
+
+                driver.FindElementById("Input_Username").SendKeys(username);
+                driver.FindElementById("Input_Password").SendKeys(password);
+
+                var loginBtn = driver.WaitForElementToBeVisibleAndEnabled(OpenQA.Selenium.By.Name("Input.Button"));
+                loginBtn?.Click();
             }, TestContext);
         }
 
