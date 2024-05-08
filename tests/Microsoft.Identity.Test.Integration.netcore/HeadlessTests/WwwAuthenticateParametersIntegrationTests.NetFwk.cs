@@ -60,17 +60,32 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [RunOn(TargetFrameworks.NetCore)]
         public async Task CreateWwwAuthenticateResponseFromAzureResourceManagerUrlAsync()
         {
+            // see API version at https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/get 
+            
             await RunTestForSettingsAsync(
                 "management.azure.com",
+                "2022-12-01",
+                "c1686c51-b717-4fe0-9af3-24a20a41fb0c",
+                "login.windows.net",
+                "72f988bf-86f1-41af-91ab-2d7cd011db47").ConfigureAwait(false);
+
+            await RunTestForSettingsAsync(
+                "management.azure.com",
+                "2020-08-01",
+                "c1686c51-b717-4fe0-9af3-24a20a41fb0c",
+                "login.windows.net",
+                "72f988bf-86f1-41af-91ab-2d7cd011db47").ConfigureAwait(false);
+
+            await RunTestForSettingsAsync(
+                "management.azure.com",
+                "2016-09-01",
                 "c1686c51-b717-4fe0-9af3-24a20a41fb0c",
                 "login.windows.net",
                 "72f988bf-86f1-41af-91ab-2d7cd011db47").ConfigureAwait(false);
         }
 
-        private static async Task RunTestForSettingsAsync(string hostName, string subscriptionId, string authority, string tenantId)
+        private static async Task RunTestForSettingsAsync(string hostName, string apiVersion, string subscriptionId, string authority, string tenantId)
         {
-            // see the latest API version at https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/get
-            const string apiVersion = "2022-12-01";
             var url = $"https://{hostName}/subscriptions/{subscriptionId}?api-version={apiVersion}";
 
             WwwAuthenticateParameters authParams = await WwwAuthenticateParameters
