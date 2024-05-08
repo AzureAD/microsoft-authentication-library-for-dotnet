@@ -31,7 +31,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string MsiResource = "scope";
         public static readonly string[] s_graphScopes = new[] { "user.read" };
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
-        public const string ClientCredentialAudience = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0";
+        public const string ClientCredentialAudience = "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca/v2.0";
+        public const string PublicCloudConfidentialClientID = "88f91eac-c606-4c67-a0e2-a5e8a186854f";
         public const string AutomationTestCertName = "LabVaultAccessCert";
         public static Dictionary<string, string> AdditionalAssertionClaims =>
             new Dictionary<string, string>() { { "Key1", "Val1" }, { "Key2", "Val2" } };
