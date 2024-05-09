@@ -764,12 +764,6 @@ namespace Microsoft.Identity.Client
         public const string NoClientId = "no_client_id";
 
         /// <summary>
-        /// <para>What happens?</para>You've specified a client ID that is not a <see cref="Guid"/>
-        /// <para>Mitigation</para>Use the application ID (a GUID) from the application portal as client ID in this SDK
-        /// </summary>
-        public const string ClientIdMustBeAGuid = "client_id_must_be_guid";
-
-        /// <summary>
         /// <para>What happens?</para>You have configured both a telemetry callback and a telemetry config. 
         /// <para>Mitigation</para>Only one telemetry mechanism can be configured.
         /// </summary>

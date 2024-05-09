@@ -45,22 +45,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };
 
-        private const string PublicCloudConfidentialClientID = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
-        private const string PublicCloudTestAuthority = "https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47";
         private const string ProtectedUrl = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
-        private static string s_publicCloudCcaSecret;
-        private KeyVaultSecretsProvider _keyVault;
 
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();           
-
-            if (_keyVault == null)
-            {
-                _keyVault = new KeyVaultSecretsProvider(KeyVaultInstance.MsalTeam);
-                s_publicCloudCcaSecret = _keyVault.GetSecretByName(TestConstants.MsalCCAKeyVaultSecretName).Value;
-            }
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -82,11 +72,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl));
             popConfig.HttpMethod = HttpMethod.Get;
 
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(PublicCloudConfidentialClientID)
+                .Create(settings.ClientId)
                 .WithExperimentalFeatures()
-                .WithAuthority(PublicCloudTestAuthority)
-                .WithClientSecret(s_publicCloudCcaSecret)
+                .WithAuthority(settings.Authority)
+                .WithClientSecret(settings.GetSecret())
                 .WithTestLogging()
                 .Build();
 
@@ -97,7 +89,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.AreEqual("pop", result.TokenType);
             PoPValidator.VerifyPoPToken(
-                PublicCloudConfidentialClientID,
+                 settings.ClientId,
                  ProtectedUrl,
                  HttpMethod.Get,
                  result);
@@ -109,12 +101,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl));
             popConfig.HttpMethod = HttpMethod.Get;
 
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+
             var cca = ConfidentialClientApplicationBuilder
-                .Create(PublicCloudConfidentialClientID)
+                .Create(settings.ClientId)
                 .WithExperimentalFeatures()
-                .WithClientSecret(s_publicCloudCcaSecret)
+                .WithClientSecret(settings.GetSecret())
                 .WithTestLogging()
-                .WithAuthority(PublicCloudTestAuthority).Build();
+                .WithAuthority(settings.Authority).Build();
             ConfigureInMemoryCache(cca);
 
             // Act - acquire both a PoP and a Bearer token
@@ -127,10 +121,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.AreEqual("pop", result.TokenType);
             PoPValidator.VerifyPoPToken(
-                                      PublicCloudConfidentialClientID,
-                                       ProtectedUrl,
-                                       HttpMethod.Get,
-                                       result);
+                settings.ClientId,
+                ProtectedUrl,
+                HttpMethod.Get,
+                result);
 
             Trace.WriteLine("Getting a Bearer token");
             result = await cca
@@ -156,11 +150,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             popConfig2.HttpMethod = HttpMethod.Post;
             popConfig2.PopCryptoProvider = cryptoProvider;
 
-            var cca = ConfidentialClientApplicationBuilder.Create(PublicCloudConfidentialClientID)
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+
+            var cca = ConfidentialClientApplicationBuilder.Create(settings.ClientId)
                 .WithExperimentalFeatures()
                 .WithTestLogging()
-                .WithAuthority(PublicCloudTestAuthority)
-                .WithClientSecret(s_publicCloudCcaSecret).Build();
+                .WithAuthority(settings.Authority)
+                .WithClientSecret(settings.GetSecret()).Build();
             ConfigureInMemoryCache(cca);
 
             var result = await cca
@@ -171,17 +167,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.AreEqual("pop", result.TokenType);
             PoPValidator.VerifyPoPToken(
-                           PublicCloudConfidentialClientID,
-                            ProtectedUrl,
-                            HttpMethod.Get,
-                            result);
+                settings.ClientId,
+                ProtectedUrl,
+                HttpMethod.Get,
+                result);
 
             // recreate the pca to ensure that the silent call is served from the cache, i.e. the key remains stable
             cca = ConfidentialClientApplicationBuilder
-                .Create(PublicCloudConfidentialClientID)
+                .Create(settings.ClientId)
                 .WithExperimentalFeatures()
-                .WithAuthority(PublicCloudTestAuthority)
-                .WithClientSecret(s_publicCloudCcaSecret)
+                .WithAuthority(settings.Authority)
+                .WithClientSecret(settings.GetSecret())
                 .WithHttpClientFactory(new NoAccessHttpClientFactory()) // token should be served from the cache, no network access necessary
                 .Build();
             ConfigureInMemoryCache(cca);
@@ -196,36 +192,38 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual("pop", result.TokenType);
 
             PoPValidator.VerifyPoPToken(
-                           PublicCloudConfidentialClientID,
-                            ProtectedUrl,
-                            HttpMethod.Get,
-                            result);
+                settings.ClientId,
+                ProtectedUrl,
+                HttpMethod.Get,
+                result);
 
             // Call some other Uri - the same pop assertion can be reused, i.e. no need to call Evo
             result = await cca
-              .AcquireTokenForClient(s_keyvaultScope)
-              .WithProofOfPossession(popConfig2)
-              .ExecuteAsync()
-              .ConfigureAwait(false);
+                .AcquireTokenForClient(s_keyvaultScope)
+                .WithProofOfPossession(popConfig2)
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
             Assert.AreEqual("pop", result.TokenType);
             Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
             PoPValidator.VerifyPoPToken(
-                            PublicCloudConfidentialClientID,
-                             OtherProtectedUrl,
-                             HttpMethod.Post,
-                             result);
+                settings.ClientId,
+                OtherProtectedUrl,
+                HttpMethod.Post,
+                result);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
         public async Task PopTestWithConfigObjectAsync()
         {
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(PublicCloudConfidentialClientID)
+                .Create(settings.ClientId)
                 .WithExperimentalFeatures()
-                .WithAuthority(PublicCloudTestAuthority)
-                .WithClientSecret(s_publicCloudCcaSecret)
+                .WithAuthority(settings.Authority)
+                .WithClientSecret(settings.GetSecret())
                 .WithTestLogging()
                 .Build();
 
@@ -240,21 +238,23 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.AreEqual("pop", result.TokenType);
             PoPValidator.VerifyPoPToken(
-                PublicCloudConfidentialClientID,
-                 ProtectedUrl,
-                 HttpMethod.Get,
-                 result);
+                settings.ClientId,
+                ProtectedUrl,
+                HttpMethod.Get,
+                result);
         }
 
         [TestMethod]
         public async Task PopTestWithRSAAsync()
         {
             var telemetryClient = new TestTelemetryClient(TestConstants.ClientId);
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(PublicCloudConfidentialClientID)
+                .Create(settings.ClientId)
                 .WithExperimentalFeatures()
-                .WithAuthority(PublicCloudTestAuthority)
-                .WithClientSecret(s_publicCloudCcaSecret)
+                .WithAuthority(settings.Authority)
+                .WithClientSecret(settings.GetSecret())
                 .WithTelemetryClient(telemetryClient)
                 .Build();
 
@@ -270,10 +270,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.AreEqual("pop", result.TokenType);
             PoPValidator.VerifyPoPToken(
-                PublicCloudConfidentialClientID,
-                 ProtectedUrl,
-                 HttpMethod.Get,
-                 result);
+                settings.ClientId,
+                ProtectedUrl,
+                HttpMethod.Get,
+                result);
 
             MsalTelemetryEventDetails eventDetails = telemetryClient.TestTelemetryEventDetails;
             Assert.IsNotNull(eventDetails);
@@ -283,11 +283,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task PopTest_ExternalWilsonSigning_Async()
         {
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(PublicCloudConfidentialClientID)
+                .Create(settings.ClientId)
                 .WithExperimentalFeatures()
-                .WithAuthority(PublicCloudTestAuthority)
-                .WithClientSecret(s_publicCloudCcaSecret)
+                .WithAuthority(settings.Authority)
+                .WithClientSecret(settings.GetSecret())
                 .Build();
 
             // Create an RSA key Wilson style (SigningCredentials)
@@ -323,10 +325,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string req = signedHttpRequestHandler.CreateSignedHttpRequest(signedHttpRequestDescriptor);
 
             PoPValidator.VerifyPoPToken(
-                PublicCloudConfidentialClientID,
-                 ProtectedUrl,
-                 HttpMethod.Post,
-                 req, "pop");
+                settings.ClientId,
+                ProtectedUrl,
+                HttpMethod.Post,
+                req, "pop");
 
             var result2 = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
              .WithProofOfPossession(popConfig)
@@ -340,11 +342,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task PopTestWithECDAsync()
         {
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(PublicCloudConfidentialClientID)
+                .Create(settings.ClientId)
                 .WithExperimentalFeatures()
-                .WithAuthority(PublicCloudTestAuthority)
-                .WithClientSecret(s_publicCloudCcaSecret)
+                .WithAuthority(settings.Authority)
+                .WithClientSecret(settings.GetSecret())
                 .Build();
 
             //ECD Provider
@@ -359,7 +363,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.AreEqual("pop", result.TokenType);
             PoPValidator.VerifyPoPToken(
-                PublicCloudConfidentialClientID,
+                settings.ClientId,
                 ProtectedUrl,
                 HttpMethod.Post,
                 result);
@@ -382,11 +386,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Arrange MSALfin
 
             // 2. Create a normal CCA 
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+
             var confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(PublicCloudConfidentialClientID)
+                .Create(settings.ClientId)
                 .WithExperimentalFeatures()
-                .WithAuthority(PublicCloudTestAuthority)
-                .WithClientSecret(s_publicCloudCcaSecret)
+                .WithAuthority(settings.Authority)
+                .WithClientSecret(settings.GetSecret())
                 .Build();
 
             // 3. When acquiring a token, use WithPopKeyId and OnBeforeTokenRequest extensiblity methods
@@ -426,22 +432,22 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // play the POP token against a webservice that accepts POP to validate the keys
             PoPValidator.VerifyPoPToken(
-                PublicCloudConfidentialClientID,
-                 ProtectedUrl,
-                 HttpMethod.Post,
-                 req, "pop");
+                settings.ClientId,
+                ProtectedUrl,
+                HttpMethod.Post,
+                req, "pop");
 
             // Additional check - if using the same key, the token should come from the cache
             var result2 = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
-                 .WithProofOfPosessionKeyId(keyId, "pop")       // ensure tokens are bound to the key_id
-                 .OnBeforeTokenRequest((data) =>
-                 {
-                     // add extra data to request
-                     data.BodyParameters.Add("req_cnf", keyId);
-                     data.BodyParameters.Add("token_type", "pop");
+                .WithProofOfPosessionKeyId(keyId, "pop")       // ensure tokens are bound to the key_id
+                .OnBeforeTokenRequest((data) =>
+                {
+                    // add extra data to request
+                    data.BodyParameters.Add("req_cnf", keyId);
+                    data.BodyParameters.Add("token_type", "pop");
 
-                     return Task.CompletedTask;
-                 })
+                    return Task.CompletedTask;
+                })
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
             Assert.AreEqual(
