@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1715277385221,
+  "lastUpdate": 1715277387168,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -17554,6 +17554,54 @@ window.BENCHMARK_DATA = {
             "value": 171710.4127766927,
             "unit": "ns",
             "range": "± 1487.5818026652446"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "36173263+kurtanr@users.noreply.github.com",
+            "name": "Robert",
+            "username": "kurtanr"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b3d8ce5eb09fea92d4f20b393f55dddf0cc4cbf0",
+          "message": "PublicClientApplicationBuilder - allow non-GUID client id for AuthorityType.Generic (#4748)\n\n* PublicClientApplicationBuilder - allow non-GUID client id for AuthorityType.Generic\r\n\r\n* Completely removed ClientIdMustBeAGuid validation + related test and error messages.\r\n\r\n* Moved generic authority interactive test from GenericAuthorityTests to InteractiveFlowTests.",
+          "timestamp": "2024-05-09T18:48:56+01:00",
+          "tree_id": "7b2cf5b1b614633e37970b59de69936c08818c98",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/b3d8ce5eb09fea92d4f20b393f55dddf0cc4cbf0"
+        },
+        "date": 1715277386661,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 22480.9892578125,
+            "unit": "ns",
+            "range": "± 76.60616350192831"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 171296.46719796318,
+            "unit": "ns",
+            "range": "± 388.310510179312"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 33815.059270222984,
+            "unit": "ns",
+            "range": "± 57.12799255839952"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 174692.73611653646,
+            "unit": "ns",
+            "range": "± 1021.975872084628"
           }
         ]
       }
