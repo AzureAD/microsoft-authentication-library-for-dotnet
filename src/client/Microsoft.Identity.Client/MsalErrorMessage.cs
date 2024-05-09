@@ -245,7 +245,6 @@ namespace Microsoft.Identity.Client
 
         public const string ClientCredentialAuthenticationTypesAreMutuallyExclusive = "ClientSecret, Certificate and ClientAssertion are mutually exclusive properties. Only specify one. See https://aka.ms/msal-net-client-credentials. ";
         public const string ClientCredentialAuthenticationTypeMustBeDefined = "One client credential type required either: ClientSecret, Certificate, ClientAssertion or AppTokenProvider must be defined when creating a Confidential Client. Only specify one. See https://aka.ms/msal-net-client-credentials. ";
-        public const string ClientIdMustBeAGuid = "Error: ClientId is not a GUID. ";
 
         public static string InvalidRedirectUriReceived(string invalidRedirectUri)
         {
