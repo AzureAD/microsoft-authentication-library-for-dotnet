@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1715277387168,
+  "lastUpdate": 1715277388903,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -25124,6 +25124,66 @@ window.BENCHMARK_DATA = {
             "value": 135583.9,
             "unit": "ns",
             "range": "± 9171.097870890202"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "36173263+kurtanr@users.noreply.github.com",
+            "name": "Robert",
+            "username": "kurtanr"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b3d8ce5eb09fea92d4f20b393f55dddf0cc4cbf0",
+          "message": "PublicClientApplicationBuilder - allow non-GUID client id for AuthorityType.Generic (#4748)\n\n* PublicClientApplicationBuilder - allow non-GUID client id for AuthorityType.Generic\r\n\r\n* Completely removed ClientIdMustBeAGuid validation + related test and error messages.\r\n\r\n* Moved generic authority interactive test from GenericAuthorityTests to InteractiveFlowTests.",
+          "timestamp": "2024-05-09T18:48:56+01:00",
+          "tree_id": "7b2cf5b1b614633e37970b59de69936c08818c98",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/b3d8ce5eb09fea92d4f20b393f55dddf0cc4cbf0"
+        },
+        "date": 1715277388407,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (1, 10))",
+            "value": 17949.496263776506,
+            "unit": "ns",
+            "range": "± 48.676838064005366"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (10000, 10))",
+            "value": 29640.299743652344,
+            "unit": "ns",
+            "range": "± 255.08842642969955"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 9477.659696451823,
+            "unit": "ns",
+            "range": "± 19.437122287119713"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 20361.465224202475,
+            "unit": "ns",
+            "range": "± 174.99471078198334"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 38855.625,
+            "unit": "ns",
+            "range": "± 361.30280467589324"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 148587.3,
+            "unit": "ns",
+            "range": "± 20629.424804576516"
           }
         ]
       }
