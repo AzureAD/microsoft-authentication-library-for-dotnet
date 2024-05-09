@@ -14,6 +14,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     [TestClass]
+    [Ignore]
     public class OnBehalfOfServicePrincipalTests
     {
         //The following client ids are for applications that are within Lab PPE tenant

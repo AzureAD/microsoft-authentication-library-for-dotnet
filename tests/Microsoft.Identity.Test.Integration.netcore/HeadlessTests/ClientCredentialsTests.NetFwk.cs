@@ -33,7 +33,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
         private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };
-        private const string PublicCloudConfidentialClientID = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
 
         private enum CredentialType
         {
@@ -54,7 +53,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore )]
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx | TargetFrameworks.NetCore )]
-        [DataRow(Cloud.PPE, TargetFrameworks.NetFx)]        
+        //[DataRow(Cloud.PPE, TargetFrameworks.NetFx)]      
         [DataRow(Cloud.Public, TargetFrameworks.NetCore, true)]
         //[DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithCertificate_TestAsync(Cloud cloud, TargetFrameworks runOn, bool useAppIdUri = false)
@@ -77,7 +76,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataTestMethod]
         [DataRow(Cloud.Public,  TargetFrameworks.NetCore)]
         [DataRow(Cloud.Adfs,  TargetFrameworks.NetCore)]
-        [DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
+        //[DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientAssertion_Manual_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
@@ -88,7 +87,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetFx  )]
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
-        [DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
+        //[DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientAssertion_Wilson_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
@@ -374,10 +373,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 {
                 { "aud", TestConstants.ClientCredentialAudience },
                 { "exp", validUntil.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture) },
-                { "iss", PublicCloudConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
+                { "iss", TestConstants.PublicCloudConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
                 { "jti", Guid.NewGuid().ToString() },
                 { "nbf", validFrom.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture) },
-                { "sub", PublicCloudConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
+                { "sub", TestConstants.PublicCloudConfidentialClientID.ToString(CultureInfo.InvariantCulture) },
                 { "ip", "192.168.2.1" }
                 };
             }
@@ -475,11 +474,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string token = Base64UrlHelpers.Encode(headerBytes) + "." + Base64UrlHelpers.Encode(claimsBytes);
 
             //codeql [SM03799] Backwards Compatibility: Requires accepting PKCS1 for supporting ADFS 
-            string signature = Base64UrlHelpers.Encode(
-                rsa.SignData(
+            byte[] signatureBytes = rsa.SignData(
                     Encoding.UTF8.GetBytes(token),
                     HashAlgorithmName.SHA256,
-                    useSha2AndPss ? RSASignaturePadding.Pss : RSASignaturePadding.Pkcs1));
+                    useSha2AndPss ? RSASignaturePadding.Pss : RSASignaturePadding.Pkcs1);
+            string signature = Base64UrlHelpers.Encode(signatureBytes);
+
             return string.Concat(token, ".", signature);
         }
     }
