@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1715106752359,
+  "lastUpdate": 1715277383321,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5066,6 +5066,42 @@ window.BENCHMARK_DATA = {
             "value": 335366.75,
             "unit": "ns",
             "range": "± 3139.2355793612037"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "36173263+kurtanr@users.noreply.github.com",
+            "name": "Robert",
+            "username": "kurtanr"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b3d8ce5eb09fea92d4f20b393f55dddf0cc4cbf0",
+          "message": "PublicClientApplicationBuilder - allow non-GUID client id for AuthorityType.Generic (#4748)\n\n* PublicClientApplicationBuilder - allow non-GUID client id for AuthorityType.Generic\r\n\r\n* Completely removed ClientIdMustBeAGuid validation + related test and error messages.\r\n\r\n* Moved generic authority interactive test from GenericAuthorityTests to InteractiveFlowTests.",
+          "timestamp": "2024-05-09T18:48:56+01:00",
+          "tree_id": "7b2cf5b1b614633e37970b59de69936c08818c98",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/b3d8ce5eb09fea92d4f20b393f55dddf0cc4cbf0"
+        },
+        "date": 1715277379988,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 240804.15789473685,
+            "unit": "ns",
+            "range": "± 4373.994617981217"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 335478.5,
+            "unit": "ns",
+            "range": "± 9139.999435307387"
           }
         ]
       }
