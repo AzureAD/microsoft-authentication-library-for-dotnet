@@ -1,33 +1,44 @@
+4.61.0
+==========
+### New Features
+- Removed support for deprecated frameworks, Xamarin.Android 12 and Xamarin.iOS 10. MSAL.NET packages will no longer include `monoandroid12.0` and `xamarinios10` binaries. Existing applications should migrate to modern frameworks like .NET MAUI. See [4715](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4715) and [Announcing the Upcoming Deprecation of MSAL.NET for Xamarin and UWP](https://devblogs.microsoft.com/identity/uwp-xamarin-msal-net-deprecation/).
+- Removed support for UWP. MSAL.NET packages will no longer include `uap10.0.17763` binary. Existing applications should migrate to modern frameworks like WinUI 3. See [4717](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4717) and [Announcing the Upcoming Deprecation of MSAL.NET for Xamarin and UWP](https://devblogs.microsoft.com/identity/uwp-xamarin-msal-net-deprecation/).
+- Removed Windows Forms dependency from `Microsoft.Identity.Client`, which will no longer include `net6.0-windows7.0` binary. Existing desktop applications targeting `net6.0-windows` should reference `Microsoft.Identity.Client.Broker` when using [interactive authentication with Windows Broker](https://aka.ms/msal-net-wam) and call `WithBroker(BrokerOptions)`; or reference `Microsoft.Identity.Client.Desktop` when [authenticating with browser](https://aka.ms/msal-net-uses-web-browser) and call `WithWindowsEmbeddedBrowserSupport()`. There are no changes to the usage of the system browser. See [4468](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4468).
+- Re-enabled the use of SHA 256 and PSS padding to create client assertions. See [4695](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4695).
+
+### Bug Fixes
+- Public methods in Kerberos `TicketCacheWriter` and `TicketCacheReader` were corrected to be internal. Public API in `KerberosSupplementalTicketManager` should be used.  See [#4726](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/4726).
+
 4.60.3
 ==========
 ### Bug Fixes
-Updated Android webview attribute.
+- Updated Android webview attribute.
 
 4.60.2
 ==========
 ### Bug Fixes
-When `OnBeforeTokenRequest` extensibility API is used, MSAL now correctly uses the user-provided `OnBeforeTokenRequestData.RequestUri` to set the token request endpoint. See [4701](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4701).
+- When `OnBeforeTokenRequest` extensibility API is used, MSAL now correctly uses the user-provided `OnBeforeTokenRequestData.RequestUri` to set the token request endpoint. See [4701](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4701).
 
 4.60.1
 ==========
 ### Bug Fixes
-Resolved an issue where MSAL attempts to acquire a token via certificate authentication using SHA2 and PSS resulting in a `MsalServiceException' (Error code: AADSTS5002730). See [4690](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4690)
+- Resolved an issue where MSAL attempts to acquire a token via certificate authentication using SHA2 and PSS resulting in a `MsalServiceException' (Error code: AADSTS5002730). See [4690](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4690).
 
 4.60.0
 ==========
 ### New Features
-- AAD client assertions are computed using SHA 256 and PSS padding. See [4428](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4428)
-- CorrelationId is available in MsalException. See [4187](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4187)
-- Open telemetry records telemetry for proactive token refresh background process. See [4492](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4492)
-- MSAL.Net now supports generic authorities with query parameters. See [4631](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4631)
+- AAD client assertions are computed using SHA 256 and PSS padding. See [4428](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4428).
+- CorrelationId is available in MsalException. See [4187](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4187).
+- Open telemetry records telemetry for proactive token refresh background process. See [4492](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4492).
+- MSAL.Net now supports generic authorities with query parameters. See [4631](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4631).
 
 ### Bug Fixes
-- MSAL.Net now logs an error when OBO is performed over common or organizations. See [4606](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4606)
-- MSAL.Net now handles the v2.0 authorization endpoint. See [4416](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4416)
-- Improved logging and error message when the web api receives a claims challenge. See [4496](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4496)
-- Cloud shell error message from the managed identity endpoint is now parsed correctly. See [4402](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4402)
-- Improved error message when CCA certificate is disposed before MSAL can use it. See [4602](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4602)
-- Client id is now accepted as a scope. See [4652](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4652)
+- MSAL.Net now logs an error when OBO is performed over common or organizations. See [4606](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4606).
+- MSAL.Net now handles the v2.0 authorization endpoint. See [4416](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4416).
+- Improved logging and error message when the web api receives a claims challenge. See [4496](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4496).
+- Cloud shell error message from the managed identity endpoint is now parsed correctly. See [4402](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4402).
+- Improved error message when CCA certificate is disposed before MSAL can use it. See [4602](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4602).
+- Client id is now accepted as a scope. See [4652](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4652).
 
 4.59.0
 ==========
