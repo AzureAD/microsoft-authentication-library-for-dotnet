@@ -132,7 +132,6 @@ namespace Microsoft.Identity.Client
         /// If both WithLogging apis are set, this one will override the other
         /// </param>
         /// <returns>The builder to chain the .With methods</returns>
-        /// <remarks>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</remarks>
         public T WithLogging(
             IIdentityLogger identityLogger,
             bool enablePiiLogging = false)
@@ -218,13 +217,6 @@ namespace Microsoft.Identity.Client
                 // Both WithAuthority and WithTenant were used at app config level
                 if (!string.IsNullOrEmpty(Config.TenantId))
                 {
-                    if (!Config.Authority.AuthorityInfo.CanBeTenanted)
-                    {
-                        throw new MsalClientException(
-                            MsalError.TenantOverrideNonAad,
-                            $"Cannot use WithTenantId(tenantId) in the application builder, because the authority {Config.Authority.AuthorityInfo.AuthorityType} doesn't support it.");
-                    }
-
                     string tenantedAuthority = Config.Authority.GetTenantedAuthority(
                         Config.TenantId,
                         forceSpecifiedTenant: true);
