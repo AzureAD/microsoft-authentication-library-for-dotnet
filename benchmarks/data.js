@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1715277388903,
+  "lastUpdate": 1715599840062,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5102,6 +5102,42 @@ window.BENCHMARK_DATA = {
             "value": 335478.5,
             "unit": "ns",
             "range": "± 9139.999435307387"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "be0ea5c093fcdf112b8f11f86784006017a85811",
+          "message": "Fix for #4608- do not throw exception for ADFS + WithTenantId (#4753)\n\nFix for #2509 - do not throw exception for ADFS + WithTenantId",
+          "timestamp": "2024-05-13T12:23:32+01:00",
+          "tree_id": "fe12a8c58783680ca83b94b6a86256d2e74d2875",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/be0ea5c093fcdf112b8f11f86784006017a85811"
+        },
+        "date": 1715599836689,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 247516.55,
+            "unit": "ns",
+            "range": "± 5450.330028394707"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 336085.3,
+            "unit": "ns",
+            "range": "± 4408.278189951265"
           }
         ]
       }
