@@ -162,6 +162,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string ciamWebApi = "634de702-3173-4a71-b336-a4fab786a479";
             string ciamEmail = "idlab@msidlabciam6.onmicrosoft.com";
 
+            //Get lab details
+            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
+            {
+                FederationProvider = FederationProvider.CIAMCUD,
+                SignInAudience = SignInAudience.AzureAdMyOrg,
+                PublicClient = PublicClient.no
+            }).ConfigureAwait(false);
+
             //Acquire tokens
             var msalPublicClient = PublicClientApplicationBuilder
                 .Create(ciamClient)
@@ -170,7 +178,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .Build();
 
             var result = await msalPublicClient
-                .AcquireTokenByUsernamePassword(new[] { $"api://{ciamWebApi}/.default" }, ciamEmail, LabUserHelper.FetchUserPassword("msidlabciam6"))
+                .AcquireTokenByUsernamePassword(new[] { $"api://{ciamWebApi}/.default" }, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
