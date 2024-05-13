@@ -47,5 +47,41 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 AzureArcManagedIdentitySource.TryCreate(requestContext) ??
                 new ImdsManagedIdentitySource(requestContext);
         }
+
+        internal static ManagedIdentitySource GetManagedIdentitySource()
+        {
+            string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
+            string identityHeader = EnvironmentVariables.IdentityHeader;
+            string identityServerThumbprint = EnvironmentVariables.IdentityServerThumbprint;
+            string msiSecret = EnvironmentVariables.IdentityHeader;
+            string msiEndpoint = EnvironmentVariables.MsiEndpoint;
+            string imdsEndpoint = EnvironmentVariables.ImdsEndpoint;
+            string podIdentityEndpoint = EnvironmentVariables.PodIdentityEndpoint;
+
+            if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader) && !string.IsNullOrEmpty(identityServerThumbprint))
+            {
+                return ManagedIdentitySource.ServiceFabric;
+            }
+            else if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader))
+            {
+                return ManagedIdentitySource.AppService;
+            }
+            else if (!string.IsNullOrEmpty(msiEndpoint))
+            {
+                return ManagedIdentitySource.CloudShell;
+            }
+            else if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(imdsEndpoint))
+            {
+                return ManagedIdentitySource.AzureArc;
+            }
+            else if (!string.IsNullOrEmpty(podIdentityEndpoint))
+            {
+                return ManagedIdentitySource.Imds;
+            }
+            else
+            {
+                return ManagedIdentitySource.DefaultToImds;
+            }
+        }
     }
 }
