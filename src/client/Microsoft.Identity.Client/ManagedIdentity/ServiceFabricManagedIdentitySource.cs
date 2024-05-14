@@ -22,14 +22,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         public static AbstractManagedIdentity TryCreate(RequestContext requestContext)
         {
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
-            string identityHeader = EnvironmentVariables.IdentityHeader;
-            string identityServerThumbprint = EnvironmentVariables.IdentityServerThumbprint;
-
-            if (string.IsNullOrEmpty(identityEndpoint) || string.IsNullOrEmpty(identityHeader) || string.IsNullOrEmpty(identityServerThumbprint))
-            {
-                requestContext.Logger.Verbose(() => "[Managed Identity] Service Fabric managed identity unavailable.");
-                return null;
-            }
 
             if (!Uri.TryCreate(identityEndpoint, UriKind.Absolute, out Uri endpointUri))
             {
@@ -48,7 +40,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             requestContext.Logger.Verbose(() => "[Managed Identity] Creating Service Fabric managed identity. Endpoint URI: " + identityEndpoint);
-            return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, identityHeader);
+            return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader);
         }
 
         private ServiceFabricManagedIdentitySource(RequestContext requestContext, Uri endpoint, string identityHeaderValue) : 

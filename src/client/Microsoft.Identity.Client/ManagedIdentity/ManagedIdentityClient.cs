@@ -40,14 +40,29 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
         private static AbstractManagedIdentity SelectManagedIdentitySource(RequestContext requestContext)
         {
-            return 
-                ServiceFabricManagedIdentitySource.TryCreate(requestContext) ??
-                AppServiceManagedIdentitySource.TryCreate(requestContext) ?? 
-                CloudShellManagedIdentitySource.TryCreate(requestContext) ??
-                AzureArcManagedIdentitySource.TryCreate(requestContext) ??
-                new ImdsManagedIdentitySource(requestContext);
+            ManagedIdentitySource managedIdentitySource = GetManagedIdentitySource();
+
+            switch (managedIdentitySource)
+            {
+                case ManagedIdentitySource.ServiceFabric:
+                    requestContext.Logger.Info(() => "[Managed Identity] Service fabric managed identity is available.");
+                    return ServiceFabricManagedIdentitySource.TryCreate(requestContext);
+                case ManagedIdentitySource.AppService:
+                    requestContext.Logger.Info(() => "[Managed Identity] App service managed identity is available.");
+                    return AppServiceManagedIdentitySource.TryCreate(requestContext);
+                case ManagedIdentitySource.CloudShell:
+                    requestContext.Logger.Info(() => "[Managed Identity] Cloud shell managed identity is available.");
+                    return CloudShellManagedIdentitySource.TryCreate(requestContext);
+                case ManagedIdentitySource.AzureArc:
+                    requestContext.Logger.Info(() => "[Managed Identity] Azure Arc managed identity is available.");
+                    return AzureArcManagedIdentitySource.TryCreate(requestContext);
+                default:
+                    requestContext.Logger.Info(() => "[Managed Identity] Defaulting to IMDS managed identity.");
+                    return new ImdsManagedIdentitySource(requestContext);
+            }
         }
 
+        // Detect managed identity source based on the availability of environment variables.
         internal static ManagedIdentitySource GetManagedIdentitySource()
         {
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
