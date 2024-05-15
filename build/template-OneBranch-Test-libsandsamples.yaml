@@ -1,0 +1,46 @@
+# template-OneBranch-CI-libsandsamples.yaml
+# Performs Nuget Restore and Build of LibsAndSamples.sln based on BuildPlatform and BuildConfiguration
+
+parameters:
+  BuildPlatform: 'any cpu'
+  BuildConfiguration: 'release'
+  MsalClientSemVer: '4.0.0-devopsbuild'
+
+steps:
+- task: CmdLine@2
+  displayName: 'Clear local NuGet cache'
+  inputs:
+    script: 'nuget locals all -clear'
+
+- task: VSBuild@1
+  displayName: 'NuGet restore ${{ parameters.Solution }}'
+  inputs:
+    solution: ${{ parameters.Solution }}
+    msbuildArgs: '/t:restore'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
+
+- task: VSBuild@1
+  displayName: 'Build solution ${{ parameters.Solution }}'
+  inputs:
+    solution: ${{ parameters.Solution }}
+    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
+
+  # Run All Desktop Tests
+- template: template-run-all-tests.yaml
+  parameters:
+    BuildConfiguration: '$(BuildConfiguration)'
+
+- task: VSTest@2
+  displayName: 'Run cache compat tests'
+  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '**\CacheCompat\CommonCache.Test.Unit\bin\**\CommonCache.Test.Unit.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    codeCoverageEnabled: true
+    failOnMinTestsNotRun: true
+    minimumExpectedTests: '1'
+    runInParallel: true
