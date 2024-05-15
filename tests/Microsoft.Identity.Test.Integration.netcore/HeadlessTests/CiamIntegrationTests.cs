@@ -156,29 +156,25 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task OBOCiam_CustomDomain_ReturnsValidTokens()
         {
-            string authorityNonCud = "https://MSIDLABCIAM6.ciamlogin.com";
             string authorityCud = "https://login.msidlabsciam.com/fe362aec-5d43-45d1-b730-9755e60dc3b9/v2.0/";
-            string ciamClient = "b244c86f-ed88-45bf-abda-6b37aa482c79";
             string ciamWebApi = "634de702-3173-4a71-b336-a4fab786a479";
-            string ciamEmail = "idlab@msidlabciam6.onmicrosoft.com";
 
             //Get lab details
-            var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
+            LabResponse labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
             {
                 FederationProvider = FederationProvider.CIAMCUD,
-                SignInAudience = SignInAudience.AzureAdMyOrg,
-                PublicClient = PublicClient.no
+                SignInAudience = SignInAudience.AzureAdMyOrg
             }).ConfigureAwait(false);
 
             //Acquire tokens
             var msalPublicClient = PublicClientApplicationBuilder
-                .Create(ciamClient)
-                .WithAuthority(authorityNonCud, false)
-                .WithRedirectUri(_ciamRedirectUri)
+                .Create(labResponse.App.AppId)
+                .WithAuthority(labResponse.App.Authority, false)
+                .WithRedirectUri(labResponse.App.RedirectUri)
                 .Build();
 
             var result = await msalPublicClient
-                .AcquireTokenByUsernamePassword(new[] { $"api://{ciamWebApi}/.default" }, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+                .AcquireTokenByUsernamePassword(new[] { labResponse.App.DefaultScopes }, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
