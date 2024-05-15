@@ -17,7 +17,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         ADFSv2019,
         B2C,
         Ping,
-        CIAM
+        CIAM,
+        CIAMCUD
     }
 
     public enum B2CIdentityProvider
