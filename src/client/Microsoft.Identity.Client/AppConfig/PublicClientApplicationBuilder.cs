@@ -157,6 +157,12 @@ namespace Microsoft.Identity.Client
             return this;
         }
 #else
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="enableBroker"></param>
+        /// <returns></returns>
+        /// <exception cref="PlatformNotSupportedException"></exception>
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("The desktop broker is not directly available in the MSAL package. Install the NuGet package Microsoft.Identity.Client.Broker and call the extension method .WithBroker(BrokerOptions). For details, see https://aka.ms/msal-net-wam", true)]
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
