@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1715599845536,
+  "lastUpdate": 1715762146881,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5138,6 +5138,42 @@ window.BENCHMARK_DATA = {
             "value": 336085.3,
             "unit": "ns",
             "range": "± 4408.278189951265"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f9253a67e69d4c34f30d26063006d6f788d71591",
+          "message": "Allow POP extensibility API on all requests (#4758)",
+          "timestamp": "2024-05-15T09:28:21+01:00",
+          "tree_id": "882e273941f531b544ada6292bc2fa9fa3d736d2",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/f9253a67e69d4c34f30d26063006d6f788d71591"
+        },
+        "date": 1715762143496,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 248153.3076923077,
+            "unit": "ns",
+            "range": "± 3779.840393116606"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 337432.03846153844,
+            "unit": "ns",
+            "range": "± 5306.728113369929"
           }
         ]
       }
