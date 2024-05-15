@@ -41,10 +41,11 @@ steps:
 - template: template-run-all-tests.yaml
   parameters:
     BuildConfiguration: '$(BuildConfiguration)'
+  condition: and(succeeded(), eq(variables['PipelineType'], 'Legacy'))
 
 - task: VSTest@2
   displayName: 'Run cache compat tests'
-  condition: and(succeeded(), eq(variables['RunTests'], 'true'))
+  condition: and(succeeded(), eq(variables['PipelineType'], 'Legacy'))
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: '**\CacheCompat\CommonCache.Test.Unit\bin\**\CommonCache.Test.Unit.dll'
