@@ -84,6 +84,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+#if ONEBRANCH_BUILD
+        [Ignore]
+#endif
         public async Task ClientCredentialCiam_WithClientCredentials_ReturnsValidTokens()
         {
             string authority;
@@ -154,6 +157,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+#if ONEBRANCH_BUILD
+        [Ignore]
+#endif        
         public async Task OBOCiam_CustomDomain_ReturnsValidTokens()
         {
             string authorityCud = "https://login.msidlabsciam.com/fe362aec-5d43-45d1-b730-9755e60dc3b9/v2.0/";
