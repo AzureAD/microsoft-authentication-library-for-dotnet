@@ -13,10 +13,6 @@ steps:
   inputs:
     script: 'nuget locals all -clear'
 
-- powershell: 'powershell.exe -File "$(MsalSourceDir)build\InstallAndroid.ps1" -ExecutionPolicy Bypass'
-  displayName: 'Install Android'
-  condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
-
 - task: VSBuild@1
   displayName: 'NuGet restore ${{ parameters.Solution }}'
   inputs:
@@ -32,25 +28,3 @@ steps:
     msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
     platform: ${{ parameters.BuildPlatform }}
     configuration: ${{ parameters.BuildConfiguration }}
-
-- powershell: 'powershell.exe -File "$(MsalSourceDir)build\installEdgeDriver.ps1" -ExecutionPolicy Bypass'
-  displayName: 'Install EdgeDriver'
-  condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
-
-  # Run All Desktop Tests
-- template: template-run-all-tests.yaml
-  parameters:
-    BuildConfiguration: '$(BuildConfiguration)'
-  condition: and(succeeded(), eq(variables['PipelineType'], 'Legacy'))
-
-- task: VSTest@2
-  displayName: 'Run cache compat tests'
-  condition: and(succeeded(), eq(variables['PipelineType'], 'Legacy'))
-  inputs:
-    testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\CacheCompat\CommonCache.Test.Unit\bin\**\CommonCache.Test.Unit.dll'
-    searchFolder: '$(System.DefaultWorkingDirectory)'
-    codeCoverageEnabled: true
-    failOnMinTestsNotRun: true
-    minimumExpectedTests: '1'
-    runInParallel: true
