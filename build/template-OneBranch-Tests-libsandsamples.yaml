@@ -6,7 +6,6 @@ parameters:
   BuildConfiguration: 'release'
   MsalClientSemVer: '4.0.0-devopsbuild'
   MsalSourceDir: '' #Default MSAL Location
-  
 
 steps:
 - task: CmdLine@2
