@@ -5,6 +5,7 @@
 
 using System;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Desktop.WebView2WebUi;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
 using Microsoft.Identity.Client.Platforms.Features.WinFormsLegacyWebUi;
