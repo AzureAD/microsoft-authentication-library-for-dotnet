@@ -13,7 +13,7 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
-namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
+namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 {
 
     internal class WinFormsPanelWithWebView2 : Form
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                 InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(_ownerWindow));
                 cancellationToken.ThrowIfCancellationRequested();
             }
-             
+
             switch (uiResult)
             {
                 case DialogResult.OK:
@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
         {
             if (InvokeRequired)
             {
-                this.Invoke(action);
+                Invoke(action);
             }
             else
             {
@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
         {
             InvokeHandlingOwnerWindow(() =>
             {
-                Screen screen = (_ownerWindow != null)
+                Screen screen = _ownerWindow != null
                     ? Screen.FromHandle(_ownerWindow.Handle)
                     : Screen.PrimaryScreen;
 
@@ -197,7 +197,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                 Name = "BrowserAuthenticationWindow";
 
                 // Move the window to the center of the parent window only if owner window is set.
-                StartPosition = (_ownerWindow != null)
+                StartPosition = _ownerWindow != null
                     ? FormStartPosition.CenterParent
                     : FormStartPosition.CenterScreen;
                 Text = string.Empty;
@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                 ResumeLayout(false);
             });
 
-            this.Shown += PlaceOnTop;
+            Shown += PlaceOnTop;
         }
 
         private void WebView2Control_NavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                 readyToClose = true;
             }
 
-            if (!readyToClose && !EmbeddedUiCommon.IsAllowedIeOrEdgeAuthorizationRedirect(url)) 
+            if (!readyToClose && !EmbeddedUiCommon.IsAllowedIeOrEdgeAuthorizationRedirect(url))
             {
                 _logger.Error($"[WebView2Control] Redirection to url: {url} is not permitted - WebView2 will fail...");
 

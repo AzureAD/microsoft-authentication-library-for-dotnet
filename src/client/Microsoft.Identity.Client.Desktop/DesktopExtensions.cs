@@ -5,9 +5,9 @@ using System;
 using System.ComponentModel;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Desktop.WebView2WebUi;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.Platforms.Features.RuntimeBroker;
-using Microsoft.Identity.Client.Platforms.Features.WebView2WebUi;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.Desktop
