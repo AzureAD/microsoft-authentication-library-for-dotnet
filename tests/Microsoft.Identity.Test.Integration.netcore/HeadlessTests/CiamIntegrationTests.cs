@@ -35,8 +35,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
             {
                 FederationProvider = FederationProvider.CIAM,
-                SignInAudience = SignInAudience.AzureAdMyOrg,
-                PublicClient = PublicClient.no
             }).ConfigureAwait(false);
 
             //https://tenantName.ciamlogin.com/
@@ -91,8 +89,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
             {
                 FederationProvider = FederationProvider.CIAM,
-                SignInAudience = SignInAudience.AzureAdMyOrg,
-                PublicClient = PublicClient.no
             }).ConfigureAwait(false);
 
 
