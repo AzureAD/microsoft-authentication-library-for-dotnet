@@ -39,6 +39,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal ImdsManagedIdentitySource(RequestContext requestContext) : 
             base(requestContext, ManagedIdentitySource.Imds)
         {
+            requestContext.Logger.Info(() => "[Managed Identity] Defaulting to IMDS managed identity.");
+
             if (!string.IsNullOrEmpty(EnvironmentVariables.PodIdentityEndpoint))
 			{
                 requestContext.Logger.Verbose(() => "[Managed Identity] Environment variable AZURE_POD_IDENTITY_AUTHORITY_HOST for IMDS returned endpoint: " + EnvironmentVariables.PodIdentityEndpoint);

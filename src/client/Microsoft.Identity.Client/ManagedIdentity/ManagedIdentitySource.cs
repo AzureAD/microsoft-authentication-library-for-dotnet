@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         None,
 
         /// <summary>
-        /// The source to acquire token for managed identity is IMDS.
+        /// The source to acquire token for managed identity is defaulted to IMDS.
         /// </summary>
         Imds,
 
@@ -42,12 +42,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// <summary>
         /// The source to acquire token for managed identity is Service Fabric.
         /// </summary>
-        ServiceFabric,
-
-        /// <summary>
-        /// The source to acquire token for managed identity is defaulted to IMDS as no environment variables are found. 
-        /// This is specifically used when the source is not known.
-        /// </summary>
-        DefaultToImds
+        ServiceFabric
     }
 }

@@ -24,6 +24,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         public static AbstractManagedIdentity TryCreate(RequestContext requestContext)
         {
+            requestContext.Logger.Info(() => "[Managed Identity] App service managed identity is available.");
+
             return TryValidateEnvVars(EnvironmentVariables.IdentityEndpoint, requestContext.Logger, out Uri endpointUri)
                 ? new AppServiceManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader)
                 : null;

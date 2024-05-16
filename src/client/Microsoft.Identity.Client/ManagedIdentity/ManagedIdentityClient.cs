@@ -23,6 +23,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class ManagedIdentityClient
     {
         private readonly AbstractManagedIdentity _identitySource;
+        internal static Lazy<ManagedIdentitySource> s_managedIdentitySourceDetected = new Lazy<ManagedIdentitySource>(() => GetManagedIdentitySource());
 
         public ManagedIdentityClient(RequestContext requestContext)
         {
@@ -40,30 +41,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
         private static AbstractManagedIdentity SelectManagedIdentitySource(RequestContext requestContext)
         {
-            ManagedIdentitySource managedIdentitySource = GetManagedIdentitySource();
-
-            switch (managedIdentitySource)
+            return s_managedIdentitySourceDetected.Value switch
             {
-                case ManagedIdentitySource.ServiceFabric:
-                    requestContext.Logger.Info(() => "[Managed Identity] Service fabric managed identity is available.");
-                    return ServiceFabricManagedIdentitySource.TryCreate(requestContext);
-                case ManagedIdentitySource.AppService:
-                    requestContext.Logger.Info(() => "[Managed Identity] App service managed identity is available.");
-                    return AppServiceManagedIdentitySource.TryCreate(requestContext);
-                case ManagedIdentitySource.CloudShell:
-                    requestContext.Logger.Info(() => "[Managed Identity] Cloud shell managed identity is available.");
-                    return CloudShellManagedIdentitySource.TryCreate(requestContext);
-                case ManagedIdentitySource.AzureArc:
-                    requestContext.Logger.Info(() => "[Managed Identity] Azure Arc managed identity is available.");
-                    return AzureArcManagedIdentitySource.TryCreate(requestContext);
-                default:
-                    requestContext.Logger.Info(() => "[Managed Identity] Defaulting to IMDS managed identity.");
-                    return new ImdsManagedIdentitySource(requestContext);
-            }
+                ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.TryCreate(requestContext),
+                ManagedIdentitySource.AppService => AppServiceManagedIdentitySource.TryCreate(requestContext),
+                ManagedIdentitySource.CloudShell => CloudShellManagedIdentitySource.TryCreate(requestContext),
+                ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.TryCreate(requestContext),
+                _ => new ImdsManagedIdentitySource(requestContext)
+            };
         }
 
         // Detect managed identity source based on the availability of environment variables.
-        internal static ManagedIdentitySource GetManagedIdentitySource()
+        private static ManagedIdentitySource GetManagedIdentitySource()
         {
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
             string identityHeader = EnvironmentVariables.IdentityHeader;
@@ -73,7 +62,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string imdsEndpoint = EnvironmentVariables.ImdsEndpoint;
             string podIdentityEndpoint = EnvironmentVariables.PodIdentityEndpoint;
 
-            if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader) && !string.IsNullOrEmpty(identityServerThumbprint))
+            if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader) && 
+                !string.IsNullOrEmpty(identityServerThumbprint))
             {
                 return ManagedIdentitySource.ServiceFabric;
             }
@@ -95,7 +85,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
             else
             {
-                return ManagedIdentitySource.DefaultToImds;
+                return ManagedIdentitySource.Imds;
             }
         }
     }

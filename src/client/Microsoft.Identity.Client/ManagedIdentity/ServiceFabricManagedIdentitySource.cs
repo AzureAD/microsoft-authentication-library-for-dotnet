@@ -23,6 +23,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
 
+            requestContext.Logger.Info(() => "[Managed Identity] Service fabric managed identity is available.");
+
             if (!Uri.TryCreate(identityEndpoint, UriKind.Absolute, out Uri endpointUri))
             {
                 string errorMessage = string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityEndpointInvalidUriError,

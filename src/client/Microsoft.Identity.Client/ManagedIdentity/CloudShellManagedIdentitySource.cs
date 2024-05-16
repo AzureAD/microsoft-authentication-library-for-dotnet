@@ -22,6 +22,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string msiEndpoint = EnvironmentVariables.MsiEndpoint;
 
             Uri endpointUri;
+
+            requestContext.Logger.Info(() => "[Managed Identity] Cloud shell managed identity is available.");
+
             try
             {
                 endpointUri = new Uri(msiEndpoint);
