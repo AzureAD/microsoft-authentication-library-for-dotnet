@@ -238,11 +238,12 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
 
-                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
-
                 var app = builder
                     .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None))
                     .BuildConcrete();
+
+                // important: set the func after calling `WithBroker`
+                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
 
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 harness.HttpManager.AddWsTrustMockHandler();
@@ -456,11 +457,12 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
 
-                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
-
                 var app = builder
                     .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
                     .BuildConcrete();
+
+                // important: set the func after calling `WithBroker`
+                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
 
                 // Act
                 var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
@@ -514,10 +516,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .WithHttpManager(harness.HttpManager);
 
                 builder.Config.IsBrokerEnabled = true;
-                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
+                
+                var app = builder.BuildConcrete();
 
-                var app = builder
-                    .BuildConcrete();
+                // important: set the func after calling `WithBroker`
+                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
 
                 // Act
                 try
