@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1716207265374,
+  "lastUpdate": 1716207267208,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -11688,6 +11688,54 @@ window.BENCHMARK_DATA = {
             "value": 124413.72469932155,
             "unit": "ns",
             "range": "± 2616.1838815271517"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d3ce6ad7a9c2705c9ae925198de4d2aa65f05cfe",
+          "message": "Move PCA classes to the Broker / Desktop project (#4771)\n\n* WithBroker(true) now fails at build time, not at runtime\r\n\r\n* 2\r\n\r\n* no warning\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/PublicClientApplicationBuilder.cs\r\n\r\nCo-authored-by: Travis Walker <travis.walker@microsoft.com>\r\n\r\n* Fix tests and apps\r\n\r\n* Move PCA classes to the Broker / Desktop project\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* WithBroker(true) now fails at build time, not at runtime\r\n\r\n* 2\r\n\r\n* no warning\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/PublicClientApplicationBuilder.cs\r\n\r\nCo-authored-by: Travis Walker <travis.walker@microsoft.com>\r\n\r\n* Fix tests and apps\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* Move PCA classes to the Broker / Desktop project\r\n\r\n* fix\r\n\r\n---------\r\n\r\nCo-authored-by: Travis Walker <travis.walker@microsoft.com>",
+          "timestamp": "2024-05-20T13:07:14+01:00",
+          "tree_id": "2115da552000397076c8f4c566d71cc4a1170d5a",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/d3ce6ad7a9c2705c9ae925198de4d2aa65f05cfe"
+        },
+        "date": 1716207266725,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 12615.76312800816,
+            "unit": "ns",
+            "range": "± 75.5381995439107"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 129666.47229817709,
+            "unit": "ns",
+            "range": "± 1950.4134049555646"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 23680.433938162667,
+            "unit": "ns",
+            "range": "± 32.36677964631866"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 125279.56945800781,
+            "unit": "ns",
+            "range": "± 2800.6683097194477"
           }
         ]
       }
