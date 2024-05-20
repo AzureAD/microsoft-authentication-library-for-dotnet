@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1716200369326,
+  "lastUpdate": 1716200372130,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -11604,6 +11604,54 @@ window.BENCHMARK_DATA = {
             "value": 126324.8582397461,
             "unit": "ns",
             "range": "± 2775.4684302125065"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "61a9fb3ab6a14f50be2122e7db8587bf87b49a86",
+          "message": "WithBroker(true) now fails at build time, not at runtime (#4767)\n\n* WithBroker(true) now fails at build time, not at runtime\r\n\r\n* 2\r\n\r\n* no warning\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/PublicClientApplicationBuilder.cs\r\n\r\nCo-authored-by: Travis Walker <travis.walker@microsoft.com>\r\n\r\n* Fix tests and apps\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* WithBroker(true) now fails at build time, not at runtime\r\n\r\n* 2\r\n\r\n* no warning\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/PublicClientApplicationBuilder.cs\r\n\r\nCo-authored-by: Travis Walker <travis.walker@microsoft.com>\r\n\r\n* Fix tests and apps\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/PublicClientApplicationBuilder.cs\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n---------\r\n\r\nCo-authored-by: Travis Walker <travis.walker@microsoft.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-05-20T11:12:04+01:00",
+          "tree_id": "8cdbb3241979260c5a7178e56f58a906e9f46399",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/61a9fb3ab6a14f50be2122e7db8587bf87b49a86"
+        },
+        "date": 1716200371015,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 12753.444814409528,
+            "unit": "ns",
+            "range": "± 29.63843928834986"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 120615.7351422991,
+            "unit": "ns",
+            "range": "± 572.9206431416949"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 23232.380021315355,
+            "unit": "ns",
+            "range": "± 42.23483203373166"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 124413.72469932155,
+            "unit": "ns",
+            "range": "± 2616.1838815271517"
           }
         ]
       }
