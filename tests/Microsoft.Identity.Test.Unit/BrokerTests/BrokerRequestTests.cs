@@ -238,9 +238,12 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
 
-                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
+                var app = builder
+                    .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None))
+                    .BuildConcrete();
 
-                var app = builder.WithBroker(true).BuildConcrete();
+                // important: set the func after calling `WithBroker`
+                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
 
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 harness.HttpManager.AddWsTrustMockHandler();
@@ -454,9 +457,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
 
-                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
+                var app = builder                   
+                    .BuildConcrete();
 
-                var app = builder.WithBroker(true).BuildConcrete();
+                // important: set the func after calling `WithBroker`
+                builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
 
                 // Act
                 var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
@@ -480,9 +485,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                      .Create(TestConstants.ClientId)
                      .WithHttpManager(harness.HttpManager);
 
-                builder.Config.BrokerCreatorFunc = (_, _, _) => { return broker; };
+                builder.Config.IsBrokerEnabled = true;
+                builder.Config.BrokerCreatorFunc = (_, _, _) => broker;
 
-                var app = builder.WithBroker(true).BuildConcrete();
+                var app = builder
+                    .BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
@@ -505,11 +512,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 var builder = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithHttpManager(harness.HttpManager);
-
+                    .WithHttpManager(harness.HttpManager);                
+                
+                var app = builder.BuildConcrete();                
                 builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
 
-                var app = builder.WithBroker(true).BuildConcrete();
 
                 // Act
                 try
@@ -556,7 +563,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new IosBrokerMock(logger); };
                 builder.Config.PlatformProxy = platformProxy;
 
-                var app = builder.WithBroker(true).BuildConcrete();
+                var app = builder
+                    .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+                    .BuildConcrete();
 
                 // Act
                 try
@@ -830,10 +839,14 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                    .WithMultiCloudSupport(true)
                    .WithHttpManager(harness.HttpManager);
 
+                builder.Config.IsBrokerEnabled = true;
                 var broker = Substitute.For<IBroker>();
+
                 builder.Config.BrokerCreatorFunc = (_, _, _) => broker;
 
-                var globalPca = builder.WithBroker(true).BuildConcrete();
+
+                var globalPca = builder.BuildConcrete();
+
 
                 // Setup the broker to return AuthorityUrl in the MsalTokenResponse as different cloud
                 broker.IsBrokerInstalledAndInvokable(AuthorityType.Aad).Returns(true);
@@ -843,7 +856,9 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                 broker.AcquireTokenInteractiveAsync(null, null).ReturnsForAnyArgs(Task.FromResult(tokenResponse));
 
                 // Act - interactive flow logs-in Arlighton user
-                var result = await globalPca.AcquireTokenInteractive(TestConstants.s_graphScopes).ExecuteAsync().ConfigureAwait(false);
+                var result = await globalPca.AcquireTokenInteractive(TestConstants.s_graphScopes)
+                    .WithParentActivityOrWindow(IntPtr.Zero)
+                    .ExecuteAsync().ConfigureAwait(false);
                 Assert.AreEqual("login.microsoftonline.us", result.Account.Environment);
                 Assert.AreEqual(TestConstants.Utid, result.TenantId);
 
