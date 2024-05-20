@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public async Task CredentialUserAssignedHappyPathAsync(string userAssignedId,
             UserAssignedIdentityId userAssignedIdentityId)
         {
-            CryptoKeyType cryptoKeyType = CryptoKeyType.KeyGuard;
+            CryptoKeyType cryptoKeyType = CryptoKeyType.KeyGuardMachine;
 
             // Arrange
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -237,7 +237,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithClientCapabilities(new[] { "CP1" })
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.User);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardUser);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -310,7 +310,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -351,7 +351,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.User);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardUser);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -399,7 +399,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .WithClientCapabilities(new[] { "CP1" })
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.User);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardUser);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -470,7 +470,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -531,7 +531,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.User);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardUser);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -564,7 +564,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -588,7 +588,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(ex.Message, expectedErrorMessage);
-                Assert.AreEqual(ManagedIdentitySource.Credential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
+                Assert.AreEqual(ManagedIdentitySource.SlcCredential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(ex.ErrorCode, expectedErrorCode);
             }
         }
@@ -607,7 +607,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -631,7 +631,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(ex.Message, expectedErrorMessage);
-                Assert.AreEqual(ManagedIdentitySource.Credential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
+                Assert.AreEqual(ManagedIdentitySource.SlcCredential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(ex.ErrorCode, expectedErrorCode);
             }
         }
@@ -649,7 +649,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.User);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardUser);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -672,7 +672,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -691,7 +691,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySource.Credential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
+                Assert.AreEqual(ManagedIdentitySource.SlcCredential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.CredentialRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.CredentialEndpointNoResponseReceived, ex.Message);
             }
@@ -707,7 +707,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -726,7 +726,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySource.Credential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
+                Assert.AreEqual(ManagedIdentitySource.SlcCredential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.CredentialRequestFailed, ex.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidResponse, ex.Message);
             }
@@ -742,7 +742,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -759,7 +759,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySource.Credential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
+                Assert.AreEqual(ManagedIdentitySource.SlcCredential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityUnreachableNetwork, ex.ErrorCode);
                 Assert.AreEqual("A socket operation was attempted to an unreachable network.", ex.Message);
             }
@@ -775,7 +775,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -796,7 +796,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
                 Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySource.Credential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
+                Assert.AreEqual(ManagedIdentitySource.SlcCredential.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityUnreachableNetwork, ex.ErrorCode);
                 Assert.AreEqual("A socket operation was attempted to an unreachable network.", ex.Message);
             }
@@ -817,7 +817,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -869,7 +869,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.
@@ -901,7 +901,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task UserAssignedManagedIdentityApiIdTestAsync()
         {
-            CryptoKeyType cryptoKeyType = CryptoKeyType.KeyGuard;
+            CryptoKeyType cryptoKeyType = CryptoKeyType.KeyGuardMachine;
 
             // Arrange
             using (MockHttpAndServiceBundle harness = CreateTestHarness())
@@ -950,7 +950,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(TestConstants.ClientId, UserAssignedIdentityId.ClientId);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 miBuilder.WithHttpManager(httpManager);
@@ -996,7 +996,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(TestConstants.ClientId, UserAssignedIdentityId.ClientId);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 miBuilder.WithHttpManager(httpManager);
@@ -1025,7 +1025,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(TestConstants.ClientId, UserAssignedIdentityId.ClientId);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 miBuilder.WithHttpManager(httpManager);
@@ -1054,7 +1054,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(TestConstants.ClientId, UserAssignedIdentityId.ClientId);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 miBuilder.WithHttpManager(httpManager);
@@ -1083,7 +1083,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(TestConstants.ClientId, UserAssignedIdentityId.ClientId);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 miBuilder.WithHttpManager(httpManager);
@@ -1111,7 +1111,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             {
                 ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(TestConstants.ClientId, UserAssignedIdentityId.ClientId);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 miBuilder.WithHttpManager(httpManager);
@@ -1193,7 +1193,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
 
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuard);
+                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardMachine);
                 miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
 
                 // Disabling shared cache options to avoid cross test pollution.

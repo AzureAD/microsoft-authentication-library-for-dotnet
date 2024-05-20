@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Net;
+
 namespace Microsoft.Identity.Client.Http
 {
     internal static class HttpRetryConditions
@@ -14,20 +16,14 @@ namespace Microsoft.Identity.Client.Http
         /// Retry policy specific to managed identity flow.
         /// Avoid changing this, as it's breaking change.
         /// </summary>
-        public static bool Msi(HttpResponse response)
+        public static bool ManagedIdentity(HttpResponse response)
         {
-            switch ((int)response.StatusCode)
+            return (int)response.StatusCode switch
             {
-                case 404: //Not Found
-                case 408: // Request Timeout
-                case 429: // Too Many Requests
-                case 500: // Internal Server Error
-                case 503: // Service Unavailable
-                case 504: // Gateway Timeout
-                    return true;
-                default:
-                    return false;
-            }
+                //Not Found
+                404 or 408 or 429 or 500 or 503 or 504 => true,
+                _ => false,
+            };
         }
 
         /// <summary>

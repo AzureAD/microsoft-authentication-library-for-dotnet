@@ -5,7 +5,6 @@ using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Platforms.Windows;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Platforms.Features.SLC
@@ -37,19 +36,19 @@ namespace Microsoft.Identity.Client.Platforms.Features.SLC
         // Logger instance for capturing log information
         private readonly ILoggerAdapter _logger;
 
-        private readonly KeyGuardManager _keyGuardManager; // Use KeyGuardManager
+        private readonly KeyGuardProxy _keyGuardProxy; // Use KeyGuardManager
 
-        private bool _isInitialized = false;
+        private static bool s_isInitialized = false;
 
         // Property to get or create the binding certificate from crypto key information
         public X509Certificate2 BindingCertificate
         {
             get
             {
-                if (!_isInitialized)
+                if (!s_isInitialized)
                 {
                     s_bindingCertificate = GetOrCreateCertificateFromCryptoKeyInfo();
-                    _isInitialized = true;
+                    s_isInitialized = true;
                 }
 
                 return s_bindingCertificate;
@@ -61,9 +60,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.SLC
         {
             get
             {
-                if (!_isInitialized)
+                if (!s_isInitialized)
                 {
-                    throw new InvalidOperationException("CryptoKeyType cannot be accessed before initialization.");
+                    s_bindingCertificate = GetOrCreateCertificateFromCryptoKeyInfo();
+                    s_isInitialized = true;
                 }
 
                 return s_cryptoKeyType;
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.SLC
         public ManagedIdentityCertificateProvider(ILoggerAdapter logger)
         {
             _logger = logger;
-            _keyGuardManager = new KeyGuardManager(logger); 
+            _keyGuardProxy = new KeyGuardProxy(logger); 
         }
 
         /// <summary>
@@ -95,23 +95,23 @@ namespace Microsoft.Identity.Client.Platforms.Features.SLC
                 if (s_bindingCertificate != null && !CertificateNeedsRotation(s_bindingCertificate))
                 {
                     _logger.Verbose(() => "[Managed Identity] Another thread created the certificate while waiting for the lock.");
-                    _isInitialized = true;
+                    s_isInitialized = true;
                     return s_bindingCertificate;
                 }
 
                 // The cached certificate needs to be rotated or does not exist
-                ECDsa eCDsaKey = _keyGuardManager.LoadCngKeyWithProvider(KeyProviderName);
-                s_cryptoKeyType = _keyGuardManager.CryptoKeyType;
+                ECDsa eCDsaKey = _keyGuardProxy.LoadCngKeyWithProvider(KeyProviderName);
+                s_cryptoKeyType = _keyGuardProxy.CryptoKeyType;
 
                 if (eCDsaKey != null)
                 {
                     s_bindingCertificate = CreateBindingCertificate(eCDsaKey);
-                    _isInitialized = true;
+                    s_isInitialized = true;
                     return s_bindingCertificate;
                 }
             }
 
-            _isInitialized = false;
+            s_isInitialized = false;
             return null;
         }
 

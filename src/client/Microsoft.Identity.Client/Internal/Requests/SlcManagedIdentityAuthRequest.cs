@@ -19,11 +19,11 @@ using System.Linq;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class CredentialBasedMsiAuthRequest : MsiAuthRequest
+    internal class SlcManagedIdentityAuthRequest : ManagedIdentityAuthRequest
     {
         private readonly Uri _credentialEndpoint;
 
-        private CredentialBasedMsiAuthRequest(
+        private SlcManagedIdentityAuthRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenForManagedIdentityParameters managedIdentityParameters,
@@ -33,16 +33,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _credentialEndpoint = credentialEndpoint;
         }
 
-        public static CredentialBasedMsiAuthRequest TryCreate(
+        public static SlcManagedIdentityAuthRequest TryCreate(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenForManagedIdentityParameters managedIdentityParameters)
         {
-            return IsCredentialKeyAvailable(
+            return UseSlcManagedIdentity(
                 authenticationRequestParameters.RequestContext,
-                managedIdentityParameters,
                 out Uri credentialEndpointUri) ?
-                    new CredentialBasedMsiAuthRequest(
+                    new SlcManagedIdentityAuthRequest(
                     serviceBundle,
                     authenticationRequestParameters,
                     managedIdentityParameters, credentialEndpointUri) : null;
@@ -60,9 +59,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalAccessTokenCacheItem cachedAccessTokenItem = null;
 
             //allow only one call to the provider 
-            logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Entering token acquire for managed identity credential request semaphore.");
+            logger.Verbose(() => "[SlcManagedIdentityAuthRequest] Entering acquire token for managed identity credential request semaphore.");
             await s_semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
-            logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Entered token acquire for managed identity credential request semaphore.");
+            logger.Verbose(() => "[SlcManagedIdentityAuthRequest] Entered acquire token for managed identity credential request semaphore.");
 
             try
             {
@@ -70,8 +69,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // 1. Force refresh is requested, or
                 // 2. Claims are passed, or 
                 // 3. If the AT needs to be refreshed pro-actively 
-                if (AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
-                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ForceRefreshOrClaims)
+                if (_managedIdentityParameters.ForceRefresh ||
+                    !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims) ||
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed)
                 {
                     authResult = await GetAccessTokenFromTokenEndpointAsync(keyMaterial, cancellationToken, logger).ConfigureAwait(false);
                 }
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     }
                     else
                     {
-                        logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Getting Access token from cache ...");
+                        logger.Verbose(() => "[SlcManagedIdentityAuthRequest] Getting Access token from cache ...");
                         authResult = CreateAuthenticationResultFromCache(cachedAccessTokenItem);
                     }
                 }
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             finally
             {
                 s_semaphoreSlim.Release();
-                logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Released token acquire for managed identity credential request semaphore.");
+                logger.Verbose(() => "[SlcManagedIdentityAuthRequest] Released acquire token for managed identity credential request semaphore.");
             }
         }
 
@@ -109,15 +109,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             try
             {
-                logger.Verbose(() => "[CredentialBasedMsiAuthRequest] Getting token from the managed identity endpoint.");
+                logger.Verbose(() => "[SlcManagedIdentityAuthRequest] Getting token from the managed identity endpoint.");
 
-                CredentialResponse credentialResponse =
+                SlcCredentialResponse credentialResponse =
                     await GetCredentialAssertionAsync(keyMaterial, logger, cancellationToken).ConfigureAwait(false);
 
                 var baseUri = new Uri(credentialResponse.RegionalTokenUrl);
                 var tokenUrl = new Uri(baseUri, $"{credentialResponse.TenantId}/oauth2/v2.0/token");
 
-                logger.Verbose(() => $"[CredentialBasedMsiAuthRequest] Token endpoint : { tokenUrl }.");
+                logger.Verbose(() => $"[SlcManagedIdentityAuthRequest] Token endpoint : { tokenUrl }.");
 
                 OAuth2Client client = CreateClientRequest(
                     keyMaterial,
@@ -132,14 +132,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 msalTokenResponse.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
 
-                logger.Info("[CredentialBasedMsiAuthRequest] Successful response received.");
+                logger.Info("[SlcManagedIdentityAuthRequest] Successful response received.");
 
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse)
                     .ConfigureAwait(false);
             }
             catch (MsalClientException ex)
             {
-                logger.Verbose(() => $"[CredentialBasedMsiAuthRequest] Caught an exception. {ex.Message}");
+                logger.Verbose(() => $"[SlcManagedIdentityAuthRequest] Caught an exception. {ex.Message}");
                 throw;
             }
             catch (HttpRequestException ex)
@@ -147,28 +147,30 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                 MsalError.ManagedIdentityUnreachableNetwork,
                 ex.Message,
-                ex.InnerException,
-                ManagedIdentitySource.Credential,
+                ex,
+                ManagedIdentitySource.SlcCredential,
                 null);
+
+                logger.Verbose(() => $"[SlcManagedIdentityAuthRequest] Caught an exception. {ex.Message}");
 
                 throw exception;
             }
             catch (MsalServiceException ex)
             {
-                logger.Verbose(() => $"[CredentialBasedMsiAuthRequest] Caught an exception. {ex.Message}. Error Code : {ex.ErrorCode} Status Code : {ex.StatusCode}");
+                logger.Verbose(() => $"[SlcManagedIdentityAuthRequest] Caught an exception. {ex.Message}. Error Code : {ex.ErrorCode} Status Code : {ex.StatusCode}");
 
                 exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     ex.ErrorCode,
                     ex.Message,
-                    ex.InnerException,
-                    ManagedIdentitySource.Credential,
+                    ex,
+                    ManagedIdentitySource.SlcCredential,
                     ex.StatusCode);
 
                 throw exception;
             }
             catch (Exception e) when (e is not MsalServiceException)
             {
-                logger.Error($"[Managed Identity] Exception: {e.Message}");
+                logger.Error($"[SlcManagedIdentityAuthRequest] Exception: {e.Message}");
                 exception = e;
                 message = MsalErrorMessage.CredentialEndpointNoResponseReceived;
             }
@@ -177,27 +179,27 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 MsalError.CredentialRequestFailed,
                 message,
                 exception,
-                ManagedIdentitySource.Credential,
+                ManagedIdentitySource.SlcCredential,
                 null);
 
             throw msalException;
         }
 
-        private async Task<CredentialResponse> GetCredentialAssertionAsync(
+        private async Task<SlcCredentialResponse> GetCredentialAssertionAsync(
             IKeyMaterialManager keyMaterial,
             ILoggerAdapter logger,
             CancellationToken cancellationToken
             )
         {
-            var managedIdentityCredentialResponse = new ManagedIdentityCredentialResponse(
+            var msiCredentialService = new ManagedIdentityCredentialService(
                 _credentialEndpoint,
                 keyMaterial.BindingCertificate,
                 AuthenticationRequestParameters.RequestContext,
                 cancellationToken);
 
-            CredentialResponse credentialResponse = await managedIdentityCredentialResponse.GetCredentialAsync().ConfigureAwait(false);
+            SlcCredentialResponse credentialResponse = await msiCredentialService.GetCredentialAsync().ConfigureAwait(false);
 
-            logger.Verbose(() => "[CredentialBasedMsiAuthRequest] A credential was successfully fetched.");
+            logger.Verbose(() => "[SlcManagedIdentityAuthRequest] A credential was successfully fetched.");
 
             return credentialResponse;
         }
@@ -212,7 +214,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private OAuth2Client CreateClientRequest(
             IKeyMaterialManager keyMaterial,
             IHttpManager httpManager,
-            CredentialResponse credentialResponse)
+            SlcCredentialResponse credentialResponse)
         {
             // Initialize an OAuth2 client with logger, HTTP manager, and binding certificate.
             var client = new OAuth2Client(
@@ -222,6 +224,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             // Convert overridden scopes to a single string.
             string scopes = GetOverriddenScopes(AuthenticationRequestParameters.Scope).AsSingleString();
+
+            //credential flows must have a scope value with /.default suffixed to the resource identifier (application ID URI)
+            scopes += "/.default";
 
             // Add required parameters for client credentials grant request.
             client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials);
@@ -241,16 +246,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         // Check if CredentialKeyType is set to a valid value for Managed Identity.
-        private static bool IsCredentialKeyAvailable(
+        private static bool UseSlcManagedIdentity(
             RequestContext requestContext,
-            AcquireTokenForManagedIdentityParameters managedIdentityParameters,
             out Uri credentialEndpointUri)
         {
             credentialEndpointUri = null;
-
+            
             CryptoKeyType credentialKeyType = requestContext.ServiceBundle.Config.ManagedIdentityCredentialKeyType;
             bool isClaimsRequested = requestContext.ServiceBundle.Config.ClientCapabilities?.Any() == true;
-            bool isPopRequested = requestContext.ServiceBundle.Config.ManagedIdentityPopSupported;
 
             // CredentialKeyType will be Undefined, if no keys are provisioned.
             if (credentialKeyType == CryptoKeyType.Undefined)
@@ -258,61 +261,48 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // If new CAE APIs are used when no keys are defined, throw an exception.
                 if (isClaimsRequested)
                 {
-                    requestContext.Logger.Verbose(() => "[Managed Identity] Claims-based authentication is not " +
+                    requestContext.Logger.Verbose(() => "[SlcManagedIdentityAuthRequest] Claims-based authentication is not " +
                     "supported with Managed Identity on the current Azure Resource.");
 
                     throw new MsalClientException(
                         MsalError.ClaimsNotSupportedOnMiResource,
                         MsalErrorMessage.ResourceDoesNotSupportClaims);
                 }
-
-                //If new POP APIs are used when no keys are defined, throw an exception.
-                if (isPopRequested)
-                {
-                    requestContext.Logger.Verbose(() => "[Managed Identity] Proof of Possession is not " +
-                    "supported with Managed Identity on the current Azure Resource.");
-
-                    throw new MsalClientException(
-                        MsalError.PopNotSupportedOnMiResource,
-                        MsalErrorMessage.ResourceDoesNotSupportPop);
-                }
-
                 // Log the unavailability of credential based managed identity for a basic request.
                 // Proceed to use Legacy MSI flow.
-                requestContext.Logger.Verbose(() => "[Managed Identity] Credential based managed identity is unavailable without specific client capabilities.");
+                requestContext.Logger.Verbose(() => "[SlcManagedIdentityAuthRequest] Credential based managed identity is unavailable without specific client capabilities.");
                 return false;
             }
 
-            if (credentialKeyType == CryptoKeyType.User && !isClaimsRequested)
+            if (credentialKeyType == CryptoKeyType.KeyGuardUser && !isClaimsRequested)
             {
                 // MSAL will setup a user key in public preview and try to fetch a credential if claims are requested.
                 // Even if MSAL was able to setup a user key and no claims where requested proceed to use Legacy MSI flow.
-                requestContext.Logger.Verbose(() => "[Managed Identity] Credential based managed identity is unavailable without specific client capabilities.");
+                requestContext.Logger.Verbose(() => "[SlcManagedIdentityAuthRequest] Credential based managed identity is unavailable without specific client capabilities.");
                 return false;
             }
 
             // Initialize the credentialUri with the constant CredentialEndpoint and API version.
             string credentialUri = Constants.CredentialEndpoint;
-            credentialUri += $"?cred-api-version=1.0";
 
             // Switch based on the type of Managed Identity ID provided.
             switch (requestContext.ServiceBundle.Config.ManagedIdentityId.IdType)
             {
                 // If the ID is of type ClientId, add user assigned client id to the request.
                 case ManagedIdentityIdType.ClientId:
-                    requestContext.Logger.Info("[Managed Identity] Adding user assigned client id to the request.");
+                    requestContext.Logger.Info("[SlcManagedIdentityAuthRequest] Adding user assigned client id to the request.");
                     credentialUri += $"&{Constants.ManagedIdentityClientId}={requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
                     break;
 
                 // If the ID is of type ResourceId, add user assigned resource id to the request.
                 case ManagedIdentityIdType.ResourceId:
-                    requestContext.Logger.Info("[Managed Identity] Adding user assigned resource id to the request.");
+                    requestContext.Logger.Info("[SlcManagedIdentityAuthRequest] Adding user assigned resource id to the request.");
                     credentialUri += $"&{Constants.ManagedIdentityResourceId}={requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
                     break;
 
                 // If the ID is of type ObjectId, add user assigned object id to the request.
                 case ManagedIdentityIdType.ObjectId:
-                    requestContext.Logger.Info("[Managed Identity] Adding user assigned object id to the request.");
+                    requestContext.Logger.Info("[SlcManagedIdentityAuthRequest] Adding user assigned object id to the request.");
                     credentialUri += $"&{Constants.ManagedIdentityObjectId}={requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId}";
                     break;
             }
@@ -321,7 +311,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             credentialEndpointUri = new Uri(credentialUri);
 
             // Log information about creating Credential based managed identity.
-            requestContext.Logger.Info($"[Managed Identity] Creating Credential based managed identity.");
+            requestContext.Logger.Info($"[SlcManagedIdentityAuthRequest] Creating Credential based managed identity.");
             return true;
         }
     }

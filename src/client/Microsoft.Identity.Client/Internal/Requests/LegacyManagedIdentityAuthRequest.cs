@@ -15,12 +15,13 @@ using Microsoft.Identity.Client.Utils;
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     /// <summary>
-    /// Old implementation of MSI, which works by getting tokens directly from the MSI infrastructure. 
+    /// Old implementation of MSI, which works by getting tokens directly 
+    /// from the managed identity token endpoints. 
     /// </summary>
-    internal class LegacyMsiAuthRequest
-        : MsiAuthRequest
+    internal class LegacyManagedIdentityAuthRequest
+        : ManagedIdentityAuthRequest
     {
-        public LegacyMsiAuthRequest(
+        public LegacyManagedIdentityAuthRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenForManagedIdentityParameters managedIdentityParameters)

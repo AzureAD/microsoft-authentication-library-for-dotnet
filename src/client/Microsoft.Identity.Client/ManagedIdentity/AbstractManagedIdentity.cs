@@ -123,8 +123,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             ManagedIdentityResponse managedIdentityResponse = JsonHelper.DeserializeFromJson<ManagedIdentityResponse>(response.Body);
 
-            if (managedIdentityResponse == null || managedIdentityResponse.AccessToken.IsNullOrEmpty()
-                && (managedIdentityResponse.ExpiresOn.IsNullOrEmpty() || managedIdentityResponse.ExpiresIn.IsNullOrEmpty()))
+            if (managedIdentityResponse == null || !managedIdentityResponse.IsValid())
             {
                 _requestContext.Logger.Error("[Managed Identity] Response is either null or insufficient for authentication.");
 

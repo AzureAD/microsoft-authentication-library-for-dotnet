@@ -764,12 +764,6 @@ namespace Microsoft.Identity.Client
         public const string NoClientId = "no_client_id";
 
         /// <summary>
-        /// <para>What happens?</para>You've specified a client ID that is not a <see cref="Guid"/>
-        /// <para>Mitigation</para>Use the application ID (a GUID) from the application portal as client ID in this SDK
-        /// </summary>
-        public const string ClientIdMustBeAGuid = "client_id_must_be_guid";
-
-        /// <summary>
         /// <para>What happens?</para>You have configured both a telemetry callback and a telemetry config. 
         /// <para>Mitigation</para>Only one telemetry mechanism can be configured.
         /// </summary>
@@ -923,16 +917,10 @@ namespace Microsoft.Identity.Client
         public const string NonceRequiredForPopOnPCA = "nonce_required_for_pop_on_pca";
 
         /// <summary>
-        /// <para>What happens?</para>The request has Proof-of-Possession configured but the platform does not support Proof-of-Possession.
-        /// <para>Mitigation</para>Remove the Proof-of-Possession API from the request.
-        /// </summary>
-        public const string PopNotSupportedOnMiResource = "mi_pop_not_supported_platform";
-
-        /// <summary>
         /// <para>What happens?</para>The request has client capabilities configured but the platform does not support claims.
         /// <para>Mitigation</para>Remove the Client Capabilities API from the request.
         /// </summary>
-        public const string ClaimsNotSupportedOnMiResource = "mi_claims_not_supported_platform";
+        public const string ClaimsNotSupportedOnMiResource = "managed_identity_claims_not_supported_platform";
 
 #if iOS
         /// <summary>

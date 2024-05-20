@@ -19,14 +19,14 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 
         /// <summary>
         /// Represents a cryptographic machine key protected by KeyGuard. This key is typically used for operations 
-        /// requiring higher security enforced by system hardware for e.g. to acquire a POP token.
+        /// requiring higher security enforced by the system hardware (e.g., to acquire Proof-of-Possession tokens).
         /// </summary>
-        KeyGuard = 1,
+        KeyGuardMachine = 1,
 
         /// <summary>
         /// Represents a cryptographic user key protected by KeyGuard. This key is user-specific and provides 
-        /// the same security measures like a machine key, but is only used to acquire cae based tokens.
+        /// the same security measures like a machine key, but is only used to acquire Continuous Access Evaluation tokens.
         /// </summary>
-        User = 2,
+        KeyGuardUser = 2,
     }
 }

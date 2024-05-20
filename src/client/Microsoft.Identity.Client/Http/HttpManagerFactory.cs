@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.Http
             }
 
             return isManagedIdentity ?
-                new HttpManager(httpClientFactory, HttpRetryConditions.Msi) :
+                new HttpManager(httpClientFactory, HttpRetryConditions.ManagedIdentity) :
                 new HttpManager(httpClientFactory, HttpRetryConditions.Sts);
         }
     }

@@ -87,8 +87,16 @@
     <Compile Include="$(PathToMsalSources)\**\*.cs" Exclude="$(PathToMsalSources)\obj\**\*.*" />
     <Compile Remove="$(PathToMsalSources)\Platforms\**\*.*;$(PathToMsalSources)\Resources\*.cs" />
     <Compile Remove="$(PathToMsalSources)\PlatformsCommon\PlatformNotSupported\ApiConfig\SystemWebViewOptions.cs" />
+    <Compile Include="Internal\Requests\LegacyManagedIdentityAuthRequest.cs" />
+    <Compile Include="Internal\Requests\ManagedIdentityAuthRequest.cs" />
+    <Compile Include="Internal\Requests\SlcManagedIdentityAuthRequest.cs" />
+    <Compile Include="ManagedIdentity\SlcCredentialResponse.cs" />
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
     <None Include="$(PathToMsalSources)\..\..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="Internal\Requests\LegacyManagedIdentityAuthRequest.cs" />
+    <None Include="Internal\Requests\ManagedIdentityAuthRequest.cs" />
+    <None Include="Internal\Requests\SlcManagedIdentityAuthRequest.cs" />
+    <None Include="ManagedIdentity\SlcCredentialResponse.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
@@ -144,23 +152,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\SLC\**\*.cs" />
-
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.IdentityModel" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop472)'">

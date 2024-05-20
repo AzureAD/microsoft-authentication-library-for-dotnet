@@ -38,27 +38,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
-            if (_managedIdentityApplication.KeyMaterialManager.CryptoKeyType != CryptoKeyType.Undefined)
-            {
-                // managed identity resource 
-                string miResource = managedIdentityParameters.Resource;
-
-                // Check if the input ends with "/.default"
-                bool endsWithDefault = miResource.EndsWith("/.default", StringComparison.OrdinalIgnoreCase);
-
-                // Add "/.default" only if it doesn't end with "/.default" and doesn't contain "/.somethingelse"
-                if (!endsWithDefault)
-                {
-                    // Add "/.default" to the scopes
-                    commonParameters.Scopes = new SortedSet<string>
-                    {
-                        managedIdentityParameters.Resource + "/.default"
-                    };
-
-                    requestContext.Logger.Verbose(() => $"User provided scope : {miResource} was updated with /.default for managed identity.");
-                }
-            }
-
             var requestParams = await _managedIdentityApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
@@ -68,12 +47,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             RequestBase handler = null;
 
             // May or may not be initialized, depending on the state of the Azure resource
-            handler = CredentialBasedMsiAuthRequest.TryCreate(
+            handler = SlcManagedIdentityAuthRequest.TryCreate(
                 ServiceBundle,
                 requestParams,
                 managedIdentityParameters);
 
-            handler ??= new LegacyMsiAuthRequest(
+            handler ??= new LegacyManagedIdentityAuthRequest(
                     ServiceBundle,
                     requestParams,
                     managedIdentityParameters);

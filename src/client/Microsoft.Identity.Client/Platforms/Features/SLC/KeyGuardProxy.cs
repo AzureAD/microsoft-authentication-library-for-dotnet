@@ -2,14 +2,15 @@
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
-namespace Microsoft.Identity.Client.Platforms.Windows
+namespace Microsoft.Identity.Client.Platforms.Features.SLC
 {
     /// <summary>
     /// Platform / OS specific logic to manage KeyGuard keys.
     /// </summary>
-    internal class KeyGuardManager : IKeyGuardManager
+    internal class KeyGuardProxy : IKeyGuardProxy
     {
         // The name of the key guard isolation property
         private const string IsKeyGuardEnabledProperty = "Virtual Iso";
@@ -18,10 +19,8 @@ namespace Microsoft.Identity.Client.Platforms.Windows
         private const CngKeyCreationOptions NCryptUseVirtualIsolationFlag = (CngKeyCreationOptions)0x00020000;
 
         // Constants specifying the names for the key storage provider and key names
-        private const string KeyProviderName = "Microsoft Software Key Storage Provider";
-        private const string MachineKeyName = "ManagedIdentityCredentialKey";
-        private const string SoftwareKeyName = "ResourceBindingKey";
-        private const string MsalKeyGuardKeyName = "ManagedIdentityUserBindingKey";
+        private const string MachineKeyName = "ResourceBindingMachineCredentialKey";
+        private const string SoftwareKeyName = "ResourceBindingUserCredentialKey";
 
         // Logger instance for capturing log information
         private readonly ILoggerAdapter _logger;
@@ -31,7 +30,7 @@ namespace Microsoft.Identity.Client.Platforms.Windows
         /// </summary>
         public CryptoKeyType CryptoKeyType { get; private set; } = CryptoKeyType.Undefined;
 
-        internal KeyGuardManager(ILoggerAdapter logger)
+        internal KeyGuardProxy(ILoggerAdapter logger)
         {
             _logger = logger;
         }
@@ -49,16 +48,16 @@ namespace Microsoft.Identity.Client.Platforms.Windows
                 _logger.Verbose(() => "[Managed Identity] Initializing Cng Key.");
 
                 // Try to get the key material from machine key
-                if (TryGetKeyMaterial(KeyProviderName, MachineKeyName, CngKeyOpenOptions.MachineKey, out ECDsa ecdsaKey))
+                if (TryGetCryptoKey(keyProvider, MachineKeyName, CngKeyOpenOptions.MachineKey, out ECDsa ecdsaKey))
                 {
                     _logger.Verbose(() => $"[Managed Identity] A machine key was found. Key Name : {MachineKeyName}. ");
                     return ecdsaKey;
                 }
 
                 // If machine key is not available, fall back to software key
-                if (TryGetKeyMaterial(KeyProviderName, MsalKeyGuardKeyName, CngKeyOpenOptions.None, out ecdsaKey))
+                if (TryGetCryptoKey(keyProvider, SoftwareKeyName, CngKeyOpenOptions.None, out ecdsaKey))
                 {
-                    _logger.Verbose(() => $"[Managed Identity] A non-machine key was found. Key Name : {SoftwareKeyName}. ");
+                    _logger.Verbose(() => $"[Managed Identity] A software key was found. Key Name : {SoftwareKeyName}. ");
                     return ecdsaKey;
                 }
 
@@ -66,10 +65,10 @@ namespace Microsoft.Identity.Client.Platforms.Windows
                     "Attempting to create a new key for Managed Identity.");
 
                 // Attempt to create a new key if none are available
-                //if (TryCreateKeyMaterial(MsalKeyGuardKeyName, out ecdsaKey))
-                //{
-                //    return ecdsaKey;
-                //}
+                if (TryCreateKeyMaterial(SoftwareKeyName, out ecdsaKey))
+                {
+                    return ecdsaKey;
+                }
 
                 // All attempts for getting keys failed
                 // Now we should follow the legacy managed identity flow
@@ -95,7 +94,7 @@ namespace Microsoft.Identity.Client.Platforms.Windows
         /// <returns>
         ///   <c>true</c> if the key material is successfully retrieved; otherwise, <c>false</c>.
         /// </returns>
-        public bool TryGetKeyMaterial(
+        public bool TryGetCryptoKey(
             string keyProviderName,
             string keyName,
             CngKeyOpenOptions cngKeyOpenOptions,
@@ -112,9 +111,18 @@ namespace Microsoft.Identity.Client.Platforms.Windows
                 ecdsaKey = new ECDsaCng(cngKey);
 
                 //check if the key is protected by KeyGuard
-                if (IsKeyGuardProtected(cngKey))
+                if (IsKeyGuardProtectedKey(cngKey))
                 {
-                    CryptoKeyType = CryptoKeyType.KeyGuard;
+                    // Check if the key name indicates user-specific key
+                    if (keyName.Equals(SoftwareKeyName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        CryptoKeyType = CryptoKeyType.KeyGuardUser;
+                    }
+                    else
+                    {
+                        CryptoKeyType = CryptoKeyType.KeyGuardMachine;
+                    }
+
                     return true;
                 }
             }
@@ -144,7 +152,7 @@ namespace Microsoft.Identity.Client.Platforms.Windows
         /// <returns>
         ///   <c>true</c> if the key is protected by KeyGuard; otherwise, <c>false</c>.
         /// </returns>
-        public bool IsKeyGuardProtected(CngKey cngKey)
+        public bool IsKeyGuardProtectedKey(CngKey cngKey)
         {
             //Check to see if the KeyGuard Isolation flag was set in the key
             if (!cngKey.HasProperty(IsKeyGuardEnabledProperty, CngPropertyOptions.None))
@@ -174,31 +182,6 @@ namespace Microsoft.Identity.Client.Platforms.Windows
         }
 
         /// <summary>
-        /// Checks if the private key of the given certificate is protected by KeyGuard.
-        /// </summary>
-        /// <param name="certificate"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        public bool IsKeyGuardProtected(X509Certificate2 certificate)
-        {
-            if (certificate == null)
-                throw new ArgumentNullException(nameof(certificate));
-
-            return certificate.HasPrivateKey;
-        }
-
-        /// <summary>
-        /// Checks if virtualization-based security is enabled on the device, allowing the functionality of KeyGuard.
-        /// </summary>
-        /// <returns></returns>
-        public bool IsVBSEnabled()
-        {
-            // In reality, you might need to P/Invoke to check system settings or use a Windows API.
-            // Placeholder for demonstration
-            return true; // Assume VBS is enabled
-        }
-
-        /// <summary>
         /// Attempts to create a new cryptographic key and load it into a CngKey with the specified options.
         /// </summary>
         /// <param name="keyName">The name of the key to create.</param>
@@ -221,7 +204,7 @@ namespace Microsoft.Identity.Client.Platforms.Windows
                 using var cngKey = CngKey.Create(CngAlgorithm.ECDsaP256, keyName, keyParams);
                 ecdsaKey = new ECDsaCng(cngKey);
                 _logger.Info($"[Managed Identity] Key '{keyName}' created successfully with Virtual Isolation.");
-                CryptoKeyType = CryptoKeyType.User;
+                CryptoKeyType = CryptoKeyType.KeyGuardUser;
                 return true; // Key creation was successful
             }
             catch (Exception ex)

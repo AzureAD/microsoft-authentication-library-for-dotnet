@@ -129,18 +129,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             // Assert
             Assert.IsFalse(result, "Expected false since the certificate expiration is below the custom rotation threshold.");
         }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void CryptoKeyType_ShouldThrowException_IfNotInitialized()
-        {
-            // Arrange
-            ILoggerAdapter logger = Substitute.For<ILoggerAdapter>();
-            ManagedIdentityCertificateProvider provider = new(logger);
-
-            // Act & Assert
-            _ = provider.CryptoKeyType;
-        }
 #endif
     }
 }

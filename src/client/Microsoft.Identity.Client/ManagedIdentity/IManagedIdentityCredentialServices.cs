@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-    internal interface IManagedIdentityCredentialResponse
+    internal interface IManagedIdentityCredentialService
     {
-        Task<CredentialResponse> GetCredentialAsync();
+        Task<SlcCredentialResponse> GetCredentialAsync();
     }
 }

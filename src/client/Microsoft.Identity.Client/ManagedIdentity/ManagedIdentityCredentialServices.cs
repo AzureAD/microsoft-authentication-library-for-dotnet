@@ -16,7 +16,7 @@ using System.Linq;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-    internal class ManagedIdentityCredentialResponse : IManagedIdentityCredentialResponse
+    internal class ManagedIdentityCredentialService : IManagedIdentityCredentialService
     {
         private readonly Uri _uri;
         private readonly X509Certificate2 _bindingCertificate;
@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private readonly CancellationToken _cancellationToken;
         internal const string TimeoutError = "[Managed Identity] Authentication unavailable. The request to the managed identity endpoint timed out.";
 
-        public ManagedIdentityCredentialResponse(
+        public ManagedIdentityCredentialService(
             Uri uri,
             X509Certificate2 bindingCertificate,
             RequestContext requestContext,
@@ -41,12 +41,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// </summary>
         /// <returns></returns>
         /// <exception cref="MsalManagedIdentityException"></exception>
-        public async Task<CredentialResponse> GetCredentialAsync()
+        public async Task<SlcCredentialResponse> GetCredentialAsync()
         {
-            CredentialResponse credentialResponse = await FetchFromServiceAsync(
+            SlcCredentialResponse credentialResponse = await FetchFromServiceAsync(
                 _requestContext.ServiceBundle.HttpManager,
-                _cancellationToken
-            ).ConfigureAwait(false);
+                _cancellationToken)
+                .ConfigureAwait(false);
 
             ValidateCredentialResponse(credentialResponse);
 
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// Validates the properties of a CredentialResponse to ensure it meets the necessary criteria for authentication.
         /// </summary>
         /// <param name="credentialResponse">The CredentialResponse to be validated.</param>
-        private void ValidateCredentialResponse(CredentialResponse credentialResponse)
+        private void ValidateCredentialResponse(SlcCredentialResponse credentialResponse)
         {
             var errorMessages = new List<string>();
 
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     MsalError.CredentialRequestFailed,
                     MsalErrorMessage.ManagedIdentityInvalidResponse,
                     null,
-                    ManagedIdentitySource.Credential,
+                    ManagedIdentitySource.SlcCredential,
                     null);
 
                 throw exception;
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="MsalManagedIdentityException"></exception>
-        private async Task<CredentialResponse> FetchFromServiceAsync(
+        private async Task<SlcCredentialResponse> FetchFromServiceAsync(
             IHttpManager httpManager,
             CancellationToken cancellationToken)
         {
@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             OAuth2Client client = CreateClientRequest(httpManager);
 
-            CredentialResponse credentialResponse = await client
+            SlcCredentialResponse credentialResponse = await client
                 .GetCredentialResponseAsync(_uri, _requestContext)
                 .ConfigureAwait(false);
 
@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             client.AddHeader("Metadata", "true");
             client.AddHeader("x-ms-client-request-id", _requestContext.CorrelationId.ToString("D"));
-            string jsonPayload = GetCredentialPayload(_bindingCertificate);
+            string jsonPayload = GetCredentialPayload();
             client.AddBodyContent(new StringContent(jsonPayload, System.Text.Encoding.UTF8, "application/json"));
 
             return client;
@@ -150,25 +150,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// <summary>
         /// Creates the payload for the managed identity credential request.
         /// </summary>
-        /// <param name="x509Certificate2"></param>
-        /// <returns></returns>
-        private static string GetCredentialPayload(X509Certificate2 x509Certificate2)
+        private string GetCredentialPayload()
         {
-            string certificateBase64 = Convert.ToBase64String(x509Certificate2.Export(X509ContentType.Cert));
+            string certificateBase64 = Convert.ToBase64String(_bindingCertificate.Export(X509ContentType.Cert));
 
-            return @"
-                    {
-                        ""cnf"": {
-                            ""jwk"": {
-                                ""kty"": ""RSA"", 
-                                ""use"": ""sig"",
-                                ""alg"": ""RS256"",
-                                ""kid"": """ + x509Certificate2.Thumbprint + @""",
-                                ""x5c"": [""" + certificateBase64 + @"""]
-                            }
-                        },
-                        ""latch_key"": false    
-                    }";
+            return @"{""cnf"":{""jwk"":{""kty"":""RSA"",""use"":""sig"",""alg"":""RS256"",""kid"":""" + _bindingCertificate.Thumbprint +
+                @""",""x5c"":[""" + certificateBase64 + @"""]}},""latch_key"":false}";
         }
+
     }
 }

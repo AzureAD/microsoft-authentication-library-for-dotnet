@@ -65,25 +65,23 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Used to determine if managed identity is able to perform Proof-of-Possession.
-        /// </summary>
-        /// <returns>Boolean indicating if Proof-of-Possession is supported</returns>
-        public bool IsProofOfPossessionSupportedByClient()
-        {
-            return KeyMaterialManager.CryptoKeyType == CryptoKeyType.KeyGuard;
-        }
-
-        /// <summary>
         /// Used to determine if managed identity is able to handle claims.
         /// </summary>
         /// <returns>Boolean indicating if Claims is supported</returns>
-        public bool IsClaimsSupportedByClient()
+        public static bool IsClaimsSupportedByClient()
         {
-            return KeyMaterialManager.CryptoKeyType != CryptoKeyType.Undefined;
+            // Get the PlatformProxy instance
+            IPlatformProxy platformProxy = PlatformProxyFactory.CreatePlatformProxy(null);
+
+            // Get the KeyMaterialManager
+            IKeyMaterialManager keyMaterialManager = platformProxy.GetKeyMaterialManager();
+
+            // True if the key material manager has a crypto key type
+            return keyMaterialManager.CryptoKeyType != CryptoKeyType.Undefined;
         }
 
         /// <summary>
-        /// Retrives the binding certificate for advanced managed identity scenarios.
+        /// Retrieves the binding certificate for advanced managed identity scenarios.
         /// </summary>
         /// <returns>Binding certificate used for advanced scenarios</returns>
         public static X509Certificate2 GetBindingCertificate()

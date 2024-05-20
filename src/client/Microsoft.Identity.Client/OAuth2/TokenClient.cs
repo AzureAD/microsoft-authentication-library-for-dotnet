@@ -164,12 +164,12 @@ namespace Microsoft.Identity.Client.OAuth2
             // It should not be included for authorize request.
             AddClaims();
 
-            foreach (var kvp in additionalBodyParameters)
+            foreach (KeyValuePair<string, string> kvp in additionalBodyParameters)
             {
                 _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
             }
 
-            foreach (var kvp in _requestParams.AuthenticationScheme.GetTokenRequestParams())
+            foreach (KeyValuePair<string, string> kvp in _requestParams.AuthenticationScheme.GetTokenRequestParams())
             {
                 _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
             }
@@ -284,11 +284,10 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 if (ex.StatusCode == (int)HttpStatusCode.Unauthorized)
                 {
-                    string responseHeader = string.Empty;
                     var isChallenge = _serviceBundle.DeviceAuthManager.TryCreateDeviceAuthChallengeResponse(
                         ex.Headers,
                         new Uri(tokenEndpoint), // do not add query params to PKeyAuth https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2359
-                        out responseHeader);
+                        out string responseHeader);
                     if (isChallenge)
                     {
                         //Injecting PKeyAuth response here and replaying request to attempt device auth
@@ -297,7 +296,8 @@ namespace Microsoft.Identity.Client.OAuth2
                         return await _oAuth2Client.GetTokenAsync(
                             tokenEndpointWithQueryParams,
                             _requestParams.RequestContext,
-                            false, _requestParams.OnBeforeTokenRequestHandler).ConfigureAwait(false);
+                            false, _requestParams.OnBeforeTokenRequestHandler)
+                            .ConfigureAwait(false);
                     }
                 }
 

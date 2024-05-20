@@ -24,14 +24,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         public Dictionary<string, string> QueryParameters { get; }
 
-        public StringContent Content { get; set; }
-
         public X509Certificate2 BindingCertificate { get; internal set; }
 
         public ManagedIdentityRequest(
             HttpMethod method,
             Uri endpoint,
-            StringContent content = null,
             X509Certificate2 bindingCertificate = null)
         {
             Method = method;
@@ -39,7 +36,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             Headers = new Dictionary<string, string>();
             BodyParameters = new Dictionary<string, string>();
             QueryParameters = new Dictionary<string, string>();
-            Content = content;
             BindingCertificate = bindingCertificate;
         }
 

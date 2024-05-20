@@ -11,12 +11,12 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal abstract class MsiAuthRequest : RequestBase
+    internal abstract class ManagedIdentityAuthRequest : RequestBase
     {
         protected readonly AcquireTokenForManagedIdentityParameters _managedIdentityParameters;
         protected static readonly SemaphoreSlim s_semaphoreSlim = new(1, 1);
 
-        protected MsiAuthRequest(
+        protected ManagedIdentityAuthRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenForManagedIdentityParameters managedIdentityParameters)
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                               AuthenticationRequestParameters.RequestContext.ServiceBundle.PlatformProxy.GetKeyMaterialManager();
 
             // Skip checking cache for force refresh or when claims are present
-            if (_managedIdentityParameters.ForceRefresh || !string.IsNullOrEmpty(_managedIdentityParameters.Claims))
+            if (_managedIdentityParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
                 logger.Info("[ManagedIdentityRequest] Skipped looking for a cached access token because ForceRefresh or Claims was set.");

@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         /// <param name="certificate">An X509Certificate2 object representing the client certificate for MTLS.</param>
         /// <returns>An instance of the class, allowing for method chaining in a fluent interface style.</returns>
-        public T WithMtlsCertificate(X509Certificate2 certificate)
+        internal T WithMtlsCertificate(X509Certificate2 certificate)
         {
             CommonParameters.MtlsCertificate = certificate;
             return this as T;
