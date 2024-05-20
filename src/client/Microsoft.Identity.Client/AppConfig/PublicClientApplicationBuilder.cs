@@ -138,46 +138,43 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+#if ANDROID || iOS
         /// <summary>
-        /// Brokers enable Single-Sign-On, device identification,
+        /// Brokers (Microsoft Authenticator, Intune Company Portal) enable Single-Sign-On, device identification,
+
         /// and application identification verification. To enable one of these features,
-        /// you need to set the WithBroker() parameters to true. See https://aka.ms/msal-net-wam 
-        /// for more information on platform specific settings required to enable the broker.
-        /// 
-        /// On iOS and Android, Authenticator and Company Portal serve as brokers.
-        /// On Windows, WAM (Windows Account Manager) serves as broker. See https://aka.ms/msal-net-wam
+        /// you need to set the WithBroker(bool) parameters to true on Android and iOS. 
+        /// On desktop platforms, install the NuGet package Microsoft.Identity.Client.Broker and call the extension method .WithBroker(BrokerOptions)
+        /// See https://aka.ms/msal-net-wam for desktop platforms.
         /// </summary>
         /// <param name="enableBroker">Determines whether or not to use broker with the default set to true.</param>
         /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
         /// parameters, and to create a public client application instance</returns>
         /// <remarks>On desktop (.NET, .NET Framework) install the NuGet package Microsoft.Identity.Client.Broker and call .WithBroker(BrokerOptions).
         /// This is not needed for MAUI apps.</remarks>
-
         public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
         {
-#if NETFRAMEWORK
-            if (Config.BrokerCreatorFunc == null)
-            {
-                throw new PlatformNotSupportedException(
-                    "The desktop broker is not directly available in MSAL for .NET Framework. " +
-                    "\n\rTo use it, install the NuGet package named Microsoft.Identity.Client.Broker " +
-                    "and call the extension method .WithBroker(BrokerOptions) " +                    
-                    "\n\rFor details see https://aka.ms/msal-net-wam ");
-            }
-#endif
-
-#if NET 
-            if (Config.BrokerCreatorFunc == null)
-            {
-                throw new PlatformNotSupportedException(
-                    "The desktop broker is not directly available in the MSAL package. "+
-                    "\n\rInstall the NuGet package Microsoft.Identity.Client.Broker and call the extension method .WithBroker(BrokerOptions). " +
-                    "\n\rFor details, see https://aka.ms/msal-net-wam");
-            }
-#endif
             Config.IsBrokerEnabled = enableBroker;
             return this;
         }
+#else
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="enableBroker"></param>
+        /// <returns></returns>
+        /// <exception cref="PlatformNotSupportedException"></exception>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("The desktop broker is not directly available in the MSAL package. Install the NuGet package Microsoft.Identity.Client.Broker and call the extension method .WithBroker(BrokerOptions). For details, see https://aka.ms/msal-net-wam", true)]
+        public PublicClientApplicationBuilder WithBroker(bool enableBroker = true)
+        {
+            throw new PlatformNotSupportedException(
+                  "The desktop broker is not directly available in the Microsoft.Identity.Client package. " +
+                  "\n\rTo use it, install the NuGet package named Microsoft.Identity.Client.Broker " +
+                  "and call the extension method .WithBroker(BrokerOptions) from namespace Microsoft.Identity.Client.Broker" +
+                  "\n\rFor details see https://aka.ms/msal-net-wam ");
+        }
+#endif
 
         /// <summary>
         /// Allows customization of the Windows 10 Broker experience. 
@@ -280,7 +277,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if NETFRAMEWORK 
+#if NETFRAMEWORK
         /// <summary>
         /// Sets a reference to the current IWin32Window that triggers the browser to be shown.
         /// Used to center the browser that pop-up onto this window.
@@ -347,7 +344,7 @@ namespace Microsoft.Identity.Client
         /// <item><description>In mobile apps, the device must be Intune joined and Authenticator or Company Portal must be installed. See https://aka.ms/msal-brokers </description></item>
         /// </list>
         /// </remarks>
-#if ANDROID || iOS 
+#if ANDROID || iOS
         [Obsolete("This method is obsolete. Applications should rely on the library automatically falling back to a browser if the broker is not available. ", false)]
 #endif
         public bool IsBrokerAvailable()
@@ -377,7 +374,7 @@ namespace Microsoft.Identity.Client
         {
             base.Validate();
 
-#if __MOBILE__ 
+#if __MOBILE__
             if (Config.IsBrokerEnabled && Config.MultiCloudSupportEnabled)
             {
                 // TODO: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3139
