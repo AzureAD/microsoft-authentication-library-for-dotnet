@@ -299,9 +299,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             bool sendX5C, 
             bool useSha2AndPssForAssertion)
         {
+            string a = "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca";
             var builder = ConfidentialClientApplicationBuilder
                 .Create(settings.ClientId)
-                .WithAuthority(settings.Authority, true)
+                .WithAuthority(a, true)
                 .WithTestLogging();
 
             switch (credentialType)
