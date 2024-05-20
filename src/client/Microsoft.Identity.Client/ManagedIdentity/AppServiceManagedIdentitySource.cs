@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private readonly Uri _endpoint;
         private readonly string _secret;
 
-        public static AbstractManagedIdentity TryCreate(RequestContext requestContext)
+        public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
             requestContext.Logger.Info(() => "[Managed Identity] App service managed identity is available.");
 

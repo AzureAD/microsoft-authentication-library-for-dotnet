@@ -42,10 +42,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         {
             return s_managedIdentitySourceDetected.Value switch
             {
-                ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.TryCreate(requestContext),
-                ManagedIdentitySource.AppService => AppServiceManagedIdentitySource.TryCreate(requestContext),
-                ManagedIdentitySource.CloudShell => CloudShellManagedIdentitySource.TryCreate(requestContext),
-                ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.TryCreate(requestContext),
+                ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.Create(requestContext),
+                ManagedIdentitySource.AppService => AppServiceManagedIdentitySource.Create(requestContext),
+                ManagedIdentitySource.CloudShell => CloudShellManagedIdentitySource.Create(requestContext),
+                ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.Create(requestContext),
                 _ => new ImdsManagedIdentitySource(requestContext)
             };
         }
@@ -61,14 +61,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string imdsEndpoint = EnvironmentVariables.ImdsEndpoint;
             string podIdentityEndpoint = EnvironmentVariables.PodIdentityEndpoint;
 
-            if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader) && 
-                !string.IsNullOrEmpty(identityServerThumbprint))
+            
+            if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader))
             {
-                return ManagedIdentitySource.ServiceFabric;
-            }
-            else if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader))
-            {
-                return ManagedIdentitySource.AppService;
+                if (!string.IsNullOrEmpty(identityServerThumbprint))
+                {
+                    return ManagedIdentitySource.ServiceFabric;
+                }
+                else
+                {
+                    return ManagedIdentitySource.AppService;
+                }
             }
             else if (!string.IsNullOrEmpty(msiEndpoint))
             {

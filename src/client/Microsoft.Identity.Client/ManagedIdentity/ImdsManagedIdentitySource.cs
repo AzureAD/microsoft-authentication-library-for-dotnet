@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         internal ImdsManagedIdentitySource(RequestContext requestContext) : 
             base(requestContext, ManagedIdentitySource.Imds)
         {
-            requestContext.Logger.Info(() => "[Managed Identity] Defaulting to IMDS managed identity.");
+            requestContext.Logger.Info(() => "[Managed Identity] Defaulting to IMDS endpoint for managed identity.");
 
             if (!string.IsNullOrEmpty(EnvironmentVariables.PodIdentityEndpoint))
 			{

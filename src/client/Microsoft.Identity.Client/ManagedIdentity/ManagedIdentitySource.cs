@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         None,
 
         /// <summary>
-        /// The source to acquire token for managed identity is defaulted to IMDS.
+        /// The source to acquire token for managed identity is IMDS.
         /// </summary>
         Imds,
 

@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private readonly Uri _endpoint;
         private const string CloudShell = "Cloud Shell";
 
-        public static AbstractManagedIdentity TryCreate(RequestContext requestContext)
+        public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
             string msiEndpoint = EnvironmentVariables.MsiEndpoint;
 
