@@ -38,12 +38,6 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   
-  <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)' or '$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
-    <Compile Include="$(PathToMsalSources)\Platforms\Features\WebView2WebUi\**\*.cs" LinkBase="Features/WebView2WebUi" />
-
-    <PackageReference Include="Microsoft.Web.WebView2" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
     <Compile Include="$(PathToMsalSources)\Platforms\Features\WinFormsLegacyWebUi\**\*.cs" LinkBase="Features\WinFormsLegacyWebUi" />
     <Compile Include="$(PathToMsalSources)\Platforms\Features\DesktopOS\StaTaskScheduler.cs" LinkBase="Features\DesktopOS" />
@@ -54,6 +48,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" />
     <ProjectReference Include="..\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>

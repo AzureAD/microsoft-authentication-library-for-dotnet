@@ -11,7 +11,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Web.WebView2.Core;
 
-namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
+namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 {
     internal class WebView2WebUiFactory : IWebUIFactory
     {

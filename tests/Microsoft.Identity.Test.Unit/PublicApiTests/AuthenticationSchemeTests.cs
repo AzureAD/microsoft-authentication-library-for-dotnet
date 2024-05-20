@@ -120,7 +120,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     .WithTestBroker(mockBroker)
                     .WithHttpManager(harness.HttpManager);
 
-                pcaBuilder = pcaBuilder.WithBroker();
                 var pca = pcaBuilder.BuildConcrete();
 
                 TokenCacheHelper.PopulateCache(pca.UserTokenCacheInternal.Accessor);

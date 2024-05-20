@@ -33,6 +33,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         [JsonProperty("authority")]
         public string Authority { get; set; }
 
+        [JsonProperty("defaultscopes")]
+        public string DefaultScopes { get; set; }
+
     }
 
     public class Lab
