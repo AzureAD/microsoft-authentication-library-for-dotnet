@@ -2,16 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Client.Extensibility;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Linq;
-using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.IdentityModel.Abstractions;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
@@ -24,6 +17,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     {
         private readonly AbstractManagedIdentity _identitySource;
         internal static Lazy<ManagedIdentitySource> s_managedIdentitySourceDetected = new Lazy<ManagedIdentitySource>(() => GetManagedIdentitySource());
+
+        // To reset the cached source for testing purposes.
+        internal static void resetCachedSource()
+        {
+            s_managedIdentitySourceDetected = new Lazy<ManagedIdentitySource>(() => GetManagedIdentitySource());
+        }
 
         public ManagedIdentityClient(RequestContext requestContext)
         {
@@ -79,13 +78,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 return ManagedIdentitySource.AzureArc;
             }
-            else if (!string.IsNullOrEmpty(podIdentityEndpoint))
-            {
-                return ManagedIdentitySource.Imds;
-            }
             else
             {
-                return ManagedIdentitySource.Imds;
+                return ManagedIdentitySource.DefaultToImds;
             }
         }
     }
