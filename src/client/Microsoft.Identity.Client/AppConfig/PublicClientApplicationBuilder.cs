@@ -144,8 +144,7 @@ namespace Microsoft.Identity.Client
 
         /// and application identification verification. To enable one of these features,
         /// you need to set the WithBroker(bool) parameters to true on Android and iOS. 
-        /// On desktop platforms, install the NuGet package Microsoft.Identity.Client.Broker and call the extension method .WithBroker(BrokerOptions
-
+        /// On desktop platforms, install the NuGet package Microsoft.Identity.Client.Broker and call the extension method .WithBroker(BrokerOptions)
         /// See https://aka.ms/msal-net-wam for desktop platforms.
         /// </summary>
         /// <param name="enableBroker">Determines whether or not to use broker with the default set to true.</param>

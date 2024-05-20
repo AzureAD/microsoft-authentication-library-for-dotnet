@@ -457,8 +457,7 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
                     .Create(TestConstants.ClientId)
                     .WithHttpManager(harness.HttpManager);
 
-                var app = builder
-                    .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+                var app = builder                   
                     .BuildConcrete();
 
                 // important: set the func after calling `WithBroker`
@@ -513,14 +512,11 @@ namespace Microsoft.Identity.Test.Unit.BrokerTests
             {
                 var builder = PublicClientApplicationBuilder
                     .Create(TestConstants.ClientId)
-                    .WithHttpManager(harness.HttpManager);
-
-                builder.Config.IsBrokerEnabled = true;
+                    .WithHttpManager(harness.HttpManager);                
                 
-                var app = builder.BuildConcrete();
-
-                // important: set the func after calling `WithBroker`
+                var app = builder.BuildConcrete();                
                 builder.Config.BrokerCreatorFunc = (_, _, logger) => { return new NullBroker(logger); };
+
 
                 // Act
                 try
