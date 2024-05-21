@@ -74,6 +74,16 @@ steps:
     SessionTimeout: 20
     VerboseLogin: true
   timeoutInMinutes: 5
+  enabled: false
+
+- task: onebranch.pipeline.signing@1
+  displayName: 'Sign Packages with OneBranch'
+  inputs:
+    command: 'sign'
+    signing_profile: 'CP-401405'
+    files_to_sign: '*nupkg'
+    search_root: '$(Build.ArtifactStagingDirectory)\packages'
+  condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
 
 - task: CmdLine@2
   displayName: 'Verify packages are signed'
