@@ -3,16 +3,22 @@ parameters:
   BuildConfiguration: 'release'
   ProjectRootPath: ''
   AssemblyName: ''
+  NoBuild: 'true'
 
 steps:
 
-- template: template-sign-binary.yaml
-  parameters:
-    FolderPath: '${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}'
-    Pattern: '**\bin\**\${{ parameters.AssemblyName }}.dll'
+- task: onebranch.pipeline.signing@1
+  displayName: 'Sign ${{ parameters.LibraryName }} with OneBranch'
+  inputs:
+    command: 'sign'
+    signing_profile: 'external_distribution' #CP-230012 -> https://eng.ms/docs/products/onebranch/signing/containerbuildsigning#signing-using-onebranchpipelinesigning-ado-task
+    files_to_sign: '**\bin\**\${{ parameters.AssemblyName }}.dll'
+    search_root: '${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}'
+  condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
 
-- template: template-nuget-pack.yaml
-  parameters:
-    NoBuild: 'true'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-    ProjectPath: '${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}\${{ parameters.AssemblyName }}.csproj'
+- task: VSBuild@1
+  displayName: 'Pack ${{ parameters.ProjectPath }}'
+  inputs:
+    solution: '${{ parameters.ProjectRootPath }}\${{ parameters.AssemblyName }}\${{ parameters.AssemblyName }}.csproj'
+    msbuildArgs: '/t:pack /p:nobuild=${{parameters.NoBuild}} /p:IncludeSymbols=true'
+    configuration: ${{ parameters.BuildConfiguration }}
