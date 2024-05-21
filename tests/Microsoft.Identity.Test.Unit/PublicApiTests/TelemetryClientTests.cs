@@ -550,7 +550,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 case AssertionType.ClientAssertion:
                     _cca = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
-                        .WithClientAssertion(TestConstants.DefaultClientAssertion)
+                        .WithClientAssertion(() => TestConstants.DefaultClientAssertion)
                         .WithHttpManager(_harness.HttpManager)
                         .WithExperimentalFeatures()
                         .WithTelemetryClient(_telemetryClient)

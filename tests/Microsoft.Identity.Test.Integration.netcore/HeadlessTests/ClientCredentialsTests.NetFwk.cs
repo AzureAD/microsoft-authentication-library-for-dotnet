@@ -318,13 +318,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                         settings.Authority + "/oauth2/token" :
                         settings.Authority + "/oauth2/v2.0/token";
 
-                    string signedAssertionManual = GetSignedClientAssertionManual(
+                    builder.WithClientAssertion(() => GetSignedClientAssertionManual(
                       settings.ClientId,
                       aud, // for AAD use v2.0, but not for ADFS
                       settings.GetCertificate(),
-                      useSha2AndPssForAssertion);
-
-                    builder.WithClientAssertion(signedAssertionManual);
+                      useSha2AndPssForAssertion));
                     break;
 
                 case CredentialType.ClientAssertion_Wilson:
@@ -332,12 +330,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                        settings.Authority + "/oauth2/token" :
                        settings.Authority + "/oauth2/v2.0/token";
 
-                    string clientAssertion = GetSignedClientAssertionUsingWilson(
-                        settings.ClientId,
-                        aud2,
-                        settings.GetCertificate());
-
-                    builder.WithClientAssertion(clientAssertion);
+                    builder.WithClientAssertion(
+                        () => GetSignedClientAssertionUsingWilson(
+                            settings.ClientId,
+                            aud2,
+                            settings.GetCertificate()));
                     break;
 
                 case CredentialType.ClientClaims_ExtraClaims:

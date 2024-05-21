@@ -198,6 +198,8 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="signedClientAssertion">The client assertion used to prove the identity of the application to Azure AD. This is a Base-64 encoded JWT.</param>
         /// <returns></returns>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [Obsolete("This method is not recommended. Use overload with Func<AssertionRequestOptions, Task<string>> instead, and return a non-expired assertion, which can be Federated Credential. See https://aka.ms/msal-net-client-assertion", false)]
         public ConfidentialClientApplicationBuilder WithClientAssertion(string signedClientAssertion)
         {
             if (string.IsNullOrWhiteSpace(signedClientAssertion))
@@ -216,7 +218,7 @@ namespace Microsoft.Identity.Client
         /// This is a delegate that computes a Base-64 encoded JWT for each authentication call.</param>
         /// <returns>The ConfidentialClientApplicationBuilder to chain more .With methods</returns>
         /// <remarks> Callers can use this mechanism to cache their assertions </remarks>
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]        
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<string> clientAssertionDelegate)
         {
             if (clientAssertionDelegate == null)
@@ -240,7 +242,7 @@ namespace Microsoft.Identity.Client
         /// This is a delegate that computes a Base-64 encoded JWT for each authentication call.</param>
         /// <returns>The ConfidentialClientApplicationBuilder to chain more .With methods</returns>
         /// <remarks> Callers can use this mechanism to cache their assertions </remarks>
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]        
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<CancellationToken, Task<string>> clientAssertionAsyncDelegate)
         {
             if (clientAssertionAsyncDelegate == null)
@@ -253,10 +255,11 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Configures an async delegate that creates a client assertion. See https://aka.ms/msal-net-client-assertion
+        /// Configures an async delegate that creates a client assertion. The delegate is invoked only a token cannot be retrieved from the cache.
+        /// 
+        /// See https://aka.ms/msal-net-client-assertion
         /// </summary>
-        /// <param name="clientAssertionAsyncDelegate">An async delegate computing the client assertion used to prove the identity of the application to Azure AD.
-        /// This is a delegate that computes a Base-64 encoded JWT for each authentication call.</param>
+        /// <param name="clientAssertionAsyncDelegate">An async delegate that returns the client assertion. Assertion lifetime is the responsability of the caller.</param>
         /// <returns>The ConfidentialClientApplicationBuilder to chain more .With methods</returns>
         /// <remarks> Callers can use this mechanism to cache their assertions </remarks>
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<AssertionRequestOptions, Task<string>> clientAssertionAsyncDelegate)
