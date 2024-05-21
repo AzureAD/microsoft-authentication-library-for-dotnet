@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1716328929980,
+  "lastUpdate": 1716328932447,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -18346,6 +18346,54 @@ window.BENCHMARK_DATA = {
             "value": 173961.11410086494,
             "unit": "ns",
             "range": "± 985.2297802097494"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "01050f5497d2f84c481de9b57a58a875449bce04",
+          "message": "Fix for #4775 - deprecate WithClientAssertion(string) (#4776)\n\n* Fix for #4775 - deprecate WithClientAssertion(string)\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/ConfidentialClientApplicationBuilder.cs\r\n\r\n* Apply suggestions from code review\r\n\r\n---------\r\n\r\nCo-authored-by: Neha Bhargava <61847233+neha-bhargava@users.noreply.github.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-05-21T14:54:47-07:00",
+          "tree_id": "da9d2c88637ed550e5da8eda24e38d37ee2e0c39",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/01050f5497d2f84c481de9b57a58a875449bce04"
+        },
+        "date": 1716328931571,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 22730.75602416992,
+            "unit": "ns",
+            "range": "± 125.71429591420116"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 168022.37488731972,
+            "unit": "ns",
+            "range": "± 289.7276897749931"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 33333.747596153844,
+            "unit": "ns",
+            "range": "± 92.32311186415622"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 171290.7241373698,
+            "unit": "ns",
+            "range": "± 1412.8115811822533"
           }
         ]
       }
