@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1716321836796,
+  "lastUpdate": 1716328927517,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5282,6 +5282,42 @@ window.BENCHMARK_DATA = {
             "value": 346787.9285714286,
             "unit": "ns",
             "range": "± 9715.944628894611"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "01050f5497d2f84c481de9b57a58a875449bce04",
+          "message": "Fix for #4775 - deprecate WithClientAssertion(string) (#4776)\n\n* Fix for #4775 - deprecate WithClientAssertion(string)\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/ConfidentialClientApplicationBuilder.cs\r\n\r\n* Apply suggestions from code review\r\n\r\n---------\r\n\r\nCo-authored-by: Neha Bhargava <61847233+neha-bhargava@users.noreply.github.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-05-21T14:54:47-07:00",
+          "tree_id": "da9d2c88637ed550e5da8eda24e38d37ee2e0c39",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/01050f5497d2f84c481de9b57a58a875449bce04"
+        },
+        "date": 1716328923361,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 256579.92857142858,
+            "unit": "ns",
+            "range": "± 4476.31542272618"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 356923.98,
+            "unit": "ns",
+            "range": "± 14292.278629314473"
           }
         ]
       }
