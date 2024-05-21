@@ -83,6 +83,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 //Set the Environment Variables
                 SetEnvironmentVariables(envVariables);
 
+                //Reset cached source with update in environment variables
+                ManagedIdentityClient.resetCachedSource();
+
                 //form the http proxy URI 
                 string uri = s_baseURL + $"MSIToken?" +
                     $"azureresource={azureResource}&uri=";
@@ -137,7 +140,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         
                 //Set the Environment Variables
                 SetEnvironmentVariables(envVariables);
-        
+
+                //Reset cached source with update in environment variables
+                ManagedIdentityClient.resetCachedSource();
+
                 //form the http proxy URI 
                 string uri = s_baseURL + $"MSIToken?" +
                     $"azureresource={MsiAzureResource.WebApp}&uri=";
@@ -202,6 +208,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 //Set the Environment Variables
                 SetEnvironmentVariables(envVariables);
 
+                //Reset cached source with update in environment variables
+                ManagedIdentityClient.resetCachedSource();
+
                 //form the http proxy URI 
                 string uri = s_baseURL + $"MSIToken?" +
                     $"azureresource={azureResource}&uri=";
@@ -243,6 +252,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //Set the Environment Variables
                 SetEnvironmentVariables(envVariables);
+
+                //Reset cached source with update in environment variables
+                ManagedIdentityClient.resetCachedSource();
 
                 //form the http proxy URI 
                 string uri = s_baseURL + $"MSIToken?" +
