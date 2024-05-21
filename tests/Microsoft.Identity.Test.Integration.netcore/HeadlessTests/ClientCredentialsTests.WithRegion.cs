@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var builder = ConfidentialClientApplicationBuilder.Create(settings.ClientId);
             if (useClaims)
             {
-                builder.WithClientAssertion(GetSignedClientAssertionUsingMsalInternal(settings.ClientId, GetClaims(settings)));
+                builder.WithClientAssertion(() => GetSignedClientAssertionUsingMsalInternal(settings.ClientId, GetClaims(settings)));
             }
             else
             {

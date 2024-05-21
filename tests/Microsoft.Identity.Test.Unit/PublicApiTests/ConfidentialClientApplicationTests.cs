@@ -453,7 +453,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.AreEqual(cert, app.Certificate);
                     break;
                 case CredentialType.SignedAssertion:
+#pragma warning disable CS0618 // Type or member is soft obsolete
                     builder = builder.WithClientAssertion(TestConstants.DefaultClientAssertion);
+#pragma warning restore CS0618 // Type or member is soft obsolete
                     app = builder.BuildConcrete();
                     Assert.IsNull(app.Certificate);
                     break;
