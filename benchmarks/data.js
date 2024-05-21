@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1716207270992,
+  "lastUpdate": 1716321831227,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5246,6 +5246,42 @@ window.BENCHMARK_DATA = {
             "value": 342459.21428571426,
             "unit": "ns",
             "range": "± 5414.078931943889"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "61847233+neha-bhargava@users.noreply.github.com",
+            "name": "Neha Bhargava",
+            "username": "neha-bhargava"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "51638a1cb465ab3d9c164c21373c7ccc2de0f59a",
+          "message": "Add msi source detect logic (#4761)\n\n* Add msi source detect logic\r\n\r\n* Address comments\r\n\r\n* Address comments\r\n\r\n* Address comments and reset cache for tests\r\n\r\n* Address comments\r\n\r\n* Fix integration tests by resetting cahce",
+          "timestamp": "2024-05-21T12:56:31-07:00",
+          "tree_id": "65f380b24b04e99f608fef588b4fc487ae63b262",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/51638a1cb465ab3d9c164c21373c7ccc2de0f59a"
+        },
+        "date": 1716321827963,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 250761.88095238095,
+            "unit": "ns",
+            "range": "± 5936.743631623235"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 346787.9285714286,
+            "unit": "ns",
+            "range": "± 9715.944628894611"
           }
         ]
       }
