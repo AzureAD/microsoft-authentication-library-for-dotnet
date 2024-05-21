@@ -13,8 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.ApiConfig;
-using Microsoft.Identity.Client.Broker;
+using Microsoft.Identity.Client.Desktop;
 
 namespace NetDesktopWinForms
 {
@@ -69,14 +68,14 @@ namespace NetDesktopWinForms
             _syncContext = SynchronizationContext.Current;
 
             cbxUseWam.DataSource = Enum.GetValues(typeof(AuthMethod));
-            cbxUseWam.SelectedIndex = 1;
+            cbxUseWam.SelectedIndex = 0;
 
         }
 
-        private AuthMethod GetAuthMethod()
+        private AuthMethod GetWebView()
         {
             AuthMethod status;
-            if (Enum.TryParse<AuthMethod>(cbxUseWam.SelectedValue.ToString(), out status))
+            if (Enum.TryParse(cbxUseWam.SelectedValue.ToString(), out status))
             {
                 return status;
             }
@@ -96,12 +95,11 @@ namespace NetDesktopWinForms
                 .WithAuthority(this.authorityCbx.Text)
                 .WithMultiCloudSupport(true);
 
-            var authMethod = GetAuthMethod();
+            var authMethod = GetWebView();
 
             switch (authMethod)
             {
                 case AuthMethod.WAM:
-                case AuthMethod.WAMRuntime:
                     builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
                     {
                         ListOperatingSystemAccounts = cbxListOsAccounts.Checked,
@@ -110,13 +108,18 @@ namespace NetDesktopWinForms
                     });
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
+                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));                    
                     builder = builder.WithRedirectUri("http://localhost");
                     break;
-                case AuthMethod.EmbeddedBrowser:
+                case AuthMethod.WebView1:
                     builder = builder.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}");
                     builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
                     break;
+                case AuthMethod.WebView2:
+                    builder = builder.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}");
+                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
+                    builder.WithWindowsEmbeddedBrowserSupport(); // can't switch back...
+                    break;               
                 default:
                     throw new NotImplementedException();
             }
@@ -313,20 +316,28 @@ namespace NetDesktopWinForms
             var builder = pca.AcquireTokenInteractive(scopes)
                              .WithParentActivityOrWindow(this.Handle);
 
-            if (GetAuthMethod() == AuthMethod.SystemBrowser)
-            {
-                builder.WithSystemWebViewOptions(new SystemWebViewOptions() { HtmlMessageSuccess = "Successful login! You can close the tab." });
-            }
-            else
-            {
-                builder.WithUseEmbeddedWebView(true)
-                //.WithExtraQueryParameters("domain_hint=live.com") -- will force AAD login with browser
-                //.WithExtraQueryParameters("msafed=0")             -- will force MSA login with browser
-                .WithEmbeddedWebViewOptions(
-                new EmbeddedWebViewOptions()
-                {
-                    Title = "Hello world",
-                });
+            var webview = GetWebView();
+            switch (webview)
+            {               
+                case AuthMethod.WebView1:
+                    builder.WithUseEmbeddedWebView(true)
+                        //.WithExtraQueryParameters("domain_hint=live.com") -- will force AAD login with browser
+                        //.WithExtraQueryParameters("msafed=0")             -- will force MSA login with browser
+                        .WithEmbeddedWebViewOptions(
+                        new EmbeddedWebViewOptions()
+                        {
+                            Title = "Hello world",
+                        });
+                    break;
+                case AuthMethod.WebView2:
+                    break;
+                case AuthMethod.SystemBrowser:
+                    builder.WithUseEmbeddedWebView(false);
+                    builder.WithSystemWebViewOptions(
+                        new SystemWebViewOptions() { HtmlMessageSuccess = "Successful login! You can close the tab." });
+                    break;
+                default:
+                    break;
             }
 
             Prompt? prompt = GetPrompt();
@@ -675,9 +686,12 @@ namespace NetDesktopWinForms
 
     public enum AuthMethod
     {
-        WAM = 1,
-        WAMRuntime = 2,
-        EmbeddedBrowser = 3,
-        SystemBrowser = 4,
+        WAM,
+        WebView1,
+        /// <summary>
+        /// Not for AAD
+        /// </summary>
+        WebView2,
+        SystemBrowser
     }
 }

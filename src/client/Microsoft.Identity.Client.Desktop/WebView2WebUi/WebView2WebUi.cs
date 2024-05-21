@@ -12,7 +12,7 @@ using Microsoft.Identity.Client.Platforms.Features.DesktopOs;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
+namespace Microsoft.Identity.Client.Desktop.WebView2WebUi
 {
     internal class WebView2WebUi : IWebUI
     {
@@ -26,9 +26,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(
-            Uri authorizationUri, 
-            Uri redirectUri, 
-            RequestContext requestContext, 
+            Uri authorizationUri,
+            Uri redirectUri,
+            RequestContext requestContext,
             CancellationToken cancellationToken)
         {
             AuthorizationResult result = null;
@@ -57,14 +57,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
                     });
 
                     var tcs2 = new TaskCompletionSource<object>();
-                    
+
                     _parent.SynchronizationContext.Post(
                         new SendOrPostCallback(sendAuthorizeRequestWithTcs), tcs2);
                     await tcs2.Task.ConfigureAwait(false);
                 }
                 else
                 {
-                    using (var staTaskScheduler = new StaTaskScheduler(1)) 
+                    using (var staTaskScheduler = new StaTaskScheduler(1))
                     {
                         try
                         {
@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
             }
 
             return result;
-          
+
         }
 
         public Uri UpdateRedirectUri(Uri redirectUri)
@@ -110,10 +110,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.WebView2WebUi
         private AuthorizationResult InvokeEmbeddedWebview(Uri startUri, Uri endUri, CancellationToken cancellationToken)
         {
             using (var form = new WinFormsPanelWithWebView2(
-                _parent.OwnerWindow, 
+                _parent.OwnerWindow,
                 _parent?.EmbeddedWebviewOptions,
-                _requestContext.Logger, 
-                startUri, 
+                _requestContext.Logger,
+                startUri,
                 endUri))
             {
                 return form.DisplayDialogAndInterceptUri(cancellationToken);
