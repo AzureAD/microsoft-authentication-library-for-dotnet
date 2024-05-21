@@ -54,5 +54,14 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreateManagedIdentityExecutor(this),
                 resource);
         }
+
+        /// <summary>
+        /// Detects and returns the managed identity source available on the environment.
+        /// </summary>
+        /// <returns>Managed identity source detected on the environment if any.</returns>
+        public static ManagedIdentitySource GetManagedIdentitySource()
+        {
+            return ManagedIdentityClient.s_managedIdentitySourceDetected.Value;
+        }
     }
 }
