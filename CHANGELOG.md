@@ -4,6 +4,7 @@
 - Enabled Proof of Possession (POP) extensibility API for all confidential client requests, enhancing security measures for confidential clients. See [4757](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4757)
 - Introduced a public API to detect and return the current environment for Managed Identity. This API helps identify and utilize the appropriate managed identity source, streamlining the management of different environments. See [4751](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4751)
 - Deprecated the WithClientAssertion(string) method. Developers are encouraged to use the overload with Func<AssertionRequestOptions, Task<string>> instead, which ensures the return of a non-expired assertion, potentially including a Federated Credential. See [4775](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4775)
+- Adding support for Non-GUID Client IDs with AuthorityType.Generic See [#4686](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4686)
 
 ### Bug Fixes
 - Improved logic to handle ADFS tokens that include a manually added tid claim, preventing exceptions. See [4608](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4608)
