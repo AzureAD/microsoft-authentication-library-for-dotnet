@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using Microsoft.Identity.Client.Utils;
 
@@ -75,27 +74,6 @@ namespace Microsoft.Identity.Client
             ValidateUseOfExperimentalFeature("WithClaims");
 
             CommonParameters.Claims = claims;
-            return this;
-        }
-
-        /// <summary>
-        /// Registers an asynchronous delegate that will be invoked just before the token request is executed.
-        /// This delegate allows for modifications to the token request data, such as adding or removing headers,
-        /// or altering body parameters. Use this method to inject custom logic or to manipulate the request
-        /// based on dynamic conditions or application-specific requirements.
-        /// </summary>
-        /// <param name="onBeforeTokenRequestHandler">An async delegate that takes an instance of <see cref="OnBeforeTokenRequestData"/>
-        /// and allows for the manipulation of the request data before the token request is made. The delegate can perform
-        /// operations such as modifying the request headers, changing the request body, or logging request data.</param>
-        /// <returns>The same <see cref="AcquireTokenForManagedIdentityParameterBuilder"/> instance to enable method chaining.</returns>
-        /// <remarks>
-        /// This method is part of experimental features and may change in future releases. It is provided for testability purposes.
-        /// </remarks>
-        public AcquireTokenForManagedIdentityParameterBuilder OnBeforeTokenRequest(Func<OnBeforeTokenRequestData, Task> onBeforeTokenRequestHandler)
-        {
-            ValidateUseOfExperimentalFeature("OnBeforeTokenRequest");
-
-            CommonParameters.OnBeforeTokenRequestHandler = onBeforeTokenRequestHandler;
             return this;
         }
 

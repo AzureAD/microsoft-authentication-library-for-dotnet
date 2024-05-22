@@ -140,7 +140,6 @@ namespace Microsoft.Identity.Client.OAuth2
                     {
                         if (onBeforePostRequestData != null)
                         {
-                            requestContext.Logger.Verbose(() => "[Oauth2Client] Processing onBeforePostRequestData ");
                             var requestData = new OnBeforeTokenRequestData(_bodyParameters, _headers, endpointUri, requestContext.UserCancellationToken);
                             await onBeforePostRequestData(requestData).ConfigureAwait(false);
                             endpointUri = requestData.RequestUri;
