@@ -257,12 +257,9 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Configures an async delegate that creates a client assertion. The delegate is invoked only when a token cannot be retrieved from the cache.
-
-        /// 
         /// See https://aka.ms/msal-net-client-assertion
         /// </summary>
         /// <param name="clientAssertionAsyncDelegate">An async delegate that returns the client assertion. Assertion lifetime is the responsibility of the caller.</param>
-
         /// <returns>The ConfidentialClientApplicationBuilder to chain more .With methods</returns>
         /// <remarks> Callers can use this mechanism to cache their assertions </remarks>
         public ConfidentialClientApplicationBuilder WithClientAssertion(Func<AssertionRequestOptions, Task<string>> clientAssertionAsyncDelegate)
