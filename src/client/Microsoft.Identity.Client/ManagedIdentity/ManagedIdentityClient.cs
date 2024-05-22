@@ -61,7 +61,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string imdsEndpoint = EnvironmentVariables.ImdsEndpoint;
             string podIdentityEndpoint = EnvironmentVariables.PodIdentityEndpoint;
 
-
             if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader))
             {
                 if (!string.IsNullOrEmpty(identityServerThumbprint))
