@@ -8,6 +8,7 @@
 ### Bug Fixes
 - Improved logic to handle ADFS tokens that include a manually added tid claim, preventing exceptions. See [4608](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4608)
 - Improved build-time validation to ensure that applications using the WithBroker(true) method will fail at build time if the application targets net6-windows and uses an old broker API. This change prevents runtime failures and facilitates early detection of issues. See [4768](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4768)
+- Fixed token acquisition failure in broker based flow when authority is common. See [4696](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4696)
 
 4.61.0
 ==========
