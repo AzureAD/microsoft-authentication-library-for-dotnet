@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1716328934842,
+  "lastUpdate": 1716351700480,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5318,6 +5318,42 @@ window.BENCHMARK_DATA = {
             "value": 356923.98,
             "unit": "ns",
             "range": "± 14292.278629314473"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7d82506afeb8088f57869bfb36f6ec09069b2a99",
+          "message": "Update ConfidentialClientApplicationBuilder.cs",
+          "timestamp": "2024-05-21T21:14:39-07:00",
+          "tree_id": "e8af1729194e7225ac08f5b046680a00cdc2417c",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/7d82506afeb8088f57869bfb36f6ec09069b2a99"
+        },
+        "date": 1716351697120,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 243813.25,
+            "unit": "ns",
+            "range": "± 4700.075339821693"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 346320.06666666665,
+            "unit": "ns",
+            "range": "± 10088.786539531397"
           }
         ]
       }
