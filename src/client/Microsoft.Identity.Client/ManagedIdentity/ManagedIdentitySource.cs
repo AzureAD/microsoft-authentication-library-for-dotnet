@@ -45,6 +45,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         ServiceFabric,
 
         /// <summary>
+        /// Indicates that the source is defaulted to IMDS since no environment variables are set.
+        /// This is used to detect the managed identity source.
+        /// </summary>
+        DefaultToImds,
+
+        /// <summary>
         /// The source to acquire token for managed identity is Slc Credential Endpoint.
         /// </summary>
         SlcCredential

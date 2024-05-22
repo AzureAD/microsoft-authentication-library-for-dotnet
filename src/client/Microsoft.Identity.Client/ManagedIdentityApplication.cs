@@ -95,5 +95,14 @@ namespace Microsoft.Identity.Client
             // Return the binding certificate
             return keyMaterialManager.BindingCertificate;
         }
+
+        /// <summary>
+        /// Detects and returns the managed identity source available on the environment.
+        /// </summary>
+        /// <returns>Managed identity source detected on the environment if any.</returns>
+        public static ManagedIdentitySource GetManagedIdentitySource()
+        {
+            return ManagedIdentityClient.s_managedIdentitySourceDetected.Value;
+        }
     }
 }

@@ -338,55 +338,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         /// User keys with no new APIs response from IMDS.
         /// </summary>
         [TestMethod]
-        public async Task UserKeyWithNoNewApisResponseFromImdsAsync()
-        {
-            string ImdsEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token";
-            string resource = "https://management.azure.com";
-
-            using (MockHttpAndServiceBundle harness = CreateTestHarness())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
-            {
-                //Arrange
-                ManagedIdentityApplicationBuilder miBuilder = ManagedIdentityApplicationBuilder
-                    .Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager);
-
-                KeyMaterialManagerMock keyManagerMock = new(CertHelper.GetOrCreateTestCert(), CryptoKeyType.KeyGuardUser);
-                miBuilder.Config.KeyMaterialManagerForTest = keyManagerMock;
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-
-                IManagedIdentityApplication mi = miBuilder.Build();
-
-                httpManager.AddManagedIdentityMockHandler(
-                        ImdsEndpoint,
-                        resource,
-                        MockHelpers.GetMsiSuccessfulResponse(),
-                        ManagedIdentitySource.Imds);
-
-                var result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-
-                // Acquire token for same scope
-                result = await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .ExecuteAsync().ConfigureAwait(false);
-
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.AccessToken);
-                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
-            }
-        }
-
-        /// <summary>
-        /// User keys with no new APIs response from IMDS.
-        /// </summary>
-        [TestMethod]
         public async Task UserKeyWithNewApisResponseFromCredentialAsync()
         {
             using (MockHttpAndServiceBundle harness = CreateTestHarness())

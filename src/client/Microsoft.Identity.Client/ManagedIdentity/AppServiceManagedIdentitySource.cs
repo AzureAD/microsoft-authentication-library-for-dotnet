@@ -22,32 +22,25 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private readonly Uri _endpoint;
         private readonly string _secret;
 
-        public static AbstractManagedIdentity TryCreate(RequestContext requestContext)
+        public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
-            var msiSecret = EnvironmentVariables.IdentityHeader;
+            requestContext.Logger.Info(() => "[Managed Identity] App service managed identity is available.");
 
-            return TryValidateEnvVars(EnvironmentVariables.IdentityEndpoint, msiSecret, requestContext.Logger, out Uri endpointUri)
-                ? new AppServiceManagedIdentitySource(requestContext, endpointUri, msiSecret)
+            return TryValidateEnvVars(EnvironmentVariables.IdentityEndpoint, requestContext.Logger, out Uri endpointUri)
+                ? new AppServiceManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader)
                 : null;
         }
 
-        private AppServiceManagedIdentitySource(RequestContext requestContext, Uri endpoint, string secret) 
+        private AppServiceManagedIdentitySource(RequestContext requestContext, Uri endpoint, string secret)
             : base(requestContext, ManagedIdentitySource.AppService)
         {
             _endpoint = endpoint;
             _secret = secret;
         }
 
-        private static bool TryValidateEnvVars(string msiEndpoint, string secret, ILoggerAdapter logger, out Uri endpointUri)
+        private static bool TryValidateEnvVars(string msiEndpoint, ILoggerAdapter logger, out Uri endpointUri)
         {
             endpointUri = null;
-
-            // if BOTH the env vars endpoint and secret values are null, this MSI provider is unavailable.
-            if (string.IsNullOrEmpty(msiEndpoint) || string.IsNullOrEmpty(secret))
-            {
-                logger.Verbose(()=>"[Managed Identity] App service managed identity is unavailable.");
-                return false;
-            }
 
             try
             {
@@ -64,7 +57,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.InvalidManagedIdentityEndpoint,
                     errorMessage,
-                    ex, 
+                    ex,
                     ManagedIdentitySource.AppService,
                     null); // statusCode is null in this case
 
@@ -78,7 +71,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         protected override ManagedIdentityRequest CreateRequest(string resource)
         {
             ManagedIdentityRequest request = new(System.Net.Http.HttpMethod.Get, _endpoint);
-            
+
             request.Headers.Add(SecretHeaderName, _secret);
             request.QueryParameters["api-version"] = AppServiceMsiApiVersion;
             request.QueryParameters["resource"] = resource;
@@ -100,7 +93,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     request.QueryParameters[Constants.ManagedIdentityObjectId] = _requestContext.ServiceBundle.Config.ManagedIdentityId.UserAssignedId;
                     break;
             }
-                
+
             return request;
         }
     }

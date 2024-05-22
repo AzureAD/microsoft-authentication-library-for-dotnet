@@ -26,17 +26,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         private readonly Uri _endpoint;
 
-        public static AbstractManagedIdentity TryCreate(RequestContext requestContext)
+        public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
-            string imdsEndpoint = EnvironmentVariables.ImdsEndpoint;
 
-            // if BOTH the env vars IDENTITY_ENDPOINT and IMDS_ENDPOINT are set the MsiType is Azure Arc
-            if (string.IsNullOrEmpty(identityEndpoint) || string.IsNullOrEmpty(imdsEndpoint))
-            {
-                requestContext.Logger.Verbose(()=>"[Managed Identity] Azure Arc managed identity is unavailable.");
-                return null;
-            }
+            requestContext.Logger.Info(() => "[Managed Identity] Azure Arc managed identity is available.");
 
             if (!Uri.TryCreate(identityEndpoint, UriKind.Absolute, out Uri endpointUri))
             {
@@ -49,18 +43,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.InvalidManagedIdentityEndpoint,
                     errorMessage,
-                    null, 
+                    null,
                     ManagedIdentitySource.AzureArc,
-                    null); 
+                    null);
 
                 throw exception;
             }
 
-            requestContext.Logger.Verbose(()=>"[Managed Identity] Creating Azure Arc managed identity. Endpoint URI: " + endpointUri);
+            requestContext.Logger.Verbose(() => "[Managed Identity] Creating Azure Arc managed identity. Endpoint URI: " + endpointUri);
             return new AzureArcManagedIdentitySource(endpointUri, requestContext);
         }
 
-        private AzureArcManagedIdentitySource(Uri endpoint, RequestContext requestContext) : 
+        private AzureArcManagedIdentitySource(Uri endpoint, RequestContext requestContext) :
             base(requestContext, ManagedIdentitySource.AzureArc)
         {
             _endpoint = endpoint;
@@ -70,10 +64,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 string errorMessage = string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.ManagedIdentityUserAssignedNotSupported, AzureArc);
 
                 var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
-                    MsalError.UserAssignedManagedIdentityNotSupported, 
-                    errorMessage, 
-                    null, 
-                    ManagedIdentitySource.AzureArc, 
+                    MsalError.UserAssignedManagedIdentityNotSupported,
+                    errorMessage,
+                    null,
+                    ManagedIdentitySource.AzureArc,
                     null);
 
                 throw exception;
