@@ -1791,6 +1791,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 Assert.IsNull(acc);
             }
-        }             
+        }
+
+        [TestMethod]
+        public void AssertionInputIsMutable()
+        {
+            AssertionRequestOptions options = new AssertionRequestOptions();
+            options.ClientID = "clientid";
+            options.TokenEndpoint = "https://login.microsoft.com/v2.0/token";
+            options.CancellationToken = CancellationToken.None;
+        }
     }
 }
