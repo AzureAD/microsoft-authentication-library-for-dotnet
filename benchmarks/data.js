@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1716351705980,
+  "lastUpdate": 1716453505347,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5354,6 +5354,42 @@ window.BENCHMARK_DATA = {
             "value": 346320.06666666665,
             "unit": "ns",
             "range": "± 10088.786539531397"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d145fcd61438ca5ee22c9646d3c1c55ed91158c7",
+          "message": "Make the AssertionRequestOptions mutable (testable) (#4781)\n\n* Make the AssertionRequestOptions mutable (testable)\r\n\r\n* make setter public",
+          "timestamp": "2024-05-23T09:30:33+01:00",
+          "tree_id": "851b6b5626de5b6ad2b7a9c3c6fe697835c4ce53",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/d145fcd61438ca5ee22c9646d3c1c55ed91158c7"
+        },
+        "date": 1716453501078,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 280134.7551020408,
+            "unit": "ns",
+            "range": "± 27538.559317055682"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 402113.5,
+            "unit": "ns",
+            "range": "± 7687.883098313432"
           }
         ]
       }
