@@ -274,14 +274,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return false;
             }
 
-            if (credentialKeyType == CryptoKeyType.KeyGuardUser && !isClaimsRequested)
-            {
-                // MSAL will setup a user key in public preview and try to fetch a credential if claims are requested.
-                // Even if MSAL was able to setup a user key and no claims where requested proceed to use Legacy MSI flow.
-                requestContext.Logger.Verbose(() => "[SlcManagedIdentityAuthRequest] Credential based managed identity is unavailable without specific client capabilities.");
-                return false;
-            }
-
             // Initialize the credentialUri with the constant CredentialEndpoint and API version.
             string credentialUri = Constants.CredentialEndpoint;
 
