@@ -14,16 +14,16 @@ namespace Microsoft.Identity.Client
     public class AssertionRequestOptions {
         /// <summary>
         /// </summary>
-        public CancellationToken CancellationToken { get; internal set; }
+        public CancellationToken CancellationToken { get; set; }
         
         /// <summary>
         /// Client ID for which a signed assertion is requested
         /// </summary>
-        public string ClientID { get; internal set; }
+        public string ClientID { get; set; }
 
         /// <summary>
         /// The intended token endpoint
         /// </summary>
-        public string TokenEndpoint { get; internal set; }
+        public string TokenEndpoint { get; set; }
     }
 }
