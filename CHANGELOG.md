@@ -1,3 +1,16 @@
+4.61.1
+==========
+### New Features
+- Enabled Proof of Possession (POP) extensibility API for all confidential client requests, enhancing security measures for confidential clients. See [4757](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4757)
+- Introduced a public API that identifies and returns the current Azure environment for Managed Identity. See [4751](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4751)
+- Deprecated the WithClientAssertion(string) method. Developers are encouraged to use the overload with Func<AssertionRequestOptions, Task<string>> instead, which ensures the return of a non-expired assertion, potentially including a Federated Credential. See [4775](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4775)
+- Adding support for Non-GUID Client IDs with AuthorityType.Generic See [#4686](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4686)
+
+### Bug Fixes
+- Improved logic to handle ADFS tokens that include a manually added tid claim, preventing exceptions. See [4608](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4608)
+- Improved build-time validation to ensure that applications using the WithBroker(true) method will fail at build time if the application targets net6-windows and uses an old broker API. This change prevents runtime failures and facilitates early detection of issues. See [4768](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4768)
+- Fixed token acquisition failure in broker based flow when authority is common. See [4696](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4696)
+
 4.61.0
 ==========
 ### New Features
