@@ -22,12 +22,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private readonly Uri _endpoint;
         private readonly string _secret;
 
-        public static AbstractManagedIdentity TryCreate(RequestContext requestContext)
+        public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
-            var msiSecret = EnvironmentVariables.IdentityHeader;
+            requestContext.Logger.Info(() => "[Managed Identity] App service managed identity is available.");
 
-            return TryValidateEnvVars(EnvironmentVariables.IdentityEndpoint, msiSecret, requestContext.Logger, out Uri endpointUri)
-                ? new AppServiceManagedIdentitySource(requestContext, endpointUri, msiSecret)
+            return TryValidateEnvVars(EnvironmentVariables.IdentityEndpoint, requestContext.Logger, out Uri endpointUri)
+                ? new AppServiceManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader)
                 : null;
         }
 
@@ -38,16 +38,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             _secret = secret;
         }
 
-        private static bool TryValidateEnvVars(string msiEndpoint, string secret, ILoggerAdapter logger, out Uri endpointUri)
+        private static bool TryValidateEnvVars(string msiEndpoint, ILoggerAdapter logger, out Uri endpointUri)
         {
             endpointUri = null;
-
-            // if BOTH the env vars endpoint and secret values are null, this MSI provider is unavailable.
-            if (string.IsNullOrEmpty(msiEndpoint) || string.IsNullOrEmpty(secret))
-            {
-                logger.Verbose(()=>"[Managed Identity] App service managed identity is unavailable.");
-                return false;
-            }
 
             try
             {

@@ -17,18 +17,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private readonly Uri _endpoint;
         private const string CloudShell = "Cloud Shell";
 
-        public static AbstractManagedIdentity TryCreate(RequestContext requestContext)
+        public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
             string msiEndpoint = EnvironmentVariables.MsiEndpoint;
 
-            // if ONLY the env var MSI_ENDPOINT is set the MsiType is CloudShell
-            if (string.IsNullOrEmpty(msiEndpoint))
-            {
-                requestContext.Logger.Verbose(()=>"[Managed Identity] Cloud shell managed identity is unavailable.");
-                return null;
-            }
-
             Uri endpointUri;
+
+            requestContext.Logger.Info(() => "[Managed Identity] Cloud shell managed identity is available.");
+
             try
             {
                 endpointUri = new Uri(msiEndpoint);

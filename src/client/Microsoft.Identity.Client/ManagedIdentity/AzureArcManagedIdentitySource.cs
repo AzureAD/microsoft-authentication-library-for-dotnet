@@ -26,17 +26,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         private readonly Uri _endpoint;
 
-        public static AbstractManagedIdentity TryCreate(RequestContext requestContext)
+        public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
-            string imdsEndpoint = EnvironmentVariables.ImdsEndpoint;
 
-            // if BOTH the env vars IDENTITY_ENDPOINT and IMDS_ENDPOINT are set the MsiType is Azure Arc
-            if (string.IsNullOrEmpty(identityEndpoint) || string.IsNullOrEmpty(imdsEndpoint))
-            {
-                requestContext.Logger.Verbose(()=>"[Managed Identity] Azure Arc managed identity is unavailable.");
-                return null;
-            }
+            requestContext.Logger.Info(() => "[Managed Identity] Azure Arc managed identity is available.");
 
             if (!Uri.TryCreate(identityEndpoint, UriKind.Absolute, out Uri endpointUri))
             {

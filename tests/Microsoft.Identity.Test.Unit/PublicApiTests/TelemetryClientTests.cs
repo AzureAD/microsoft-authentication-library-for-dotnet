@@ -372,7 +372,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 string endpoint = "http://localhost:40342/metadata/identity/oauth2/token";
                 string resource = "https://management.azure.com";
 
-                Environment.SetEnvironmentVariable("MSI_ENDPOINT", endpoint);
+                SetEnvironmentVariables(ManagedIdentitySource.CloudShell, endpoint);
 
                 var mia = ManagedIdentityApplicationBuilder
                     .Create(ManagedIdentityId.SystemAssigned)
@@ -550,7 +550,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 case AssertionType.ClientAssertion:
                     _cca = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
-                        .WithClientAssertion(TestConstants.DefaultClientAssertion)
+                        .WithClientAssertion(() => TestConstants.DefaultClientAssertion)
                         .WithHttpManager(_harness.HttpManager)
                         .WithExperimentalFeatures()
                         .WithTelemetryClient(_telemetryClient)

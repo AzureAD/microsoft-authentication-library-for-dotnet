@@ -38,6 +38,27 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         internal const string ExpectedCorrelationId = "Some GUID";
 
         [DataTestMethod]
+        [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
+        [DataRow(AppServiceEndpoint, ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
+        [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, ManagedIdentitySource.DefaultToImds)]
+        [DataRow(null, ManagedIdentitySource.Imds, ManagedIdentitySource.DefaultToImds)]
+        [DataRow(AzureArcEndpoint, ManagedIdentitySource.AzureArc, ManagedIdentitySource.AzureArc)]
+        [DataRow(CloudShellEndpoint, ManagedIdentitySource.CloudShell, ManagedIdentitySource.CloudShell)]
+        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, ManagedIdentitySource.ServiceFabric)]
+        public void GetManagedIdentityTests(
+            string endpoint,
+            ManagedIdentitySource managedIdentitySource, 
+            ManagedIdentitySource expectedManagedIdentitySource)
+        {
+            using (new EnvVariableContext())
+            {
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
+
+                Assert.AreEqual(expectedManagedIdentitySource, ManagedIdentityApplication.GetManagedIdentitySource());
+            }
+        }
+
+        [DataTestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", Resource, ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, Resource, ManagedIdentitySource.AppService)]
         [DataRow(AppServiceEndpoint, ResourceDefaultSuffix, ManagedIdentitySource.AppService)]
