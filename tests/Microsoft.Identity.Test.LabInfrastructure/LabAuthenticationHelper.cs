@@ -10,14 +10,16 @@ using Azure.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Azure.Identity;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public static class LabAuthenticationHelper
     {
         private const string LabAccessConfidentialClientId = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
-        private const string LabAccessPublicClientId = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
-        
+        private const string MsftTenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
+        private const string ServiceConnectionResourceId = "6eeeb73d-37aa-4d78-83b7-728101b8bddd";
+
         public static async Task<AccessToken> GetAccessTokenForLabAPIAsync(string labAccessClientId)
         {
             string[] scopes = new string[] { "https://msidlab.com/.default" };
@@ -33,37 +35,24 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return await GetLabAccessTokenAsync(
                 authority,
                 scopes,
-                String.Empty).ConfigureAwait(false);
+                string.Empty).ConfigureAwait(false);
         }
 
         public static async Task<AccessToken> GetLabAccessTokenAsync(string authority, string[] scopes, string clientId)
         {
-            AuthenticationResult authResult;
-            IConfidentialClientApplication confidentialApp;
-            X509Certificate2 cert;
+            var clientIdForAuth = string.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
+            var credential = new AzurePipelinesCredential(MsftTenantId, clientIdForAuth, ServiceConnectionResourceId);
+            var tokenRequestContext = new TokenRequestContext(scopes);
 
-            var clientIdForCertAuth = String.IsNullOrEmpty(clientId) ? LabAccessConfidentialClientId : clientId;
-
-            cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
-            if (cert == null)
+            try
             {
-                throw new InvalidOperationException(
-                    "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
+                AccessToken accessToken = await credential.GetTokenAsync(tokenRequestContext, default).ConfigureAwait(false);
+                return accessToken;
             }
-
-            confidentialApp = ConfidentialClientApplicationBuilder
-                .Create(clientIdForCertAuth)
-                .WithAuthority(new Uri(authority), true)
-                .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
-                .WithCertificate(cert)
-                .Build();
-
-            authResult = await confidentialApp
-                .AcquireTokenForClient(scopes)
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
-
-            return new AccessToken(authResult.AccessToken, authResult.ExpiresOn);
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Failed to acquire an Azure AD token", ex);
+            }
         }
     }
 
