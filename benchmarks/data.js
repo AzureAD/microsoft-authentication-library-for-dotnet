@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1717063412978,
+  "lastUpdate": 1717063415145,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -18742,6 +18742,54 @@ window.BENCHMARK_DATA = {
             "value": 175826.31722586494,
             "unit": "ns",
             "range": "± 1626.9885187432787"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "rudd.andy@gmail.com",
+            "name": "SingleCopy",
+            "username": "SingleCopy"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "239d9d64ac2eb2f778c23e255e1ea20a12171fc2",
+          "message": "MeasureDurationResult incorrect when running in linux (#4785)\n\nUse the Stopwatch.Frequency when calculating the milli and micro seconds\r\n\r\nCo-authored-by: Andy Rudd <andy.rudd@milliman.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\nCo-authored-by: Neha Bhargava <61847233+neha-bhargava@users.noreply.github.com>",
+          "timestamp": "2024-05-30T10:56:00+01:00",
+          "tree_id": "c82db0e1a3d0e441b08272984464412884126c1d",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/239d9d64ac2eb2f778c23e255e1ea20a12171fc2"
+        },
+        "date": 1717063414523,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 22841.062656947546,
+            "unit": "ns",
+            "range": "± 186.40380018947278"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 174087.18416922432,
+            "unit": "ns",
+            "range": "± 1160.5293323823425"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 33189.55064174107,
+            "unit": "ns",
+            "range": "± 267.00409437172965"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 174245.0489032452,
+            "unit": "ns",
+            "range": "± 934.2304417330508"
           }
         ]
       }
