@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1716453513125,
+  "lastUpdate": 1717063410919,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5390,6 +5390,42 @@ window.BENCHMARK_DATA = {
             "value": 402113.5,
             "unit": "ns",
             "range": "± 7687.883098313432"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "rudd.andy@gmail.com",
+            "name": "SingleCopy",
+            "username": "SingleCopy"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "239d9d64ac2eb2f778c23e255e1ea20a12171fc2",
+          "message": "MeasureDurationResult incorrect when running in linux (#4785)\n\nUse the Stopwatch.Frequency when calculating the milli and micro seconds\r\n\r\nCo-authored-by: Andy Rudd <andy.rudd@milliman.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\nCo-authored-by: Neha Bhargava <61847233+neha-bhargava@users.noreply.github.com>",
+          "timestamp": "2024-05-30T10:56:00+01:00",
+          "tree_id": "c82db0e1a3d0e441b08272984464412884126c1d",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/239d9d64ac2eb2f778c23e255e1ea20a12171fc2"
+        },
+        "date": 1717063407282,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 241483.80434782608,
+            "unit": "ns",
+            "range": "± 5775.200110147956"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 330442.3846153846,
+            "unit": "ns",
+            "range": "± 2807.8558408645063"
           }
         ]
       }
