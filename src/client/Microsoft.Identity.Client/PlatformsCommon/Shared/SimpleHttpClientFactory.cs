@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Shared
@@ -14,23 +16,73 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     /// .NET should use the IHttpClientFactory, but MSAL cannot take a dependency on it.
     /// .NET should use SocketHandler, but UseDefaultCredentials doesn't work with it 
     /// </remarks>
-    internal class SimpleHttpClientFactory : IMsalHttpClientFactory
+    internal class SimpleHttpClientFactory : IMsalMtlsHttpClientFactory
     {
         //Please see (https://aka.ms/msal-httpclient-info) for important information regarding the HttpClient.
-        private static readonly Lazy<HttpClient> s_httpClient = new Lazy<HttpClient>(InitializeClient);
+        private static readonly ConcurrentDictionary<string, HttpClient> s_httpClientPool = new ConcurrentDictionary<string, HttpClient>();
+        private static readonly object s_cacheLock = new object();
 
-        private static HttpClient InitializeClient()
+        private static HttpClient CreateNonMtlsClient()
         {
-            var httpClient = new HttpClient(new HttpClientHandler() { 
-                /* important for IWA */ UseDefaultCredentials = true });
+            CheckAndManageCache();
+
+            var httpClient = new HttpClient(new HttpClientHandler()
+            {
+                /* important for IWA */
+                UseDefaultCredentials = true
+            });
             HttpClientConfig.ConfigureRequestHeadersAndSize(httpClient);
 
             return httpClient;
         }
 
+        private static HttpClient CreateMtlsHttpClient(X509Certificate2 bindingCertificate)
+        {
+            CheckAndManageCache();
+
+            if (bindingCertificate == null)
+            {
+                throw new ArgumentNullException(nameof(bindingCertificate), "A valid X509 certificate must be provided for mTLS.");
+            }
+
+            //Create an HttpClientHandler and configure it to use the client certificate
+            HttpClientHandler handler = new HttpClientHandler();
+#if SUPPORTS_MTLS
+            handler.ClientCertificates.Add(bindingCertificate);
+            var httpClient = new HttpClient(handler);
+            HttpClientConfig.ConfigureRequestHeadersAndSize(httpClient);
+
+            return httpClient;
+#else
+    throw new NotSupportedException("mTLS is not supported on this platform.");
+#endif
+        }
+
         public HttpClient GetHttpClient()
         {
-            return s_httpClient.Value;
+            return s_httpClientPool.GetOrAdd("non_mtls", CreateNonMtlsClient());
+        }
+
+        public HttpClient GetHttpClient(X509Certificate2 x509Certificate2)
+        {
+            if (x509Certificate2 == null)
+            {
+                return GetHttpClient();
+            }
+
+            string key = x509Certificate2.Thumbprint;
+            return s_httpClientPool.GetOrAdd(key, CreateMtlsHttpClient(x509Certificate2));
+        }
+
+        private static void CheckAndManageCache()
+        {
+            lock (s_cacheLock)
+            {
+                if (s_httpClientPool.Count >= 1000)
+                {
+                    s_httpClientPool.Clear();
+                }
+            }
         }
     }
 }
