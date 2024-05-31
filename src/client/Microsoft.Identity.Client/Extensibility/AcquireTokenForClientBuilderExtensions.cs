@@ -2,9 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ComponentModel;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class AcquireTokenForClientBuilderExtensions
     {
         /// <summary>
