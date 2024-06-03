@@ -117,9 +117,8 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// For IWA
         /// </summary>
-        internal bool IsUserAssertionSupported => 
-            AuthorityType != AuthorityType.Adfs && 
-            AuthorityType != AuthorityType.B2C;
+        internal bool IsWsTrustFlowSupported =>
+            AuthorityType == AuthorityType.Aad;
 
         /// <summary>
         /// Authority supports multi-tenancy. ADFS and Generic authorities are not tenanted.
