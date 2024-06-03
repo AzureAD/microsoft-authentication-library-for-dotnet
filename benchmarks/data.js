@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1717063417185,
+  "lastUpdate": 1717437094537,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5426,6 +5426,42 @@ window.BENCHMARK_DATA = {
             "value": 330442.3846153846,
             "unit": "ns",
             "range": "± 2807.8558408645063"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5c6f22f144fb0bc9ce962f217e9fb9259dfd9dd9",
+          "message": "Fix TypeLoadException (#4792)\n\n* Fix\r\n\r\n* attribute",
+          "timestamp": "2024-06-03T18:44:05+01:00",
+          "tree_id": "913662de66826ea7700fec0adba3b2a792dbabf9",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/5c6f22f144fb0bc9ce962f217e9fb9259dfd9dd9"
+        },
+        "date": 1717437091142,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 254326.69642857142,
+            "unit": "ns",
+            "range": "± 10532.499969867542"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 360739.76923076925,
+            "unit": "ns",
+            "range": "± 5743.023291406803"
           }
         ]
       }
