@@ -1,8 +1,8 @@
 4.61.2
 ==========
 ### Bug Fixes
-- Fixed a regression in MSAL 4.61.1 where Proof of Possession (POP) extensibility API was made available for all the confidential client scenarios caused runtime exception for users using higher level SDKs with explicit dependency on MSAL. See [4789](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4789)
-- Measurement of duration in milliseconds is now consistent across all platforms. See [4784](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4784)
+- Fixed a regression in MSAL 4.61.1 where the Proof of Possession (POP) extensibility API, when made available for all confidential client scenarios, caused a runtime exception for users of higher-level SDKs that have an explicit dependency on MSAL. See [Issue #4789](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4789).
+- Ensured that the measurement of duration in milliseconds is now consistent across all platforms. See [Issue #4784](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4784).
 
 4.61.1
 ==========
