@@ -12,6 +12,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute.Core;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
@@ -78,8 +79,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [TestMethod]
-        public async Task AzureArcAuthHeaderInvalidAsync()
+        [DataTestMethod]
+        [DataRow("somefile=filename", MsalErrorMessage.ManagedIdentityInvalidChallenge)]
+        [DataRow("path/filename", MsalErrorMessage.ManagedIdentityInvalidFile)]
+        public async Task AzureArcAuthHeaderInvalidAsync(string filename, string errorMessage)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))

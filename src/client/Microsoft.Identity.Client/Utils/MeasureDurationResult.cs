@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Utils
@@ -14,11 +12,14 @@ namespace Microsoft.Identity.Client.Utils
     /// </summary>
     internal struct MeasureDurationResult<TResult>
     {
+        private const int TicksPerMicrosecond = 10;
+        private static readonly double s_tickFrequency = TimeSpan.TicksPerSecond / (double)Stopwatch.Frequency;
+
         public MeasureDurationResult(TResult result, long ticks)
         {
             Result = result;
-            Milliseconds = ticks / TimeSpan.TicksPerMillisecond;
-            Microseconds = ticks / (TimeSpan.TicksPerMillisecond / 1000);
+            Milliseconds = (long)(ticks / s_tickFrequency / TimeSpan.TicksPerMillisecond);
+            Microseconds = (long)(ticks * s_tickFrequency / TicksPerMicrosecond % 1000);
             Ticks = ticks;
         }
 
@@ -45,10 +46,13 @@ namespace Microsoft.Identity.Client.Utils
     /// </summary>
     internal struct MeasureDurationResult
     {
+        private const int TicksPerMicrosecond = 10;
+        private static readonly double s_tickFrequency = TimeSpan.TicksPerSecond / (double)Stopwatch.Frequency;
+
         public MeasureDurationResult(long ticks)
         {
-            Milliseconds = ticks / TimeSpan.TicksPerMillisecond;
-            Microseconds = ticks / (TimeSpan.TicksPerMillisecond / 1000);
+            Milliseconds = (long)(ticks * s_tickFrequency / TimeSpan.TicksPerMillisecond % 1000);
+            Microseconds = (long)(ticks * s_tickFrequency / TicksPerMicrosecond % 1000);
             Ticks = ticks;
         }
 

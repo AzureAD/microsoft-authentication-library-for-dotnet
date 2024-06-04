@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
+
     /// <summary>
     /// Extensions for all AcquireToken methods
     /// </summary>
-    public static partial class AbstractConfidentialClientAcquireTokenParameterBuilderExtension
+    public static class AbstractConfidentialClientAcquireTokenParameterBuilderExtension
     {
         /// <summary>
         /// Intervenes in the request pipeline, by executing a user provided delegate before MSAL makes the token request. 
