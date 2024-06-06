@@ -1,7 +1,7 @@
 4.61.3
 ==========
 ### Bug Fixes
-- Exclude using WSTrust for ROPC flow except for AAD. See [Issue #4791](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4791)
+- Exclude the use of WSTrust for ROPC flow except for AAD authorities. See [Issue #4791](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4791)
 
 4.61.2
 ==========
