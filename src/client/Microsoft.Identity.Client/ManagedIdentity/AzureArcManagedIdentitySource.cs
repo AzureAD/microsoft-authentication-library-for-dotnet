@@ -187,11 +187,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 string expandedExpectedPath = Environment.ExpandEnvironmentVariables("%ProgramData%\\AzureConnectedMachineAgent\\Tokens\\");
 
-                expectedFilePath = expandedExpectedPath + Path.GetFileName(path);
+                expectedFilePath = expandedExpectedPath + Path.GetFileNameWithoutExtension(path) + ".key";
             }
             else if (DesktopOsHelper.IsLinux())
             {
-                expectedFilePath = "/var/opt/azcmagent/tokens/" + Path.GetFileName(path);
+                expectedFilePath = "/var/opt/azcmagent/tokens/" + Path.GetFileNameWithoutExtension(path) + ".key";
             }
             else
             {
@@ -200,8 +200,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     MsalErrorMessage.ManagedIdentityPlatformNotSupported);
             }
 
-            return path.Equals(expectedFilePath, StringComparison.OrdinalIgnoreCase) &&
-                path.EndsWith(".key", StringComparison.OrdinalIgnoreCase);
+            return path.Equals(expectedFilePath, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
