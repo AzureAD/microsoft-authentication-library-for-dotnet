@@ -198,7 +198,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     MsalErrorMessage.ManagedIdentityPlatformNotSupported);
             }
 
-            return path.Equals(expectedFilePath, StringComparison.OrdinalIgnoreCase);
+            return path.Equals(expectedFilePath);
         }
     }
 }
