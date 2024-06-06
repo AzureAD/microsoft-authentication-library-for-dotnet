@@ -144,9 +144,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             _requestContext.Logger.Verbose(() => $"[Managed Identity] Challenge is valid. FilePath: {splitChallenge[1]}");
-            string path = Path.GetFullPath(new Uri(splitChallenge[1]).LocalPath)
-                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-
+            
             if (!IsValidPath(splitChallenge[1]))
             {
                 throw CreateManagedIdentityException(
@@ -154,7 +152,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     MsalErrorMessage.ManagedIdentityInvalidFile);
             }
 
-            _requestContext.Logger.Verbose(() => $"[Managed Identity] File path is valid. Path: {path}");
+            _requestContext.Logger.Verbose(() => $"[Managed Identity] File path is valid. Path: {splitChallenge[1]}");
 
             var length = new FileInfo(splitChallenge[1]).Length;
 
