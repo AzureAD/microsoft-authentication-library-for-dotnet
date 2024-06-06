@@ -311,6 +311,12 @@ namespace Microsoft.Identity.Client
         public const string RopcDoesNotSupportMsaAccounts = "ropc_not_supported_for_msa";
 
         /// <summary>
+        /// Resource Owner Password Credential (ROPC) grant attempted with a federated account on confidential client which is not supported.
+        /// See https://aka.ms/msal-net-ropc for details.
+        /// </summary>
+        public const string RopcDoesNotSupportFederatedAccountsOnCca = "ropc_not_supported_for_federated_accounts_on_confidential_client";
+
+        /// <summary>
         /// Federation Metadata URL is missing for federated user.
         /// </summary>
         public const string MissingFederationMetadataUrl = "missing_federation_metadata_url";

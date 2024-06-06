@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.Infrastructure;
+using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -57,6 +58,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task ROPC_AAD_CCA_Async()
+        {
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            await RunHappyPathTestAsync(labResponse: labResponse, isPublicClient: false).ConfigureAwait(false);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -245,21 +253,37 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.Fail("Bad exception or no exception thrown");
         }
 
-        private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "")
+        private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "", bool isPublicClient = true)
         {
             var factory = new HttpSnifferClientFactory();
-            var msalPublicClient = PublicClientApplicationBuilder
-                .Create(labResponse.App.AppId)
-                .WithTestLogging()
-                .WithHttpClientFactory(factory)
-                .WithAuthority(labResponse.Lab.Authority, "organizations")
-                .Build();
+            IClientApplicationBase clientApp = null;
+
+            if (isPublicClient)
+            {
+                clientApp = PublicClientApplicationBuilder
+                            .Create(labResponse.App.AppId)
+                            .WithTestLogging()
+                            .WithHttpClientFactory(factory)
+                            .WithAuthority(labResponse.Lab.Authority, "organizations")
+                            .Build();
+            }
+            else
+            {
+                IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+                clientApp = ConfidentialClientApplicationBuilder
+                            .Create(settings.ClientId)
+                            .WithTestLogging()
+                            .WithHttpClientFactory(factory)
+                            .WithAuthority(labResponse.Lab.Authority, "organizations")
+                            .WithClientSecret(settings.GetSecret())
+                            .Build();
+            }
 
             AuthenticationResult authResult
                 = await GetAuthenticationResultWithAssertAsync(
                     labResponse,
                     factory,
-                    msalPublicClient,
+                    clientApp,
                     federationMetadata,
                     CorrelationId).ConfigureAwait(false);
 
@@ -318,16 +342,31 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private async Task<AuthenticationResult> GetAuthenticationResultWithAssertAsync(
             LabResponse labResponse,
             HttpSnifferClientFactory factory,
-            IPublicClientApplication msalPublicClient,
+            IClientApplicationBase clientApp,
             string federationMetadata,
             Guid testCorrelationId)
         {
-            AuthenticationResult authResult = await msalPublicClient
+            AuthenticationResult authResult;
+
+            if (clientApp is IPublicClientApplication publicClientApp)
+            {
+                authResult = await publicClientApp
                 .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .WithCorrelationId(testCorrelationId)
                 .WithFederationMetadata(federationMetadata)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
+            }
+            else
+            {
+                authResult = await ((IConfidentialClientApplication)clientApp)
+                .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+                .WithCorrelationId(testCorrelationId)
+                .WithFederationMetadata(federationMetadata)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+            }
+
 
             Assert.IsNotNull(authResult);
             Assert.AreEqual(TokenSource.IdentityProvider, authResult.AuthenticationResultMetadata.TokenSource);

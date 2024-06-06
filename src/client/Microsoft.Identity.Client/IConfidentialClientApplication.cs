@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Executors;
 
 namespace Microsoft.Identity.Client
 {
@@ -85,6 +86,8 @@ namespace Microsoft.Identity.Client
         /// <returns>A builder enabling you to add optional parameters before executing the token request to get the
         /// URL of the authorization endpoint with the specified parameters.</returns>
         GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(IEnumerable<string> scopes);
+
+        public AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder AcquireTokenByUsernamePassword(IEnumerable<string> scopes, string username, string password);
 
         /// <summary>
         /// In confidential client apps use <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/> instead.

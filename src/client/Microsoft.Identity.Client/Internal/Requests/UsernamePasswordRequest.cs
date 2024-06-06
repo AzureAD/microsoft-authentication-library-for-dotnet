@@ -117,6 +117,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (userRealmResponse.IsFederated)
             {
+                if (AuthenticationRequestParameters.AppConfig.IsConfidentialClient)
+                {
+                    throw new MsalClientException(MsalError.RopcDoesNotSupportFederatedAccountsOnCca);
+                }
+
                 var wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
                                           userRealmResponse.FederationMetadataUrl,
                                           userRealmResponse.CloudAudienceUrn,

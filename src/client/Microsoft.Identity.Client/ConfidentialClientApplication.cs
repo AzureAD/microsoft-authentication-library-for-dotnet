@@ -170,6 +170,19 @@ namespace Microsoft.Identity.Client
                 scopes);
         }
 
+        /// <inheritdoc/>
+        public AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder AcquireTokenByUsernamePassword(
+            IEnumerable<string> scopes,
+            string username,
+            string password)
+        {
+            return AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder.Create(
+                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                scopes,
+                username,
+                password);
+        }
+
         AcquireTokenByRefreshTokenParameterBuilder IByRefreshToken.AcquireTokenByRefreshToken(
             IEnumerable<string> scopes,
             string refreshToken)
