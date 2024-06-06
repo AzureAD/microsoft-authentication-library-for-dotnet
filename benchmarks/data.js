@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1717709763995,
+  "lastUpdate": 1717710360183,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5534,6 +5534,42 @@ window.BENCHMARK_DATA = {
             "value": 328712.23076923075,
             "unit": "ns",
             "range": "± 4583.577044802566"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "88df64013795d4e3716e1f677600f8164ffdb542",
+          "message": "Fix for #4791 - don't use WSTrust for ROPC except for AAD authorities (#4794)\n\n* Fix for #4791\r\n\r\n* Fix for #4791\r\n\r\n* fix\r\n\r\n---------\r\n\r\nCo-authored-by: Neha Bhargava <61847233+neha-bhargava@users.noreply.github.com>",
+          "timestamp": "2024-06-06T14:38:12-07:00",
+          "tree_id": "b1f5ca9cbe546284bf4b543333bf5890c4ab32a7",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/88df64013795d4e3716e1f677600f8164ffdb542"
+        },
+        "date": 1717710355967,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 238799.5,
+            "unit": "ns",
+            "range": "± 2569.3456643389077"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 342075,
+            "unit": "ns",
+            "range": "± 2031.527414622711"
           }
         ]
       }
