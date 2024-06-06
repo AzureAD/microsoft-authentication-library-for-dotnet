@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             Assert.IsTrue((app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.CanBeTenanted);
             Assert.IsTrue((app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.IsClientInfoSupported);
             Assert.IsFalse((app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.IsInstanceDiscoverySupported);
-            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.IsUserAssertionSupported);
+            Assert.IsTrue((app.AppConfig as ApplicationConfiguration).Authority.AuthorityInfo.IsWsTrustFlowSupported);
         }
 
         [TestMethod]
