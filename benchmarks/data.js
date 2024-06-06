@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1717710360183,
+  "lastUpdate": 1717710362839,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -12444,6 +12444,54 @@ window.BENCHMARK_DATA = {
             "value": 125595.99103461372,
             "unit": "ns",
             "range": "± 2560.213426442897"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "88df64013795d4e3716e1f677600f8164ffdb542",
+          "message": "Fix for #4791 - don't use WSTrust for ROPC except for AAD authorities (#4794)\n\n* Fix for #4791\r\n\r\n* Fix for #4791\r\n\r\n* fix\r\n\r\n---------\r\n\r\nCo-authored-by: Neha Bhargava <61847233+neha-bhargava@users.noreply.github.com>",
+          "timestamp": "2024-06-06T14:38:12-07:00",
+          "tree_id": "b1f5ca9cbe546284bf4b543333bf5890c4ab32a7",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/88df64013795d4e3716e1f677600f8164ffdb542"
+        },
+        "date": 1717710361965,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 12721.931428175707,
+            "unit": "ns",
+            "range": "± 20.586276921820854"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 122149.18915264423,
+            "unit": "ns",
+            "range": "± 614.9552147223751"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 23800.67708943685,
+            "unit": "ns",
+            "range": "± 156.64627088088895"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 124607.89622738487,
+            "unit": "ns",
+            "range": "± 2639.876188325527"
           }
         ]
       }
