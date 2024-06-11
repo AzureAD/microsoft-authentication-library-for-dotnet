@@ -111,17 +111,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return null;
             }
 
+            //WsTrust not supported on ROPC
+            if (AuthenticationRequestParameters.AppConfig.IsConfidentialClient)
+            {
+                return null;
+            }
+
             var userRealmResponse = await _commonNonInteractiveHandler
                                           .QueryUserRealmDataAsync(AuthenticationRequestParameters.AuthorityInfo.UserRealmUriPrefix, _usernamePasswordParameters.Username)
                                           .ConfigureAwait(false);
 
             if (userRealmResponse.IsFederated)
             {
-                if (AuthenticationRequestParameters.AppConfig.IsConfidentialClient)
-                {
-                    throw new MsalClientException(MsalError.RopcDoesNotSupportFederatedAccountsOnCca);
-                }
-
                 var wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
                                           userRealmResponse.FederationMetadataUrl,
                                           userRealmResponse.CloudAudienceUrn,

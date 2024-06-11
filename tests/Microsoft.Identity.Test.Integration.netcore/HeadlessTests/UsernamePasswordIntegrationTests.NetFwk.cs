@@ -77,6 +77,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.Arlington)]
+        public async Task ARLINGTON_ROPC_AAD_CCA_Async()
+        {
+            var labResponse = await LabUserHelper.GetArlingtonUserAsync().ConfigureAwait(false);
+            await RunHappyPathTestAsync(labResponse, isPublicClient: false, cloud:Cloud.Arlington).ConfigureAwait(false);
+        }
+
+        [RunOn(TargetFrameworks.NetCore)]
+        [TestCategory(TestCategories.Arlington)]
         public async Task ARLINGTON_ROPC_ADFS_Async()
         {
             var labResponse = await LabUserHelper.GetArlingtonADFSUserAsync().ConfigureAwait(false);
@@ -253,7 +261,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.Fail("Bad exception or no exception thrown");
         }
 
-        private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "", bool isPublicClient = true)
+        private async Task RunHappyPathTestAsync(LabResponse labResponse, string federationMetadata = "", bool isPublicClient = true, Cloud cloud = Cloud.Public)
         {
             var factory = new HttpSnifferClientFactory();
             IClientApplicationBase clientApp = null;
@@ -269,7 +277,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
             else
             {
-                IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+                IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(cloud);
                 clientApp = ConfidentialClientApplicationBuilder
                             .Create(settings.ClientId)
                             .WithTestLogging()
@@ -362,7 +370,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 authResult = await ((IConfidentialClientApplication)clientApp)
                 .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .WithCorrelationId(testCorrelationId)
-                .WithFederationMetadata(federationMetadata)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
             }
