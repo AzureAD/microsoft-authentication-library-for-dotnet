@@ -81,7 +81,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
         [DataTestMethod]
         [DataRow("somefile=filename", MsalErrorMessage.ManagedIdentityInvalidChallenge)]
-        [DataRow("path/filename", MsalErrorMessage.ManagedIdentityInvalidFile)]
+        [DataRow("C:\\ProgramData\\AzureConnectedMachineAgent\\Tokens\\filename.txt", MsalErrorMessage.ManagedIdentityInvalidFile)]
+        [DataRow("C:\\ProgramData\\AzureConnectedMachineAgent\\Tokens\\...\\etc\\filename.key", MsalErrorMessage.ManagedIdentityInvalidFile)]
         public async Task AzureArcAuthHeaderInvalidAsync(string filename, string errorMessage)
         {
             using (new EnvVariableContext())
@@ -97,7 +98,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                httpManager.AddManagedIdentityWSTrustMockHandler(ManagedIdentityTests.AzureArcEndpoint, "somevalue=filepath");
+                httpManager.AddManagedIdentityWSTrustMockHandler(ManagedIdentityTests.AzureArcEndpoint, filename);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("scope")
@@ -106,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(ManagedIdentitySource.AzureArc.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidChallenge, ex.Message);
+                Assert.AreEqual(errorMessage, ex.Message);
             }
         }
 

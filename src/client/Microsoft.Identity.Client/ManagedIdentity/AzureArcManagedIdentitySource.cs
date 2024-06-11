@@ -138,35 +138,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             _requestContext.Logger.Verbose(() => $"[Managed Identity] Challenge is valid. FilePath: {splitChallenge[1]}");
-
-            if (DesktopOsHelper.IsWindows())
-            {
-                if (!IsValidWindowsPath(splitChallenge[1]))
-                {
-                    throw CreateManagedIdentityException(
-                        MsalError.ManagedIdentityRequestFailed,
-                        MsalErrorMessage.ManagedIdentityInvalidFile);
-                }
-
-                _requestContext.Logger.Verbose(() => "[Managed Identity] Windows path is valid.");
-            }
-            else if (DesktopOsHelper.IsLinux())
-            {
-                if (!IsValidLinuxPath(splitChallenge[1]))
-                {
-                    throw CreateManagedIdentityException(
-                        MsalError.ManagedIdentityRequestFailed,
-                        MsalErrorMessage.ManagedIdentityInvalidFile);
-                }
-
-                _requestContext.Logger.Verbose(() => "[Managed Identity] Linux path is valid.");
-            }
-            else
+            
+            if (!IsValidPath(splitChallenge[1]))
             {
                 throw CreateManagedIdentityException(
                     MsalError.ManagedIdentityRequestFailed,
-                    MsalErrorMessage.ManagedIdentityPlatformNotSupported);
+                    MsalErrorMessage.ManagedIdentityInvalidFile);
             }
+
+            _requestContext.Logger.Verbose(() => $"[Managed Identity] File path is valid. Path: {splitChallenge[1]}");
 
             var length = new FileInfo(splitChallenge[1]).Length;
 
@@ -191,20 +171,28 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 null);
         }
 
-        private bool IsValidLinuxPath(string path)
+        private bool IsValidPath(string path)
         {
-            string linuxPath = "/var/opt/azcmagent/tokens/";
+            string expectedFilePath;
 
-            return path.StartsWith(linuxPath, StringComparison.OrdinalIgnoreCase) && 
-                path.EndsWith(".key", StringComparison.OrdinalIgnoreCase);
-        }
+            if (DesktopOsHelper.IsWindows())
+            {
+                string expandedExpectedPath = Environment.ExpandEnvironmentVariables("%ProgramData%\\AzureConnectedMachineAgent\\Tokens\\");
 
-        private bool IsValidWindowsPath(string path)
-        {
-            string expandedExpectedPath = Environment.ExpandEnvironmentVariables("%ProgramData%\\AzureConnectedMachineAgent\\Tokens\\");
+                expectedFilePath = expandedExpectedPath + Path.GetFileNameWithoutExtension(path) + ".key";
+            }
+            else if (DesktopOsHelper.IsLinux())
+            {
+                expectedFilePath = "/var/opt/azcmagent/tokens/" + Path.GetFileNameWithoutExtension(path) + ".key";
+            }
+            else
+            {
+                throw CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    MsalErrorMessage.ManagedIdentityPlatformNotSupported);
+            }
 
-            return path.StartsWith(expandedExpectedPath, StringComparison.OrdinalIgnoreCase) && 
-                path.EndsWith(".key", StringComparison.OrdinalIgnoreCase);
+            return path.Equals(expectedFilePath);
         }
     }
 }

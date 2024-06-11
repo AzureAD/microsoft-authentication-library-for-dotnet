@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<UserAssertion> FetchAssertionFromWsTrustAsync()
         {
-            if (!AuthenticationRequestParameters.AuthorityInfo.IsUserAssertionSupported)
+            if (!AuthenticationRequestParameters.AuthorityInfo.IsWsTrustFlowSupported)
             {
                 return null;
             }
