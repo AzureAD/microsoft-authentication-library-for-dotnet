@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
@@ -110,19 +111,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 var splitChallenge = challenge.Split(new char[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
 
-                if (splitChallenge.Length != 2)
-                {
-                    _requestContext.Logger.Error("[Managed Identity] The WWW-Authenticate header for Azure arc managed identity is not an expected format.");
-
-                    var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
-                        MsalError.ManagedIdentityRequestFailed,
-                        MsalErrorMessage.ManagedIdentityInvalidChallenge,
-                        null,
-                        ManagedIdentitySource.AzureArc,
-                        null);
-
-                    throw exception;
-                }
+                ValidateSplitChallenge(splitChallenge);
 
                 var authHeaderValue = "Basic " + File.ReadAllText(splitChallenge[1]);
 
@@ -147,6 +136,73 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
 
             return await base.HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
+        }
+
+        private void ValidateSplitChallenge(string[] splitChallenge)
+        {
+            if (splitChallenge.Length != 2)
+            {
+                throw CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    MsalErrorMessage.ManagedIdentityInvalidChallenge);
+            }
+
+            _requestContext.Logger.Verbose(() => $"[Managed Identity] Challenge is valid. FilePath: {splitChallenge[1]}");
+            
+            if (!IsValidPath(splitChallenge[1]))
+            {
+                throw CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    MsalErrorMessage.ManagedIdentityInvalidFile);
+            }
+
+            _requestContext.Logger.Verbose(() => $"[Managed Identity] File path is valid. Path: {splitChallenge[1]}");
+
+            var length = new FileInfo(splitChallenge[1]).Length;
+
+            if ((!File.Exists(splitChallenge[1]) || (length) > 4096))
+            {
+                _requestContext.Logger.Error($"[Managed Identity] File does not exist or is greater than 4096 bytes. File exists: {File.Exists(splitChallenge[1])}. Length of file: {length}");
+                throw CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    MsalErrorMessage.ManagedIdentityInvalidFile);
+            }
+
+            _requestContext.Logger.Verbose(() => "[Managed Identity] File exists and is less than 4096 bytes.");
+        }
+
+        private MsalException CreateManagedIdentityException(string errorCode, string errorMessage)
+        {
+            return MsalServiceExceptionFactory.CreateManagedIdentityException(
+                errorCode,
+                errorMessage,
+                null,
+                ManagedIdentitySource.AzureArc,
+                null);
+        }
+
+        private bool IsValidPath(string path)
+        {
+            string expectedFilePath;
+
+            if (DesktopOsHelper.IsWindows())
+            {
+                string expandedExpectedPath = Environment.ExpandEnvironmentVariables("%ProgramData%\\AzureConnectedMachineAgent\\Tokens\\");
+
+                expectedFilePath = expandedExpectedPath + Path.GetFileNameWithoutExtension(path) + ".key";
+            }
+            else if (DesktopOsHelper.IsLinux())
+            {
+                expectedFilePath = "/var/opt/azcmagent/tokens/" + Path.GetFileNameWithoutExtension(path) + ".key";
+            }
+            else
+            {
+                throw CreateManagedIdentityException(
+                    MsalError.ManagedIdentityRequestFailed,
+                    MsalErrorMessage.ManagedIdentityPlatformNotSupported);
+            }
+
+            return path.Equals(expectedFilePath);
         }
     }
 }

@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<UserAssertion> FetchAssertionFromWsTrustAsync()
         {
-            if (!AuthenticationRequestParameters.AuthorityInfo.IsUserAssertionSupported)
+            if (!AuthenticationRequestParameters.AuthorityInfo.IsWsTrustFlowSupported)
             {
                 //IWA is currently not supported in pure adfs environments. See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/2771
                 throw new MsalClientException(
