@@ -8,10 +8,12 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
 {
+
+#pragma warning disable 618 // This workaround required for Native Win32 API call
     /// <summary>
     /// Helper class to check Kerberos Ticket in user's Ticket Cache.
     /// </summary>
-    internal class TicketCacheReader : IDisposable
+    public class TicketCacheReader : IDisposable
     {
         private readonly string _spn;
         private readonly SspiSecurityContext _context;
@@ -75,4 +77,6 @@ namespace Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos
             GC.SuppressFinalize(this);
         }
     }
+
+#pragma warning restore 618
 }
