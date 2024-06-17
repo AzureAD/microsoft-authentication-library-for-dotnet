@@ -15,12 +15,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public static class LabAuthenticationHelper
     {
-        private const string LabAccessConfidentialClientId = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
+        private const string LabAccessConfidentialClientId = "00bedee1-0e09-4a8d-81a0-0679c5a64a83";
         private const string LabAccessPublicClientId = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
         
         public static async Task<AccessToken> GetAccessTokenForLabAPIAsync(string labAccessClientId)
         {
-            string[] scopes = new string[] { "https://request.msidlab.com/.default" };
+            string[] scopes = new string[] { "https://msidlab.com/.default" };
 
             return await GetLabAccessTokenAsync(
                 "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/", 
@@ -55,11 +55,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 .Create(clientIdForCertAuth)
                 .WithAuthority(new Uri(authority), true)
                 .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
-                .WithCertificate(cert)
+                .WithCertificate(cert, true)
                 .Build();
 
             authResult = await confidentialApp
                 .AcquireTokenForClient(scopes)
+                .WithSendX5C(true)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
