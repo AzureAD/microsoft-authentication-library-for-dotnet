@@ -105,11 +105,11 @@ namespace Microsoft.Identity.Test.Integration.Broker
 
             MsalAssert.AssertAuthResult(result, TokenSource.Broker, labResponse.Lab.TenantId, expectedScopes, true);
 
-            await PoPValidator.VerifyPoPTokenAsync(
+            PoPValidator.VerifyPoPToken(
                 labResponse.App.AppId,
                 requestUri.AbsoluteUri,
                 HttpMethod.Get,
-                result).ConfigureAwait(false);
+                result);
         }
 
         [IgnoreOnOneBranch]

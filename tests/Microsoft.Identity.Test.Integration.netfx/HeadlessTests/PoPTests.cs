@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                  settings.ClientId,
                  ProtectedUrl,
                  HttpMethod.Get,
-                 result).ConfigureAwait(false);
+                 result);
         }
 
         private async Task BearerAndPoP_CanCoexist_Async()
@@ -369,7 +369,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 settings.ClientId,
                 ProtectedUrl,
                 HttpMethod.Post,
-                result).ConfigureAwait(false);
+                result);
         }
 
         [TestMethod]
@@ -489,11 +489,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Assert.IsTrue(wastestLogger.HasLogged);
 
-            await PoPValidator.VerifyPoPTokenAsync(
+            PoPValidator.VerifyPoPToken(
                 labResponse.App.AppId,
                 ProtectedUrl,
                 HttpMethod.Get,
-                result).ConfigureAwait(false);
+                result);
         }
 #endif
 

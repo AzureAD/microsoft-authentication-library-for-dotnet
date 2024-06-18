@@ -190,7 +190,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             HandlePrompt(driver, "otherTile");
             EnterUsername(driver, user, withLoginHint, adfsOnly, fields);
-            HandlePrompt(driver, CoreUiTestConstants.NextButton);
+            //HandlePrompt(driver, CoreUiTestConstants.NextButton);
             EnterPassword(driver, user, fields);
 
             HandleConsent(driver, user, fields, prompt);

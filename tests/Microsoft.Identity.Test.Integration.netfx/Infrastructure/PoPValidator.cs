@@ -28,20 +28,20 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         /// This calls a special endpoint that validates any POP token against a configurable HTTP request.
         /// The HTTP request is configured through headers.
         /// </summary>
-        public static Task VerifyPoPTokenAsync(
-            string clientId, 
-            string requestUri, 
-            HttpMethod method, 
+        public static void VerifyPoPToken(
+            string clientId,
+            string requestUri,
+            HttpMethod method,
             AuthenticationResult result)
         {
-            return VerifyPoPTokenAsync(clientId, requestUri, method, result.AccessToken, result.TokenType);
+            VerifyPoPToken(clientId, requestUri, method, result.AccessToken, result.TokenType);
         }
 
-        public static async Task VerifyPoPTokenAsync(
-            string clientId, 
-            string requestUri, 
-            HttpMethod method, 
-            string token, 
+        public static void VerifyPoPToken(
+            string clientId,
+            string requestUri,
+            HttpMethod method,
+            string token,
             string tokenType)
         {
             Uri protectedUri = new Uri(requestUri);
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             Assert.IsNotNull(cnf);
             ClaimsPrincipal innerTokenClaims = IdToken.Parse(assertionWithoutShr).ClaimsPrincipal;
             string reqCnf = innerTokenClaims.FindFirst("cnf").Value;
-            Assert.IsNotNull(reqCnf);            
+            Assert.IsNotNull(reqCnf);
         }
 
         public static async Task VerifyPopNonceAsync(string nonce)
