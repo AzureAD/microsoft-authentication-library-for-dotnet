@@ -214,21 +214,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets the telemetry callback. For details see https://aka.ms/msal-net-telemetry
-        /// </summary>
-        /// <param name="telemetryCallback">Delegate to the callback sending the telemetry
-        /// elaborated by the library to the telemetry endpoint of choice</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        /// <exception cref="InvalidOperationException"/> is thrown if the method was already
-        /// called on the application builder.
-        [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.", false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        internal T WithTelemetry(TelemetryCallback telemetryCallback)
-        {
-            return this as T;
-        }
-
-        /// <summary>
         /// Sets the Client ID of the application
         /// </summary>
         /// <param name="clientId">Client ID (also known as <i>Application ID</i>) of the application as registered in the
