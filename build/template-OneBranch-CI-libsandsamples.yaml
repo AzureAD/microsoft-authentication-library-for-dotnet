@@ -9,19 +9,6 @@ parameters:
 
 steps:
 
-- task: JavaToolInstaller@0
-  displayName: Install Java 11
-  inputs:
-    versionSpec: '11'
-    jdkArchitectureOption: 'x64'
-    jdkSourceOption: AzureStorage
-    azureResourceManagerEndpoint: AuthSdkResourceManager #use managed identity to connect to the storage
-    azureStorageAccountName: msalbuilds #storage in the lab
-    azureContainerName: javasdk #container where the jdk is stored
-    azureCommonVirtualFile: 'jdk-11.0.21_windows-x64_bin.zip' #jdk file
-    jdkDestinationDirectory: '$(agent.toolsDirectory)/jdk11'
-    cleanDestinationDirectory: false
-
 - task: PowerShell@2
   displayName: Install Windows 10 SDK (version 17763)
   inputs:
