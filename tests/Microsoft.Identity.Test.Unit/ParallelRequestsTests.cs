@@ -272,6 +272,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             bool doNotThrow,
             bool retry,
             X509Certificate2 mtlsCertificate,
+            Func<HttpClient> validateServerCertificateCallback,
             CancellationToken cancellationToken)
         {
             // simulate delay and also add complexity due to thread context switch

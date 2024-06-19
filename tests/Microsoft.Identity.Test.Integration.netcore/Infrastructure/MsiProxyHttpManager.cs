@@ -48,6 +48,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             bool doNotThrow,
             bool retry,
             X509Certificate2 mtlsCertificate,
+            Func<HttpClient> validateServerCertificateCallback,
             CancellationToken cancellationToken)
         {
             //Get token for the MSIHelperService

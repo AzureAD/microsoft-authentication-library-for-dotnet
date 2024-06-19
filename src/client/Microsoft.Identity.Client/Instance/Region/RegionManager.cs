@@ -199,16 +199,17 @@ namespace Microsoft.Identity.Client.Region
                             Uri imdsUri = BuildImdsUri(DefaultApiVersion);
 
                             HttpResponse response = await _httpManager.SendRequestAsync(
-                                 imdsUri,
-                                 headers,
-                                 body: null,
-                                 HttpMethod.Get,
-                                 logger: logger,
-                                 doNotThrow: false,
-                                 retry: false,
-                                 mtlsCertificate: null,
-                                 GetCancellationToken(requestCancellationToken))
-                                    .ConfigureAwait(false);
+                                imdsUri,
+                                headers,
+                                body: null,
+                                HttpMethod.Get,
+                                logger: logger,
+                                doNotThrow: false,
+                                retry: false,
+                                mtlsCertificate: null,
+                                validateServerCertificateCallback: null,
+                                GetCancellationToken(requestCancellationToken))
+                                .ConfigureAwait(false);
 
                             // A bad request occurs when the version in the IMDS call is no longer supported.
                             if (response.StatusCode == HttpStatusCode.BadRequest)
@@ -216,16 +217,17 @@ namespace Microsoft.Identity.Client.Region
                                 string apiVersion = await GetImdsUriApiVersionAsync(logger, headers, requestCancellationToken).ConfigureAwait(false); // Get the latest version
                                 imdsUri = BuildImdsUri(apiVersion);
                                 response = await _httpManager.SendRequestAsync(
-                                   imdsUri,
-                                   headers,
-                                   body: null,
-                                   HttpMethod.Get,
-                                   logger: logger,
-                                   doNotThrow: false,
-                                   retry: false,
-                                   mtlsCertificate: null,
-                                   GetCancellationToken(requestCancellationToken))
-                                      .ConfigureAwait(false); // Call again with updated version
+                                    imdsUri,
+                                    headers,
+                                    body: null,
+                                    HttpMethod.Get,
+                                    logger: logger,
+                                    doNotThrow: false,
+                                    retry: false,
+                                    mtlsCertificate: null,
+                                    validateServerCertificateCallback: null,
+                                    GetCancellationToken(requestCancellationToken))
+                                        .ConfigureAwait(false); // Call again with updated version
                             }
 
                             if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
@@ -326,6 +328,7 @@ namespace Microsoft.Identity.Client.Region
                   doNotThrow: false,
                   retry: false,
                   mtlsCertificate: null,
+                  validateServerCertificateCallback: null,
                   GetCancellationToken(userCancellationToken))
                      .ConfigureAwait(false);
 

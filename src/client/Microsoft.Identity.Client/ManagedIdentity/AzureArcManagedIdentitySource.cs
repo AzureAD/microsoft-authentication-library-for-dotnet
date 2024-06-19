@@ -140,6 +140,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                      doNotThrow: false,
                      retry: true,
                      mtlsCertificate: null,
+                     validateServerCertificateCallback: null,
                      cancellationToken)
                         .ConfigureAwait(false);
 

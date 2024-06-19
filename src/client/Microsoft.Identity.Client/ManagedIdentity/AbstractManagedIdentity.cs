@@ -64,6 +64,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             doNotThrow: true,
                             retry: true,
                             mtlsCertificate: null,
+                            ValidateServerCertificateCallback(_requestContext),
                             cancellationToken).ConfigureAwait(false);
                 }
                 else
@@ -78,6 +79,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             doNotThrow: true,
                             retry: true,
                             mtlsCertificate: null,
+                            ValidateServerCertificateCallback(_requestContext),
                             cancellationToken)
                         .ConfigureAwait(false);
 
@@ -90,6 +92,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 HandleException(ex);
                 throw;
             }
+        }
+
+        internal virtual Func<HttpClient> ValidateServerCertificateCallback(RequestContext requestContext)
+        {
+            return null;
         }
 
         protected virtual Task<ManagedIdentityResponse> HandleResponseAsync(

@@ -140,6 +140,7 @@ namespace Microsoft.Identity.Client.OAuth2
                             doNotThrow: false,
                             retry: true,
                             mtlsCertificate: _mtlsCertificate,
+                            validateServerCertificateCallback: null,
                             requestContext.UserCancellationToken)
                         .ConfigureAwait(false);
                     }
@@ -154,6 +155,7 @@ namespace Microsoft.Identity.Client.OAuth2
                             doNotThrow: false,
                             retry: true,
                             mtlsCertificate: null,
+                            validateServerCertificateCallback: null,
                             requestContext.UserCancellationToken)
                         .ConfigureAwait(false);
                     }

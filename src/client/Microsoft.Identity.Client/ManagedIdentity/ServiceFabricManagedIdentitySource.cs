@@ -15,9 +15,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class ServiceFabricManagedIdentitySource : AbstractManagedIdentity
     {
         private const string ServiceFabricMsiApiVersion = "2019-07-01-preview";
-
         private readonly Uri _endpoint;
         private readonly string _identityHeaderValue;
+        private static HttpClient s_httpClient;
 
         public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
@@ -45,8 +45,42 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader);
         }
 
+        internal override Func<HttpClient> ValidateServerCertificateCallback(RequestContext requestContext)
+        {
+            return () =>
+            {
+                if (s_httpClient == null)
+                {
+                    s_httpClient = new HttpClient(ValidateServerCertificate(requestContext.Logger));
+                }
+                return s_httpClient;
+            };
+        }
+
+        internal HttpClientHandler ValidateServerCertificate(ILoggerAdapter logger)
+        {
+#if !NET462
+            logger.Info(() => "[Managed Identity] Setting up server certificate validation callback.");
+            return new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (message, certificate, chain, sslPolicyErrors) =>
+                {
+                    if (sslPolicyErrors != System.Net.Security.SslPolicyErrors.None)
+                    {
+                        return 0 == string.Compare(certificate.Thumbprint, EnvironmentVariables.IdentityServerThumbprint, StringComparison.OrdinalIgnoreCase);
+                    }
+                    return true;
+                }
+            };
+#else
+            logger.Warning("[Managed Identity] Server certificate validation callback is not supported on .NET Framework.");
+            return new HttpClientHandler();
+#endif
+        }
+
+
         private ServiceFabricManagedIdentitySource(RequestContext requestContext, Uri endpoint, string identityHeaderValue) : 
-            base(requestContext, ManagedIdentitySource.ServiceFabric)
+        base(requestContext, ManagedIdentitySource.ServiceFabric)
         {
             _endpoint = endpoint;
             _identityHeaderValue = identityHeaderValue;
