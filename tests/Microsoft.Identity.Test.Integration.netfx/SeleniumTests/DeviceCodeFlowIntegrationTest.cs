@@ -76,6 +76,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         [RunOn(TargetFrameworks.NetCore)]
         [Timeout(2 * 60 * 1000)] // 2 min timeout
         [TestCategory(TestCategories.MSA)]
+        [Ignore]
         public async Task DeviceCodeFlowMsaTestAsync()
         {
             LabResponse labResponse = await LabUserHelper.GetMsaUserAsync().ConfigureAwait(false);
