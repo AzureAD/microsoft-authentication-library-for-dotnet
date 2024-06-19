@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// This method is obsolete. See https://aka.ms/msal-net-telemetry
         /// </summary>
-        [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.", false)]
+        [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.", true)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public ManagedIdentityApplicationBuilder WithTelemetryClient(params ITelemetryClient[] telemetryClients)
         {
