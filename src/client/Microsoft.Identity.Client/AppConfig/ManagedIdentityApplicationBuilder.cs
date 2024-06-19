@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -67,49 +68,14 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets telemetry client for the application.
+        /// This method is obsolete. See https://aka.ms/msal-net-telemetry
         /// </summary>
-        /// <param name="telemetryClients">List of telemetry clients to add telemetry logs.</param>
-        /// <returns>The builder to chain the .With methods</returns>
+        [Obsolete("Telemetry is sent automatically by MSAL.NET. See https://aka.ms/msal-net-telemetry.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public ManagedIdentityApplicationBuilder WithTelemetryClient(params ITelemetryClient[] telemetryClients)
         {
-            ValidateUseOfExperimentalFeature("ITelemetryClient");
-
-            if (telemetryClients == null)
-            {
-                throw new ArgumentNullException(nameof(telemetryClients));
-            }
-
-            if (telemetryClients.Length > 0)
-            {
-                foreach (var telemetryClient in telemetryClients)
-                {
-                    if (telemetryClient == null)
-                    {
-                        throw new ArgumentNullException(nameof(telemetryClient));
-                    }
-
-                    telemetryClient.Initialize();
-                }
-
-                Config.TelemetryClients = telemetryClients;
-            }
-
-            TelemetryClientLogMsalVersion();
-
             return this;
-        }
-
-        private void TelemetryClientLogMsalVersion()
-        {
-            if (Config.TelemetryClients.HasEnabledClients(TelemetryConstants.ConfigurationUpdateEventName))
-            {
-                MsalTelemetryEventDetails telemetryEventDetails = new MsalTelemetryEventDetails(TelemetryConstants.ConfigurationUpdateEventName);
-                telemetryEventDetails.SetProperty(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion());
-
-                Config.TelemetryClients.TrackEvent(telemetryEventDetails);
-            }
-        }
+        }        
 
         internal ManagedIdentityApplicationBuilder WithAppTokenCacheInternalForTest(ITokenCacheInternal tokenCacheInternal)
         {

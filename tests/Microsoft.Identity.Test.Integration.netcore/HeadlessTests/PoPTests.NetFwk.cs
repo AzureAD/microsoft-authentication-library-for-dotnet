@@ -247,7 +247,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task PopTestWithRSAAsync()
         {
-            var telemetryClient = new TestTelemetryClient(TestConstants.ClientId);
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
 
             var confidentialApp = ConfidentialClientApplicationBuilder
@@ -255,7 +254,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithExperimentalFeatures()
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
-                .WithTelemetryClient(telemetryClient)
                 .Build();
 
             //RSA provider
@@ -274,10 +272,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 ProtectedUrl,
                 HttpMethod.Get,
                 result);
-
-            MsalTelemetryEventDetails eventDetails = telemetryClient.TestTelemetryEventDetails;
-            Assert.IsNotNull(eventDetails);
-            Assert.AreEqual(Convert.ToInt64(TokenType.Pop), eventDetails.Properties[TelemetryConstants.TokenType]);
         }
 
         [TestMethod]
