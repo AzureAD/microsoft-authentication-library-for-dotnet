@@ -372,7 +372,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 x.Item1.RequestUri.AbsoluteUri == labResponse.Lab.Authority + "organizations/oauth2/v2.0/token" &&
                 x.Item2.StatusCode == HttpStatusCode.OK);
 
-            var telemetryLastValue = req.Headers.Single(h => h.Key == TelemetryConstants.XClientLastTelemetry).Value;
             var telemetryCurrentValue = req.Headers.Single(h => h.Key == TelemetryConstants.XClientCurrentTelemetry).Value;
             HttpTelemetryRecorder httpTelemetryRecorder = new HttpTelemetryRecorder();
 

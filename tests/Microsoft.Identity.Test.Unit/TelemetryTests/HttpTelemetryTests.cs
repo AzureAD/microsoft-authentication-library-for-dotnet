@@ -641,37 +641,5 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
 
             Assert.AreEqual(TokenType.Bearer.ToString("D"), telemetryCategories[2].Split(',')[2]);
         }    
-
-        private (int SilentCount, string[] FailedApis, string[] CorrelationIds, string[] Errors) ParseLastRequestHeader(HttpRequestMessage requestMessage)
-        {
-            // schema_version | silent_succesful_count | failed_requests | errors | platform_fields
-            // where a failed_request is "api_id, correlation_id"
-            string lastTelemetryHeader = requestMessage.Headers.GetValues(
-               TelemetryConstants.XClientLastTelemetry).Single();
-            var lastRequestParts = lastTelemetryHeader.Split('|');
-
-            Assert.AreEqual(5, lastRequestParts.Length); //  2 | 1 | | |
-            Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion.ToString(), lastRequestParts[0]); // version
-
-            int actualSuccessfullSilentCount = int.Parse(lastRequestParts[1], CultureInfo.InvariantCulture);
-
-            string[] actualFailedApiIds = lastRequestParts[2]
-                .Split(',')
-                .Where((_, index) => index % 2 == 0)
-                .Where(it => !string.IsNullOrEmpty(it))
-                .ToArray();
-            string[] correlationIds = lastRequestParts[2]
-                .Split(',')
-                .Where((_, index) => index % 2 != 0)
-                .Where(it => !string.IsNullOrEmpty(it))
-                .ToArray();
-
-            string[] actualErrors = lastRequestParts[3]
-                .Split(',')
-                .Where(it => !string.IsNullOrEmpty(it))
-                .ToArray();
-
-            return (actualSuccessfullSilentCount, actualFailedApiIds, correlationIds, actualErrors);
-        }
     }
 }
