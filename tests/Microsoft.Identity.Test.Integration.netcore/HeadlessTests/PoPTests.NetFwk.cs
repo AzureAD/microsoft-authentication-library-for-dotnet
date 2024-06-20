@@ -281,7 +281,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(Convert.ToInt64(TokenType.Pop), eventDetails.Properties[TelemetryConstants.TokenType]);
         }
 
-        [TestMethod]
+        [RunOn(TargetFrameworks.NetCore)]
         public async Task ROPC_PopTestWithRSAAsync()
         {
             var telemetryClient = new TestTelemetryClient(TestConstants.ClientId);
@@ -301,7 +301,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
             popConfig.HttpMethod = HttpMethod.Get;
 
-            var result = await confidentialApp.AcquireTokenByUsernamePassword(s_ropcScope, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+            var result = await (confidentialApp as IByUsernameAndPassword).AcquireTokenByUsernamePassword(s_ropcScope, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .WithProofOfPossession(popConfig)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);

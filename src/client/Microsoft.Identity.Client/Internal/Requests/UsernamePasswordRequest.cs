@@ -114,6 +114,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             //WsTrust not supported on ROPC
             if (AuthenticationRequestParameters.AppConfig.IsConfidentialClient)
             {
+                _logger.Info("WSTrust is not supported on confidential clients. Skipping wstrust for ROPC.");
                 return null;
             }
 

@@ -367,7 +367,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
             else
             {
-                authResult = await ((IConfidentialClientApplication)clientApp)
+                authResult = await (((IConfidentialClientApplication)clientApp) as IByUsernameAndPassword)
                 .AcquireTokenByUsernamePassword(s_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
                 .WithCorrelationId(testCorrelationId)
                 .ExecuteAsync(CancellationToken.None)

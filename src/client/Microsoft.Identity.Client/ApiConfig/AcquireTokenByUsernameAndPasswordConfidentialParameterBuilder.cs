@@ -42,12 +42,12 @@ namespace Microsoft.Identity.Client
             string username,
             string password)
         {
-            if (username == null)
+            if (string.IsNullOrEmpty(username))
             {
                 throw new ArgumentNullException(nameof(username));
             }
 
-            if (password == null)
+            if (string.IsNullOrEmpty(password))
             {
                 throw new ArgumentNullException(nameof(password));
             }
