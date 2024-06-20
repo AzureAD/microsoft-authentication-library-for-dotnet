@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Specifies if the client application should ignore access tokens when reading the token cache.
-        /// Refresh token will still be used. Any new tokens from the Identity Provider will still be written to the token cache.
+        /// Refresh tokens will still be used. Any new tokens from the Identity Provider will still be written to the token cache.
         /// By default the token is taken from the the user token cache (forceRefresh=false)
         /// </summary>
         /// <param name="forceRefresh">If <c>true</c>, ignore any access token in the user token cache
