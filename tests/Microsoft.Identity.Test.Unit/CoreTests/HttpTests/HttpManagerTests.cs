@@ -12,7 +12,6 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common;
 using NSubstitute;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using System.Threading;
 using System.Security.Cryptography.X509Certificates;
@@ -60,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                             doNotThrow: false,
                             retry: true,
                             mtlsCertificate: cert,
-                            validateServerCertificateCallback: null,
+                            customHttpClient: null,
                             default)
                                .ConfigureAwait(false);
 
@@ -88,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                              doNotThrow: false,
                              retry: true,
                              mtlsCertificate: null,
-                             validateServerCertificateCallback: null,
+                             customHttpClient: null,
                              default)
                                 .ConfigureAwait(false);
 
@@ -130,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                             doNotThrow: false,
                             retry: true,
                             mtlsCertificate: null,
-                            validateServerCertificateCallback: null,
+                            customHttpClient: null,
                             default)
                                .ConfigureAwait(false);
 
@@ -162,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                      doNotThrow: false,
                      retry: true,
                      mtlsCertificate: null,
-                     validateServerCertificateCallback: null,
+                     customHttpClient: null,
                      default)
                 .ConfigureAwait(false);
 
@@ -200,7 +199,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                          doNotThrow: false,
                          retry: true,
                          mtlsCertificate: null,
-                         validateServerCertificateCallback: null,
+                         customHttpClient: null,
                          cts.Token))
                     .ConfigureAwait(false);
             }
@@ -225,7 +224,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         doNotThrow: false,
                         retry: true,
                         mtlsCertificate: null,
-                        validateServerCertificateCallback: null,
+                        customHttpClient: null,
                         default))
                    .ConfigureAwait(false);
 
@@ -254,7 +253,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                      doNotThrow: false,
                      retry: true,
                      mtlsCertificate: null,
-                     validateServerCertificateCallback: null,
+                     customHttpClient: null,
                      default))
                 .ConfigureAwait(false);
 
@@ -286,7 +285,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                              doNotThrow: false,
                              retry: true,
                              mtlsCertificate: null,
-                             validateServerCertificateCallback: null,
+                             customHttpClient: null,
                              default))
                     .ConfigureAwait(false);
 
@@ -312,7 +311,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                             doNotThrow: true,
                             retry: true,
                             mtlsCertificate: null,
-                            validateServerCertificateCallback: null,
+                            customHttpClient: null,
                             default).ConfigureAwait(false);
 
                 Assert.AreEqual(HttpStatusCode.BadGateway, msalHttpResponse.StatusCode);
@@ -339,7 +338,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         doNotThrow: false,
                         retry: true,
                         mtlsCertificate: null,
-                        validateServerCertificateCallback: null,
+                        customHttpClient: null,
                         default)).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.ServiceNotAvailable, exc.ErrorCode);
@@ -365,7 +364,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                       doNotThrow: false,
                       retry: true,
                       mtlsCertificate: null,
-                      validateServerCertificateCallback: null,
+                      customHttpClient: null,
                       default)).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
@@ -392,7 +391,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         doNotThrow: false,
                         retry: true,
                         mtlsCertificate: null,
-                        validateServerCertificateCallback: null,
+                        customHttpClient: null,
                         default)).ConfigureAwait(false);
                 Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
                 Assert.IsTrue(exc.InnerException is TaskCanceledException);
@@ -423,7 +422,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         doNotThrow: true,
                         retry: true,
                         mtlsCertificate: null,
-                        validateServerCertificateCallback: null,
+                        customHttpClient: null,
                         default).ConfigureAwait(false);
 
                 Assert.IsNotNull(msalHttpResponse);

@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string ServiceFabricMsiApiVersion = "2019-07-01-preview";
         private readonly Uri _endpoint;
         private readonly string _identityHeaderValue;
-        private static HttpClient s_httpClient;
+        internal static Lazy<HttpClient> _httpClient = new Lazy<HttpClient>();
 
         public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
@@ -45,21 +45,14 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader);
         }
 
-        internal override Func<HttpClient> ValidateServerCertificateCallback(RequestContext requestContext)
+        internal override HttpClient CreateCustomHttpClient(RequestContext requestContext)
         {
-            return () =>
-            {
-                if (s_httpClient == null)
-                {
-                    s_httpClient = new HttpClient(ValidateServerCertificate(requestContext.Logger));
-                }
-                return s_httpClient;
-            };
+            return new HttpClient(CreateHandlerWithSslValidation(requestContext.Logger));
         }
 
-        internal HttpClientHandler ValidateServerCertificate(ILoggerAdapter logger)
+        internal HttpClientHandler CreateHandlerWithSslValidation(ILoggerAdapter logger)
         {
-#if !NET462
+#if NET471_OR_GREATER || NETSTANDARD1_3_OR_GREATER || NET
             logger.Info(() => "[Managed Identity] Setting up server certificate validation callback.");
             return new HttpClientHandler
             {

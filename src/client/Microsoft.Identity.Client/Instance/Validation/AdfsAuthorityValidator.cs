@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
                     doNotThrow: false,
                     retry: true,
                     mtlsCertificate: null,
-                    validateServerCertificateCallback: null,
+                    customHttpClient: null,
                     _requestContext.UserCancellationToken)
                         .ConfigureAwait(false);
 

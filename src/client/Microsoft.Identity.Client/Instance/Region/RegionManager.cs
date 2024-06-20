@@ -207,7 +207,7 @@ namespace Microsoft.Identity.Client.Region
                                 doNotThrow: false,
                                 retry: false,
                                 mtlsCertificate: null,
-                                validateServerCertificateCallback: null,
+                                customHttpClient: null,
                                 GetCancellationToken(requestCancellationToken))
                                 .ConfigureAwait(false);
 
@@ -225,7 +225,7 @@ namespace Microsoft.Identity.Client.Region
                                     doNotThrow: false,
                                     retry: false,
                                     mtlsCertificate: null,
-                                    validateServerCertificateCallback: null,
+                                    customHttpClient: null,
                                     GetCancellationToken(requestCancellationToken))
                                         .ConfigureAwait(false); // Call again with updated version
                             }
@@ -328,7 +328,7 @@ namespace Microsoft.Identity.Client.Region
                   doNotThrow: false,
                   retry: false,
                   mtlsCertificate: null,
-                  validateServerCertificateCallback: null,
+                  customHttpClient: null,
                   GetCancellationToken(userCancellationToken))
                      .ConfigureAwait(false);
 

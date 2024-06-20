@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             doNotThrow: true,
                             retry: true,
                             mtlsCertificate: null,
-                            ValidateServerCertificateCallback(_requestContext),
+                            CreateCustomHttpClient(_requestContext),
                             cancellationToken).ConfigureAwait(false);
                 }
                 else
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             doNotThrow: true,
                             retry: true,
                             mtlsCertificate: null,
-                            ValidateServerCertificateCallback(_requestContext),
+                            CreateCustomHttpClient(_requestContext),
                             cancellationToken)
                         .ConfigureAwait(false);
 
@@ -94,7 +94,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
-        internal virtual Func<HttpClient> ValidateServerCertificateCallback(RequestContext requestContext)
+        // This method is internal for testing purposes.
+        internal virtual HttpClient CreateCustomHttpClient(RequestContext requestContext)
         {
             return null;
         }

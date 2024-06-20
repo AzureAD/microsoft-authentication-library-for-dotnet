@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             bool doNotThrow,
             bool retry,
             X509Certificate2 mtlsCertificate,
-            Func<HttpClient> validateServerCertificateCallback,
+            HttpClient customHttpClient,
             CancellationToken cancellationToken)
         {
             return _httpManager.SendRequestAsync(
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 doNotThrow,
                 retry,
                 mtlsCertificate,
-                null,
+                customHttpClient: null,
                 cancellationToken);
         }
     }

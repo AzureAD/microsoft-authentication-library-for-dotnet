@@ -16,6 +16,21 @@ namespace Microsoft.Identity.Client.Http
     {
         long LastRequestDurationInMs { get; }
 
+        /// <summary>
+        /// Method to send a request to the server using the HttpClient configured in the implementation.
+        /// </summary>
+        /// <param name="endpoint">The endpoint to send the request to.</param>
+        /// <param name="headers">Headers to send in the http request.</param>
+        /// <param name="body">Body of the request.</param>
+        /// <param name="method">Http method.</param>
+        /// <param name="logger">Logger from the request context.</param>
+        /// <param name="doNotThrow">Flag to decide if MsalServiceException is thrown or the response is returned in case of 5xx errors.</param>
+        /// <param name="retry">Flag to indicate whether the retries are performed in for specific failures.</param>
+        /// <param name="mtlsCertificate">Certificate used for MTLS authentication.</param>
+        /// <param name="customHttpClient">Custom http client which by passes the HttpClientFactory. 
+        /// This is needed for service fabric managed identity where a cert validation callback is added to the handler.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         Task<HttpResponse> SendRequestAsync(
            Uri endpoint,
            Dictionary<string, string> headers,
@@ -25,7 +40,7 @@ namespace Microsoft.Identity.Client.Http
            bool doNotThrow,
            bool retry,
            X509Certificate2 mtlsCertificate,
-           Func<HttpClient> validateServerCertificateCallback,
+           HttpClient customHttpClient, 
            CancellationToken cancellationToken);
     }
 }

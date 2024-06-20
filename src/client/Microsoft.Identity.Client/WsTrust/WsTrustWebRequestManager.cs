@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.WsTrust
                     doNotThrow: false,
                     retry: true,
                     mtlsCertificate: null,
-                    validateServerCertificateCallback: null,
+                    customHttpClient: null,
                     requestContext.UserCancellationToken)
                 .ConfigureAwait(false);
 
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client.WsTrust
                     doNotThrow: true,
                     retry: true,
                     mtlsCertificate: null,
-                    validateServerCertificateCallback: null,
+                    customHttpClient: null,
                     requestContext.UserCancellationToken).ConfigureAwait(false);
 
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client.WsTrust
                doNotThrow: false,
                retry: true,
                mtlsCertificate: null,
-               validateServerCertificateCallback: null,
+               customHttpClient: null,
                requestContext.UserCancellationToken)
                   .ConfigureAwait(false);
 
