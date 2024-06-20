@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
         /// By default the token is taken from the application token cache (forceRefresh=false)
         /// </summary>
         /// <param name="forceRefresh">
-        /// If <c>true</c>, the request will ignore cached access tokens on read, but will still write them to the cache once obtained from the Identity Provider. The default is <c>false</c>
+        /// If <c>true</c>, the request will ignore cached access tokens on read, but will still write them to the cache once obtained from the identity provider. The default is <c>false</c>
         /// </param>
         /// <remarks>
         /// Do not use this flag except in well understood cases. Identity Providers will throttle clients that make too issue similar token requests.
