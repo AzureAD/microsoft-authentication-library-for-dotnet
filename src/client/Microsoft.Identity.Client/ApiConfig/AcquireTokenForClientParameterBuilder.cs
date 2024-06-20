@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
         /// If <c>true</c>, the request will ignore cached access tokens on read, but will still write them to the cache once obtained from the identity provider. The default is <c>false</c>
         /// </param>
         /// <remarks>
-        /// Do not use this flag except in well understood cases. Identity Providers will throttle clients that make too issue similar token requests.
+        /// Do not use this flag except in well understood cases. Identity providers will throttle clients that make too many similar token requests.
         /// </remarks>
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenForClientParameterBuilder WithForceRefresh(bool forceRefresh)
