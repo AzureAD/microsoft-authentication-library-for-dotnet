@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1717710367969,
+  "lastUpdate": 1718885757498,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5570,6 +5570,42 @@ window.BENCHMARK_DATA = {
             "value": 342075,
             "unit": "ns",
             "range": "± 2031.527414622711"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f9d1554212487a05b797c216c30650a4ad55cd88",
+          "message": "Doc fix for 4808 and 4809 (#4812)\n\n* Fix for 4808 and 4809\r\n\r\n* minor update\r\n\r\n* Update src/client/Microsoft.Identity.Client/ApiConfig/AcquireTokenSilentParameterBuilder.cs\r\n\r\nCo-authored-by: Travis Walker <travis.walker@microsoft.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/ApiConfig/AcquireTokenForClientParameterBuilder.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/ApiConfig/AcquireTokenForClientParameterBuilder.cs\r\n\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>\r\n\r\n---------\r\n\r\nCo-authored-by: Travis Walker <travis.walker@microsoft.com>\r\nCo-authored-by: Peter <34331512+pmaytak@users.noreply.github.com>",
+          "timestamp": "2024-06-20T13:08:13+01:00",
+          "tree_id": "b3bf9d7f8f60ddddcf037cd70537c84552f27ed9",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/f9d1554212487a05b797c216c30650a4ad55cd88"
+        },
+        "date": 1718885754000,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 252895.06666666668,
+            "unit": "ns",
+            "range": "± 3879.4993135467266"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 353568.61904761905,
+            "unit": "ns",
+            "range": "± 8423.794593152128"
           }
         ]
       }
