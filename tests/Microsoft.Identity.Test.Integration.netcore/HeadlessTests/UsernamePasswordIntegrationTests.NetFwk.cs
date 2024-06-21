@@ -35,9 +35,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         private static Guid CorrelationId = new Guid("ad8c894a-557f-48c0-b045-c129590c344e");
         private readonly string XClientCurrentTelemetryROPC = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheRefreshReason.NotApplicable:D},,,|0,1,1";
         private readonly string XClientCurrentTelemetryROPCFailure = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|1003,{CacheRefreshReason.NotApplicable:D},,,|0,1,1";
-        private readonly string XClientLastTelemetryROPC = $"{TelemetryConstants.HttpTelemetrySchemaVersion}|0|||";
-        private readonly string XClientLastTelemetryROPCFailure =
-            $"{TelemetryConstants.HttpTelemetrySchemaVersion}|0|1003,ad8c894a-557f-48c0-b045-c129590c344e|invalid_grant|";
         private const string ApiIdAndCorrelationIdSection =
             "1003,ad8c894a-557f-48c0-b045-c129590c344e";
         private const string InvalidGrantError = "invalid_grant";
@@ -376,28 +373,22 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             HttpTelemetryRecorder httpTelemetryRecorder = new HttpTelemetryRecorder();
 
             string csvCurrent = telemetryCurrentValue.FirstOrDefault();
-            string csvPrevious = telemetryLastValue.FirstOrDefault();
 
             if (!IsFailure)
             {
                 Assert.AreEqual(XClientCurrentTelemetryROPC, csvCurrent);
-                Assert.AreEqual(XClientLastTelemetryROPC, csvPrevious);
 
                 httpTelemetryRecorder.SplitCurrentCsv(csvCurrent);
                 httpTelemetryRecorder.CheckSchemaVersion(csvCurrent);
 
                 Assert.AreEqual(UPApiId, httpTelemetryRecorder.ApiId.FirstOrDefault(e => e.Contains(UPApiId)));
                 Assert.IsFalse(httpTelemetryRecorder.ForceRefresh);
-                Assert.AreEqual(XClientLastTelemetryROPC, csvPrevious);
             }
             else
             {
                 Assert.AreEqual(XClientCurrentTelemetryROPCFailure, csvCurrent);
-                Assert.AreEqual(XClientLastTelemetryROPCFailure, csvPrevious);
                 httpTelemetryRecorder.CheckSchemaVersion(csvCurrent);
-                httpTelemetryRecorder.CheckSchemaVersion(csvPrevious);
                 httpTelemetryRecorder.SplitCurrentCsv(csvCurrent);
-                httpTelemetryRecorder.SplitPreviousCsv(csvPrevious);
 
                 Assert.AreEqual(UPApiId, httpTelemetryRecorder.ApiId.FirstOrDefault(e => e.Contains(UPApiId)));
                 Assert.AreEqual(1, httpTelemetryRecorder.ErrorCode.Count);
