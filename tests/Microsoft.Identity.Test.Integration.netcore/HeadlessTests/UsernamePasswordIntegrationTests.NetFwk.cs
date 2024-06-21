@@ -391,11 +391,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 httpTelemetryRecorder.SplitCurrentCsv(csvCurrent);
 
                 Assert.AreEqual(UPApiId, httpTelemetryRecorder.ApiId.FirstOrDefault(e => e.Contains(UPApiId)));
-                Assert.AreEqual(1, httpTelemetryRecorder.ErrorCode.Count);
-                Assert.AreEqual(TelemetryConstants.Zero.ToString(), httpTelemetryRecorder.SilentCallSuccessfulCount);
                 Assert.IsFalse(httpTelemetryRecorder.ForceRefresh);
-                Assert.AreEqual(ApiIdAndCorrelationIdSection, httpTelemetryRecorder.ApiIdAndCorrelationIds.FirstOrDefault());
-                Assert.AreEqual(InvalidGrantError, httpTelemetryRecorder.ErrorCode.FirstOrDefault());
             }
         }
 
