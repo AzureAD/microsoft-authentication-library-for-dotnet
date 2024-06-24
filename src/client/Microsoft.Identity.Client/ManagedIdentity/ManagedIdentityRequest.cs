@@ -17,11 +17,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         public HttpMethod Method { get; }
 
-        public IDictionary<string, string> Headers { get; }
+        public Dictionary<string, string> Headers { get; }
 
-        public IDictionary<string, string> BodyParameters { get; }
+        public Dictionary<string, string> BodyParameters { get; }
 
-        public IDictionary<string, string> QueryParameters { get; }
+        public Dictionary<string, string> QueryParameters { get; }
 
         public ManagedIdentityRequest(HttpMethod method, Uri endpoint)
         {
