@@ -130,5 +130,25 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 return await handler.GetAuthorizationUriWithoutPkceAsync(cancellationToken).ConfigureAwait(false);
             }
         }
+
+        public async Task<AuthenticationResult> ExecuteAsync(
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
+            CancellationToken cancellationToken)
+        {
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
+
+            var requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
+                commonParameters,
+                requestContext,
+                _confidentialClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
+
+            var handler = new UsernamePasswordRequest(
+                ServiceBundle,
+                requestParams,
+                usernamePasswordParameters);
+
+            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+        }
     }
 }

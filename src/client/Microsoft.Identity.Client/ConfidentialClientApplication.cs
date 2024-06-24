@@ -25,7 +25,8 @@ namespace Microsoft.Identity.Client
             IConfidentialClientApplication,
             IConfidentialClientApplicationWithCertificate,
             IByRefreshToken,
-            ILongRunningWebApi
+            ILongRunningWebApi,
+            IByUsernameAndPassword
     {
         /// <summary>
         /// Instructs MSAL to try to auto discover the Azure region.
@@ -168,6 +169,19 @@ namespace Microsoft.Identity.Client
             return GetAuthorizationRequestUrlParameterBuilder.Create(
                 ClientExecutorFactory.CreateConfidentialClientExecutor(this),
                 scopes);
+        }
+
+        /// <inheritdoc/>
+        AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder IByUsernameAndPassword.AcquireTokenByUsernamePassword(
+            IEnumerable<string> scopes,
+            string username,
+            string password)
+        {
+            return AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder.Create(
+                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                scopes,
+                username,
+                password);
         }
 
         AcquireTokenByRefreshTokenParameterBuilder IByRefreshToken.AcquireTokenByRefreshToken(
