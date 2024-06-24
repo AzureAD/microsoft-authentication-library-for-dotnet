@@ -12,6 +12,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute.Core;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
@@ -78,8 +79,11 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [TestMethod]
-        public async Task AzureArcAuthHeaderInvalidAsync()
+        [DataTestMethod]
+        [DataRow("somefile=filename", MsalErrorMessage.ManagedIdentityInvalidChallenge)]
+        [DataRow("C:\\ProgramData\\AzureConnectedMachineAgent\\Tokens\\filename.txt", MsalErrorMessage.ManagedIdentityInvalidFile)]
+        [DataRow("C:\\ProgramData\\AzureConnectedMachineAgent\\Tokens\\...\\etc\\filename.key", MsalErrorMessage.ManagedIdentityInvalidFile)]
+        public async Task AzureArcAuthHeaderInvalidAsync(string filename, string errorMessage)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))
@@ -94,7 +98,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                httpManager.AddManagedIdentityWSTrustMockHandler(ManagedIdentityTests.AzureArcEndpoint, "somevalue=filepath");
+                httpManager.AddManagedIdentityWSTrustMockHandler(ManagedIdentityTests.AzureArcEndpoint, filename);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity("scope")
@@ -103,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(ManagedIdentitySource.AzureArc.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.AreEqual(MsalErrorMessage.ManagedIdentityInvalidChallenge, ex.Message);
+                Assert.AreEqual(errorMessage, ex.Message);
             }
         }
 
