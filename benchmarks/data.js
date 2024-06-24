@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1718885764483,
+  "lastUpdate": 1719230950325,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5606,6 +5606,42 @@ window.BENCHMARK_DATA = {
             "value": 353568.61904761905,
             "unit": "ns",
             "range": "± 8423.794593152128"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2d75a65d2009f20b06e360539b6b005972661cc7",
+          "message": "Remove last_telemetry header (#4813)\n\n* Remove last_telemetry\r\n\r\n* more fixes\r\n\r\n* fix\r\n\r\n* fix",
+          "timestamp": "2024-06-24T15:02:06+03:00",
+          "tree_id": "bfb936fe17a1257279b4678774d70054c92a3d05",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/2d75a65d2009f20b06e360539b6b005972661cc7"
+        },
+        "date": 1719230947095,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 254479.88235294117,
+            "unit": "ns",
+            "range": "± 5142.77520997118"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 356160.5625,
+            "unit": "ns",
+            "range": "± 11072.394623822127"
           }
         ]
       }
