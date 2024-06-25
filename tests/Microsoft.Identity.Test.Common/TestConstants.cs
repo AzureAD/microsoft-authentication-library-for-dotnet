@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Test.Unit
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
         public const string ClientCredentialAudience = "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca/v2.0";
         public const string PublicCloudConfidentialClientID = "88f91eac-c606-4c67-a0e2-a5e8a186854f";
-        public const string AutomationTestCertName = "LabVaultAccessCert";
+        public const string AutomationTestCertName = "LabAuth.MSIDLab.com";
         public static Dictionary<string, string> AdditionalAssertionClaims =>
             new Dictionary<string, string>() { { "Key1", "Val1" }, { "Key2", "Val2" } };
 

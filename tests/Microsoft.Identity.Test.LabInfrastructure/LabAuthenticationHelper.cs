@@ -55,11 +55,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 .Create(clientIdForCertAuth)
                 .WithAuthority(new Uri(authority), true)
                 .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
-                .WithCertificate(cert)
+                .WithCertificate(cert, true)
                 .Build();
 
             authResult = await confidentialApp
                 .AcquireTokenForClient(scopes)
+                .WithSendX5C(true)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
