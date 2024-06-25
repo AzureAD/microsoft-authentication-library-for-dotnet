@@ -94,7 +94,7 @@ namespace MSIHelperService.Helper
         {
             logger.LogInformation("GetFunctionAppEnvironmentVariables Function called.");
 
-            string[] scopes = new string[] { "https://msidlab.com/.default" };
+            string[] scopes = new string[] { "https://request.msidlab.com/.default" };
 
             string? token = await GetMSALToken(s_requestAppID, null, GetWebAppCertificate(logger), scopes, logger)
                 .ConfigureAwait(false);
@@ -218,7 +218,7 @@ namespace MSIHelperService.Helper
             logger.LogInformation("GetFunctionAppMSIToken Function called.");
 
             //Scopes
-            string[] scopes = new string[] { "https://msidlab.com/.default" };
+            string[] scopes = new string[] { "https://request.msidlab.com/.default" };
 
             string? token = await GetMSALToken(s_requestAppID, null, GetWebAppCertificate(logger), scopes, logger)
                 .ConfigureAwait(false);
