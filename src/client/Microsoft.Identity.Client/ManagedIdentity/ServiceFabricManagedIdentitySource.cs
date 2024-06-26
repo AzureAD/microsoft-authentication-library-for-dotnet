@@ -34,9 +34,9 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 var exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
                     MsalError.InvalidManagedIdentityEndpoint,
                     errorMessage,
-                    null, 
+                    null,
                     ManagedIdentitySource.ServiceFabric,
-                    null); 
+                    null);
 
                 throw exception;
             }
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader);
         }
 
-        private ServiceFabricManagedIdentitySource(RequestContext requestContext, Uri endpoint, string identityHeaderValue) : 
+        private ServiceFabricManagedIdentitySource(RequestContext requestContext, Uri endpoint, string identityHeaderValue) :
             base(requestContext, ManagedIdentitySource.ServiceFabric)
         {
             _endpoint = endpoint;

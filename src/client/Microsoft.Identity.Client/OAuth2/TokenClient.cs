@@ -37,7 +37,8 @@ namespace Microsoft.Identity.Client.OAuth2
 
             _oAuth2Client = new OAuth2Client(
                _serviceBundle.ApplicationLogger,
-               _serviceBundle.HttpManager);
+               _serviceBundle.HttpManager,
+               requestParams.MtlsCertificate);
         }
 
         public async Task<MsalTokenResponse> SendTokenRequestAsync(
@@ -135,6 +136,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 var tokenEndpoint = await _requestParams.Authority.GetTokenEndpointAsync(_requestParams.RequestContext).ConfigureAwait(false);
 
                 bool useSha2 = _requestParams.AuthorityManager.Authority.AuthorityInfo.IsSha2CredentialSupported;
+
                 await _serviceBundle.Config.ClientCredential.AddConfidentialClientParametersAsync(
                     _oAuth2Client,
                     _requestParams.RequestContext.Logger,
@@ -156,12 +158,12 @@ namespace Microsoft.Identity.Client.OAuth2
             // It should not be included for authorize request.
             AddClaims();
 
-            foreach (var kvp in additionalBodyParameters)
+            foreach (KeyValuePair<string, string> kvp in additionalBodyParameters)
             {
                 _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
             }
 
-            foreach (var kvp in _requestParams.AuthenticationScheme.GetTokenRequestParams())
+            foreach (KeyValuePair<string, string> kvp in _requestParams.AuthenticationScheme.GetTokenRequestParams())
             {
                 _oAuth2Client.AddBodyParameter(kvp.Key, kvp.Value);
             }
@@ -268,7 +270,8 @@ namespace Microsoft.Identity.Client.OAuth2
                         return await _oAuth2Client.GetTokenAsync(
                             tokenEndpointWithQueryParams,
                             _requestParams.RequestContext,
-                            false, _requestParams.OnBeforeTokenRequestHandler).ConfigureAwait(false);
+                            false, _requestParams.OnBeforeTokenRequestHandler)
+                            .ConfigureAwait(false);
                     }
                 }
 

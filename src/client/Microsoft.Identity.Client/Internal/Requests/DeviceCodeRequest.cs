@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             await ResolveAuthorityAsync().ConfigureAwait(false);
 
-            var client = new OAuth2Client(ServiceBundle.ApplicationLogger, ServiceBundle.HttpManager);
+            var client = new OAuth2Client(ServiceBundle.ApplicationLogger, ServiceBundle.HttpManager, null);
 
             var deviceCodeScopes = new HashSet<string>();
             deviceCodeScopes.UnionWith(AuthenticationRequestParameters.Scope);
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var response = await client.ExecuteRequestAsync<DeviceCodeResponse>(
                                builder.Uri,
                                HttpMethod.Post,
-                               AuthenticationRequestParameters.RequestContext, 
+                               AuthenticationRequestParameters.RequestContext,
                                // Normally AAD responds with an error HTTP code, but /devicecode endpoint sends errors on 200OK
                                expectErrorsOn200OK: true).ConfigureAwait(false);
 

@@ -105,8 +105,8 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsNotNull(result);
                 Assert.AreEqual(0, _harness.HttpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
-                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.ProactivelyRefreshed);
-                Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn == refreshOn);
+                Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, result.AuthenticationResultMetadata.CacheRefreshReason);
+                Assert.AreEqual(refreshOn, result.AuthenticationResultMetadata.RefreshOn);
 
                 Trace.WriteLine("5. ATS - should not perform an RT refresh, as the token is still valid");
                 result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 Trace.WriteLine(result.AuthenticationResultMetadata.DurationTotalInMs);
 
-                Assert.IsTrue(result.AuthenticationResultMetadata.CacheRefreshReason == CacheRefreshReason.NotApplicable);
+                Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
 
                 s_meterProvider.ForceFlush();
                 VerifyMetrics(4, _exportedMetrics, 4, 0);

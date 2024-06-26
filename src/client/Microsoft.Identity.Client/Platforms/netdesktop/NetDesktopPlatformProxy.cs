@@ -19,6 +19,9 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Win32;
+#if NET472_OR_GREATER
+using Microsoft.Identity.Client.Platforms.Features.SLC;
+#endif
 
 namespace Microsoft.Identity.Client.Platforms.netdesktop
 {
@@ -248,5 +251,14 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop
         }
 
         public override bool BrokerSupportsWamAccounts => true;
+
+        public override IKeyMaterialManager GetKeyMaterialManager()
+        {
+#if NET472_OR_GREATER
+            return new ManagedIdentityCertificateProvider(Logger);
+#else
+            return NullKeyMaterialManager.Instance;
+#endif
+        }
     }
 }

@@ -21,7 +21,6 @@ namespace Microsoft.Identity.Client.Utils
             return string.Join(" ", split);
         }
 
-
         public static bool ScopeContains(ISet<string> outerSet, IEnumerable<string> possibleContainedSet)
         {
             foreach (string key in possibleContainedSet)

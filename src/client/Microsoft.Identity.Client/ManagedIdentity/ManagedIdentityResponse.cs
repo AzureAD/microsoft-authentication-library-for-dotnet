@@ -55,5 +55,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         [JsonProperty("client_id")]
         public string ClientId { get; set; }
 
+        // Method to check if the necessary properties are valid
+        public bool IsValid()
+        {
+            return !string.IsNullOrEmpty(AccessToken) && !string.IsNullOrEmpty(ExpiresOn);
+        }
     }
 }

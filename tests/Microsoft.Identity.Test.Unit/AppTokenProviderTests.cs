@@ -175,7 +175,6 @@ namespace Microsoft.Identity.Test.Unit
         {
             using (var harness = CreateTestHarness())
             {
-
                 int numOfTasks = 10;
                 int identityProviderHits = 0;
                 int cacheHits = 0;
@@ -213,7 +212,6 @@ namespace Microsoft.Identity.Test.Unit
                     });
                 }
 
-
                 await Task.WhenAll(tasks).ConfigureAwait(false);
 
                 Debug.WriteLine($"Total Identity Hits: {identityProviderHits}");
@@ -221,7 +219,6 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.IsTrue(cacheHits == 9);
 
                 harness.HttpManager.ClearQueue();
-
             }
         }
 

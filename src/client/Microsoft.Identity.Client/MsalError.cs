@@ -866,6 +866,16 @@ namespace Microsoft.Identity.Client
         public const string DeviceCertificateNotFound = "device_certificate_not_found";
 
         /// <summary>
+        /// Managed Identity certificate creation failed.
+        /// </summary>
+        public const string CertificateCreationFailed = "certificate_creation_failed";
+
+        /// <summary>
+        /// Managed Identity certificate credential request failed.
+        /// </summary>
+        public const string CredentialRequestFailed = "credential_request_failed";
+
+        /// <summary>
         /// <para>What happens?</para>The ADAL cache is invalid as it contains multiple refresh token entries for one user.
         /// <para>Mitigation</para>Delete the ADAL cache. If you do not maintain an ADAL cache, this may be a bug in MSAL.
         /// </summary>
@@ -905,6 +915,13 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para>Provide a nonce when Proof-of-Possession is configured for public clients.
         /// </summary>
         public const string NonceRequiredForPopOnPCA = "nonce_required_for_pop_on_pca";
+
+        /// <summary>
+        /// <para>What happens?</para>The request has client capabilities configured but the platform does not support claims.
+        /// <para>Mitigation</para>Remove the Client Capabilities API from the request.
+        /// </summary>
+        public const string ClaimsNotSupportedOnMiResource = "managed_identity_claims_not_supported_platform";
+
 #if iOS
         /// <summary>
         /// Xamarin.iOS specific. This error indicates that keychain access has not been enabled for the application.
@@ -1109,6 +1126,11 @@ namespace Microsoft.Identity.Client
         /// Managed Identity endpoint is not reachable.
         /// </summary>
         public const string ManagedIdentityUnreachableNetwork = "managed_identity_unreachable_network";
+
+        /// <summary>
+        /// Credential endpoint is not reachable.
+        /// </summary>
+        public const string CredentialUnreachableNetwork = "credential_endpoint_unreachable_network";
 
         /// <summary>
         /// Unknown error response received.

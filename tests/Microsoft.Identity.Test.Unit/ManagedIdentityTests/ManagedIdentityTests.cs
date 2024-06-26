@@ -17,7 +17,6 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenTelemetry.Resources;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
@@ -33,9 +32,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         internal const string AzureArcEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
         internal const string CloudShellEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
         internal const string ServiceFabricEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
-        internal const string ExpectedErrorMessage = "Expected error message.";
-        internal const string ExpectedErrorCode = "ErrorCode";
-        internal const string ExpectedCorrelationId = "Some GUID";
 
         [DataTestMethod]
         [DataRow("http://127.0.0.1:41564/msi/token/", ManagedIdentitySource.AppService, ManagedIdentitySource.AppService)]
@@ -47,7 +43,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, ManagedIdentitySource.ServiceFabric)]
         public void GetManagedIdentityTests(
             string endpoint,
-            ManagedIdentitySource managedIdentitySource, 
+            ManagedIdentitySource managedIdentitySource,
             ManagedIdentitySource expectedManagedIdentitySource)
         {
             using (new EnvVariableContext())
@@ -87,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 miBuilder.Config.AccessorOptions = null;
 
                 var mi = miBuilder.Build();
-                
+
                 httpManager.AddManagedIdentityMockHandler(
                 endpoint,
                 Resource,
@@ -117,7 +113,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
         [DataRow(ImdsEndpoint, ManagedIdentitySource.Imds, TestConstants.MiResourceId, UserAssignedIdentityId.ObjectId)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.ClientId, UserAssignedIdentityId.ClientId)]
-        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId .ResourceId)]
+        [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId.ResourceId)]
         [DataRow(ServiceFabricEndpoint, ManagedIdentitySource.ServiceFabric, TestConstants.MiResourceId, UserAssignedIdentityId.ObjectId)]
         public async Task ManagedIdentityUserAssignedHappyPathAsync(
             string endpoint,
@@ -131,7 +127,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 ManagedIdentityApplicationBuilder miBuilder = CreateMIABuilder(userAssignedId, userAssignedIdentityId);
-                
+
                 miBuilder.WithHttpManager(httpManager);
 
                 IManagedIdentityApplication mi = miBuilder.Build();
@@ -310,9 +306,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
-                httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiErrorResponse(managedIdentitySource),
+                httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiErrorResponse(),
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
-                httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiErrorResponse(managedIdentitySource),
+                httpManager.AddManagedIdentityMockHandler(endpoint, resource, MockHelpers.GetMsiErrorResponse(),
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
@@ -322,53 +318,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(managedIdentitySource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
                 Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.IsFalse(ex.Message.Contains(MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse));
-            }
-        }
-
-        [DataTestMethod]
-        [DataRow("{\"statusCode\":500,\"message\":\"Error message\",\"correlationId\":\"GUID\"}", new string[] { "Error message", "GUID" })]
-        [DataRow("{\"message\":\"Error message\",\"correlationId\":\"GUID\"}", new string[] { "Error message", "GUID" })]
-        [DataRow("{\"error\":\"errorCode\",\"error_description\":\"Error message\"}", new string[] { "errorCode", "Error message" })]
-        [DataRow("{\"error_description\":\"Error message\"}", new string[] { "Error message" })]
-        [DataRow("{\"message\":\"Error message\"}", new string[] { "Error message" })]
-        [DataRow("{\"error\":{\"code\":\"errorCode\"}}", new string[] { "errorCode" })]
-        [DataRow("{\"error\":{\"message\":\"Error message\"}}", new string[] { "Error message" })]
-        [DataRow("{\"error\":{\"code\":\"errorCode\",\"message\":\"Error message\"}}", new string[] { "errorCode", "Error message" })]
-        [DataRow("{\"error\":{\"code\":\"errorCode\",\"message\":\"Error message\",\"innererror\":{\"trace\":\"trace\"}}}", new string[] { "errorCode", "Error message" })]
-        [DataRow("{\"notExpectedJson\":\"someValue\"}", new string[] { MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse })]
-        [DataRow("notExpectedJson", new string[] { MsalErrorMessage.ManagedIdentityUnexpectedErrorResponse })]
-        public async Task ManagedIdentityTestErrorResponseParsing(string errorResponse, string[] expectedInErrorResponse)
-        {
-            using (new EnvVariableContext())
-            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
-            {
-                SetEnvironmentVariables(ManagedIdentitySource.AppService, AppServiceEndpoint);
-
-                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithHttpManager(httpManager);
-
-                // Disabling shared cache options to avoid cross test pollution.
-                miBuilder.Config.AccessorOptions = null;
-                var mi = miBuilder.Build();
-
-                httpManager.AddManagedIdentityMockHandler(AppServiceEndpoint, Resource, errorResponse,
-                    ManagedIdentitySource.AppService, statusCode: HttpStatusCode.InternalServerError);
-                httpManager.AddManagedIdentityMockHandler(AppServiceEndpoint, Resource, errorResponse,
-                    ManagedIdentitySource.AppService, statusCode: HttpStatusCode.InternalServerError);
-
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity(Resource)
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
-
-                Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySource.AppService.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
-                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-
-                foreach (var expectedErrorSubString in expectedInErrorResponse)
-                {
-                    Assert.IsTrue(ex.Message.Contains(expectedErrorSubString));
-                }
             }
         }
 
@@ -497,7 +446,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.IsNotNull(ex);
                 Assert.AreEqual(managedIdentitySource.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
-                Assert.AreEqual(MsalError.ManagedIdentityUnreachableNetwork, ex.ErrorCode);
+                Assert.AreEqual(MsalError.CredentialUnreachableNetwork, ex.ErrorCode);
                 Assert.AreEqual("A socket operation was attempted to an unreachable network.", ex.Message);
             }
         }
@@ -539,7 +488,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     Resource,
                     "",
                     managedIdentitySource,
-                    statusCode: statusCode); 
+                    statusCode: statusCode);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
@@ -552,7 +501,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
             }
         }
 
-        [TestMethod] 
+        [TestMethod]
         public async Task SystemAssignedManagedIdentityApiIdTestAsync()
         {
             using (new EnvVariableContext())
@@ -778,7 +727,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 Assert.AreEqual(0, httpManager.QueueSize,
                     "MSAL should have refreshed the token because the original AT was marked for refresh");
-                
+
                 cacheAccess.WaitTo_AssertAcessCounts(1, 1);
 
                 Assert.AreEqual(CacheRefreshReason.ProactivelyRefreshed, result.AuthenticationResultMetadata.CacheRefreshReason);
@@ -788,7 +737,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 result = await mi.AcquireTokenForManagedIdentity(Resource)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
-                
+
                 Assert.AreEqual(CacheRefreshReason.NotApplicable, result.AuthenticationResultMetadata.CacheRefreshReason);
             }
         }
@@ -851,7 +800,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         [TestMethod]
         public async Task ParallelRequests_CallTokenEndpointOnceAsync()
         {
-            int numOfTasks = 10; 
+            int numOfTasks = 10;
             int identityProviderHits = 0;
             int cacheHits = 0;
 

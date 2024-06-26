@@ -26,8 +26,8 @@ namespace Microsoft.Identity.Client.Internal
         IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
         IDeviceAuthManager DeviceAuthManager { get; }
         IThrottlingProvider ThrottlingManager { get; }
-
         IHttpTelemetryManager HttpTelemetryManager { get; }
+        IKeyMaterialManager KeyMaterialManager { get; }
 
         #region Testing
         void SetPlatformProxyForTest(IPlatformProxy platformProxy);

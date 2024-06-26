@@ -228,29 +228,29 @@ namespace Microsoft.Identity.Client
         internal virtual void PopulateObjectFromJson(JObject jObject)
         {
             // Populate this exception instance with broker exception data from JSON
-            var exceptionData = JsonHelper.ExtractInnerJsonAsDictionary(jObject, ExceptionSerializationKey.AdditionalExceptionData);
+            IDictionary<string, string> exceptionData = JsonHelper.ExtractInnerJsonAsDictionary(jObject, ExceptionSerializationKey.AdditionalExceptionData);
 
-            if (exceptionData.TryGetValue(ExceptionSerializationKey.BrokerErrorContext, out string brokerErrorContext))
+            if(exceptionData.TryGetValue(ExceptionSerializationKey.BrokerErrorContext, out string brokerErrorContext))
             {
                 exceptionData[BrokerErrorContext] = brokerErrorContext;
                 exceptionData.Remove(ExceptionSerializationKey.BrokerErrorContext);
             }
-            if (exceptionData.TryGetValue(ExceptionSerializationKey.BrokerErrorTag, out string brokerErrorTag))
+            if(exceptionData.TryGetValue(ExceptionSerializationKey.BrokerErrorTag, out string brokerErrorTag))
             {
                 exceptionData[BrokerErrorTag] = brokerErrorTag;
                 exceptionData.Remove(ExceptionSerializationKey.BrokerErrorTag);
             }
-            if (exceptionData.TryGetValue(ExceptionSerializationKey.BrokerErrorStatus, out string brokerErrorStatus))
+            if(exceptionData.TryGetValue(ExceptionSerializationKey.BrokerErrorStatus, out string brokerErrorStatus))
             {
                 exceptionData[BrokerErrorStatus] = brokerErrorStatus;
                 exceptionData.Remove(ExceptionSerializationKey.BrokerErrorStatus);
             }
-            if (exceptionData.TryGetValue(ExceptionSerializationKey.BrokerErrorCode, out string brokerErrorCode))
+            if(exceptionData.TryGetValue(ExceptionSerializationKey.BrokerErrorCode, out string brokerErrorCode))
             {
                 exceptionData[BrokerErrorCode] = brokerErrorCode;
                 exceptionData.Remove(ExceptionSerializationKey.BrokerErrorCode);
             }
-            if (exceptionData.TryGetValue(ExceptionSerializationKey.BrokerTelemetry, out string brokerTelemetry))
+            if(exceptionData.TryGetValue(ExceptionSerializationKey.BrokerTelemetry, out string brokerTelemetry))
             {
                 exceptionData[BrokerTelemetry] = brokerTelemetry;
                 exceptionData.Remove(ExceptionSerializationKey.BrokerTelemetry);
