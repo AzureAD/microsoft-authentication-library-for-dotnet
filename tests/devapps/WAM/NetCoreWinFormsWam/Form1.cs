@@ -15,7 +15,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Broker;
+using Microsoft.Identity.Client.Desktop;
 using Microsoft.Identity.Client.ApiConfig;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace NetDesktopWinForms
 {
@@ -105,7 +107,7 @@ namespace NetDesktopWinForms
             var builder = PublicClientApplicationBuilder
                 .Create(clientId)
                 .WithRedirectUri("http://localhost")
-                .WithClientCapabilities(new[] { "cp1"})
+                .WithClientCapabilities(new[] { "cp1" })
                 .WithMultiCloudSupport(cbxMultiCloud2.Checked)
                 .WithAuthority(authority);
 
@@ -116,7 +118,7 @@ namespace NetDesktopWinForms
             {
                 case AuthMethod.WAM:
                 case AuthMethod.WAMRuntime:
-                    builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
+                    builder = builder.WithWindowsDesktopFeatures(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
                     {
                         ListOperatingSystemAccounts = cbxListOsAccounts.Checked,
                         MsaPassthrough = cbxMsaPt.Checked,
@@ -124,11 +126,10 @@ namespace NetDesktopWinForms
                     });
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None))
-                                     .WithSsoPolicy();
+                    builder.WithWindowsEmbeddedBrowserSupport();
                     break;
                 case AuthMethod.EmbeddedBrowser:
-                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
+                    builder.WithWindowsEmbeddedBrowserSupport();
                     break;
                 default:
                     throw new NotImplementedException();
@@ -767,6 +768,32 @@ namespace NetDesktopWinForms
                 Log($"Time Taken : \t {elapsedMilliseconds} ms. \t\t {brokerTimer.ElapsedMilliseconds} ms");
                 Log($"Source : \t\t {result1.AuthenticationResultMetadata.TokenSource} \t\t {result2.AuthenticationResultMetadata.TokenSource}");
                 Log("------------------------------------------------------------------------------");
+            }
+            catch (Exception ex)
+            {
+                Log("Exception: " + ex);
+            }
+        }
+
+        private async void btn_ATSDeviceCodeFlow_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var cancellationTokenSource = new CancellationTokenSource();
+
+                var pca = CreatePca(GetAuthMethod());
+                AuthenticationResult authenticationResult = await pca
+                .AcquireTokenWithDeviceCode(
+                        GetScopes(),
+                        dcr =>
+                        {
+                            BeginInvoke(new MethodInvoker(() => resultTbx.Text = dcr.Message));
+                            return Task.FromResult(0);
+                        })
+                    .ExecuteAsync(cancellationTokenSource.Token)
+                    .ConfigureAwait(true);
+
+                await LogResultAndRefreshAccountsAsync(authenticationResult).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
