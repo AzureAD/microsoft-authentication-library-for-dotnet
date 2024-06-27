@@ -129,6 +129,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                      doNotThrow: false,
                      retry: true,
                      mtlsCertificate: null,
+                     customHttpClient: null,
                      cancellationToken)
                         .ConfigureAwait(false);
 
