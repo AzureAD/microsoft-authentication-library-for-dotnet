@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             doNotThrow: true,
                             retry: true,
                             mtlsCertificate: null,
-                            CreateCustomHttpClient(_requestContext),
+                            GetHttpClientWithSslValidation(_requestContext),
                             cancellationToken).ConfigureAwait(false);
                 }
                 else
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             doNotThrow: true,
                             retry: true,
                             mtlsCertificate: null,
-                            CreateCustomHttpClient(_requestContext),
+                            GetHttpClientWithSslValidation(_requestContext),
                             cancellationToken)
                         .ConfigureAwait(false);
 
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         // This method is internal for testing purposes.
-        internal virtual HttpClient CreateCustomHttpClient(RequestContext requestContext)
+        internal virtual HttpClient GetHttpClientWithSslValidation(RequestContext requestContext)
         {
             return null;
         }

@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         private const string ServiceFabricMsiApiVersion = "2019-07-01-preview";
         private readonly Uri _endpoint;
         private readonly string _identityHeaderValue;
-        internal static Lazy<HttpClient> _httpClient;
+        internal static Lazy<HttpClient> _httpClientLazy;
 
         public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
@@ -45,18 +45,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             return new ServiceFabricManagedIdentitySource(requestContext, endpointUri, EnvironmentVariables.IdentityHeader);
         }
 
-        internal override HttpClient CreateCustomHttpClient(RequestContext requestContext)
+        internal override HttpClient GetHttpClientWithSslValidation(RequestContext requestContext)
         {
-            if (_httpClient == null)
+            if (_httpClientLazy == null)
             {
-                _httpClient = new Lazy<HttpClient>(() =>
+                _httpClientLazy = new Lazy<HttpClient>(() =>
                 {
                     HttpClientHandler handler = CreateHandlerWithSslValidation(requestContext.Logger);
                     return new HttpClient(handler);
                 });
             }
 
-            return _httpClient.Value;
+            return _httpClientLazy.Value;
         }
 
         internal HttpClientHandler CreateHandlerWithSslValidation(ILoggerAdapter logger)
