@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         internal HttpClientHandler CreateHandlerWithSslValidation(ILoggerAdapter logger)
         {
-#if NET471_OR_GREATER || NETSTANDARD1_3_OR_GREATER || NET
+#if NET471_OR_GREATER || NETSTANDARD || NET
             logger.Info(() => "[Managed Identity] Setting up server certificate validation callback.");
             return new HttpClientHandler
             {
