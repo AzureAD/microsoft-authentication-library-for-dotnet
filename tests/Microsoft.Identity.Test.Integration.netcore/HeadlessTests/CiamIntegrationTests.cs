@@ -34,7 +34,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Get lab details
             var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
             {
-                FederationProvider = FederationProvider.CIAM,
+                FederationProvider = FederationProvider.CIAMCUD,
+                SignInAudience = SignInAudience.AzureAdMyOrg
             }).ConfigureAwait(false);
 
             //https://tenantName.ciamlogin.com/
@@ -88,7 +89,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Get lab details
             var labResponse = await LabUserHelper.GetLabUserDataAsync(new UserQuery()
             {
-                FederationProvider = FederationProvider.CIAM,
+                FederationProvider = FederationProvider.CIAMCUD,
+                SignInAudience = SignInAudience.AzureAdMyOrg
             }).ConfigureAwait(false);
 
 
@@ -115,17 +117,16 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             //Acquire tokens
             var msalConfidentialClientBuilder = ConfidentialClientApplicationBuilder
                 .Create(appId)
+                .WithCertificate(CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName))
                 .WithExperimentalFeatures();
 
             if (authority.Contains(Constants.CiamAuthorityHostSuffix))
             {
-                msalConfidentialClientBuilder.WithClientSecret(GetCiamSecret())
-                                             .WithAuthority(authority, false);
+                msalConfidentialClientBuilder.WithAuthority(authority, false);
             }
             else
             {
-                msalConfidentialClientBuilder.WithCertificate(CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName))
-                                             .WithOidcAuthority(authority);
+                msalConfidentialClientBuilder.WithOidcAuthority(authority);
             }
 
 
