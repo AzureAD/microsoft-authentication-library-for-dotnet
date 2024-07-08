@@ -46,9 +46,9 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
             HttpMethod method,
             ILoggerAdapter logger,
             bool doNotThrow,
-            bool retry,
             X509Certificate2 mtlsCertificate,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken, 
+            int retryCount = 0)
         {
             //Get token for the MSIHelperService
             var labApi = new LabServiceApi();

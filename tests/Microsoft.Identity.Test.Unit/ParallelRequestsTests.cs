@@ -270,9 +270,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             HttpMethod method,
             ILoggerAdapter logger,
             bool doNotThrow,
-            bool retry,
             X509Certificate2 mtlsCertificate,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken, 
+            int retryCount = 0)
         {
             // simulate delay and also add complexity due to thread context switch
             await Task.Delay(ParallelRequestsTests.NetworkAccessPenaltyMs).ConfigureAwait(false);

@@ -127,7 +127,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                      System.Net.Http.HttpMethod.Get,
                      logger: _requestContext.Logger,
                      doNotThrow: false,
-                     retry: true,
                      mtlsCertificate: null,
                      cancellationToken)
                         .ConfigureAwait(false);

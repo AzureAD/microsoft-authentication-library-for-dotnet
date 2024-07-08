@@ -22,8 +22,8 @@ namespace Microsoft.Identity.Client.Http
            HttpMethod method,
            ILoggerAdapter logger,
            bool doNotThrow,
-           bool retry,
            X509Certificate2 mtlsCertificate,
-           CancellationToken cancellationToken);
+           CancellationToken cancellationToken,
+           int retryCount = 0);
     }
 }

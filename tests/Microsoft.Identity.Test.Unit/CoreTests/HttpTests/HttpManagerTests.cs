@@ -58,7 +58,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                             HttpMethod.Post,
                             logger: Substitute.For<ILoggerAdapter>(),
                             doNotThrow: false,
-                            retry: true,
                             mtlsCertificate: cert,
                             default)
                                .ConfigureAwait(false);
@@ -85,7 +84,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                              HttpMethod.Post,
                              logger: Substitute.For<ILoggerAdapter>(),
                              doNotThrow: false,
-                             retry: true,
                              mtlsCertificate: null,
                              default)
                                 .ConfigureAwait(false);
@@ -126,7 +124,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                             HttpMethod.Post,
                             logger: Substitute.For<ILoggerAdapter>(),
                             doNotThrow: false,
-                            retry: true,
                             mtlsCertificate: null,
                             default)
                                .ConfigureAwait(false);
@@ -157,7 +154,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                      HttpMethod.Get,
                      logger: Substitute.For<ILoggerAdapter>(),
                      doNotThrow: false,
-                     retry: true,
                      mtlsCertificate: null,
                      default)
                 .ConfigureAwait(false);
@@ -194,7 +190,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                          HttpMethod.Get,
                          logger: Substitute.For<ILoggerAdapter>(),
                          doNotThrow: false,
-                         retry: true,
                          mtlsCertificate: null,
                          cts.Token))
                     .ConfigureAwait(false);
@@ -204,7 +199,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         [TestMethod]
         public async Task TestSendGetWithRetryFalseHttp500TypeFailureAsync()
         {
-            using (var httpManager = new MockHttpManager(retryOnce: false))
+            using (var httpManager = new MockHttpManager(retry: false))
             {
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Get, HttpStatusCode.GatewayTimeout);
 
@@ -218,7 +213,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         HttpMethod.Get,
                         logger: Substitute.For<ILoggerAdapter>(),
                         doNotThrow: false,
-                        retry: true,
                         mtlsCertificate: null,
                         default))
                    .ConfigureAwait(false);
@@ -246,7 +240,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                      HttpMethod.Get,
                      logger: Substitute.For<ILoggerAdapter>(),
                      doNotThrow: false,
-                     retry: true,
                      mtlsCertificate: null,
                      default))
                 .ConfigureAwait(false);
@@ -277,7 +270,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                              HttpMethod.Get,
                              logger: Substitute.For<ILoggerAdapter>(),
                              doNotThrow: false,
-                             retry: true,
                              mtlsCertificate: null,
                              default))
                     .ConfigureAwait(false);
@@ -302,7 +294,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                             HttpMethod.Post,
                             logger: Substitute.For<ILoggerAdapter>(),
                             doNotThrow: true,
-                            retry: true,
                             mtlsCertificate: null,
                             default).ConfigureAwait(false);
 
@@ -328,7 +319,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         HttpMethod.Post,
                         logger: Substitute.For<ILoggerAdapter>(),
                         doNotThrow: false,
-                        retry: true,
                         mtlsCertificate: null,
                         default)).ConfigureAwait(false);
 
@@ -353,7 +343,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                       HttpMethod.Get,
                       logger: Substitute.For<ILoggerAdapter>(),
                       doNotThrow: false,
-                      retry: true,
                       mtlsCertificate: null,
                       default)).ConfigureAwait(false);
 
@@ -379,7 +368,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         HttpMethod.Post,
                         logger: Substitute.For<ILoggerAdapter>(),
                         doNotThrow: false,
-                        retry: true,
                         mtlsCertificate: null,
                         default)).ConfigureAwait(false);
                 Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
@@ -409,7 +397,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                         HttpMethod.Post,
                         logger: Substitute.For<ILoggerAdapter>(),
                         doNotThrow: true,
-                        retry: true,
                         mtlsCertificate: null,
                         default).ConfigureAwait(false);
 

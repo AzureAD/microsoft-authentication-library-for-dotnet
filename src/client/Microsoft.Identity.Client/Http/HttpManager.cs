@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.Http
     internal class HttpManager : IHttpManager
     {
         protected readonly IMsalHttpClientFactory _httpClientFactory;
-        private readonly Func<HttpResponse, bool> _retryCondition;
+        private readonly IRetryPolicy _retryPolicy;
         public long LastRequestDurationInMs { get; private set; }
 
         /// <summary>
@@ -36,11 +36,11 @@ namespace Microsoft.Identity.Client.Http
         /// </summary>
         public HttpManager(
             IMsalHttpClientFactory httpClientFactory,
-            Func<HttpResponse, bool> retryCondition)
+            IRetryPolicy retryPolicy)
         {
             _httpClientFactory = httpClientFactory ??
                 throw new ArgumentNullException(nameof(httpClientFactory));
-            _retryCondition = retryCondition;
+            _retryPolicy = retryPolicy;
         }
 
         public async Task<HttpResponse> SendRequestAsync(
@@ -50,13 +50,12 @@ namespace Microsoft.Identity.Client.Http
             HttpMethod method,
             ILoggerAdapter logger,
             bool doNotThrow,
-            bool retry,
             X509Certificate2 bindingCertificate,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken, 
+            int retryCount = 0)
         {
             Exception timeoutException = null;
             HttpResponse response = null;
-            bool isRetriable = false;
 
             try
             {
@@ -88,8 +87,6 @@ namespace Microsoft.Identity.Client.Http
                 logger.Info(() => string.Format(CultureInfo.InvariantCulture,
                     MsalErrorMessage.HttpRequestUnsuccessful,
                     (int)response.StatusCode, response.StatusCode));
-
-                isRetriable = _retryCondition(response);
             }
             catch (TaskCanceledException exception)
             {
@@ -100,14 +97,12 @@ namespace Microsoft.Identity.Client.Http
                 }
 
                 logger.Error("The HTTP request failed. " + exception.Message);
-                isRetriable = true;
                 timeoutException = exception;
             }
 
-            if (isRetriable && retry)
+            while (_retryPolicy.pauseForRetry(response, timeoutException, retryCount))
             {
-                logger.Warning("Retry condition met. Retrying 1 time after waiting 1 second.");
-                await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+                logger.Warning($"Retry condition met. Retry count: {retryCount++} after waiting {_retryPolicy.DelayInMilliseconds}ms.");
                 return await SendRequestAsync(
                     endpoint,
                     headers,
@@ -115,9 +110,10 @@ namespace Microsoft.Identity.Client.Http
                     method,
                     logger,
                     doNotThrow,
-                    retry: false,  // retry just once
                     bindingCertificate,
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
+                    cancellationToken: cancellationToken,
+                    retryCount) // Pass the updated retry count
+                    .ConfigureAwait(false);
             }
 
             logger.Warning("Request retry failed.");

@@ -205,7 +205,6 @@ namespace Microsoft.Identity.Client.Region
                                  HttpMethod.Get,
                                  logger: logger,
                                  doNotThrow: false,
-                                 retry: false,
                                  mtlsCertificate: null,
                                  GetCancellationToken(requestCancellationToken))
                                     .ConfigureAwait(false);
@@ -222,7 +221,6 @@ namespace Microsoft.Identity.Client.Region
                                    HttpMethod.Get,
                                    logger: logger,
                                    doNotThrow: false,
-                                   retry: false,
                                    mtlsCertificate: null,
                                    GetCancellationToken(requestCancellationToken))
                                       .ConfigureAwait(false); // Call again with updated version
@@ -324,7 +322,6 @@ namespace Microsoft.Identity.Client.Region
                   HttpMethod.Get,
                   logger: logger,
                   doNotThrow: false,
-                  retry: false,
                   mtlsCertificate: null,
                   GetCancellationToken(userCancellationToken))
                      .ConfigureAwait(false);

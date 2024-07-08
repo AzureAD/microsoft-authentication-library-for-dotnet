@@ -7,11 +7,6 @@ namespace Microsoft.Identity.Client.Http
 {
     internal static class HttpRetryConditions
     {
-        public static bool NoRetry(HttpResponse response)
-        {
-            return false;
-        }
-
         /// <summary>
         /// Retry policy specific to managed identity flow.
         /// Avoid changing this, as it's breaking change.

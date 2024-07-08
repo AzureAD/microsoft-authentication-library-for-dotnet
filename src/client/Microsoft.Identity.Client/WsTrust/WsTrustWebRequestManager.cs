@@ -50,7 +50,6 @@ namespace Microsoft.Identity.Client.WsTrust
                     HttpMethod.Get,
                     logger: requestContext.Logger,
                     doNotThrow: false,
-                    retry: true,
                     mtlsCertificate: null,
                     requestContext.UserCancellationToken)
                 .ConfigureAwait(false);
@@ -106,7 +105,6 @@ namespace Microsoft.Identity.Client.WsTrust
                     HttpMethod.Post,
                     logger: requestContext.Logger,
                     doNotThrow: true,
-                    retry: true,
                     mtlsCertificate: null,
                     requestContext.UserCancellationToken).ConfigureAwait(false);
 
@@ -180,7 +178,6 @@ namespace Microsoft.Identity.Client.WsTrust
                HttpMethod.Get,
                logger: requestContext.Logger,
                doNotThrow: false,
-               retry: true,
                mtlsCertificate: null,
                requestContext.UserCancellationToken)
                   .ConfigureAwait(false);

@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         { }
 
         public MockHttpManager(
-            bool retryOnce,
+            bool retry,
             string testName = null,
             bool isManagedIdentity = false,
             Func<MockHttpMessageHandler> messageHandlerFunc = null,
@@ -43,11 +43,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             _httpManager = invokeNonMtlsHttpManagerFactory
                 ? HttpManagerFactory.GetHttpManager(
                     new MockNonMtlsHttpClientFactory(messageHandlerFunc, _httpMessageHandlerQueue, testName),
-                    retryOnce,
+                    retry,
                     isManagedIdentity)
                 : HttpManagerFactory.GetHttpManager(
                     new MockHttpClientFactory(messageHandlerFunc, _httpMessageHandlerQueue, testName),
-                    retryOnce,
+                    retry,
                     isManagedIdentity);
 
             _testName = testName;
@@ -109,9 +109,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             HttpMethod method,
             ILoggerAdapter logger,
             bool doNotThrow,
-            bool retry,
             X509Certificate2 mtlsCertificate,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            int retryCount = 0)
         {
             return _httpManager.SendRequestAsync(
                 endpoint,
@@ -120,9 +120,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 method,
                 logger,
                 doNotThrow,
-                retry,
                 mtlsCertificate,
-                cancellationToken);
+                cancellationToken,
+                retryCount);
         }
     }
 

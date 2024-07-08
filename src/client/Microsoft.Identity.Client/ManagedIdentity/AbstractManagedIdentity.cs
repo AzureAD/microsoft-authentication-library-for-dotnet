@@ -62,7 +62,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             HttpMethod.Get,
                             logger: _requestContext.Logger,
                             doNotThrow: true,
-                            retry: true,
                             mtlsCertificate: null,
                             cancellationToken).ConfigureAwait(false);
                 }
@@ -76,7 +75,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             HttpMethod.Post,
                             logger: _requestContext.Logger,
                             doNotThrow: true,
-                            retry: true,
                             mtlsCertificate: null,
                             cancellationToken)
                         .ConfigureAwait(false);
