@@ -57,8 +57,6 @@ namespace Microsoft.Identity.Client
             internal set { _clientVersion = string.IsNullOrWhiteSpace(value) ? DefaultClientVersion : value; }
         }
 
-        public ITelemetryClient[] TelemetryClients { get; internal set; } = Array.Empty<ITelemetryClient>();
-
         public Func<object> ParentActivityOrWindowFunc { get; internal set; }
 
         public string IosKeychainSecurityGroup { get; internal set; }
@@ -124,7 +122,6 @@ namespace Microsoft.Identity.Client
         public bool IsManagedIdentity { get; }
         public bool IsConfidentialClient { get; }
         public bool IsPublicClient => !IsConfidentialClient && !IsManagedIdentity;
-
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
 
