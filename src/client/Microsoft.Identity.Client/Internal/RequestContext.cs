@@ -32,13 +32,6 @@ namespace Microsoft.Identity.Client.Internal
             Logger = LoggerHelper.CreateLogger(correlationId, ServiceBundle.Config);
             CorrelationId = correlationId;
             UserCancellationToken = cancellationToken;
-        }
-
-        public TelemetryHelper CreateTelemetryHelper(ApiEvent eventToStart)
-        {
-            return new TelemetryHelper(
-                ServiceBundle.HttpTelemetryManager,
-                eventToStart);
-        }
+        }       
     }
 }
