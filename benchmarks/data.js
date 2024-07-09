@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1720501944778,
+  "lastUpdate": 1720501947387,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -12696,6 +12696,54 @@ window.BENCHMARK_DATA = {
             "value": 125411.8817545573,
             "unit": "ns",
             "range": "± 1408.9443583691939"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c910dc339d4d7fc8b4471f70c24f7e3c00a35857",
+          "message": "Deprecate WithClientTelemetry (#4816)\n\n* Remove last_telemetry\r\n\r\n* Remove telemetry client\r\n\r\n* Remove extra stuff",
+          "timestamp": "2024-07-09T14:05:19+09:00",
+          "tree_id": "da8bef524b115940349c0b0ff949bc41667a6128",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/c910dc339d4d7fc8b4471f70c24f7e3c00a35857"
+        },
+        "date": 1720501946869,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 12305.069967416617,
+            "unit": "ns",
+            "range": "± 21.3884367341572"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 120446.98863002232,
+            "unit": "ns",
+            "range": "± 621.8771258800823"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 23709.432514735632,
+            "unit": "ns",
+            "range": "± 146.8973169682058"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 124934.60813903809,
+            "unit": "ns",
+            "range": "± 2375.197290015744"
           }
         ]
       }
