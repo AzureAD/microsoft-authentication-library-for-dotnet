@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Integration.NetFx.Infrastructure
 
         public async Task<HttpResponse> SendRequestAsync(
             Uri endpoint,
-            Dictionary<string, string> headers,
+            IDictionary<string, string> headers,
             HttpContent body,
             HttpMethod method,
             ILoggerAdapter logger,

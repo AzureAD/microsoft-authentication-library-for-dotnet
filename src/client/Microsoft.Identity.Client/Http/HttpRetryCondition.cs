@@ -31,6 +31,7 @@ namespace Microsoft.Identity.Client.Http
         /// Retry condition for /token and /authorize endpoints
         /// </summary>
         /// <param name="response"></param>
+        /// <param name="exception"></param>
         /// <returns></returns>
         public static bool Sts(HttpResponse response, Exception exception)
         {

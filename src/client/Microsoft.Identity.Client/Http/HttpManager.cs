@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Http
 
         public async Task<HttpResponse> SendRequestAsync(
             Uri endpoint,
-            Dictionary<string, string> headers,
+            IDictionary<string, string> headers,
             HttpContent body,
             HttpMethod method,
             ILoggerAdapter logger,

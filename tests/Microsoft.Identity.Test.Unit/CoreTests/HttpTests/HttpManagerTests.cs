@@ -28,7 +28,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-
         [TestMethod]
         public async Task MtlsCertAsync()
         {
@@ -309,7 +308,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.GatewayTimeout);
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.ServiceUnavailable);
 
-
                 var exc = await AssertException.TaskThrowsAsync<MsalServiceException>(
                     () =>
                      httpManager.SendRequestAsync(
@@ -376,11 +374,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         }
 
         [TestMethod]
-        [DataRow(true)]
-        [DataRow(false)]
-        public async Task TestRetryConfigWithHttp500TypeFailureAsync(bool retry)
+        [DataRow(true, false)]
+        [DataRow(false, false)]
+        [DataRow(true, true)]
+        [DataRow(false, true)]
+        public async Task TestRetryConfigWithHttp500TypeFailureAsync(bool retry, bool isManagedIdentity)
         {
-            using (var httpManager = new MockHttpManager(retry, null))
+            using (var httpManager = new MockHttpManager(retry, isManagedIdentity: isManagedIdentity))
             {
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.ServiceUnavailable);
 
@@ -388,6 +388,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 {
                     //Adding second response for retry
                     httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.ServiceUnavailable);
+
+                    // Add 2 more response for the managed identity flow since 3 retries happen in this scenario
+                    if (isManagedIdentity)
+                    {
+                        httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.ServiceUnavailable);
+                        httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.ServiceUnavailable);
+                    }
+
                 }
 
                 var msalHttpResponse = await httpManager.SendRequestAsync(

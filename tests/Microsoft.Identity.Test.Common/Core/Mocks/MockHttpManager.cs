@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public Task<HttpResponse> SendRequestAsync(
             Uri endpoint,
-            Dictionary<string, string> headers,
+            IDictionary<string, string> headers,
             HttpContent body,
             HttpMethod method,
             ILoggerAdapter logger,
