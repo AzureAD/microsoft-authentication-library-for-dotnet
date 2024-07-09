@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Http
@@ -10,10 +11,10 @@ namespace Microsoft.Identity.Client.Http
     {
         
         private int _maxRetries;
-        private readonly Func<HttpResponse, bool> _retryCondition;
+        private readonly Func<HttpResponse, Exception, bool> _retryCondition;
         public int DelayInMilliseconds { private set; get; }
 
-        public LinearRetryPolicy(int delayMilliseconds, int maxRetries, Func<HttpResponse, bool> retryCondition)
+        public LinearRetryPolicy(int delayMilliseconds, int maxRetries, Func<HttpResponse, Exception, bool> retryCondition)
         {
             DelayInMilliseconds = delayMilliseconds;
             _maxRetries = maxRetries;
@@ -22,7 +23,7 @@ namespace Microsoft.Identity.Client.Http
 
         public bool pauseForRetry(HttpResponse response, Exception exception, int retryCount)
         {
-            return retryCount < _maxRetries && ((exception != null && exception is TaskCanceledException) || _retryCondition(response));
+            return retryCount < _maxRetries && _retryCondition(response, exception);
         }
     }
 }

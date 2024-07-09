@@ -1,7 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Net;
+using System;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Http
 {
@@ -11,8 +12,13 @@ namespace Microsoft.Identity.Client.Http
         /// Retry policy specific to managed identity flow.
         /// Avoid changing this, as it's breaking change.
         /// </summary>
-        public static bool ManagedIdentity(HttpResponse response)
+        public static bool ManagedIdentity(HttpResponse response, Exception exception)
         {
+            if (exception != null)
+            {
+                return exception is TaskCanceledException ? true : false;
+            } 
+
             return (int)response.StatusCode switch
             {
                 //Not Found
@@ -26,8 +32,13 @@ namespace Microsoft.Identity.Client.Http
         /// </summary>
         /// <param name="response"></param>
         /// <returns></returns>
-        public static bool Sts(HttpResponse response)
+        public static bool Sts(HttpResponse response, Exception exception)
         {
+            if (exception != null)
+            {
+                return exception is TaskCanceledException ? true : false;
+            }
+
             var retryAfter = response?.Headers?.RetryAfter;
             bool hasRetryAfterHeader = retryAfter != null &&
                 (retryAfter.Delta.HasValue || retryAfter.Date.HasValue);

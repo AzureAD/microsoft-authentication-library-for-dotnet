@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         private static readonly ConcurrentDictionary<string, HttpClient> s_httpClientPool = new ConcurrentDictionary<string, HttpClient>();
         private static readonly object s_cacheLock = new object();
 
-        private static HttpClient CreateNonMtlsClient()
+        private static HttpClient CreateHttpClient()
         {
             CheckAndManageCache();
 
@@ -38,6 +38,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         private static HttpClient CreateMtlsHttpClient(X509Certificate2 bindingCertificate)
         {
+#if SUPPORTS_MTLS
             CheckAndManageCache();
 
             if (bindingCertificate == null)
@@ -47,20 +48,20 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
             //Create an HttpClientHandler and configure it to use the client certificate
             HttpClientHandler handler = new HttpClientHandler();
-#if SUPPORTS_MTLS
+
             handler.ClientCertificates.Add(bindingCertificate);
             var httpClient = new HttpClient(handler);
             HttpClientConfig.ConfigureRequestHeadersAndSize(httpClient);
 
             return httpClient;
 #else
-    throw new NotSupportedException("mTLS is not supported on this platform.");
+            throw new NotSupportedException("mTLS is not supported on this platform.");
 #endif
         }
 
         public HttpClient GetHttpClient()
         {
-            return s_httpClientPool.GetOrAdd("non_mtls", CreateNonMtlsClient());
+            return s_httpClientPool.GetOrAdd("non_mtls", CreateHttpClient());
         }
 
         public HttpClient GetHttpClient(X509Certificate2 x509Certificate2)
