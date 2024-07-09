@@ -11,9 +11,6 @@ steps:
 
 - template: template-restore-build-libsandsamples.yaml
   parameters:
-    BuildPlatform: '$(BuildPlatform)'
-    BuildConfiguration: '$(BuildConfiguration)'
-    MsalClientSemVer: $(MsalClientSemVer)
     Solution: 'LibsAndSamples.sln'    
 
   # Run All Desktop Tests
