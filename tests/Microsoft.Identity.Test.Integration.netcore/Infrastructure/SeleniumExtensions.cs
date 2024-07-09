@@ -24,21 +24,21 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         public static IWebDriver CreateDefaultWebDriver()
         {
-            EdgeOptions options = new EdgeOptions();
-            EdgeDriver driver;
+            ChromeOptions options = new ChromeOptions();
+            ChromeDriver driver;
 
             // ~2x faster, no visual rendering
             // remove when debugging to see the UI automation
             options.AddArguments("headless");
 
-            var env = Environment.GetEnvironmentVariable("EDGEWEBDRIVER");
+            var env = Environment.GetEnvironmentVariable("CHROMEWEBDRIVER");
             if (string.IsNullOrEmpty(env))
             {
-                driver = new EdgeDriver(options);
+                driver = new ChromeDriver(options);
             }
             else
             {
-                driver = new EdgeDriver(env, options);
+                driver = new ChromeDriver(env, options);
             }
 
             driver.Manage().Timeouts().ImplicitWait = ImplicitTimespan;
