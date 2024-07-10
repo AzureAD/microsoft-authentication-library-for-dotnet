@@ -314,6 +314,7 @@ namespace NetDesktopWinForms
             var scopes = GetScopes();
 
             var builder = pca.AcquireTokenInteractive(scopes)
+                             .WithPrompt(Prompt.ForceLogin).WithLoginHint(loginHint)
                              .WithParentActivityOrWindow(this.Handle);
 
             var webview = GetWebView();
