@@ -1,23 +1,24 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Net;
+using System;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Http
 {
     internal static class HttpRetryConditions
     {
-        public static bool NoRetry(HttpResponse response)
-        {
-            return false;
-        }
-
         /// <summary>
         /// Retry policy specific to managed identity flow.
         /// Avoid changing this, as it's breaking change.
         /// </summary>
-        public static bool ManagedIdentity(HttpResponse response)
+        public static bool ManagedIdentity(HttpResponse response, Exception exception)
         {
+            if (exception != null)
+            {
+                return exception is TaskCanceledException ? true : false;
+            } 
+
             return (int)response.StatusCode switch
             {
                 //Not Found
@@ -30,9 +31,15 @@ namespace Microsoft.Identity.Client.Http
         /// Retry condition for /token and /authorize endpoints
         /// </summary>
         /// <param name="response"></param>
+        /// <param name="exception"></param>
         /// <returns></returns>
-        public static bool Sts(HttpResponse response)
+        public static bool Sts(HttpResponse response, Exception exception)
         {
+            if (exception != null)
+            {
+                return exception is TaskCanceledException ? true : false;
+            }
+
             var retryAfter = response?.Headers?.RetryAfter;
             bool hasRetryAfterHeader = retryAfter != null &&
                 (retryAfter.Delta.HasValue || retryAfter.Date.HasValue);

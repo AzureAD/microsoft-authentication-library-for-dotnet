@@ -21,12 +21,12 @@ namespace Microsoft.Identity.Client.Http
         {
             if (!withRetry)
             {
-                return new HttpManager(httpClientFactory, HttpRetryConditions.NoRetry);
+                return new HttpManager(httpClientFactory, new NoRetryPolicy());
             }
 
             return isManagedIdentity ?
-                new HttpManager(httpClientFactory, HttpRetryConditions.ManagedIdentity) :
-                new HttpManager(httpClientFactory, HttpRetryConditions.Sts);
+                new HttpManager(httpClientFactory, new LinearRetryPolicy(1000, 3, HttpRetryConditions.ManagedIdentity)) :
+                new HttpManager(httpClientFactory, new LinearRetryPolicy(1000, 1, HttpRetryConditions.Sts));
         }
     }
 }

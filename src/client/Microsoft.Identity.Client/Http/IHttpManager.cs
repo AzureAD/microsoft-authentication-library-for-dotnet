@@ -33,14 +33,14 @@ namespace Microsoft.Identity.Client.Http
         /// <returns></returns>
         Task<HttpResponse> SendRequestAsync(
            Uri endpoint,
-           Dictionary<string, string> headers,
+           IDictionary<string, string> headers,
            HttpContent body,
            HttpMethod method,
            ILoggerAdapter logger,
            bool doNotThrow,
-           bool retry,
            X509Certificate2 mtlsCertificate,
-           HttpClient customHttpClient, 
-           CancellationToken cancellationToken);
+           HttpClient customHttpClient,
+           CancellationToken cancellationToken,
+           int retryCount = 0);
     }
 }

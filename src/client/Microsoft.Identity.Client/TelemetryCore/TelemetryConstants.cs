@@ -8,7 +8,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const char HttpTelemetrySchemaVersion = '5';
         public const char HttpTelemetryPipe = '|';
         public const string XClientCurrentTelemetry = "x-client-current-telemetry";
-        public const string XClientLastTelemetry = "x-client-last-telemetry";
         public const string False = "false";
         public const string True = "true";
         public const char One = '1';

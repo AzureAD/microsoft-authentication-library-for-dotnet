@@ -265,15 +265,15 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         public async Task<HttpResponse> SendRequestAsync(
             Uri endpoint,
-            Dictionary<string, string> headers,
+            IDictionary<string, string> headers,
             HttpContent body,
             HttpMethod method,
             ILoggerAdapter logger,
             bool doNotThrow,
-            bool retry,
             X509Certificate2 mtlsCertificate,
             HttpClient customHttpClient,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken, 
+            int retryCount = 0)
         {
             // simulate delay and also add complexity due to thread context switch
             await Task.Delay(ParallelRequestsTests.NetworkAccessPenaltyMs).ConfigureAwait(false);

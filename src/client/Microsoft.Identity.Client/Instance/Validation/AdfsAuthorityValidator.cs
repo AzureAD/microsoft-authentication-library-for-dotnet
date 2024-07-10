@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
                     mtlsCertificate: null,
                     customHttpClient: null,
                     _requestContext.UserCancellationToken)
-                        .ConfigureAwait(false);
+                    .ConfigureAwait(false);
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {

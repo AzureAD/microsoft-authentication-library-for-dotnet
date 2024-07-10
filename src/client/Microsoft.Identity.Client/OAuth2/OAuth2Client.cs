@@ -138,7 +138,6 @@ namespace Microsoft.Identity.Client.OAuth2
                             HttpMethod.Post,
                             logger: requestContext.Logger,
                             doNotThrow: false,
-                            retry: true,
                             mtlsCertificate: _mtlsCertificate,
                             customHttpClient: null,
                             requestContext.UserCancellationToken)
@@ -153,7 +152,6 @@ namespace Microsoft.Identity.Client.OAuth2
                             HttpMethod.Get,
                             logger: requestContext.Logger,
                             doNotThrow: false,
-                            retry: true,
                             mtlsCertificate: null,
                             customHttpClient: null,
                             requestContext.UserCancellationToken)
