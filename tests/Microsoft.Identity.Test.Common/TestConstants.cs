@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Test.Unit
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
         public const string ClientCredentialAudience = "https://login.microsoftonline.com/f645ad92-e38d-4d1a-b510-d1b09a74a8ca/v2.0";
         public const string PublicCloudConfidentialClientID = "88f91eac-c606-4c67-a0e2-a5e8a186854f";
-        public const string AutomationTestCertName = "LabVaultAccessCert";
+        public const string AutomationTestCertName = "LabAuth.MSIDLab.com";
         public static Dictionary<string, string> AdditionalAssertionClaims =>
             new Dictionary<string, string>() { { "Key1", "Val1" }, { "Key2", "Val2" } };
 
@@ -53,12 +53,14 @@ namespace Microsoft.Identity.Test.Unit
         public const string TenantId2 = "aaaaaaab-aaaa-aaaa-bbbb-aaaaaaaaaaaa";
         public const string AadTenantId = "751a212b-4003-416e-b600-e1f48e40db9f";
         public const string MsaTenantId = "9188040d-6c67-4c5b-b112-36a304b66dad";
+        public const string MsftTenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
         public const string SomeTenantId = "sometenantid";
         public const string CatsAreAwesome = "catsareawesome";
         public const string TenantIdNumber1 = "12345679";
         public const string TenantIdNumber2 = "987654321";
         public const string TenantIdString = "tenantid";
         public const string AadAuthorityWithTestTenantId = "https://login.microsoftonline.com/" + AadTenantId + "/";
+        public const string AadAuthorityWithMsftTenantId = "https://login.microsoftonline.com/" + MsftTenantId + "/";
         public static readonly IDictionary<string, string> s_clientAssertionClaims = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { { "client_ip", "some_ip" }, { "aud", "some_audience" } };
         public const string RTSecret = "someRT";
         public const string ATSecret = "some-access-token";

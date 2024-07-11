@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         
         public static async Task<AccessToken> GetAccessTokenForLabAPIAsync(string labAccessClientId)
         {
-            string[] scopes = new string[] { "https://msidlab.com/.default" };
+            string[] scopes = new string[] { "https://request.msidlab.com/.default" };
 
             return await GetLabAccessTokenAsync(
                 "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/", 
@@ -55,11 +55,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 .Create(clientIdForCertAuth)
                 .WithAuthority(new Uri(authority), true)
                 .WithCacheOptions(CacheOptions.EnableSharedCacheOptions)
-                .WithCertificate(cert)
+                .WithCertificate(cert, true)
                 .Build();
 
             authResult = await confidentialApp
                 .AcquireTokenForClient(scopes)
+                .WithSendX5C(true)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 

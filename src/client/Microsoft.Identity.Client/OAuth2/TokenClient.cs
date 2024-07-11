@@ -30,12 +30,6 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly IServiceBundle _serviceBundle;
         private readonly OAuth2Client _oAuth2Client;
 
-        /// <summary>
-        /// Used to avoid sending duplicate "last request" telemetry
-        /// from a multi-threaded environment
-        /// </summary>
-        private volatile bool _requestInProgress = false;
-
         public TokenClient(AuthenticationRequestParameters requestParams)
         {
             _requestParams = requestParams ?? throw new ArgumentNullException(nameof(requestParams));
@@ -43,7 +37,8 @@ namespace Microsoft.Identity.Client.OAuth2
 
             _oAuth2Client = new OAuth2Client(
                _serviceBundle.ApplicationLogger,
-               _serviceBundle.HttpManager);
+               _serviceBundle.HttpManager,
+               requestParams.MtlsCertificate);
         }
 
         public async Task<MsalTokenResponse> SendTokenRequestAsync(
@@ -177,15 +172,6 @@ namespace Microsoft.Identity.Client.OAuth2
                 _serviceBundle.HttpTelemetryManager.GetCurrentRequestHeader(
                     _requestParams.RequestContext.ApiEvent));
 
-            if (!_requestInProgress)
-            {
-                _requestInProgress = true;
-
-                _oAuth2Client.AddHeader(
-                    TelemetryConstants.XClientLastTelemetry,
-                    _serviceBundle.HttpTelemetryManager.GetLastRequestHeader());
-            }
-
             //Signaling that the client can perform PKey Auth on supported platforms
             if (DeviceAuthHelper.CanOSPerformPKeyAuth())
             {
@@ -265,21 +251,10 @@ namespace Microsoft.Identity.Client.OAuth2
                             _requestParams.RequestContext, true, _requestParams.OnBeforeTokenRequestHandler)
                         .ConfigureAwait(false);
 
-                // Clear failed telemetry data as we've just sent it
-                _serviceBundle.HttpTelemetryManager.ResetPreviousUnsentData();
-
                 return msalTokenResponse;
             }
             catch (MsalServiceException ex)
             {
-                if (!ex.IsRetryable)
-                {
-                    // Clear failed telemetry data as we've just sent it ... 
-                    // even if we received an error from the server, 
-                    // telemetry would have been recorded
-                    _serviceBundle.HttpTelemetryManager.ResetPreviousUnsentData();
-                }
-
                 if (ex.StatusCode == (int)HttpStatusCode.Unauthorized)
                 {
                     var isChallenge = _serviceBundle.DeviceAuthManager.TryCreateDeviceAuthChallengeResponse(
@@ -299,11 +274,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
 
                 throw;
-            }
-            finally
-            {
-                _requestInProgress = false;
-            }
+            }           
         }
 
         private static string GetDefaultScopes(ISet<string> inputScope)
