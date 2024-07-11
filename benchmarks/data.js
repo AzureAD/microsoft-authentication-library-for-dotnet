@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1720719452796,
+  "lastUpdate": 1720719454485,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -28388,6 +28388,66 @@ window.BENCHMARK_DATA = {
             "value": 135771.88888888888,
             "unit": "ns",
             "range": "± 12986.414539416535"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5c7c527b173b5f2a719926fb89ccd68bc55d1b3e",
+          "message": "Updated httpmanager to support mtls (#4793)\n\n* initial\r\n\r\n* Add retry policy\r\n\r\n* Address comments\r\n\r\n* Update tests to test managed identity retry policy as well\r\n\r\n---------\r\n\r\nCo-authored-by: Gladwin Johnson <gljohns@microsoft.com>\r\nCo-authored-by: Neha Bhargava <61847233+neha-bhargava@users.noreply.github.com>",
+          "timestamp": "2024-07-11T10:30:23-07:00",
+          "tree_id": "8bdf4e174930fa3216769ce1e21818a6077974de",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/5c7c527b173b5f2a719926fb89ccd68bc55d1b3e"
+        },
+        "date": 1720719454181,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (1, 10))",
+            "value": 17910.51533156175,
+            "unit": "ns",
+            "range": "± 52.04499461584228"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (10000, 10))",
+            "value": 29085.62203470866,
+            "unit": "ns",
+            "range": "± 51.392136366126906"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 9228.469882965088,
+            "unit": "ns",
+            "range": "± 26.774437093594337"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 20747.6097542899,
+            "unit": "ns",
+            "range": "± 21.511299638028305"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 44957.09090909091,
+            "unit": "ns",
+            "range": "± 1094.7172676558528"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 137871.79787234042,
+            "unit": "ns",
+            "range": "± 12693.075883678182"
           }
         ]
       }
