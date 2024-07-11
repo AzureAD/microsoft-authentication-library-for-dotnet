@@ -246,9 +246,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                     result.AuthenticationResultMetadata.TokenSource);
 
                 //6. Gets a token for the user-assigned Managed Identity.
+
+                AuthenticationResult miResult = null;
+
                 var miAssertionProvider = async (AssertionRequestOptions _) =>
                 {
-                    var miResult = await mia.AcquireTokenForManagedIdentity(resource)
+                    miResult = await mia.AcquireTokenForManagedIdentity(resource)
                         .ExecuteAsync()
                         .ConfigureAwait(false);
 
@@ -270,6 +273,24 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 Assert.AreEqual("Bearer", ccaResult.TokenType);
                 Assert.IsNotNull(ccaResult.AccessToken);
                 Assert.IsTrue(ccaResult.ExpiresOn > DateTimeOffset.UtcNow);
+
+                // Step 8: Get token from ESTS again - check that it is cached (reuse the app obj)
+                ccaResult = await app.AcquireTokenForClient(scopes)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, ccaResult.AuthenticationResultMetadata.TokenSource);
+
+                // Step 9: Get token from ESTS and use force refresh - check that the MI provider returns a cached token for api://tokenExchange
+                ccaResult = await app.AcquireTokenForClient(scopes)
+                    .WithForceRefresh(true)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, ccaResult.AuthenticationResultMetadata.TokenSource);
+
+                // Check that the MI provider returns a cached token for api://tokenExchange
+                Assert.AreEqual(TokenSource.Cache, miResult.AuthenticationResultMetadata.TokenSource);
             }
         }
 
