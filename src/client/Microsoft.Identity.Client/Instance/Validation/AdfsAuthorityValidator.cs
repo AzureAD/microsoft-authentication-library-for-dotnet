@@ -29,11 +29,16 @@ namespace Microsoft.Identity.Client.Instance.Validation
                 var resource = $"https://{authorityInfo.Host}";
                 string webFingerUrl = Constants.FormatAdfsWebFingerUrl(authorityInfo.Host, resource);
 
-                Http.HttpResponse httpResponse = await _requestContext.ServiceBundle.HttpManager.SendGetAsync(
-                    new Uri(webFingerUrl), 
-                    null,
-                    _requestContext.Logger, 
-                    cancellationToken: _requestContext.UserCancellationToken).ConfigureAwait(false);
+                Http.HttpResponse httpResponse = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
+                   new Uri(webFingerUrl),
+                   null,
+                   body: null,
+                   System.Net.Http.HttpMethod.Get,
+                   logger: _requestContext.Logger,
+                   doNotThrow: false,
+                   mtlsCertificate: null,
+                   _requestContext.UserCancellationToken)
+                      .ConfigureAwait(false);
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
