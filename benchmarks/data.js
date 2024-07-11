@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1720719451046,
+  "lastUpdate": 1720719452796,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -19798,6 +19798,54 @@ window.BENCHMARK_DATA = {
             "value": 173725.98399135045,
             "unit": "ns",
             "range": "± 958.8044628267362"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5c7c527b173b5f2a719926fb89ccd68bc55d1b3e",
+          "message": "Updated httpmanager to support mtls (#4793)\n\n* initial\r\n\r\n* Add retry policy\r\n\r\n* Address comments\r\n\r\n* Update tests to test managed identity retry policy as well\r\n\r\n---------\r\n\r\nCo-authored-by: Gladwin Johnson <gljohns@microsoft.com>\r\nCo-authored-by: Neha Bhargava <61847233+neha-bhargava@users.noreply.github.com>",
+          "timestamp": "2024-07-11T10:30:23-07:00",
+          "tree_id": "8bdf4e174930fa3216769ce1e21818a6077974de",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/5c7c527b173b5f2a719926fb89ccd68bc55d1b3e"
+        },
+        "date": 1720719452390,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 21724.175611223494,
+            "unit": "ns",
+            "range": "± 76.66924969042918"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 170073.03901018415,
+            "unit": "ns",
+            "range": "± 852.5881379129503"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 33933.56404331752,
+            "unit": "ns",
+            "range": "± 271.69980655655104"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 176264.24934895834,
+            "unit": "ns",
+            "range": "± 1658.0449728748808"
           }
         ]
       }
