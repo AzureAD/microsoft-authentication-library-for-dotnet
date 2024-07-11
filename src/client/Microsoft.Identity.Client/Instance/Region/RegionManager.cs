@@ -205,7 +205,6 @@ namespace Microsoft.Identity.Client.Region
                                 HttpMethod.Get,
                                 logger: logger,
                                 doNotThrow: false,
-                                retry: false,
                                 mtlsCertificate: null,
                                 customHttpClient: null,
                                 GetCancellationToken(requestCancellationToken))
@@ -223,7 +222,6 @@ namespace Microsoft.Identity.Client.Region
                                     HttpMethod.Get,
                                     logger: logger,
                                     doNotThrow: false,
-                                    retry: false,
                                     mtlsCertificate: null,
                                     customHttpClient: null,
                                     GetCancellationToken(requestCancellationToken))

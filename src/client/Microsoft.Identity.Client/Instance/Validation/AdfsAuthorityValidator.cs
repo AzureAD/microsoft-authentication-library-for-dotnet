@@ -36,7 +36,6 @@ namespace Microsoft.Identity.Client.Instance.Validation
                     System.Net.Http.HttpMethod.Get,
                     logger: _requestContext.Logger,
                     doNotThrow: false,
-                    retry: true,
                     mtlsCertificate: null,
                     customHttpClient: null,
                     _requestContext.UserCancellationToken)

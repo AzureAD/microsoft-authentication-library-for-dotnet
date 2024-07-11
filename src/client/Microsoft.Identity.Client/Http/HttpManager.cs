@@ -146,7 +146,12 @@ namespace Microsoft.Identity.Client.Http
         }
 
         private HttpClient GetHttpClient(X509Certificate2 x509Certificate2, HttpClient customHttpClient) {
-            if (x509Certificate2 != null && _httpClientFactory is IMsalMtlsHttpClientFactory msalMtlsHttpClientFactory)
+            if (x509Certificate2 != null && customHttpClient != null)
+            {
+                throw new NotImplementedException("Mtls certificate cannot be used with service fabric. A custom http client is used for service fabric managed identity to validate the server certificate.");
+            }
+
+            if (_httpClientFactory is IMsalMtlsHttpClientFactory msalMtlsHttpClientFactory)
             {
                 // If the factory is an IMsalMtlsHttpClientFactory, use it to get an HttpClient with the certificate
                 return msalMtlsHttpClientFactory.GetHttpClient(x509Certificate2);
