@@ -227,7 +227,7 @@ namespace Microsoft.Identity.Client.Region
                                     mtlsCertificate: null,
                                     customHttpClient: null,
                                     GetCancellationToken(requestCancellationToken))
-                                        .ConfigureAwait(false); // Call again with updated version
+                                    .ConfigureAwait(false); // Call again with updated version
                             }
 
                             if (response.StatusCode == HttpStatusCode.OK && !response.Body.IsNullOrEmpty())
