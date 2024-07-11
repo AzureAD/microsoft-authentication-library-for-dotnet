@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestMethod]
         public async Task AcquireMsiToken_ExchangeForEstsToken_Successfully()
         {
-            string resource = "api://AzureAdTokenExchange";
+           const string resource = "api://AzureAdTokenExchange";
 
             //Arrange
             using (new EnvVariableContext())
