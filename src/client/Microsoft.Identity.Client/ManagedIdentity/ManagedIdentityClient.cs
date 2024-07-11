@@ -16,13 +16,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     internal class ManagedIdentityClient
     {
         private readonly AbstractManagedIdentity _identitySource;
-        internal static Lazy<ManagedIdentitySource> s_managedIdentitySourceDetected = new Lazy<ManagedIdentitySource>(() => GetManagedIdentitySource());
-
-        // To reset the cached source for testing purposes.
-        internal static void resetCachedSource()
-        {
-            s_managedIdentitySourceDetected = new Lazy<ManagedIdentitySource>(() => GetManagedIdentitySource());
-        }
 
         public ManagedIdentityClient(RequestContext requestContext)
         {
@@ -40,7 +33,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
         private static AbstractManagedIdentity SelectManagedIdentitySource(RequestContext requestContext)
         {
-            return s_managedIdentitySourceDetected.Value switch
+            return GetManagedIdentitySource() switch
             {
                 ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.AppService => AppServiceManagedIdentitySource.Create(requestContext),
@@ -51,7 +44,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         // Detect managed identity source based on the availability of environment variables.
-        private static ManagedIdentitySource GetManagedIdentitySource()
+        internal static ManagedIdentitySource GetManagedIdentitySource()
         {
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
             string identityHeader = EnvironmentVariables.IdentityHeader;
