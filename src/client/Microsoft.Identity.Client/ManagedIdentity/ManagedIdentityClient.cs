@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         // Detect managed identity source based on the availability of environment variables.
         // The result of this method is not cached because reading environment variables is cheap. 
-        // Static caching the managed identity source would prevent us from detecting changes in the environment.
+        // This method is perf sensitive any changes should be benchmarked.
         internal static ManagedIdentitySource GetManagedIdentitySource()
         {
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
