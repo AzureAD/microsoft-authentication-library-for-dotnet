@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1720719454485,
+  "lastUpdate": 1720822083945,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5714,6 +5714,42 @@ window.BENCHMARK_DATA = {
             "value": 362358.53846153844,
             "unit": "ns",
             "range": "± 5999.495515116037"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "61847233+neha-bhargava@users.noreply.github.com",
+            "name": "Neha Bhargava",
+            "username": "neha-bhargava"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4419b3ff4983fc7e99eff3dcb849cab39e7b7e48",
+          "message": "Remove static caching of managed identity source (#4840)\n\n* Remove static caching of managed identity source\r\n\r\n* Add comments\r\n\r\n* Update ManagedIdentityClient.cs",
+          "timestamp": "2024-07-12T15:00:55-07:00",
+          "tree_id": "ccfe3ca76f5d2fc3836616a29ef10a588e8e903a",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/4419b3ff4983fc7e99eff3dcb849cab39e7b7e48"
+        },
+        "date": 1720822080392,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 239609.9393939394,
+            "unit": "ns",
+            "range": "± 6928.217523917109"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 360835.42307692306,
+            "unit": "ns",
+            "range": "± 4081.0966757629103"
           }
         ]
       }
