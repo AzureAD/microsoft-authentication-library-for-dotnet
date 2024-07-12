@@ -9,6 +9,11 @@ parameters:
 
 steps:
 
+- task: UseDotNet@2
+  displayName: 'Use the latest .NET 6'
+  inputs:
+    version: 6.x
+
 - template: template-restore-build-libsandsamples.yaml
   parameters:
     Solution: 'LibsAndSamples.sln'    
