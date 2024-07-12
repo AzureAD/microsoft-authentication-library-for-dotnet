@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 
-
 namespace MSIHelperService.AzureFunction // Name space is not required while updating this code in the function app
 {
     /// <summary>
@@ -18,7 +17,7 @@ namespace MSIHelperService.AzureFunction // Name space is not required while upd
     /// </summary>
     public class GetEnvironmentVariables
     {
-        private static Dictionary<string, string> _envVariables => new Dictionary<string, string>();
+        private static IDictionary<string, string> _envVariables => new Dictionary<string, string>();
 
         /// <summary>
         /// Gets the environment variables
@@ -26,7 +25,7 @@ namespace MSIHelperService.AzureFunction // Name space is not required while upd
         /// <param name="req"></param>
         /// <param name="log"></param>
         /// <returns></returns>
-        public static async Task<IActionResult> Run(HttpRequest req, ILogger log)
+        public static IActionResult Run(HttpRequest req, ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -36,7 +35,7 @@ namespace MSIHelperService.AzureFunction // Name space is not required while upd
 
             if (string.IsNullOrEmpty(name))
             {
-                Dictionary<string, string?> _envVariables = new Dictionary<string, string?>();
+                IDictionary<string, string?> _envVariables = new Dictionary<string, string?>();
                 _envVariables.Add("IDENTITY_HEADER", Environment.GetEnvironmentVariable("IDENTITY_HEADER"));
                 _envVariables.Add("IDENTITY_ENDPOINT", Environment.GetEnvironmentVariable("IDENTITY_ENDPOINT"));
                 _envVariables.Add("IDENTITY_API_VERSION", Environment.GetEnvironmentVariable("IDENTITY_API_VERSION"));
@@ -47,7 +46,7 @@ namespace MSIHelperService.AzureFunction // Name space is not required while upd
             else
             {
                 string? responseMessage = Environment.GetEnvironmentVariable(name);
-                log.LogInformation("Returning Environment Variable Based on the variable name : " , name);
+                log.LogInformation("Returning Environment Variable Based on the variable name : ", name);
                 return new OkObjectResult(responseMessage);
             }
         }
