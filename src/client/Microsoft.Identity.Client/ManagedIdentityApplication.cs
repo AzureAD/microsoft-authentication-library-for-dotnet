@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Managed identity source detected on the environment if any.</returns>
         public static ManagedIdentitySource GetManagedIdentitySource()
         {
-            return ManagedIdentityClient.s_managedIdentitySourceDetected.Value;
+            return ManagedIdentityClient.GetManagedIdentitySource();
         }
     }
 }
