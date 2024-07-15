@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1721028118674,
+  "lastUpdate": 1721028120536,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -12948,6 +12948,54 @@ window.BENCHMARK_DATA = {
             "value": 120280.08603515624,
             "unit": "ns",
             "range": "± 777.8278300161658"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "62267180+fengga@users.noreply.github.com",
+            "name": "fengga",
+            "username": "fengga"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "df470134878b89226786a16fb407db782f5f2156",
+          "message": "Add 'haschrome=1' to avoid unexpected back buttons on the first page. (#4836)\n\n* Always add 'haschrome=1' in the protocol to avoid unexpected back buttons on\r\nthe first page.\r\n\r\n* Fix broken unit tests\r\n\r\n---------\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-07-15T00:15:02-07:00",
+          "tree_id": "e82fb1c374047b5434310d971d870b451a284c5b",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/df470134878b89226786a16fb407db782f5f2156"
+        },
+        "date": 1721028120059,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 12436.288682120186,
+            "unit": "ns",
+            "range": "± 59.20966899689838"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 121069.35114933894,
+            "unit": "ns",
+            "range": "± 503.30424660839117"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 23397.1444138747,
+            "unit": "ns",
+            "range": "± 51.71440185841884"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 124535.44430338542,
+            "unit": "ns",
+            "range": "± 1629.034907283117"
           }
         ]
       }
