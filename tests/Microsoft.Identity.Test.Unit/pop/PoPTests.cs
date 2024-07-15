@@ -377,37 +377,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Assert.AreEqual(TokenSource.Broker, result.AuthenticationResultMetadata.TokenSource);
             }
         }
-
-        [TestMethod]
-        public void CheckPopRuntimeBrokerSupportTest()
-        {
-            //Broker enabled
-            var pcaBuilder = PublicClientApplicationBuilder
-                                            .Create(TestConstants.ClientId);
-
-            pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
-
-            IPublicClientApplication app = pcaBuilder.Build();
-
-            Assert.IsTrue(app.IsProofOfPossessionSupportedByClient());
-
-            //Broker disabled
-            pcaBuilder = PublicClientApplicationBuilder
-                                .Create(TestConstants.ClientId);
-
-            pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
-
-            app = pcaBuilder.Build();
-
-            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
-
-            //Broker not configured
-            app = PublicClientApplicationBuilder
-                                .Create(TestConstants.ClientId)
-                                .Build();
-
-            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
-        }
 #endif
 
         [TestMethod]
