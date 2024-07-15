@@ -60,8 +60,6 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                     Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", thumbprint);
                     break;
             }
-
-            ManagedIdentityClient.resetCachedSource();
         }
 
         /// <summary>
