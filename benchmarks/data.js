@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1720822089956,
+  "lastUpdate": 1721028118674,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5750,6 +5750,42 @@ window.BENCHMARK_DATA = {
             "value": 360835.42307692306,
             "unit": "ns",
             "range": "± 4081.0966757629103"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "62267180+fengga@users.noreply.github.com",
+            "name": "fengga",
+            "username": "fengga"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "df470134878b89226786a16fb407db782f5f2156",
+          "message": "Add 'haschrome=1' to avoid unexpected back buttons on the first page. (#4836)\n\n* Always add 'haschrome=1' in the protocol to avoid unexpected back buttons on\r\nthe first page.\r\n\r\n* Fix broken unit tests\r\n\r\n---------\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-07-15T00:15:02-07:00",
+          "tree_id": "e82fb1c374047b5434310d971d870b451a284c5b",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/df470134878b89226786a16fb407db782f5f2156"
+        },
+        "date": 1721028115282,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 231996.83333333334,
+            "unit": "ns",
+            "range": "± 1445.0079479701728"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 332410.4666666667,
+            "unit": "ns",
+            "range": "± 9939.508857405217"
           }
         ]
       }
