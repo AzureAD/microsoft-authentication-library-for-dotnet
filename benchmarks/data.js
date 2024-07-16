@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1721028124161,
+  "lastUpdate": 1721166454543,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5786,6 +5786,42 @@ window.BENCHMARK_DATA = {
             "value": 332410.4666666667,
             "unit": "ns",
             "range": "± 9939.508857405217"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "61847233+neha-bhargava@users.noreply.github.com",
+            "name": "Neha Bhargava",
+            "username": "neha-bhargava"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9049fe9570fdc7f28de2a6464cc53f173359e04f",
+          "message": "Add validation callback and tests (#4818)\n\n* initial\r\n\r\n* Add validation callback and tests\r\n\r\n* Address comments\r\n\r\n* Missed to use Lazy HttpClient\r\n\r\n* Update src/client/Microsoft.Identity.Client/Http/IHttpManager.cs\r\n\r\nCo-authored-by: Bogdan Gavril <bogavril@microsoft.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/ManagedIdentity/ServiceFabricManagedIdentitySource.cs\r\n\r\nCo-authored-by: Bogdan Gavril <bogavril@microsoft.com>\r\n\r\n* Rename\r\n\r\n* Add retry policy\r\n\r\n* Address comments\r\n\r\n* Update tests to test managed identity retry policy as well\r\n\r\n* Address comments\r\n\r\n* Update the logic to check for custom http client first.\r\n\r\n* Fix tests failing due to reflection\r\n\r\n* Update the service fabric endpoint in tests\r\n\r\n---------\r\n\r\nCo-authored-by: Gladwin Johnson <gljohns@microsoft.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\nCo-authored-by: Bogdan Gavril <bogavril@microsoft.com>",
+          "timestamp": "2024-07-16T14:40:09-07:00",
+          "tree_id": "edb827cf553cb03369f6df805acd38d2a47e8aa4",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/9049fe9570fdc7f28de2a6464cc53f173359e04f"
+        },
+        "date": 1721166450457,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 252650.92857142858,
+            "unit": "ns",
+            "range": "± 5746.906772964293"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 336570.9130434783,
+            "unit": "ns",
+            "range": "± 8240.228317186824"
           }
         ]
       }
