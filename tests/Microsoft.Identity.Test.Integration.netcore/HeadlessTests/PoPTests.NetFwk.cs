@@ -36,6 +36,7 @@ using Microsoft.Identity.Client.Internal;
 using System.Security.Claims;
 using System.Net.Sockets;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -242,6 +243,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 ProtectedUrl,
                 HttpMethod.Get,
                 result);
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(result.AccessToken);
+            var alg = token.Header.Alg;
+
+            // Check the algorithm
+            Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
         }
 
         [TestMethod]
@@ -272,6 +280,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 ProtectedUrl,
                 HttpMethod.Get,
                 result);
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(result.AccessToken);
+            var alg = token.Header.Alg;
+
+            // Check the algorithm
+            Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
         }
 
         [TestMethod]
@@ -305,6 +320,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(
                 TokenSource.IdentityProvider,
                 result.AuthenticationResultMetadata.TokenSource);
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(result.AccessToken);
+            var alg = token.Header.Alg;
+
+            // Check the algorithm
+            Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
 
             SignedHttpRequestDescriptor signedHttpRequestDescriptor =
                 new SignedHttpRequestDescriptor(
@@ -356,6 +378,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             Assert.AreEqual("pop", result.TokenType);
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(result.AccessToken);
+            var alg = token.Header.Alg;
+
+            // Check the algorithm
+            Assert.AreEqual("ES256", alg, "The algorithm in the token header should be ES256");
+
             PoPValidator.VerifyPoPToken(
                 settings.ClientId,
                 ProtectedUrl,
@@ -407,6 +437,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(
                 TokenSource.IdentityProvider,
                 result.AuthenticationResultMetadata.TokenSource);
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(result.AccessToken);
+            var alg = token.Header.Alg;
+
+            // Check the algorithm
+            Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
 
             // Outside MSAL - Create the SHR (using Wilson)
 
