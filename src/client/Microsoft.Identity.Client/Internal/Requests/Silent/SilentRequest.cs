@@ -61,7 +61,9 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                        UiRequiredExceptionClassification.AcquireTokenSilentFailed);
                 }
 
-                if (isBrokerConfigured)
+                if (isBrokerConfigured
+                    && AuthenticationRequestParameters.Account.AccountSource != null
+                    && AuthenticationRequestParameters.Account.AccountSource != "device_code")
                 {
                     _logger.Info("Broker is configured and enabled, attempting to use broker instead.");
                     var brokerResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);

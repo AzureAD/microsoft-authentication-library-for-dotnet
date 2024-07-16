@@ -128,10 +128,12 @@ namespace Microsoft.Identity.Client
                     homeAccountId);
 
                 Dictionary<string, string> wamAccountIds = TokenResponseHelper.GetWamAccountIds(requestParams, response);
+                string accountSource = requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenByDeviceCode ? "device_code" : null;
                 msalAccountCacheItem = new MsalAccountCacheItem(
                              instanceDiscoveryMetadata.PreferredCache,
                              response.ClientInfo,
                              homeAccountId,
+                             accountSource,
                              idToken,
                              username,
                              tenantId,
@@ -149,10 +151,12 @@ namespace Microsoft.Identity.Client
                     }
                 }
 
+                
                 account = new Account(
                   homeAccountId,
                   username,
                   instanceDiscoveryMetadata.PreferredNetwork,
+                  accountSource,
                   wamAccountIds,
                   tenantProfiles?.Values);
             }
@@ -988,6 +992,7 @@ namespace Microsoft.Identity.Client
                             requestParameters.AppConfig.MultiCloudSupportEnabled ?
                                 account.Environment : // If multi cloud support is enabled keep the cached environment
                                 environment, // Preserve the environment passed in by the user
+                            account.AccountSource,
                             account.WamAccountIds,
                             tenantProfiles?.Values);
 
@@ -1020,6 +1025,7 @@ namespace Microsoft.Identity.Client
                             cachedAccount.HomeAccountId,
                             cachedAccount.PreferredUsername,
                             cachedAccount.Environment,
+                            cachedAccount.AccountSource,
                             cachedAccount.WamAccountIds,
                             tenantProfiles?.Values);
 
@@ -1067,7 +1073,7 @@ namespace Microsoft.Identity.Client
                 if (!clientInfoToAccountMap.ContainsKey(accountIdentifier))
                 {
                     clientInfoToAccountMap[accountIdentifier] = new Account(
-                            accountIdentifier, pair.Value.DisplayableId, envFromRequest);
+                            accountIdentifier, pair.Value.DisplayableId, envFromRequest, null);
                 }
             }
         }
@@ -1084,7 +1090,7 @@ namespace Microsoft.Identity.Client
             {
                 if (!string.IsNullOrEmpty(user.DisplayableId) && !uniqueUserNames.Contains(user.DisplayableId))
                 {
-                    accounts.Add(new Account(null, user.DisplayableId, envFromRequest));
+                    accounts.Add(new Account(null, user.DisplayableId, envFromRequest, null));
                     uniqueUserNames.Add(user.DisplayableId);
                 }
             }
@@ -1153,12 +1159,14 @@ namespace Microsoft.Identity.Client
                         msalAccessTokenCacheItem.Environment,
                         msalAccessTokenCacheItem.TenantId,
                         msalAccessTokenCacheItem.HomeAccountId,
+                        requestParameters.Account?.AccountSource,
                         requestParameters.Account?.Username));
 
             return new Account(
                 msalAccessTokenCacheItem.HomeAccountId,
                 accountCacheItem?.PreferredUsername,
                 accountCacheItem?.Environment,
+                accountCacheItem?.AccountSource,
                 accountCacheItem?.WamAccountIds,
                 tenantProfiles?.Values);
         }

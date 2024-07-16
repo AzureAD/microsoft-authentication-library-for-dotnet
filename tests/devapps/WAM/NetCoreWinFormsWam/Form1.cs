@@ -821,6 +821,7 @@ namespace NetDesktopWinForms
                 "" :
                 $"({Account.Environment})";
             string homeTenantId = account?.HomeAccountId?.TenantId?.Substring(0, 5);
+            string accountSource = account?.AccountSource;
 
             DisplayValue = displayValue ?? $"{Account.Username} {env} {homeTenantId}";
         }
@@ -833,6 +834,8 @@ namespace NetDesktopWinForms
         public string Environment => "";
 
         public AccountId HomeAccountId => null;
+
+        public string AccountSource => null;
     }
 
     public enum AuthMethod

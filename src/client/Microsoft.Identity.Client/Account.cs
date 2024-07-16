@@ -18,17 +18,20 @@ namespace Microsoft.Identity.Client
         /// <param name="homeAccountId">Home account ID in "uid.utid" format; can be null, for example when migrating the ADAL v3 cache.</param>
         /// <param name="username"><see href="https://learn.microsoft.com/windows/win32/secauthn/user-name-formats#user-principal-name">UPN-style</see>, can be null</param>
         /// <param name="environment">Identity provider for the account, e.g., <c>login.microsoftonline.com</c>.</param>
+        /// <param name="accountsource">The initial flow that established the account. e.g., device code flow.</param>
         /// <param name="wamAccountIds">Map of (<c>client_id</c>, <c>wam_account_id</c>)</param>
         /// <param name="tenantProfiles">Map of (<c>tenant_id</c>, <c>tenant_profile</c>)</param>
         public Account(
             string homeAccountId, 
             string username, 
-            string environment, 
+            string environment,
+            string accountsource = "",
             IDictionary<string, string> wamAccountIds = null, 
             IEnumerable<TenantProfile> tenantProfiles = null)
         {
             Username = username;
             Environment = environment;
+            AccountSource = accountsource;
             HomeAccountId = AccountId.ParseFromString(homeAccountId);
             WamAccountIds = wamAccountIds;
             TenantProfiles = tenantProfiles;
@@ -43,6 +46,10 @@ namespace Microsoft.Identity.Client
         /// Gets the environment associated with the account. For example, <c>login.microsoftonline.com</c>.
         /// </summary>
         public string Environment { get; }
+
+        /// <summary>
+        /// Gets the source of the account. For example, device code flow, broker etc.
+        public string AccountSource { get; }
 
         /// <summary>
         /// Gets additional account identifiers, such as object ID, tenant ID, and the unique identifier.

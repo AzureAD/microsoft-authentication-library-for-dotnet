@@ -48,6 +48,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string preferredCacheEnv,
             string clientInfo,
             string homeAccountId,
+            string accountSource,
             IdToken idToken,
             string preferredUsername,
             string tenantId,
@@ -59,6 +60,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 idToken?.GetUniqueId(),
                 clientInfo,
                 homeAccountId,
+                accountSource,
                 idToken?.Name,
                 preferredUsername,
                 tenantId,
@@ -72,6 +74,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string localAccountId,
             string rawClientInfo,
             string homeAccountId,
+            string accountSource,
             string name,
             string preferredUsername,
             string tenantId,
@@ -85,6 +88,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 localAccountId,
                 rawClientInfo,
                 homeAccountId,
+                accountSource,
                 name,
                 preferredUsername,
                 tenantId,
@@ -96,13 +100,15 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal MsalAccountCacheItem(
             string environment, 
             string tenantId, 
-            string homeAccountId, 
+            string homeAccountId,
+            string accountSource,
             string preferredUsername)
             : this()
         {
             Environment = environment;
             TenantId = tenantId;
             HomeAccountId = homeAccountId;
+            AccountSource = accountSource;
             PreferredUsername = preferredUsername;
 
             InitCacheKey();
@@ -114,6 +120,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal string GivenName { get; set; }
         internal string FamilyName { get; set; }
         internal string LocalAccountId { get; set; }
+        internal string AccountSource { get; set; }
         internal string AuthorityType { get; set; }
 
         /// <summary>
@@ -133,6 +140,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string localAccountId,
             string rawClientInfo,
             string homeAccountId,
+            string accountSource,
             string name,
             string preferredUsername,
             string tenantId,
@@ -149,6 +157,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             GivenName = givenName;
             FamilyName = familyName;
             HomeAccountId = homeAccountId;
+            AccountSource = accountSource;
             WamAccountIds = wamAccountIds;
 
             InitCacheKey();
