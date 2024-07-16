@@ -486,6 +486,44 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result2.AuthenticationResultMetadata.TokenSource);
         }
 
+        [TestMethod]
+        public async Task InMemoryCryptoProvider_AlgIsPS256()
+        {
+            // Arrange - create a Confidential Client Application with PoP configuration
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(settings.ClientId)
+                .WithExperimentalFeatures()
+                .WithAuthority(settings.Authority)
+                .WithClientSecret(settings.GetSecret())
+                .Build();
+
+            // Use InMemoryCryptoProvider
+            var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl))
+            {
+                PopCryptoProvider = new InMemoryCryptoProvider(),
+                HttpMethod = HttpMethod.Get
+            };
+
+            var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .WithProofOfPossession(popConfig)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            // Assert token type
+            Assert.AreEqual("pop", result.TokenType);
+
+            // Validate the token
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(result.AccessToken);
+            var alg = token.Header.Alg;
+
+            // Check the algorithm
+            Assert.AreEqual("PS256", alg, "The algorithm in the token header should be PS256");
+        }
+
+
 #if NET_CORE
         [IgnoreOnOneBranch]
         public async Task WamUsernamePasswordRequestWithPOPAsync()
