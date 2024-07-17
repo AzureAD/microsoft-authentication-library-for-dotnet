@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
@@ -29,6 +30,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public PoPAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
         public Func<OnBeforeTokenRequestData, Task> OnBeforeTokenRequestHandler { get; internal set; }
         public X509Certificate2 MtlsCertificate { get; internal set; }
-
+        public IEnumerable<Constraint> AuthenticationConstraints { get; set; }
     }
 }

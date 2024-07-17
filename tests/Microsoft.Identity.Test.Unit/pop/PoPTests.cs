@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 #if !NET6_0
 using Microsoft.Identity.Client.Broker;
@@ -44,8 +45,42 @@ namespace Microsoft.Identity.Test.Unit.Pop
         [TestCleanup]
         public override void TestCleanup()
         {
-            PoPProviderFactory.Reset();
+            CryptoProviderFactory.Reset();
             base.TestCleanup();
+        }
+
+        [TestMethod]
+        public async Task CDT_Test_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication app =
+                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .WithExperimentalFeatures(true)
+                                                              .BuildConcrete();
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
+                var popConfig = new PoPAuthenticationConfiguration(request);
+                var provider = CryptoProviderFactory.GetOrCreateProvider();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithTenantId(TestConstants.Utid)
+                    .WithProofOfPossession(popConfig)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // access token parsing can be done with MSAL's id token parsing logic
+                var claims = IdToken.Parse(result.AccessToken).ClaimsPrincipal;
+
+                Assert.IsTrue(!string.IsNullOrEmpty(claims.FindAll("nonce").Single().Value));
+                AssertSingedHttpRequestClaims(provider, claims);
+            }
         }
 
         [TestMethod]
@@ -62,7 +97,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
                 var popConfig = new PoPAuthenticationConfiguration(request);
-                var provider = PoPProviderFactory.GetOrCreateProvider();
+                var provider = CryptoProviderFactory.GetOrCreateProvider();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
@@ -96,7 +131,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 // no HTTP method binding, but custom nonce
                 var popConfig = new PoPAuthenticationConfiguration() { Nonce = CustomNonce };
-                var provider = PoPProviderFactory.GetOrCreateProvider();
+                var provider = CryptoProviderFactory.GetOrCreateProvider();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
@@ -134,7 +169,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
                 var popConfig = new PoPAuthenticationConfiguration(request) { Nonce = CustomNonce };
-                var provider = PoPProviderFactory.GetOrCreateProvider();
+                var provider = CryptoProviderFactory.GetOrCreateProvider();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
@@ -212,7 +247,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                                                               .WithExperimentalFeatures(true)
                                                               .BuildConcrete();
                 var testTimeService = new TestTimeService();
-                PoPProviderFactory.TimeService = testTimeService;
+                CryptoProviderFactory.TimeService = testTimeService;
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
                 var popConfig = new PoPAuthenticationConfiguration(request);
@@ -231,7 +266,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 // Assert
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                string expectedKid = GetKidFromJwk(PoPProviderFactory.GetOrCreateProvider().CannonicalPublicKeyJwk);
+                string expectedKid = GetKidFromJwk(CryptoProviderFactory.GetOrCreateProvider().CannonicalPublicKeyJwk);
                 string actualCacheKey = cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey;
                 Assert.AreEqual(
                     string.Format(
@@ -243,8 +278,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     actualCacheKey);
 
                 // Arrange - force a new key by moving to the future
-                (PoPProviderFactory.TimeService as TestTimeService).MoveToFuture(
-                    PoPProviderFactory.KeyRotationInterval.Add(TimeSpan.FromMinutes(10)));
+                (CryptoProviderFactory.TimeService as TestTimeService).MoveToFuture(
+                    CryptoProviderFactory.KeyRotationInterval.Add(TimeSpan.FromMinutes(10)));
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
 
@@ -258,7 +293,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 // Assert
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                string expectedKid2 = GetKidFromJwk(PoPProviderFactory.GetOrCreateProvider().CannonicalPublicKeyJwk);
+                string expectedKid2 = GetKidFromJwk(CryptoProviderFactory.GetOrCreateProvider().CannonicalPublicKeyJwk);
                 string actualCacheKey2 = cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey;
                 Assert.AreEqual(
                     string.Format(
@@ -553,7 +588,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             }
         }
 
-        private static void AssertSingedHttpRequestClaims(IPoPCryptoProvider popCryptoProvider, System.Security.Claims.ClaimsPrincipal claims)
+        private static void AssertSingedHttpRequestClaims(ICryptoProvider popCryptoProvider, System.Security.Claims.ClaimsPrincipal claims)
         {
             Assert.AreEqual("GET", claims.FindAll("m").Single().Value);
             Assert.AreEqual("www.contoso.com", claims.FindAll("u").Single().Value);
@@ -562,7 +597,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             AssertTsAndJwkClaims(popCryptoProvider, claims);
         }
 
-        private static void AssertTsAndJwkClaims(IPoPCryptoProvider popCryptoProvider, System.Security.Claims.ClaimsPrincipal claims)
+        private static void AssertTsAndJwkClaims(ICryptoProvider popCryptoProvider, System.Security.Claims.ClaimsPrincipal claims)
         {
             long ts = long.Parse(claims.FindAll("ts").Single().Value);
             CoreAssert.IsWithinRange(DateTimeOffset.UtcNow, DateTimeHelpers.UnixTimestampToDateTime(ts), TimeSpan.FromSeconds(5));

@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Broker;
@@ -214,7 +214,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public virtual bool BrokerSupportsWamAccounts => false;
 
-        public virtual IPoPCryptoProvider GetDefaultPoPCryptoProvider()
+        public virtual ICryptoProvider GetDefaultCryptoProvider()
         {
             throw new NotImplementedException();
         }

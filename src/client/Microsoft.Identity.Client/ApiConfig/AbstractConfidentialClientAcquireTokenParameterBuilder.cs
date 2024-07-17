@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Executors;
@@ -83,6 +85,20 @@ namespace Microsoft.Identity.Client
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
             CommonParameters.AuthenticationScheme = new PopAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
+
+            return this as T;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="contraints"></param>
+        /// <returns></returns>
+        public T WithConstraints(IEnumerable<Constraint> contraints)
+        {
+            ValidateUseOfExperimentalFeature();
+
+            CommonParameters.AuthenticationConstraints = contraints;
 
             return this as T;
         }

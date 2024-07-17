@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -41,7 +40,7 @@ namespace Microsoft.Identity.Test.Integration
         }
     }
 
-    internal class SigningCredentialsToPopCryptoProviderAdapter : IPoPCryptoProvider
+    internal class SigningCredentialsToPopCryptoProviderAdapter : Client.AuthScheme.ICryptoProvider
     {
         private readonly SigningCredentials _popCredentials;
         private readonly bool _assertNotSigned;

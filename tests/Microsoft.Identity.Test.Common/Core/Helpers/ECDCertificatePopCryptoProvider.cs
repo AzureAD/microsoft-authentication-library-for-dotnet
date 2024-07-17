@@ -3,12 +3,13 @@
 
 using System;
 using System.Security.Cryptography;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
-    public class ECDCertificatePopCryptoProvider : IPoPCryptoProvider
+    public class ECDCertificatePopCryptoProvider : ICryptoProvider
     {
         public byte[] Sign(byte[] payload)
         {

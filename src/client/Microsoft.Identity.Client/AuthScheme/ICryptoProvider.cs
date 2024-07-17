@@ -3,7 +3,7 @@
 
 using System.Security.Cryptography;
 
-namespace Microsoft.Identity.Client.AuthScheme.PoP
+namespace Microsoft.Identity.Client.AuthScheme
 {
     // TODO: we can expose this interface to users for a simple but low-level extensibility mechanism.
     // For a more complex extensibility mechanism, we should allow users to configure SigningCredentials, 
@@ -21,7 +21,8 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     /// Ideally there should be a single public / private key pair associated with a machine, so implementers of this interface
     /// should consider exposing a singleton.
     /// </remarks>
-    public interface IPoPCryptoProvider
+    public interface ICryptoProvider
+
     {
         /// <summary>
         /// The canonical representation of the JWK.         

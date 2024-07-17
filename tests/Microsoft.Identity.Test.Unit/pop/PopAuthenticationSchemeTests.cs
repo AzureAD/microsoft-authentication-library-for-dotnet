@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(uri);
                 popConfig.HttpMethod = HttpMethod.Post;
 
-                var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
+                var popCryptoProvider = Substitute.For<ICryptoProvider>();
                 var serviceBundle = Substitute.For<IServiceBundle>();
                 popCryptoProvider.CannonicalPublicKeyJwk.Returns(JWK);
                 popCryptoProvider.CryptographicAlgorithm.Returns("RS256");
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 Guid correlationId = Guid.NewGuid();
                 TestTimeService testClock = new TestTimeService();
-                PoPProviderFactory.TimeService = testClock;
+                CryptoProviderFactory.TimeService = testClock;
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPossession(popConfig)
@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 //Advance time 7 hours. Should still be the same key and token
                 testClock.MoveToFuture(TimeSpan.FromHours(7));
-                PoPProviderFactory.TimeService = testClock;
+                CryptoProviderFactory.TimeService = testClock;
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPossession(popConfig)
@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 //Advance time 2 hours. Should be a different key
                 testClock.MoveToFuture(TimeSpan.FromHours(2));
-                PoPProviderFactory.TimeService = testClock;
+                CryptoProviderFactory.TimeService = testClock;
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPossession(popConfig)

@@ -3,28 +3,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Security.Cryptography;
+using System.Linq;
 using System.Text;
-using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Cache.Items;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Utils;
-#if SUPPORTS_SYSTEM_TEXT_JSON
-using JObject = System.Text.Json.Nodes.JsonObject;
-using JToken = System.Text.Json.Nodes.JsonNode;
-#else
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
-#endif
 
-namespace Microsoft.Identity.Client.AuthScheme.PoP
+namespace Microsoft.Identity.Client.AuthScheme.CDT
 {
-    internal class PopAuthenticationScheme : IAuthenticationScheme
+    internal class CdtAuthenticationScheme : IAuthenticationScheme
     {
         private readonly PoPAuthenticationConfiguration _popAuthenticationConfiguration;
-        private readonly ICryptoProvider _popCryptoProvider;
+        private readonly ICdtCryptoProvider _cdtCryptoProvider;
 
         /// <summary>
         /// Creates POP tokens, i.e. tokens that are bound to an HTTP request and are digitally signed.
@@ -33,7 +22,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// Currently the signing credential algorithm is hard-coded to RSA with SHA256. Extensibility should be done
         /// by integrating Wilson's SigningCredentials
         /// </remarks>
-        public PopAuthenticationScheme(PoPAuthenticationConfiguration popAuthenticationConfiguration, IServiceBundle serviceBundle)
+        public CdtAuthenticationScheme(ICdtCryptoProvider cdtCryptoProvider, IEnumerable<Constraint> contraints, IServiceBundle serviceBundle)
         {
             if (serviceBundle == null)
             {
@@ -42,9 +31,9 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
             _popAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
-            _popCryptoProvider = _popAuthenticationConfiguration.PopCryptoProvider ?? serviceBundle.PlatformProxy.GetDefaultCryptoProvider();
+            _cdtCryptoProvider = _popAuthenticationConfiguration.PopCryptoProvider ?? serviceBundle.PlatformProxy.GetDefaultCryptoProvider();
 
-            var keyThumbprint = ComputeThumbprint(_popCryptoProvider.CannonicalPublicKeyJwk);
+            var keyThumbprint = ComputeThumbprint(_cdtCryptoProvider.CannonicalPublicKeyJwk);
             KeyId = Base64UrlHelpers.Encode(keyThumbprint);
         }
 
@@ -75,7 +64,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             }
 
             var header = new JObject();
-            header[JsonWebTokenConstants.Algorithm] = _popCryptoProvider.CryptographicAlgorithm;
+            header[JsonWebTokenConstants.Algorithm] = _cdtCryptoProvider.CryptographicAlgorithm;
             header[JsonWebTokenConstants.KeyId] = KeyId;
             header[JsonWebTokenConstants.Type] = Constants.PoPTokenType;
 
@@ -87,7 +76,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         private JObject CreateBody(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            var publicKeyJwk = JToken.Parse(_popCryptoProvider.CannonicalPublicKeyJwk);
+            var publicKeyJwk = JToken.Parse(_cdtCryptoProvider.CannonicalPublicKeyJwk);
             var body = new JObject
             {
                 // Mandatory parameters
@@ -157,7 +146,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             string headerAndPayload = sb.ToString();
 
             sb.Append('.');
-            sb.Append(Base64UrlHelpers.Encode(_popCryptoProvider.Sign(Encoding.UTF8.GetBytes(headerAndPayload))));
+            sb.Append(Base64UrlHelpers.Encode(_cdtCryptoProvider.Sign(Encoding.UTF8.GetBytes(headerAndPayload))));
 
             return sb.ToString();
         }

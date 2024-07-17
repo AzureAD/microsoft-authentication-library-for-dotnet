@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 
         IWebUIFactory GetWebUiFactory(ApplicationConfiguration appConfig);
 
-        IPoPCryptoProvider GetDefaultPoPCryptoProvider();
+        ICryptoProvider GetDefaultCryptoProvider();
 
         IFeatureFlags GetFeatureFlags();
 

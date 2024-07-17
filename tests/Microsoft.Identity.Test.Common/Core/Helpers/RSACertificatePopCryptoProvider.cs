@@ -4,12 +4,12 @@
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
-    public class RSACertificatePopCryptoProvider : IPoPCryptoProvider
+    public class RSACertificatePopCryptoProvider : ICryptoProvider
     {
         private readonly X509Certificate2 _cert;
 
