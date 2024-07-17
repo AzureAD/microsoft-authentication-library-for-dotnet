@@ -136,9 +136,10 @@ namespace Microsoft.Identity.Client.Http
             // package 500 errors in a "service not available" exception
             if ((int)response.StatusCode >= 500 && (int)response.StatusCode < 600)
             {
+                string requestUriScrubbed = $"{endpoint.AbsoluteUri.Split('?')[0]}";
                 throw MsalServiceExceptionFactory.FromHttpResponse(
                     MsalError.ServiceNotAvailable,
-                    "Service is unavailable to process the request",
+                    $"Service is unavailable to process the request. The request Uri is: {requestUriScrubbed} on port {endpoint.Port}",
                     response);
             }
 
