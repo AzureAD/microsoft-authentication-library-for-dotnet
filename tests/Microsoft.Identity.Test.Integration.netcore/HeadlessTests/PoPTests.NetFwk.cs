@@ -499,10 +499,23 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithClientSecret(settings.GetSecret())
                 .Build();
 
+            // Create a new InMemoryCryptoProvider and get its JWK
+            var cryptoProvider = new InMemoryCryptoProvider();
+            var canonicalJwk = cryptoProvider.CannonicalPublicKeyJwk;
+            var base64EncodedJwk = Base64UrlHelpers.Encode(Encoding.UTF8.GetBytes(canonicalJwk));
+
+            // Calculate the expected kid
+            string expectedKid;
+            using (var sha256 = SHA256.Create())
+            {
+                var kidBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(canonicalJwk));
+                expectedKid = Base64UrlHelpers.Encode(kidBytes);
+            }
+
             // Use InMemoryCryptoProvider
             var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl))
             {
-                PopCryptoProvider = new InMemoryCryptoProvider(),
+                PopCryptoProvider = cryptoProvider,
                 HttpMethod = HttpMethod.Get
             };
 
@@ -518,11 +531,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.ReadJwtToken(result.AccessToken);
             var alg = token.Header.Alg;
+            var kid = token.Header.Kid;
 
-            // Check the algorithm
+            // Check the algorithm and kid
             Assert.AreEqual("PS256", alg, "The algorithm in the token header should be PS256");
-        }
+            Assert.AreEqual(expectedKid, kid, "The kid in the token header should match the generated key");
 
+            // Validate the canonical JWK includes the alg field
+            Assert.IsTrue(canonicalJwk.Contains(@"""alg"":""PS256"""), "The canonical JWK should include the alg field with value PS256");
+        }
 
 #if NET_CORE
         [IgnoreOnOneBranch]
@@ -560,6 +577,37 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 ProtectedUrl,
                 HttpMethod.Get,
                 result);
+        }
+
+        [TestMethod]
+        public void CheckPopRuntimeBrokerSupportTest()
+        {
+            //Broker enabled
+            var pcaBuilder = PublicClientApplicationBuilder
+                                            .Create(TestConstants.ClientId);
+
+            pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+
+            IPublicClientApplication app = pcaBuilder.Build();
+
+            Assert.IsTrue(app.IsProofOfPossessionSupportedByClient());
+
+            //Broker disabled
+            pcaBuilder = PublicClientApplicationBuilder
+                                .Create(TestConstants.ClientId);
+
+            pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
+
+            app = pcaBuilder.Build();
+
+            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
+
+            //Broker not configured
+            app = PublicClientApplicationBuilder
+                                .Create(TestConstants.ClientId)
+                                .Build();
+
+            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
         }
 #endif
 
@@ -616,9 +664,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // the reason for creating the RsaSecurityKey from RSAParameters is so that a SignatureProvider created with this key
             // will own the RSA object and dispose it. If we pass a RSA object, the SignatureProvider does not own the object, the RSA object will not be disposed.
             RSAParameters rsaParameters = rsa.ExportParameters(true);
-            RsaSecurityKey rsaSecuirtyKey = new RsaSecurityKey(rsaParameters) { KeyId = CreateRsaKeyId(rsaParameters) };
+            RsaSecurityKey rsaSecurityKey = new RsaSecurityKey(rsaParameters) { KeyId = CreateRsaKeyId(rsaParameters) };
             rsa.Dispose();
-            return rsaSecuirtyKey;
+            return rsaSecurityKey;
         }
 
         private static string CreateRsaKeyId(RSAParameters rsaParameters)

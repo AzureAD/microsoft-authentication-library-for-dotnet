@@ -56,9 +56,15 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// </summary>
         private static string ComputeCanonicalJwk(RSAParameters rsaPublicKey)
         {
-            return $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
+            return $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",
+                     ""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",
+                     ""{JsonWebKeyParameterNames.N}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}"",
+                     ""alg"":""PS256""}}";
         }
 
+        /// <summary>
+        /// For internal testing only
+        /// </summary>
         internal RSAParameters GetPublicKeyParameters()
         {
             return _signingKey.ExportParameters(false);
