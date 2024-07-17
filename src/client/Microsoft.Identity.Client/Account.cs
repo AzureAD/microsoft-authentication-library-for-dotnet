@@ -49,6 +49,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Gets the source of the account. For example, device code flow, broker etc.
+        /// </summary>
         public string AccountSource { get; }
 
         /// <summary>
