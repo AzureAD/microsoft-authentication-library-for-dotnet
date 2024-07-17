@@ -126,6 +126,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _requestParams.AppConfig.ExtraQueryParameters[InstanceAwareParam] = "true";
             }
 
+            // Aligh with MSAL CPP: https://github.com/AzureAD/microsoft-authentication-library-for-cpp/blob/4fa774db2b38cdce9c9b94e3e686ab53fc24b948/source/xplat/requests/WebRequestManager.cpp#L566
+            // Always add 'haschrome=1' in the protocol to avoid unexpected back buttons on the first page.
+            _requestParams.AppConfig.ExtraQueryParameters["haschrome"] = "1";
+
             IAuthCodeRequestComponent authorizationFetcher =
                 _authCodeRequestComponentOverride ??
                 new AuthCodeRequestComponent(

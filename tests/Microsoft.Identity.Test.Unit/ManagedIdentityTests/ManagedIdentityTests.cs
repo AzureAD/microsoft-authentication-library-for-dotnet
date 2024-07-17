@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         internal const string ImdsEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token";
         internal const string AzureArcEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
         internal const string CloudShellEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
-        internal const string ServiceFabricEndpoint = "http://localhost:40342/metadata/identity/oauth2/token";
+        internal const string ServiceFabricEndpoint = "https://localhost:2377/metadata/identity/oauth2/token";
         internal const string ExpectedErrorMessage = "Expected error message.";
         internal const string ExpectedErrorCode = "ErrorCode";
         internal const string ExpectedCorrelationId = "Some GUID";
@@ -356,6 +356,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     ManagedIdentitySource.AppService, statusCode: HttpStatusCode.InternalServerError);
                 httpManager.AddManagedIdentityMockHandler(AppServiceEndpoint, Resource, errorResponse,
                     ManagedIdentitySource.AppService, statusCode: HttpStatusCode.InternalServerError);
+                httpManager.AddManagedIdentityMockHandler(AppServiceEndpoint, Resource, errorResponse,
+                    ManagedIdentitySource.AppService, statusCode: HttpStatusCode.InternalServerError);
+                httpManager.AddManagedIdentityMockHandler(AppServiceEndpoint, Resource, errorResponse,
+                    ManagedIdentitySource.AppService, statusCode: HttpStatusCode.InternalServerError);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)
@@ -367,7 +371,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 foreach (var expectedErrorSubString in expectedInErrorResponse)
                 {
-                    Assert.IsTrue(ex.Message.Contains(expectedErrorSubString));
+                    Assert.IsTrue(ex.Message.Contains(expectedErrorSubString), 
+                        $"Expected to contain string {expectedErrorSubString}. Actual error message: {ex.Message}");
                 }
             }
         }
@@ -412,6 +417,10 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 
                 var mi = miBuilder.Build();
 
+                httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
+                    managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
+                httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
+                    managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
                 httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
                     managedIdentitySource, statusCode: HttpStatusCode.InternalServerError);
                 httpManager.AddManagedIdentityMockHandler(endpoint, "scope", "",
@@ -539,7 +548,21 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                     Resource,
                     "",
                     managedIdentitySource,
-                    statusCode: statusCode); 
+                    statusCode: statusCode);
+
+                httpManager.AddManagedIdentityMockHandler(
+                    endpoint,
+                    Resource,
+                    "",
+                    managedIdentitySource,
+                    statusCode: statusCode);
+
+                httpManager.AddManagedIdentityMockHandler(
+                    endpoint,
+                    Resource,
+                    "",
+                    managedIdentitySource,
+                    statusCode: statusCode);
 
                 MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
                     await mi.AcquireTokenForManagedIdentity(Resource)

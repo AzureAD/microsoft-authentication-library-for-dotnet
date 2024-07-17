@@ -20,6 +20,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
     {
         private readonly IDictionary<string, string> _claimsToSign;
         private readonly bool _appendDefaultClaims;
+        private readonly string _base64EncodedThumbprint; // x5t
 
         public X509Certificate2 Certificate { get; }
 
@@ -33,7 +34,7 @@ namespace Microsoft.Identity.Client.Internal.ClientCredential
             Certificate = certificate;
             _claimsToSign = claimsToSign;
             _appendDefaultClaims = appendDefaultClaims;
-           
+            _base64EncodedThumbprint = Base64UrlHelpers.Encode(certificate.GetCertHash());
         }
 
         public Task AddConfidentialClientParametersAsync(

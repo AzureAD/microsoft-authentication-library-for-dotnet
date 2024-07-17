@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             ServiceFabric
         }
 
-        public static void SetEnvironmentVariables(ManagedIdentitySource managedIdentitySource, string endpoint, string secret = "secret")
+        public static void SetEnvironmentVariables(ManagedIdentitySource managedIdentitySource, string endpoint, string secret = "secret", string thumbprint = "thumbprint")
         {
             switch (managedIdentitySource)
             {
@@ -57,11 +57,9 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 case ManagedIdentitySource.ServiceFabric:
                     Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", endpoint);
                     Environment.SetEnvironmentVariable("IDENTITY_HEADER", secret);
-                    Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", "thumbprint");
+                    Environment.SetEnvironmentVariable("IDENTITY_SERVER_THUMBPRINT", thumbprint);
                     break;
             }
-
-            ManagedIdentityClient.resetCachedSource();
         }
 
         /// <summary>
