@@ -8,16 +8,12 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Desktop;
-using Microsoft.Identity.Client.ApiConfig;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace NetDesktopWinForms
 {
@@ -118,7 +114,7 @@ namespace NetDesktopWinForms
             {
                 case AuthMethod.WAM:
                 case AuthMethod.WAMRuntime:
-                    builder = builder.WithWindowsDesktopFeatures(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
+                    builder = builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows)
                     {
                         ListOperatingSystemAccounts = cbxListOsAccounts.Checked,
                         MsaPassthrough = cbxMsaPt.Checked,
@@ -126,7 +122,7 @@ namespace NetDesktopWinForms
                     });
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder.WithWindowsEmbeddedBrowserSupport();
+                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
                     break;
                 case AuthMethod.EmbeddedBrowser:
                     builder.WithWindowsEmbeddedBrowserSupport();

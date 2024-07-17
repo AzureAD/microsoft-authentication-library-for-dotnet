@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         private async Task AcquireTokenSilentAfterDeviceCodeFlowWithBrokerAsync(LabResponse labResponse, string userType)
         {
-            Trace.WriteLine($"Calling AcquireTokenWithDeviceCodeAsync with {0}", userType);
+            Trace.WriteLine($"Calling AcquireTokenSilentAfterDeviceCodeFlowWithBrokerAsync with {0}", userType);
             BrokerOptions options = new BrokerOptions(BrokerOptions.OperatingSystems.Windows);
             var builder = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithTestLogging().WithBroker(options);
 
@@ -153,6 +153,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
 
             Assert.IsNotNull(result);
+            Assert.IsTrue(result.Account.AccountSource == "device_code_flow");
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
             TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
 
