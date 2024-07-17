@@ -41,27 +41,47 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
+            HttpResponse response;
+
             // Convert the scopes to a resource string.
             string resource = parameters.Resource;
 
             ManagedIdentityRequest request = CreateRequest(resource);
 
+            _requestContext.Logger.Info("[Managed Identity] Sending request to managed identity endpoints.");
+
             try
             {
-                HttpResponse response =
-                    request.Method == HttpMethod.Get ?
-                    await _requestContext.ServiceBundle.HttpManager
-                        .SendGetForceResponseAsync(
-                            request.ComputeUri(), 
-                            request.Headers, 
-                            _requestContext.Logger, 
-                            cancellationToken: cancellationToken).ConfigureAwait(false) :
-                    await _requestContext.ServiceBundle.HttpManager
-                        .SendPostForceResponseAsync(
-                            request.ComputeUri(), 
-                            request.Headers, 
-                            request.BodyParameters, 
-                            _requestContext.Logger, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (request.Method == HttpMethod.Get)
+                {
+                    response = await _requestContext.ServiceBundle.HttpManager
+                        .SendRequestAsync(
+                            request.ComputeUri(),
+                            request.Headers,
+                            body: null,
+                            HttpMethod.Get,
+                            logger: _requestContext.Logger,
+                            doNotThrow: true,
+                            mtlsCertificate: null,
+                            GetHttpClientWithSslValidation(_requestContext),
+                            cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    response = await _requestContext.ServiceBundle.HttpManager
+                        .SendRequestAsync(
+                            request.ComputeUri(),
+                            request.Headers,
+                            body: new FormUrlEncodedContent(request.BodyParameters),
+                            HttpMethod.Post,
+                            logger: _requestContext.Logger,
+                            doNotThrow: true,
+                            mtlsCertificate: null,
+                            GetHttpClientWithSslValidation(_requestContext),
+                            cancellationToken)
+                        .ConfigureAwait(false);
+
+                }
 
                 return await HandleResponseAsync(parameters, response, cancellationToken).ConfigureAwait(false);
             }
@@ -70,6 +90,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 HandleException(ex);
                 throw;
             }
+        }
+
+        // This method is internal for testing purposes.
+        internal virtual HttpClient GetHttpClientWithSslValidation(RequestContext requestContext)
+        {
+            return null;
         }
 
         protected virtual Task<ManagedIdentityResponse> HandleResponseAsync(

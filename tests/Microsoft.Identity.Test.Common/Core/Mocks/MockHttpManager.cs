@@ -9,40 +9,58 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
     internal sealed class MockHttpManager : IHttpManager,
                                             IDisposable
     {
-        private readonly TestContext _testContext;
+        private readonly string _testName;
 
         private readonly IHttpManager _httpManager;
 
-        public MockHttpManager(TestContext testContext = null, bool isManagedIdentity = false, Func<MockHttpMessageHandler> messageHandlerFunc = null) :
-            this(true, testContext, isManagedIdentity, messageHandlerFunc)
-        { }
-
-        public MockHttpManager(bool retryOnce, TestContext testContext = null, bool isManagedIdentity = false, Func<MockHttpMessageHandler> messageHandlerFunc = null)
+        public MockHttpManager(string testName = null,
+            bool isManagedIdentity = false,
+            Func<MockHttpMessageHandler> messageHandlerFunc = null,
+            Func<HttpClient> validateServerCertificateCallback = null,
+            bool invokeNonMtlsHttpManagerFactory = false) :
+            this(true, testName, isManagedIdentity, messageHandlerFunc, invokeNonMtlsHttpManagerFactory)
         {
-            _httpManager = HttpManagerFactory.GetHttpManager(new MockHttpClientFactory(messageHandlerFunc,
-                _httpMessageHandlerQueue, testContext), retryOnce, isManagedIdentity);
-
-            _testContext = testContext;
         }
 
-        private ConcurrentQueue<HttpMessageHandler> _httpMessageHandlerQueue
+        public MockHttpManager(
+            bool retry,
+            string testName = null,
+            bool isManagedIdentity = false,
+            Func<MockHttpMessageHandler> messageHandlerFunc = null,
+            bool invokeNonMtlsHttpManagerFactory = false)
+        {
+            _httpManager = invokeNonMtlsHttpManagerFactory
+                ? HttpManagerFactory.GetHttpManager(
+                    new MockNonMtlsHttpClientFactory(messageHandlerFunc, _httpMessageHandlerQueue, testName),
+                    retry,
+                    isManagedIdentity)
+                : HttpManagerFactory.GetHttpManager(
+                    new MockHttpClientFactory(messageHandlerFunc, _httpMessageHandlerQueue, testName),
+                    retry,
+                    isManagedIdentity);
+
+            _testName = testName;
+        }
+
+        private ConcurrentQueue<HttpClientHandler> _httpMessageHandlerQueue
         {
             get;
             set;
-        } = new ConcurrentQueue<HttpMessageHandler>();
+        } = new ConcurrentQueue<HttpClientHandler>();
 
         /// <inheritdoc/>
         public void Dispose()
@@ -55,7 +73,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 #pragma warning restore CS0618 // Type or member is obsolete
             {
                 string remainingMocks = string.Join(" ",
-                    _httpMessageHandlerQueue.Select(GetExpectedUrlFromHandler));
+                    _httpMessageHandlerQueue.Select(m => GetExpectedUrlFromHandler(m)));
                 Assert.AreEqual(0, _httpMessageHandlerQueue.Count,
                     "All mocks should have been consumed. Remaining mocks are for: " + remainingMocks);
             }
@@ -63,9 +81,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public MockHttpMessageHandler AddMockHandler(MockHttpMessageHandler handler)
         {
-            string testName = _testContext?.TestName ?? "";
-            Trace.WriteLine($"Test {testName} adds an HttpMessageHandler for { GetExpectedUrlFromHandler(handler) }");
-            _httpMessageHandlerQueue.Enqueue(handler);           
+            Trace.WriteLine($"Test {_testName} adds an HttpMessageHandler for {GetExpectedUrlFromHandler(handler)}");
+            _httpMessageHandlerQueue.Enqueue(handler);
 
             return handler;
         }
@@ -83,61 +100,56 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public long LastRequestDurationInMs => 3000;
 
-        
-
         private string GetExpectedUrlFromHandler(HttpMessageHandler handler)
         {
             return (handler as MockHttpMessageHandler)?.ExpectedUrl ?? "";
         }
 
-        public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ILoggerAdapter logger, CancellationToken cancellationToken = default)
+        public Task<HttpResponse> SendRequestAsync(
+            Uri endpoint,
+            IDictionary<string, string> headers,
+            HttpContent body,
+            HttpMethod method,
+            ILoggerAdapter logger,
+            bool doNotThrow,
+            X509Certificate2 mtlsCertificate,
+            HttpClient customHttpClient,
+            CancellationToken cancellationToken,
+            int retryCount = 0)
         {
-            return await _httpManager.SendPostAsync(endpoint, headers, bodyParameters, logger, cancellationToken).ConfigureAwait(false);
-        }
-
-        public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers, HttpContent body, ILoggerAdapter logger, CancellationToken cancellationToken = default)
-        {
-            return await _httpManager.SendPostAsync(endpoint, headers, body, logger, cancellationToken).ConfigureAwait(false);
-        }
-
-        public Task<HttpResponse> SendGetAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
-        {
-            return _httpManager.SendGetAsync(endpoint, headers, logger, retry, cancellationToken);
-        }
-
-        public async Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, StringContent body, ILoggerAdapter logger, CancellationToken cancellationToken = default)
-        {
-            return await _httpManager.SendPostForceResponseAsync(uri, headers, body, logger, cancellationToken).ConfigureAwait(false);
-        }
-
-        public async Task<HttpResponse> SendPostForceResponseAsync(Uri uri, IDictionary<string, string> headers, IDictionary<string, string> bodyParameters, ILoggerAdapter logger, CancellationToken cancellationToken = default)
-        {
-            return await _httpManager.SendPostForceResponseAsync(uri, headers, bodyParameters, logger, cancellationToken).ConfigureAwait(false);
-        }
-
-        public async Task<HttpResponse> SendGetForceResponseAsync(Uri endpoint, IDictionary<string, string> headers, ILoggerAdapter logger, bool retry = true, CancellationToken cancellationToken = default)
-        {
-            return await _httpManager.SendGetForceResponseAsync(endpoint, headers, logger, retry, cancellationToken).ConfigureAwait(false); 
+            return _httpManager.SendRequestAsync(
+                endpoint,
+                headers,
+                body,
+                method,
+                logger,
+                doNotThrow,
+                mtlsCertificate,
+                customHttpClient: null,
+                cancellationToken,
+                retryCount);
         }
     }
 
-    internal class MockHttpClientFactory : IMsalHttpClientFactory
+    internal class MockHttpClientFactoryBase
     {
-        Func<MockHttpMessageHandler> MessageHandlerFunc;
-        ConcurrentQueue<HttpMessageHandler> HttpMessageHandlerQueue;
-        TestContext TestContext;
+        protected Func<MockHttpMessageHandler> MessageHandlerFunc { get; set; }
+        protected ConcurrentQueue<HttpClientHandler> HttpMessageHandlerQueue { get; set; }
+        protected string _testName { get; set; }
 
-        public MockHttpClientFactory(Func<MockHttpMessageHandler> messageHandlerFunc,
-            ConcurrentQueue<HttpMessageHandler> httpMessageHandlerQueue, TestContext testContext)
+        protected MockHttpClientFactoryBase(
+            Func<MockHttpMessageHandler> messageHandlerFunc,
+            ConcurrentQueue<HttpClientHandler> httpMessageHandlerQueue,
+            string testName)
         {
             MessageHandlerFunc = messageHandlerFunc;
             HttpMessageHandlerQueue = httpMessageHandlerQueue;
-            TestContext = testContext;
+            _testName = testName;
         }
 
-        public HttpClient GetHttpClient()
+        protected HttpClient GetHttpClientInternal(X509Certificate2 mtlsBindingCert)
         {
-            HttpMessageHandler messageHandler;
+            HttpClientHandler messageHandler;
 
             if (MessageHandlerFunc != null)
             {
@@ -151,7 +163,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 }
             }
 
-            Trace.WriteLine($"Test {TestContext?.TestName ?? ""} dequeued a mock handler for {GetExpectedUrlFromHandler(messageHandler)}");
+            Trace.WriteLine($"Test {_testName} dequeued a mock handler for {GetExpectedUrlFromHandler(messageHandler)}");
+
+            if (mtlsBindingCert != null)
+            {
+                messageHandler.ClientCertificates.Add(mtlsBindingCert);
+            }
 
             var httpClient = new HttpClient(messageHandler)
             {
@@ -169,4 +186,42 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return (handler as MockHttpMessageHandler)?.ExpectedUrl ?? "";
         }
     }
+
+    internal class MockHttpClientFactory : MockHttpClientFactoryBase, IMsalMtlsHttpClientFactory
+    {
+        public MockHttpClientFactory(
+            Func<MockHttpMessageHandler> messageHandlerFunc,
+            ConcurrentQueue<HttpClientHandler> httpMessageHandlerQueue,
+            string testName)
+            : base(messageHandlerFunc, httpMessageHandlerQueue, testName)
+        {
+        }
+
+        public HttpClient GetHttpClient()
+        {
+            return GetHttpClientInternal(null);
+        }
+
+        public HttpClient GetHttpClient(X509Certificate2 mtlsBindingCert)
+        {
+            return GetHttpClientInternal(mtlsBindingCert);
+        }
+    }
+
+    internal class MockNonMtlsHttpClientFactory : MockHttpClientFactoryBase, IMsalHttpClientFactory
+    {
+        public MockNonMtlsHttpClientFactory(
+            Func<MockHttpMessageHandler> messageHandlerFunc,
+            ConcurrentQueue<HttpClientHandler> httpMessageHandlerQueue,
+            string testName)
+            : base(messageHandlerFunc, httpMessageHandlerQueue, testName)
+        {
+        }
+
+        public HttpClient GetHttpClient()
+        {
+            return GetHttpClientInternal(null);
+        }
+    }
+
 }

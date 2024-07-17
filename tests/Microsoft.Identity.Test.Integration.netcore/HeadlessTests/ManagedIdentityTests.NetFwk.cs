@@ -20,6 +20,7 @@ using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
@@ -37,6 +38,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         //Shared User Assigned Client ID
         private const string UserAssignedClientID = "3b57c42c-3201-4295-ae27-d6baec5b7027";
+        
+        private const string LabAccessClientID = "f62c5ae3-bf3a-4af5-afa8-a68b800396e9";
+
+        private const string LabVaultAccessUserAssignedClientID = "4b7a4b0b-ecb2-409e-879a-1e21a15ddaf6";
 
         private const string UserAssignedObjectID = "9fc6a41b-e161-43ba-90ba-12f172141c23";
 
@@ -82,9 +87,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //Set the Environment Variables
                 SetEnvironmentVariables(envVariables);
-
-                //Reset cached source with update in environment variables
-                ManagedIdentityClient.resetCachedSource();
 
                 //form the http proxy URI 
                 string uri = s_baseURL + $"MSIToken?" +
@@ -141,9 +143,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 //Set the Environment Variables
                 SetEnvironmentVariables(envVariables);
 
-                //Reset cached source with update in environment variables
-                ManagedIdentityClient.resetCachedSource();
-
                 //form the http proxy URI 
                 string uri = s_baseURL + $"MSIToken?" +
                     $"azureresource={MsiAzureResource.WebApp}&uri=";
@@ -184,6 +183,108 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             }
         }
 
+        [TestMethod]
+        public async Task AcquireMsiToken_ExchangeForEstsToken_Successfully()
+        {
+           const string resource = "api://AzureAdTokenExchange";
+
+            //Arrange
+            using (new EnvVariableContext())
+            {
+                // Fetch the env variables from the resource and set them locally
+                Dictionary<string, string> envVariables =
+                    await GetEnvironmentVariablesAsync(MsiAzureResource.WebApp).ConfigureAwait(false);
+
+                //Set the Environment Variables
+                SetEnvironmentVariables(envVariables);
+
+                //form the http proxy URI 
+                string uri = s_baseURL + $"MSIToken?" +
+                    $"azureresource={MsiAzureResource.WebApp}&uri=";
+
+                //Create CCA with Proxy
+                IManagedIdentityApplication mia = CreateMIAWithProxy(uri, LabVaultAccessUserAssignedClientID, UserAssignedIdentityId.ClientId);
+
+                AuthenticationResult result;
+                //Act
+                result = await mia
+                            .AcquireTokenForManagedIdentity(resource)
+                            .ExecuteAsync().ConfigureAwait(false);
+
+                //Assert
+                //1. Token Type
+                Assert.AreEqual("Bearer", result.TokenType);
+
+                //2. First token response is from the MSI Endpoint
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                //3. Validate the ExpiresOn falls within a 24 hour range from now
+                CoreAssert.IsWithinRange(
+                                DateTimeOffset.UtcNow + TimeSpan.FromHours(0),
+                                result.ExpiresOn,
+                                TimeSpan.FromHours(24));
+
+                result = await mia
+                    .AcquireTokenForManagedIdentity(resource)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                //4. Validate the scope
+                Assert.IsTrue(result.Scopes.All(resource.Contains));
+
+                //5. Validate the second call to token endpoint gets returned from the cache
+                Assert.AreEqual(TokenSource.Cache,
+                    result.AuthenticationResultMetadata.TokenSource);
+
+                //6. Gets a token for the user-assigned Managed Identity.
+
+                AuthenticationResult miResult = null;
+
+                var miAssertionProvider = async (AssertionRequestOptions _) =>
+                {
+                    miResult = await mia.AcquireTokenForManagedIdentity(resource)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                    return miResult.AccessToken;
+                };
+
+                //7. Get a token for the ESTS resource using MI token as an assertion
+                IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(LabAccessClientID)
+                    .WithAuthority(TestConstants.AadAuthorityWithMsftTenantId, false)
+                    .WithClientAssertion(miAssertionProvider)
+                    .Build();
+
+                string[] scopes = { "https://msidlabs.vault.azure.net/.default" };
+                AuthenticationResult ccaResult = await app.AcquireTokenForClient(scopes)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert: Validate successful CCA token acquisition
+                Assert.AreEqual("Bearer", ccaResult.TokenType);
+                Assert.IsNotNull(ccaResult.AccessToken);
+                Assert.IsTrue(ccaResult.ExpiresOn > DateTimeOffset.UtcNow);
+
+                // Step 8: Get token from ESTS again - check that it is cached (reuse the app obj)
+                ccaResult = await app.AcquireTokenForClient(scopes)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, ccaResult.AuthenticationResultMetadata.TokenSource);
+
+                // Step 9: Get token from ESTS and use force refresh - check that the MI provider returns a cached token for api://tokenExchange
+                ccaResult = await app.AcquireTokenForClient(scopes)
+                    .WithForceRefresh(true)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.IdentityProvider, ccaResult.AuthenticationResultMetadata.TokenSource);
+
+                // Check that the MI provider returns a cached token for api://tokenExchange
+                Assert.AreEqual(TokenSource.Cache, miResult.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
         [DataTestMethod]
         [DataRow(MsiAzureResource.WebApp, SomeRandomGuid, UserAssignedIdentityId.ClientId, DisplayName = "ClientId_Web_App")]
         [DataRow(MsiAzureResource.WebApp, SomeRandomGuid, UserAssignedIdentityId.ObjectId, DisplayName = "ObjectId_Web_App")]
@@ -207,9 +308,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //Set the Environment Variables
                 SetEnvironmentVariables(envVariables);
-
-                //Reset cached source with update in environment variables
-                ManagedIdentityClient.resetCachedSource();
 
                 //form the http proxy URI 
                 string uri = s_baseURL + $"MSIToken?" +
@@ -252,9 +350,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //Set the Environment Variables
                 SetEnvironmentVariables(envVariables);
-
-                //Reset cached source with update in environment variables
-                ManagedIdentityClient.resetCachedSource();
 
                 //form the http proxy URI 
                 string uri = s_baseURL + $"MSIToken?" +
