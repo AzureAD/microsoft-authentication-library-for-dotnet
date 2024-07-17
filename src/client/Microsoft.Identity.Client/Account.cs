@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client
             string homeAccountId, 
             string username, 
             string environment,
-            string accountsource = "",
+            string accountsource = null,
             IDictionary<string, string> wamAccountIds = null, 
             IEnumerable<TenantProfile> tenantProfiles = null)
         {

@@ -155,7 +155,6 @@ namespace Microsoft.Identity.Client
                 Account = new Account(
                     homeAccountId,
                     msalIdTokenCacheItem?.GetUsername(),
-                    "test",
                     environment);
             }
 

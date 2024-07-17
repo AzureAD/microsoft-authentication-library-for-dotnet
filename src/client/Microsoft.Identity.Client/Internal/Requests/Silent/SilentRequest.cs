@@ -61,9 +61,10 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                        UiRequiredExceptionClassification.AcquireTokenSilentFailed);
                 }
 
-                if (isBrokerConfigured
-                    && AuthenticationRequestParameters.Account.AccountSource != null
-                    && AuthenticationRequestParameters.Account.AccountSource != "device_code")
+                bool isAccountSourceDeviceCode = !string.IsNullOrEmpty(AuthenticationRequestParameters.Account.AccountSource) &&
+                                               AuthenticationRequestParameters.Account.AccountSource == "device_code";
+
+                if (isBrokerConfigured && !isAccountSourceDeviceCode)
                 {
                     _logger.Info("Broker is configured and enabled, attempting to use broker instead.");
                     var brokerResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);

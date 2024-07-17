@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Kerberos;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -41,6 +42,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
             await AcquireTokenWithDeviceCodeFlowAsync(labResponse, "aad user").ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        [Timeout(2 * 60 * 1000)] // 2 min timeout
+        public async Task SilentTokenAfterDeviceCodeFlowWithBrokerTestAsync()
+        {
+            LabResponse labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+            await AcquireTokenSilentAfterDeviceCodeFlowWithBrokerAsync(labResponse, "aad user").ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -112,6 +121,44 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsNotNull(result);
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
             TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
+        }
+
+        private async Task AcquireTokenSilentAfterDeviceCodeFlowWithBrokerAsync(LabResponse labResponse, string userType)
+        {
+            Trace.WriteLine($"Calling AcquireTokenWithDeviceCodeAsync with {0}", userType);
+            BrokerOptions options = new BrokerOptions(BrokerOptions.OperatingSystems.Windows);
+            var builder = PublicClientApplicationBuilder.Create(labResponse.App.AppId).WithTestLogging().WithBroker(options);
+
+            switch (labResponse.User.AzureEnvironment)
+            {
+                case AzureEnvironment.azureusgovernment:
+                    builder.WithAuthority(labResponse.Lab.Authority + labResponse.Lab.TenantId);
+                    break;
+                default:
+                    break;
+            }
+
+            var pca = builder.Build();
+            var userCacheAccess = pca.UserTokenCache.RecordAccess();
+
+            var result = await pca.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>
+            {
+                SeleniumExtensions.PerformDeviceCodeLogin(deviceCodeResult, labResponse.User, TestContext, false);
+                return Task.FromResult(0);
+            }).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+
+            Trace.WriteLine("Running asserts");
+
+            userCacheAccess.AssertAccessCounts(0, 1);
+            Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
+            TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
+
+            var silentTokenResult = await pca.AcquireTokenSilent(s_scopes, result.Account).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            Assert.IsNotNull(silentTokenResult);
+            Assert.IsTrue(!string.IsNullOrEmpty(silentTokenResult.AccessToken));
         }
 
         #region Azure AD Kerberos Feature Tests

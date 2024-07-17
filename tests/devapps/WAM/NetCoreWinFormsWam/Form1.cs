@@ -823,7 +823,7 @@ namespace NetDesktopWinForms
             string homeTenantId = account?.HomeAccountId?.TenantId?.Substring(0, 5);
             string accountSource = account?.AccountSource;
 
-            DisplayValue = displayValue ?? $"{Account.Username} {env} {homeTenantId}";
+            DisplayValue = displayValue ?? $"{Account.Username} {env} {homeTenantId} {accountSource}";
         }
     }
 

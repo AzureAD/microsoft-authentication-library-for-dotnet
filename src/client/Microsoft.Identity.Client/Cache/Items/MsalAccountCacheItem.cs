@@ -211,7 +211,8 @@ namespace Microsoft.Identity.Client.Cache.Items
                 LocalAccountId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.LocalAccountId),
                 AuthorityType = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.AuthorityType),
                 TenantId = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),
-                WamAccountIds = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.WamAccountIds)
+                WamAccountIds = JsonHelper.ExtractInnerJsonAsDictionary(j, StorageJsonKeys.WamAccountIds),
+                AccountSource = JsonHelper.ExtractExistingOrEmptyString(j, StorageJsonKeys.AccountSource)
             };
 
             item.PopulateFieldsFromJObject(j);
@@ -232,6 +233,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             SetItemIfValueNotNull(json, StorageJsonKeys.LocalAccountId, LocalAccountId);
             SetItemIfValueNotNull(json, StorageJsonKeys.AuthorityType, AuthorityType);
             SetItemIfValueNotNull(json, StorageJsonKeys.Realm, TenantId);
+            SetItemIfValueNotNull(json, StorageJsonKeys.AccountSource, AccountSource);
             if (WamAccountIds != null && WamAccountIds.Any())
             {
 #if SUPPORTS_SYSTEM_TEXT_JSON
