@@ -30,15 +30,16 @@ namespace Microsoft.Identity.Client.Instance.Validation
                 string webFingerUrl = Constants.FormatAdfsWebFingerUrl(authorityInfo.Host, resource);
 
                 Http.HttpResponse httpResponse = await _requestContext.ServiceBundle.HttpManager.SendRequestAsync(
-                   new Uri(webFingerUrl),
-                   null,
-                   body: null,
-                   System.Net.Http.HttpMethod.Get,
-                   logger: _requestContext.Logger,
-                   doNotThrow: false,
-                   mtlsCertificate: null,
-                   _requestContext.UserCancellationToken)
-                      .ConfigureAwait(false);
+                    new Uri(webFingerUrl),
+                    null,
+                    body: null,
+                    System.Net.Http.HttpMethod.Get,
+                    logger: _requestContext.Logger,
+                    doNotThrow: false,
+                    mtlsCertificate: null,
+                    customHttpClient: null,
+                    _requestContext.UserCancellationToken)
+                    .ConfigureAwait(false);
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {

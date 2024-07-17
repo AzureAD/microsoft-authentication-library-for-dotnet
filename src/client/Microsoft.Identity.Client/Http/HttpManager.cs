@@ -51,6 +51,7 @@ namespace Microsoft.Identity.Client.Http
             ILoggerAdapter logger,
             bool doNotThrow,
             X509Certificate2 bindingCertificate,
+            HttpClient customHttpClient,
             CancellationToken cancellationToken, 
             int retryCount = 0)
         {
@@ -75,6 +76,7 @@ namespace Microsoft.Identity.Client.Http
                         clonedBody,
                         method,
                         bindingCertificate,
+                        customHttpClient,
                         logger,
                         cancellationToken).ConfigureAwait(false);
                 }
@@ -111,6 +113,7 @@ namespace Microsoft.Identity.Client.Http
                     logger,
                     doNotThrow,
                     bindingCertificate,
+                    customHttpClient,
                     cancellationToken: cancellationToken,
                     retryCount) // Pass the updated retry count
                     .ConfigureAwait(false);
@@ -142,8 +145,17 @@ namespace Microsoft.Identity.Client.Http
             return response;
         }
 
-        private HttpClient GetHttpClient(X509Certificate2 x509Certificate2)
-        {
+        private HttpClient GetHttpClient(X509Certificate2 x509Certificate2, HttpClient customHttpClient) {
+            if (x509Certificate2 != null && customHttpClient != null)
+            {
+                throw new NotImplementedException("Mtls certificate cannot be used with service fabric. A custom http client is used for service fabric managed identity to validate the server certificate.");
+            }
+
+            if (customHttpClient != null)
+            {
+                return customHttpClient;
+            }
+
             if (_httpClientFactory is IMsalMtlsHttpClientFactory msalMtlsHttpClientFactory)
             {
                 // If the factory is an IMsalMtlsHttpClientFactory, use it to get an HttpClient with the certificate
@@ -175,6 +187,7 @@ namespace Microsoft.Identity.Client.Http
             HttpContent body,
             HttpMethod method,
             X509Certificate2 bindingCertificate,
+            HttpClient customHttpClient,
             ILoggerAdapter logger,
             CancellationToken cancellationToken = default)
         {
@@ -189,7 +202,7 @@ namespace Microsoft.Identity.Client.Http
 
                 Stopwatch sw = Stopwatch.StartNew();
 
-                HttpClient client = GetHttpClient(bindingCertificate);
+                HttpClient client = GetHttpClient(bindingCertificate, customHttpClient);
 
                 using (HttpResponseMessage responseMessage =
                     await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false))
