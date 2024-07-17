@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client
                     homeAccountId);
 
                 Dictionary<string, string> wamAccountIds = TokenResponseHelper.GetWamAccountIds(requestParams, response);
-                string accountSource = requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenByDeviceCode ? "device_code" : null;
+                string accountSource = requestParams.ApiId == ApiEvent.ApiIds.AcquireTokenByDeviceCode ? "device_code_flow" : null;
                 msalAccountCacheItem = new MsalAccountCacheItem(
                              instanceDiscoveryMetadata.PreferredCache,
                              response.ClientInfo,
