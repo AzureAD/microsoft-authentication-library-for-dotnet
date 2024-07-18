@@ -8,14 +8,12 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Broker;
-using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.Desktop;
 
 namespace NetDesktopWinForms
 {
@@ -105,7 +103,7 @@ namespace NetDesktopWinForms
             var builder = PublicClientApplicationBuilder
                 .Create(clientId)
                 .WithRedirectUri("http://localhost")
-                .WithClientCapabilities(new[] { "cp1"})
+                .WithClientCapabilities(new[] { "cp1" })
                 .WithMultiCloudSupport(cbxMultiCloud2.Checked)
                 .WithAuthority(authority);
 
@@ -124,11 +122,10 @@ namespace NetDesktopWinForms
                     });
                     break;
                 case AuthMethod.SystemBrowser:
-                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None))
-                                     .WithSsoPolicy();
+                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
                     break;
                 case AuthMethod.EmbeddedBrowser:
-                    builder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
+                    builder.WithWindowsEmbeddedBrowserSupport();
                     break;
                 default:
                     throw new NotImplementedException();
@@ -773,6 +770,32 @@ namespace NetDesktopWinForms
                 Log("Exception: " + ex);
             }
         }
+
+        private async void btn_ATSDeviceCodeFlow_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var cancellationTokenSource = new CancellationTokenSource();
+
+                var pca = CreatePca(GetAuthMethod());
+                AuthenticationResult authenticationResult = await pca
+                .AcquireTokenWithDeviceCode(
+                        GetScopes(),
+                        dcr =>
+                        {
+                            BeginInvoke(new MethodInvoker(() => resultTbx.Text = dcr.Message));
+                            return Task.FromResult(0);
+                        })
+                    .ExecuteAsync(cancellationTokenSource.Token)
+                    .ConfigureAwait(true);
+
+                await LogResultAndRefreshAccountsAsync(authenticationResult).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Log("Exception: " + ex);
+            }
+        }
     }
 
     public class ClientEntry
@@ -794,8 +817,9 @@ namespace NetDesktopWinForms
                 "" :
                 $"({Account.Environment})";
             string homeTenantId = account?.HomeAccountId?.TenantId?.Substring(0, 5);
+            string accountSource = account?.AccountSource;
 
-            DisplayValue = displayValue ?? $"{Account.Username} {env} {homeTenantId}";
+            DisplayValue = displayValue ?? $"{Account.Username} {env} {homeTenantId} {accountSource}";
         }
     }
 
@@ -806,6 +830,8 @@ namespace NetDesktopWinForms
         public string Environment => "";
 
         public AccountId HomeAccountId => null;
+
+        public string AccountSource => null;
     }
 
     public enum AuthMethod

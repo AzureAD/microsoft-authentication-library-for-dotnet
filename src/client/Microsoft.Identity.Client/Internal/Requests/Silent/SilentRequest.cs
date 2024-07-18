@@ -61,7 +61,10 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                        UiRequiredExceptionClassification.AcquireTokenSilentFailed);
                 }
 
-                if (isBrokerConfigured)
+                bool isAccountSourceDeviceCodeFlow = !string.IsNullOrEmpty(AuthenticationRequestParameters.Account.AccountSource) &&
+                                               AuthenticationRequestParameters.Account.AccountSource == "device_code_flow";
+
+                if (isBrokerConfigured && !isAccountSourceDeviceCodeFlow)
                 {
                     _logger.Info("Broker is configured and enabled, attempting to use broker instead.");
                     var brokerResult = await _brokerStrategyLazy.Value.ExecuteAsync(cancellationToken).ConfigureAwait(false);
