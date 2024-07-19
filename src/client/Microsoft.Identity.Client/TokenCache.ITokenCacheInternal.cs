@@ -1154,13 +1154,14 @@ namespace Microsoft.Identity.Client
 
             var tenantProfiles = await GetTenantProfilesAsync(requestParameters, msalAccessTokenCacheItem.HomeAccountId).ConfigureAwait(false);
 
+            var account = requestParameters.Account as Account;
             var accountCacheItem = Accessor.GetAccount(
                 new MsalAccountCacheItem(
                         msalAccessTokenCacheItem.Environment,
                         msalAccessTokenCacheItem.TenantId,
                         msalAccessTokenCacheItem.HomeAccountId,
-                        requestParameters.Account?.AccountSource,
-                        requestParameters.Account?.Username));
+                        account?.AccountSource,
+                        account?.Username));
 
             return new Account(
                 msalAccessTokenCacheItem.HomeAccountId,
