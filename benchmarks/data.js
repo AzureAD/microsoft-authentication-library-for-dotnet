@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1721338406240,
+  "lastUpdate": 1721415377555,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -5894,6 +5894,42 @@ window.BENCHMARK_DATA = {
             "value": 345715.34,
             "unit": "ns",
             "range": "± 8871.135124097706"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "83938949+ashok672@users.noreply.github.com",
+            "name": "Ashok Kumar Ramakrishnan",
+            "username": "ashok672"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d13481395efa644db1ca29026c8a613890cb51fd",
+          "message": "Remove AccountSource from public IAccount interface to avoid breaking change (#4848)\n\n* Remove AccountSource from public IAccount interface to avoid breaking change\r\n\r\n* Update IAccount.cs\r\n\r\n* Fix compilation errors\r\n\r\n* Update SilentRequest.cs",
+          "timestamp": "2024-07-19T11:49:04-07:00",
+          "tree_id": "9a2ef4983fda37891acb042ca31b0e8fc3ed3494",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/d13481395efa644db1ca29026c8a613890cb51fd"
+        },
+        "date": 1721415374128,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 247858.45,
+            "unit": "ns",
+            "range": "± 5709.375221372393"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 336723.0833333333,
+            "unit": "ns",
+            "range": "± 1869.9962789624296"
           }
         ]
       }
