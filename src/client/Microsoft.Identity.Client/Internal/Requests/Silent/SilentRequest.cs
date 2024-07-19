@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                 }
 
                 var account = AuthenticationRequestParameters.Account as Account;
-                bool isAccountSourceDeviceCodeFlow = !string.IsNullOrEmpty(account.AccountSource) &&
+                bool isAccountSourceDeviceCodeFlow = account !=null &&
                                                account.AccountSource == "device_code_flow";
 
                 if (isBrokerConfigured && !isAccountSourceDeviceCodeFlow)
