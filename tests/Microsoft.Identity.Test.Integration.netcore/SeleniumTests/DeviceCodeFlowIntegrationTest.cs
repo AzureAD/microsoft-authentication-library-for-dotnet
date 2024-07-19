@@ -153,7 +153,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsFalse(userCacheAccess.LastAfterAccessNotificationArgs.IsApplicationCache);
 
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.Account.AccountSource == "device_code_flow");
+            var account = result.Account as Account;
+            Assert.IsTrue(account.AccountSource == "device_code_flow");
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
             TestCommon.ValidateNoKerberosTicketFromAuthenticationResult(result);
 

@@ -61,8 +61,9 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
                        UiRequiredExceptionClassification.AcquireTokenSilentFailed);
                 }
 
-                bool isAccountSourceDeviceCodeFlow = !string.IsNullOrEmpty(AuthenticationRequestParameters.Account.AccountSource) &&
-                                               AuthenticationRequestParameters.Account.AccountSource == "device_code_flow";
+                var account = AuthenticationRequestParameters.Account as Account;
+                bool isAccountSourceDeviceCodeFlow = !string.IsNullOrEmpty(account.AccountSource) &&
+                                               account.AccountSource == "device_code_flow";
 
                 if (isBrokerConfigured && !isAccountSourceDeviceCodeFlow)
                 {
