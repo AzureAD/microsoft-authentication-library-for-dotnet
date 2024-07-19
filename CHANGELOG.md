@@ -1,3 +1,10 @@
+4.62.0
+==========
+### New Features
+
+### Bug fixes
+- Fix for device code flow when broker is enabled. See [Issue #4786](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4786)
+
 4.61.3
 ==========
 ### Bug Fixes
