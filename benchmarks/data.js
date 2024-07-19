@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1721415379493,
+  "lastUpdate": 1721415381318,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -20590,6 +20590,54 @@ window.BENCHMARK_DATA = {
             "value": 178294.00669642858,
             "unit": "ns",
             "range": "± 1250.7209840892458"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "83938949+ashok672@users.noreply.github.com",
+            "name": "Ashok Kumar Ramakrishnan",
+            "username": "ashok672"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d13481395efa644db1ca29026c8a613890cb51fd",
+          "message": "Remove AccountSource from public IAccount interface to avoid breaking change (#4848)\n\n* Remove AccountSource from public IAccount interface to avoid breaking change\r\n\r\n* Update IAccount.cs\r\n\r\n* Fix compilation errors\r\n\r\n* Update SilentRequest.cs",
+          "timestamp": "2024-07-19T11:49:04-07:00",
+          "tree_id": "9a2ef4983fda37891acb042ca31b0e8fc3ed3494",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/d13481395efa644db1ca29026c8a613890cb51fd"
+        },
+        "date": 1721415380924,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 21957.050333658855,
+            "unit": "ns",
+            "range": "± 65.81311526129352"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 174431.24231896034,
+            "unit": "ns",
+            "range": "± 516.6680484122527"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 34064.491075788224,
+            "unit": "ns",
+            "range": "± 422.47096249412795"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 175030.59029947917,
+            "unit": "ns",
+            "range": "± 882.366551953583"
           }
         ]
       }
