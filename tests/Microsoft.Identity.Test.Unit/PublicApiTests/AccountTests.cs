@@ -264,6 +264,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     homeAccountId2,
                     null,
                     null,
+                    null,
                     "uTId1",
                     null,
                     null,

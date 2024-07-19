@@ -104,6 +104,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 "login.microsoftonline.com",
                 "contoso.com",
                 "uid.utid",
+                null,
                 "localId");
 
             var iOSKey = item.iOSCacheKey;

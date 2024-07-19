@@ -128,6 +128,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                      logger: _requestContext.Logger,
                      doNotThrow: false,
                      mtlsCertificate: null,
+                     customHttpClient: null,
                      cancellationToken)
                         .ConfigureAwait(false);
 

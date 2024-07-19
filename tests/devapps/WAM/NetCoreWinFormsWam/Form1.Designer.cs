@@ -66,6 +66,7 @@
             label9 = new System.Windows.Forms.Label();
             cbxMultiCloud2 = new System.Windows.Forms.CheckBox();
             cbxWithForceRefresh = new System.Windows.Forms.CheckBox();
+            btn_ATSDeviceCodeFlow = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)nudAutocancelSeconds).BeginInit();
             SuspendLayout();
             // 
@@ -436,11 +437,22 @@
             cbxWithForceRefresh.Text = "WithForceRefresh";
             cbxWithForceRefresh.UseVisualStyleBackColor = true;
             // 
+            // btn_ATSDeviceCodeFlow
+            // 
+            btn_ATSDeviceCodeFlow.Location = new System.Drawing.Point(495, 280);
+            btn_ATSDeviceCodeFlow.Name = "btn_ATSDeviceCodeFlow";
+            btn_ATSDeviceCodeFlow.Size = new System.Drawing.Size(140, 27);
+            btn_ATSDeviceCodeFlow.TabIndex = 37;
+            btn_ATSDeviceCodeFlow.Text = "AT DeviceCodeFlow";
+            btn_ATSDeviceCodeFlow.UseVisualStyleBackColor = true;
+            btn_ATSDeviceCodeFlow.Click += btn_ATSDeviceCodeFlow_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(738, 794);
+            Controls.Add(btn_ATSDeviceCodeFlow);
             Controls.Add(cbxWithForceRefresh);
             Controls.Add(cbxMultiCloud2);
             Controls.Add(atUsernamePwdBtn);
@@ -525,6 +537,7 @@
 
         private System.Windows.Forms.CheckBox cbxMultiCloud2;
         private System.Windows.Forms.CheckBox cbxWithForceRefresh;
+        private System.Windows.Forms.Button btn_ATSDeviceCodeFlow;
     }
 }
 
