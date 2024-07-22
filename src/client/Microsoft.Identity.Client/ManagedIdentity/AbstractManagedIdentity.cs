@@ -63,6 +63,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: null,
+                            GetHttpClientWithSslValidation(_requestContext),
                             cancellationToken).ConfigureAwait(false);
                 }
                 else
@@ -76,6 +77,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: null,
+                            GetHttpClientWithSslValidation(_requestContext),
                             cancellationToken)
                         .ConfigureAwait(false);
 
@@ -88,6 +90,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 HandleException(ex);
                 throw;
             }
+        }
+
+        // This method is internal for testing purposes.
+        internal virtual HttpClient GetHttpClientWithSslValidation(RequestContext requestContext)
+        {
+            return null;
         }
 
         protected virtual Task<ManagedIdentityResponse> HandleResponseAsync(

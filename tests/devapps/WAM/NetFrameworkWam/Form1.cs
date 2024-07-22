@@ -683,6 +683,8 @@ namespace NetDesktopWinForms
         public string Environment => "";
 
         public AccountId HomeAccountId => null;
+
+        public string AccountSource => null;
     }
 
     public enum AuthMethod
