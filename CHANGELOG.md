@@ -1,9 +1,11 @@
 4.62.0
 ==========
 ### New Features
+- Updated the Service Fabric managed identity flow to validate the server certificate. See [Issue #4462](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4462)
 
 ### Bug Fixes
 - Fix for device code flow when broker is enabled. See [Issue #4786](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4786)
+- Fix the computation of `TotalDurationInMs` for linux platform. See [Issue #4784](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4784)
 
 4.61.3
 ==========
