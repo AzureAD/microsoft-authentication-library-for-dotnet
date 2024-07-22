@@ -6,7 +6,7 @@
 - Removed unused telemetry headers `WithClientTelemetry` and `last_telemetry header`. See [Issue #4815](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4815)
 
 ### Bug Fixes
-- Fix for device code flow when broker is enabled. See [Issue #4786](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4786)
+- Fix for silent token acquisition failing after device code flow when broker is enabled. See [Issue #4786](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4786)
 - Fix the computation of `TotalDurationInMs` for linux platform. See [Issue #4784](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4784)
 - Added 'haschrome=1' to avoid unexpected back buttons on the first page in embedded browser. See [Issue #4836](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4836)
 
