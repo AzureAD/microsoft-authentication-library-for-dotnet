@@ -28,5 +28,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public const string X509CertificatePublicCertValue = "x5c";
 
+        public const string CdtEncrypt = "enc";
+
     }
 }

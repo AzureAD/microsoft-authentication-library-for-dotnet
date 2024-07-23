@@ -37,6 +37,10 @@ namespace Microsoft.Identity.Client.Internal
         public const string PoPAuthHeaderPrefix = "PoP"; 
         public const string RequestConfirmation = "req_cnf";
         public const string BearerAuthHeaderPrefix = "Bearer";
+        public const string NoAlgorythmPrefix = "none";
+        public const string JasonWebTokenType = "JWT";
+        public const string CdtEncryptedAlgoryth = "dir";
+        public const string CdtEncryptedValue = "A256CBC-HS256";
 
         public const string ManagedIdentityClientId = "client_id";
         public const string ManagedIdentityObjectId = "object_id";
