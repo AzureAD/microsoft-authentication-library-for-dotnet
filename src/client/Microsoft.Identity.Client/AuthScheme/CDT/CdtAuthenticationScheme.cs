@@ -27,12 +27,11 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
 {
     internal class CdtAuthenticationScheme : IAuthenticationScheme
     {
-        //private readonly PoPAuthenticationConfiguration _popAuthenticationConfiguration;
         private readonly ICdtCryptoProvider _cdtCryptoProvider;
         private readonly IEnumerable<Constraint> _contraints;
 
         /// <summary>
-        /// Creates POP tokens, i.e. tokens that are bound to an HTTP request and are digitally signed.
+        /// Creates Cdt tokens, i.e. tokens that are bound to an HTTP request and are digitally signed.
         /// </summary>
         /// <remarks>
         /// Currently the signing credential algorithm is hard-coded to RSA with SHA256. Extensibility should be done
@@ -49,21 +48,21 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
             KeyId = Base64UrlHelpers.Encode(keyThumbprint);
         }
 
-        public TokenType TelemetryTokenType => TokenType.Pop;
+        public TokenType TelemetryTokenType => TokenType.Bearer;
 
-        public string AuthorizationHeaderPrefix => Constants.PoPAuthHeaderPrefix;
+        public string AuthorizationHeaderPrefix => Constants.BearerAuthHeaderPrefix;
 
-        public string AccessTokenType => Constants.PoPTokenType;
+        public string AccessTokenType => Constants.BearerAuthHeaderPrefix;
 
         /// <summary>
-        /// For PoP, we chose to use the base64(jwk_thumbprint)
+        /// For Cdt, we chose to use the base64(jwk_thumbprint)
         /// </summary>
         public string KeyId { get; }
 
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()
         {
             return new Dictionary<string, string>() {
-                { OAuth2Parameter.TokenType, Constants.PoPTokenType},
+                { OAuth2Parameter.TokenType, Constants.BearerAuthHeaderPrefix},
                 { Constants.RequestConfirmation, ComputeReqCnf()}
             };
         }
@@ -71,7 +70,7 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
         public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             var header = new JObject();
-            header[JsonWebTokenConstants.Type] = Constants.PoPTokenType;
+            header[JsonWebTokenConstants.Type] = Constants.BearerAuthHeaderPrefix;
             header[JsonWebTokenConstants.Algorithm] = Constants.NoAlgorythmPrefix;
             
             var body = CreateCdtBody(msalAccessTokenCacheItem);
@@ -180,7 +179,7 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
 
         /// <summary>
         /// A key ID that uniquely describes a public / private key pair. While KeyID is not normally
-        /// strict, AAD support for PoP requires that we use the base64 encoded JWK thumbprint, as described by 
+        /// strict, AAD support for Cdt requires that we use the base64 encoded JWK thumbprint, as described by 
         /// https://tools.ietf.org/html/rfc7638
         /// </summary>
         private static byte[] ComputeThumbprint(string canonicalJwk)
