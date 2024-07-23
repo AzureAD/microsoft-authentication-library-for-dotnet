@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using System.IO;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -72,7 +74,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 return ManagedIdentitySource.CloudShell;
             }
-            else if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(imdsEndpoint))
+            else if (ValidateAzureArcEnvironment(identityEndpoint, imdsEndpoint))
             {
                 return ManagedIdentitySource.AzureArc;
             }
@@ -80,6 +82,32 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 return ManagedIdentitySource.DefaultToImds;
             }
+        }
+
+        // Method to return true if a file exists and is not empty to validate the Azure arc environment.
+        private static bool ValidateAzureArcEnvironment(string identityEndpoint, string imdsEndpoint)
+        {
+            if (!string.IsNullOrEmpty(identityEndpoint) || !string.IsNullOrEmpty(imdsEndpoint))
+            {
+                return true;
+            }
+
+            string path;
+
+            if (DesktopOsHelper.IsWindows())
+            {
+                path = Environment.ExpandEnvironmentVariables("%Programfiles%\\AzureConnectedMachineAgent\\himds.exe");
+            }
+            else if (DesktopOsHelper.IsLinux())
+            {
+                path = "/opt/azcmagent/bin/himds";
+            }
+            else
+            {
+                return false;
+            }
+
+            return File.Exists(path) && new FileInfo(path).Length > 0;
         }
     }
 }
