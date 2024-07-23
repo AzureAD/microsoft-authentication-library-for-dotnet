@@ -3,15 +3,16 @@
 
 using System;
 using System.Security.Cryptography;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.AuthScheme.PoP
+namespace Microsoft.Identity.Client.AuthScheme
 {
 
     /// <summary>
     /// The default implementation will store a key in memory    
     /// </summary>
-    internal class InMemoryCryptoProvider : ICryptoProvider
+    internal class InMemoryCryptoProvider : IPoPCryptoProvider
     {
         internal /* internal for test only */ const int RsaKeySize = 2048;
         private RSA _signingKey;

@@ -52,6 +52,12 @@ namespace Microsoft.Identity.Test.Unit.Pop
         [TestMethod]
         public async Task CDT_Test_Async()
         {
+            Constraint constraint = new Constraint();
+
+            constraint.Type = "wk:user";
+            constraint.Action = "update";
+            constraint.Values = new[] { "val1", "val2" };
+
             using (var httpManager = new MockHttpManager())
             {
                 ConfidentialClientApplication app =
@@ -66,12 +72,12 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 var provider = CryptoProviderFactory.GetOrCreateProvider();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithProofOfPossession(popConfig)
+                    .WithConstraints(new[] {constraint })
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -588,7 +594,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             }
         }
 
-        private static void AssertSingedHttpRequestClaims(ICryptoProvider popCryptoProvider, System.Security.Claims.ClaimsPrincipal claims)
+        private static void AssertSingedHttpRequestClaims(IPoPCryptoProvider popCryptoProvider, System.Security.Claims.ClaimsPrincipal claims)
         {
             Assert.AreEqual("GET", claims.FindAll("m").Single().Value);
             Assert.AreEqual("www.contoso.com", claims.FindAll("u").Single().Value);
@@ -597,7 +603,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             AssertTsAndJwkClaims(popCryptoProvider, claims);
         }
 
-        private static void AssertTsAndJwkClaims(ICryptoProvider popCryptoProvider, System.Security.Claims.ClaimsPrincipal claims)
+        private static void AssertTsAndJwkClaims(IPoPCryptoProvider popCryptoProvider, System.Security.Claims.ClaimsPrincipal claims)
         {
             long ts = long.Parse(claims.FindAll("ts").Single().Value);
             CoreAssert.IsWithinRange(DateTimeOffset.UtcNow, DateTimeHelpers.UnixTimestampToDateTime(ts), TimeSpan.FromSeconds(5));

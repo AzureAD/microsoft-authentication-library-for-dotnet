@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     internal class PopAuthenticationScheme : IAuthenticationScheme
     {
         private readonly PoPAuthenticationConfiguration _popAuthenticationConfiguration;
-        private readonly ICryptoProvider _popCryptoProvider;
+        private readonly IPoPCryptoProvider _popCryptoProvider;
 
         /// <summary>
         /// Creates POP tokens, i.e. tokens that are bound to an HTTP request and are digitally signed.
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
             _popAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
-            _popCryptoProvider = _popAuthenticationConfiguration.PopCryptoProvider ?? serviceBundle.PlatformProxy.GetDefaultCryptoProvider();
+            _popCryptoProvider = _popAuthenticationConfiguration.PopCryptoProvider ?? serviceBundle.PlatformProxy.GetDefaultPoPCryptoProvider();
 
             var keyThumbprint = ComputeThumbprint(_popCryptoProvider.CannonicalPublicKeyJwk);
             KeyId = Base64UrlHelpers.Encode(keyThumbprint);

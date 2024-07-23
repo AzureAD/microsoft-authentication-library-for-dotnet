@@ -9,7 +9,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
-    public class ECDCertificatePopCryptoProvider : ICryptoProvider
+    public class ECDCertificatePopCryptoProvider : IPoPCryptoProvider
     {
         public byte[] Sign(byte[] payload)
         {

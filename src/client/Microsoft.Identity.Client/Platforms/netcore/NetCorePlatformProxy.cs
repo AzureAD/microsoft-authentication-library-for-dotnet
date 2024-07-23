@@ -261,7 +261,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return new[] { "xdg-open", "gnome-open", "kfmclient", "microsoft-edge", "wslview" };
         }
 
-        public override ICryptoProvider GetDefaultCryptoProvider()
+        public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
             return CryptoProviderFactory.GetOrCreateProvider();
         }

@@ -5,18 +5,17 @@ using System;
 using System.Diagnostics;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.AuthScheme.PoP
+namespace Microsoft.Identity.Client.AuthScheme
 {
     /// <summary>
     /// This factory ensures key rotation every 8h
     /// </summary>
     internal static class CryptoProviderFactory
-
     {
         private static InMemoryCryptoProvider s_currentProvider;
         private static DateTime s_providerExpiration;
 
-        public /* public for test only */ static TimeSpan KeyRotationInterval { get; } 
+        public /* public for test only */ static TimeSpan KeyRotationInterval { get; }
             = TimeSpan.FromHours(8);
 
         private static object s_lock = new object();

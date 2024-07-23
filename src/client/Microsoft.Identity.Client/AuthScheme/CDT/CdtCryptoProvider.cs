@@ -2,19 +2,23 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Security.Cryptography;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Identity.Client.AuthScheme;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Test.Common.Core.Helpers
+namespace Microsoft.Identity.Client.AuthScheme.CDT
 {
-    public class RSACertificatePopCryptoProvider : IPoPCryptoProvider
+    //TODO: Add support for ECD keys
+    internal class CdtCryptoProvider : IPoPCryptoProvider
     {
         private readonly X509Certificate2 _cert;
 
-        public RSACertificatePopCryptoProvider(X509Certificate2 cert)
+        public CdtCryptoProvider(X509Certificate2 cert)
         {
             _cert = cert ?? throw new ArgumentNullException(nameof(cert));
 

@@ -4,11 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.AuthScheme.CDT;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 
 namespace Microsoft.Identity.Client
@@ -98,7 +100,22 @@ namespace Microsoft.Identity.Client
         {
             ValidateUseOfExperimentalFeature();
 
-            CommonParameters.AuthenticationConstraints = contraints;
+            CommonParameters.AuthenticationScheme = new CdtAuthenticationScheme(contraints, ServiceBundle, null);
+
+            return this as T;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="contraints"></param>
+        /// <param name="certificate"></param>
+        /// <returns></returns>
+        public T WithConstraints(IEnumerable<Constraint> contraints, X509Certificate2 certificate)
+        {
+            ValidateUseOfExperimentalFeature();
+
+            CommonParameters.AuthenticationScheme = new CdtAuthenticationScheme(contraints, ServiceBundle, certificate);
 
             return this as T;
         }

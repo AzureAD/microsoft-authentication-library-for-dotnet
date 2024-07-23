@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop
             return Task.FromResult(0);
         }
 
-        public override ICryptoProvider GetDefaultCryptoProvider()
+        public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
             return CryptoProviderFactory.GetOrCreateProvider();
         }

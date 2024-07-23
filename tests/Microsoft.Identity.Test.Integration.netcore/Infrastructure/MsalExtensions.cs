@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Integration
         }
     }
 
-    internal class SigningCredentialsToPopCryptoProviderAdapter : Client.AuthScheme.ICryptoProvider
+    internal class SigningCredentialsToPopCryptoProviderAdapter : Client.AuthScheme.IPoPCryptoProvider
     {
         private readonly SigningCredentials _popCredentials;
         private readonly bool _assertNotSigned;

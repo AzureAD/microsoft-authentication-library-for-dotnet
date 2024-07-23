@@ -4,6 +4,7 @@
 using System;
 using System.Net.Http;
 using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -88,7 +89,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// Important note: if you want to change the key (e.g. rotate the key), you should create a new instance of this object,
         /// as MSAL.NET will keep a thumbprint of keys in memory.
         /// </summary>
-        public ICryptoProvider PopCryptoProvider { get; set; }
+        public IPoPCryptoProvider PopCryptoProvider { get; set; }
 
         /// <summary>
         /// If the protected resource (RP) requires use of a special nonce, they will publish it as part of the WWWAuthenticate header associated with a 401 HTTP response
@@ -101,7 +102,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// App developers can use a package like Microsoft.IdentityModel.Protocols.SignedHttpRequest to later create and sign the envelope. 
         /// </summary>
         /// <remarks>
-        /// If set to false, you do not need to implement the <see cref="ICryptoProvider.Sign(byte[])"/> method when using custom keys. 
+        /// If set to false, you do not need to implement the <see cref="IPoPCryptoProvider.Sign(byte[])"/> method when using custom keys. 
         /// </remarks>
         public bool SignHttpRequest { get; set; } = true;
     }

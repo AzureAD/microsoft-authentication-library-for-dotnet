@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 PoPAuthenticationConfiguration popConfig = new PoPAuthenticationConfiguration(uri);
                 popConfig.HttpMethod = HttpMethod.Post;
 
-                var popCryptoProvider = Substitute.For<ICryptoProvider>();
+                var popCryptoProvider = Substitute.For<IPoPCryptoProvider>();
                 var serviceBundle = Substitute.For<IServiceBundle>();
                 popCryptoProvider.CannonicalPublicKeyJwk.Returns(JWK);
                 popCryptoProvider.CryptographicAlgorithm.Returns("RS256");

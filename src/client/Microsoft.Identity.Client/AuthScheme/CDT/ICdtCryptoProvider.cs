@@ -6,30 +6,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 
 namespace Microsoft.Identity.Client.AuthScheme.CDT
 {
     /// <summary>
-    /// 
+    /// An abstraction over an the asymmetric key operations needed by CDT, that encapsulates a pair of 
+    /// public and private keys and some typical crypto operations.
+    /// All symmetric operations are SHA256.
     /// </summary>
-    public interface ICdtCryptoProvider
+    /// <remarks>
+    /// Important: The 2 methods on this interface will be called at different times but MUST return details of 
+    /// the same private / public key pair, i.e. do not change to a different key pair mid way. Best to have this class immutable.
+    /// 
+    /// Ideally there should be a single public / private key pair associated with a machine, so implementers of this interface
+    /// should consider exposing a singleton.
+    /// </remarks>
+    internal interface ICdtCryptoProvider : IPoPCryptoProvider
     {
-        /// <summary>
-        /// The canonical representation of the JWK.         
-        /// See https://tools.ietf.org/html/rfc7638#section-3
-        /// </summary>
-        string CannonicalPublicKeyJwk { get; }
 
-        /// <summary>
-        /// Algorithm used to sign proof of possession request. 
-        /// See <see href="https://learn.microsoft.com/azure/key-vault/keys/about-keys-details#signverify">EC algorithms</see> for ECD.
-        /// See <see href="https://learn.microsoft.com/azure/key-vault/keys/about-keys-details#signverify-1">RSA algorithms</see> for RSA.
-        /// </summary>
-        string CryptographicAlgorithm { get; }
-
-        /// <summary>
-        /// Signs the byte array using the private key
-        /// </summary>
-        byte[] Sign(byte[] data);
     }
 }

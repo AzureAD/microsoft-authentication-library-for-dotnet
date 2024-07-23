@@ -3,17 +3,33 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using JObject = System.Text.Json.Nodes.JsonObject;
+using JToken = System.Text.Json.Nodes.JsonNode;
+#else
+using Microsoft.Identity.Json;
+using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.AuthScheme.CDT
 {
     internal class CdtAuthenticationScheme : IAuthenticationScheme
     {
-        private readonly PoPAuthenticationConfiguration _popAuthenticationConfiguration;
+        //private readonly PoPAuthenticationConfiguration _popAuthenticationConfiguration;
         private readonly ICdtCryptoProvider _cdtCryptoProvider;
+        private readonly IEnumerable<Constraint> _contraints;
 
         /// <summary>
         /// Creates POP tokens, i.e. tokens that are bound to an HTTP request and are digitally signed.
@@ -22,16 +38,12 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
         /// Currently the signing credential algorithm is hard-coded to RSA with SHA256. Extensibility should be done
         /// by integrating Wilson's SigningCredentials
         /// </remarks>
-        public CdtAuthenticationScheme(ICdtCryptoProvider cdtCryptoProvider, IEnumerable<Constraint> contraints, IServiceBundle serviceBundle)
+        public CdtAuthenticationScheme(IEnumerable<Constraint> contraints, IServiceBundle serviceBundle, X509Certificate2 certificate)
         {
-            if (serviceBundle == null)
-            {
-                throw new ArgumentNullException(nameof(serviceBundle));
-            }
 
-            _popAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
+            _contraints = contraints ?? throw new ArgumentNullException(nameof(contraints));
 
-            _cdtCryptoProvider = _popAuthenticationConfiguration.PopCryptoProvider ?? serviceBundle.PlatformProxy.GetDefaultCryptoProvider();
+            _cdtCryptoProvider = (ICdtCryptoProvider)(certificate == null ? serviceBundle.PlatformProxy.GetDefaultPoPCryptoProvider() : new CdtCryptoProvider(certificate));
 
             var keyThumbprint = ComputeThumbprint(_cdtCryptoProvider.CannonicalPublicKeyJwk);
             KeyId = Base64UrlHelpers.Encode(keyThumbprint);
@@ -58,51 +70,97 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
 
         public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            if (!_popAuthenticationConfiguration.SignHttpRequest)
-            {
-                return msalAccessTokenCacheItem.Secret;
-            }
-
             var header = new JObject();
-            header[JsonWebTokenConstants.Algorithm] = _cdtCryptoProvider.CryptographicAlgorithm;
-            header[JsonWebTokenConstants.KeyId] = KeyId;
             header[JsonWebTokenConstants.Type] = Constants.PoPTokenType;
+            header[JsonWebTokenConstants.Algorithm] = Constants.NoAlgorythmPrefix;
+            
+            var body = CreateCdtBody(msalAccessTokenCacheItem);
 
-            var body = CreateBody(msalAccessTokenCacheItem);
-
-            string popToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header));
-            return popToken;
+            string constraintToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header), false);
+            return constraintToken;
         }
 
-        private JObject CreateBody(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        private JObject CreateCdtBody(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             var publicKeyJwk = JToken.Parse(_cdtCryptoProvider.CannonicalPublicKeyJwk);
+            string encryptionKey = GetEncryptionKeyFromToken(msalAccessTokenCacheItem);
             var body = new JObject
             {
                 // Mandatory parameters
-                [PoPClaimTypes.Cnf] = new JObject
-                {
-                    [PoPClaimTypes.JWK] = publicKeyJwk
-                },
-                [PoPClaimTypes.Ts] = DateTimeHelpers.CurrDateTimeInUnixTimestamp(),
-                [PoPClaimTypes.At] = msalAccessTokenCacheItem.Secret,
-                [PoPClaimTypes.Nonce] = _popAuthenticationConfiguration.Nonce ?? CreateSimpleNonce(),
+                [CdtClaimTypes.Ticket] = $"{msalAccessTokenCacheItem.Secret}[ds_cnf={publicKeyJwk}]",
+                [CdtClaimTypes.ConstraintsToken] = string.IsNullOrEmpty(encryptionKey) 
+                                                    ? CreateCdtConstraintsJwT(msalAccessTokenCacheItem) :
+                                                      CreateEncryptedCdtConstraintsJwT(msalAccessTokenCacheItem, encryptionKey)
             };
 
-            if (_popAuthenticationConfiguration.HttpMethod != null)
-            {
-                body[PoPClaimTypes.HttpMethod] = _popAuthenticationConfiguration.HttpMethod?.ToString();
-            }
+            return body;
+        }
 
-            if (!string.IsNullOrEmpty(_popAuthenticationConfiguration.HttpHost))
-            {
-                body[PoPClaimTypes.Host] = _popAuthenticationConfiguration.HttpHost;
-            }
+        private JToken CreateEncryptedCdtConstraintsJwT(MsalAccessTokenCacheItem msalAccessTokenCacheItem, string encryptionKey)
+        {
+            var header = new JObject();
+            header[JsonWebTokenConstants.Algorithm] = Constants.CdtEncryptedAlgoryth;
+            header[JsonWebTokenConstants.CdtEncrypt] = Constants.CdtEncryptedValue;
 
-            if (!string.IsNullOrEmpty(_popAuthenticationConfiguration.HttpPath))
+            var body = new JObject
             {
-                body[PoPClaimTypes.Path] = _popAuthenticationConfiguration.HttpPath;
-            }
+                // TODO: ENCRYPT JWT
+                [CdtClaimTypes.Constraints] = CreateCdtConstraintsJwT(msalAccessTokenCacheItem)
+            };
+
+            string cdtConstraintToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header));
+            return cdtConstraintToken;
+        }
+
+        private JToken CreateCdtConstraintsJwT(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        {
+            var header = new JObject();
+            header[JsonWebTokenConstants.Algorithm] = _cdtCryptoProvider.CryptographicAlgorithm;
+            header[JsonWebTokenConstants.Type] = Constants.JasonWebTokenType;
+            header[CdtClaimTypes.Nonce] = GetNonceFromToken(msalAccessTokenCacheItem);
+
+            var body = CreateCdtConstrantBody();
+
+            string cdtConstraintToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header));
+            return cdtConstraintToken;
+        }
+
+        private string GetNonceFromToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        {
+            var decodedToken = Base64UrlHelpers.Decode(msalAccessTokenCacheItem.Secret);
+            var jsonHeader = JsonHelper.ParseIntoJsonObject(decodedToken.Split('.')[0]);
+            JToken value;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+
+            JsonHelper.TryGetValue(jsonHeader, "nonce", out value);
+#else
+            JsonHelper.TryGetValue(jsonHeader, "nonce", out value);
+#endif
+            return value?.ToString();
+        }
+
+        private string GetEncryptionKeyFromToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        {
+            var decodedToken = Base64UrlHelpers.Decode(msalAccessTokenCacheItem.Secret);
+            var jsonHeader = JsonHelper.ParseIntoJsonObject(decodedToken.Split('.')[0]);
+            JToken value;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+
+            JsonHelper.TryGetValue(jsonHeader, "ds_enc", out value);
+#else
+            JsonHelper.TryGetValue(jsonHeader, "ds_enc", out value);
+#endif
+            return value?.ToString();
+        }
+
+        private JObject CreateCdtConstrantBody()
+        {
+
+            var body = new JObject
+            {
+                // Mandatory parameters
+                [CdtClaimTypes.Constraints] = JsonHelper.SerializeToJson(_contraints)
+            };
 
             return body;
         }
@@ -137,7 +195,7 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
         /// Creates a JWS (json web signature) as per: https://tools.ietf.org/html/rfc7515
         /// Format: header.payload.signed_payload
         /// </summary>
-        private string CreateJWS(string payload, string header)
+        private string CreateJWS(string payload, string header, bool signPayload = true)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(Base64UrlHelpers.Encode(Encoding.UTF8.GetBytes(header)));
@@ -145,8 +203,11 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
             sb.Append(Base64UrlHelpers.Encode(payload));
             string headerAndPayload = sb.ToString();
 
-            sb.Append('.');
-            sb.Append(Base64UrlHelpers.Encode(_cdtCryptoProvider.Sign(Encoding.UTF8.GetBytes(headerAndPayload))));
+            if (signPayload)
+            {
+                sb.Append('.');
+                sb.Append(Base64UrlHelpers.Encode(_cdtCryptoProvider.Sign(Encoding.UTF8.GetBytes(headerAndPayload))));
+            }
 
             return sb.ToString();
         }
