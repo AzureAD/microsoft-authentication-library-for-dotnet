@@ -643,5 +643,53 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Assert.IsTrue(isValidSignature, "The signature should be valid using PSS padding.");
             }
         }
+
+        [TestMethod]
+        public void JwkContainsCorrectAlgorithm()
+        {
+            // Arrange
+            var provider = new InMemoryCryptoProvider();
+
+            // Act
+            var jwk = provider.CannonicalPublicKeyJwk;
+
+            // Assert
+            Assert.IsTrue(jwk.Contains("\"alg\":\"PS256\""), "JWK should contain alg: PS256");
+        }
+
+        [TestMethod]
+        public async Task TokenGenerationAndValidation_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                  .WithClientSecret(TestConstants.ClientSecret)
+                                                                  .WithHttpManager(httpManager)
+                                                                  .WithExperimentalFeatures(true)
+                                                                  .BuildConcrete();
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
+                var popConfig = new PoPAuthenticationConfiguration(request);
+                var provider = PoPProviderFactory.GetOrCreateProvider();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithTenantId(TestConstants.Utid)
+                    .WithProofOfPossession(popConfig)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // access token parsing can be done with MSAL's id token parsing logic
+                var claims = IdToken.Parse(result.AccessToken).ClaimsPrincipal;
+
+                // Assert
+                Assert.AreEqual("PS256", provider.CryptographicAlgorithm);
+                Assert.IsTrue(!string.IsNullOrEmpty(claims.FindAll("nonce").Single().Value));
+                AssertSingedHttpRequestClaims(provider, claims);
+            }
+        }
     }
 }

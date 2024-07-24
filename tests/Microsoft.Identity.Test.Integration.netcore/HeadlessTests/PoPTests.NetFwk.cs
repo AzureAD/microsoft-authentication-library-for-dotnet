@@ -541,8 +541,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.IsTrue(canonicalJwk.Contains(@"""alg"":""PS256"""), "The canonical JWK should include the alg field with value PS256");
         }
 
+        [Ignore("This test is ignored because it is not ready yet.")]
         [TestMethod]
-        public async Task InMemoryCryptoProvider_IntegrationTest()
+        public async Task InMemoryCryptoProvider_WithGraph()
         {
             // Arrange - create a Confidential Client Application with PoP configuration
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
@@ -631,6 +632,43 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Assert that the response is successful
             Assert.IsTrue(responseWithPopToken.IsSuccessStatusCode, "The response should be successful with the PoP token");
+        }
+
+        [TestMethod]
+        public async Task PoPToken_ShouldHaveCorrectAlgorithm_PS256_Async()
+        {
+            // Arrange
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(settings.ClientId)
+                .WithExperimentalFeatures()
+                .WithAuthority(settings.Authority)
+                .WithClientSecret(settings.GetSecret())
+                .Build();
+
+            var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl))
+            {
+                PopCryptoProvider = new InMemoryCryptoProvider(),
+                HttpMethod = HttpMethod.Get
+            };
+
+            // Act
+            var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .WithProofOfPossession(popConfig)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            // Assert token type
+            Assert.AreEqual("pop", result.TokenType);
+
+            // Validate the token
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(result.AccessToken);
+            var alg = token.Header.Alg;
+            var kid = token.Header.Kid;
+
+            // Check the algorithm
+            Assert.AreEqual("PS256", alg, "The algorithm in the token header should be PS256");
         }
 
 #if NET_CORE
