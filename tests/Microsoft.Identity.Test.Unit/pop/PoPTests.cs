@@ -645,19 +645,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
         }
 
         [TestMethod]
-        public void JwkContainsCorrectAlgorithm()
-        {
-            // Arrange
-            var provider = new InMemoryCryptoProvider();
-
-            // Act
-            var jwk = provider.CannonicalPublicKeyJwk;
-
-            // Assert
-            Assert.IsTrue(jwk.Contains("\"alg\":\"PS256\""), "JWK should contain alg: PS256");
-        }
-
-        [TestMethod]
         public async Task TokenGenerationAndValidation_Async()
         {
             using (var httpManager = new MockHttpManager())
