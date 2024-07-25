@@ -8,6 +8,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using System.IO;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -35,7 +36,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
         private static AbstractManagedIdentity SelectManagedIdentitySource(RequestContext requestContext)
         {
-            return GetManagedIdentitySource() switch
+            return GetManagedIdentitySource(requestContext.Logger) switch
             {
                 ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.AppService => AppServiceManagedIdentitySource.Create(requestContext),
@@ -48,7 +49,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // Detect managed identity source based on the availability of environment variables.
         // The result of this method is not cached because reading environment variables is cheap. 
         // This method is perf sensitive any changes should be benchmarked.
-        internal static ManagedIdentitySource GetManagedIdentitySource()
+        internal static ManagedIdentitySource GetManagedIdentitySource(ILoggerAdapter logger = null)
         {
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
             string identityHeader = EnvironmentVariables.IdentityHeader;
@@ -74,7 +75,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 return ManagedIdentitySource.CloudShell;
             }
-            else if (ValidateAzureArcEnvironment(identityEndpoint, imdsEndpoint))
+            else if (ValidateAzureArcEnvironment(identityEndpoint, imdsEndpoint, logger))
             {
                 return ManagedIdentitySource.AzureArc;
             }
@@ -85,10 +86,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         // Method to return true if a file exists and is not empty to validate the Azure arc environment.
-        private static bool ValidateAzureArcEnvironment(string identityEndpoint, string imdsEndpoint)
+        private static bool ValidateAzureArcEnvironment(string identityEndpoint, string imdsEndpoint, ILoggerAdapter logger)
         {
-            if (!string.IsNullOrEmpty(identityEndpoint) || !string.IsNullOrEmpty(imdsEndpoint))
+            if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(imdsEndpoint))
             {
+                logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is available through environment variables.");
                 return true;
             }
 
@@ -107,7 +109,13 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return false;
             }
 
-            return File.Exists(path) && new FileInfo(path).Length > 0;
+            if (File.Exists(path) && new FileInfo(path).Length > 0)
+            {
+                logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is available through file detection.");
+                return true;
+            }
+            
+            return false;
         }
     }
 }
