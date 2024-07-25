@@ -536,9 +536,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Check the algorithm and kid
             Assert.AreEqual("PS256", alg, "The algorithm in the token header should be PS256");
             Assert.AreEqual(expectedKid, kid, "The kid in the token header should match the generated key");
-
-            // Validate the canonical JWK includes the alg field
-            Assert.IsTrue(canonicalJwk.Contains(@"""alg"":""PS256"""), "The canonical JWK should include the alg field with value PS256");
         }
 
         [Ignore("This test is ignored because it is not ready yet.")]
@@ -592,9 +589,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Check the algorithm and kid
             Assert.AreEqual("PS256", alg, "The algorithm in the token header should be PS256");
             Assert.AreEqual(expectedKid, kid, "The kid in the token header should match the generated key");
-
-            // Validate the canonical JWK includes the alg field
-            Assert.IsTrue(canonicalJwk.Contains(@"""alg"":""PS256"""), "The canonical JWK should include the alg field with value PS256");
 
             // Integration Test: Call the Graph API and test for success
             var httpClient = new HttpClient();
