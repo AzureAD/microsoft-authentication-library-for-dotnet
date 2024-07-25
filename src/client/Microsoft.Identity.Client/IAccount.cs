@@ -33,11 +33,5 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>Can be null, for example if this account was migrated to MSAL.NET from ADAL.NET v3's token cache</remarks>
         AccountId HomeAccountId { get; }
-
-        /// <summary>
-        /// The initial flow that established the account. For example, device code flow.
-        /// </summary>
-        /// <remarks>Can be null. Currently only device code flow updates this property with a valid string</remarks>
-        string AccountSource { get; }
     }
 }
