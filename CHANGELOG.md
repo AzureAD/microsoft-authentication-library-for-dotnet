@@ -1,3 +1,15 @@
+4.62.0
+==========
+### New Features
+- Updated the Service Fabric managed identity flow to validate the server certificate. See [Issue #4462](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4462)
+- Updated MSAL exception when server returns 500 to include request URI. See [Issue #4412](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4412)
+- Removed unused telemetry headers `WithClientTelemetry` and `last_telemetry header`. See [Issue #4815](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4815)
+
+### Bug Fixes
+- Fix for silent token acquisition failing after device code flow when broker is enabled. See [Issue #4786](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4786)
+- Fix the computation of `TotalDurationInMs` for linux platform. See [Issue #4784](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4784)
+- Added 'haschrome=1' to avoid unexpected back buttons on the first page in embedded browser. See [Issue #4836](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4836)
+
 4.61.3
 ==========
 ### Bug Fixes
