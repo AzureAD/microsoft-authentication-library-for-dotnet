@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1722014225649,
+  "lastUpdate": 1722014227766,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -20854,6 +20854,54 @@ window.BENCHMARK_DATA = {
             "value": 174706.88748372396,
             "unit": "ns",
             "range": "± 2297.039191141037"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5db1993b3965638b8aba02370219648a3e3a8ff6",
+          "message": "[Bug Fix] Correct alg to PS256 for SHR POP Tokens (#4842)\n\n* initial\r\n\r\n* NativeInterop\r\n\r\n* remove test\r\n\r\n* tests\r\n\r\n* InMemoryCryptoProvider_AlgIsPS256 tests\r\n\r\n* pr comments\r\n\r\n* int test with graph\r\n\r\n* pr\r\n\r\n* removed header alg\r\n\r\n* test fix\r\n\r\n---------\r\n\r\nCo-authored-by: Gladwin Johnson <gljohns@microsoft.com>",
+          "timestamp": "2024-07-26T10:09:20-07:00",
+          "tree_id": "35ebec67b03aa4e77d12181953727a6ef98591e8",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/5db1993b3965638b8aba02370219648a3e3a8ff6"
+        },
+        "date": 1722014227263,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 22146.387461344402,
+            "unit": "ns",
+            "range": "± 51.61673065787453"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 175000.6339029948,
+            "unit": "ns",
+            "range": "± 1094.3888127916039"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 33072.456939697266,
+            "unit": "ns",
+            "range": "± 47.766815634200846"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 175590.24701397234,
+            "unit": "ns",
+            "range": "± 644.8972490897496"
           }
         ]
       }
