@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1722014227766,
+  "lastUpdate": 1722014229679,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -29924,6 +29924,66 @@ window.BENCHMARK_DATA = {
             "value": 134937.95555555556,
             "unit": "ns",
             "range": "± 5154.997746915809"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5db1993b3965638b8aba02370219648a3e3a8ff6",
+          "message": "[Bug Fix] Correct alg to PS256 for SHR POP Tokens (#4842)\n\n* initial\r\n\r\n* NativeInterop\r\n\r\n* remove test\r\n\r\n* tests\r\n\r\n* InMemoryCryptoProvider_AlgIsPS256 tests\r\n\r\n* pr comments\r\n\r\n* int test with graph\r\n\r\n* pr\r\n\r\n* removed header alg\r\n\r\n* test fix\r\n\r\n---------\r\n\r\nCo-authored-by: Gladwin Johnson <gljohns@microsoft.com>",
+          "timestamp": "2024-07-26T10:09:20-07:00",
+          "tree_id": "35ebec67b03aa4e77d12181953727a6ef98591e8",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/5db1993b3965638b8aba02370219648a3e3a8ff6"
+        },
+        "date": 1722014229104,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (1, 10))",
+            "value": 17424.670026506697,
+            "unit": "ns",
+            "range": "± 29.424292813270757"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (10000, 10))",
+            "value": 29855.080486591047,
+            "unit": "ns",
+            "range": "± 87.78585522450122"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 9461.498015340168,
+            "unit": "ns",
+            "range": "± 68.59327573591717"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 20301.164392324594,
+            "unit": "ns",
+            "range": "± 42.91329657655474"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 38710.86666666667,
+            "unit": "ns",
+            "range": "± 685.3613089528208"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 153646.1978021978,
+            "unit": "ns",
+            "range": "± 10852.493329716941"
           }
         ]
       }
