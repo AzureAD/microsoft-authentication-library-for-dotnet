@@ -366,6 +366,8 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.MsalVersion);
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.CallerSdkId);
+                        expectedTags.Add(TelemetryConstants.CallerSdkVersion);
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
@@ -472,8 +474,6 @@ namespace Microsoft.Identity.Test.Unit
                         Assert.Fail("Unexpected metrics logged.");
                         break;
                 }
-
-                
             }
         }
 

@@ -25,7 +25,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public string Claims { get; set; }
         public AuthorityInfo AuthorityOverride { get; set; }
         public IAuthenticationScheme AuthenticationScheme { get; set; } = new BearerAuthenticationScheme();
-        public IDictionary<string, string> ExtraHttpHeaders { get; set; }
+        public IDictionary<string, string> ExtraHttpHeaders { get; } = new Dictionary<string, string>();
         public PoPAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
         public Func<OnBeforeTokenRequestData, Task> OnBeforeTokenRequestHandler { get; internal set; }
         public X509Certificate2 MtlsCertificate { get; internal set; }
