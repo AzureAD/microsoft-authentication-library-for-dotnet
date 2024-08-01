@@ -62,8 +62,9 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            console.log('${{ steps.check_label.outputs.result }}')
-            const labels = JSON.parse('${{ steps.check_label.outputs.result }}');
+            const labelsJson = '${{ steps.check_label.outputs.result }}';
+            console.log(labelsJson);
+            const labels = JSON.parse(labelsJson);
             if (labels.length > 0) {
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
