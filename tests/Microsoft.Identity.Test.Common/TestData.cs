@@ -78,6 +78,9 @@ namespace Microsoft.Identity.Test.Common
             // Test case with claims containing an access token, null capabilities, and the expected merged JSON
             yield return new object[] { TestConstants.ClaimsWithAccessToken, null, TestConstants.ClaimsWithAccessToken };
 
+            // Test case with custom claims
+            yield return new object[] { TestConstants.CustomClaims, TestConstants.ClientCapabilities, TestConstants.ExpectedMergedJsonCustomClaims };
+
             // Test case with claims containing an additional key and access key (different order), non-empty capabilities, and the expected merged JSON
             yield return new object[] { TestConstants.ClaimWithAdditionalKeyAndAccessKey, TestConstants.ClientCapabilities, TestConstants.MergedJsonClaimWithAdditionalKeyAndAccessKey };
         }
