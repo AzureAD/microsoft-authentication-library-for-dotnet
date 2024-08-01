@@ -16,6 +16,7 @@ jobs:
         id: fetch_issue
         uses: actions/github-script@v7
         with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             // Fetch the issue details using the GitHub API
             const { data: issue } = await github.issues.get({
@@ -29,20 +30,18 @@ jobs:
         id: check_label
         uses: actions/github-script@v7
         with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const labelsToAdd = [];
-            const publicClientOptions = [
-              "PublicClient"
-            ];
-            const confidentialClientOptions = [
-              "ConfidentialClient"
-            ];
-            const managedIdentityClientOptions = [
-              "ManagedIdentityClient"
-            ];
+            const publicClientOptions = ["PublicClient"];
+            const confidentialClientOptions = ["ConfidentialClient"];
+            const managedIdentityClientOptions = ["ManagedIdentityClient"];
             
-            const issueBody = context.issue.body;
-
+            const issueBody = ${{ steps.fetch_issue.outputs.result }};
+            
+            if (!issueBody) {
+              throw new Error('Issue body is undefined');
+            }
             if (publicClientOptions.some(option => issueBody.includes(option))) {
               labelsToAdd.push('public-client');
             }
@@ -60,6 +59,7 @@ jobs:
       - name: Add labels to the issue
         uses: actions/github-script@v7
         with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const labels = JSON.parse('${{ steps.check_label.outputs.result }}');
             if (labels.length > 0) {
