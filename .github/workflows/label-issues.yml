@@ -42,7 +42,6 @@ jobs:
             if (!issueBody) {
               throw new Error('Issue body is undefined');
             }
-            
             if (publicClientOptions.some(option => issueBody.includes(option))) {
               labelsToAdd.push('public-client');
             }
