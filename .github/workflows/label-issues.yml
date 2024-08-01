@@ -3,6 +3,7 @@ name: Label Client Issues
 on:
   issues:
     types: [opened, edited]
+  workflow_dispatch:
 
 permissions:
   issues: write
@@ -19,7 +20,7 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             // Fetch the issue details using the GitHub API
-            const { data: issue } = await github.issues.get({
+            const { data: issue } = await github.rest.issues.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number
@@ -63,7 +64,7 @@ jobs:
           script: |
             const labels = JSON.parse('${{ steps.check_label.outputs.result }}');
             if (labels.length > 0) {
-              await github.issues.addLabels({
+              await github.rest.issues.addLabels({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
