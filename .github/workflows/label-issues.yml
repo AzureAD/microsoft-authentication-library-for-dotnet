@@ -31,16 +31,18 @@ jobs:
         with:
           script: |
             const labelsToAdd = [];
-            const publicClientOptions = ["PublicClient"];
-            const confidentialClientOptions = ["ConfidentialClient"];
-            const managedIdentityClientOptions = ["ManagedIdentityClient"];
+            const publicClientOptions = [
+              "PublicClient"
+            ];
+            const confidentialClientOptions = [
+              "ConfidentialClient"
+            ];
+            const managedIdentityClientOptions = [
+              "ManagedIdentityClient"
+            ];
             
-            const issueBody = ${{ steps.fetch_issue.outputs.result }};
-            
-            if (!issueBody) {
-              throw new Error('Issue body is undefined');
-            }
-            
+            const issueBody = context.issue.body;
+
             if (publicClientOptions.some(option => issueBody.includes(option))) {
               labelsToAdd.push('public-client');
             }
