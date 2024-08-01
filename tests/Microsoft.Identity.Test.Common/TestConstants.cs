@@ -155,6 +155,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string Claims = @"{""userinfo"":{""given_name"":{""essential"":true},""nickname"":null,""email"":{""essential"":true},""email_verified"":{""essential"":true},""picture"":null,""http://example.info/claims/groups"":null},""id_token"":{""auth_time"":{""essential"":true},""acr"":{""values"":[""urn:mace:incommon:iap:silver""]}}}";
         public static readonly string[] ClientCapabilities = new[] { "cp1", "cp2" };
         public const string ClientCapabilitiesJson = @"{""access_token"":{""xms_cc"":{""values"":[""cp1"",""cp2""]}}}";
+        public const string CustomClaims = @"{""customClaims"": { ""xms_az_nwperimid"": [""GUID"", ""GUID2"", ""GUID3""] }}";
+        public const string ExpectedMergedJsonCustomClaims = @"{""access_token"":{""xms_cc"":{""values"":[""cp1"",""cp2""]}},""customClaims"":{""xms_az_nwperimid"":[""GUID"",""GUID2"",""GUID3""]}}";
         // this a JSON merge from Claims and ClientCapabilitiesJson
         public const string ClientCapabilitiesAndClaimsJson = @"{""access_token"":{""xms_cc"":{""values"":[""cp1"",""cp2""]}},""userinfo"":{""given_name"":{""essential"":true},""nickname"":null,""email"":{""essential"":true},""email_verified"":{""essential"":true},""picture"":null,""http://example.info/claims/groups"":null},""id_token"":{""auth_time"":{""essential"":true},""acr"":{""values"":[""urn:mace:incommon:iap:silver""]}}}";
         public const string ClaimsWithAccessToken = @"{""access_token"":{""nbf"":{""essential"":true, ""value"":""1701477303""}}}";
