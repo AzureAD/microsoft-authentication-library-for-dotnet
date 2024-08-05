@@ -37,7 +37,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (_managedIdentityParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
-                logger.Info("[ManagedIdentityRequest] Skipped looking for a cached access token because ForceRefresh or Claims were set.");
+                
+                logger.Info("[ManagedIdentityRequest] Skipped looking for a cached access token because ForceRefresh or Claims were set. " +
+                    "This means either a force refresh was requested or claims were present.");
+
                 authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
                 return authResult;
             }
