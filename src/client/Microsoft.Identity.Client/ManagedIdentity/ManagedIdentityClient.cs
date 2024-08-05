@@ -18,6 +18,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     /// </summary>
     internal class ManagedIdentityClient
     {
+        private const string WindowsHimdsFilePath = "%Programfiles%\\AzureConnectedMachineAgent\\himds.exe";
+        private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
         private readonly AbstractManagedIdentity _identitySource;
 
         public ManagedIdentityClient(RequestContext requestContext)
@@ -94,27 +96,18 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 return true;
             }
 
-            string path;
-
-            if (DesktopOsHelper.IsWindows())
+            if (DesktopOsHelper.IsWindows() && File.Exists(Environment.ExpandEnvironmentVariables(WindowsHimdsFilePath)))
             {
-                path = Environment.ExpandEnvironmentVariables("%Programfiles%\\AzureConnectedMachineAgent\\himds.exe");
+                logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is available through file detection.");
+                return true;
             }
-            else if (DesktopOsHelper.IsLinux())
-            {
-                path = "/opt/azcmagent/bin/himds";
-            }
-            else
-            {
-                return false;
-            }
-
-            if (File.Exists(path) && new FileInfo(path).Length > 0)
+            else if (DesktopOsHelper.IsLinux() && File.Exists(LinuxHimdsFilePath))
             {
                 logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is available through file detection.");
                 return true;
             }
             
+            logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is not available on this platform.");
             return false;
         }
     }
