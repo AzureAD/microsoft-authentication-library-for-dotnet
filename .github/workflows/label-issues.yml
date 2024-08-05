@@ -1,0 +1,75 @@
+name: Label Client Issues
+
+on:
+  issues:
+    types: [opened, edited]
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fetch issue details
+        id: fetch_issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            // Fetch the issue details using the GitHub API
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            return issue.body;
+
+      - name: Check issue body for client type
+        id: check_label
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const labelsToAdd = [];
+            const publicClientOptions = ["PublicClient"];
+            const confidentialClientOptions = ["ConfidentialClient"];
+            const managedIdentityClientOptions = ["ManagedIdentityClient"];
+            
+            const issueBody = ${{ steps.fetch_issue.outputs.result }};
+            
+            if (!issueBody) {
+              throw new Error('Issue body is undefined');
+            }
+            if (publicClientOptions.some(option => issueBody.includes(option))) {
+              labelsToAdd.push('public-client');
+            }
+            
+            if (confidentialClientOptions.some(option => issueBody.includes(option))) {
+              labelsToAdd.push('confidential-client');
+            }
+
+            if (managedIdentityClientOptions.some(option => issueBody.includes(option))) {
+              labelsToAdd.push('scenario:ManagedIdentity');
+            }
+
+            return labelsToAdd;
+
+      - name: Add labels to the issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const labelsJson = '${{ steps.check_label.outputs.result }}';
+            console.log(labelsJson);
+            const labels = JSON.parse(labelsJson);
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: labels
+              });
+            }

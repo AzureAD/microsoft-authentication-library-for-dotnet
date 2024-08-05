@@ -24,7 +24,7 @@ namespace DesktopTestApp
 {
     public partial class MainForm : Form
     {
-        private const string PublicClientId = "6afec070-b576-4a2f-8d95-41f317b28e06";
+        private const string PublicClientId = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
         private string _b2CClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
         public const string B2CCustomDomainClientId = "64a88201-6bbd-49f5-ab46-9153798493fd ";
         private const string _ciamAuthority = "https://msidlabciam1.ciamlogin.com";
