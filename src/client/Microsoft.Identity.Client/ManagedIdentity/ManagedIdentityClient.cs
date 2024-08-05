@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             } 
             else
             {
-                logger?.Warning(() => "[Managed Identity] Azure Arc managed identity cannot be configured on a platform other than Windows and Linux.");
+                logger?.Warning("[Managed Identity] Azure Arc managed identity cannot be configured on a platform other than Windows and Linux.");
             }
             
             logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is not available.");
