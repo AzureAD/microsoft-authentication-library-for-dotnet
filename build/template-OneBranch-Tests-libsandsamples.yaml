@@ -8,33 +8,15 @@ parameters:
   MsalSourceDir: '' #Default MSAL Location
 
 steps:
-- task: CmdLine@2
-  displayName: 'Clear local NuGet cache'
-  inputs:
-    script: 'nuget locals all -clear'
 
-- task: VSBuild@1
-  displayName: 'NuGet restore ${{ parameters.Solution }}'
+- task: UseDotNet@2
+  displayName: 'Use the latest .NET 6'
   inputs:
-    solution: ${{ parameters.Solution }}
-    msbuildArgs: '/t:restore'
-    platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
+    version: 6.x
 
-- task: JavaToolInstaller@0
-  displayName: 'Use Java 11'
-  inputs:
-    versionSpec: 11
-    jdkArchitectureOption: x64
-    jdkSourceOption: PreInstalled
-
-- task: VSBuild@1
-  displayName: 'Build solution ${{ parameters.Solution }}'
-  inputs:
-    solution: ${{ parameters.Solution }}
-    msbuildArgs: '/p:RunCodeAnalysis=false /p:MsalClientSemVer=${{ parameters.MsalClientSemVer }} /p:SourceLinkCreate=true /p:ContinousIntegrationBuild=true'
-    platform: ${{ parameters.BuildPlatform }}
-    configuration: ${{ parameters.BuildConfiguration }}
+- template: template-restore-build-libsandsamples.yaml
+  parameters:
+    Solution: 'LibsAndSamples.sln'    
 
   # Run All Desktop Tests
 - template: template-run-all-tests.yaml
