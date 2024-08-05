@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1722900072608,
+  "lastUpdate": 1722900075201,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -20986,6 +20986,54 @@ window.BENCHMARK_DATA = {
             "value": 175590.24701397234,
             "unit": "ns",
             "range": "± 644.8972490897496"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "83725aa93115d361ddf07eb1648804ef2e43a8f9",
+          "message": "Enhance MSAL Managed Identity to Bypass Cache When Claims Are Present (#4875)\n\n* initial\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Bogdan Gavril <bogavril@microsoft.com>\r\n\r\n* pr comments\r\n\r\n---------\r\n\r\nCo-authored-by: Gladwin Johnson <gljohns@microsoft.com>\r\nCo-authored-by: Bogdan Gavril <bogavril@microsoft.com>",
+          "timestamp": "2024-08-05T16:13:36-07:00",
+          "tree_id": "01185b7a4995c1e873645e868698b40a3a82faaa",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/83725aa93115d361ddf07eb1648804ef2e43a8f9"
+        },
+        "date": 1722900074385,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 21843.37104695638,
+            "unit": "ns",
+            "range": "± 167.4266107147714"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 168093.75771484376,
+            "unit": "ns",
+            "range": "± 1272.3856101248211"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 33768.8953904372,
+            "unit": "ns",
+            "range": "± 297.19458725927154"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 174064.86840820312,
+            "unit": "ns",
+            "range": "± 827.24689321094"
           }
         ]
       }
