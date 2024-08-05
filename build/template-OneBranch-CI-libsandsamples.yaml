@@ -8,6 +8,55 @@ parameters:
   MsalSourceDir: 'microsoft-authentication-library-for-dotnet\' #Default MSAL Location
 
 steps:
+
+# Unit tests require .NET 3.x
+- task: UseDotNet@2
+  displayName: 'Use .Net Core SDK 3.x'
+  inputs:
+    version: 3.x
+    
+# Use the latest .NET SDK
+- task: UseDotNet@2
+  displayName: 'Use .Net Core sdk 6.x'
+  inputs:
+    version: 6.x
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet workload restore for Desktop project'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore microsoft-authentication-library-for-dotnet\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet workload restore for Identity.Client'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: 'restore microsoft-authentication-library-for-dotnet\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+
+- task: PowerShell@2
+  displayName: Install MAUI
+  inputs:
+    targetType: 'inline'
+    script: |
+      dotnet workload install maui --source https://api.nuget.org/v3/index.json
+      dotnet workload install android --source https://api.nuget.org/v3/index.json
+
+- task: PowerShell@2
+  displayName: Install Chocolatey
+  inputs:
+    targetType: 'inline'
+    script: |
+      Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))      
+
+- task: PowerShell@2
+  displayName: Install Java 11
+  inputs:
+    targetType: 'inline'
+    script: |
+      choco install openjdk --version=11.0.2.01 -y
+
 - task: CmdLine@2
   displayName: 'Clear local NuGet cache'
   inputs:
