@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1722014229679,
+  "lastUpdate": 1722900070169,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6002,6 +6002,42 @@ window.BENCHMARK_DATA = {
             "value": 351447.6153846154,
             "unit": "ns",
             "range": "± 5408.3299261180055"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "83725aa93115d361ddf07eb1648804ef2e43a8f9",
+          "message": "Enhance MSAL Managed Identity to Bypass Cache When Claims Are Present (#4875)\n\n* initial\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Bogdan Gavril <bogavril@microsoft.com>\r\n\r\n* pr comments\r\n\r\n---------\r\n\r\nCo-authored-by: Gladwin Johnson <gljohns@microsoft.com>\r\nCo-authored-by: Bogdan Gavril <bogavril@microsoft.com>",
+          "timestamp": "2024-08-05T16:13:36-07:00",
+          "tree_id": "01185b7a4995c1e873645e868698b40a3a82faaa",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/83725aa93115d361ddf07eb1648804ef2e43a8f9"
+        },
+        "date": 1722900066033,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 241907.93333333332,
+            "unit": "ns",
+            "range": "± 9144.770620414707"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 339811.55555555556,
+            "unit": "ns",
+            "range": "± 6890.625526306799"
           }
         ]
       }
