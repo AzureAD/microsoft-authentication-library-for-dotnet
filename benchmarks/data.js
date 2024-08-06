@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1722952830785,
+  "lastUpdate": 1722952832672,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -13620,6 +13620,54 @@ window.BENCHMARK_DATA = {
             "value": 123081.44554036458,
             "unit": "ns",
             "range": "± 1602.8402407329163"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "dd337e23fccf2d16925bce8a1a4bc72ae943a564",
+          "message": "Fix Pre-release Regression: Correct JSON Web Key (JWK) Encoding for RSA Public Key Export (#4878)\n\n* Revert JWK format\r\n\r\n* Update src/client/Microsoft.Identity.Client/AuthScheme/PoP/InMemoryCryptoProvider.cs\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Adding JWK test\r\ndisabling failing test\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-08-06T06:53:20-07:00",
+          "tree_id": "5585088765b94d5c4c8bafad51ed796dc3fac002",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/dd337e23fccf2d16925bce8a1a4bc72ae943a564"
+        },
+        "date": 1722952832267,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 12442.884868915264,
+            "unit": "ns",
+            "range": "± 56.519804700143915"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 119820.32493489583,
+            "unit": "ns",
+            "range": "± 632.1574242650022"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 23573.709698486327,
+            "unit": "ns",
+            "range": "± 164.29660824337583"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 122330.53064778647,
+            "unit": "ns",
+            "range": "± 1493.7088333584697"
           }
         ]
       }
