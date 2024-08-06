@@ -5,7 +5,6 @@
 
 ### Bug Fixes
 - Fixed an issue where SHR POP tokens were broken due to an invalid algorithm. The algorithm has been corrected to PS256 from RS256. See [Issue #4839](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4839)
-- Addressed a problem with incorrectly encoded JWK format in RSA public key export. See [Issue #4881](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4881)
 
 4.62.0
 ==========
