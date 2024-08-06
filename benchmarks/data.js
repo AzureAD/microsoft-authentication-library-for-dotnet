@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1722900077733,
+  "lastUpdate": 1722952830785,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6038,6 +6038,42 @@ window.BENCHMARK_DATA = {
             "value": 339811.55555555556,
             "unit": "ns",
             "range": "± 6890.625526306799"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "dd337e23fccf2d16925bce8a1a4bc72ae943a564",
+          "message": "Fix Pre-release Regression: Correct JSON Web Key (JWK) Encoding for RSA Public Key Export (#4878)\n\n* Revert JWK format\r\n\r\n* Update src/client/Microsoft.Identity.Client/AuthScheme/PoP/InMemoryCryptoProvider.cs\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Adding JWK test\r\ndisabling failing test\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-08-06T06:53:20-07:00",
+          "tree_id": "5585088765b94d5c4c8bafad51ed796dc3fac002",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/dd337e23fccf2d16925bce8a1a4bc72ae943a564"
+        },
+        "date": 1722952827303,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 257889,
+            "unit": "ns",
+            "range": "± 6806.235560131607"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 336223.4285714286,
+            "unit": "ns",
+            "range": "± 5067.474028839914"
           }
         ]
       }
