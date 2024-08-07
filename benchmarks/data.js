@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1722952836513,
+  "lastUpdate": 1723024094019,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6074,6 +6074,42 @@ window.BENCHMARK_DATA = {
             "value": 336223.4285714286,
             "unit": "ns",
             "range": "± 5067.474028839914"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "adf5dab22f6a60ba78ac116927ac17df1dc1b6dc",
+          "message": "Enabling ROPC on CCA (#4799)\n\n* Enabling ROPC on CCA\r\n\r\n* Clean up.\r\nAdding tests.\r\n\r\n* Refactoring.\r\nAdding explicit interface for ROPC with CCA\r\n\r\n* Update src/client/Microsoft.Identity.Client/IByUsernameAndPassword.cs\r\n\r\nCo-authored-by: Neha Bhargava <61847233+neha-bhargava@users.noreply.github.com>\r\n\r\n* Clean up.\r\nRefactoring\r\n\r\n* clean up\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\nCo-authored-by: Neha Bhargava <61847233+neha-bhargava@users.noreply.github.com>",
+          "timestamp": "2024-08-07T02:40:44-07:00",
+          "tree_id": "094c458ec8ae159648edbb842c5eb615bb5eac23",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/adf5dab22f6a60ba78ac116927ac17df1dc1b6dc"
+        },
+        "date": 1723024089671,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 259082.0294117647,
+            "unit": "ns",
+            "range": "± 8332.309652828793"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 337465.07692307694,
+            "unit": "ns",
+            "range": "± 3103.1773894278763"
           }
         ]
       }
