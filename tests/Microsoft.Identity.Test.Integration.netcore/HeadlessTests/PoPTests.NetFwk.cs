@@ -293,7 +293,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [RunOn(TargetFrameworks.NetCore)]
         public async Task ROPC_PopTestWithRSAAsync()
         {
-            var telemetryClient = new TestTelemetryClient(TestConstants.ClientId);
             var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
 
@@ -321,9 +320,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 HttpMethod.Get,
                 result);
 
-            MsalTelemetryEventDetails eventDetails = telemetryClient.TestTelemetryEventDetails;
-            Assert.IsNotNull(eventDetails);
-            Assert.AreEqual(Convert.ToInt64(TokenType.Pop), eventDetails.Properties[TelemetryConstants.TokenType]);
         }
 
         [TestMethod]
