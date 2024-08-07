@@ -21,7 +21,7 @@ namespace Microsoft.Identity.Client
         /// such as <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/> to check the token cache.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API.</param>
-        /// <param name="username">Identifier of the user application requests token on behalf.
+        /// <param name="username">Identifier of the user, application requests token on behalf of.
         /// Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
         /// <param name="password">User password as a string.</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request.</returns>
