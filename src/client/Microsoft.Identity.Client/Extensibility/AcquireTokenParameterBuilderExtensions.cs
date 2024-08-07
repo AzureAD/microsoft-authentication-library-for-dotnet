@@ -21,10 +21,7 @@ namespace Microsoft.Identity.Client.Advanced
             IDictionary<string, string> extraHttpHeaders)
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
-            foreach (var kvp in extraHttpHeaders)
-            {
-                builder.CommonParameters.ExtraHttpHeaders.Add(kvp.Key, kvp.Value);
-            }
+            builder.CommonParameters.ExtraHttpHeaders = extraHttpHeaders;
             return (T)builder;
         }
     }

@@ -244,15 +244,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
             apiEvent.TokenType = AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
             apiEvent.AssertionType = GetAssertionType();
 
-            if (AuthenticationRequestParameters.ExtraQueryParameters.ContainsKey("caller-sdk-id"))
+            // Check if ExtraQueryParameters contains caller-sdk-id and caller-sdk-ver
+            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-id", out string callerSdkId))
             {
-                apiEvent.CallerSdkApiId = AuthenticationRequestParameters.ExtraQueryParameters["caller-sdk-id"];
+                apiEvent.CallerSdkApiId = callerSdkId;
                 AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-id");
             }
 
-            if (AuthenticationRequestParameters.ExtraQueryParameters.ContainsKey("caller-sdk-ver"))
+            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-ver", out string callerSdkVersion))
             {
-                apiEvent.CallerSdkVersion = AuthenticationRequestParameters.ExtraQueryParameters["caller-sdk-ver"];
+                apiEvent.CallerSdkVersion = callerSdkVersion;
                 AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-ver");
             }
 
