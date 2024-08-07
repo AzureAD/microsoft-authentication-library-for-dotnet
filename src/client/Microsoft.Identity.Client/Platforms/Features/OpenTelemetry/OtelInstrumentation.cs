@@ -168,8 +168,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
-                        new(TelemetryConstants.CallerSdkId, callerSdkId),
-                        new(TelemetryConstants.CallerSdkVersion, callerSdkVersion),
+                        new(TelemetryConstants.CallerSdkId, callerSdkId ?? ""),
+                        new(TelemetryConstants.CallerSdkVersion, callerSdkVersion ?? ""),
                         new(TelemetryConstants.TokenSource, tokenSource),
                         new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
                         new(TelemetryConstants.CacheLevel, cacheLevel));

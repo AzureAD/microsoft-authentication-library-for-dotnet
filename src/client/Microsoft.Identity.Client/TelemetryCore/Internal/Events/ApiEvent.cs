@@ -136,9 +136,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
 
         public string MsalRuntimeTelemetry { get; set; }
 
-        public string CallerSdkApiId { get; set; } = "";
+        public string CallerSdkApiId { get; set; }
 
-        public string CallerSdkVersion { get; set; } = "";
+        public string CallerSdkVersion { get; set; }
 
         public static bool IsLongRunningObo(ApiIds apiId) => apiId == ApiIds.InitiateLongRunningObo || apiId == ApiIds.AcquireTokenInLongRunningObo;
 
