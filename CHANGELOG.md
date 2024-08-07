@@ -1,3 +1,11 @@
+4.63.0
+==========
+### New Features
+- Implemented Claims API to Bypass Cache When Claims are Present in MSAL with Managed Identity. This is still an experimental API and may change in the future. See [Issue #4845](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4845)
+
+### Bug Fixes
+- Fixed an issue where SHR POP tokens were broken due to an invalid algorithm. The algorithm has been corrected to PS256 from RS256. See [Issue #4839](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4839)
+
 4.62.0
 ==========
 ### New Features

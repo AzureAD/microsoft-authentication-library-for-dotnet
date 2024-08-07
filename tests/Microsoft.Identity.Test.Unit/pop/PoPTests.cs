@@ -31,6 +31,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
+using JsonWebAlgorithmsKeyTypes = Microsoft.Identity.Client.AuthScheme.PoP.JsonWebAlgorithmsKeyTypes;
+using JsonWebKeyParameterNames = Microsoft.Identity.Client.AuthScheme.PoP.JsonWebKeyParameterNames;
 
 namespace Microsoft.Identity.Test.Unit.Pop
 {
@@ -677,6 +679,22 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Assert.IsTrue(!string.IsNullOrEmpty(claims.FindAll("nonce").Single().Value));
                 AssertSingedHttpRequestClaims(provider, claims);
             }
+        }
+
+        [TestMethod]
+        public void ValidateCanonicalJwkFormat()
+        {
+            // Arrange
+            var provider = PoPProviderFactory.GetOrCreateProvider();
+            var actualCanonicaljwk = provider.CannonicalPublicKeyJwk;
+
+            // Act and Assert
+
+            // Parse the JWK to get the RSA parameters so that we can create a new canonical JWK in expected format
+            var jsonWebKey = JsonWebKey.Create(actualCanonicaljwk);
+            var expectedCanonicalJwk = $@"{{""{JsonWebKeyParameterNames.E}"":""{jsonWebKey.E}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{jsonWebKey.N}""}}";
+
+            Assert.AreEqual(expectedCanonicalJwk, actualCanonicaljwk);
         }
     }
 }
