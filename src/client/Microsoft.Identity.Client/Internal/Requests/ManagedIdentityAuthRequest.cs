@@ -33,11 +33,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationResult authResult = null;
             ILoggerAdapter logger = AuthenticationRequestParameters.RequestContext.Logger;
 
-            // Skip checking cache when force refresh is specified
-            if (_managedIdentityParameters.ForceRefresh)
+            // Skip checking cache when force refresh or claims is specified
+            if (_managedIdentityParameters.ForceRefresh || !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
             {
                 AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo = CacheRefreshReason.ForceRefreshOrClaims;
-                logger.Info("[ManagedIdentityRequest] Skipped looking for a cached access token because ForceRefresh was set.");
+                
+                logger.Info("[ManagedIdentityRequest] Skipped looking for a cached access token because ForceRefresh or Claims were set. " +
+                    "This means either a force refresh was requested or claims were present.");
+
                 authResult = await GetAccessTokenAsync(cancellationToken, logger).ConfigureAwait(false);
                 return authResult;
             }
@@ -113,7 +116,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 // 1. Force refresh is requested, or
                 // 2. If the access token needs to be refreshed proactively.
                 if (_managedIdentityParameters.ForceRefresh || 
-                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed)
+                    AuthenticationRequestParameters.RequestContext.ApiEvent.CacheInfo == CacheRefreshReason.ProactivelyRefreshed ||
+                    !string.IsNullOrEmpty(AuthenticationRequestParameters.Claims))
                 {
                     authResult = await SendTokenRequestForManagedIdentityAsync(logger, cancellationToken).ConfigureAwait(false);
                 }

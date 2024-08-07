@@ -450,6 +450,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             builder.Config.AccessorOptions = null;
 
             IManagedIdentityApplication mia = builder
+                .WithExperimentalFeatures(true)
                 .WithHttpManager(proxyHttpManager).Build();
 
             return mia;

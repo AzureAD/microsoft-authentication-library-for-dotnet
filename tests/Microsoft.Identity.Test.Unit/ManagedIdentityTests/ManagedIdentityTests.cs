@@ -280,6 +280,129 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
+        [DataRow(AppServiceEndpoint, Resource, ManagedIdentitySource.AppService)]
+        [DataRow(ImdsEndpoint, Resource, ManagedIdentitySource.Imds)]
+        [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
+        [DataRow(CloudShellEndpoint, Resource, ManagedIdentitySource.CloudShell)]
+        [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySource.ServiceFabric)]
+        public async Task ManagedIdentityWithClaimsAndCapabilitiesTestAsync(
+            string endpoint,
+            string scope,
+            ManagedIdentitySource managedIdentitySource)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures(true)
+                    .WithClientCapabilities(TestConstants.ClientCapabilities)
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    endpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    managedIdentitySource);
+
+                var result = await mi.AcquireTokenForManagedIdentity(scope).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // Acquire token from cache
+                result = await mi.AcquireTokenForManagedIdentity(scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+
+                httpManager.AddManagedIdentityMockHandler(
+                    endpoint,
+                    scope,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    managedIdentitySource);
+
+                // Acquire token with force refresh
+                result = await mi.AcquireTokenForManagedIdentity(scope).WithClaims(TestConstants.Claims)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(AppServiceEndpoint, Resource, ManagedIdentitySource.AppService)]
+        [DataRow(ImdsEndpoint, Resource, ManagedIdentitySource.Imds)]
+        [DataRow(AzureArcEndpoint, Resource, ManagedIdentitySource.AzureArc)]
+        [DataRow(CloudShellEndpoint, Resource, ManagedIdentitySource.CloudShell)]
+        [DataRow(ServiceFabricEndpoint, Resource, ManagedIdentitySource.ServiceFabric)]
+        public async Task ManagedIdentityWithClaimsTestAsync(
+            string endpoint,
+            string scope,
+            ManagedIdentitySource managedIdentitySource)
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager(isManagedIdentity: true))
+            {
+                SetEnvironmentVariables(managedIdentitySource, endpoint);
+
+                var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
+                    .WithExperimentalFeatures(true)
+                    .WithHttpManager(httpManager);
+
+                // Disabling shared cache options to avoid cross test pollution.
+                miBuilder.Config.AccessorOptions = null;
+
+                var mi = miBuilder.Build();
+
+                httpManager.AddManagedIdentityMockHandler(
+                    endpoint,
+                    Resource,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    managedIdentitySource);
+
+                var result = await mi.AcquireTokenForManagedIdentity(scope).ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                // Acquire token from cache
+                result = await mi.AcquireTokenForManagedIdentity(scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+
+                httpManager.AddManagedIdentityMockHandler(
+                    endpoint,
+                    scope,
+                    MockHelpers.GetMsiSuccessfulResponse(),
+                    managedIdentitySource);
+
+                // Acquire token with force refresh
+                result = await mi.AcquireTokenForManagedIdentity(scope).WithClaims(TestConstants.Claims)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [DataTestMethod]
         [DataRow("user.read", ManagedIdentitySource.AppService, AppServiceEndpoint)]
         [DataRow("https://management.core.windows.net//user_impersonation", ManagedIdentitySource.AppService, AppServiceEndpoint)]
         [DataRow("s", ManagedIdentitySource.AppService, AppServiceEndpoint)]
