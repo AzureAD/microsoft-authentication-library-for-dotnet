@@ -302,7 +302,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithExperimentalFeatures()
                 .WithAuthority(settings.Authority)
                 .WithClientSecret(settings.GetSecret())
-                .WithTelemetryClient(telemetryClient)
                 .Build();
 
             //RSA provider
