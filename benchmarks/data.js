@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1723024099205,
+  "lastUpdate": 1723024101875,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -30500,6 +30500,66 @@ window.BENCHMARK_DATA = {
             "value": 138364.62,
             "unit": "ns",
             "range": "± 17038.003886013114"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "adf5dab22f6a60ba78ac116927ac17df1dc1b6dc",
+          "message": "Enabling ROPC on CCA (#4799)\n\n* Enabling ROPC on CCA\r\n\r\n* Clean up.\r\nAdding tests.\r\n\r\n* Refactoring.\r\nAdding explicit interface for ROPC with CCA\r\n\r\n* Update src/client/Microsoft.Identity.Client/IByUsernameAndPassword.cs\r\n\r\nCo-authored-by: Neha Bhargava <61847233+neha-bhargava@users.noreply.github.com>\r\n\r\n* Clean up.\r\nRefactoring\r\n\r\n* clean up\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\nCo-authored-by: Neha Bhargava <61847233+neha-bhargava@users.noreply.github.com>",
+          "timestamp": "2024-08-07T02:40:44-07:00",
+          "tree_id": "094c458ec8ae159648edbb842c5eb615bb5eac23",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/adf5dab22f6a60ba78ac116927ac17df1dc1b6dc"
+        },
+        "date": 1723024101017,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (1, 10))",
+            "value": 18675.616778564454,
+            "unit": "ns",
+            "range": "± 103.40442213853272"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (10000, 10))",
+            "value": 29253.884047444662,
+            "unit": "ns",
+            "range": "± 142.66014271868667"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 9235.803371722881,
+            "unit": "ns",
+            "range": "± 24.849916320368212"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 20722.7767964681,
+            "unit": "ns",
+            "range": "± 157.78069109438667"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 39216.4,
+            "unit": "ns",
+            "range": "± 500.59204947741625"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 139011.76288659795,
+            "unit": "ns",
+            "range": "± 10839.20803223687"
           }
         ]
       }
