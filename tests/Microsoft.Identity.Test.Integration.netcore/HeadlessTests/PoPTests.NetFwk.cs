@@ -36,6 +36,7 @@ using Microsoft.Identity.Client.Internal;
 using System.Security.Claims;
 using System.Net.Sockets;
 using Microsoft.Identity.Test.Integration.NetFx.Infrastructure;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
@@ -243,6 +244,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 ProtectedUrl,
                 HttpMethod.Get,
                 result);
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(result.AccessToken);
+            var alg = token.Header.Alg;
+
+            // Check the algorithm
+            Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
         }
 
         [TestMethod]
@@ -273,6 +281,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 ProtectedUrl,
                 HttpMethod.Get,
                 result);
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(result.AccessToken);
+            var alg = token.Header.Alg;
+
+            // Check the algorithm
+            Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -344,6 +359,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 TokenSource.IdentityProvider,
                 result.AuthenticationResultMetadata.TokenSource);
 
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(result.AccessToken);
+            var alg = token.Header.Alg;
+
+            // Check the algorithm
+            Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
+
             SignedHttpRequestDescriptor signedHttpRequestDescriptor =
                 new SignedHttpRequestDescriptor(
                     result.AccessToken,
@@ -394,6 +416,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ConfigureAwait(false);
 
             Assert.AreEqual("pop", result.TokenType);
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(result.AccessToken);
+            var alg = token.Header.Alg;
+
+            // Check the algorithm
+            Assert.AreEqual("ES256", alg, "The algorithm in the token header should be ES256");
+
             PoPValidator.VerifyPoPToken(
                 settings.ClientId,
                 ProtectedUrl,
@@ -446,6 +476,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 TokenSource.IdentityProvider,
                 result.AuthenticationResultMetadata.TokenSource);
 
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(result.AccessToken);
+            var alg = token.Header.Alg;
+
+            // Check the algorithm
+            Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
+
             // Outside MSAL - Create the SHR (using Wilson)
 
             var popCredentials = new SigningCredentials(popKey, SecurityAlgorithms.RsaSha256);
@@ -487,6 +524,185 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 result2.AuthenticationResultMetadata.TokenSource);
         }
 
+        [TestMethod]
+        public async Task InMemoryCryptoProvider_AlgIsPS256()
+        {
+            // Arrange - create a Confidential Client Application with PoP configuration
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(settings.ClientId)
+                .WithExperimentalFeatures()
+                .WithAuthority(settings.Authority)
+                .WithClientSecret(settings.GetSecret())
+                .Build();
+
+            // Create a new InMemoryCryptoProvider and get its JWK
+            var cryptoProvider = new InMemoryCryptoProvider();
+            var canonicalJwk = cryptoProvider.CannonicalPublicKeyJwk;
+            var base64EncodedJwk = Base64UrlHelpers.Encode(Encoding.UTF8.GetBytes(canonicalJwk));
+
+            // Calculate the expected kid
+            string expectedKid;
+            using (var sha256 = SHA256.Create())
+            {
+                var kidBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(canonicalJwk));
+                expectedKid = Base64UrlHelpers.Encode(kidBytes);
+            }
+
+            // Use InMemoryCryptoProvider
+            var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl))
+            {
+                PopCryptoProvider = cryptoProvider,
+                HttpMethod = HttpMethod.Get
+            };
+
+            var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .WithProofOfPossession(popConfig)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            // Assert token type
+            Assert.AreEqual("pop", result.TokenType);
+
+            // Validate the token
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(result.AccessToken);
+            var alg = token.Header.Alg;
+            var kid = token.Header.Kid;
+
+            // Check the algorithm and kid
+            Assert.AreEqual("PS256", alg, "The algorithm in the token header should be PS256");
+            Assert.AreEqual(expectedKid, kid, "The kid in the token header should match the generated key");
+        }
+
+        [Ignore("This test is ignored because it is not ready yet.")]
+        [TestMethod]
+        public async Task InMemoryCryptoProvider_WithGraph()
+        {
+            // Arrange - create a Confidential Client Application with PoP configuration
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(settings.ClientId)
+                .WithExperimentalFeatures()
+                .WithAuthority(settings.Authority)
+                .WithClientSecret(settings.GetSecret())
+                .Build();
+
+            // Create a new InMemoryCryptoProvider and get its JWK
+            var cryptoProvider = new InMemoryCryptoProvider();
+            var canonicalJwk = cryptoProvider.CannonicalPublicKeyJwk;
+            var base64EncodedJwk = Base64UrlHelpers.Encode(Encoding.UTF8.GetBytes(canonicalJwk));
+
+            // Calculate the expected kid
+            string expectedKid;
+            using (var sha256 = SHA256.Create())
+            {
+                var kidBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(canonicalJwk));
+                expectedKid = Base64UrlHelpers.Encode(kidBytes);
+            }
+
+            // Use InMemoryCryptoProvider
+            var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl))
+            {
+                PopCryptoProvider = cryptoProvider,
+                HttpMethod = HttpMethod.Get
+            };
+
+            var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .WithProofOfPossession(popConfig)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            // Assert token type
+            Assert.AreEqual("pop", result.TokenType);
+
+            // Validate the token
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(result.AccessToken);
+            var alg = token.Header.Alg;
+            var kid = token.Header.Kid;
+
+            // Check the algorithm and kid
+            Assert.AreEqual("PS256", alg, "The algorithm in the token header should be PS256");
+            Assert.AreEqual(expectedKid, kid, "The kid in the token header should match the generated key");
+
+            // Integration Test: Call the Graph API and test for success
+            var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync("https://graph.microsoft.com/v1.0/users").ConfigureAwait(false);
+
+            // Check for WWW-Authenticate header
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.Unauthorized, "The response should be Unauthorized (401)");
+
+            // Extract WWW-Authenticate header to get the nonce
+            var authParams = await WwwAuthenticateParameters.CreateFromAuthenticationResponseAsync(
+                "https://graph.microsoft.com/v1.0/users", "Pop").ConfigureAwait(false);
+
+            // Use the nonce to acquire a PoP token
+            var popConfigWithNonce = new PoPAuthenticationConfiguration(new Uri("https://graph.microsoft.com/v1.0/users"))
+            {
+                PopCryptoProvider = cryptoProvider,
+                HttpMethod = HttpMethod.Get,
+                Nonce = authParams.Nonce
+            };
+
+            var resultWithNonce = await confidentialApp.AcquireTokenForClient(new[] { "https://graph.microsoft.com/.default" })
+                .WithProofOfPossession(popConfigWithNonce)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            // Make a new request with the PoP token to access a specific application
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("pop", resultWithNonce.AccessToken);
+            var responseWithPopToken = await httpClient.GetAsync($"https://graph.microsoft.com/v1.0/users").ConfigureAwait(false);
+
+            response = await httpClient.GetAsync("https://graph.microsoft.com/v1.0/applications").ConfigureAwait(false);
+
+            // Check for success
+            Assert.IsTrue(response.IsSuccessStatusCode, "The response should be successful");
+            var applications = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            // Assert that the response is successful
+            Assert.IsTrue(responseWithPopToken.IsSuccessStatusCode, "The response should be successful with the PoP token");
+        }
+
+        [TestMethod]
+        public async Task PoPToken_ShouldHaveCorrectAlgorithm_PS256_Async()
+        {
+            // Arrange
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(settings.ClientId)
+                .WithExperimentalFeatures()
+                .WithAuthority(settings.Authority)
+                .WithClientSecret(settings.GetSecret())
+                .Build();
+
+            var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl))
+            {
+                PopCryptoProvider = new InMemoryCryptoProvider(),
+                HttpMethod = HttpMethod.Get
+            };
+
+            // Act
+            var result = await confidentialApp.AcquireTokenForClient(s_keyvaultScope)
+                .WithProofOfPossession(popConfig)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            // Assert token type
+            Assert.AreEqual("pop", result.TokenType);
+
+            // Validate the token
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(result.AccessToken);
+            var alg = token.Header.Alg;
+            var kid = token.Header.Kid;
+
+            // Check the algorithm
+            Assert.AreEqual("PS256", alg, "The algorithm in the token header should be PS256");
+        }
+
 #if NET_CORE
         [IgnoreOnOneBranch]
         public async Task WamUsernamePasswordRequestWithPOPAsync()
@@ -523,6 +739,37 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 ProtectedUrl,
                 HttpMethod.Get,
                 result);
+        }
+
+        [TestMethod]
+        public void CheckPopRuntimeBrokerSupportTest()
+        {
+            //Broker enabled
+            var pcaBuilder = PublicClientApplicationBuilder
+                                            .Create(TestConstants.ClientId);
+
+            pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
+
+            IPublicClientApplication app = pcaBuilder.Build();
+
+            Assert.IsTrue(app.IsProofOfPossessionSupportedByClient());
+
+            //Broker disabled
+            pcaBuilder = PublicClientApplicationBuilder
+                                .Create(TestConstants.ClientId);
+
+            pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
+
+            app = pcaBuilder.Build();
+
+            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
+
+            //Broker not configured
+            app = PublicClientApplicationBuilder
+                                .Create(TestConstants.ClientId)
+                                .Build();
+
+            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
         }
 #endif
 
@@ -579,9 +826,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // the reason for creating the RsaSecurityKey from RSAParameters is so that a SignatureProvider created with this key
             // will own the RSA object and dispose it. If we pass a RSA object, the SignatureProvider does not own the object, the RSA object will not be disposed.
             RSAParameters rsaParameters = rsa.ExportParameters(true);
-            RsaSecurityKey rsaSecuirtyKey = new RsaSecurityKey(rsaParameters) { KeyId = CreateRsaKeyId(rsaParameters) };
+            RsaSecurityKey rsaSecurityKey = new RsaSecurityKey(rsaParameters) { KeyId = CreateRsaKeyId(rsaParameters) };
             rsa.Dispose();
-            return rsaSecuirtyKey;
+            return rsaSecurityKey;
         }
 
         private static string CreateRsaKeyId(RSAParameters rsaParameters)

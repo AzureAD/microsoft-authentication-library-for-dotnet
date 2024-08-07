@@ -25,5 +25,10 @@ namespace Microsoft.Identity.Client
         /// The intended token endpoint
         /// </summary>
         public string TokenEndpoint { get; set; }
+
+        /// <summary>
+        /// Claims to be included in the client assertion
+        /// </summary>
+        public string Claims { get; set; }
     }
 }
