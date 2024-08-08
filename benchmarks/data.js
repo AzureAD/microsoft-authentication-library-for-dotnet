@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1723122372383,
+  "lastUpdate": 1723122374315,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -13788,6 +13788,54 @@ window.BENCHMARK_DATA = {
             "value": 126253.11806640626,
             "unit": "ns",
             "range": "± 1640.9619517761207"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "61847233+neha-bhargava@users.noreply.github.com",
+            "name": "Neha Bhargava",
+            "username": "neha-bhargava"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6956f26f5e1e7e85e946def7ddca3dc69496f79d",
+          "message": "Update the logic to add file based detection for azure arc for linux env (#4856)\n\n* Update the logic to add file based detection for azure arc for linux env\r\n\r\n* Address comments\r\n\r\n* Add logs\r\n\r\n* Add logs when azure arc is enabled for a platform other than windows and linux\r\n\r\n* Fix build",
+          "timestamp": "2024-08-08T18:28:53+05:30",
+          "tree_id": "1bf16a3d986471c28f7e1a034f65c0a2377cf4b6",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/6956f26f5e1e7e85e946def7ddca3dc69496f79d"
+        },
+        "date": 1723122373889,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 12254.51596069336,
+            "unit": "ns",
+            "range": "± 21.189839936302004"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 121180.19581705729,
+            "unit": "ns",
+            "range": "± 538.8520105191035"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 23711.867130533854,
+            "unit": "ns",
+            "range": "± 229.83244288892251"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 125787.00590820312,
+            "unit": "ns",
+            "range": "± 1216.4762987554318"
           }
         ]
       }
