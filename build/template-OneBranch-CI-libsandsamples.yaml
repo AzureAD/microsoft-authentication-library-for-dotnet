@@ -21,6 +21,39 @@ steps:
   inputs:
     version: 6.x
 
+# Task to disable the public NuGet source
+- task: CmdLine@2
+  displayName: 'Disable Public NuGet source'
+  inputs:
+    script: 'dotnet nuget disable source NuGet --configfile "$(MsalSourceDir)NuGet.Config"'
+
+# Copy the OneBranch NuGet.config
+- task: PowerShell@2
+  displayName: 'Copy NuGet.config to Solutions Directory'
+  inputs:
+    targetType: 'inline'
+    script: |
+        $sourcePath = "$(Build.SourcesDirectory)/.nuget/NuGet.config"
+        $destPath1 = "$(Build.SourcesDirectory)/microsoft-authentication-library-for-dotnet/NuGet.config"
+        $destPath2 = "$(Build.SourcesDirectory)/microsoft-authentication-library-for-dotnet/NuGet/NuGet.config"
+
+        Copy-Item -Path $sourcePath -Destination $destPath1 -Force
+
+        $destDirectory = [System.IO.Path]::GetDirectoryName($destPath2)
+
+        if (-not (Test-Path -Path $destDirectory -PathType Container)) {
+            New-Item -ItemType Directory -Path $destDirectory -Force
+        }
+        
+        Copy-Item -Path $sourcePath -Destination $destPath2 -Force
+        Write-Host "Copied NuGet.config to $destPath"
+
+# Task to add the OneBranch NuGet source
+- task: CmdLine@2
+  displayName: 'Add OneBranch NuGet source'
+  inputs:
+    script: 'dotnet nuget add source NuGet --configfile "$(MsalSourceDir)NuGet.Config"'
+
 - task: DotNetCoreCLI@2
   displayName: 'dotnet workload restore for Desktop project'
   inputs:
