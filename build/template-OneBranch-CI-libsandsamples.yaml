@@ -31,7 +31,9 @@ steps:
 - task: CmdLine@2
   displayName: 'Disable Public NuGet source'
   inputs:
-    script: 'dotnet nuget disable source NuGet --configfile "$(Build.SourcesDirectory)/NuGet.Config"'
+    script: |
+      echo "Config file path: $(Build.SourcesDirectory)/$(MsalSourceDir)NuGet.Config"
+      dotnet nuget disable source NuGet --configfile "$(Build.SourcesDirectory)/$(MsalSourceDir)NuGet.Config"
 
 # Copy the OneBranch NuGet.config
 - task: PowerShell@2
