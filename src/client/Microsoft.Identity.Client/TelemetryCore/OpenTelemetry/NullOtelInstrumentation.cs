@@ -17,6 +17,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         public void LogSuccessMetrics(
             string platform,
             ApiEvent.ApiIds apiId,
+            string callerSdkId,
+            string callerSdkVersion,
             CacheLevel cacheLevel,
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
@@ -34,7 +36,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         }
 
         void IOtelInstrumentation.IncrementSuccessCounter(string platform, 
-            ApiEvent.ApiIds apiId, 
+            ApiEvent.ApiIds apiId,
+            string callerSdkId,
+            string callerSdkVersion,
             TokenSource tokenSource, 
             CacheRefreshReason cacheRefreshReason, 
             CacheLevel cacheLevel, 

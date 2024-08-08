@@ -346,7 +346,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(3, telemetryCategories.Length);
             Assert.AreEqual(1, telemetryCategories[0].Split(',').Length); // version
             Assert.AreEqual(5, telemetryCategories[1].Split(',').Length); // api_id, cache_info, region_used, region_source, region_outcome
-            Assert.AreEqual(3, telemetryCategories[2].Split(',').Length); // platform_fields
+            Assert.AreEqual(5, telemetryCategories[2].Split(',').Length); // platform_fields
 
             Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion.ToString(), telemetryCategories[0]); // version
 

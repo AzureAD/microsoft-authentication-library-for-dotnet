@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 UpdateTelemetry(measureDurationResult.Milliseconds + measureTelemetryDurationResult.Milliseconds, apiEvent, authenticationResult);
                 LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
-                LogSuccessTelemetryToOtel(authenticationResult, apiEvent.ApiId, measureDurationResult.Microseconds);
+                LogSuccessTelemetryToOtel(authenticationResult, apiEvent, measureDurationResult.Microseconds);
 
                 return authenticationResult;
             }
@@ -117,12 +117,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }           
         }
 
-        private void LogSuccessTelemetryToOtel(AuthenticationResult authenticationResult, ApiEvent.ApiIds apiId, long durationInUs)
+        private void LogSuccessTelemetryToOtel(AuthenticationResult authenticationResult, ApiEvent apiEvent, long durationInUs)
         {
             // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogSuccessMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
-                        apiId,
+                        apiEvent.ApiId,
+                        apiEvent.CallerSdkApiId,
+                        apiEvent.CallerSdkVersion,
                         GetCacheLevel(authenticationResult),
                         durationInUs,
                         authenticationResult.AuthenticationResultMetadata,
@@ -241,6 +243,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
             apiEvent.CacheInfo = CacheRefreshReason.NotApplicable;
             apiEvent.TokenType = AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
             apiEvent.AssertionType = GetAssertionType();
+
+            // Check if ExtraQueryParameters contains caller-sdk-id and caller-sdk-ver
+            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-id", out string callerSdkId))
+            {
+                apiEvent.CallerSdkApiId = callerSdkId;
+                AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-id");
+            }
+
+            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-ver", out string callerSdkVersion))
+            {
+                apiEvent.CallerSdkVersion = callerSdkVersion;
+                AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-ver");
+            }
 
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
             EnrichTelemetryApiEvent(apiEvent);

@@ -216,6 +216,7 @@ namespace Microsoft.Identity.Client.OAuth2
             // no-op if resolvedClaims is null
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, resolvedClaims);
         }
+
         private void AddExtraHttpHeaders()
         {
             if (_requestParams.ExtraHttpHeaders != null)

@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
     {
         /// <summary>
         /// Expected format: 5|api_id,cache_info,region_used,region_autodetection,region_outcome|platform_config
-        /// platform_config: is_token_cache_serialized,is_legacy_cache_enabled, token_type
+        /// platform_config: is_token_cache_serialized,is_legacy_cache_enabled, token_type, caller_sdk_id, caller_sdk_version
         /// </summary>
         public string GetCurrentRequestHeader(ApiEvent eventInProgress)
         {
@@ -51,6 +51,10 @@ namespace Microsoft.Identity.Client.TelemetryCore.Http
             sb.Append(TelemetryConstants.CommaDelimiter);
             // Token type is to indicate 1 - bearer, 2 - pop, 3 - ssh-cert, 4 - external.
             sb.Append(eventInProgress.TokenTypeString);
+            sb.Append(TelemetryConstants.CommaDelimiter);
+            sb.Append(eventInProgress.CallerSdkApiId);
+            sb.Append(TelemetryConstants.CommaDelimiter);
+            sb.Append(eventInProgress.CallerSdkVersion);
 
             return sb.ToString();
         }

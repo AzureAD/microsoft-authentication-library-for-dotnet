@@ -44,6 +44,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string Platform = "Platform";
         public const string ApiId = "ApiId";
         public const string IsProactiveRefresh = "IsProactiveRefresh";
+        public const string CallerSdkId = "CallerSdkId";
+        public const string CallerSdkVersion = "CallerSdkVersion";
 
 #endregion
     }

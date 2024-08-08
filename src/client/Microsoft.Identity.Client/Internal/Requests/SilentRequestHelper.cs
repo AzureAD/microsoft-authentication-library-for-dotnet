@@ -85,7 +85,9 @@ namespace Microsoft.Identity.Client.Internal
             Func<Task<AuthenticationResult>> fetchAction,
             ILoggerAdapter logger, 
             IServiceBundle serviceBundle, 
-            ApiEvent.ApiIds apiId)
+            ApiEvent.ApiIds apiId, 
+            string callerSdkId, 
+            string callerSdkVersion)
         {
             _ = Task.Run(async () =>
             {
@@ -95,6 +97,8 @@ namespace Microsoft.Identity.Client.Internal
                     serviceBundle.PlatformProxy.OtelInstrumentation.IncrementSuccessCounter(
                         serviceBundle.PlatformProxy.GetProductName(),
                         apiId,
+                        callerSdkId,
+                        callerSdkVersion,
                         TokenSource.IdentityProvider, 
                         CacheRefreshReason.ProactivelyRefreshed, 
                         Cache.CacheLevel.None,
