@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1723024101875,
+  "lastUpdate": 1723122372383,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6110,6 +6110,42 @@ window.BENCHMARK_DATA = {
             "value": 337465.07692307694,
             "unit": "ns",
             "range": "± 3103.1773894278763"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "61847233+neha-bhargava@users.noreply.github.com",
+            "name": "Neha Bhargava",
+            "username": "neha-bhargava"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6956f26f5e1e7e85e946def7ddca3dc69496f79d",
+          "message": "Update the logic to add file based detection for azure arc for linux env (#4856)\n\n* Update the logic to add file based detection for azure arc for linux env\r\n\r\n* Address comments\r\n\r\n* Add logs\r\n\r\n* Add logs when azure arc is enabled for a platform other than windows and linux\r\n\r\n* Fix build",
+          "timestamp": "2024-08-08T18:28:53+05:30",
+          "tree_id": "1bf16a3d986471c28f7e1a034f65c0a2377cf4b6",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/6956f26f5e1e7e85e946def7ddca3dc69496f79d"
+        },
+        "date": 1723122368942,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 245258.8,
+            "unit": "ns",
+            "range": "± 5481.277843714913"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 353122.4146341463,
+            "unit": "ns",
+            "range": "± 11191.970704428262"
           }
         ]
       }
