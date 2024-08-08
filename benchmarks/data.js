@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1723122376196,
+  "lastUpdate": 1723122377956,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -30692,6 +30692,66 @@ window.BENCHMARK_DATA = {
             "value": 139011.76288659795,
             "unit": "ns",
             "range": "± 10839.20803223687"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "61847233+neha-bhargava@users.noreply.github.com",
+            "name": "Neha Bhargava",
+            "username": "neha-bhargava"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6956f26f5e1e7e85e946def7ddca3dc69496f79d",
+          "message": "Update the logic to add file based detection for azure arc for linux env (#4856)\n\n* Update the logic to add file based detection for azure arc for linux env\r\n\r\n* Address comments\r\n\r\n* Add logs\r\n\r\n* Add logs when azure arc is enabled for a platform other than windows and linux\r\n\r\n* Fix build",
+          "timestamp": "2024-08-08T18:28:53+05:30",
+          "tree_id": "1bf16a3d986471c28f7e1a034f65c0a2377cf4b6",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/6956f26f5e1e7e85e946def7ddca3dc69496f79d"
+        },
+        "date": 1723122377540,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (1, 10))",
+            "value": 18016.33512526292,
+            "unit": "ns",
+            "range": "± 57.059398305367246"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (10000, 10))",
+            "value": 29374.0115620931,
+            "unit": "ns",
+            "range": "± 285.6882629862738"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 9659.978923543295,
+            "unit": "ns",
+            "range": "± 48.613061616331926"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 20316.45436968122,
+            "unit": "ns",
+            "range": "± 38.94983285389956"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 39082.769230769234,
+            "unit": "ns",
+            "range": "± 520.2155248622366"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 141259.63,
+            "unit": "ns",
+            "range": "± 14871.762994301882"
           }
         ]
       }
