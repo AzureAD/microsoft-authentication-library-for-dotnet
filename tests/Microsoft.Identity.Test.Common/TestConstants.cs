@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string TenantIdString = "tenantid";
         public const string AadAuthorityWithTestTenantId = "https://login.microsoftonline.com/" + AadTenantId + "/";
         public const string AadAuthorityWithMsftTenantId = "https://login.microsoftonline.com/" + MsftTenantId + "/";
-        public static readonly IDictionary<string, string> s_clientAssertionClaims = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { { "client_ip", "some_ip" }, { "aud", "some_audience" } };
+        public static readonly IDictionary<string, string> s_clientAssertionClaims = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { { "client_ip", "some_ip" }, { "aud", "some_audience" }, { "customClaims", "{\"xms_az_claim\": [\"GUID\", \"GUID2\", \"GUID3\"]}" } };
         public const string RTSecret = "someRT";
         public const string ATSecret = "some-access-token";
         public const string RTSecret2 = "someRT2";
