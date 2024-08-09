@@ -8,6 +8,11 @@ using System.Text;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 using System.Security.Cryptography;
+#if SUPPORTS_SYSTEM_TEXT_JSON
+using JObject = System.Text.Json.Nodes.JsonObject;
+#else
+using Microsoft.Identity.Json.Linq;
+#endif
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -65,17 +70,16 @@ namespace Microsoft.Identity.Client.Internal
                 payload.Append('{');
             }
 
-            int i = 0;
-            foreach (var kvp in _claimsToSign)
+            var json = new JObject();
+
+            foreach (var claim in _claimsToSign)
             {
-                payload.Append($"\"{kvp.Key}\":\"{kvp.Value}\"");
-                
-                if (i!= _claimsToSign.Count-1)
-                {
-                    i++;
-                    payload.Append(',');
-                }
+                json[claim.Key] = claim.Value;
             }
+
+            var jsonClaims = JsonHelper.JsonObjectToString(json);
+
+            payload.Append(jsonClaims.Substring(1, jsonClaims.Length - 2));
 
             payload.Append('}');
 
