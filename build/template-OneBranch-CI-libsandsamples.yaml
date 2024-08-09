@@ -21,6 +21,44 @@ steps:
   inputs:
     version: 6.x
 
+# Task to list all files and folders in the source directory
+- task: CmdLine@2
+  displayName: 'List all files and folders in the source directory'
+  inputs:
+    script: 'dir "$(Build.SourcesDirectory)" /s'
+
+- task: PowerShell@2
+  displayName: 'Disable Public NuGet source'
+  inputs:
+    targetType: 'inline'
+    script: |
+      $configFilePath = "$(Build.SourcesDirectory)/microsoft-authentication-library-for-dotnet/NuGet.Config"
+      Write-Host "Config file path: $configFilePath"
+      dotnet nuget disable source NuGet --configfile $configFilePath
+      
+# Copy the OneBranch NuGet.config
+- task: PowerShell@2
+  displayName: 'Copy NuGet.config to Solutions Directory'
+  inputs:
+    targetType: 'inline'
+    script: |
+        $sourcePath = "$(Build.SourcesDirectory)/.nuget/NuGet.config"
+        $destPath1 = "$(Build.SourcesDirectory)/microsoft-authentication-library-for-dotnet/NuGet.config"
+        $destPath2 = "$(Build.SourcesDirectory)/microsoft-authentication-library-for-dotnet/NuGet/NuGet.config"
+        Copy-Item -Path $sourcePath -Destination $destPath1 -Force
+        $destDirectory = [System.IO.Path]::GetDirectoryName($destPath2)
+        if (-not (Test-Path -Path $destDirectory -PathType Container)) {
+            New-Item -ItemType Directory -Path $destDirectory -Force
+        }
+        
+        Copy-Item -Path $sourcePath -Destination $destPath2 -Force
+        Write-Host "Copied NuGet.config to $destPath"
+        
+- task: CmdLine@2
+  displayName: 'Add OneBranch NuGet source'
+  inputs:
+    script: 'dotnet nuget add source NuGet --configfile "$(Build.SourcesDirectory)/.nuget/NuGet.config"'
+
 - task: DotNetCoreCLI@2
   displayName: 'dotnet workload restore for Desktop project'
   inputs:
