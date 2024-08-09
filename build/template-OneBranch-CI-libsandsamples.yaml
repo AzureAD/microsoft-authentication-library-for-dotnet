@@ -21,12 +21,6 @@ steps:
   inputs:
     version: 6.x
 
-# Task to list all files and folders in the source directory
-- task: CmdLine@2
-  displayName: 'List all files and folders in the source directory'
-  inputs:
-    script: 'dir "$(Build.SourcesDirectory)" /s'
-
 - task: PowerShell@2
   displayName: 'Disable Public NuGet source'
   inputs:
