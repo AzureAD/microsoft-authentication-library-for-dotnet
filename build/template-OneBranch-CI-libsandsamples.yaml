@@ -29,11 +29,28 @@ steps:
       $configFilePath = "$(Build.SourcesDirectory)/microsoft-authentication-library-for-dotnet/NuGet.Config"
       Write-Host "Config file path: $configFilePath"
       dotnet nuget disable source NuGet --configfile $configFilePath
+
+- task: PowerShell@2
+  displayName: 'Copy NuGet.config to Solutions Directory'
+  inputs:
+    targetType: 'inline'
+    script: |
+      $sourcePath = "$(Build.SourcesDirectory)/.nuget/NuGet.config"
+      $destinationPath = "$(Build.SourcesDirectory)/microsoft-authentication-library-for-dotnet/NuGet.Config"
+
+      Write-Host "Copying NuGet.config from $sourcePath to $destinationPath"
+      Copy-Item -Path $sourcePath -Destination $destinationPath -Force
+      Write-Host "NuGet.config copied successfully."
         
-- task: CmdLine@2
+- task: PowerShell@2
   displayName: 'Add OneBranch NuGet source'
   inputs:
-    script: 'dotnet nuget add source NuGet --configfile "$(Build.SourcesDirectory)/.nuget/NuGet.config"'
+    targetType: 'inline'
+    script: |
+      $configFilePath = "$(Build.SourcesDirectory)/microsoft-authentication-library-for-dotnet/NuGet.Config"
+      Write-Host "Adding OneBranch NuGet source using config file: $configFilePath"
+      dotnet nuget add source NuGet --configfile $configFilePath
+      Write-Host "Successfully added OneBranch NuGet source."
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet workload restore for Desktop project'
