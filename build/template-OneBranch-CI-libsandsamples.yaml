@@ -57,11 +57,10 @@ steps:
         Copy-Item -Path $sourcePath -Destination $destPath2 -Force
         Write-Host "Copied NuGet.config to $destPath"
 
-# Task to add the OneBranch NuGet source
 - task: CmdLine@2
   displayName: 'Add OneBranch NuGet source'
   inputs:
-    script: 'dotnet nuget add source NuGet --configfile "$(MsalSourceDir)NuGet.Config"'
+    script: 'dotnet nuget add source NuGet --configfile "$(Build.SourcesDirectory)/microsoft-authentication-library-for-dotnet/NuGet.Config"'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet workload restore for Desktop project'
