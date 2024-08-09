@@ -60,7 +60,7 @@ steps:
 - task: CmdLine@2
   displayName: 'Add OneBranch NuGet source'
   inputs:
-    script: 'dotnet nuget add source NuGet --configfile "$(Build.SourcesDirectory)/microsoft-authentication-library-for-dotnet/NuGet.Config"'
+    script: 'dotnet nuget add source NuGet --configfile "$(Build.SourcesDirectory)/microsoft-authentication-library-for-dotnet/.nuget/NuGet.Config"'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet workload restore for Desktop project'
