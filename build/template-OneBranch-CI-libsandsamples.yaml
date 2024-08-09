@@ -32,7 +32,7 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      $configFilePath = "$(Build.SourcesDirectory)/$(MsalSourceDir)NuGet.Config"
+      $configFilePath = "C:\__w\1\s\microsoft-authentication-library-for-dotnet\NuGet.Config"
       echo "Config file path: $configFilePath"
       dotnet nuget disable source NuGet --configfile $configFilePath
 
