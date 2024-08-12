@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1723122377956,
+  "lastUpdate": 1723456310521,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6146,6 +6146,42 @@ window.BENCHMARK_DATA = {
             "value": 353122.4146341463,
             "unit": "ns",
             "range": "± 11191.970704428262"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "61847233+neha-bhargava@users.noreply.github.com",
+            "name": "Neha Bhargava",
+            "username": "neha-bhargava"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5ff5d219416deab07f79ba5a6393002557b101ee",
+          "message": "Remove the links to Azure SDK for managed identity since these will be updated soon. (#4888)\n\n* Remove the links to Azure SDK since these will be updated soon.\r\n\r\n* Remove comments",
+          "timestamp": "2024-08-12T15:14:32+05:30",
+          "tree_id": "f6d06bf15981999b4c742c4683fbd031054c0fec",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/5ff5d219416deab07f79ba5a6393002557b101ee"
+        },
+        "date": 1723456306402,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 246451.6739130435,
+            "unit": "ns",
+            "range": "± 5926.501640567745"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 331199.5,
+            "unit": "ns",
+            "range": "± 8076.480066334886"
           }
         ]
       }
