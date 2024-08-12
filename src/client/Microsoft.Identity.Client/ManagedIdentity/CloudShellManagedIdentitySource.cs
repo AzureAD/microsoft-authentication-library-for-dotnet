@@ -10,7 +10,7 @@ using Microsoft.Identity.Client.Internal;
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
     /// <summary>
-    /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/CloudShellManagedIdentitySource.cs
+    /// Cloud Shell managed identity source.
     /// </summary>
     internal class CloudShellManagedIdentitySource : AbstractManagedIdentity
     {
