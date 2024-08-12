@@ -111,6 +111,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return null;
             }
 
+            //WsTrust not supported on ROPC
+            if (AuthenticationRequestParameters.AppConfig.IsConfidentialClient)
+            {
+                _logger.Info("WSTrust is not supported on confidential clients. Skipping wstrust for ROPC.");
+                return null;
+            }
+
             var userRealmResponse = await _commonNonInteractiveHandler
                                           .QueryUserRealmDataAsync(AuthenticationRequestParameters.AuthorityInfo.UserRealmUriPrefix, _usernamePasswordParameters.Username)
                                           .ConfigureAwait(false);

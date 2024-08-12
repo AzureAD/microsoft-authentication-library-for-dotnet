@@ -29,7 +29,16 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
         public static AbstractManagedIdentity Create(RequestContext requestContext)
         {
-            string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
+            string identityEndpoint;
+                
+            if (EnvironmentVariables.IdentityEndpoint == null)
+            {
+                identityEndpoint = "http://127.0.0.1:40342/metadata/identity/oauth2/token";
+                requestContext.Logger.Info(() => "[Managed Identity] Azure Arc was detected through file based detection but the environment variables were not found. Defaulting to known azure arc endpoint.");
+            } else
+            {
+                identityEndpoint = EnvironmentVariables.IdentityEndpoint;
+            }
 
             requestContext.Logger.Info(() => "[Managed Identity] Azure Arc managed identity is available.");
 

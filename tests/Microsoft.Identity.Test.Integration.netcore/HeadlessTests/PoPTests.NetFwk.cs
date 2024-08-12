@@ -45,6 +45,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
 
         private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };
+        private static readonly string[] s_ropcScope = { "User.Read" };
 
         private const string ProtectedUrl = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
 
@@ -287,6 +288,38 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             // Check the algorithm
             Assert.AreEqual("RS256", alg, "The algorithm in the token header should be RS256");
+        }
+
+        [RunOn(TargetFrameworks.NetCore)]
+        public async Task ROPC_PopTestWithRSAAsync()
+        {
+            var settings = ConfidentialAppSettings.GetSettings(Cloud.Public);
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+
+            var confidentialApp = ConfidentialClientApplicationBuilder
+                .Create(settings.ClientId)
+                .WithExperimentalFeatures()
+                .WithAuthority(settings.Authority)
+                .WithClientSecret(settings.GetSecret())
+                .Build();
+
+            //RSA provider
+            var popConfig = new PoPAuthenticationConfiguration(new Uri(ProtectedUrl));
+            popConfig.PopCryptoProvider = new RSACertificatePopCryptoProvider(GetCertificate());
+            popConfig.HttpMethod = HttpMethod.Get;
+
+            var result = await (confidentialApp as IByUsernameAndPassword).AcquireTokenByUsernamePassword(s_ropcScope, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+                .WithProofOfPossession(popConfig)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("pop", result.TokenType);
+            PoPValidator.VerifyPoPToken(
+                settings.ClientId,
+                ProtectedUrl,
+                HttpMethod.Get,
+                result);
+
         }
 
         [TestMethod]
