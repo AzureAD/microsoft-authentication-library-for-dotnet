@@ -37,24 +37,21 @@ namespace Microsoft.Identity.Client
                     break;
             }
         }
-        
-        public const string DefaultClientName = "UnknownClient";
-        public const string DefaultClientVersion = "0.0.0.0";
 
         // For telemetry, the ClientName of the application.
-        private string _clientName = DefaultClientName;
+        private string _clientName;
         public string ClientName
         {
             get => _clientName;
-            internal set { _clientName = string.IsNullOrWhiteSpace(value) ? DefaultClientName : value; }
+            internal set { _clientName = string.IsNullOrWhiteSpace(value) ? "" : value; }
         }
 
         // For telemetry, the ClientVersion of the application.
-        private string _clientVersion = DefaultClientVersion;
+        private string _clientVersion;
         public string ClientVersion
         {
             get => _clientVersion;
-            internal set { _clientVersion = string.IsNullOrWhiteSpace(value) ? DefaultClientVersion : value; }
+            internal set { _clientVersion = string.IsNullOrWhiteSpace(value) ? "" : value; }
         }
 
         public Func<object> ParentActivityOrWindowFunc { get; internal set; }

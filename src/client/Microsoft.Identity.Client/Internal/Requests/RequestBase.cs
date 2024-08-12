@@ -22,6 +22,7 @@ using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 using Microsoft.Identity.Client.Internal.Broker;
+using System.Runtime.ConstrainedExecution;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -244,23 +245,41 @@ namespace Microsoft.Identity.Client.Internal.Requests
             apiEvent.TokenType = AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
             apiEvent.AssertionType = GetAssertionType();
 
-            // Check if ExtraQueryParameters contains caller-sdk-id and caller-sdk-ver
-            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-id", out string callerSdkId))
-            {
-                apiEvent.CallerSdkApiId = callerSdkId;
-                AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-id");
-            }
-
-            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-ver", out string callerSdkVersion))
-            {
-                apiEvent.CallerSdkVersion = callerSdkVersion;
-                AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-ver");
-            }
+            UpdateCallerSdkDetails(apiEvent);
 
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
             EnrichTelemetryApiEvent(apiEvent);
 
             return apiEvent;
+        }
+
+        private void UpdateCallerSdkDetails(ApiEvent apiEvent)
+        {
+            string callerSdkId;
+            string callerSdkVer;
+
+            // Check if ExtraQueryParameters contains caller-sdk-id and caller-sdk-ver
+            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-id", out callerSdkId))
+            {
+                
+                AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-id");
+            } 
+            else
+            {
+                callerSdkId = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientName;
+            }
+            
+            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-ver", out callerSdkVer))
+            {
+                AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-ver");
+            }
+            else
+            {
+                callerSdkVer = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientVersion;
+            }
+
+            apiEvent.CallerSdkApiId = callerSdkId == null ? null : callerSdkId.Substring(0, Math.Min(callerSdkId.Length, 10));
+            apiEvent.CallerSdkVersion = callerSdkVer == null ? null : callerSdkVer.Substring(0, Math.Min(callerSdkVer.Length, 20));
         }
 
         private AssertionType GetAssertionType()
