@@ -9,9 +9,6 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-    /// <summary>
-    /// Cloud Shell managed identity source.
-    /// </summary>
     internal class CloudShellManagedIdentitySource : AbstractManagedIdentity
     {
         private readonly Uri _endpoint;
