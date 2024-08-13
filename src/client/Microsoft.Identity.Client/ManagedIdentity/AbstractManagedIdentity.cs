@@ -15,9 +15,6 @@ using System.Text;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-    /// <summary>
-    /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/ManagedIdentitySource.cs
-    /// </summary>
     internal abstract class AbstractManagedIdentity
     {
         protected readonly RequestContext _requestContext;

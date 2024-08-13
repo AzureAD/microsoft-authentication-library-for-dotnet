@@ -14,7 +14,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 {
     /// <summary>
     /// Class to initialize a managed identity and identify the service.
-    /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/ManagedIdentityClient.cs
     /// </summary>
     internal class ManagedIdentityClient
     {

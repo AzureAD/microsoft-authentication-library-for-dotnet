@@ -9,9 +9,6 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-    /// <summary>
-    /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/ServiceFabricManagedIdentitySource.cs
-    /// </summary>
     internal class ServiceFabricManagedIdentitySource : AbstractManagedIdentity
     {
         private const string ServiceFabricMsiApiVersion = "2019-07-01-preview";
