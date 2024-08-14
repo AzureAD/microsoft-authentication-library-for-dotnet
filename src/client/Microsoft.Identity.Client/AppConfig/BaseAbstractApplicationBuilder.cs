@@ -204,6 +204,28 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
+        /// <summary>
+        /// Sets the name of the calling SDK API Id for telemetry purposes.
+        /// </summary>
+        /// <param name="clientName">The name of the SDK API Id for telemetry purposes.</param>
+        /// <returns></returns>
+        public T WithClientName(string clientName)
+        {
+            Config.ClientName = GetValueIfNotEmpty(Config.ClientName, clientName);
+            return this as T;
+        }
+
+        /// <summary>
+        /// Sets the version of the calling SDK for telemetry purposes.
+        /// </summary>
+        /// <param name="clientVersion">The version of the calling SDK for telemetry purposes.</param>
+        /// <returns></returns>
+        public T WithClientVersion(string clientVersion)
+        {
+            Config.ClientVersion = GetValueIfNotEmpty(Config.ClientVersion, clientVersion);
+            return this as T;
+        }
+
         internal virtual ApplicationConfiguration BuildConfiguration()
         {
             ResolveAuthority();
@@ -294,6 +316,11 @@ namespace Microsoft.Identity.Client
                     MsalError.ExperimentalFeature,
                     MsalErrorMessage.ExperimentalFeature(memberName));
             }
+        }
+
+        internal static string GetValueIfNotEmpty(string original, string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? original : value;
         }
     }
 }

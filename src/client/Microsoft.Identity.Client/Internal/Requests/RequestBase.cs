@@ -261,7 +261,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // Check if ExtraQueryParameters contains caller-sdk-id and caller-sdk-ver
             if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-id", out callerSdkId))
             {
-                
                 AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-id");
             } 
             else

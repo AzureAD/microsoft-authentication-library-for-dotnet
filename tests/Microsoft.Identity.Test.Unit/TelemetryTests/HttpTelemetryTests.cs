@@ -387,6 +387,34 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         }
 
         [TestMethod]
+        public async Task CallerSdkDetails_ConstraintsTestAsync()
+        {
+            string callerSdkId = "testApiIdMoreThan10Chars";
+            string callerSdkVersion = "testSdkVersionMoreThan20Chars";
+
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var cca = CreateConfidentialClientApp();
+
+                await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, string> {
+                        { "caller-sdk-id", callerSdkId },
+                        { "caller-sdk-ver", callerSdkVersion } })
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(
+                    requestHandler.ActualRequestMessage,
+                    ApiIds.AcquireTokenForClient,
+                    CacheRefreshReason.NoCachedAccessToken,
+                    callerSdkId: callerSdkId.Substring(0, Math.Min(callerSdkId.Length, 10)),
+                    callerSdkVersion: callerSdkVersion.Substring(0, Math.Min(callerSdkVersion.Length, 20)));
+            }
+        }
+
+        [TestMethod]
         public async Task CallerSdkDetailsWithClientNameTestAsync()
         {
             using (_harness = CreateTestHarness())
