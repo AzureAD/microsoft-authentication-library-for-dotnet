@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             HandlePrompt(driver, "otherTile");
             EnterUsername(driver, user, withLoginHint, adfsOnly, fields);
-            HandlePrompt(driver, CoreUiTestConstants.NextButton);
+            HandlePrompt(driver, CoreUiTestConstants.WebSubmitId);
             EnterPassword(driver, user, fields);
 
             HandleConsent(driver, user, fields, prompt);
@@ -251,7 +251,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             if (prompt == Prompt.Consent)
             {
                 Trace.WriteLine("Consenting...");
-                driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.AADSignInButtonId)).Click();
+                driver.WaitForElementToBeVisibleAndEnabled(By.Name(fields.AADSignInButtonId)).Click();
             }
         }
 
