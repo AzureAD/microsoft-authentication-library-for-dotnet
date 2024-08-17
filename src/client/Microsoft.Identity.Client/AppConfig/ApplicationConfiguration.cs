@@ -43,7 +43,8 @@ namespace Microsoft.Identity.Client
         public string ClientName
         {
             get => _clientName;
-            internal set { _clientName = string.IsNullOrWhiteSpace(value) ? "" : value; }
+            internal set { _clientName = string.IsNullOrWhiteSpace(value) ? string.Empty : value; }
+
         }
 
         // For telemetry, the ClientVersion of the application.
