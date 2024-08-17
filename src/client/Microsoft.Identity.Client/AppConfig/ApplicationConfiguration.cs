@@ -51,7 +51,8 @@ namespace Microsoft.Identity.Client
         public string ClientVersion
         {
             get => _clientVersion;
-            internal set { _clientVersion = string.IsNullOrWhiteSpace(value) ? "" : value; }
+            internal set { _clientVersion = string.IsNullOrWhiteSpace(value) ? string.Empty : value; }
+
         }
 
         public Func<object> ParentActivityOrWindowFunc { get; internal set; }
