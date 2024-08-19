@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 MockHttpMessageHandler handler = httpManager.
                     AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
 
-                AddIn exampleAddIn = new AddIn()
+                MsalAddIn exampleAddIn = new MsalAddIn()
                 {
                     AdditionalAccessTokenPropertiesToCache = new[] { "ds_nonce", "ds_enc" },
                     // OnBeforeTokenRequestHandler not needed for this flow
