@@ -27,9 +27,9 @@ namespace Microsoft.Identity.Client.Extensibility
 
         public string AccessTokenType => _tokenType;
 
-        public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        public void FormatResult(AuthenticationResult authenticationResult)
         {
-            return msalAccessTokenCacheItem.Secret;
+            // no-op, the implementers will format the token
         }
 
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()

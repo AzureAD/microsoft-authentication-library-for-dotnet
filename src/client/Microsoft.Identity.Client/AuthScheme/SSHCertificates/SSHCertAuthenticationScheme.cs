@@ -39,9 +39,9 @@ namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
 
         public string KeyId { get; }
 
-        public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        public void FormatResult(AuthenticationResult authenticationResult)
         {
-            return msalAccessTokenCacheItem.Secret;
+            // no-op, the access token doesn't require any formatting
         }
 
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()

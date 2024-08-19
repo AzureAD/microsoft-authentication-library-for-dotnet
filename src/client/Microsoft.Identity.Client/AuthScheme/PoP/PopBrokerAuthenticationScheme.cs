@@ -25,10 +25,9 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         public string AccessTokenType => Constants.PoPTokenType;
 
-        public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        public void FormatResult(AuthenticationResult authenticationResult)
         {
-            //no op
-            return msalAccessTokenCacheItem.Secret;
+            // no-op, the token is already in POP format from the broker            
         }
 
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()

@@ -3,18 +3,22 @@
 
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Extensibility;
 
 namespace Microsoft.Identity.Client.AuthScheme
 {
     /// <summary>
-    /// Used to modify the experience depending on the type of token asked. 
+    /// Extensiblity interface Used to modify the experience depending on the type of token asked. 
     /// </summary>
-    internal interface IAuthenticationScheme
+    public interface IAuthenticationScheme 
     {
+        //TODO bogavril - abstract class instead of interface?
+        //TODO bogavril - replace legacy POP impl in Id.Web with this and hard deprecate WithKeyId extensiblity point
+
         /// <summary>
-        /// Value to log to telemetry to indicate pop usage.
+        /// Value to log to HTTP telemetry.
         /// </summary>
-        TokenType TelemetryTokenType { get; }
+        TokenType TelemetryTokenType { get; }  // TODO: bogavril - enums are not good for extensiblity, consider using INT
 
         /// <summary>
         /// Prefix for the HTTP header that has the token. E.g. "Bearer" or "POP"
@@ -37,7 +41,7 @@ namespace Microsoft.Identity.Client.AuthScheme
         /// <summary>
         /// Creates the access token that goes into an Authorization HTTP header. 
         /// </summary>
-        string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem);
+        void FormatResult(AuthenticationResult authenticationResult); 
 
         /// <summary>
         /// Expected to match the token_type parameter returned by ESTS. Used to disambiguate

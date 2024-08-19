@@ -67,11 +67,12 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             };
         }
 
-        public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        public void FormatResult(AuthenticationResult authenticationResult)
         {
             if (!_popAuthenticationConfiguration.SignHttpRequest)
             {
-                return msalAccessTokenCacheItem.Secret;
+                // token will be signed by the caller
+                return;
             }
 
             var header = new JObject();
@@ -79,13 +80,13 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             header[JsonWebTokenConstants.KeyId] = KeyId;
             header[JsonWebTokenConstants.Type] = Constants.PoPTokenType;
 
-            var body = CreateBody(msalAccessTokenCacheItem);
+            var body = CreateBody(authenticationResult.AccessToken);
 
             string popToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header));
-            return popToken;
+            authenticationResult.AccessToken = popToken;
         }
 
-        private JObject CreateBody(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        private JObject CreateBody(string accessToken)
         {
             var publicKeyJwk = JToken.Parse(_popCryptoProvider.CannonicalPublicKeyJwk);
             var body = new JObject
@@ -96,7 +97,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
                     [PoPClaimTypes.JWK] = publicKeyJwk
                 },
                 [PoPClaimTypes.Ts] = DateTimeHelpers.CurrDateTimeInUnixTimestamp(),
-                [PoPClaimTypes.At] = msalAccessTokenCacheItem.Secret,
+                [PoPClaimTypes.At] = accessToken,
                 [PoPClaimTypes.Nonce] = _popAuthenticationConfiguration.Nonce ?? CreateSimpleNonce(),
             };
 

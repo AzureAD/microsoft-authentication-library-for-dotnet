@@ -6,7 +6,7 @@ namespace Microsoft.Identity.Client.AuthScheme
     /// <summary>
     /// Specifies the token type to log to telemetry.
     /// </summary>
-    internal enum TokenType
+    public enum TokenType
     {
         /// <summary>
         /// Bearer token type.
@@ -14,7 +14,7 @@ namespace Microsoft.Identity.Client.AuthScheme
         Bearer = 1,
 
         /// <summary>
-        /// Pop token type.
+        /// Pop token type (referrs to the official SHR POP)
         /// </summary>
         Pop = 2,
 
@@ -24,8 +24,10 @@ namespace Microsoft.Identity.Client.AuthScheme
         SshCert = 3,
 
         /// <summary>
-        /// External token type.
+        /// External token type. Currently used by the unoficial SHR POP implementation.
         /// </summary>
         External = 4
+
+        // values up to 20 are reserved for internal use
     }
 }

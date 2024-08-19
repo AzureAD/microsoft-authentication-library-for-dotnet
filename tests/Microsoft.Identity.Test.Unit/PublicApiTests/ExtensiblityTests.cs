@@ -12,12 +12,80 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.Extensibility;
 using System.Threading;
+using Microsoft.Identity.Client.AuthScheme;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
     public class ExtensiblityTests : TestBase
     {
+        internal class ExampleAuthScheme : IAuthenticationScheme
+        {
+            private readonly X509Certificate2 _cert; // TODO: can use in-memory keys as well, but using cert here for simplicity
+
+            public ExampleAuthScheme(X509Certificate2 cert)
+            {
+                _cert = cert;
+            }
+
+            public TokenType TelemetryTokenType => TokenType.External; // TODO: needs more extensiblity, link an int
+
+            public string AuthorizationHeaderPrefix => "CDT"; // ??
+
+            public string KeyId => _cert.Thumbprint;
+
+            public string AccessTokenType => "CDT"; // should match what ESTS puts on the wire in "token_type"
+
+            public void FormatResult(AuthenticationResult authenticationResult)
+            {
+                // 1. create constraint token and sign with cert
+                // 2. perform extra step with authenticationResult.AdditionalResponseParameters["ds_nonce"];
+                // 3. create CDT token 
+                // 4. update authenticationResult.AccessToken
+            }
+
+            public IReadOnlyDictionary<string, string> GetTokenRequestParams()
+            {
+                return new Dictionary<string, string>
+                {
+                    { "req_ds_cnf", "JWK" }
+                };
+            }
+        }
+
+        [TestMethod]
+        public async Task AddInTestAsync()
+        {
+            
+
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                MockHttpMessageHandler handler = httpManager.
+                    AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                AddIn exampleAddIn = new AddIn()
+                {
+                    AdditionalAccessTokenPropertiesToCache = new[] { "ds_nonce", "ds_enc" },
+                    // OnBeforeTokenRequestHandler not needed for this flow
+                    AuthenticationScheme = new ExampleAuthScheme(default)
+                };
+
+                var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                              .WithAuthority("https://login.microsoftonline.com/tid/")
+                              .WithExperimentalFeatures(true)
+                              .WithHttpManager(httpManager)
+                              .Build();
+
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithAddIn(exampleAddIn)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+            }
+        }
+
         [TestMethod]
         public async Task ChangeTokenUriAsync()
         {
