@@ -79,6 +79,7 @@ namespace Microsoft.Identity.Client.Internal
 
             var jsonClaims = JsonHelper.JsonObjectToString(json);
 
+            //Remove extra brackets from JSON result
             payload.Append(jsonClaims.Substring(1, jsonClaims.Length - 2));
 
             payload.Append('}');

@@ -480,7 +480,7 @@ namespace Microsoft.Identity.Test.Unit
             if (appendDefaultClaims == false && addExtraClaims == false)
                 appendDefaultClaims = true;
 
-            int expectedPayloadClaimsCount = (appendDefaultClaims ? 6 : 0) + (addExtraClaims ? 2 : 0);
+            int expectedPayloadClaimsCount = (appendDefaultClaims ? 6 : 0) + (addExtraClaims ? 3 : 0);
             Assert.AreEqual(expectedPayloadClaimsCount, decodedToken.Payload.Count);
             if (appendDefaultClaims)
             {
@@ -506,6 +506,8 @@ namespace Microsoft.Identity.Test.Unit
             {
                 Assert.AreEqual("Val1", decodedToken.Payload["Key1"]);
                 Assert.AreEqual("Val2", decodedToken.Payload["Key2"]);
+                //Ensure JSON formatting is preserved
+                Assert.AreEqual("{\"xms_az_claim\": [\"GUID\", \"GUID2\", \"GUID3\"]}", decodedToken.Payload["customClaims"]);
             }
 
             if (useSha2AndPss)
