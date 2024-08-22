@@ -77,8 +77,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [RunOn(TargetFrameworks.NetCore)]
-        // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4879
-        [Ignore]
         public async Task InteractiveConsentPromptAsync()
         {
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
