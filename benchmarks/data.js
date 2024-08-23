@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1723456318098,
+  "lastUpdate": 1724398086270,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6182,6 +6182,42 @@ window.BENCHMARK_DATA = {
             "value": 331199.5,
             "unit": "ns",
             "range": "± 8076.480066334886"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8fe46a8d1862b2b37907adb7f38c9e332a0a29d6",
+          "message": "Changing the handling of client claims to use JSON (#4886)\n\n* Changing the handling of client claims to use JSON\r\n\r\n* Updating tests to account for JSON formatting\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>",
+          "timestamp": "2024-08-23T00:20:47-07:00",
+          "tree_id": "f9d8d074e26d75d4702fb49b2aecc9089470e9ae",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/8fe46a8d1862b2b37907adb7f38c9e332a0a29d6"
+        },
+        "date": 1724398082250,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 243523.57142857142,
+            "unit": "ns",
+            "range": "± 4110.941904315766"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 343124.86363636365,
+            "unit": "ns",
+            "range": "± 7442.569789780783"
           }
         ]
       }
