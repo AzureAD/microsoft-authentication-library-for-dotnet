@@ -1,3 +1,11 @@
+4.64.0
+==========
+### New Features
+- Added managed identity support for Azure ARC on Linux. See [Issue #4358](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4358)
+
+### Bug Fixes
+- Resolved SHA2 issues that break custom claims during authentication flows. See [Issue #4868](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4868)
+
 4.63.0
 ==========
 ### New Features
