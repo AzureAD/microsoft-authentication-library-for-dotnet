@@ -1,7 +1,7 @@
 4.64.0
 ==========
 ### New Features
-- Added managed identity support for Azure ARC on Linux. See [Issue #4358](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4358)
+- Improved managed identity support for Azure ARC on Linux by adding file detection. See [Issue #4358](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4358)
 - Added Username and password support for confidential clients. See [Issue #3774](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3774)
 
 ### Bug Fixes
