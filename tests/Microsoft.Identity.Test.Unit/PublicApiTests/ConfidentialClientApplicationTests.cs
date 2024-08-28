@@ -23,6 +23,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.Identity.Client.Extensibility;
+using System.Net;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
@@ -420,6 +421,61 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 appCacheAccess.AssertAccessCounts(2, 1);
                 userCacheAccess.AssertAccessCounts(0, 0);
 
+            }
+        }
+
+        [TestMethod]
+        public async Task ClientCreds_And_AAD_LogRequestUri_OnServerError_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .WithExtraQueryParameters("parameter=x")
+                                                              .BuildConcrete();
+                var appCacheAccess = cca.AppTokenCache.RecordAccess();
+                var userCacheAccess = cca.UserTokenCache.RecordAccess();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.InternalServerError, retryAfter: 0);
+
+                // Acquire Token
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => cca.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                //Assert
+                Assert.AreEqual(MsalError.ServiceNotAvailable, ex.ErrorCode);
+                Assert.IsTrue(ex.Message.Contains(ClientApplicationBase.DefaultAuthority + "oauth2/v2.0/token"));
+            }
+        }
+
+        [TestMethod]
+        public async Task ClientCreds_And_ADFS_LogRequestUri_OnServerError_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithAuthority(new Uri(TestConstants.OnPremiseAuthority), false)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .WithExtraQueryParameters("parameter=x")
+                                                              .BuildConcrete();
+                var appCacheAccess = cca.AppTokenCache.RecordAccess();
+                var userCacheAccess = cca.UserTokenCache.RecordAccess();
+
+                httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.InternalServerError, retryAfter: 0);
+
+                // Acquire Token
+                var ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
+                    () => cca.AcquireTokenForClient(TestConstants.s_scope.ToArray()).ExecuteAsync())
+                    .ConfigureAwait(false);
+
+                //Assert
+                Assert.AreEqual(MsalError.ServiceNotAvailable, ex.ErrorCode);
+                Assert.IsTrue(ex.Message.Contains(TestConstants.OnPremiseAuthority + "oauth2/token"));
             }
         }
 
@@ -1800,6 +1856,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             options.ClientID = "clientid";
             options.TokenEndpoint = "https://login.microsoft.com/v2.0/token";
             options.CancellationToken = CancellationToken.None;
+            options.Claims = TestConstants.Claims;
         }
     }
 }

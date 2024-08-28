@@ -417,6 +417,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     nativeAccount.HomeAccountid,
                     nativeAccount.UserName,
                     nativeAccount.Environment,
+                    null,
                     new Dictionary<string, string>() {
                         {
                             clientId,

@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client
             if (ServiceBundle?.Config.ClientCredential == null &&
                 CommonParameters.OnBeforeTokenRequestHandler == null &&
                 ServiceBundle?.Config.AppTokenProvider == null
-                ) 
+                )
             {
                 throw new MsalClientException(
                     MsalError.ClientCredentialAuthenticationTypeMustBeDefined,

@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if !NET6_0
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -28,9 +28,12 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Test.Unit.BrokerTests;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
+using JsonWebAlgorithmsKeyTypes = Microsoft.Identity.Client.AuthScheme.PoP.JsonWebAlgorithmsKeyTypes;
+using JsonWebKeyParameterNames = Microsoft.Identity.Client.AuthScheme.PoP.JsonWebKeyParameterNames;
 
 namespace Microsoft.Identity.Test.Unit.Pop
 {
@@ -194,6 +197,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             }
         }
 
+#if !NET6_0
         [TestMethod]
         public async Task POP_WithMissingNonceForPCA_Async()
         {
@@ -223,98 +227,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
             }
         }
 
-        [TestMethod]
-        public void PopConfig()
-        {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
-            var popConfig = new PoPAuthenticationConfiguration(request);
-
-            Assert.AreEqual(HttpMethod.Get, popConfig.HttpMethod);
-            Assert.AreEqual("www.contoso.com", popConfig.HttpHost);
-            Assert.AreEqual("/path1/path2", popConfig.HttpPath);
-
-            request = new HttpRequestMessage(HttpMethod.Post, new Uri(ProtectedUrlWithPort));
-            popConfig = new PoPAuthenticationConfiguration(request);
-
-            Assert.AreEqual(HttpMethod.Post, popConfig.HttpMethod);
-            Assert.AreEqual("www.contoso.com:5555", popConfig.HttpHost);
-            Assert.AreEqual("/path1/path2", popConfig.HttpPath);
-        }
-
-        [TestMethod]
-        public async Task CacheKey_Includes_POPKid_Async()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                ConfidentialClientApplication app =
-                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
-                                                              .WithClientSecret(TestConstants.ClientSecret)
-                                                              .WithHttpManager(httpManager)
-                                                              .WithExperimentalFeatures(true)
-                                                              .BuildConcrete();
-                var testTimeService = new TestTimeService();
-                CryptoProviderFactory.TimeService = testTimeService;
-
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
-                var popConfig = new PoPAuthenticationConfiguration(request);
-                var cacheAccess = app.AppTokenCache.RecordAccess();
-
-                httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
-
-                // Act
-                Trace.WriteLine("1. AcquireTokenForClient ");
-                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithTenantId(TestConstants.Utid)
-                    .WithProofOfPossession(popConfig)
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                string expectedKid = GetKidFromJwk(CryptoProviderFactory.GetOrCreateProvider().CannonicalPublicKeyJwk);
-                string actualCacheKey = cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey;
-                Assert.AreEqual(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "{0}{1}_{2}_AppTokenCache",
-                        expectedKid,
-                        TestConstants.ClientId,
-                        TestConstants.Utid),
-                    actualCacheKey);
-
-                // Arrange - force a new key by moving to the future
-                (CryptoProviderFactory.TimeService as TestTimeService).MoveToFuture(
-                    CryptoProviderFactory.KeyRotationInterval.Add(TimeSpan.FromMinutes(10)));
-
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
-
-                // Act
-                Trace.WriteLine("1. AcquireTokenForClient again, after time passes - expect POP key rotation");
-                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                   .WithTenantId(TestConstants.Utid)
-                   .WithProofOfPossession(popConfig)
-                   .ExecuteAsync()
-                   .ConfigureAwait(false);
-
-                // Assert
-                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                string expectedKid2 = GetKidFromJwk(CryptoProviderFactory.GetOrCreateProvider().CannonicalPublicKeyJwk);
-                string actualCacheKey2 = cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey;
-                Assert.AreEqual(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "{0}{1}_{2}_AppTokenCache",
-                        expectedKid2,
-                        TestConstants.ClientId,
-                        TestConstants.Utid),
-                    actualCacheKey2);
-
-                Assert.AreNotEqual(actualCacheKey, actualCacheKey2);
-            }
-        }
-
-        [TestMethod]
+                [TestMethod]
         public async Task PopWhenBrokerIsNotAvailableTest_Async()
         {
             //MSAL should not fall back to using the browser if the broker is not available when using POP
@@ -507,6 +420,98 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Assert.AreEqual(TokenSource.Broker, result.AuthenticationResultMetadata.TokenSource);
             }
         }
+#endif
+
+        [TestMethod]
+        public void PopConfig()
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
+            var popConfig = new PoPAuthenticationConfiguration(request);
+
+            Assert.AreEqual(HttpMethod.Get, popConfig.HttpMethod);
+            Assert.AreEqual("www.contoso.com", popConfig.HttpHost);
+            Assert.AreEqual("/path1/path2", popConfig.HttpPath);
+
+            request = new HttpRequestMessage(HttpMethod.Post, new Uri(ProtectedUrlWithPort));
+            popConfig = new PoPAuthenticationConfiguration(request);
+
+            Assert.AreEqual(HttpMethod.Post, popConfig.HttpMethod);
+            Assert.AreEqual("www.contoso.com:5555", popConfig.HttpHost);
+            Assert.AreEqual("/path1/path2", popConfig.HttpPath);
+        }
+
+        [TestMethod]
+        public async Task CacheKey_Includes_POPKid_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication app =
+                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .WithExperimentalFeatures(true)
+                                                              .BuildConcrete();
+                var testTimeService = new TestTimeService();
+                PoPProviderFactory.TimeService = testTimeService;
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
+                var popConfig = new PoPAuthenticationConfiguration(request);
+                var cacheAccess = app.AppTokenCache.RecordAccess();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
+
+                // Act
+                Trace.WriteLine("1. AcquireTokenForClient ");
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithTenantId(TestConstants.Utid)
+                    .WithProofOfPossession(popConfig)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                string expectedKid = GetKidFromJwk(PoPProviderFactory.GetOrCreateProvider().CannonicalPublicKeyJwk);
+                string actualCacheKey = cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey;
+                Assert.AreEqual(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "{0}{1}_{2}_AppTokenCache",
+                        expectedKid,
+                        TestConstants.ClientId,
+                        TestConstants.Utid),
+                    actualCacheKey);
+
+                // Arrange - force a new key by moving to the future
+                (PoPProviderFactory.TimeService as TestTimeService).MoveToFuture(
+                    PoPProviderFactory.KeyRotationInterval.Add(TimeSpan.FromMinutes(10)));
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
+
+                // Act
+                Trace.WriteLine("1. AcquireTokenForClient again, after time passes - expect POP key rotation");
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                   .WithTenantId(TestConstants.Utid)
+                   .WithProofOfPossession(popConfig)
+                   .ExecuteAsync()
+                   .ConfigureAwait(false);
+
+                // Assert
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                string expectedKid2 = GetKidFromJwk(PoPProviderFactory.GetOrCreateProvider().CannonicalPublicKeyJwk);
+                string actualCacheKey2 = cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey;
+                Assert.AreEqual(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "{0}{1}_{2}_AppTokenCache",
+                        expectedKid2,
+                        TestConstants.ClientId,
+                        TestConstants.Utid),
+                    actualCacheKey2);
+
+                Assert.AreNotEqual(actualCacheKey, actualCacheKey2);
+            }
+        }
 
         private MsalTokenResponse CreateMsalPopTokenResponse(string accessToken = null)
         {
@@ -546,39 +551,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
             Assert.AreEqual(MsalErrorMessage.BrokerRequiredForPop, ex.Message);
         }
 
-#if NET_CORE
-        [TestMethod]
-        public void CheckPopRuntimeBrokerSupportTest()
-        {
-            //Broker enabled
-            var pcaBuilder = PublicClientApplicationBuilder
-                                            .Create(TestConstants.ClientId);
-
-            pcaBuilder = pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows));
-
-            IPublicClientApplication app = pcaBuilder.Build();
-
-            Assert.IsTrue(app.IsProofOfPossessionSupportedByClient());
-
-            //Broker disabled
-            pcaBuilder = PublicClientApplicationBuilder
-                                .Create(TestConstants.ClientId);
-
-            pcaBuilder.WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.None));
-
-            app = pcaBuilder.Build();
-
-            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
-
-            //Broker not configured
-            app = PublicClientApplicationBuilder
-                                .Create(TestConstants.ClientId)
-                                .Build();
-
-            Assert.IsFalse(app.IsProofOfPossessionSupportedByClient());
-        }
-#endif
-
         /// <summary>
         /// A key ID that uniquely describes a public / private key pair. While KeyID is not normally
         /// strict, AAD support for PoP requires that we use the base64 encoded JWK thumbprint, as described by 
@@ -616,7 +588,154 @@ namespace Microsoft.Identity.Test.Unit.Pop
             Assert.IsTrue(JObject.DeepEquals(jwkInConfig, jwkInToken));
         }
 
-       
+        [TestMethod]
+        public void Sign_UsesPSSPadding()
+        {
+            // Arrange
+            var provider = new InMemoryCryptoProvider();
+            byte[] payload = Encoding.UTF8.GetBytes("test payload");
+
+            // Act
+            byte[] signature = provider.Sign(payload);
+
+            // Assert
+#if NET6_0
+            using (RSA rsa = RSA.Create())
+#else
+            using (RSA rsa = RSA.Create("RSAPSS"))
+#endif
+            {
+                rsa.ImportParameters(provider.GetPublicKeyParameters());
+
+                bool isValidSignature = rsa.VerifyData(
+                    payload,
+                    signature,
+                    HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pss);
+
+                Assert.IsTrue(isValidSignature, "The signature should be valid using PSS padding.");
+            }
+        }
+
+        [TestMethod]
+        public async Task POP_SignatureValidationWithPS256_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication app =
+                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .WithExperimentalFeatures(true)
+                                                              .BuildConcrete();
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
+                var popConfig = new PoPAuthenticationConfiguration(request);
+                var provider = PoPProviderFactory.GetOrCreateProvider();
+
+                // Check if the CryptographicAlgorithm returns "PS256"
+                Assert.AreEqual("PS256", provider.CryptographicAlgorithm);
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithTenantId(TestConstants.Utid)
+                    .WithProofOfPossession(popConfig)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // access token parsing can be done with MSAL's id token parsing logic
+                var claims = IdToken.Parse(result.AccessToken).ClaimsPrincipal;
+
+                Assert.IsTrue(!string.IsNullOrEmpty(claims.FindAll("nonce").Single().Value));
+                AssertSingedHttpRequestClaims(provider, claims);
+            }
+        }
+
+        [TestMethod]
+        public void ValidateSignature_UsesCorrectPadding()
+        {
+            // Arrange
+            var provider = new InMemoryCryptoProvider();
+            byte[] payload = Encoding.UTF8.GetBytes("test payload");
+            byte[] signature = provider.Sign(payload);
+            byte[] hash;
+
+            using (var sha256 = SHA256.Create())
+            {
+                hash = sha256.ComputeHash(payload);
+            }
+
+            // Act and Assert
+#if NET6_0
+            using (RSA rsa = RSA.Create())
+#else
+            using (RSA rsa = RSA.Create("RSAPSS"))
+#endif
+            {
+                rsa.ImportParameters(provider.GetPublicKeyParameters());
+
+                bool isValidSignature = rsa.VerifyHash(
+                    hash,
+                    signature,
+                    HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pss);
+
+                Assert.IsTrue(isValidSignature, "The signature should be valid using PSS padding.");
+            }
+        }
+
+        [TestMethod]
+        public async Task TokenGenerationAndValidation_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                  .WithClientSecret(TestConstants.ClientSecret)
+                                                                  .WithHttpManager(httpManager)
+                                                                  .WithExperimentalFeatures(true)
+                                                                  .BuildConcrete();
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
+                var popConfig = new PoPAuthenticationConfiguration(request);
+                var provider = PoPProviderFactory.GetOrCreateProvider();
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithTenantId(TestConstants.Utid)
+                    .WithProofOfPossession(popConfig)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // access token parsing can be done with MSAL's id token parsing logic
+                var claims = IdToken.Parse(result.AccessToken).ClaimsPrincipal;
+
+                // Assert
+                Assert.AreEqual("PS256", provider.CryptographicAlgorithm);
+                Assert.IsTrue(!string.IsNullOrEmpty(claims.FindAll("nonce").Single().Value));
+                AssertSingedHttpRequestClaims(provider, claims);
+            }
+        }
+
+        [TestMethod]
+        public void ValidateCanonicalJwkFormat()
+        {
+            // Arrange
+            var provider = PoPProviderFactory.GetOrCreateProvider();
+            var actualCanonicaljwk = provider.CannonicalPublicKeyJwk;
+
+            // Act and Assert
+
+            // Parse the JWK to get the RSA parameters so that we can create a new canonical JWK in expected format
+            var jsonWebKey = JsonWebKey.Create(actualCanonicaljwk);
+            var expectedCanonicalJwk = $@"{{""{JsonWebKeyParameterNames.E}"":""{jsonWebKey.E}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{jsonWebKey.N}""}}";
+
+            Assert.AreEqual(expectedCanonicalJwk, actualCanonicaljwk);
+        }
     }
 }
-#endif

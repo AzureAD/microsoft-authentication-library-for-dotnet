@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
@@ -29,9 +30,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public MockHttpManager(string testName = null,
             bool isManagedIdentity = false,
             Func<MockHttpMessageHandler> messageHandlerFunc = null,
+            Func<HttpClient> validateServerCertificateCallback = null,
             bool invokeNonMtlsHttpManagerFactory = false) :
             this(true, testName, isManagedIdentity, messageHandlerFunc, invokeNonMtlsHttpManagerFactory)
-        { }
+        {
+        }
 
         public MockHttpManager(
             bool retry,
@@ -110,6 +113,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ILoggerAdapter logger,
             bool doNotThrow,
             X509Certificate2 mtlsCertificate,
+            HttpClient customHttpClient,
             CancellationToken cancellationToken,
             int retryCount = 0)
         {
@@ -121,6 +125,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 logger,
                 doNotThrow,
                 mtlsCertificate,
+                customHttpClient: null,
                 cancellationToken,
                 retryCount);
         }

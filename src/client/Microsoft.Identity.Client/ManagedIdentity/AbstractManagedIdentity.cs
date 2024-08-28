@@ -15,9 +15,6 @@ using System.Text;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-    /// <summary>
-    /// Original source of code: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/src/ManagedIdentitySource.cs
-    /// </summary>
     internal abstract class AbstractManagedIdentity
     {
         protected readonly RequestContext _requestContext;
@@ -63,6 +60,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: null,
+                            GetHttpClientWithSslValidation(_requestContext),
                             cancellationToken).ConfigureAwait(false);
                 }
                 else
@@ -76,6 +74,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                             logger: _requestContext.Logger,
                             doNotThrow: true,
                             mtlsCertificate: null,
+                            GetHttpClientWithSslValidation(_requestContext),
                             cancellationToken)
                         .ConfigureAwait(false);
 
@@ -88,6 +87,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 HandleException(ex);
                 throw;
             }
+        }
+
+        // This method is internal for testing purposes.
+        internal virtual HttpClient GetHttpClientWithSslValidation(RequestContext requestContext)
+        {
+            return null;
         }
 
         protected virtual Task<ManagedIdentityResponse> HandleResponseAsync(

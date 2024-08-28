@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.AuthScheme
 
         public string CannonicalPublicKeyJwk { get; private set; }
 
-        public string CryptographicAlgorithm { get => "RS256"; }
+        public string CryptographicAlgorithm { get => "PS256"; }
 
         private void InitializeSigningKey()
         {
@@ -56,7 +56,16 @@ namespace Microsoft.Identity.Client.AuthScheme
         /// </summary>
         private static string ComputeCanonicalJwk(RSAParameters rsaPublicKey)
         {
+            //Important: This format cannot be modified as it needs to be the same as what is used in the service when calculating hashes.
             return $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
+        }
+
+        /// <summary>
+        /// For internal testing only
+        /// </summary>
+        internal RSAParameters GetPublicKeyParameters()
+        {
+            return _signingKey.ExportParameters(false);
         }
     }
 }

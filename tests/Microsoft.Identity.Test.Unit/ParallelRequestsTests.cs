@@ -271,6 +271,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             ILoggerAdapter logger,
             bool doNotThrow,
             X509Certificate2 mtlsCertificate,
+            HttpClient customHttpClient,
             CancellationToken cancellationToken, 
             int retryCount = 0)
         {
