@@ -166,6 +166,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WAMClassLibrary", "tests\de
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WAMCallsIntoClassLibrary", "tests\devapps\WAM\WAMCallsIntoClassLibrary\WAMCallsIntoClassLibrary.csproj", "{4EA542D2-D4C9-403C-B615-0047D0A62790}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WAMMauiApp", "tests\devapps\WAM\WAMMauiApp\WAMMauiApp\WAMMauiApp.csproj", "{1B047736-9325-4F59-906B-89A3E12AC8FB}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Integration.NetCore", "tests\Microsoft.Identity.Test.Integration.netcore\Microsoft.Identity.Test.Integration.NetCore.csproj", "{C5902FA4-CC11-43E8-B7E3-192B5FFA1C40}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestTelemetry", "tests\devapps\TestTelemetry\TestTelemetry.csproj", "{8B6AE343-A726-4367-A1AA-522CD5EDD071}"
