@@ -14,7 +14,7 @@ using Microsoft.Identity.Client.Utils;
 namespace Microsoft.Identity.Client.AuthScheme.CDT
 {
     //TODO: Add support for ECD keys
-    internal class CdtCryptoProvider : IPoPCryptoProvider
+    internal class CdtCryptoProvider : ICdtCryptoProvider
     {
         private readonly X509Certificate2 _cert;
 
@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
 
         public string CannonicalPublicKeyJwk { get; }
 
-        public string CryptographicAlgorithm { get => "RS256"; }
+        public string CryptographicAlgorithm { get => "PS256"; }
 
         /// <summary>
         /// Creates the canonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3

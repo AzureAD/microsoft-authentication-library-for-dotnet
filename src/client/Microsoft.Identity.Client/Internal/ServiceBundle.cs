@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Internal
             if (shouldClearCaches) // for test
             {
                 AuthorityManager.ClearValidationCache();
-                CryptoProviderFactory.Reset();
+                MsalCryptoProviderFactory.Reset();
             }
         }
 

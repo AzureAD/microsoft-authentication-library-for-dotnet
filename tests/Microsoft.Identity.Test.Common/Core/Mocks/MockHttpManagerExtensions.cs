@@ -197,6 +197,34 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return handler;
         }
 
+        public static MockHttpMessageHandler AddMockHandlerSuccessfulCDTClientCredentialTokenResponseMessage(
+            this MockHttpManager httpManager,
+            string token = "header.payload.signature",
+            string expiresIn = "3599",
+            string tokenType = "Bearer",
+            string confirmation = "{ some_cnf }",
+            string nonce = "nonce",
+            string encKey = "someKey",
+            IList<string> unexpectedHttpHeaders = null)
+        {
+            var handler = new MockHttpMessageHandler()
+            {
+                ExpectedMethod = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateSuccessfulCDTClientCredentialTokenResponseMessage(
+                                                    token, 
+                                                    expiresIn, 
+                                                    tokenType, 
+                                                    confirmation, 
+                                                    nonce, 
+                                                    encKey),
+                UnexpectedRequestHeaders = unexpectedHttpHeaders
+            };
+
+            httpManager.AddMockHandler(handler);
+
+            return handler;
+        }
+
         public static MockHttpMessageHandler AddMockHandlerForThrottledResponseMessage(
             this MockHttpManager httpManager)
         {

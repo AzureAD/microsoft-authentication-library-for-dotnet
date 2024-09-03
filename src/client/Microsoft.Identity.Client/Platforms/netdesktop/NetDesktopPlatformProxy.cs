@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Client.Platforms.netdesktop
 
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
-            return CryptoProviderFactory.GetOrCreateProvider();
+            return MsalCryptoProviderFactory.GetOrCreateProvider();
         }
 
         public override IDeviceAuthManager CreateDeviceAuthManager()

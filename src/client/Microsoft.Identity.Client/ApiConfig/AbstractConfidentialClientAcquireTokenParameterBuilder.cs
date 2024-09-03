@@ -94,13 +94,13 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="contraints"></param>
+        /// <param name="constraints"></param>
         /// <returns></returns>
-        public T WithConstraints(IEnumerable<Constraint> contraints)
+        public T WithConstraints(string constraints)
         {
             ValidateUseOfExperimentalFeature();
 
-            CommonParameters.AuthenticationScheme = new CdtAuthenticationScheme(contraints, ServiceBundle, null);
+            CommonParameters.AuthenticationScheme = new CdtAuthenticationScheme(constraints, ServiceBundle, null);
 
             return this as T;
         }
@@ -108,14 +108,14 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="contraints"></param>
+        /// <param name="constraints"></param>
         /// <param name="certificate"></param>
         /// <returns></returns>
-        public T WithConstraints(IEnumerable<Constraint> contraints, X509Certificate2 certificate)
+        public T WithConstraints(string constraints, X509Certificate2 certificate)
         {
             ValidateUseOfExperimentalFeature();
 
-            CommonParameters.AuthenticationScheme = new CdtAuthenticationScheme(contraints, ServiceBundle, certificate);
+            CommonParameters.AuthenticationScheme = new CdtAuthenticationScheme(constraints, ServiceBundle, certificate);
 
             return this as T;
         }

@@ -10,7 +10,7 @@ namespace Microsoft.Identity.Client.AuthScheme
     /// <summary>
     /// This factory ensures key rotation every 8h
     /// </summary>
-    internal static class CryptoProviderFactory
+    internal static class MsalCryptoProviderFactory
     {
         private static InMemoryCryptoProvider s_currentProvider;
         private static DateTime s_providerExpiration;

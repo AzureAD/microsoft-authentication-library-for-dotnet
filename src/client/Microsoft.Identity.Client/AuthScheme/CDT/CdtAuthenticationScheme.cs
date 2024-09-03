@@ -28,7 +28,8 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
     internal class CdtAuthenticationScheme : IAuthenticationScheme
     {
         private readonly ICdtCryptoProvider _cdtCryptoProvider;
-        private readonly IEnumerable<Constraint> _contraints;
+        private readonly string _constraints;
+        private readonly string _reqCnf;
 
         /// <summary>
         /// Creates Cdt tokens, i.e. tokens that are bound to an HTTP request and are digitally signed.
@@ -37,15 +38,16 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
         /// Currently the signing credential algorithm is hard-coded to RSA with SHA256. Extensibility should be done
         /// by integrating Wilson's SigningCredentials
         /// </remarks>
-        public CdtAuthenticationScheme(IEnumerable<Constraint> contraints, IServiceBundle serviceBundle, X509Certificate2 certificate)
+        public CdtAuthenticationScheme(string constraints, IServiceBundle serviceBundle, X509Certificate2 certificate)
         {
-
-            _contraints = contraints ?? throw new ArgumentNullException(nameof(contraints));
+            _constraints = constraints ?? throw new ArgumentNullException(nameof(constraints));
 
             _cdtCryptoProvider = (ICdtCryptoProvider)(certificate == null ? serviceBundle.PlatformProxy.GetDefaultPoPCryptoProvider() : new CdtCryptoProvider(certificate));
 
             var keyThumbprint = ComputeThumbprint(_cdtCryptoProvider.CannonicalPublicKeyJwk);
             KeyId = Base64UrlHelpers.Encode(keyThumbprint);
+
+            _reqCnf = ComputeReqCnf();
         }
 
         public TokenType TelemetryTokenType => TokenType.Bearer;
@@ -63,7 +65,7 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
         {
             return new Dictionary<string, string>() {
                 { OAuth2Parameter.TokenType, Constants.BearerAuthHeaderPrefix},
-                { Constants.RequestConfirmation, ComputeReqCnf()}
+                { Constants.RequestConfirmation, _reqCnf}
             };
         }
 
@@ -81,88 +83,80 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
 
         private JObject CreateCdtBody(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
-            var publicKeyJwk = JToken.Parse(_cdtCryptoProvider.CannonicalPublicKeyJwk);
-            string encryptionKey = GetEncryptionKeyFromToken(msalAccessTokenCacheItem);
+            //string encryptionKey = GetEncryptionKeyFromToken(msalAccessTokenCacheItem);
             var body = new JObject
             {
                 // Mandatory parameters
-                [CdtClaimTypes.Ticket] = $"{msalAccessTokenCacheItem.Secret}[ds_cnf={publicKeyJwk}]",
-                [CdtClaimTypes.ConstraintsToken] = string.IsNullOrEmpty(encryptionKey) 
-                                                    ? CreateCdtConstraintsJwT(msalAccessTokenCacheItem) :
-                                                      CreateEncryptedCdtConstraintsJwT(msalAccessTokenCacheItem, encryptionKey)
+                [CdtClaimTypes.Ticket] = $"{msalAccessTokenCacheItem.Secret}[ds_cnf={_reqCnf}]",
+                //[CdtClaimTypes.ConstraintsToken] = string.IsNullOrEmpty(encryptionKey) 
+                //                                    ? CreateCdtConstraintsJwT(msalAccessTokenCacheItem) :
+                //                                      CreateEncryptedCdtConstraintsJwT(msalAccessTokenCacheItem, encryptionKey)
+                [CdtClaimTypes.ConstraintsToken] = CreateCdtConstraintsJwT(msalAccessTokenCacheItem)
             };
 
             return body;
         }
 
-        private JToken CreateEncryptedCdtConstraintsJwT(MsalAccessTokenCacheItem msalAccessTokenCacheItem, string encryptionKey)
-        {
-            var header = new JObject();
-            header[JsonWebTokenConstants.Algorithm] = Constants.CdtEncryptedAlgoryth;
-            header[JsonWebTokenConstants.CdtEncrypt] = Constants.CdtEncryptedValue;
+        //private JToken CreateEncryptedCdtConstraintsJwT(MsalAccessTokenCacheItem msalAccessTokenCacheItem, string encryptionKey)
+        //{
+        //    var header = new JObject();
+        //    header[JsonWebTokenConstants.Algorithm] = Constants.CdtEncryptedAlgoryth;
+        //    header[JsonWebTokenConstants.CdtEncrypt] = Constants.CdtEncryptedValue;
 
-            var body = new JObject
-            {
-                // TODO: ENCRYPT JWT
-                [CdtClaimTypes.Constraints] = CreateCdtConstraintsJwT(msalAccessTokenCacheItem)
-            };
+        //    var body = new JObject
+        //    {
+        //        // TODO: ENCRYPT JWT
+        //        [CdtClaimTypes.Constraints] = CreateCdtConstraintsJwT(msalAccessTokenCacheItem)
+        //    };
 
-            string cdtConstraintToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header));
-            return cdtConstraintToken;
-        }
+        //    string cdtConstraintToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header));
+        //    return cdtConstraintToken;
+        //}
 
         private JToken CreateCdtConstraintsJwT(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             var header = new JObject();
             header[JsonWebTokenConstants.Algorithm] = _cdtCryptoProvider.CryptographicAlgorithm;
             header[JsonWebTokenConstants.Type] = Constants.JasonWebTokenType;
-            header[CdtClaimTypes.Nonce] = GetNonceFromToken(msalAccessTokenCacheItem);
+            header[CdtClaimTypes.Nonce] = msalAccessTokenCacheItem.CdtNonce;
 
-            var body = CreateCdtConstrantBody();
+            var body = new JObject
+            {
+                // Mandatory parameters
+                [CdtClaimTypes.Constraints] = _constraints
+            };
 
             string cdtConstraintToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header));
             return cdtConstraintToken;
         }
 
-        private string GetNonceFromToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
-        {
-            var decodedToken = Base64UrlHelpers.Decode(msalAccessTokenCacheItem.Secret);
-            var jsonHeader = JsonHelper.ParseIntoJsonObject(decodedToken.Split('.')[0]);
-            JToken value;
-#if SUPPORTS_SYSTEM_TEXT_JSON
+//        private string GetNonceFromToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+//        {
+//            var decodedToken = Base64UrlHelpers.Decode(msalAccessTokenCacheItem.Secret);
+//            var jsonHeader = JsonHelper.ParseIntoJsonObject(decodedToken.Split('.')[0]);
+//            JToken value;
+//#if SUPPORTS_SYSTEM_TEXT_JSON
 
-            JsonHelper.TryGetValue(jsonHeader, "nonce", out value);
-#else
-            JsonHelper.TryGetValue(jsonHeader, "nonce", out value);
-#endif
-            return value?.ToString();
-        }
+//            JsonHelper.TryGetValue(jsonHeader, "nonce", out value);
+//#else
+//            JsonHelper.TryGetValue(jsonHeader, "nonce", out value);
+//#endif
+//            return value?.ToString();
+//        }
 
-        private string GetEncryptionKeyFromToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
-        {
-            var decodedToken = Base64UrlHelpers.Decode(msalAccessTokenCacheItem.Secret);
-            var jsonHeader = JsonHelper.ParseIntoJsonObject(decodedToken.Split('.')[0]);
-            JToken value;
-#if SUPPORTS_SYSTEM_TEXT_JSON
+//        private string GetEncryptionKeyFromToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+//        {
+//            var decodedToken = Base64UrlHelpers.Decode(msalAccessTokenCacheItem.Secret);
+//            var jsonHeader = JsonHelper.ParseIntoJsonObject(decodedToken.Split('.')[0]);
+//            JToken value;
+//#if SUPPORTS_SYSTEM_TEXT_JSON
 
-            JsonHelper.TryGetValue(jsonHeader, "ds_enc", out value);
-#else
-            JsonHelper.TryGetValue(jsonHeader, "ds_enc", out value);
-#endif
-            return value?.ToString();
-        }
-
-        private JObject CreateCdtConstrantBody()
-        {
-
-            var body = new JObject
-            {
-                // Mandatory parameters
-                [CdtClaimTypes.Constraints] = JsonHelper.SerializeToJson(_contraints)
-            };
-
-            return body;
-        }
+//            JsonHelper.TryGetValue(jsonHeader, "ds_enc", out value);
+//#else
+//            JsonHelper.TryGetValue(jsonHeader, "ds_enc", out value);
+//#endif
+//            return value?.ToString();
+//        }
 
         private static string CreateSimpleNonce()
         {
