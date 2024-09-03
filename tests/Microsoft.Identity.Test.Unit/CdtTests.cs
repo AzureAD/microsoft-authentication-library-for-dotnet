@@ -18,7 +18,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit
 {
-    internal class CdtTests : TestBase
+    [TestClass]
+    public class CdtTests : TestBase
     {
         private const string ProtectedUrl = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
 
@@ -59,6 +60,20 @@ namespace Microsoft.Identity.Test.Unit
                 // access token parsing can be done with MSAL's id token parsing logic
                 var claims = IdToken.Parse(result.AccessToken).ClaimsPrincipal;
 
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                AssertConstrainedDelegationClaims(provider, claims, constraintAsString);
+
+                //Verify that the original AT token is cached and the CDT can be recreated
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithTenantId(TestConstants.Utid)
+                    .WithConstraints(constraintAsString)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // access token parsing can be done with MSAL's id token parsing logic
+                claims = IdToken.Parse(result.AccessToken).ClaimsPrincipal;
+
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 AssertConstrainedDelegationClaims(provider, claims, constraintAsString);
             }
         }
@@ -104,6 +119,20 @@ namespace Microsoft.Identity.Test.Unit
                 // access token parsing can be done with MSAL's id token parsing logic
                 var claims = IdToken.Parse(result.AccessToken).ClaimsPrincipal;
 
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                AssertConstrainedDelegationClaims(provider, claims, constraintAsString);
+
+                //Verify that the original AT token is cached and the CDT can be recreated
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithTenantId(TestConstants.Utid)
+                    .WithConstraints(constraintAsString)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                // access token parsing can be done with MSAL's id token parsing logic
+                claims = IdToken.Parse(result.AccessToken).ClaimsPrincipal;
+
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
                 AssertConstrainedDelegationClaims(provider, claims, constraintAsString);
             }
         }
