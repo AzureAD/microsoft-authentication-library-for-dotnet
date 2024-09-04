@@ -11,6 +11,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -18,7 +19,9 @@ using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.SSHCertificates;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -35,6 +38,23 @@ namespace Microsoft.Identity.Test.Integration.Broker
         [DllImport("user32.dll")]
         static extern IntPtr GetForegroundWindow();
 
+        //This client id is for Azure CLI which is one of the only 2 clients that have PreAuth to use ssh cert feature
+        string _SSH_ClientId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46";
+        //SSH User impersonation scope required for this test
+        private string[] _SSH_scopes = new[] { "https://pas.windows.net/CheckMyAccess/Linux/user_impersonation" };
+
+        private string CreateJwk()
+        {
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048);
+            RSAParameters rsaKeyInfo = rsa.ExportParameters(false);
+
+            string modulus = Base64UrlHelpers.Encode(rsaKeyInfo.Modulus);
+            string exp = Base64UrlHelpers.Encode(rsaKeyInfo.Exponent);
+            string jwk = $"{{\"kty\":\"RSA\", \"n\":\"{modulus}\", \"e\":\"{exp}\"}}";
+
+            return jwk;
+        }
+        
         // This test should fail locally but succeed in a CI build.
         [IgnoreOnOneBranch]
         [TestMethod]
@@ -221,6 +241,47 @@ namespace Microsoft.Identity.Test.Integration.Broker
             await AssertException.TaskThrowsAsync<MsalUiRequiredException>(
                () => pca.AcquireTokenSilent(scopes, account).ExecuteAsync())
                 .ConfigureAwait(false);
+        }
+
+        [IgnoreOnOneBranch]
+        [TestMethod]
+        public async Task WamWithSSHCertificateAuthenticationSchemeAsync()
+        {
+            IntPtr intPtr = GetForegroundWindow();
+            Func<IntPtr> windowHandleProvider = () => intPtr;
+
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+            .Create(_SSH_ClientId)
+            .WithTestLogging()
+            .WithParentActivityOrWindow(windowHandleProvider)
+            .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+            .Build();
+
+
+            string jwk = CreateJwk();
+
+            AuthenticationResult result = await pca
+                .AcquireTokenInteractive(_SSH_scopes)
+                .WithSSHCertificateAuthenticationScheme(jwk, "key1")
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("ssh-cert", result.TokenType);
+            
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            Assert.IsNotNull(accounts);
+            var account = accounts.FirstOrDefault();
+            Assert.IsNotNull(account);
+
+            result = await pca
+                .AcquireTokenSilent(_SSH_scopes, account)
+                .WithSSHCertificateAuthenticationScheme(jwk, "key2")
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+            Assert.AreEqual("ssh-cert", result.TokenType);
+
+
         }
 
         [IgnoreOnOneBranch]
