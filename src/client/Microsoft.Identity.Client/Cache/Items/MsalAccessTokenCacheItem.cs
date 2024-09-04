@@ -45,14 +45,12 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = response.ClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
-            CdtKey = response.CdtKey;
             CdtNonce = response.CdtNonce;
             CdtEncKey = response.CdtEncKey;
 
             InitCacheKey();
         }
 
-      
         internal /* for test */ MsalAccessTokenCacheItem(
             string preferredCacheEnv,
             string clientId,
@@ -217,8 +215,6 @@ namespace Microsoft.Identity.Client.Cache.Items
         public bool IsExtendedLifeTimeToken { get; set; }
 
         internal string CacheKey { get; private set; }
-
-        internal string CdtKey { get; private set; }
 
         internal string CdtNonce { get; private set; }
 

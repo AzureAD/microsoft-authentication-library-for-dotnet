@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
     {
         private readonly ICdtCryptoProvider _cdtCryptoProvider;
         private readonly string _constraints;
-        private readonly string _reqCnf;
+        private readonly string _dsReqCnf;
 
         /// <summary>
         /// Creates Cdt tokens, i.e. tokens that are bound to an HTTP request and are digitally signed.
@@ -44,10 +44,7 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
 
             _cdtCryptoProvider = (ICdtCryptoProvider)(certificate == null ? serviceBundle.PlatformProxy.GetDefaultPoPCryptoProvider() : new CdtCryptoProvider(certificate));
 
-            var keyThumbprint = ComputeThumbprint(_cdtCryptoProvider.CannonicalPublicKeyJwk);
-            KeyId = Base64UrlHelpers.Encode(keyThumbprint);
-
-            _reqCnf = ComputeReqCnf();
+            _dsReqCnf = _cdtCryptoProvider.CannonicalPublicKeyJwk;
         }
 
         public TokenType TelemetryTokenType => TokenType.Bearer;
@@ -65,14 +62,14 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
         {
             return new Dictionary<string, string>() {
                 { OAuth2Parameter.TokenType, Constants.BearerAuthHeaderPrefix},
-                { Constants.RequestConfirmation, _reqCnf}
+                { Constants.RequestConfirmation, _dsReqCnf}
             };
         }
 
         public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             var header = new JObject();
-            header[JsonWebTokenConstants.Type] = Constants.BearerAuthHeaderPrefix;
+            header[JsonWebTokenConstants.Type] = Constants.JasonWebTokenType;
             header[JsonWebTokenConstants.Algorithm] = Constants.NoAlgorythmPrefix;
             
             var body = CreateCdtBody(msalAccessTokenCacheItem);
@@ -87,11 +84,11 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
             var body = new JObject
             {
                 // Mandatory parameters
-                [CdtClaimTypes.Ticket] = $"{msalAccessTokenCacheItem.Secret}[ds_cnf={_reqCnf}]",
+                [CdtClaimTypes.Ticket] = msalAccessTokenCacheItem.Secret,
+                [CdtClaimTypes.ConstraintsToken] = CreateCdtConstraintsJwT(msalAccessTokenCacheItem)
                 //[CdtClaimTypes.ConstraintsToken] = string.IsNullOrEmpty(encryptionKey) 
                 //                                    ? CreateCdtConstraintsJwT(msalAccessTokenCacheItem) :
                 //                                      CreateEncryptedCdtConstraintsJwT(msalAccessTokenCacheItem, encryptionKey)
-                [CdtClaimTypes.ConstraintsToken] = CreateCdtConstraintsJwT(msalAccessTokenCacheItem)
             };
 
             return body;
@@ -158,18 +155,11 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
 //            return value?.ToString();
 //        }
 
-        private static string CreateSimpleNonce()
-        {
-            // Guid with no hyphens
-            return Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);
-        }
-
-        private string ComputeReqCnf()
-        {
-            // There are 4 possible formats for a JWK, but Evo supports only this one for simplicity
-            var jwk = $@"{{""{JsonWebKeyParameterNames.Kid}"":""{KeyId}""}}";
-            return Base64UrlHelpers.Encode(jwk);
-        }
+        //private static string CreateSimpleNonce()
+        //{
+        //    // Guid with no hyphens
+        //    return Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);
+        //}
 
         /// <summary>
         /// A key ID that uniquely describes a public / private key pair. While KeyID is not normally

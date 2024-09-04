@@ -141,25 +141,15 @@ namespace Microsoft.Identity.Test.Unit
         {
             var ticket = claims.FindAll("t").Single().Value;
             var constraints = claims.FindAll("c").Single().Value;
+
             Assert.IsTrue(!string.IsNullOrEmpty(ticket));
             Assert.IsTrue(!string.IsNullOrEmpty(constraints));
 
-            Assert.IsTrue(ticket.Contains($"header.payload.signature[ds_cnf="));
-            var keyId = ticket.Split('=')[1].TrimEnd(']');
-            var decodedKey = Base64UrlHelpers.Decode(keyId);
-            Assert.IsTrue(decodedKey.Contains(ComputeThumbprint(cdtCryptoProvider.CannonicalPublicKeyJwk)));
+            Assert.AreEqual($"header.payload.signature", ticket);
 
             var constraintsClaims = IdToken.Parse(constraints).ClaimsPrincipal;
             var constraintsClaim = constraintsClaims.FindAll("constraints").Single().Value;
             Assert.AreEqual(constraint, constraintsClaim);
-        }
-
-        private static string ComputeThumbprint(string canonicalJwk)
-        {
-            using (SHA256 hash = SHA256.Create())
-            {
-                return Base64UrlHelpers.Encode(hash.ComputeHash(Encoding.UTF8.GetBytes(canonicalJwk)));
-            }
         }
     }
 }
