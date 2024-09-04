@@ -18,7 +18,7 @@ using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Parameter builder for the <see cref="IConfidentialClientApplication.AcquireTokenByUsernamePassword(IEnumerable{string}, string, string)"/>
+    /// Parameter builder for the <see cref="IByUsernameAndPassword.AcquireTokenByUsernamePassword(IEnumerable{string}, string, string)"/>
     /// operation. See https://aka.ms/msal-net-up
     /// </summary>
     public sealed class AcquireTokenByUsernameAndPasswordConfidentialParameterBuilder :
@@ -66,6 +66,17 @@ namespace Microsoft.Identity.Client
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
             return ApiEvent.ApiIds.AcquireTokenByUsernamePassword;
+        }
+
+        /// <inheritdoc/>
+        protected override void Validate()
+        {
+            base.Validate();
+
+            if (Parameters.SendX5C == null)
+            {
+                Parameters.SendX5C = ServiceBundle.Config?.SendX5C ?? false;
+            }
         }
     }
 }

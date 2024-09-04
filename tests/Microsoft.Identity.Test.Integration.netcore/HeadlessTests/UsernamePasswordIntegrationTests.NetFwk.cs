@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                             .WithTestLogging()
                             .WithHttpClientFactory(factory)
                             .WithAuthority(labResponse.Lab.Authority, "organizations")
-                            .WithClientSecret(settings.GetSecret())
+                            .WithCertificate(settings.GetCertificate(), true)
                             .Build();
             }
 

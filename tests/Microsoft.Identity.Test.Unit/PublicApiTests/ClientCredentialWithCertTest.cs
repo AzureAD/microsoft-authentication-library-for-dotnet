@@ -669,6 +669,41 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+
+        // regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4913
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task RopcCcaSendsX5CAsync(bool sendX5C)
+        {
+            using (var harness = CreateTestHarness())
+            {
+                var certificate = CertHelper.GetOrCreateTestCert();
+                var exportedCertificate = Convert.ToBase64String(certificate.Export(X509ContentType.Cert));
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(certificate, sendX5C)
+                    .Build();
+
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                harness.HttpManager.AddMockHandler(
+                    CreateTokenResponseHttpHandlerWithX5CValidation(
+                        clientCredentialFlow: false, 
+                        expectedX5C: sendX5C ? exportedCertificate: null));
+
+                var result = await (app as IByUsernameAndPassword)
+                    .AcquireTokenByUsernamePassword(
+                        TestConstants.s_scope,
+                        TestConstants.Username,
+                        TestConstants.DefaultPassword)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+            }
+        }
+
         private static string ComputeCertThumbprint(X509Certificate2 certificate, bool useSha2)
         {
             string thumbprint = null;

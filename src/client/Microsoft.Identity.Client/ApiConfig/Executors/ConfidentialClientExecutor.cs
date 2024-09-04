@@ -142,6 +142,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 commonParameters,
                 requestContext,
                 _confidentialClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
+            
+            requestParams.SendX5C = usernamePasswordParameters.SendX5C ?? false;
 
             var handler = new UsernamePasswordRequest(
                 ServiceBundle,
