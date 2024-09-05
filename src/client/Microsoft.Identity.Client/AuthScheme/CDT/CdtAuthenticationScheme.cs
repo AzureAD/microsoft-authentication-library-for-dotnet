@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
         {
             return new Dictionary<string, string>() {
                 { OAuth2Parameter.TokenType, Constants.BearerAuthHeaderPrefix},
-                { Constants.RequestConfirmation, _dsReqCnf}
+                { Constants.CdtRequestConfirmation, _dsReqCnf}
             };
         }
 

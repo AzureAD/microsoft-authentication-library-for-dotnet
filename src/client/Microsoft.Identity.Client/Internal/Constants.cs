@@ -49,6 +49,8 @@ namespace Microsoft.Identity.Client.Internal
         public const string ManagedIdentityDefaultTenant = "managed_identity";
         public const string CiamAuthorityHostSuffix = ".ciamlogin.com";
 
+        public const string CdtRequestConfirmation = "req_ds_cnf";
+
         public static string FormatEnterpriseRegistrationOnPremiseUri(string domain)
         {
             return $"https://enterpriseregistration.{domain}/enrollmentserver/contract";
