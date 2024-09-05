@@ -35,6 +35,12 @@ steps:
     custom: 'workload'
     arguments: 'restore microsoft-authentication-library-for-dotnet\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
 
+# Authenticate to the NuGet feed
+- task: NuGetAuthenticate@1
+  displayName: 'Authenticate to NuGet feed'
+  inputs:
+    forceReinstallCredentialProvider: true
+
 - task: PowerShell@2
   displayName: Install MAUI
   inputs:
