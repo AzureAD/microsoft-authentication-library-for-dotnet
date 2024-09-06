@@ -250,32 +250,35 @@ namespace Microsoft.Identity.Test.Integration.Broker
             IntPtr intPtr = GetForegroundWindow();
             Func<IntPtr> windowHandleProvider = () => intPtr;
 
+
+            var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
+
             IPublicClientApplication pca = PublicClientApplicationBuilder
             .Create(_SSH_ClientId)
             .WithTestLogging()
+            .WithAuthority(labResponse.Lab.Authority, "organizations")
             .WithParentActivityOrWindow(windowHandleProvider)
             .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
             .Build();
 
 
             string jwk = CreateJwk();
-
+            //Do a login with username password
             AuthenticationResult result = await pca
-                .AcquireTokenInteractive(_SSH_scopes)
-                .WithSSHCertificateAuthenticationScheme(jwk, "key1")
-                .ExecuteAsync()
-                .ConfigureAwait(false);
+            .AcquireTokenByUsernamePassword(_SSH_scopes, labResponse.User.Upn, labResponse.User.GetOrFetchPassword())
+            .ExecuteAsync()
+            .ConfigureAwait(false);
 
-            Assert.AreEqual("SshCert", result.TokenType);
-            
+            //Assert successful login
             var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
             Assert.IsNotNull(accounts);
             var account = accounts.FirstOrDefault();
             Assert.IsNotNull(account);
 
+            //Acquire token with SSH cert
             result = await pca
                 .AcquireTokenSilent(_SSH_scopes, account)
-                .WithSSHCertificateAuthenticationScheme(jwk, "key2")
+                .WithSSHCertificateAuthenticationScheme(jwk, "key1")
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 
