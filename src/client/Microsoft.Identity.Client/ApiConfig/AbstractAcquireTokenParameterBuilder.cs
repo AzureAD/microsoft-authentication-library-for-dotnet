@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -344,6 +345,22 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(authorityUri));
             }
             CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
+            return this as T;
+        }
+
+        /// <summary>
+        /// Specifies additional parameters acquired from authentication responses to be cached with the access token that are normally not included in the cache key.
+        /// </summary>
+        /// <param name="cacheParameters">Additional parameters to cache</param>
+        /// <returns></returns>
+        public T WithAdditionalCacheParameters(IEnumerable<string> cacheParameters)
+        {
+            if (cacheParameters != null && cacheParameters.Count() == 0)
+            {
+                throw new ArgumentNullException(nameof(cacheParameters));
+            }
+
+            CommonParameters.AdditionalCacheParameters = cacheParameters;
             return this as T;
         }
 

@@ -3,12 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 #if SUPPORTS_SYSTEM_TEXT_JSON
+using System.Text.Json;
 using JObject = System.Text.Json.Nodes.JsonObject;
 #else
 using Microsoft.Identity.Json.Linq;
@@ -28,7 +30,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             string tenantId,
             string homeAccountId,
             string keyId = null,
-            string oboCacheKey = null)
+            string oboCacheKey = null,
+            IEnumerable<string> additionalRequestRapameters = null)
             : this(
                 scopes: ScopeHelper.OrderScopesAlphabetically(response.Scope), // order scopes to avoid cache duplication. This is not in the hot path.
                 cachedAt: DateTimeOffset.UtcNow,
@@ -45,11 +48,26 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = response.ClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
+            AdditionalCacheParameters = AcquireCacheParametersFromResponse(additionalRequestRapameters, response.ExtensionData);
 
             InitCacheKey();
         }
 
-      
+        private IDictionary<string, string> AcquireCacheParametersFromResponse(
+                                                    IEnumerable<string> additionalRequestRapameters,
+#if SUPPORTS_SYSTEM_TEXT_JSON
+                                                    IDictionary<string, JsonElement> extraDataFromResponse)
+#else
+                                                    IDictionary<string, JToken> extraDataFromResponse)
+#endif
+        {
+            var cacheParameters = extraDataFromResponse
+                                    .Where(x => additionalRequestRapameters.Contains(x.Key))
+                                    .ToDictionary(x => x.Key, x => x.Value.ToString());
+
+            return cacheParameters;
+        }
+
         internal /* for test */ MsalAccessTokenCacheItem(
             string preferredCacheEnv,
             string clientId,
@@ -214,6 +232,12 @@ namespace Microsoft.Identity.Client.Cache.Items
         public bool IsExtendedLifeTimeToken { get; set; }
 
         internal string CacheKey { get; private set; }
+
+        /// <summary>
+        /// Additional parameters that were requested in the token request and are stored in the cache.
+        /// These are acquired from the response and are stored in the cache for later use.
+        /// </summary>
+        internal IDictionary<string, string> AdditionalCacheParameters { get; private set; }
 
         private Lazy<IiOSKey> iOSCacheKeyLazy;
         public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;
