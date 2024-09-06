@@ -349,7 +349,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Specifies additional parameters acquired from authentication responses to be cached with the access token that are normally not included in the cache key.
+        /// Specifies additional parameters acquired from authentication responses to be cached with the access token that are normally not included in the cache object.
         /// </summary>
         /// <param name="cacheParameters">Additional parameters to cache</param>
         /// <returns></returns>
