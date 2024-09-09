@@ -275,13 +275,22 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             else
             {
                 IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(cloud);
-                clientApp = ConfidentialClientApplicationBuilder
+                var clientAppBuilder = ConfidentialClientApplicationBuilder
                             .Create(settings.ClientId)
                             .WithTestLogging()
                             .WithHttpClientFactory(factory)
-                            .WithAuthority(labResponse.Lab.Authority, "organizations")
-                            .WithClientSecret(settings.GetSecret())
-                            .Build();
+                            .WithAuthority(labResponse.Lab.Authority, "organizations");
+
+                if (cloud == Cloud.Arlington)
+                {
+                    clientAppBuilder.WithClientSecret(settings.GetSecret());
+                }
+                else
+                {
+                    clientAppBuilder.WithCertificate(settings.GetCertificate(), true);
+                }
+
+                 clientApp = clientAppBuilder.Build();
             }
 
             AuthenticationResult authResult

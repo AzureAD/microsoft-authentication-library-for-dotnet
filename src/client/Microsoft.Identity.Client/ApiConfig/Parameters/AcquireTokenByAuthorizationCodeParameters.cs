@@ -11,6 +11,11 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 
         public string PkceCodeVerifier { get; set; }
 
+        /// <summary>
+        /// if <c>true</c> then Spa code param will be sent via AcquireTokenByAuthorizeCode
+        /// </summary>
+        public bool SpaCode { get; set; }
+
         public void LogParameters(ILoggerAdapter logger)
         {
         }
