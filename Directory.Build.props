@@ -10,6 +10,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <!-- Projects must set this individually -->
     <IsPackable>false</IsPackable>
+    <ChecksumAlgorithm>SHA256</ChecksumAlgorithm>
   </PropertyGroup>
 
   <PropertyGroup Label="For CI build" Condition="'$(TF_BUILD)' == 'true'">
