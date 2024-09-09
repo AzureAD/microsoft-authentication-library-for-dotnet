@@ -9,6 +9,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
+    <ChecksumAlgorithm>SHA256</ChecksumAlgorithm>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
@@ -24,14 +25,17 @@
     </Description>
     <PackageTags>Microsoft Authentication Library Desktop MSAL WAM broker Windows Authentication Manager</PackageTags>
     <Product>Microsoft Authentication Library Desktop</Product>
+    <ChecksumAlgorithm>SHA256</ChecksumAlgorithm>
   </PropertyGroup>
   
   <PropertyGroup Label="For CI build" Condition="'$(TF_BUILD)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <ChecksumAlgorithm>SHA256</ChecksumAlgorithm>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)'">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
+    <ChecksumAlgorithm>SHA256</ChecksumAlgorithm>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
