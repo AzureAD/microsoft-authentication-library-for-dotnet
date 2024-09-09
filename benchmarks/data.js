@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1724398093506,
+  "lastUpdate": 1725881552545,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6218,6 +6218,42 @@ window.BENCHMARK_DATA = {
             "value": 343124.86363636365,
             "unit": "ns",
             "range": "± 7442.569789780783"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a805fcaa4950e318213119eee412f04348171374",
+          "message": "Fix for 4913 - sendX5C for ROPC CCA (#4917)\n\n* Fix for 4913 - sendX5C for ROPC CCA\r\n\r\n* fix",
+          "timestamp": "2024-09-09T12:25:27+01:00",
+          "tree_id": "b488a2c25fa499e700c7b7ef2924fa6a0cf5c6b1",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/a805fcaa4950e318213119eee412f04348171374"
+        },
+        "date": 1725881549138,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 250868.42307692306,
+            "unit": "ns",
+            "range": "± 3038.4958576445483"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 338075.5,
+            "unit": "ns",
+            "range": "± 6078.846066483342"
           }
         ]
       }
