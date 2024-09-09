@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = response.ClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
-            AdditionalCacheParameters = AcquireCacheParametersFromResponse(additionalRequestRapameters, response.ExtensionData);
+            PersistedCacheParameters = AcquireCacheParametersFromResponse(additionalRequestRapameters, response.ExtensionData);
 
             InitCacheKey();
         }
@@ -237,7 +237,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         /// Additional parameters that were requested in the token request and are stored in the cache.
         /// These are acquired from the response and are stored in the cache for later use.
         /// </summary>
-        internal IDictionary<string, string> AdditionalCacheParameters { get; private set; }
+        internal IDictionary<string, string> PersistedCacheParameters { get; private set; }
 
         private Lazy<IiOSKey> iOSCacheKeyLazy;
         public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;

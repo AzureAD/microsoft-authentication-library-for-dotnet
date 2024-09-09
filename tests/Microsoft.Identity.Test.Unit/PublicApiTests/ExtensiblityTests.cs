@@ -228,29 +228,34 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                               .WithAuthority("https://login.microsoftonline.com/tid/")
                               .WithClientSecret(TestConstants.ClientSecret)
+                              .WithExperimentalFeatures(true)
                               .WithHttpManager(httpManager)
                               .BuildConcrete();
 
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage();
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAdditionalCacheParameters(new List<string> { "additional_param1", "additional_param2", "additional_param3" })
+                    .WithAdditionalCacheParameters(new List<string> { "additional_param1", "additional_param2", "additional_param3", "additional_param4" })
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                var parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().AdditionalCacheParameters;
-                Assert.IsTrue(parameters.Count == 3);
+                var parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
+                Assert.IsTrue(parameters.Count == 4);
 
                 parameters.TryGetValue("additional_param1", out string additionalParam1);
                 parameters.TryGetValue("additional_param2", out string additionalParam2);
                 parameters.TryGetValue("additional_param3", out string additionalParam3);
+                parameters.TryGetValue("additional_param4", out string additionalParam4);
 
                 Assert.AreEqual("value1", additionalParam1);
                 Assert.AreEqual("value2", additionalParam2);
                 Assert.AreEqual("value3", additionalParam3);
+                Assert.AreEqual("[\"GUID\", \"GUID2\", \"GUID3\"]", additionalParam4);
 
                 Assert.AreEqual("Bearer", result.TokenType);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                //Validate that the additional parameters are reflected in the AuthenticationResult.AdditionalResponseParameters
+                Assert.AreEqual((IReadOnlyDictionary<string, string>)parameters, result.AdditionalResponseParameters);
 
                 //Verify cache parameters still exist
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
@@ -261,16 +266,20 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual("Bearer", result.TokenType);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
-                parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().AdditionalCacheParameters;
-                Assert.IsTrue(parameters.Count == 3);
+                parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
+                Assert.IsTrue(parameters.Count == 4);
 
                 parameters.TryGetValue("additional_param1", out additionalParam1);
                 parameters.TryGetValue("additional_param2", out additionalParam2);
                 parameters.TryGetValue("additional_param3", out additionalParam3);
+                parameters.TryGetValue("additional_param4", out additionalParam4);
 
                 Assert.AreEqual("value1", additionalParam1);
                 Assert.AreEqual("value2", additionalParam2);
                 Assert.AreEqual("value3", additionalParam3);
+                Assert.AreEqual("[\"GUID\", \"GUID2\", \"GUID3\"]", additionalParam4);
+
+                Assert.AreEqual((IReadOnlyDictionary<string, string>)parameters, result.AdditionalResponseParameters);
 
                 //Verify cache parameters still exist without using WithAdditionalCacheParameters
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
@@ -280,8 +289,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual("Bearer", result.TokenType);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
-                parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().AdditionalCacheParameters;
-                Assert.IsTrue(parameters.Count == 3);
+                parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
+                Assert.IsTrue(parameters.Count == 4);
 
                 parameters.TryGetValue("additional_param1", out additionalParam1);
                 parameters.TryGetValue("additional_param2", out additionalParam2);
@@ -291,21 +300,24 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual("value2", additionalParam2);
                 Assert.AreEqual("value3", additionalParam3);
 
+                Assert.AreEqual((IReadOnlyDictionary<string, string>)parameters, result.AdditionalResponseParameters);
+
                 //Ensure not all cache parameters are required
                 app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                         .WithClientSecret(TestConstants.ClientSecret)
+                        .WithExperimentalFeatures(true)
                         .WithAuthority("https://login.microsoftonline.com/tid/")
                         .WithHttpManager(httpManager)
                         .BuildConcrete();
 
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage();
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithAdditionalCacheParameters(new List<string> { "additional_param1", "additional_param3" })
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().AdditionalCacheParameters;
+                parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
                 Assert.IsTrue(parameters.Count == 2);
 
                 parameters.TryGetValue("additional_param1", out additionalParam1);
@@ -314,20 +326,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual("value1", additionalParam1);
                 Assert.AreEqual("value3", additionalParam3);
 
+                Assert.AreEqual((IReadOnlyDictionary<string, string>)parameters, result.AdditionalResponseParameters);
+
                 //Ensure missing cache parameters are not added
                 app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                       .WithClientSecret(TestConstants.ClientSecret)
+                      .WithExperimentalFeatures(true)
                       .WithAuthority("https://login.microsoftonline.com/tid/")
                       .WithHttpManager(httpManager)
                       .BuildConcrete();
 
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage();
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAdditionalCacheParameters(new List<string> { "additional_param4" })
+                    .WithAdditionalCacheParameters(new List<string> { "additional_paramN" })
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
-                parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().AdditionalCacheParameters;
+                parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
                 parameters.TryGetValue("additional_param1", out string additionalParam);
                 Assert.IsNull(additionalParam);
             }

@@ -348,22 +348,6 @@ namespace Microsoft.Identity.Client
             return this as T;
         }
 
-        /// <summary>
-        /// Specifies additional parameters acquired from authentication responses to be cached with the access token that are normally not included in the cache object.
-        /// </summary>
-        /// <param name="cacheParameters">Additional parameters to cache</param>
-        /// <returns></returns>
-        public T WithAdditionalCacheParameters(IEnumerable<string> cacheParameters)
-        {
-            if (cacheParameters != null && cacheParameters.Count() == 0)
-            {
-                throw new ArgumentNullException(nameof(cacheParameters));
-            }
-
-            CommonParameters.AdditionalCacheParameters = cacheParameters;
-            return this as T;
-        }
-
         internal /* for testing */ T WithAuthenticationScheme(IAuthenticationScheme scheme)
         {
             CommonParameters.AuthenticationScheme = scheme ?? throw new ArgumentNullException(nameof(scheme));
