@@ -20,6 +20,8 @@
 		<ApplicationVersion>1</ApplicationVersion>
 
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+
+		<ChecksumAlgorithm>SHA256</ChecksumAlgorithm>
 	</PropertyGroup>
 
 	<ItemGroup>

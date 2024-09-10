@@ -480,7 +480,7 @@ namespace Microsoft.Identity.Test.Unit
             if (appendDefaultClaims == false && addExtraClaims == false)
                 appendDefaultClaims = true;
 
-            int expectedPayloadClaimsCount = (appendDefaultClaims ? 6 : 0) + (addExtraClaims ? 2 : 0);
+            int expectedPayloadClaimsCount = (appendDefaultClaims ? 6 : 0) + (addExtraClaims ? 3 : 0);
             Assert.AreEqual(expectedPayloadClaimsCount, decodedToken.Payload.Count);
             if (appendDefaultClaims)
             {
@@ -506,6 +506,8 @@ namespace Microsoft.Identity.Test.Unit
             {
                 Assert.AreEqual("Val1", decodedToken.Payload["Key1"]);
                 Assert.AreEqual("Val2", decodedToken.Payload["Key2"]);
+                //Ensure JSON formatting is preserved
+                Assert.AreEqual("{\"xms_az_claim\": [\"GUID\", \"GUID2\", \"GUID3\"]}", decodedToken.Payload["customClaims"]);
             }
 
             if (useSha2AndPss)
@@ -664,6 +666,41 @@ namespace Microsoft.Identity.Test.Unit
 
                 Assert.AreEqual(MsalError.CryptographicError, exception.ErrorCode);
                 Assert.AreEqual(MsalErrorMessage.CryptographicError, exception.Message);
+            }
+        }
+
+
+        // regression test for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4913
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task RopcCcaSendsX5CAsync(bool sendX5C)
+        {
+            using (var harness = CreateTestHarness())
+            {
+                var certificate = CertHelper.GetOrCreateTestCert();
+                var exportedCertificate = Convert.ToBase64String(certificate.Export(X509ContentType.Cert));
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(harness.HttpManager)
+                    .WithCertificate(certificate, sendX5C)
+                    .Build();
+
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                harness.HttpManager.AddMockHandler(
+                    CreateTokenResponseHttpHandlerWithX5CValidation(
+                        clientCredentialFlow: false, 
+                        expectedX5C: sendX5C ? exportedCertificate: null));
+
+                var result = await (app as IByUsernameAndPassword)
+                    .AcquireTokenByUsernamePassword(
+                        TestConstants.s_scope,
+                        TestConstants.Username,
+                        TestConstants.DefaultPassword)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
             }
         }
 

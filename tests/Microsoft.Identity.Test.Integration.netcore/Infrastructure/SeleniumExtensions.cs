@@ -251,7 +251,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             if (prompt == Prompt.Consent)
             {
                 Trace.WriteLine("Consenting...");
-                driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.AADSignInButtonId)).Click();
+                driver.WaitForElementToBeVisibleAndEnabled(By.Name(fields.AADSignInButtonId)).Click();
             }
         }
 
