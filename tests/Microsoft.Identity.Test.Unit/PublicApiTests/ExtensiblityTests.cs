@@ -295,10 +295,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 parameters.TryGetValue("additional_param1", out additionalParam1);
                 parameters.TryGetValue("additional_param2", out additionalParam2);
                 parameters.TryGetValue("additional_param3", out additionalParam3);
+                parameters.TryGetValue("additional_param4", out additionalParam4);
 
                 Assert.AreEqual("value1", additionalParam1);
                 Assert.AreEqual("value2", additionalParam2);
                 Assert.AreEqual("value3", additionalParam3);
+                Assert.AreEqual("[\"GUID\", \"GUID2\", \"GUID3\"]", additionalParam4);
 
                 Assert.AreEqual((IReadOnlyDictionary<string, string>)parameters, result.AdditionalResponseParameters);
 
@@ -345,6 +347,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
                 parameters.TryGetValue("additional_param1", out string additionalParam);
                 Assert.IsNull(additionalParam);
+                Assert.IsTrue(result.AdditionalResponseParameters.Count == 4);
             }
         }
 
