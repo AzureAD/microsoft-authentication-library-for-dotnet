@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             string homeAccountId,
             string keyId = null,
             string oboCacheKey = null,
-            IEnumerable<string> additionalRequestRapameters = null)
+            IEnumerable<string> persistedCacheParameters = null)
             : this(
                 scopes: ScopeHelper.OrderScopesAlphabetically(response.Scope), // order scopes to avoid cache duplication. This is not in the hot path.
                 cachedAt: DateTimeOffset.UtcNow,
@@ -49,21 +49,26 @@ namespace Microsoft.Identity.Client.Cache.Items
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
 #if !iOS && !ANDROID
-            PersistedCacheParameters = AcquireCacheParametersFromResponse(additionalRequestRapameters, response.ExtensionData);
+            PersistedCacheParameters = AcquireCacheParametersFromResponse(persistedCacheParameters, response.ExtensionData);
 #endif
             InitCacheKey();
         }
 
         private IDictionary<string, string> AcquireCacheParametersFromResponse(
-                                                    IEnumerable<string> additionalRequestRapameters,
+                                                    IEnumerable<string> persistedCacheParameters,
 #if SUPPORTS_SYSTEM_TEXT_JSON
                                                     IDictionary<string, JsonElement> extraDataFromResponse)
 #else
                                                     IDictionary<string, JToken> extraDataFromResponse)
 #endif
         {
+            if (persistedCacheParameters == null)
+            {
+                return null;
+            }
+
             var cacheParameters = extraDataFromResponse
-                                    .Where(x => additionalRequestRapameters.Contains(x.Key))
+                                    .Where(x => persistedCacheParameters.Contains(x.Key))
                                     .ToDictionary(x => x.Key, x => x.Value.ToString());
 
             return cacheParameters;

@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client
                         homeAccountId,
                         requestParams.AuthenticationScheme.KeyId,
                         CacheKeyFactory.GetOboKey(requestParams.LongRunningOboCacheKey, requestParams.UserAssertion),
-                        requestParams.AdditionalCacheParameters);
+                        requestParams.PersistedCacheParameters);
             }
 
             if (!string.IsNullOrEmpty(response.RefreshToken))
