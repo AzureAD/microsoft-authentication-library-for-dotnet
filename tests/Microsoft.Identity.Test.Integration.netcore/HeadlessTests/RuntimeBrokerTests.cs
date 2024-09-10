@@ -249,8 +249,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
         {
             IntPtr intPtr = GetForegroundWindow();
             Func<IntPtr> windowHandleProvider = () => intPtr;
-
-
             var labResponse = await LabUserHelper.GetDefaultUserAsync().ConfigureAwait(false);
 
             IPublicClientApplication pca = PublicClientApplicationBuilder
@@ -260,7 +258,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
             .WithParentActivityOrWindow(windowHandleProvider)
             .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
             .Build();
-
 
             string jwk = CreateJwk();
             //Do a login with username password
@@ -283,8 +280,6 @@ namespace Microsoft.Identity.Test.Integration.Broker
                 .ConfigureAwait(false);
 
             Assert.AreEqual("SshCert", result.TokenType);
-
-
         }
 
         [IgnoreOnOneBranch]
