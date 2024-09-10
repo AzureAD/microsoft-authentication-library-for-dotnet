@@ -48,8 +48,9 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = response.ClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
+#if !iOS && !ANDROID
             PersistedCacheParameters = AcquireCacheParametersFromResponse(additionalRequestRapameters, response.ExtensionData);
-
+#endif
             InitCacheKey();
         }
 
