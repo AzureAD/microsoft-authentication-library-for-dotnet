@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -84,7 +86,37 @@ namespace Microsoft.Identity.Client.Extensibility
                 builder.WithAuthenticationScheme(addIn.AuthenticationScheme);
 
             // TODO: bogavril - AdditionalAccessTokenPropertiesToCache needs implementation
+            return builder;
+        }
+        
+        /// Specifies additional parameters acquired from authentication responses to be cached with the access token that are normally not included in the cache object.
+        /// these values can be read from the <see cref="AuthenticationResult.AdditionalResponseParameters"/> parameter.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="builder">The builder to chain options to</param>
+        /// <param name="cacheParameters">Additional parameters to cache</param>
+        /// <returns></returns>
+        public static AbstractAcquireTokenParameterBuilder<T> WithAdditionalCacheParameters<T>(
+            this AbstractAcquireTokenParameterBuilder<T> builder, 
+            IEnumerable<string> cacheParameters)
+            where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            if (cacheParameters != null && cacheParameters.Count() == 0)
+            {
+                return builder;
+            }
 
+            builder.ValidateUseOfExperimentalFeature();
+
+            //Check if the cache parameters are already initialized, if so, add to the existing list
+            if (builder.CommonParameters.AdditionalCacheParameters != null)
+            {
+                builder.CommonParameters.AdditionalCacheParameters.AddRange(cacheParameters);
+            }
+            else
+            {
+                builder.CommonParameters.AdditionalCacheParameters = cacheParameters.ToList<string>();
+            }
             return builder;
         }
     }   

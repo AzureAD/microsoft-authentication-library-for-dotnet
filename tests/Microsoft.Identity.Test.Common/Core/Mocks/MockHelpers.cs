@@ -341,7 +341,18 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string tokenType = "Bearer")
         {
             return CreateSuccessResponseMessage(
-                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\"}");
+                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\"}");
+        }
+
+        public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(
+            string token = "header.payload.signature",
+            string expiry = "3599",
+            string tokenType = "Bearer",
+            string additionalparams = ",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\",\"additional_param4\":[\"GUID\", \"GUID2\", \"GUID3\"],\"additional_param5\":{\"value5json\":\"value5\"}"
+            )
+        {
+            return CreateSuccessResponseMessage(
+                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\"" + additionalparams + "}");
         }
 
         public static HttpResponseMessage CreateSuccessfulCDTClientCredentialTokenResponseMessage(

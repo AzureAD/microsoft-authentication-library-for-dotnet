@@ -180,10 +180,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsFalse(extMap.ContainsKey("id_token"));
                 Assert.IsFalse(extMap.ContainsKey("client_info"));
 
-                // only scalar properties should be in the map
-                Assert.IsFalse(extMap.ContainsKey("object_extension"));
-                Assert.IsFalse(extMap.ContainsKey("array_extension"));
-
                 // all other properties should be in the map
                 Assert.AreEqual("1209599", extMap["number_extension"]);
                 Assert.AreEqual("True", extMap["true_extension"]);
