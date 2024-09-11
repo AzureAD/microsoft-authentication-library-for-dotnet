@@ -70,8 +70,9 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 // Act
                 PopAuthenticationScheme authenticationScheme = new PopAuthenticationScheme(popConfig, harness.ServiceBundle);
                 var tokenParams = authenticationScheme.GetTokenRequestParams();
-                var popTokenString = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
-                JwtSecurityToken decodedPopToken = new JwtSecurityToken(popTokenString);
+                AuthenticationResult ar = new AuthenticationResult(msalAccessTokenCacheItem, null, null, Guid.NewGuid(), TokenSource.IdentityProvider, default, default, default, default);
+                authenticationScheme.FormatResult(ar);
+                JwtSecurityToken decodedPopToken = new JwtSecurityToken(ar.AccessToken);
 
                 // Assert
                 Assert.AreEqual("PoP", authenticationScheme.AuthorizationHeaderPrefix);

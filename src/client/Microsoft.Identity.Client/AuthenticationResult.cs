@@ -185,6 +185,8 @@ namespace Microsoft.Identity.Client
                 {
                     AuthenticationResultMetadata.RefreshOn = msalAccessTokenCacheItem.RefreshOn;
                 }
+                
+                AccessToken = msalAccessTokenCacheItem.Secret;
             }
 
             //Important: only call this at the end

@@ -45,7 +45,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             authScheme.AccessTokenType.Returns("bearer");
             authScheme.KeyId.Returns("keyid");
             authScheme.GetTokenRequestParams().Returns(new Dictionary<string, string>() { { "tokenParam", "tokenParamValue" } });
-            authScheme.FormatAccessToken(default).ReturnsForAnyArgs(x => "enhanced_secret_" + ((MsalAccessTokenCacheItem)x[0]).Secret);
+            // When FormatResult is called, change the AccessToken property 
+            authScheme.WhenForAnyArgs(x => x.FormatResult(default)).Do(x => x[0] = "enhanced_secret_" + ((AuthenticationResult)x[0]).AccessToken);
 
             using (var httpManager = new MockHttpManager())
             {
@@ -164,7 +165,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             authScheme.AuthorizationHeaderPrefix.Returns("BearToken");
             authScheme.KeyId.Returns("keyid");
             authScheme.GetTokenRequestParams().Returns(new Dictionary<string, string>() { { "tokenParam", "tokenParamValue" } });
-            authScheme.FormatAccessToken(default).ReturnsForAnyArgs(x => "enhanced_secret_" + ((MsalAccessTokenCacheItem)x[0]).Secret);
+            // When FormatResult is called, change the AccessToken property 
+            authScheme.WhenForAnyArgs(x => x.FormatResult(default)).Do(x => x[0] = "enhanced_secret_" + ((AuthenticationResult)x[0]).AccessToken);
 
             using (var httpManager = new MockHttpManager())
             {

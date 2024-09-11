@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Test.Unit.CDT
         /// </summary>
         public class Constraint
         {
-            public Dictionary<string, string> Constraints { get; set; }
+            public Dictionary<string, string> Constraints { get; set; } = new Dictionary<string, string>();
         }
     }
 }
