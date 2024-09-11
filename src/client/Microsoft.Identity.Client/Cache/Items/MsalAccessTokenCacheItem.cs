@@ -69,7 +69,14 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             var cacheParameters = extraDataFromResponse
                                     .Where(x => persistedCacheParameters.Contains(x.Key))
+#if SUPPORTS_SYSTEM_TEXT_JSON
                                     .ToDictionary(x => x.Key, x => x.Value.ToString());
+#else
+                                    //Avoid formatting arrays because it adds new lines after every element
+                                    .ToDictionary(x => x.Key, x => x.Value.Type == JTokenType.Array || x.Value.Type == JTokenType.Object ?
+                                                                                    x.Value.ToString(Json.Formatting.None) :
+                                                                                    x.Value.ToString());
+#endif
 
             return cacheParameters;
         }

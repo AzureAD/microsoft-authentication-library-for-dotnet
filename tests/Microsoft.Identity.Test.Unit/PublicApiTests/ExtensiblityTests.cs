@@ -235,22 +235,28 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage();
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
-                    .WithAdditionalCacheParameters(new List<string> { "additional_param1", "additional_param2", "additional_param3", "additional_param4" })
+                    .WithAdditionalCacheParameters(new List<string> { "additional_param1", "additional_param2", "additional_param3", "additional_param4", "additional_param5" })
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
                 var parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
-                Assert.IsTrue(parameters.Count == 4);
+                Assert.IsTrue(parameters.Count == 5);
 
                 parameters.TryGetValue("additional_param1", out string additionalParam1);
                 parameters.TryGetValue("additional_param2", out string additionalParam2);
                 parameters.TryGetValue("additional_param3", out string additionalParam3);
                 parameters.TryGetValue("additional_param4", out string additionalParam4);
+                parameters.TryGetValue("additional_param5", out string additionalParam5);
 
                 Assert.AreEqual("value1", additionalParam1);
                 Assert.AreEqual("value2", additionalParam2);
                 Assert.AreEqual("value3", additionalParam3);
+#if SUPPORTS_SYSTEM_TEXT_JSON
                 Assert.AreEqual("[\"GUID\", \"GUID2\", \"GUID3\"]", additionalParam4);
+#else
+                Assert.AreEqual("[\"GUID\",\"GUID2\",\"GUID3\"]", additionalParam4);
+#endif
+                Assert.AreEqual("{\"value5json\":\"value5\"}", additionalParam5);
 
                 Assert.AreEqual("Bearer", result.TokenType);
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
@@ -267,17 +273,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
                 parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
-                Assert.IsTrue(parameters.Count == 4);
+                Assert.IsTrue(parameters.Count == 5);
 
                 parameters.TryGetValue("additional_param1", out additionalParam1);
                 parameters.TryGetValue("additional_param2", out additionalParam2);
                 parameters.TryGetValue("additional_param3", out additionalParam3);
                 parameters.TryGetValue("additional_param4", out additionalParam4);
+                parameters.TryGetValue("additional_param5", out additionalParam5);
 
                 Assert.AreEqual("value1", additionalParam1);
                 Assert.AreEqual("value2", additionalParam2);
                 Assert.AreEqual("value3", additionalParam3);
+#if SUPPORTS_SYSTEM_TEXT_JSON
                 Assert.AreEqual("[\"GUID\", \"GUID2\", \"GUID3\"]", additionalParam4);
+#else
+                Assert.AreEqual("[\"GUID\",\"GUID2\",\"GUID3\"]", additionalParam4);
+#endif
+                Assert.AreEqual("{\"value5json\":\"value5\"}", additionalParam5);
 
                 Assert.AreEqual((IReadOnlyDictionary<string, string>)parameters, result.AdditionalResponseParameters);
 
@@ -290,17 +302,23 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
 
                 parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
-                Assert.IsTrue(parameters.Count == 4);
+                Assert.IsTrue(parameters.Count == 5);
 
                 parameters.TryGetValue("additional_param1", out additionalParam1);
                 parameters.TryGetValue("additional_param2", out additionalParam2);
                 parameters.TryGetValue("additional_param3", out additionalParam3);
                 parameters.TryGetValue("additional_param4", out additionalParam4);
+                parameters.TryGetValue("additional_param5", out additionalParam5);
 
                 Assert.AreEqual("value1", additionalParam1);
                 Assert.AreEqual("value2", additionalParam2);
                 Assert.AreEqual("value3", additionalParam3);
+#if SUPPORTS_SYSTEM_TEXT_JSON
                 Assert.AreEqual("[\"GUID\", \"GUID2\", \"GUID3\"]", additionalParam4);
+#else
+                Assert.AreEqual("[\"GUID\",\"GUID2\",\"GUID3\"]", additionalParam4);
+#endif
+                Assert.AreEqual("{\"value5json\":\"value5\"}", additionalParam5);
 
                 Assert.AreEqual((IReadOnlyDictionary<string, string>)parameters, result.AdditionalResponseParameters);
 
@@ -347,7 +365,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 parameters = app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Single().PersistedCacheParameters;
                 parameters.TryGetValue("additional_param1", out string additionalParam);
                 Assert.IsNull(additionalParam);
-                Assert.IsTrue(result.AdditionalResponseParameters.Count == 4);
+                Assert.IsTrue(result.AdditionalResponseParameters.Count == 5);
             }
         }
 

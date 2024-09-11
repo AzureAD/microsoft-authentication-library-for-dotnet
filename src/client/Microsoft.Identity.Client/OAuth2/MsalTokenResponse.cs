@@ -93,12 +93,7 @@ namespace Microsoft.Identity.Client.OAuth2
 #if SUPPORTS_SYSTEM_TEXT_JSON
             foreach (KeyValuePair<string, JsonElement> item in ExtensionData)
             {
-                if (item.Value.ValueKind == JsonValueKind.String ||
-                   item.Value.ValueKind == JsonValueKind.Number ||
-                   item.Value.ValueKind == JsonValueKind.True ||
-                   item.Value.ValueKind == JsonValueKind.False ||
-                   item.Value.ValueKind == JsonValueKind.Array ||
-                   item.Value.ValueKind == JsonValueKind.Null)
+                if (item.Value.ValueKind != JsonValueKind.Undefined)
                 {
                     stringExtensionData.Add(item.Key, item.Value.ToString());
                 }
@@ -114,10 +109,13 @@ namespace Microsoft.Identity.Client.OAuth2
                    item.Value.Type == JTokenType.Guid ||
                    item.Value.Type == JTokenType.Integer ||
                    item.Value.Type == JTokenType.TimeSpan ||
-                   item.Value.Type == JTokenType.Array ||
                    item.Value.Type == JTokenType.Null)
                 {
                     stringExtensionData.Add(item.Key, item.Value.ToString());
+                }
+                else if (item.Value.Type == JTokenType.Array || item.Value.Type == JTokenType.Object)
+                {
+                    stringExtensionData.Add(item.Key, item.Value.ToString(Formatting.None));
                 }
             }
 #endif

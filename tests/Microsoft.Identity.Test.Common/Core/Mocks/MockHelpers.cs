@@ -348,7 +348,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string token = "header.payload.signature",
             string expiry = "3599",
             string tokenType = "Bearer",
-            string additionalparams = ",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\",\"additional_param4\":[\"GUID\", \"GUID2\", \"GUID3\"]"
+            string additionalparams = ",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\",\"additional_param4\":[\"GUID\", \"GUID2\", \"GUID3\"],\"additional_param5\":{\"value5json\":\"value5\"}"
             )
         {
             return CreateSuccessResponseMessage(
