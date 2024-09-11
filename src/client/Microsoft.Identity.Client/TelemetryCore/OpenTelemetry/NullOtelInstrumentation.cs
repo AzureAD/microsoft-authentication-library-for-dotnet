@@ -30,6 +30,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         public void LogFailureMetrics(string platform, 
             string errorCode, 
             ApiEvent.ApiIds apiId, 
+            string callerSdkId,
+            string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason)
         {
             // No op

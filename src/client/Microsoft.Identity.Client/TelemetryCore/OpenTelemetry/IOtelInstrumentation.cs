@@ -32,7 +32,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 
         internal void LogFailureMetrics(string platform, 
             string errorCode, 
-            ApiEvent.ApiIds apiId, 
+            ApiEvent.ApiIds apiId,
+            string callerSdkId,
+            string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason);
     }
 }

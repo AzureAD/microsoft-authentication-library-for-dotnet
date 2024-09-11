@@ -179,7 +179,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 
         public void LogFailureMetrics(string platform, 
             string errorCode, 
-            ApiEvent.ApiIds apiId, 
+            ApiEvent.ApiIds apiId,
+            string callerSdkId,
+            string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason)
         {
             if (s_failureCounter.Value.Enabled)
@@ -188,7 +190,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ErrorCode, errorCode), 
-                        new(TelemetryConstants.ApiId, apiId), 
+                        new(TelemetryConstants.ApiId, apiId),
+                        new(TelemetryConstants.CallerSdkId, callerSdkId ?? ""),
+                        new(TelemetryConstants.CallerSdkVersion, callerSdkVersion ?? ""),
                         new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason)); 
             }
         }

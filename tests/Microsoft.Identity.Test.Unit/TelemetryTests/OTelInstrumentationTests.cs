@@ -410,13 +410,15 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ErrorCode);
                         expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.CallerSdkId);
+                        expectedTags.Add(TelemetryConstants.CallerSdkVersion);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
 
                         long totalFailedRequests = 0;
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
                             totalFailedRequests += metricPoint.GetSumLong();
-                            AssertTags(metricPoint.Tags, expectedTags);
+                            AssertTags(metricPoint.Tags, expectedTags, true);
                         }
 
                         Assert.AreEqual(expectedFailedRequests, totalFailedRequests);

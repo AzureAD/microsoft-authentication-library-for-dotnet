@@ -120,6 +120,8 @@ namespace Microsoft.Identity.Client.Internal
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.ErrorCode,
                         apiId,
+                        callerSdkId,
+                        callerSdkVersion,
                         CacheRefreshReason.ProactivelyRefreshed);
                 }
                 catch (OperationCanceledException ex)
@@ -129,6 +131,8 @@ namespace Microsoft.Identity.Client.Internal
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.GetType().Name,
                         apiId,
+                        callerSdkId, 
+                        callerSdkVersion, 
                         CacheRefreshReason.ProactivelyRefreshed);
                 }
                 catch (Exception ex)
@@ -138,6 +142,8 @@ namespace Microsoft.Identity.Client.Internal
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.GetType().Name,
                         apiId,
+                        callerSdkId, 
+                        callerSdkVersion, 
                         CacheRefreshReason.ProactivelyRefreshed);
                 }
             });

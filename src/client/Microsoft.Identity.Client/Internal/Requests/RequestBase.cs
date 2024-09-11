@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
-                LogFailureTelemetryToOtel(ex.ErrorCode, apiEvent.ApiId, apiEvent.CacheInfo);
+                LogFailureTelemetryToOtel(ex.ErrorCode, apiEvent, apiEvent.CacheInfo);
                 throw;
             }
             catch (Exception ex)
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.ApiErrorCode = ex.GetType().Name;
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
-                LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent.ApiId, apiEvent.CacheInfo);
+                LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent, apiEvent.CacheInfo);
                 throw;
             }           
         }
@@ -132,13 +132,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         AuthenticationRequestParameters.RequestContext.Logger);
         }
 
-        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent.ApiIds apiId, CacheRefreshReason cacheRefreshReason)
+        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason)
         {
             // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
                         errorCodeToLog,
-                        apiId,
+                        apiEvent.ApiId,
+                        apiEvent.CallerSdkApiId, 
+                        apiEvent.CallerSdkVersion,
                         cacheRefreshReason);
         }
 
