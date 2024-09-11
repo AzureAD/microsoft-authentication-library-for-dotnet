@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.AuthScheme.CDT;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 
 namespace Microsoft.Identity.Client

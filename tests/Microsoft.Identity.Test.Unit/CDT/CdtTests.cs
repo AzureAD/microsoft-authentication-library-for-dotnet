@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -54,10 +55,15 @@ namespace Microsoft.Identity.Test.Unit.CDT
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulCDTClientCredentialTokenResponseMessage();
 
+                MsalAddIn cdtAddin = new MsalAddIn()
+                {
+                    AuthenticationScheme = new CdtAuthenticationScheme(constraintAsString, cert)
+                };
+
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithConstraints(constraintAsString)
+                    .WithAddIn(cdtAddin)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -70,7 +76,7 @@ namespace Microsoft.Identity.Test.Unit.CDT
                 //Verify that the original AT token is cached and the CDT can be recreated
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithConstraints(constraintAsString)
+                    .WithAddIn(cdtAddin)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 

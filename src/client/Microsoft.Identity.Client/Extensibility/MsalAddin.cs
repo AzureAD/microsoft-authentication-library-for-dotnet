@@ -23,12 +23,5 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </summary>
         /// TODO: guidance on how this interacts with OnBeforeTokenRequestHandler
         public IAuthenticationScheme AuthenticationScheme { get; set; }
-
-        /// <summary>
-        /// When the token endpoint responds with a token, it may include additional properties in the response. This list instructs MSAL to save the properties in the token cache. 
-        /// The properties will be returned as part of the <see cref="AuthenticationResult.AdditionalResponseParameters"/> 
-        /// </summary>
-        /// <remarks>Currently supports only key value properties </remarks>  // TODO: need to model JObject etc, but probably as string
-        public IReadOnlyList<string> AdditionalAccessTokenPropertiesToCache { get; set; }  //TODO: bogavril - implement this
     }
 }
