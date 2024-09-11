@@ -85,6 +85,9 @@ namespace Microsoft.Identity.Client.Extensibility
             if (addIn.AuthenticationScheme != null)
                 builder.WithAuthenticationScheme(addIn.AuthenticationScheme);
 
+            if (addIn.AdditionalCacheParameters != null)
+                builder.WithAdditionalCacheParameters(addIn.AdditionalCacheParameters);
+
             // TODO: bogavril - AdditionalAccessTokenPropertiesToCache needs implementation
             return builder;
         }

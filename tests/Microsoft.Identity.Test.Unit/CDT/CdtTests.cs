@@ -57,7 +57,8 @@ namespace Microsoft.Identity.Test.Unit.CDT
 
                 MsalAddIn cdtAddin = new MsalAddIn()
                 {
-                    AuthenticationScheme = new CdtAuthenticationScheme(constraintAsString, cert)
+                    AuthenticationScheme = new CdtAuthenticationScheme(constraintAsString, cert),
+                    AdditionalCacheParameters = new[] { CdtAuthenticationScheme.CdtNonce, CdtAuthenticationScheme.CdtEncKey}
                 };
 
                 // Act

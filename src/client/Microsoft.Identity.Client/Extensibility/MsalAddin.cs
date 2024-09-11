@@ -23,5 +23,10 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </summary>
         /// TODO: guidance on how this interacts with OnBeforeTokenRequestHandler
         public IAuthenticationScheme AuthenticationScheme { get; set; }
+
+        /// <summary>
+        /// Specifies additional parameters acquired from authentication responses to be cached
+        /// </summary>
+        public IEnumerable<string> AdditionalCacheParameters { get; set; }
     }
 }
