@@ -45,8 +45,6 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = response.ClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
-            CdtNonce = response.CdtNonce;
-            CdtEncKey = response.CdtEncKey;
 
             InitCacheKey();
         }
@@ -215,10 +213,6 @@ namespace Microsoft.Identity.Client.Cache.Items
         public bool IsExtendedLifeTimeToken { get; set; }
 
         internal string CacheKey { get; private set; }
-
-        internal string CdtNonce { get; private set; }
-
-        internal string CdtEncKey { get; private set; }
 
         private Lazy<IiOSKey> iOSCacheKeyLazy;
         public IiOSKey iOSCacheKey => iOSCacheKeyLazy.Value;

@@ -5,12 +5,12 @@ using System;
 using System.Diagnostics;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.AuthScheme
+namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
     /// <summary>
     /// This factory ensures key rotation every 8h
     /// </summary>
-    internal static class MsalCryptoProviderFactory
+    internal static class PoPCryptoProviderFactory
     {
         private static InMemoryCryptoProvider s_currentProvider;
         private static DateTime s_providerExpiration;

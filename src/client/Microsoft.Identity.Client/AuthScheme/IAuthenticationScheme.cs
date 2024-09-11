@@ -9,10 +9,10 @@ namespace Microsoft.Identity.Client.AuthScheme
     /// <summary>
     /// Used to modify the experience depending on the type of token asked. 
     /// </summary>
-    internal interface IAuthenticationScheme
+    public interface IAuthenticationScheme
     {
         /// <summary>
-        /// Value to log to telemetry to indicate pop usage.
+        /// Value to log to telemetry
         /// </summary>
         TokenType TelemetryTokenType { get; }
 
@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.AuthScheme
         /// <summary>
         /// Creates the access token that goes into an Authorization HTTP header. 
         /// </summary>
-        string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem);
+        void FormatResult(AuthenticationResult authenticationResult);
 
         /// <summary>
         /// Expected to match the token_type parameter returned by ESTS. Used to disambiguate

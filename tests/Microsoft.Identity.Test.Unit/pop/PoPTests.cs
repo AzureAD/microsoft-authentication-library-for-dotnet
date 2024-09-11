@@ -8,14 +8,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.AuthScheme;
-using Microsoft.Identity.Client.AuthScheme.CDT;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 #if !NET6_0
 using Microsoft.Identity.Client.Broker;
@@ -49,7 +46,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
         [TestCleanup]
         public override void TestCleanup()
         {
-            MsalCryptoProviderFactory.Reset();
+            PoPCryptoProviderFactory.Reset();
             base.TestCleanup();
         }
 
@@ -67,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
                 var popConfig = new PoPAuthenticationConfiguration(request);
-                var provider = MsalCryptoProviderFactory.GetOrCreateProvider();
+                var provider = PoPCryptoProviderFactory.GetOrCreateProvider();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
@@ -101,7 +98,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 // no HTTP method binding, but custom nonce
                 var popConfig = new PoPAuthenticationConfiguration() { Nonce = CustomNonce };
-                var provider = MsalCryptoProviderFactory.GetOrCreateProvider();
+                var provider = PoPCryptoProviderFactory.GetOrCreateProvider();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
@@ -139,7 +136,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
                 var popConfig = new PoPAuthenticationConfiguration(request) { Nonce = CustomNonce };
-                var provider = MsalCryptoProviderFactory.GetOrCreateProvider();
+                var provider = PoPCryptoProviderFactory.GetOrCreateProvider();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
@@ -413,7 +410,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                                                               .WithExperimentalFeatures(true)
                                                               .BuildConcrete();
                 var testTimeService = new TestTimeService();
-                MsalCryptoProviderFactory.TimeService = testTimeService;
+                PoPCryptoProviderFactory.TimeService = testTimeService;
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
                 var popConfig = new PoPAuthenticationConfiguration(request);
@@ -432,7 +429,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 // Assert
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                string expectedKid = GetKidFromJwk(MsalCryptoProviderFactory.GetOrCreateProvider().CannonicalPublicKeyJwk);
+                string expectedKid = GetKidFromJwk(PoPCryptoProviderFactory.GetOrCreateProvider().CannonicalPublicKeyJwk);
                 string actualCacheKey = cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey;
                 Assert.AreEqual(
                     string.Format(
@@ -444,8 +441,8 @@ namespace Microsoft.Identity.Test.Unit.Pop
                     actualCacheKey);
 
                 // Arrange - force a new key by moving to the future
-                (MsalCryptoProviderFactory.TimeService as TestTimeService).MoveToFuture(
-                    MsalCryptoProviderFactory.KeyRotationInterval.Add(TimeSpan.FromMinutes(10)));
+                (PoPCryptoProviderFactory.TimeService as TestTimeService).MoveToFuture(
+                    PoPCryptoProviderFactory.KeyRotationInterval.Add(TimeSpan.FromMinutes(10)));
 
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
 
@@ -459,7 +456,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 // Assert
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-                string expectedKid2 = GetKidFromJwk(MsalCryptoProviderFactory.GetOrCreateProvider().CannonicalPublicKeyJwk);
+                string expectedKid2 = GetKidFromJwk(PoPCryptoProviderFactory.GetOrCreateProvider().CannonicalPublicKeyJwk);
                 string actualCacheKey2 = cacheAccess.LastBeforeAccessNotificationArgs.SuggestedCacheKey;
                 Assert.AreEqual(
                     string.Format(
@@ -592,7 +589,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
                 var popConfig = new PoPAuthenticationConfiguration(request);
-                var provider = MsalCryptoProviderFactory.GetOrCreateProvider();
+                var provider = PoPCryptoProviderFactory.GetOrCreateProvider();
 
                 // Check if the CryptographicAlgorithm returns "PS256"
                 Assert.AreEqual("PS256", provider.CryptographicAlgorithm);
@@ -661,7 +658,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
                 var popConfig = new PoPAuthenticationConfiguration(request);
-                var provider = MsalCryptoProviderFactory.GetOrCreateProvider();
+                var provider = PoPCryptoProviderFactory.GetOrCreateProvider();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "pop");
@@ -687,7 +684,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
         public void ValidateCanonicalJwkFormat()
         {
             // Arrange
-            var provider = MsalCryptoProviderFactory.GetOrCreateProvider();
+            var provider = PoPCryptoProviderFactory.GetOrCreateProvider();
             var actualCanonicaljwk = provider.CannonicalPublicKeyJwk;
 
             // Act and Assert

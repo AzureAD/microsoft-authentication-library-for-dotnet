@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Internal
             if (shouldClearCaches) // for test
             {
                 AuthorityManager.ClearValidationCache();
-                MsalCryptoProviderFactory.Reset();
+                PoPCryptoProviderFactory.Reset();
             }
         }
 

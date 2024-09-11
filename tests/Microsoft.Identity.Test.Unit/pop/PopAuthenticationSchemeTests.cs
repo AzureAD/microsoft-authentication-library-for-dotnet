@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 Guid correlationId = Guid.NewGuid();
                 TestTimeService testClock = new TestTimeService();
-                MsalCryptoProviderFactory.TimeService = testClock;
+                PoPCryptoProviderFactory.TimeService = testClock;
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPossession(popConfig)
@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 //Advance time 7 hours. Should still be the same key and token
                 testClock.MoveToFuture(TimeSpan.FromHours(7));
-                MsalCryptoProviderFactory.TimeService = testClock;
+                PoPCryptoProviderFactory.TimeService = testClock;
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPossession(popConfig)
@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 //Advance time 2 hours. Should be a different key
                 testClock.MoveToFuture(TimeSpan.FromHours(2));
-                MsalCryptoProviderFactory.TimeService = testClock;
+                PoPCryptoProviderFactory.TimeService = testClock;
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
                     .WithProofOfPossession(popConfig)

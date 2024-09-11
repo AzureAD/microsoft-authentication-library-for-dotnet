@@ -25,7 +25,12 @@ namespace Microsoft.Identity.Client.Extensibility
             this AbstractAcquireTokenParameterBuilder<T> builder, 
             Func<OnBeforeTokenRequestData, Task> onBeforeTokenRequestHandler) 
             where T : AbstractAcquireTokenParameterBuilder<T>
-        {            
+        {
+            if (builder.CommonParameters.OnBeforeTokenRequestHandler != null && onBeforeTokenRequestHandler != null)
+            {
+                throw new InvalidOperationException("Cannot set OnBeforeTokenRequest handler twice.");
+            }
+
             builder.CommonParameters.OnBeforeTokenRequestHandler = onBeforeTokenRequestHandler;
 
             return builder;
@@ -52,6 +57,33 @@ namespace Microsoft.Identity.Client.Extensibility
 
             builder.ValidateUseOfExperimentalFeature();
             builder.CommonParameters.AuthenticationScheme = new ExternalBoundTokenScheme(keyId, expectedTokenTypeFromAad);
+
+            return builder;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="builder"></param>
+        /// <param name="addIn"></param>
+        /// <returns></returns>
+        public static AbstractAcquireTokenParameterBuilder<T> WithAddIn<T>( // TODO: bogavril - support a list of add-ins ? 
+           this AbstractAcquireTokenParameterBuilder<T> builder,
+           MsalAddIn addIn)
+            where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            if (builder.CommonParameters.OnBeforeTokenRequestHandler != null && addIn.OnBeforeTokenRequestHandler != null)
+            {
+                throw new InvalidOperationException("Cannot set both an add-in and an OnBeforeTokenRequestHandler");
+            }
+
+            builder.CommonParameters.OnBeforeTokenRequestHandler = addIn.OnBeforeTokenRequestHandler;
+
+            if (addIn.AuthenticationScheme != null)
+                builder.WithAuthenticationScheme(addIn.AuthenticationScheme);
+
+            // TODO: bogavril - AdditionalAccessTokenPropertiesToCache needs implementation
 
             return builder;
         }

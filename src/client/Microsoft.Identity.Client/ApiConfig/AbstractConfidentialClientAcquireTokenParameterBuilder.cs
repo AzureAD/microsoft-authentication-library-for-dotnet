@@ -90,34 +90,5 @@ namespace Microsoft.Identity.Client
 
             return this as T;
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="constraints"></param>
-        /// <returns></returns>
-        public T WithConstraints(string constraints)
-        {
-            ValidateUseOfExperimentalFeature();
-
-            CommonParameters.AuthenticationScheme = new CdtAuthenticationScheme(constraints, ServiceBundle, null);
-
-            return this as T;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="constraints"></param>
-        /// <param name="certificate"></param>
-        /// <returns></returns>
-        public T WithConstraints(string constraints, X509Certificate2 certificate)
-        {
-            ValidateUseOfExperimentalFeature();
-
-            CommonParameters.AuthenticationScheme = new CdtAuthenticationScheme(constraints, ServiceBundle, certificate);
-
-            return this as T;
-        }
     }
 }

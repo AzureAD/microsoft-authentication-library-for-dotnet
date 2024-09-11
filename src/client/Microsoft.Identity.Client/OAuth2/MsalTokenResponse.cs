@@ -49,11 +49,6 @@ namespace Microsoft.Identity.Client.OAuth2
 
         // Hybrid SPA - see https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3994
         public const string SpaCode = "spa_code";
-
-        //CDT
-        public const string CdtKey = "ds_cnf";
-        public const string CdtNonce = "ds_nonce";
-        public const string CdtEncKey = "ds_enc";
     }
 
     [JsonObject]
@@ -174,15 +169,6 @@ namespace Microsoft.Identity.Client.OAuth2
 
         [JsonProperty(TokenResponseClaim.Authority)]
         public string AuthorityUrl { get; set; }
-
-        [JsonProperty(TokenResponseClaim.CdtKey)]
-        public string CdtKey { get; set; }
-
-        [JsonProperty(TokenResponseClaim.CdtNonce)]
-        public string CdtNonce { get; set; }
-
-        [JsonProperty(TokenResponseClaim.CdtEncKey)]
-        public string CdtEncKey { get; set; }
 
         public string TenantId { get; set; }
 

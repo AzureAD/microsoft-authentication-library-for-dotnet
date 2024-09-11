@@ -10,7 +10,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
@@ -263,7 +262,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
-            return MsalCryptoProviderFactory.GetOrCreateProvider();
+            return PoPCryptoProviderFactory.GetOrCreateProvider();
         }
 
         public override bool BrokerSupportsWamAccounts => true;

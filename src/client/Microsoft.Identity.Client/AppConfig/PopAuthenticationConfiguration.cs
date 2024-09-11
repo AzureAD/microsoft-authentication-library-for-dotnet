@@ -3,7 +3,6 @@
 
 using System;
 using System.Net.Http;
-using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.AuthScheme.PoP;
 
 namespace Microsoft.Identity.Client.AppConfig

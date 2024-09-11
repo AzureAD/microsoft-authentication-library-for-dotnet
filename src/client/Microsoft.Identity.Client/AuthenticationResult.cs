@@ -169,7 +169,6 @@ namespace Microsoft.Identity.Client
             AdditionalResponseParameters = additionalResponseParameters;
             if (msalAccessTokenCacheItem != null)
             {
-                AccessToken = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
                 ExpiresOn = msalAccessTokenCacheItem.ExpiresOn;
                 Scopes = msalAccessTokenCacheItem.ScopeSet;
 
@@ -185,6 +184,9 @@ namespace Microsoft.Identity.Client
                     AuthenticationResultMetadata.RefreshOn = msalAccessTokenCacheItem.RefreshOn;
                 }
             }
+
+            //Important: only call this at the end
+            authenticationScheme.FormatResult(this);
         }
 
         //Default constructor for testing
@@ -193,7 +195,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Access Token that can be used as a bearer token to access protected web APIs
         /// </summary>
-        public string AccessToken { get; }
+        public string AccessToken { get; set; }
 
         /// <summary>
         /// In case when Azure AD has an outage, to be more resilient, it can return tokens with

@@ -9,8 +9,9 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig;
-using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
@@ -23,11 +24,21 @@ using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
 #endif
 
-namespace Microsoft.Identity.Client.AuthScheme.CDT
+namespace Microsoft.Identity.Test.Unit.CDT
 {
-    internal class CdtAuthenticationScheme : IAuthenticationScheme
+    public class CdtAuthenticationScheme : IAuthenticationScheme
     {
-        private readonly ICdtCryptoProvider _cdtCryptoProvider;
+        //CDT
+        public const string CdtKey = "ds_cnf";
+        public const string CdtNonce = "ds_nonce";
+        public const string CdtEncKey = "ds_enc";
+        public const string NoAlgorythmPrefix = "none";
+        public const string JasonWebTokenType = "JWT";
+        public const string CdtEncryptedAlgoryth = "dir";
+        public const string CdtEncryptedValue = "A256CBC-HS256";
+        public const string CdtRequestConfirmation = "req_ds_cnf";
+
+        private readonly CdtCryptoProvider _cdtCryptoProvider;
         private readonly string _constraints;
         private readonly string _dsReqCnf;
 
@@ -38,11 +49,11 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
         /// Currently the signing credential algorithm is hard-coded to RSA with SHA256. Extensibility should be done
         /// by integrating Wilson's SigningCredentials
         /// </remarks>
-        public CdtAuthenticationScheme(string constraints, IServiceBundle serviceBundle, X509Certificate2 certificate)
+        public CdtAuthenticationScheme(string constraints, X509Certificate2 certificate)
         {
             _constraints = constraints ?? throw new ArgumentNullException(nameof(constraints));
 
-            _cdtCryptoProvider = (ICdtCryptoProvider)(certificate == null ? serviceBundle.PlatformProxy.GetDefaultPoPCryptoProvider() : new CdtCryptoProvider(certificate));
+            _cdtCryptoProvider = new CdtCryptoProvider(certificate);
 
             _dsReqCnf = _cdtCryptoProvider.CannonicalPublicKeyJwk;
         }
@@ -62,30 +73,44 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
         {
             return new Dictionary<string, string>() {
                 { OAuth2Parameter.TokenType, Constants.BearerAuthHeaderPrefix},
-                { Constants.CdtRequestConfirmation, _dsReqCnf}
+                { CdtRequestConfirmation, _dsReqCnf}
             };
         }
 
-        public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        public void FormatResult(AuthenticationResult authenticationResult)
         {
             var header = new JObject();
-            header[JsonWebTokenConstants.Type] = Constants.JasonWebTokenType;
-            header[JsonWebTokenConstants.Algorithm] = Constants.NoAlgorythmPrefix;
-            
-            var body = CreateCdtBody(msalAccessTokenCacheItem);
+            header[JsonWebTokenConstants.Type] = JasonWebTokenType;
+            header[JsonWebTokenConstants.Algorithm] = NoAlgorythmPrefix;
+
+            //TODO: determine what happens if nonce is not present
+            authenticationResult.AdditionalResponseParameters.TryGetValue(CdtNonce, out string nonce);
+            var body = CreateCdtBody(authenticationResult.AccessToken, nonce);
 
             string constraintToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header), false);
-            return constraintToken;
+            authenticationResult.AccessToken = constraintToken;
         }
 
-        private JObject CreateCdtBody(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        //public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        //{
+        //    var header = new JObject();
+        //    header[JsonWebTokenConstants.Type] = Constants.JasonWebTokenType;
+        //    header[JsonWebTokenConstants.Algorithm] = Constants.NoAlgorythmPrefix;
+            
+        //    var body = CreateCdtBody(msalAccessTokenCacheItem);
+
+        //    string constraintToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header), false);
+        //    return constraintToken;
+        //}
+
+        private JObject CreateCdtBody(string secret, string nonce)
         {
             //string encryptionKey = GetEncryptionKeyFromToken(msalAccessTokenCacheItem);
             var body = new JObject
             {
                 // Mandatory parameters
-                [CdtClaimTypes.Ticket] = msalAccessTokenCacheItem.Secret,
-                [CdtClaimTypes.ConstraintsToken] = CreateCdtConstraintsJwT(msalAccessTokenCacheItem)
+                [CdtClaimTypes.Ticket] = secret,
+                [CdtClaimTypes.ConstraintsToken] = CreateCdtConstraintsJwT(nonce)
                 //[CdtClaimTypes.ConstraintsToken] = string.IsNullOrEmpty(encryptionKey) 
                 //                                    ? CreateCdtConstraintsJwT(msalAccessTokenCacheItem) :
                 //                                      CreateEncryptedCdtConstraintsJwT(msalAccessTokenCacheItem, encryptionKey)
@@ -110,12 +135,12 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
         //    return cdtConstraintToken;
         //}
 
-        private JToken CreateCdtConstraintsJwT(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        private JToken CreateCdtConstraintsJwT(string nonce)
         {
             var header = new JObject();
             header[JsonWebTokenConstants.Algorithm] = _cdtCryptoProvider.CryptographicAlgorithm;
-            header[JsonWebTokenConstants.Type] = Constants.JasonWebTokenType;
-            header[CdtClaimTypes.Nonce] = msalAccessTokenCacheItem.CdtNonce;
+            header[JsonWebTokenConstants.Type] = JasonWebTokenType;
+            header[CdtClaimTypes.Nonce] = nonce;
 
             var body = new JObject
             {
@@ -126,40 +151,6 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
             string cdtConstraintToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header));
             return cdtConstraintToken;
         }
-
-//        private string GetNonceFromToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
-//        {
-//            var decodedToken = Base64UrlHelpers.Decode(msalAccessTokenCacheItem.Secret);
-//            var jsonHeader = JsonHelper.ParseIntoJsonObject(decodedToken.Split('.')[0]);
-//            JToken value;
-//#if SUPPORTS_SYSTEM_TEXT_JSON
-
-//            JsonHelper.TryGetValue(jsonHeader, "nonce", out value);
-//#else
-//            JsonHelper.TryGetValue(jsonHeader, "nonce", out value);
-//#endif
-//            return value?.ToString();
-//        }
-
-//        private string GetEncryptionKeyFromToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
-//        {
-//            var decodedToken = Base64UrlHelpers.Decode(msalAccessTokenCacheItem.Secret);
-//            var jsonHeader = JsonHelper.ParseIntoJsonObject(decodedToken.Split('.')[0]);
-//            JToken value;
-//#if SUPPORTS_SYSTEM_TEXT_JSON
-
-//            JsonHelper.TryGetValue(jsonHeader, "ds_enc", out value);
-//#else
-//            JsonHelper.TryGetValue(jsonHeader, "ds_enc", out value);
-//#endif
-//            return value?.ToString();
-//        }
-
-        //private static string CreateSimpleNonce()
-        //{
-        //    // Guid with no hyphens
-        //    return Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);
-        //}
 
         /// <summary>
         /// A key ID that uniquely describes a public / private key pair. While KeyID is not normally
@@ -193,6 +184,80 @@ namespace Microsoft.Identity.Client.AuthScheme.CDT
             }
 
             return sb.ToString();
+        }
+    }
+
+    public static class CdtClaimTypes
+    {
+        #region JSON keys for Http request
+
+        /// <summary>
+        /// Access token with response cnf
+        /// 
+        /// </summary>
+        public const string Ticket = "t";
+
+        /// <summary>
+        /// Constraints specified by the client
+        /// 
+        /// </summary>
+        public const string ConstraintsToken = "c";
+
+        /// <summary>
+        /// Constraints specified by the client
+        /// 
+        /// </summary>
+        public const string Constraints = "constraints";
+
+        /// <summary>
+        /// Non-standard claim representing a nonce that protects against replay attacks.
+        /// </summary>
+        public const string Nonce = "nonce";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string Type = "typ";
+
+        #endregion
+    }
+
+    //TODO: Add support for ECD keys
+    public class CdtCryptoProvider
+    {
+        private readonly X509Certificate2 _cert;
+
+        public CdtCryptoProvider(X509Certificate2 cert)
+        {
+            _cert = cert ?? throw new ArgumentNullException(nameof(cert));
+
+            RSA provider = _cert.GetRSAPublicKey();
+            RSAParameters publicKeyParams = provider.ExportParameters(false);
+            CannonicalPublicKeyJwk = ComputeCanonicalJwk(publicKeyParams);
+        }
+
+        public byte[] Sign(byte[] payload)
+        {
+            using (RSA key = _cert.GetRSAPrivateKey())
+            {
+                return key.SignData(
+                    payload,
+                    HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pss);
+            }
+        }
+
+        public string CannonicalPublicKeyJwk { get; }
+
+        public string CryptographicAlgorithm { get => "PS256"; }
+
+        /// <summary>
+        /// Creates the canonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3
+        /// The number of parameters as well as the lexicographic order is important, as this string will be hashed to get a thumbprint
+        /// </summary>
+        private static string ComputeCanonicalJwk(RSAParameters rsaPublicKey)
+        {
+            return $@"{{""e"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""kty"":""RSA"",""n"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
         }
     }
 }
