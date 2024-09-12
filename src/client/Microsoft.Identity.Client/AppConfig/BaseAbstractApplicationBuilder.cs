@@ -207,7 +207,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Sets the name of the calling SDK API for telemetry purposes.
         /// </summary>
-        /// <param name="clientName">The name of the SDK API Id for telemetry purposes.</param>
+        /// <param name="clientName">The name of the SDK API for telemetry purposes.</param>
         /// <returns></returns>
         public T WithClientName(string clientName)
         {
