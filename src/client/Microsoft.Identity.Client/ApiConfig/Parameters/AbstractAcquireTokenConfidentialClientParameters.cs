@@ -20,10 +20,5 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// This overrides application config settings.
         /// </summary>
         public bool? SendX5C { get; set; }
-
-        /// <summary>
-        /// if <c>true</c> then Spa code param will be sent via AcquireTokenByAuthorizeCode
-        /// </summary>
-        public bool SpaCode { get; set; }
     }
 }
