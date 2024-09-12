@@ -279,8 +279,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 callerSdkVer = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientVersion;
             }
 
-            apiEvent.CallerSdkApiId = callerSdkId == null ? null : callerSdkId.Substring(0, Math.Min(callerSdkId.Length, 10));
-            apiEvent.CallerSdkVersion = callerSdkVer == null ? null : callerSdkVer.Substring(0, Math.Min(callerSdkVer.Length, 20));
+            apiEvent.CallerSdkApiId = callerSdkId == null ? null : callerSdkId.Substring(0, Math.Min(callerSdkId.Length, Constants.CallerSdkIdMaxLength));
+            apiEvent.CallerSdkVersion = callerSdkVer == null ? null : callerSdkVer.Substring(0, Math.Min(callerSdkVer.Length, Constants.CallerSdkVersionMaxLength));
         }
 
         private AssertionType GetAssertionType()

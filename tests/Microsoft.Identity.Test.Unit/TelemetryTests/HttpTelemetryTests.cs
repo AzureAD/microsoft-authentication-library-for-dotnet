@@ -28,6 +28,7 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Test.Unit.TelemetryTests
 {
@@ -409,8 +410,8 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     requestHandler.ActualRequestMessage,
                     ApiIds.AcquireTokenForClient,
                     CacheRefreshReason.NoCachedAccessToken,
-                    callerSdkId: callerSdkId.Substring(0, Math.Min(callerSdkId.Length, 10)),
-                    callerSdkVersion: callerSdkVersion.Substring(0, Math.Min(callerSdkVersion.Length, 20)));
+                    callerSdkId: callerSdkId.Substring(0, Math.Min(callerSdkId.Length, Constants.CallerSdkIdMaxLength)),
+                    callerSdkVersion: callerSdkVersion.Substring(0, Math.Min(callerSdkVersion.Length, Constants.CallerSdkVersionMaxLength)));
             }
         }
 
@@ -439,6 +440,34 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     CacheRefreshReason.NoCachedAccessToken,
                     callerSdkId: "testApiId",
                     callerSdkVersion: "testSdkVersion");
+            }
+        }
+
+        [TestMethod]
+        public async Task CallerSdkDetailsWithNullClientNameTestAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithClientName(null)
+                .WithClientVersion(null)
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithHttpManager(_harness.HttpManager)
+                .BuildConcrete();
+
+                await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(
+                    requestHandler.ActualRequestMessage,
+                    ApiIds.AcquireTokenForClient,
+                    CacheRefreshReason.NoCachedAccessToken,
+                    callerSdkId: "",
+                    callerSdkVersion: "");
             }
         }
 
