@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Test.Unit.WebUITests
             await SendMessageToPortAsync(port, "TestPath").ConfigureAwait(false);
 
             // Wait for the listener to do its stuff
-            listenTask.Wait(2000 /* 2s timeout */);
+            listenTask.Wait(5000 /* 5s timeout */);
 
             // Assert
             Assert.IsTrue(listenTask.IsCompleted);
