@@ -181,6 +181,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             {
                 authParams.Properties["instance_aware"] = "true";
             }
+            
+            //SSH Cert
+            if(authenticationRequestParameters.AuthenticationScheme.AccessTokenType == "ssh-cert")
+            {
+                authParams.Properties["key_id"]= authenticationRequestParameters.AuthenticationScheme.KeyId;
+                foreach (KeyValuePair<string, string> kvp in authenticationRequestParameters.AuthenticationScheme.GetTokenRequestParams())
+                {
+                    authParams.Properties[kvp.Key] = kvp.Value;
+                }
+            }
 
             //pass extra query parameters if there are any
             if (authenticationRequestParameters.ExtraQueryParameters != null)
@@ -352,7 +362,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
                     Scope = authResult.GrantedScopes,
                     ExpiresIn = (long)(DateTime.SpecifyKind(authResult.ExpiresOn, DateTimeKind.Utc) - DateTimeOffset.UtcNow).TotalSeconds,
                     ClientInfo = authResult.Account.ClientInfo,
-                    TokenType = authResult.IsPopAuthorization ? Constants.PoPAuthHeaderPrefix : BrokerResponseConst.Bearer,
+                    TokenType = authResult.IsPopAuthorization ? Constants.PoPAuthHeaderPrefix: authenticationRequestParameters.RequestContext.ApiEvent.TokenType.ToString(),
                     WamAccountId = authResult.Account.AccountId,
                     TokenSource = TokenSource.Broker
                 };
