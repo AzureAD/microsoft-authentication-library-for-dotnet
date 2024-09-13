@@ -93,7 +93,8 @@ namespace Microsoft.Identity.Client.OAuth2
 #if SUPPORTS_SYSTEM_TEXT_JSON
             foreach (KeyValuePair<string, JsonElement> item in ExtensionData)
             {
-                if (item.Value.ValueKind != JsonValueKind.Undefined)
+                if (item.Value.ValueKind != JsonValueKind.Undefined ||
+                    item.Value.ValueKind != JsonValueKind.Null)
                 {
                     stringExtensionData.Add(item.Key, item.Value.ToString());
                 }

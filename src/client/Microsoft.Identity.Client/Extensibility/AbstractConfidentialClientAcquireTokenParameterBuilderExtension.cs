@@ -58,6 +58,7 @@ namespace Microsoft.Identity.Client.Extensibility
             return builder;
         }
 
+#if !MOBILE
         /// <summary>
         /// Specifies additional parameters acquired from authentication responses to be cached with the access token that are normally not included in the cache object.
         /// these values can be read from the <see cref="AuthenticationResult.AdditionalResponseParameters"/> parameter.
@@ -71,7 +72,7 @@ namespace Microsoft.Identity.Client.Extensibility
             IEnumerable<string> cacheParameters)
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
-            if (cacheParameters != null && cacheParameters.Count() == 0)
+            if (cacheParameters != null && !cacheParameters.Any())
             {
                 return builder;
             }
@@ -89,5 +90,6 @@ namespace Microsoft.Identity.Client.Extensibility
             }
             return builder;
         }
+#endif
     }   
 }
