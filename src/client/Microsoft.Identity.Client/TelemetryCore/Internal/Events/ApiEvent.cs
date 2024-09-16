@@ -135,7 +135,11 @@ namespace Microsoft.Identity.Client.TelemetryCore.Internal.Events
         public CacheLevel CacheLevel { get; set; }
 
         public string MsalRuntimeTelemetry { get; set; }
-        
+
+        public string CallerSdkApiId { get; set; }
+
+        public string CallerSdkVersion { get; set; }
+
         public static bool IsLongRunningObo(ApiIds apiId) => apiId == ApiIds.InitiateLongRunningObo || apiId == ApiIds.AcquireTokenInLongRunningObo;
 
         public static bool IsOnBehalfOfRequest(ApiIds apiId) => apiId == ApiIds.AcquireTokenOnBehalfOf || IsLongRunningObo(apiId);
