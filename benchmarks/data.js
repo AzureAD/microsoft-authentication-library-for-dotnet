@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1726503440946,
+  "lastUpdate": 1726503443589,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -14208,6 +14208,54 @@ window.BENCHMARK_DATA = {
             "value": 122786.5967610677,
             "unit": "ns",
             "range": "± 3175.0489237614056"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "61847233+neha-bhargava@users.noreply.github.com",
+            "name": "Neha Bhargava",
+            "username": "neha-bhargava"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c1ecec7fa462c39395456513aab66b9587bc1b34",
+          "message": "Add caller sdk id and version to telemetry server side and client side (#4864)\n\n* Add caller sdk id and version to telemetry server side and client side\r\n\r\n* Address comments\r\n\r\n* Address comments\r\n\r\n* Add constraints and use WithClientName and WithClientVersion APIs\r\n\r\n* Update tests to expect null for client name and client version\r\n\r\n* Update tests for telemetry\r\n\r\n* Add tests\r\n\r\n* Update src/client/Microsoft.Identity.Client/Platforms/Features/OpenTelemetry/OtelInstrumentation.cs\r\n\r\nCo-authored-by: Tim Hannifin <87669370+TimHannMSFT@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/Platforms/Features/OpenTelemetry/OtelInstrumentation.cs\r\n\r\nCo-authored-by: Tim Hannifin <87669370+TimHannMSFT@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/ApplicationConfiguration.cs\r\n\r\nCo-authored-by: Tim Hannifin <87669370+TimHannMSFT@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/ApplicationConfiguration.cs\r\n\r\nCo-authored-by: Tim Hannifin <87669370+TimHannMSFT@users.noreply.github.com>\r\n\r\n* Add caller sdk id and version tags to failed metrics as well\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/BaseAbstractApplicationBuilder.cs\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/BaseAbstractApplicationBuilder.cs\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Address comments\r\n\r\n---------\r\n\r\nCo-authored-by: Tim Hannifin <87669370+TimHannMSFT@users.noreply.github.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-09-16T09:10:06-07:00",
+          "tree_id": "8527e7ce57b35158bb7706fdfcee037c71dbf226",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/c1ecec7fa462c39395456513aab66b9587bc1b34"
+        },
+        "date": 1726503442787,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 12465.680321829659,
+            "unit": "ns",
+            "range": "± 63.13628265706588"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 123549.34314903847,
+            "unit": "ns",
+            "range": "± 458.011686820855"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 23151.39481201172,
+            "unit": "ns",
+            "range": "± 156.39495430450475"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 125445.31321498325,
+            "unit": "ns",
+            "range": "± 1833.2697696215423"
           }
         ]
       }
