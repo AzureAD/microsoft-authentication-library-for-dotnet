@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1726503445992,
+  "lastUpdate": 1726503448536,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -31652,6 +31652,66 @@ window.BENCHMARK_DATA = {
             "value": 137372.806122449,
             "unit": "ns",
             "range": "± 14557.022039125686"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "61847233+neha-bhargava@users.noreply.github.com",
+            "name": "Neha Bhargava",
+            "username": "neha-bhargava"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c1ecec7fa462c39395456513aab66b9587bc1b34",
+          "message": "Add caller sdk id and version to telemetry server side and client side (#4864)\n\n* Add caller sdk id and version to telemetry server side and client side\r\n\r\n* Address comments\r\n\r\n* Address comments\r\n\r\n* Add constraints and use WithClientName and WithClientVersion APIs\r\n\r\n* Update tests to expect null for client name and client version\r\n\r\n* Update tests for telemetry\r\n\r\n* Add tests\r\n\r\n* Update src/client/Microsoft.Identity.Client/Platforms/Features/OpenTelemetry/OtelInstrumentation.cs\r\n\r\nCo-authored-by: Tim Hannifin <87669370+TimHannMSFT@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/Platforms/Features/OpenTelemetry/OtelInstrumentation.cs\r\n\r\nCo-authored-by: Tim Hannifin <87669370+TimHannMSFT@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/ApplicationConfiguration.cs\r\n\r\nCo-authored-by: Tim Hannifin <87669370+TimHannMSFT@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/ApplicationConfiguration.cs\r\n\r\nCo-authored-by: Tim Hannifin <87669370+TimHannMSFT@users.noreply.github.com>\r\n\r\n* Add caller sdk id and version tags to failed metrics as well\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/BaseAbstractApplicationBuilder.cs\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/BaseAbstractApplicationBuilder.cs\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Address comments\r\n\r\n---------\r\n\r\nCo-authored-by: Tim Hannifin <87669370+TimHannMSFT@users.noreply.github.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-09-16T09:10:06-07:00",
+          "tree_id": "8527e7ce57b35158bb7706fdfcee037c71dbf226",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/c1ecec7fa462c39395456513aab66b9587bc1b34"
+        },
+        "date": 1726503447659,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (1, 10))",
+            "value": 18564.227879115515,
+            "unit": "ns",
+            "range": "± 59.117585775018696"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (10000, 10))",
+            "value": 29599.360177847055,
+            "unit": "ns",
+            "range": "± 45.94875185885704"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 9516.795112022986,
+            "unit": "ns",
+            "range": "± 10.637953775054894"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 20284.24459184919,
+            "unit": "ns",
+            "range": "± 51.0937793229322"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 44568.458333333336,
+            "unit": "ns",
+            "range": "± 1116.3212479493473"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 133769.29213483146,
+            "unit": "ns",
+            "range": "± 7635.062136143905"
           }
         ]
       }
