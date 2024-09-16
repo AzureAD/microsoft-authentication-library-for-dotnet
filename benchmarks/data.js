@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1726214414233,
+  "lastUpdate": 1726503440946,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6290,6 +6290,42 @@ window.BENCHMARK_DATA = {
             "value": 335667.64285714284,
             "unit": "ns",
             "range": "± 3746.623312698082"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "61847233+neha-bhargava@users.noreply.github.com",
+            "name": "Neha Bhargava",
+            "username": "neha-bhargava"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c1ecec7fa462c39395456513aab66b9587bc1b34",
+          "message": "Add caller sdk id and version to telemetry server side and client side (#4864)\n\n* Add caller sdk id and version to telemetry server side and client side\r\n\r\n* Address comments\r\n\r\n* Address comments\r\n\r\n* Add constraints and use WithClientName and WithClientVersion APIs\r\n\r\n* Update tests to expect null for client name and client version\r\n\r\n* Update tests for telemetry\r\n\r\n* Add tests\r\n\r\n* Update src/client/Microsoft.Identity.Client/Platforms/Features/OpenTelemetry/OtelInstrumentation.cs\r\n\r\nCo-authored-by: Tim Hannifin <87669370+TimHannMSFT@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/Platforms/Features/OpenTelemetry/OtelInstrumentation.cs\r\n\r\nCo-authored-by: Tim Hannifin <87669370+TimHannMSFT@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/ApplicationConfiguration.cs\r\n\r\nCo-authored-by: Tim Hannifin <87669370+TimHannMSFT@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/ApplicationConfiguration.cs\r\n\r\nCo-authored-by: Tim Hannifin <87669370+TimHannMSFT@users.noreply.github.com>\r\n\r\n* Add caller sdk id and version tags to failed metrics as well\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/BaseAbstractApplicationBuilder.cs\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Update src/client/Microsoft.Identity.Client/AppConfig/BaseAbstractApplicationBuilder.cs\r\n\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Address comments\r\n\r\n---------\r\n\r\nCo-authored-by: Tim Hannifin <87669370+TimHannMSFT@users.noreply.github.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-09-16T09:10:06-07:00",
+          "tree_id": "8527e7ce57b35158bb7706fdfcee037c71dbf226",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/c1ecec7fa462c39395456513aab66b9587bc1b34"
+        },
+        "date": 1726503436766,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 255949.5,
+            "unit": "ns",
+            "range": "± 2976.0682675861676"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 369721.5714285714,
+            "unit": "ns",
+            "range": "± 5540.8873312478045"
           }
         ]
       }
