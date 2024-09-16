@@ -1,3 +1,8 @@
+4.64.1
+==========
+### Bug Fixes 
+- Send X5C with ROPC confidential client. See [Issue #4913](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4913)
+
 4.64.0
 ==========
 ### New Features
