@@ -35,6 +35,7 @@ namespace Microsoft.Identity.Client
         public const string CdtEncKey = "xms_ds_enc";
         public const string NoAlgorythmPrefix = "none";
         public const string JasonWebTokenType = "JWT";
+        public const string CdtTokenType = "CDT";
         public const string CdtEncryptedAlgoryth = "dir";
         public const string CdtEncryptedValue = "A256CBC-HS256";
         public const string CdtRequestConfirmation = "req_ds_cnf";
@@ -82,8 +83,8 @@ namespace Microsoft.Identity.Client
         public void FormatResult(AuthenticationResult authenticationResult)
         {
             var header = new JObject();
-            header[JsonWebTokenConstants.Type] = JasonWebTokenType;
             header[JsonWebTokenConstants.Algorithm] = NoAlgorythmPrefix;
+            header[JsonWebTokenConstants.Type] = CdtTokenType;
 
             //TODO: determine what happens if nonce is not present
             authenticationResult.AdditionalResponseParameters.TryGetValue(CdtNonce, out string nonce);
@@ -142,11 +143,11 @@ namespace Microsoft.Identity.Client
             var header = new JObject();
             header[JsonWebTokenConstants.Algorithm] = _cdtCryptoProvider.CryptographicAlgorithm;
             header[JsonWebTokenConstants.Type] = JasonWebTokenType;
-            header[CdtClaimTypes.Nonce] = nonce;
 
             var body = new JObject
             {
                 // Mandatory parameters
+                [CdtClaimTypes.Nonce] = nonce,
                 [CdtClaimTypes.Constraints] = _constraints
             };
 
@@ -214,7 +215,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Non-standard claim representing a nonce that protects against replay attacks.
         /// </summary>
-        public const string Nonce = "nonce";
+        public const string Nonce = "xms_ds_nonce ";
 
         /// <summary>
         /// 

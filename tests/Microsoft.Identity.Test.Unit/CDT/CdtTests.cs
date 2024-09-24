@@ -168,6 +168,7 @@ namespace Microsoft.Identity.Test.Unit.CDT
 
             var constraintsClaims = IdToken.Parse(constraints).ClaimsPrincipal;
             var constraintsClaim = constraintsClaims.FindAll("constraints").Single().Value;
+
             Assert.AreEqual(constraint, constraintsClaim);
         }
     }

@@ -107,10 +107,11 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             Assert.IsTrue(!string.IsNullOrEmpty(ticket));
             Assert.IsTrue(!string.IsNullOrEmpty(constraints));
 
-            Assert.IsNotNull(ticket);
+            Assert.AreEqual($"header.payload.signature", ticket);
 
             var constraintsClaims = IdToken.Parse(constraints).ClaimsPrincipal;
             var constraintsClaim = constraintsClaims.FindAll("constraints").Single().Value;
+
             Assert.AreEqual(constraint, constraintsClaim);
         }
     }
