@@ -89,14 +89,11 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>
         /// MSAL will transform these into special claims request. See https://openid.net/specs/openid-connect-core-1_0-final.html#ClaimsParameter for
-        /// details on claim requests. This is an experimental API. The method signature may change in the future 
-        /// without involving a major version upgrade.
+        /// details on claim requests. 
         /// For more details see https://aka.ms/msal-net-claims-request
         /// </remarks>
         public ManagedIdentityApplicationBuilder WithClientCapabilities(IEnumerable<string> clientCapabilities)
         {
-            ValidateUseOfExperimentalFeature();
-
             if (clientCapabilities != null && clientCapabilities.Any())
             {
                 Config.ClientCapabilities = clientCapabilities;
