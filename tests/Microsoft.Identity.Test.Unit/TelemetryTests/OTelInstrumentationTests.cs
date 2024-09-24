@@ -32,6 +32,9 @@ namespace Microsoft.Identity.Test.Unit
         private static MeterProvider s_meterProvider;
         private readonly List<Metric> _exportedMetrics = new();
 
+        private const string callerSdkId = "123";
+        private const string callerSdkVersion = "1.1.1.1";
+
         [TestCleanup]
         public override void TestCleanup()
         {
@@ -81,6 +84,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 _harness.HttpManager.AddAllMocks(TokenResponseType.Valid_ClientCredentials);
                 AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
                     .ExecuteAsync()
                     .ConfigureAwait(false);
                 // Assert
@@ -95,6 +99,7 @@ namespace Microsoft.Identity.Test.Unit
                 // Act
                 Trace.WriteLine("4. ATS - should perform an RT refresh");
                 result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -110,8 +115,9 @@ namespace Microsoft.Identity.Test.Unit
 
                 Trace.WriteLine("5. ATS - should not perform an RT refresh, as the token is still valid");
                 result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                                    .ExecuteAsync()
-                                    .ConfigureAwait(false);
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
 
                 Trace.WriteLine(result.AuthenticationResultMetadata.DurationTotalInMs);
 
@@ -151,6 +157,7 @@ namespace Microsoft.Identity.Test.Unit
                         ManagedIdentitySource.AppService);
 
                 AuthenticationResult result = await mi.AcquireTokenForManagedIdentity(resource)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -167,6 +174,7 @@ namespace Microsoft.Identity.Test.Unit
                 // Act
                 Trace.WriteLine("4. ATM - should perform an RT refresh");
                 result = await mi.AcquireTokenForManagedIdentity(resource)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -183,6 +191,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual(refreshOn, result.AuthenticationResultMetadata.RefreshOn);
 
                 result = await mi.AcquireTokenForManagedIdentity(resource)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -214,6 +223,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 string oboCacheKey = "obo-cache-key";
                 var result = await cca.InitiateLongRunningProcessInWebApi(TestConstants.s_scope, TestConstants.DefaultAccessToken, ref oboCacheKey)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
                     .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
@@ -225,7 +235,9 @@ namespace Microsoft.Identity.Test.Unit
                 httpManager.AddSuccessTokenResponseMockHandlerForPost();
 
                 Trace.WriteLine("3. Configure AAD to respond with a valid token");
-                result = await cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
+                result = await cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
@@ -235,7 +247,9 @@ namespace Microsoft.Identity.Test.Unit
                 Thread.Sleep(1000);
 
                 Trace.WriteLine("4. Fetch token from cache");
-                result = await cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey).ExecuteAsync().ConfigureAwait(false);
+                result = await cca.AcquireTokenInLongRunningProcess(TestConstants.s_scope, oboCacheKey)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.AreEqual(TestConstants.ATSecret, result.AccessToken);
                 Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
@@ -268,6 +282,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 // Act
                 AuthenticationResult result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -281,6 +296,7 @@ namespace Microsoft.Identity.Test.Unit
                 _harness.HttpManager.AddTokenResponse(TokenResponseType.Valid_ClientCredentials);
 
                 result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
                     .ExecuteAsync()
                     .ConfigureAwait(false);
                 Assert.IsNotNull(result);
@@ -301,11 +317,13 @@ namespace Microsoft.Identity.Test.Unit
 
             // Acquire token for client with scope
             var result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
             Assert.IsNotNull(result);
 
             // Acquire token from the cache
             result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
             Assert.IsNotNull(result);
         }
@@ -317,6 +335,7 @@ namespace Microsoft.Identity.Test.Unit
             //Test for MsalServiceException
             MsalServiceException ex = await AssertException.TaskThrowsAsync<MsalServiceException>(
                 () => _cca.AcquireTokenForClient(TestConstants.s_scopeForAnotherResource)
+                .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
                 .WithTenantId(TestConstants.Utid)
                 .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
 
@@ -329,6 +348,7 @@ namespace Microsoft.Identity.Test.Unit
             //Test for MsalClientException
             MsalClientException exClient = await AssertException.TaskThrowsAsync<MsalClientException>(
                 () => _cca.AcquireTokenForClient(null) // null scope -> client exception
+                .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
                 .WithTenantId(TestConstants.Utid)
                 .ExecuteAsync(CancellationToken.None)).ConfigureAwait(false);
 
@@ -366,6 +386,8 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.MsalVersion);
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.CallerSdkId);
+                        expectedTags.Add(TelemetryConstants.CallerSdkVersion);
                         expectedTags.Add(TelemetryConstants.TokenSource);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
                         expectedTags.Add(TelemetryConstants.CacheLevel);
@@ -374,7 +396,7 @@ namespace Microsoft.Identity.Test.Unit
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
                             totalSuccessfulRequests += metricPoint.GetSumLong();
-                            AssertTags(metricPoint.Tags, expectedTags);
+                            AssertTags(metricPoint.Tags, expectedTags, true);
                         }
 
                         Assert.AreEqual(expectedSuccessfulRequests, totalSuccessfulRequests);
@@ -388,13 +410,15 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ErrorCode);
                         expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.CallerSdkId);
+                        expectedTags.Add(TelemetryConstants.CallerSdkVersion);
                         expectedTags.Add(TelemetryConstants.CacheRefreshReason);
 
                         long totalFailedRequests = 0;
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {
                             totalFailedRequests += metricPoint.GetSumLong();
-                            AssertTags(metricPoint.Tags, expectedTags);
+                            AssertTags(metricPoint.Tags, expectedTags, true);
                         }
 
                         Assert.AreEqual(expectedFailedRequests, totalFailedRequests);
@@ -472,12 +496,10 @@ namespace Microsoft.Identity.Test.Unit
                         Assert.Fail("Unexpected metrics logged.");
                         break;
                 }
-
-                
             }
         }
 
-        private void AssertTags(ReadOnlyTagCollection tags, List<string> expectedTags)
+        private void AssertTags(ReadOnlyTagCollection tags, List<string> expectedTags, bool expectCallerSdkDetails = false)
         {
             Assert.AreEqual(expectedTags.Count, tags.Count);
             IDictionary<string, object> tagDictionary = new Dictionary<string, object>();
@@ -485,6 +507,12 @@ namespace Microsoft.Identity.Test.Unit
             foreach (var tag in tags)
             {
                 tagDictionary[tag.Key] = tag.Value;
+            }
+
+            if (expectCallerSdkDetails)
+            {
+                Assert.AreEqual(callerSdkId, tagDictionary[TelemetryConstants.CallerSdkId]);
+                Assert.AreEqual(callerSdkVersion, tagDictionary[TelemetryConstants.CallerSdkVersion]);
             }
 
             foreach (var expectedTag in expectedTags)

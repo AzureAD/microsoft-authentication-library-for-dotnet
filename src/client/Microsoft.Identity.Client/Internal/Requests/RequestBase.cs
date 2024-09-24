@@ -22,6 +22,7 @@ using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 using Microsoft.Identity.Client.Internal.Broker;
+using System.Runtime.ConstrainedExecution;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -91,7 +92,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 UpdateTelemetry(measureDurationResult.Milliseconds + measureTelemetryDurationResult.Milliseconds, apiEvent, authenticationResult);
                 LogMetricsFromAuthResult(authenticationResult, AuthenticationRequestParameters.RequestContext.Logger);
-                LogSuccessTelemetryToOtel(authenticationResult, apiEvent.ApiId, measureDurationResult.Microseconds);
+                LogSuccessTelemetryToOtel(authenticationResult, apiEvent, measureDurationResult.Microseconds);
 
                 return authenticationResult;
             }
@@ -104,7 +105,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
-                LogFailureTelemetryToOtel(ex.ErrorCode, apiEvent.ApiId, apiEvent.CacheInfo);
+                LogFailureTelemetryToOtel(ex.ErrorCode, apiEvent, apiEvent.CacheInfo);
                 throw;
             }
             catch (Exception ex)
@@ -112,30 +113,34 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 apiEvent.ApiErrorCode = ex.GetType().Name;
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
 
-                LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent.ApiId, apiEvent.CacheInfo);
+                LogFailureTelemetryToOtel(ex.GetType().Name, apiEvent, apiEvent.CacheInfo);
                 throw;
             }           
         }
 
-        private void LogSuccessTelemetryToOtel(AuthenticationResult authenticationResult, ApiEvent.ApiIds apiId, long durationInUs)
+        private void LogSuccessTelemetryToOtel(AuthenticationResult authenticationResult, ApiEvent apiEvent, long durationInUs)
         {
             // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogSuccessMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
-                        apiId,
+                        apiEvent.ApiId,
+                        apiEvent.CallerSdkApiId,
+                        apiEvent.CallerSdkVersion,
                         GetCacheLevel(authenticationResult),
                         durationInUs,
                         authenticationResult.AuthenticationResultMetadata,
                         AuthenticationRequestParameters.RequestContext.Logger);
         }
 
-        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent.ApiIds apiId, CacheRefreshReason cacheRefreshReason)
+        private void LogFailureTelemetryToOtel(string errorCodeToLog, ApiEvent apiEvent, CacheRefreshReason cacheRefreshReason)
         {
             // Log metrics
             ServiceBundle.PlatformProxy.OtelInstrumentation.LogFailureMetrics(
                         ServiceBundle.PlatformProxy.GetProductName(),
                         errorCodeToLog,
-                        apiId,
+                        apiEvent.ApiId,
+                        apiEvent.CallerSdkApiId, 
+                        apiEvent.CallerSdkVersion,
                         cacheRefreshReason);
         }
 
@@ -242,10 +247,40 @@ namespace Microsoft.Identity.Client.Internal.Requests
             apiEvent.TokenType = AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
             apiEvent.AssertionType = GetAssertionType();
 
+            UpdateCallerSdkDetails(apiEvent);
+
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
             EnrichTelemetryApiEvent(apiEvent);
 
             return apiEvent;
+        }
+
+        private void UpdateCallerSdkDetails(ApiEvent apiEvent)
+        {
+            string callerSdkId;
+            string callerSdkVer;
+
+            // Check if ExtraQueryParameters contains caller-sdk-id and caller-sdk-ver
+            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-id", out callerSdkId))
+            {
+                AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-id");
+            } 
+            else
+            {
+                callerSdkId = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientName;
+            }
+            
+            if (AuthenticationRequestParameters.ExtraQueryParameters.TryGetValue("caller-sdk-ver", out callerSdkVer))
+            {
+                AuthenticationRequestParameters.ExtraQueryParameters.Remove("caller-sdk-ver");
+            }
+            else
+            {
+                callerSdkVer = AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.ClientVersion;
+            }
+
+            apiEvent.CallerSdkApiId = callerSdkId == null ? null : callerSdkId.Substring(0, Math.Min(callerSdkId.Length, Constants.CallerSdkIdMaxLength));
+            apiEvent.CallerSdkVersion = callerSdkVer == null ? null : callerSdkVer.Substring(0, Math.Min(callerSdkVer.Length, Constants.CallerSdkVersionMaxLength));
         }
 
         private AssertionType GetAssertionType()

@@ -92,6 +92,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         public void LogSuccessMetrics(
             string platform,
             ApiEvent.ApiIds apiId,
+            string callerSdkId,
+            string callerSdkVersion,
             CacheLevel cacheLevel,
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
@@ -100,6 +102,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             IncrementSuccessCounter(
                 platform,
                 apiId,
+                callerSdkId,
+                callerSdkVersion,
                 authResultMetadata.TokenSource,
                 authResultMetadata.CacheRefreshReason,
                 cacheLevel,
@@ -151,6 +155,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 
         public void IncrementSuccessCounter(string platform, 
             ApiEvent.ApiIds apiId, 
+            string callerSdkId,
+            string callerSdkVersion,
             TokenSource tokenSource,
             CacheRefreshReason cacheRefreshReason, 
             CacheLevel cacheLevel,
@@ -162,6 +168,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ApiId, apiId),
+                        new(TelemetryConstants.CallerSdkId, callerSdkId ?? string.Empty),
+                        new(TelemetryConstants.CallerSdkVersion, callerSdkVersion ?? string.Empty),
                         new(TelemetryConstants.TokenSource, tokenSource),
                         new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason),
                         new(TelemetryConstants.CacheLevel, cacheLevel));
@@ -171,7 +179,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 
         public void LogFailureMetrics(string platform, 
             string errorCode, 
-            ApiEvent.ApiIds apiId, 
+            ApiEvent.ApiIds apiId,
+            string callerSdkId,
+            string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason)
         {
             if (s_failureCounter.Value.Enabled)
@@ -180,7 +190,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                         new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                         new(TelemetryConstants.Platform, platform),
                         new(TelemetryConstants.ErrorCode, errorCode), 
-                        new(TelemetryConstants.ApiId, apiId), 
+                        new(TelemetryConstants.ApiId, apiId),
+                        new(TelemetryConstants.CallerSdkId, callerSdkId ?? ""),
+                        new(TelemetryConstants.CallerSdkVersion, callerSdkVersion ?? ""),
                         new(TelemetryConstants.CacheRefreshReason, cacheRefreshReason)); 
             }
         }

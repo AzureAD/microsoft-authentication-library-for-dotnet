@@ -48,27 +48,28 @@ namespace Microsoft.Identity.Client.Cache.Items
             RawClientInfo = response.ClientInfo;
             HomeAccountId = homeAccountId;
             OboCacheKey = oboCacheKey;
-#if !iOS && !ANDROID
+#if !MOBILE
             PersistedCacheParameters = AcquireCacheParametersFromResponse(persistedCacheParameters, response.ExtensionData);
 #endif
             InitCacheKey();
         }
 
+#if !MOBILE
         private IDictionary<string, string> AcquireCacheParametersFromResponse(
                                                     IEnumerable<string> persistedCacheParameters,
 #if SUPPORTS_SYSTEM_TEXT_JSON
-                                                    IDictionary<string, JsonElement> extraDataFromResponse)
+                                                    Dictionary<string, JsonElement> extraDataFromResponse)
 #else
-                                                    IDictionary<string, JToken> extraDataFromResponse)
+                                                    Dictionary<string, JToken> extraDataFromResponse)
 #endif
         {
-            if (persistedCacheParameters == null)
+            if (persistedCacheParameters == null || !persistedCacheParameters.Any())
             {
                 return null;
             }
 
             var cacheParameters = extraDataFromResponse?
-                                    .Where(x => persistedCacheParameters.Contains(x.Key))
+                                    .Where(x => persistedCacheParameters.Contains(x.Key, StringComparer.InvariantCultureIgnoreCase))
 #if SUPPORTS_SYSTEM_TEXT_JSON
                                     .ToDictionary(x => x.Key, x => x.Value.ToString());
 #else
@@ -77,10 +78,9 @@ namespace Microsoft.Identity.Client.Cache.Items
                                                                                     x.Value.ToString(Json.Formatting.None) :
                                                                                     x.Value.ToString());
 #endif
-
             return cacheParameters;
         }
-
+#endif
         internal /* for test */ MsalAccessTokenCacheItem(
             string preferredCacheEnv,
             string clientId,

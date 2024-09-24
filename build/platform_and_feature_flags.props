@@ -23,4 +23,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);NETSTANDARD;SUPPORTS_CONFIDENTIAL_CLIENT;SUPPORTS_BROKER;SUPPORTS_CUSTOM_CACHE;SUPPORTS_WIN32;</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNet6Android)' or '$(TargetFramework)' == '$(TargetFrameworkNet6Ios)'">
+    <DefineConstants>$(DefineConstants);MOBILE</DefineConstants>
+  </PropertyGroup>
 </Project>

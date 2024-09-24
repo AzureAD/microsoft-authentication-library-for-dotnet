@@ -38,8 +38,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, mi.ServiceBundle.Config.RedirectUri);
             Assert.AreEqual(Constants.ManagedIdentityDefaultTenant, mi.ServiceBundle.Config.TenantId);
 
-            Assert.IsNotNull(mi.ServiceBundle.Config.ClientName);
-            Assert.IsNotNull(mi.ServiceBundle.Config.ClientVersion);
+            Assert.IsNull(mi.ServiceBundle.Config.ClientName);
+            Assert.IsNull(mi.ServiceBundle.Config.ClientVersion);
 
             Assert.IsNull(mi.ServiceBundle.Config.HttpClientFactory);
             Assert.IsNull(mi.ServiceBundle.Config.LoggingCallback);
@@ -64,8 +64,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, mi.ServiceBundle.Config.RedirectUri);
             Assert.AreEqual(Constants.ManagedIdentityDefaultTenant, mi.ServiceBundle.Config.TenantId);
 
-            Assert.IsNotNull(mi.ServiceBundle.Config.ClientName);
-            Assert.IsNotNull(mi.ServiceBundle.Config.ClientVersion);
+            Assert.IsNull(mi.ServiceBundle.Config.ClientName);
+            Assert.IsNull(mi.ServiceBundle.Config.ClientVersion);
 
             Assert.IsNotNull(mi.ServiceBundle.Config.ManagedIdentityId);
             Assert.AreEqual(ManagedIdentityIdType.ClientId, mi.ServiceBundle.Config.ManagedIdentityId.IdType);
@@ -126,5 +126,17 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsNotNull(mi.ServiceBundle.Config.LoggingCallback);
         }
 
+        [TestMethod]
+        public void TestConstructor_WithClientName_WithClientVersion()
+        {
+            var mi = ManagedIdentityApplicationBuilder
+                .Create(ManagedIdentityId.SystemAssigned)
+                .WithClientName("clientName")
+                .WithClientVersion("clientVersion")
+                .BuildConcrete();
+
+            Assert.AreEqual("clientName", mi.ServiceBundle.Config.ClientName);
+            Assert.AreEqual("clientVersion", mi.ServiceBundle.Config.ClientVersion);
+        }
     }
 }

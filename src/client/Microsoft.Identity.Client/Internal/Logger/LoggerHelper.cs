@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Internal.Logger
 
         public static string GetClientInfo(string clientName, string clientVersion)
         {
-            if (!string.IsNullOrEmpty(clientName) && !ApplicationConfiguration.DefaultClientName.Equals(clientName))
+            if (!string.IsNullOrEmpty(clientName))
             {
                 // space is intentional for formatting of the message
                 if (string.IsNullOrEmpty(clientVersion))

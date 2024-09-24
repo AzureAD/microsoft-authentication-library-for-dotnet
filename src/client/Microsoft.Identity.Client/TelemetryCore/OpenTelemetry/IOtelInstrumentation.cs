@@ -14,6 +14,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
         internal void LogSuccessMetrics(
             string platform,
             ApiEvent.ApiIds apiId,
+            string callerSdkId,
+            string callerSdkVersion,
             CacheLevel cacheLevel,
             long totalDurationInUs,
             AuthenticationResultMetadata authResultMetadata,
@@ -21,6 +23,8 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 
         internal void IncrementSuccessCounter(string platform,
             ApiEvent.ApiIds apiId,
+            string callerSdkId,
+            string callerSdkVersion,
             TokenSource tokenSource,
             CacheRefreshReason cacheRefreshReason,
             CacheLevel cacheLevel,
@@ -28,7 +32,9 @@ namespace Microsoft.Identity.Client.TelemetryCore.OpenTelemetry
 
         internal void LogFailureMetrics(string platform, 
             string errorCode, 
-            ApiEvent.ApiIds apiId, 
+            ApiEvent.ApiIds apiId,
+            string callerSdkId,
+            string callerSdkVersion,
             CacheRefreshReason cacheRefreshReason);
     }
 }

@@ -47,20 +47,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets Extra Query Parameters for the query string in the HTTP authentication request.
-        /// </summary>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority
-        /// as a string of segments of the form <c>key=value</c> separated by an ampersand character.
-        /// The parameter can be null.</param>
-        /// <returns>The builder to chain the .With methods.</returns>
-        public T WithExtraQueryParameters(Dictionary<string, string> extraQueryParameters)
-        {
-            CommonParameters.ExtraQueryParameters = extraQueryParameters ??
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            return this as T;
-        }
-
-        /// <summary>
         /// Sets claims in the query. Use when the AAD admin has enabled conditional access. Acquiring the token normally will result in a
         /// <see cref="MsalUiRequiredException"/> with the <see cref="MsalServiceException.Claims"/> property set. Retry the 
         /// token acquisition, and use this value in the <see cref="WithClaims(string)"/> method. See https://aka.ms/msal-exceptions for details

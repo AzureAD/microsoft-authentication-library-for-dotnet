@@ -85,7 +85,9 @@ namespace Microsoft.Identity.Client.Internal
             Func<Task<AuthenticationResult>> fetchAction,
             ILoggerAdapter logger, 
             IServiceBundle serviceBundle, 
-            ApiEvent.ApiIds apiId)
+            ApiEvent.ApiIds apiId, 
+            string callerSdkId, 
+            string callerSdkVersion)
         {
             _ = Task.Run(async () =>
             {
@@ -95,6 +97,8 @@ namespace Microsoft.Identity.Client.Internal
                     serviceBundle.PlatformProxy.OtelInstrumentation.IncrementSuccessCounter(
                         serviceBundle.PlatformProxy.GetProductName(),
                         apiId,
+                        callerSdkId,
+                        callerSdkVersion,
                         TokenSource.IdentityProvider, 
                         CacheRefreshReason.ProactivelyRefreshed, 
                         Cache.CacheLevel.None,
@@ -116,6 +120,8 @@ namespace Microsoft.Identity.Client.Internal
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.ErrorCode,
                         apiId,
+                        callerSdkId,
+                        callerSdkVersion,
                         CacheRefreshReason.ProactivelyRefreshed);
                 }
                 catch (OperationCanceledException ex)
@@ -125,6 +131,8 @@ namespace Microsoft.Identity.Client.Internal
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.GetType().Name,
                         apiId,
+                        callerSdkId, 
+                        callerSdkVersion, 
                         CacheRefreshReason.ProactivelyRefreshed);
                 }
                 catch (Exception ex)
@@ -134,6 +142,8 @@ namespace Microsoft.Identity.Client.Internal
                         serviceBundle.PlatformProxy.GetProductName(),
                         ex.GetType().Name,
                         apiId,
+                        callerSdkId, 
+                        callerSdkVersion, 
                         CacheRefreshReason.ProactivelyRefreshed);
                 }
             });

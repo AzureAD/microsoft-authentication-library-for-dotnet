@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client.Extensibility
             IEnumerable<string> cacheParameters)
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
-            if (cacheParameters != null && cacheParameters.Count() == 0)
+            if (cacheParameters != null && !cacheParameters.Any())
             {
                 return builder;
             }
@@ -122,5 +122,6 @@ namespace Microsoft.Identity.Client.Extensibility
             }
             return builder;
         }
+#endif
     }   
 }

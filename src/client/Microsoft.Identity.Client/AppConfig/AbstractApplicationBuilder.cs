@@ -257,28 +257,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Sets the name of the calling application for telemetry purposes.
-        /// </summary>
-        /// <param name="clientName">The name of the application for telemetry purposes.</param>
-        /// <returns></returns>
-        public T WithClientName(string clientName)
-        {
-            Config.ClientName = GetValueIfNotEmpty(Config.ClientName, clientName);
-            return this as T;
-        }
-
-        /// <summary>
-        /// Sets the version of the calling application for telemetry purposes.
-        /// </summary>
-        /// <param name="clientVersion">The version of the calling application for telemetry purposes.</param>
-        /// <returns></returns>
-        public T WithClientVersion(string clientVersion)
-        {
-            Config.ClientVersion = GetValueIfNotEmpty(Config.ClientVersion, clientVersion);
-            return this as T;
-        }
-
-        /// <summary>
         /// Sets application options, which can, for instance have been read from configuration files.
         /// See https://aka.ms/msal-net-application-configuration.
         /// </summary>
@@ -643,10 +621,5 @@ namespace Microsoft.Identity.Client
         }        
         
         #endregion
-
-        private static string GetValueIfNotEmpty(string original, string value)
-        {
-            return string.IsNullOrWhiteSpace(value) ? original : value;
-        }
     }
 }

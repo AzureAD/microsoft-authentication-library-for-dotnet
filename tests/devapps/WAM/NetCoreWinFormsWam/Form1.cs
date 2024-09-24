@@ -9,11 +9,16 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Desktop;
+using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.SSHCertificates;
+using Microsoft.Identity.Client.Utils;
 
 namespace NetDesktopWinForms
 {
@@ -302,7 +307,8 @@ namespace NetDesktopWinForms
                 $"Source {ar.AuthenticationResultMetadata.TokenSource}" + Environment.NewLine +
                 $"Scopes {string.Join(" ", ar.Scopes)}" + Environment.NewLine +
                 $"AccessToken: {ar.AccessToken} " + Environment.NewLine +
-                $"IdToken {ar.IdToken}" + Environment.NewLine;
+                $"IdToken {ar.IdToken}" + Environment.NewLine +
+                $"TokenType {ar.TokenType}" + Environment.NewLine;
 
             Log(message);
 
@@ -795,6 +801,105 @@ namespace NetDesktopWinForms
             {
                 Log("Exception: " + ex);
             }
+        }
+
+        private string CreateJwk()
+        {
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048);
+            RSAParameters rsaKeyInfo = rsa.ExportParameters(false);
+
+            string modulus = Base64UrlHelpers.Encode(rsaKeyInfo.Modulus);
+            string exp = Base64UrlHelpers.Encode(rsaKeyInfo.Exponent);
+            string jwk = $"{{\"kty\":\"RSA\", \"n\":\"{modulus}\", \"e\":\"{exp}\"}}";
+
+            return jwk;
+        }
+        private async void atiSshBtn_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var pca = CreatePca(GetAuthMethod());
+                AuthenticationResult result = await RunAtiSshBtnAsync(pca).ConfigureAwait(false);
+
+                await LogResultAndRefreshAccountsAsync(result).ConfigureAwait(false);
+
+            }
+            catch (Exception ex)
+            {
+                Log("Exception: " + ex);
+            }
+        }
+
+        private async Task<AuthenticationResult> RunAtiSshBtnAsync(IPublicClientApplication pca)
+        {
+            string loginHint = GetLoginHint();
+            if (!string.IsNullOrEmpty(loginHint) && cbxAccount.SelectedIndex > 0)
+            {
+                throw new InvalidOperationException("[TEST APP FAILURE] Please use either the login hint or the account, but not both");
+            }
+
+            AuthenticationResult result = null; 
+            var scopes = GetScopes();
+            var guid = Guid.NewGuid();
+            string jwk = CreateJwk();
+            var builder = pca.AcquireTokenInteractive(scopes)
+                             .WithParentActivityOrWindow(this.Handle)
+                             .WithSSHCertificateAuthenticationScheme(jwk, "key1");
+
+            if (GetAuthMethod() == AuthMethod.SystemBrowser)
+            {
+                builder.WithSystemWebViewOptions(new SystemWebViewOptions() { HtmlMessageSuccess = "Successful login! You can close the tab." });
+            }
+            else
+            {
+                builder.WithUseEmbeddedWebView(true)
+                //.WithExtraQueryParameters("domain_hint=live.com") -- will force AAD login with browser
+                //.WithExtraQueryParameters("msafed=0")             -- will force MSA login with browser
+                .WithEmbeddedWebViewOptions(
+                new EmbeddedWebViewOptions()
+                {
+                    Title = "Hello world",
+                });
+            }
+
+            if (cbxPOP.Checked)
+            {
+                builder = builder.WithProofOfPossession(
+                    Guid.NewGuid().ToString(),
+                    System.Net.Http.HttpMethod.Get,
+                    GetRandomDownstreamUri());
+            }
+
+            Prompt? prompt = GetPrompt();
+            if (prompt.HasValue)
+            {
+                builder = builder.WithPrompt(prompt.Value);
+            }
+
+            if (!string.IsNullOrEmpty(loginHint))
+            {
+                Log($"ATI WithLoginHint  {loginHint}");
+                builder = builder.WithLoginHint(loginHint);
+            }
+            else if (cbxAccount.SelectedIndex > 0)
+            {
+                var acc = (cbxAccount.SelectedItem as AccountModel).Account;
+                Log($"ATI WithAccount for account {acc?.Username ?? "null"}");
+                builder = builder.WithAccount(acc);
+            }
+            else
+            {
+                Log($"ATI without login_hint or account. It should display the account picker");
+            }
+
+            if (cbxBackgroundThread.Checked)
+            {
+                await Task.Delay(500).ConfigureAwait(false);
+            }
+
+            result = await builder.ExecuteAsync(GetAutocancelToken()).ConfigureAwait(false);
+
+            return result;
         }
     }
 

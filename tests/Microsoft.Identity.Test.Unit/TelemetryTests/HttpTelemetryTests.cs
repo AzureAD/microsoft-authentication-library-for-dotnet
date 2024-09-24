@@ -27,6 +27,8 @@ using Microsoft.Identity.Test.Common;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
+using System.Collections.Generic;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Test.Unit.TelemetryTests
 {
@@ -46,28 +48,19 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         /// <summary>
         /// 1.  Acquire Token Interactive successfully
         ///        Current_request = 4 | ATI_ID, 0 | 0
-        ///        Last_request = 4 | 0 | | |
         /// 
         /// 2. Acquire token silent with AT served from cache ... no calls to /token endpoint
         ///        
         /// 3. Acquire token silent with AT not served from cache (AT expired)
         ///         Current_request = 4 | ATS_ID, 2 | 0
-        ///         Last_request = 4 | 1 | | |
         ///         
         /// 4. Acquire Token silent with force_refresh = true -> error invalid_client
         /// Sent to server - 
         ///         Current_request = 4 | ATS_ID, 1 | 0
-        ///         Last_request = 4 | 0 | | |
-        ///         
-        /// State of client after error response is returned – (the successful silent request counter was flushed, last_request is reset, and now we add the error from step 4)
-        ///         Last_request = 4 | 0 | ATS_ID, Corr_step_4 | invalid_client |
         /// 
         /// 5. Acquire Token silent with force_refresh = true -> error interaction_required
         /// Sent to the server - 
         ///         Current_request = 4 | ATS_ID, 1 | 0
-        ///         Last_request = 4 | 0 | ATS_ID, corr_step_4 | invalid_client
-        /// State of client after response is returned - 
-        ///         Last_request = 4 | 0 | ATS_ID, corr_step_5 | interaction_required
         ///         
         /// 6. Acquire Token interactive -> error user_cancelled (i.e. no calls to /token endpoint)
         ///       No calls to token endpoint
@@ -75,30 +68,15 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         /// 7. Acquire Token interactive -> HTTP error 503 (Service Unavailable)
         ///
         ///        Current_request = 4 | ATI_ID, 0 | 0
-        ///        Last_request = 4 | 0 |  ATS_ID, corr_step_5, ATI_ID, corr_step-6, | interaction_required, 
-        ///       authentication_canceled|
-        ///
-        /// State of the client: 
-        ///
-        ///        Last_request = 4 | 0 |  ATS_ID, corr_step_5, ATI_ID, corr_step-6, ATI-ID, corr_step-6b | interaction_required, 
-        ///       authentication_canceled, ServiceUnavailable|
         ///
         /// 8. Acquire Token interactive -> successful
         ///
         /// Sent to the server - 
         ///        Current_request = 4 | ATI_ID, 0 | 0
-        ///        Last_request = 4 | 0 |  ATS_ID, corr_step_5, ATI_ID, corr_step-6, ATI-ID, corr_step-6b  | interaction_required, 
-        ///        authentication_canceled, ServiceUnavailable |
-        ///
-        /// State of the client after response is returned - 
-        ///        Last_request = NULL
         ///
         /// 9. Acquire Token Silent with force-refresh false -> successful
         /// Sent to the server - 
         ///         Current_request = 4 | ATI_ID, 2 | 0
-        ///         Last_request = NULL
-        /// State of the client after response is returned - 
-        ///        Last_request = 4 | 1 | | |
         /// </summary>
         [TestMethod]
         public async Task TelemetryAcceptanceTestAsync()
@@ -164,22 +142,17 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         /// <summary>
         /// 1.  Acquire Token Interactive successfully
         ///        Current_request = 4 |ATS_ID, 0 | , , 0, , , , 1
-        ///        Last_request = 4 | 0 | | |
         /// 
         /// 2. Acquire token silent with AT served from cache ... no calls to /token endpoint
         ///        
         /// 3. Acquire token silent with AT expired
         ///         Current_request = 4 | ATS_ID, 3 | , , 1, , , , 1
-        ///         Last_request = 4 | 1 | | |
         ///         
         /// 4. Acquire Token silent with refresh on
         ///         Current_request = 4 | ATS_ID, 4 | , , 1, , , , 1
-        ///         Last_request = 4 | 0 | | |
         /// 
         /// 5. Acquire Token silent with force_refresh = true 
         ///         Current_request = 4 | ATS_ID, 1 | , , 1, , , , 1
-        ///         Last_request = 4 | 0 | | |
-        ///         
         /// </summary>
         [TestMethod]
         public async Task TelemetryCacheRefreshTestAsync()
@@ -221,7 +194,6 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
         /// <summary>
         /// Acquire token with serialized token cache successfully
         ///    Current_request = 4 | ATC_ID, 0 | 1
-        ///    Last_request = 4 | 0 | | |
         /// </summary>
         [TestMethod]
         public async Task TelemetryTestSerializedTokenCacheAsync()
@@ -387,6 +359,115 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
                     .ExecuteAsync().ConfigureAwait(false);
 
                 AssertCurrentTelemetry(requestHandler.ActualRequestMessage, ApiIds.AcquireTokenByUsernamePassword, CacheRefreshReason.NotApplicable);
+            }
+        }
+
+        [TestMethod]
+        public async Task CallerSdkDetailsTestAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var cca = CreateConfidentialClientApp();
+
+                await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { 
+                        { "caller-sdk-id", "testApiId" },
+                        { "caller-sdk-ver", "testSdkVersion"} })
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(
+                    requestHandler.ActualRequestMessage, 
+                    ApiIds.AcquireTokenForClient, 
+                    CacheRefreshReason.NoCachedAccessToken,
+                    callerSdkId: "testApiId", 
+                    callerSdkVersion: "testSdkVersion");
+            }
+        }
+
+        [TestMethod]
+        public async Task CallerSdkDetails_ConstraintsTestAsync()
+        {
+            string callerSdkId = "testApiIdMoreThan10Chars";
+            string callerSdkVersion = "testSdkVersionMoreThan20Chars";
+
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var cca = CreateConfidentialClientApp();
+
+                await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, string> {
+                        { "caller-sdk-id", callerSdkId },
+                        { "caller-sdk-ver", callerSdkVersion } })
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(
+                    requestHandler.ActualRequestMessage,
+                    ApiIds.AcquireTokenForClient,
+                    CacheRefreshReason.NoCachedAccessToken,
+                    callerSdkId: callerSdkId.Substring(0, Math.Min(callerSdkId.Length, Constants.CallerSdkIdMaxLength)),
+                    callerSdkVersion: callerSdkVersion.Substring(0, Math.Min(callerSdkVersion.Length, Constants.CallerSdkVersionMaxLength)));
+            }
+        }
+
+        [TestMethod]
+        public async Task CallerSdkDetailsWithClientNameTestAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithClientName("testApiId")
+                .WithClientVersion("testSdkVersion")
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithHttpManager(_harness.HttpManager)
+                .BuildConcrete();
+
+                await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(
+                    requestHandler.ActualRequestMessage,
+                    ApiIds.AcquireTokenForClient,
+                    CacheRefreshReason.NoCachedAccessToken,
+                    callerSdkId: "testApiId",
+                    callerSdkVersion: "testSdkVersion");
+            }
+        }
+
+        [TestMethod]
+        public async Task CallerSdkDetailsWithNullClientNameTestAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                _harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                var requestHandler = _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var cca = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                .WithClientSecret(TestConstants.ClientSecret)
+                .WithClientName(null)
+                .WithClientVersion(null)
+                .WithAuthority(TestConstants.AuthorityCommonTenant)
+                .WithHttpManager(_harness.HttpManager)
+                .BuildConcrete();
+
+                await cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                AssertCurrentTelemetry(
+                    requestHandler.ActualRequestMessage,
+                    ApiIds.AcquireTokenForClient,
+                    CacheRefreshReason.NoCachedAccessToken,
+                    callerSdkId: "",
+                    callerSdkVersion: "");
             }
         }
 
@@ -617,7 +698,9 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             ApiIds apiId,
             CacheRefreshReason cacheInfo,
             bool isCacheSerialized = false,
-            bool isLegacyCacheEnabled = true)
+            bool isLegacyCacheEnabled = true, 
+            string callerSdkId = "", 
+            string callerSdkVersion = "")
         {
             string[] telemetryCategories = requestMessage.Headers.GetValues(
                 TelemetryConstants.XClientCurrentTelemetry).Single().Split('|');
@@ -625,7 +708,7 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(3, telemetryCategories.Length);
             Assert.AreEqual(1, telemetryCategories[0].Split(',').Length); // version
             Assert.AreEqual(5, telemetryCategories[1].Split(',').Length); // api_id, cache_info, region_used, region_source, region_outcome
-            Assert.AreEqual(3, telemetryCategories[2].Split(',').Length); // platform_fields
+            Assert.AreEqual(5, telemetryCategories[2].Split(',').Length); // platform_fields
 
             Assert.AreEqual(TelemetryConstants.HttpTelemetrySchemaVersion.ToString(), telemetryCategories[0]); // version
 
@@ -640,6 +723,10 @@ namespace Microsoft.Identity.Test.Unit.TelemetryTests
             Assert.AreEqual(isLegacyCacheEnabled ? "1" : "0", telemetryCategories[2].Split(',')[1]); // is_legacy_cache_enabled
 
             Assert.AreEqual(TokenType.Bearer.ToString("D"), telemetryCategories[2].Split(',')[2]);
+
+            Assert.AreEqual(callerSdkId, telemetryCategories[2].Split(',')[3]);
+
+            Assert.AreEqual(callerSdkVersion, telemetryCategories[2].Split(',')[4]);
         }    
     }
 }
