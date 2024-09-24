@@ -24,14 +24,15 @@ using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
 #endif
 
-namespace Microsoft.Identity.Test.Unit.CDT
+namespace Microsoft.Identity.Client
 {
+    //Temporary location
     public class CdtAuthenticationScheme : IAuthenticationScheme
     {
         //CDT
-        public const string CdtKey = "ds_cnf";
-        public const string CdtNonce = "ds_nonce";
-        public const string CdtEncKey = "ds_enc";
+        public const string CdtKey = "xms_ds_cnf";
+        public const string CdtNonce = "xms_ds_nonce";
+        public const string CdtEncKey = "xms_ds_enc";
         public const string NoAlgorythmPrefix = "none";
         public const string JasonWebTokenType = "JWT";
         public const string CdtEncryptedAlgoryth = "dir";
@@ -71,9 +72,10 @@ namespace Microsoft.Identity.Test.Unit.CDT
 
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()
         {
+            var temp = "eyJrdHkiOiAiUlNBIiwgIm4iOiAiMUNMeDNXRW1NWlQ3el92Szc2ZHBaVVNwX2kyMEEza0Y0OWVpemtCQTBFSTJ4el9pcldTcm9BamJrRTk4dlp3SFM0QVlQV2I5WEd2YTFPYVNMX0RqQTFPTG1nSll4Uk45cU5jd1lKeGhsN3hqaGJlU25RMUMtR1NNS3ZWRzJnaDdQUlhaaU1xVXFuOWt3UzBXa1RoNDhSREMxR0xhTFFfNzZmb0dZMmo0MlNvel9XYnNRemtnVGo0TDVaVTZTWjJ3QTFwMlZ6WFliOVd1M3A4U2VuV3JCTDUzOWhUZjVGelp0b1E0R2IxNzMzVzFmWVFsUkotYUZVMTFfdEc1Umx2Ui1nSWFweHJMWkFKM1NHM28wQ2ZPa2FaejdKT2RETnJHNnE4akF3ZmJOdFJ1eDYzbnJZZ0FHc3VhemlXalZxRnZiclNMX2Mya3dZaDlZUl9uYVJFOG1RPT0iLCAiZSI6ICJBUUFCIn0%3D";
             return new Dictionary<string, string>() {
                 { OAuth2Parameter.TokenType, Constants.BearerAuthHeaderPrefix},
-                { CdtRequestConfirmation, _dsReqCnf}
+                { CdtRequestConfirmation, Base64UrlHelpers.Encode(_dsReqCnf)}
             };
         }
 
@@ -96,7 +98,7 @@ namespace Microsoft.Identity.Test.Unit.CDT
         //    var header = new JObject();
         //    header[JsonWebTokenConstants.Type] = Constants.JasonWebTokenType;
         //    header[JsonWebTokenConstants.Algorithm] = Constants.NoAlgorythmPrefix;
-            
+
         //    var body = CreateCdtBody(msalAccessTokenCacheItem);
 
         //    string constraintToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header), false);
@@ -260,4 +262,34 @@ namespace Microsoft.Identity.Test.Unit.CDT
             return $@"{{""e"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""kty"":""RSA"",""n"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
         }
     }
+
+    /// <summary>
+    /// Delagated Constraint
+    /// </summary>
+    public class ConstraintDict
+    {
+        public Dictionary<string, string> Constraints { get; set; } = new Dictionary<string, string>();
+    }
+
+    public class Constraint
+    {
+        public string Version { get; set; }
+        public string Type { get; set; }
+        public string Action { get; set; }
+        public List<ConstraintTarget> Targets { get; set; }
+        public Dictionary<string, object> AdditionalProperties { get; set; }
+    }
+
+    public class ConstraintTarget
+    {
+        public string Value { get; set; }
+        public string Policy { get; set; }
+        public Dictionary<string, object> AdditionalProperties { get; set; }
+        public ConstraintTarget(string value, string policy)
+        {
+            Value = value;
+            Policy = policy;
+        }
+    }
+
 }

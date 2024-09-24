@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 return null;
             }
 
-            var cacheParameters = extraDataFromResponse
+            var cacheParameters = extraDataFromResponse?
                                     .Where(x => persistedCacheParameters.Contains(x.Key))
 #if SUPPORTS_SYSTEM_TEXT_JSON
                                     .ToDictionary(x => x.Key, x => x.Value.ToString());

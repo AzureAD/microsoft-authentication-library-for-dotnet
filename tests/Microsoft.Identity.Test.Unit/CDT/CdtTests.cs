@@ -15,6 +15,7 @@ using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -29,11 +30,14 @@ namespace Microsoft.Identity.Test.Unit.CDT
         [DeploymentItem(@"Resources\testCert.crtfile")]
         public async Task CDT_WithCertTest_Async()
         {
-            Constraint constraint = new Constraint();
+            Client.Constraint constraint = new Client.Constraint();
+            constraint.Type = "wk:user";
+            constraint.Action = "U";
+            constraint.Version = "1.0";
+            constraint.Targets = new List<ConstraintTarget>();
 
-            constraint.Constraints.Add("typ","wk:user");
-            constraint.Constraints.Add("action", "update");
-            constraint.Constraints.Add("target", "[\"val1\", \"val2\"]");
+            constraint.Targets.Add(new ConstraintTarget("constraint1", "pol1"));
+            constraint.Targets.Add(new ConstraintTarget("constraint2", "pol2"));
 
             var constraintAsString = JsonHelper.SerializeToJson(constraint);
 
@@ -161,14 +165,6 @@ namespace Microsoft.Identity.Test.Unit.CDT
             var constraintsClaims = IdToken.Parse(constraints).ClaimsPrincipal;
             var constraintsClaim = constraintsClaims.FindAll("constraints").Single().Value;
             Assert.AreEqual(constraint, constraintsClaim);
-        }
-
-        /// <summary>
-        /// Delagated Constraint
-        /// </summary>
-        public class Constraint
-        {
-            public Dictionary<string, string> Constraints { get; set; } = new Dictionary<string, string>();
         }
     }
 }

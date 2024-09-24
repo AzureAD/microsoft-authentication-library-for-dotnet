@@ -364,7 +364,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string encKey = "someKey")
         {
             return CreateSuccessResponseMessage(
-                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\", \"ds_cnf\":\"" + confirmation + "\", \"ds_nonce\":\"" + nonce + "\", \"ds_enc\":\"" + encKey + "\"}");
+                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\", \"xms_ds_cnf\":\"" + confirmation + "\", \"xms_ds_nonce\":\"" + nonce + "\", \"xms_ds_enc\":\"" + encKey + "\"}");
         }
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(
