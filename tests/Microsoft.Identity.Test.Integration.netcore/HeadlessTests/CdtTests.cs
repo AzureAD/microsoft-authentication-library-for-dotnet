@@ -43,11 +43,11 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             //constraint.Targets.Add(new ConstraintTarget("constraint1", "pol1"));
             //constraint.Targets.Add(new ConstraintTarget("constraint2", "pol2"));
 
-            //var constraintAsString = JsonHelper.SerializeToJson(constraint);
+            //var constraintAsString = JsonHelper.SerializeToJson(new[] { constraint });
 
             //TODO: Resolve serialization failure in test. Seems to be related to some internal .net serialization issue
             //Using a hardcoded string for now
-            var constraintAsString = "{\"Version\":\"1.0\",\"Type\":\"wk:user\",\"Action\":\"U\",\"Targets\":[{\"Value\":\"constraint1\",\"Policy\":\"pol1\",\"AdditionalProperties\":null},{\"Value\":\"constraint2\",\"Policy\":\"pol2\",\"AdditionalProperties\":null}],\"AdditionalProperties\":null}";
+            var constraintAsString = "[{\"Version\":\"1.0\",\"Type\":\"wk:user\",\"Action\":\"U\",\"Targets\":[{\"Value\":\"constraint1\",\"Policy\":\"pol1\",\"AdditionalProperties\":null},{\"Value\":\"constraint2\",\"Policy\":\"pol2\",\"AdditionalProperties\":null}],\"AdditionalProperties\":null}]";
 
             var secret = GetSecretLazy(KeyVaultInstance.MSIDLab, TestConstants.MsalCCAKeyVaultSecretName).Value;
             var certificate = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
