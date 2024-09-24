@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.Extensibility
             // TODO: bogavril - AdditionalAccessTokenPropertiesToCache needs implementation
             return builder;
         }
-        
+#if !MOBILE
         /// Specifies additional parameters acquired from authentication responses to be cached with the access token that are normally not included in the cache object.
         /// these values can be read from the <see cref="AuthenticationResult.AdditionalResponseParameters"/> parameter.
         /// </summary>
