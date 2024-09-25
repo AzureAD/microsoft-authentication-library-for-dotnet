@@ -85,6 +85,36 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
+        public async Task DstsClientCredentialWithTenantIdFromAuthorityTestAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                IConfidentialClientApplication app = ConfidentialClientApplicationBuilder
+                    .Create(TestConstants.ClientId)
+                    .WithHttpManager(httpManager)
+                    .WithAuthority(TestConstants.DstsAuthorityTenantless, TestConstants.TenantId)
+                    .WithClientSecret(TestConstants.ClientSecret)
+                    .Build();
+
+                Assert.AreEqual(TestConstants.DstsAuthorityTenanted, app.Authority);
+                var confidentailClientApp = (ConfidentialClientApplication)app;
+                Assert.AreEqual(AuthorityType.Dsts, confidentailClientApp.AuthorityInfo.AuthorityType);
+
+                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(TestConstants.DstsAuthorityTenanted));
+
+                AuthenticationResult result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .WithTenantIdFromAuthority(new Uri(TestConstants.DstsAuthorityTenanted))
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            }
+        }
+
+        [TestMethod]
         public void DstsAuthorityFlags()
         {
             var app = ConfidentialClientApplicationBuilder

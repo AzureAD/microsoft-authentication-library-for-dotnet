@@ -433,6 +433,30 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             Assert.IsFalse(s_b2cAuthority.AuthorityInfo.IsDefaultAuthority);
         }
 
+        [DataTestMethod]
+        [DataRow(TestConstants.AuthorityCommonTenant, typeof(AadAuthority), "Aad")]
+        [DataRow(TestConstants.AuthorityCommonPpeAuthority, typeof(AadAuthority), "Aad")]
+        [DataRow(TestConstants.AuthorityConsumersTenant, typeof(AadAuthority), "Aad")]
+        [DataRow(TestConstants.AuthorityOrganizationsTenant, typeof(AadAuthority), "Aad")]
+        [DataRow(TestConstants.AuthorityGuidTenant, typeof(AadAuthority), "Aad")]
+        [DataRow(TestConstants.DstsAuthorityCommon, typeof(DstsAuthority), "Dsts")]
+        [DataRow(TestConstants.DstsAuthorityTenantless, typeof(DstsAuthority), "Dsts")]
+        [DataRow(TestConstants.ADFSAuthority, typeof(AdfsAuthority), "Adfs")]
+        [DataRow(TestConstants.CiamAuthorityMainFormat, typeof(CiamAuthority), "Ciam")]
+        public void VerifyConfigAuthorityType(string authorityHost, Type authorityTypeInstance, string authorityType)
+        {
+            string tenantId = "tenant";
+
+            var app = ConfidentialClientApplicationBuilder
+                .Create(TestConstants.ClientId)
+                .WithAuthority(authorityHost, tenantId)
+                .WithClientSecret("secret")
+                .BuildConcrete();
+
+            Assert.IsInstanceOfType(app.ServiceBundle.Config.Authority, authorityTypeInstance);
+            Assert.AreEqual(app.AuthorityInfo.AuthorityType.ToString(), authorityType);
+        }
+
         private static void VerifyAuthority(
             Authority configAuthority,
             Authority requestAuthority,
