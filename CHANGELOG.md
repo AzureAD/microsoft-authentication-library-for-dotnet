@@ -6,7 +6,7 @@
 - Managed identity `.WithClaims()` and `.WithClientCapabilities()` APIs are now generally available. See [Issue #4921](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4921) 
 
 ### Bug Fixes
-- Fix a bug where MSAL.Net fails for dsts authority when using `.WithTenantIdFromAuthority()`. See [Issue #4927](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4927)
+- Fix a bug where MSAL .Net fails for DSTS authority when using `.WithTenantIdFromAuthority()`. See [Issue #4927](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4927)
 
 4.64.1
 ==========
