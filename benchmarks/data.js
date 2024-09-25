@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1727274343749,
+  "lastUpdate": 1727274345801,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -14292,6 +14292,54 @@ window.BENCHMARK_DATA = {
             "value": 125445.31321498325,
             "unit": "ns",
             "range": "± 1833.2697696215423"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "54e1a94d0a3ef6574820a8ac1851b0cfacfb0af3",
+          "message": "Remove experimental flag on Managed Identity Claims and Capabilities APIs (#4942)\n\ninit\r\n\r\nCo-authored-by: Gladwin Johnson <gljohns@microsoft.com>",
+          "timestamp": "2024-09-25T07:18:00-07:00",
+          "tree_id": "11c6a41328f4dadbc651b497702d93c94bbfdaee",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/54e1a94d0a3ef6574820a8ac1851b0cfacfb0af3"
+        },
+        "date": 1727274345285,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 12425.084229532878,
+            "unit": "ns",
+            "range": "± 64.52972478588178"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 125188.44801682692,
+            "unit": "ns",
+            "range": "± 426.47251217249766"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 23517.597756522042,
+            "unit": "ns",
+            "range": "± 138.93033351493963"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForClientCacheTests.AcquireTokenForClient_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 124610.07965494791,
+            "unit": "ns",
+            "range": "± 1453.9781257421118"
           }
         ]
       }
