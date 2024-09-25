@@ -1,3 +1,13 @@
+4.65.0
+==========
+### New Features
+- Update telemetry to include the caller sdk details. See [Issue #4863](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4863)
+- MSAL.Net now exposes an API to enable developers to cache additional values in the token response. See [Issue #4922](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4922)
+- Managed identity `.WithClaims()` and `.WithClientCapabilities()` APIs are not generally available. See [Issue #4921](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4921) 
+
+### Bug Fixes
+- Fix a bug where MSAL.Net fails for dsts authority when using `.WithTenantIdFromAuthority()`. See [Issue #4927](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4927)
+
 4.64.1
 ==========
 ### Bug Fixes 
