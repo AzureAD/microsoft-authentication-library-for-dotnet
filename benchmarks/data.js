@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1727274350410,
+  "lastUpdate": 1727295283880,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6362,6 +6362,42 @@ window.BENCHMARK_DATA = {
             "value": 381126.43137254904,
             "unit": "ns",
             "range": "± 13726.25909453104"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "61847233+neha-bhargava@users.noreply.github.com",
+            "name": "Neha Bhargava",
+            "username": "neha-bhargava"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e8baa99af1726fe40b9a0ba302dfb9f3bde12803",
+          "message": "Fix the config authority type to acquire the type from AuthorityInfo (#4943)\n\n* Fix the config authority type to acquire the type using the authority info\r\n\r\n* Add tests specific to bug",
+          "timestamp": "2024-09-25T13:07:21-07:00",
+          "tree_id": "ee4b1729bcbf6cc00cf5d9d41a0aa8ade2497df0",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/e8baa99af1726fe40b9a0ba302dfb9f3bde12803"
+        },
+        "date": 1727295280177,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 269104.52777777775,
+            "unit": "ns",
+            "range": "± 8838.21794735345"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 525523.5,
+            "unit": "ns",
+            "range": "± 129538.9830515943"
           }
         ]
       }
