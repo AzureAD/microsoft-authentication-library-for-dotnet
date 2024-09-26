@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1727378094585,
+  "lastUpdate": 1727378096561,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -32072,6 +32072,66 @@ window.BENCHMARK_DATA = {
             "value": 145561.31578947368,
             "unit": "ns",
             "range": "± 21018.969184020196"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "61847233+neha-bhargava@users.noreply.github.com",
+            "name": "Neha Bhargava",
+            "username": "neha-bhargava"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e8baa99af1726fe40b9a0ba302dfb9f3bde12803",
+          "message": "Fix the config authority type to acquire the type from AuthorityInfo (#4943)\n\n* Fix the config authority type to acquire the type using the authority info\r\n\r\n* Add tests specific to bug",
+          "timestamp": "2024-09-25T13:07:21-07:00",
+          "tree_id": "ee4b1729bcbf6cc00cf5d9d41a0aa8ade2497df0",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/e8baa99af1726fe40b9a0ba302dfb9f3bde12803"
+        },
+        "date": 1727378096054,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (1, 10))",
+            "value": 17707.612874348957,
+            "unit": "ns",
+            "range": "± 60.66385113124769"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (10000, 10))",
+            "value": 29013.461389160155,
+            "unit": "ns",
+            "range": "± 130.6147437241985"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 9539.834196908134,
+            "unit": "ns",
+            "range": "± 36.09714585462992"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 19593.119656880695,
+            "unit": "ns",
+            "range": "± 45.07365078693024"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 47505.75,
+            "unit": "ns",
+            "range": "± 393.02003765711487"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 131940.0752688172,
+            "unit": "ns",
+            "range": "± 13528.805916520561"
           }
         ]
       }
