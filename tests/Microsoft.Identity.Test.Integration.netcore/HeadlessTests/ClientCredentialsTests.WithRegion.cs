@@ -125,17 +125,18 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string region = ConfidentialClientApplication.AttemptRegionDiscovery)
         {
             var builder = ConfidentialClientApplicationBuilder.Create(settings.ClientId);
-            if (useClaims)
-            {
-                builder.WithClientAssertion(() => GetSignedClientAssertionUsingMsalInternal(settings.ClientId, GetClaims(settings)));
-            }
-            else
-            {
-                builder.WithCertificate(settings.GetCertificate());
-            }
+            //if (useClaims)
+            //{
+            //    builder.WithClientAssertion(() => GetSignedClientAssertionUsingMsalInternal(settings.ClientId, GetClaims(settings)));
+            //}
+            //else
+            //{
+            //    builder.WithCertificate(settings.GetCertificate());
+            //}
 
             builder.WithAuthority($@"https://{settings.Environment}/{settings.TenantId}")
                 .WithInstanceDiscovery(settings.InstanceDiscoveryEndpoint)
+                .WithClientSecret(settings.GetSecret())
                 .WithTestLogging()
                 .WithExperimentalFeatures(true)
                 .WithHttpClientFactory(factory);
