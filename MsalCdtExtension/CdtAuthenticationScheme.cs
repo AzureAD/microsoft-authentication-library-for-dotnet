@@ -69,7 +69,6 @@ namespace MsalCdtExtension
 
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()
         {
-            var temp = "eyJrdHkiOiAiUlNBIiwgIm4iOiAiMUNMeDNXRW1NWlQ3el92Szc2ZHBaVVNwX2kyMEEza0Y0OWVpemtCQTBFSTJ4el9pcldTcm9BamJrRTk4dlp3SFM0QVlQV2I5WEd2YTFPYVNMX0RqQTFPTG1nSll4Uk45cU5jd1lKeGhsN3hqaGJlU25RMUMtR1NNS3ZWRzJnaDdQUlhaaU1xVXFuOWt3UzBXa1RoNDhSREMxR0xhTFFfNzZmb0dZMmo0MlNvel9XYnNRemtnVGo0TDVaVTZTWjJ3QTFwMlZ6WFliOVd1M3A4U2VuV3JCTDUzOWhUZjVGelp0b1E0R2IxNzMzVzFmWVFsUkotYUZVMTFfdEc1Umx2Ui1nSWFweHJMWkFKM1NHM28wQ2ZPa2FaejdKT2RETnJHNnE4akF3ZmJOdFJ1eDYzbnJZZ0FHc3VhemlXalZxRnZiclNMX2Mya3dZaDlZUl9uYVJFOG1RPT0iLCAiZSI6ICJBUUFCIn0%3D";
             return new Dictionary<string, string>() {
                 { Constants.TokenType, Constants.BearerAuthHeaderPrefix},
                 { CdtRequestConfirmation, Base64UrlHelpers.Encode(_dsReqCnf)}
