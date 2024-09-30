@@ -13,8 +13,24 @@ namespace Microsoft.Identity.Client.AuthScheme
     {
         /// <summary>
         /// Value to log to telemetry
+        /// Values available:
+        /// 
+        /// Bearer token type.
+        /// Bearer = 1
+        /// 
+        /// Pop token type.
+        /// Pop = 2,
+        ///
+        /// Ssh-cert token type.
+        /// SshCert = 3,
+        ///
+        /// External token type.
+        /// External = 4,
+        ///
+        /// Cdt token type.
+        /// Cdt = 5
         /// </summary>
-        TokenType TelemetryTokenType { get; }
+        int TelemetryTokenType { get; }
 
         /// <summary>
         /// Prefix for the HTTP header that has the token. E.g. "Bearer" or "POP"

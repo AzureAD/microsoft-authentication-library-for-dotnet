@@ -49,7 +49,7 @@ namespace MsalCdtExtension
             _dsReqCnf = _cdtCryptoProvider.CannonicalPublicKeyJwk;
         }
 
-        public TokenType TelemetryTokenType => TokenType.Cdt;
+        public int TelemetryTokenType => 5;
 
         public string AuthorizationHeaderPrefix => Constants.BearerAuthHeaderPrefix;
 
