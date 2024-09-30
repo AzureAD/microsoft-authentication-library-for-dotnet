@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+#if NET6_0_OR_GREATER
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -18,6 +18,7 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MsalCdtExtension;
 
 namespace Microsoft.Identity.Test.Unit.CDT
 {
@@ -173,3 +174,4 @@ namespace Microsoft.Identity.Test.Unit.CDT
         }
     }
 }
+#endif

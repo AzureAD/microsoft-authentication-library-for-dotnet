@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+#if NET6_0_OR_GREATER
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +16,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MsalCdtExtension;
 
 namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 {
@@ -116,3 +117,4 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
         }
     }
 }
+#endif

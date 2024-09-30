@@ -1,22 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Net;
+
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.AuthScheme;
-using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.Utils;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 using JObject = System.Text.Json.Nodes.JsonObject;
 using JToken = System.Text.Json.Nodes.JsonNode;
 
@@ -71,7 +64,7 @@ namespace MsalCdtExtension
         {
             return new Dictionary<string, string>() {
                 { Constants.TokenType, Constants.BearerAuthHeaderPrefix},
-                { CdtRequestConfirmation, Base64UrlHelpers.Encode(_dsReqCnf)}
+                { CdtRequestConfirmation, Base64UrlEncoder.Encode(_dsReqCnf)}
             };
         }
 
@@ -85,7 +78,7 @@ namespace MsalCdtExtension
             authenticationResult.AdditionalResponseParameters.TryGetValue(CdtNonce, out string nonce);
             var body = CreateCdtBody(authenticationResult.AccessToken, nonce);
 
-            string constraintToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header), false);
+            string constraintToken = CreateJWS(body.ToJsonString(), header.ToJsonString(), false);
             authenticationResult.AccessToken = constraintToken;
         }
 
@@ -95,8 +88,8 @@ namespace MsalCdtExtension
             var body = new JObject
             {
                 // Mandatory parameters
-                [CdtClaimTypes.Ticket] = secret,
-                [CdtClaimTypes.ConstraintsToken] = CreateCdtConstraintsJwT(nonce)
+                [Constants.Ticket] = secret,
+                [Constants.ConstraintsToken] = CreateCdtConstraintsJwT(nonce)
                 //[CdtClaimTypes.ConstraintsToken] = string.IsNullOrEmpty(encryptionKey) 
                 //                                    ? CreateCdtConstraintsJwT(msalAccessTokenCacheItem) :
                 //                                      CreateEncryptedCdtConstraintsJwT(msalAccessTokenCacheItem, encryptionKey)
@@ -105,37 +98,25 @@ namespace MsalCdtExtension
             return body;
         }
 
-        //private JToken CreateEncryptedCdtConstraintsJwT(MsalAccessTokenCacheItem msalAccessTokenCacheItem, string encryptionKey)
-        //{
-        //    var header = new JObject();
-        //    header[JsonWebTokenConstants.Algorithm] = Constants.CdtEncryptedAlgoryth;
-        //    header[JsonWebTokenConstants.CdtEncrypt] = Constants.CdtEncryptedValue;
-
-        //    var body = new JObject
-        //    {
-        //        // TODO: ENCRYPT JWT
-        //        [CdtClaimTypes.Constraints] = CreateCdtConstraintsJwT(msalAccessTokenCacheItem)
-        //    };
-
-        //    string cdtConstraintToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header));
-        //    return cdtConstraintToken;
-        //}
-
         private JToken CreateCdtConstraintsJwT(string nonce)
         {
-            var header = new JObject();
-            header[Constants.Algorithm] = _cdtCryptoProvider.CryptographicAlgorithm;
-            header[Constants.Type] = JasonWebTokenType;
-
-            var body = new JObject
+            var header = new
             {
-                // Mandatory parameters
-                [CdtClaimTypes.Nonce] = nonce,
-                [CdtClaimTypes.Constraints] = _constraints
+                Alg = _cdtCryptoProvider.CryptographicAlgorithm,
+                Type = JasonWebTokenType
             };
 
-            string cdtConstraintToken = CreateJWS(JsonHelper.JsonObjectToString(body), JsonHelper.JsonObjectToString(header));
-            return cdtConstraintToken;
+            var body = new
+            {
+                Nonce = nonce,
+                Constraints = _constraints
+            };
+
+            string headerJson = JsonSerializer.Serialize(header);
+            string bodyJson = JsonSerializer.Serialize(body);
+            JsonWebToken cdtToken = new JsonWebToken(headerJson, bodyJson);
+
+            return cdtToken.EncodedToken;
         }
 
         /// <summary>
@@ -158,15 +139,15 @@ namespace MsalCdtExtension
         private string CreateJWS(string payload, string header, bool signPayload = true)
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(Base64UrlHelpers.Encode(Encoding.UTF8.GetBytes(header)));
+            sb.Append(Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header)));
             sb.Append('.');
-            sb.Append(Base64UrlHelpers.Encode(payload));
+            sb.Append(Base64UrlEncoder.Encode(payload));
             string headerAndPayload = sb.ToString();
 
             if (signPayload)
             {
                 sb.Append('.');
-                sb.Append(Base64UrlHelpers.Encode(_cdtCryptoProvider.Sign(Encoding.UTF8.GetBytes(headerAndPayload))));
+                sb.Append(Base64UrlEncoder.Encode(_cdtCryptoProvider.Sign(Encoding.UTF8.GetBytes(headerAndPayload))));
             }
 
             return sb.ToString();

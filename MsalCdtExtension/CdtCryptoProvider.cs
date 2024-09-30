@@ -8,6 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MsalCdtExtension
 {
@@ -47,7 +48,7 @@ namespace MsalCdtExtension
         /// </summary>
         private static string ComputeCanonicalJwk(RSAParameters rsaPublicKey)
         {
-            return $@"{{""e"":""{Base64UrlHelpers.Encode(rsaPublicKey.Exponent)}"",""kty"":""RSA"",""n"":""{Base64UrlHelpers.Encode(rsaPublicKey.Modulus)}""}}";
+            return $@"{{""e"":""{Base64UrlEncoder.Encode(rsaPublicKey.Exponent)}"",""kty"":""RSA"",""n"":""{Base64UrlEncoder.Encode(rsaPublicKey.Modulus)}""}}";
         }
     }
 }
