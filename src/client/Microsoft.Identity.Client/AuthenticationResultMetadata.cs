@@ -78,6 +78,11 @@ namespace Microsoft.Identity.Client
         public RegionDetails RegionDetails { get; set; }
 
         /// <summary>
+        /// Time, in milliseconds, spent in the token creation of the constrained delegation token.
+        /// </summary>
+        public long DurationInCdtInMs { get; set; }
+
+        /// <summary>
         /// May contain telemetry data. 
         /// </summary>
         /// <remarks>
