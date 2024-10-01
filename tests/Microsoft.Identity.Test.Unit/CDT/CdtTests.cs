@@ -18,7 +18,6 @@ using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MsalCdtExtension;
 
 namespace Microsoft.Identity.Test.Unit.CDT
 {
@@ -59,14 +58,14 @@ namespace Microsoft.Identity.Test.Unit.CDT
 
                 var cert = new X509Certificate2(
                             ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), TestConstants.TestCertPassword);
-                var provider = new CdtCryptoProvider(cert);
+                var provider = new CdtCryptoProvider();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulCDTClientCredentialTokenResponseMessage();
 
                 MsalAddIn cdtAddin = new MsalAddIn()
                 {
-                    AuthenticationScheme = new CdtAuthenticationScheme(constraintAsString, cert),
+                    AuthenticationScheme = new CdtAuthenticationScheme(constraintAsString),
                     AdditionalCacheParameters = new[] { CdtAuthenticationScheme.CdtNonce, CdtAuthenticationScheme.CdtEncKey}
                 };
 

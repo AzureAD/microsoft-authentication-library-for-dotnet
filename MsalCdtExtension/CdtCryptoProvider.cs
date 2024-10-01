@@ -10,32 +10,35 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
 
-namespace MsalCdtExtension
+namespace Microsoft.Identity.Client
 {
 
     //TODO: Add support for ECD keys
     public class CdtCryptoProvider
     {
-        private readonly X509Certificate2 _cert;
+        //private readonly X509Certificate2 _cert;
+        private RSA _signingKey;
+        internal const int RsaKeySize = 2048;
 
-        public CdtCryptoProvider(X509Certificate2 cert)
+        public CdtCryptoProvider()
         {
-            _cert = cert ?? throw new ArgumentNullException(nameof(cert));
+#if NETFRAMEWORK
+            // This method was obsolete in .NET,
+            // but Create() on .NET FWK defaults to PKCS1 padding.
+            _signingKey = RSA.Create("RSAPSS");
+#else
+            _signingKey = RSA.Create();
+#endif
 
-            RSA provider = _cert.GetRSAPublicKey();
-            RSAParameters publicKeyParams = provider.ExportParameters(false);
-            CannonicalPublicKeyJwk = ComputeCanonicalJwk(publicKeyParams);
+            _signingKey.KeySize = RsaKeySize;
+            RSAParameters publicKeyInfo = _signingKey.ExportParameters(false);
+
+            CannonicalPublicKeyJwk = ComputeCanonicalJwk(publicKeyInfo);
         }
 
-        public byte[] Sign(byte[] payload)
+        public RSA GetKey()
         {
-            using (RSA key = _cert.GetRSAPrivateKey())
-            {
-                return key.SignData(
-                    payload,
-                    HashAlgorithmName.SHA256,
-                    RSASignaturePadding.Pss);
-            }
+            return _signingKey;
         }
 
         public string CannonicalPublicKeyJwk { get; }

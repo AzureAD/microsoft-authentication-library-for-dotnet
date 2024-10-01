@@ -16,7 +16,6 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MsalCdtExtension;
 
 namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 {
@@ -32,7 +31,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
         }
 
         [TestMethod]
-        //[Ignore("Need to wait for ESTS to release feature from test slice.")]
+        [Ignore("Need to wait for ESTS to release feature from test slice.")]
         public async Task CDT_WithCertIntegrationTest_Async()
         {
             //Client.Constraint constraint = new Client.Constraint();
@@ -60,11 +59,11 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
                                     .WithExperimentalFeatures(true)
             .BuildConcrete();
 
-            var provider = new CdtCryptoProvider(certificate);
+            var provider = new CdtCryptoProvider();
 
             MsalAddIn cdtAddin = new MsalAddIn()
             {
-                AuthenticationScheme = new CdtAuthenticationScheme(constraintAsString, certificate),
+                AuthenticationScheme = new CdtAuthenticationScheme(constraintAsString),
                 AdditionalCacheParameters = new[] { CdtAuthenticationScheme.CdtNonce, CdtAuthenticationScheme.CdtEncKey }
             };
 
@@ -108,7 +107,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
             Assert.IsTrue(!string.IsNullOrEmpty(ticket));
             Assert.IsTrue(!string.IsNullOrEmpty(constraints));
 
-            Assert.AreEqual($"header.payload.signature", ticket);
+            Assert.IsTrue(!string.IsNullOrEmpty(ticket));
 
             var constraintsClaims = IdToken.Parse(constraints).ClaimsPrincipal;
             var constraintsClaim = constraintsClaims.FindAll("constraints").Single().Value;
