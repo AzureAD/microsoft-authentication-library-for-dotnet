@@ -185,8 +185,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheExtension", "tests\dev
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Extensions.Msal", "src\client\Microsoft.Identity.Client.Extensions.Msal\Microsoft.Identity.Client.Extensions.Msal.csproj", "{87679336-95BE-47E4-B42B-8F6860A0B215}"
 EndProject
-#Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MsalCdtExtension", "MsalCdtExtension\MsalCdtExtension.csproj", "{71FFABC1-A20A-48CC-86DD-4D28541F2359}"
-#EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MsalCdtExtension", "MsalCdtExtension\MsalCdtExtension.csproj", "{71FFABC1-A20A-48CC-86DD-4D28541F2359}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug + MobileApps|Any CPU = Debug + MobileApps|Any CPU
