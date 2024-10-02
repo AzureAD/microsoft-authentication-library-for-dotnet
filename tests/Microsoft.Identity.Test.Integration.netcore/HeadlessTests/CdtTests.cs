@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
         }
 
         [TestMethod]
-        [Ignore("Need to wait for ESTS to release feature from test slice.")]
+        //[Ignore("Need to wait for ESTS to release feature from test slice.")]
         public async Task CDT_WithCertIntegrationTest_Async()
         {
             //Client.Constraint constraint = new Client.Constraint();
@@ -61,14 +61,14 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             var provider = new CdtCryptoProvider();
 
-            MsalAddIn cdtAddin = new MsalAddIn()
+            MsalAuthenticationExtension cdtExtension = new MsalAuthenticationExtension()
             {
-                AuthenticationScheme = new CdtAuthenticationScheme(constraintAsString),
+                AuthenticationExtension = new CdtAuthenticationScheme(constraintAsString),
                 AdditionalCacheParameters = new[] { CdtAuthenticationScheme.CdtNonce, CdtAuthenticationScheme.CdtEncKey }
             };
 
             var result = await confidentialApp.AcquireTokenForClient(s_scopes)
-                                                .WithAddIn(cdtAddin)
+                                                .WithAuthenticationExtension(cdtExtension)
                                                 .WithExtraQueryParameters("dc=ESTS-PUB-JPELR1-AZ1-FD000-TEST1")
                                                 .ExecuteAsync()
                                                 .ConfigureAwait(false);
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             //Verify that the original AT token is cached and the CDT can be recreated
             result = await confidentialApp.AcquireTokenForClient(s_scopes)
-                .WithAddIn(cdtAddin)
+                .WithAuthenticationExtension(cdtExtension)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
 

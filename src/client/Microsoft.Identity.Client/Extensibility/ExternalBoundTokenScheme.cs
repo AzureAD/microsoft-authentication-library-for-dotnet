@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
-    internal class ExternalBoundTokenScheme : IAuthenticationScheme
+    internal class ExternalBoundTokenScheme : IAuthenticationOperation
     {
         private readonly string _keyId;
         private readonly string _tokenType;

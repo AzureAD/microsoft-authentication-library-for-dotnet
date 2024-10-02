@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public partial class AuthenticationResult
     {
-        private readonly IAuthenticationScheme _authenticationScheme;
+        private readonly IAuthenticationOperation _authenticationScheme;
 
         /// <summary>
         /// Constructor meant to help application developers test their apps. Allows mocking of authentication flows.
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client
         internal AuthenticationResult(
             MsalAccessTokenCacheItem msalAccessTokenCacheItem,
             MsalIdTokenCacheItem msalIdTokenCacheItem, 
-            IAuthenticationScheme authenticationScheme,
+            IAuthenticationOperation authenticationScheme,
             Guid correlationID,
             TokenSource tokenSource, 
             ApiEvent apiEvent,

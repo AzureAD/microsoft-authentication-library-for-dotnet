@@ -11,7 +11,8 @@ namespace Microsoft.Identity.Client.Extensibility
     /// <summary>
     /// TODO: design for 2 things - Test User and CDT
     /// </summary>
-    public class MsalAddIn
+    public class MsalAuthenticationExtension
+
     {
         /// <summary>
         /// 
@@ -19,10 +20,10 @@ namespace Microsoft.Identity.Client.Extensibility
         public Func<OnBeforeTokenRequestData, Task> OnBeforeTokenRequestHandler { get; set; }
 
         /// <summary>
-        /// Changes the 
+        /// Enables the developer to provide a custom authentication extension.
         /// </summary>
         /// TODO: guidance on how this interacts with OnBeforeTokenRequestHandler
-        public IAuthenticationScheme AuthenticationScheme { get; set; }
+        public IAuthenticationOperation AuthenticationExtension { get; set; }
 
         /// <summary>
         /// Specifies additional parameters acquired from authentication responses to be cached

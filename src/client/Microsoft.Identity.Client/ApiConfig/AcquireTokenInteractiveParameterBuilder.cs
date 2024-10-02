@@ -384,7 +384,7 @@ namespace Microsoft.Identity.Client
             popConfig.HttpMethod = httpMethod;
 
             CommonParameters.PopAuthenticationConfiguration = popConfig;
-            CommonParameters.AuthenticationScheme = new PopBrokerAuthenticationScheme();
+            CommonParameters.AuthenticationOperation = new PopBrokerAuthenticationScheme();
 
             return this;
         }

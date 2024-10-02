@@ -12,7 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace Microsoft.Identity.Client
 {
     //Temporary location
-    public sealed class CdtAuthenticationScheme : IAuthenticationScheme
+    public sealed class CdtAuthenticationScheme : IAuthenticationOperation
     {
         //CDT
         public const string CdtKey = "xms_ds_cnf";
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public string? KeyId { get; }
 
-        int IAuthenticationScheme.TelemetryTokenType => 4;
+        int IAuthenticationOperation.TelemetryTokenType => 4;
 
         /// <summary>
         /// Represents additional parameters to be sent to Ests for the Cdt token request.

@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
 {
-    internal class SSHCertAuthenticationScheme : IAuthenticationScheme
+    internal class SSHCertAuthenticationScheme : IAuthenticationOperation
     {
         internal const string SSHCertTokenType = "ssh-cert";
         private readonly string _jwk;

@@ -9,7 +9,7 @@ namespace Microsoft.Identity.Client.AuthScheme
     /// <summary>
     /// Used to modify the experience depending on the type of token asked. 
     /// </summary>
-    public interface IAuthenticationScheme
+    public interface IAuthenticationOperation
     {
         /// <summary>
         /// Value to log to telemetry

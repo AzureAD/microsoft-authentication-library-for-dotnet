@@ -15,7 +15,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     //Authentication Scheme used when MSAL Broker and pop are used together.
     //Tokens acquired from brokers will not be saved in the local ache and MSAL will not search the local cache during silent authentication.
     //This is because tokens are cached in the broker instead so MSAL will rely on the broker's cache for silent requests.
-    internal class PopBrokerAuthenticationScheme : IAuthenticationScheme
+    internal class PopBrokerAuthenticationScheme : IAuthenticationOperation
     {
         public int TelemetryTokenType => (int)TokenType.Pop;
 

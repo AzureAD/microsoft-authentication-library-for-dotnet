@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task Interactive_WithCustomAuthScheme_ThenSilent_Async()
         {
             // Arrange
-            var authScheme = Substitute.For<IAuthenticationScheme>();
+            var authScheme = Substitute.For<IAuthenticationOperation>();
             authScheme.AuthorizationHeaderPrefix.Returns("BearToken");
             authScheme.AccessTokenType.Returns("bearer");
             authScheme.KeyId.Returns("keyid");
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Act
                 AuthenticationResult result = await app
                     .AcquireTokenInteractive(TestConstants.s_scope)
-                    .WithAuthenticationScheme(authScheme)
+                    .WithAuthenticationOperation(authScheme)
                     .ExecuteAsync().ConfigureAwait(false);
 
                 // Assert
@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task WrongTokenType_Async()
         {
             // Arrange
-            var authScheme = Substitute.For<IAuthenticationScheme>();
+            var authScheme = Substitute.For<IAuthenticationOperation>();
             authScheme.AuthorizationHeaderPrefix.Returns("BearToken");
             authScheme.KeyId.Returns("keyid");
             authScheme.GetTokenRequestParams().Returns(new Dictionary<string, string>() { { "tokenParam", "tokenParamValue" } });
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // Act
                 var ex = await AssertException.TaskThrowsAsync<MsalClientException>(() => app
                      .AcquireTokenInteractive(TestConstants.s_scope)
-                     .WithAuthenticationScheme(authScheme)
+                     .WithAuthenticationOperation(authScheme)
                      .ExecuteAsync()).ConfigureAwait(false);
 
                 Assert.AreEqual(MsalError.TokenTypeMismatch, ex.ErrorCode);
@@ -232,7 +232,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         private static async Task<AuthenticationResult> RunSilentCallAsync(
             MockHttpManager httpManager,
             PublicClientApplication app,
-            IAuthenticationScheme scheme,
+            IAuthenticationOperation scheme,
             bool expectRtRefresh)
         {
             if (expectRtRefresh)
@@ -245,7 +245,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var builder = app.AcquireTokenSilent(TestConstants.s_scope, account);
             if (scheme != null)
             {
-                builder = builder.WithAuthenticationScheme(scheme);
+                builder = builder.WithAuthenticationOperation(scheme);
             }
 
             return await builder

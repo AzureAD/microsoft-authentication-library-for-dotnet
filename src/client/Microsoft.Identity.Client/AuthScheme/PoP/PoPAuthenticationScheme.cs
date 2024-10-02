@@ -21,7 +21,7 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
-    internal class PopAuthenticationScheme : IAuthenticationScheme
+    internal class PopAuthenticationScheme : IAuthenticationOperation
     {
         private readonly PoPAuthenticationConfiguration _popAuthenticationConfiguration;
         private readonly IPoPCryptoProvider _popCryptoProvider;

@@ -7,7 +7,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AuthScheme.Bearer
 {
-    internal class BearerAuthenticationScheme : IAuthenticationScheme
+    internal class BearerAuthenticationScheme : IAuthenticationOperation
     {
         internal const string BearerTokenType = "bearer";
 

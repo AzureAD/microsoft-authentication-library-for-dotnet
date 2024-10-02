@@ -63,16 +63,16 @@ namespace Microsoft.Identity.Test.Unit.CDT
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulCDTClientCredentialTokenResponseMessage();
 
-                MsalAddIn cdtAddin = new MsalAddIn()
+                MsalAuthenticationExtension cdtExtension = new MsalAuthenticationExtension()
                 {
-                    AuthenticationScheme = new CdtAuthenticationScheme(constraintAsString),
+                    AuthenticationExtension = new CdtAuthenticationScheme(constraintAsString),
                     AdditionalCacheParameters = new[] { CdtAuthenticationScheme.CdtNonce, CdtAuthenticationScheme.CdtEncKey}
                 };
 
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithAddIn(cdtAddin)
+                    .WithAuthenticationExtension(cdtExtension)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Test.Unit.CDT
                 //Verify that the original AT token is cached and the CDT can be recreated
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithAddIn(cdtAddin)
+                    .WithAuthenticationExtension(cdtExtension)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 

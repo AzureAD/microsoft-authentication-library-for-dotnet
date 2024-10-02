@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Extensibility
             }
 
             builder.ValidateUseOfExperimentalFeature();
-            builder.CommonParameters.AuthenticationScheme = new ExternalBoundTokenScheme(keyId, expectedTokenTypeFromAad);
+            builder.CommonParameters.AuthenticationOperation = new ExternalBoundTokenScheme(keyId, expectedTokenTypeFromAad);
 
             return builder;
         }
@@ -68,25 +68,25 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="builder"></param>
-        /// <param name="addIn"></param>
+        /// <param name="authenticationExtension"></param>
         /// <returns></returns>
-        public static AbstractAcquireTokenParameterBuilder<T> WithAddIn<T>( // TODO: bogavril - support a list of add-ins ? 
+        public static AbstractAcquireTokenParameterBuilder<T> WithAuthenticationExtension<T>( // TODO: bogavril - support a list of add-ins ? 
            this AbstractAcquireTokenParameterBuilder<T> builder,
-           MsalAddIn addIn)
+           MsalAuthenticationExtension authenticationExtension)
             where T : AbstractAcquireTokenParameterBuilder<T>
         {
-            if (builder.CommonParameters.OnBeforeTokenRequestHandler != null && addIn.OnBeforeTokenRequestHandler != null)
+            if (builder.CommonParameters.OnBeforeTokenRequestHandler != null && authenticationExtension.OnBeforeTokenRequestHandler != null)
             {
                 throw new InvalidOperationException("Cannot set both an add-in and an OnBeforeTokenRequestHandler");
             }
 
-            builder.CommonParameters.OnBeforeTokenRequestHandler = addIn.OnBeforeTokenRequestHandler;
+            builder.CommonParameters.OnBeforeTokenRequestHandler = authenticationExtension.OnBeforeTokenRequestHandler;
 
-            if (addIn.AuthenticationScheme != null)
-                builder.WithAuthenticationScheme(addIn.AuthenticationScheme);
+            if (authenticationExtension.AuthenticationExtension != null)
+                builder.WithAuthenticationOperation(authenticationExtension.AuthenticationExtension);
 
-            if (addIn.AdditionalCacheParameters != null)
-                builder.WithAdditionalCacheParameters(addIn.AdditionalCacheParameters);
+            if (authenticationExtension.AdditionalCacheParameters != null)
+                builder.WithAdditionalCacheParameters(authenticationExtension.AdditionalCacheParameters);
 
             // TODO: bogavril - AdditionalAccessTokenPropertiesToCache needs implementation
             return builder;
