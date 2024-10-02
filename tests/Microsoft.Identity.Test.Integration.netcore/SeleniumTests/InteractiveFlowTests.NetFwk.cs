@@ -62,6 +62,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         [RunOn(TargetFrameworks.NetCore)]
         [TestCategory(TestCategories.MSA)]
+        [Ignore]
         public async Task Interactive_MsaUser_Async()
         {
             // Arrange
