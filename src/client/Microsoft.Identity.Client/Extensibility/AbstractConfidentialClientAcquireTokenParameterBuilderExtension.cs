@@ -27,7 +27,12 @@ namespace Microsoft.Identity.Client.Extensibility
             this AbstractAcquireTokenParameterBuilder<T> builder, 
             Func<OnBeforeTokenRequestData, Task> onBeforeTokenRequestHandler) 
             where T : AbstractAcquireTokenParameterBuilder<T>
-        {            
+        {
+            if (builder.CommonParameters.OnBeforeTokenRequestHandler != null && onBeforeTokenRequestHandler != null)
+            {
+                throw new InvalidOperationException("Cannot set OnBeforeTokenRequest handler twice.");
+            }
+
             builder.CommonParameters.OnBeforeTokenRequestHandler = onBeforeTokenRequestHandler;
 
             return builder;
@@ -53,13 +58,40 @@ namespace Microsoft.Identity.Client.Extensibility
             }
 
             builder.ValidateUseOfExperimentalFeature();
-            builder.CommonParameters.AuthenticationScheme = new ExternalBoundTokenScheme(keyId, expectedTokenTypeFromAad);
+            builder.CommonParameters.AuthenticationOperation = new ExternalBoundTokenScheme(keyId, expectedTokenTypeFromAad);
 
             return builder;
         }
-
 #if !MOBILE
         /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="builder"></param>
+        /// <param name="authenticationExtension"></param>
+        /// <returns></returns>
+        public static AbstractAcquireTokenParameterBuilder<T> WithAuthenticationExtension<T>( // TODO: bogavril - support a list of add-ins ? 
+           this AbstractAcquireTokenParameterBuilder<T> builder,
+           MsalAuthenticationExtension authenticationExtension)
+            where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            if (builder.CommonParameters.OnBeforeTokenRequestHandler != null && authenticationExtension.OnBeforeTokenRequestHandler != null)
+            {
+                throw new InvalidOperationException("Cannot set both an add-in and an OnBeforeTokenRequestHandler");
+            }
+
+            builder.CommonParameters.OnBeforeTokenRequestHandler = authenticationExtension.OnBeforeTokenRequestHandler;
+
+            if (authenticationExtension.AuthenticationOperation != null)
+                builder.WithAuthenticationOperation(authenticationExtension.AuthenticationOperation);
+
+            if (authenticationExtension.AdditionalCacheParameters != null)
+                builder.WithAdditionalCacheParameters(authenticationExtension.AdditionalCacheParameters);
+
+            // TODO: bogavril - AdditionalAccessTokenPropertiesToCache needs implementation
+            return builder;
+        }
+
         /// Specifies additional parameters acquired from authentication responses to be cached with the access token that are normally not included in the cache object.
         /// these values can be read from the <see cref="AuthenticationResult.AdditionalResponseParameters"/> parameter.
         /// </summary>

@@ -3,12 +3,10 @@
 
 using System;
 using System.Security.Cryptography;
-using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
-
     /// <summary>
     /// The default implementation will store a key in memory    
     /// </summary>

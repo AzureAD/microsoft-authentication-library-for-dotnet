@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client
 
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
-            CommonParameters.AuthenticationScheme = new PopAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
+            CommonParameters.AuthenticationOperation = new PopAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
 
             return this;
         }
@@ -232,7 +232,7 @@ namespace Microsoft.Identity.Client
             popConfig.HttpMethod = httpMethod ?? throw new ArgumentNullException(nameof(httpMethod));
             popConfig.Nonce = nonce;
 
-            IAuthenticationScheme authenticationScheme;
+            IAuthenticationOperation authenticationScheme;
 
             //POP Auth scheme should not wrap and sign token when broker is enabled for public clients
             if (ServiceBundle.Config.IsBrokerEnabled)
@@ -245,7 +245,7 @@ namespace Microsoft.Identity.Client
                 authenticationScheme = new PopAuthenticationScheme(popConfig, ServiceBundle);
             }
             CommonParameters.PopAuthenticationConfiguration = popConfig;
-            CommonParameters.AuthenticationScheme = authenticationScheme;
+            CommonParameters.AuthenticationOperation = authenticationScheme;
 
             return this;
         }

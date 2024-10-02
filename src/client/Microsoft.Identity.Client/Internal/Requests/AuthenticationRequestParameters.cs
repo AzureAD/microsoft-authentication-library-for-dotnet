@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        public IAuthenticationScheme AuthenticationScheme => _commonParameters.AuthenticationScheme;
+        public IAuthenticationOperation AuthenticationScheme => _commonParameters.AuthenticationOperation;
 
         public IEnumerable<string> PersistedCacheParameters => _commonParameters.AdditionalCacheParameters;
 

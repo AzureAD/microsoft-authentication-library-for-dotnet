@@ -334,9 +334,9 @@ namespace Microsoft.Identity.Client
             return this as T;
         }
 
-        internal /* for testing */ T WithAuthenticationScheme(IAuthenticationScheme scheme)
+        internal /* for testing */ T WithAuthenticationOperation(IAuthenticationOperation scheme)
         {
-            CommonParameters.AuthenticationScheme = scheme ?? throw new ArgumentNullException(nameof(scheme));
+            CommonParameters.AuthenticationOperation = scheme ?? throw new ArgumentNullException(nameof(scheme));
             return this as T;
         }
     }

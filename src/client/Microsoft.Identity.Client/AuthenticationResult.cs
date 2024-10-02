@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public partial class AuthenticationResult
     {
-        private readonly IAuthenticationScheme _authenticationScheme;
+        private readonly IAuthenticationOperation _authenticationScheme;
 
         /// <summary>
         /// Constructor meant to help application developers test their apps. Allows mocking of authentication flows.
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client
         internal AuthenticationResult(
             MsalAccessTokenCacheItem msalAccessTokenCacheItem,
             MsalIdTokenCacheItem msalIdTokenCacheItem, 
-            IAuthenticationScheme authenticationScheme,
+            IAuthenticationOperation authenticationScheme,
             Guid correlationID,
             TokenSource tokenSource, 
             ApiEvent apiEvent,
@@ -171,7 +171,6 @@ namespace Microsoft.Identity.Client
                                                                     additionalResponseParameters;
             if (msalAccessTokenCacheItem != null)
             {
-                AccessToken = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
                 ExpiresOn = msalAccessTokenCacheItem.ExpiresOn;
                 Scopes = msalAccessTokenCacheItem.ScopeSet;
 
@@ -186,7 +185,12 @@ namespace Microsoft.Identity.Client
                 {
                     AuthenticationResultMetadata.RefreshOn = msalAccessTokenCacheItem.RefreshOn;
                 }
+                
+                AccessToken = msalAccessTokenCacheItem.Secret;
             }
+
+            //Important: only call this at the end
+            authenticationScheme.FormatResult(this);
         }
 
         //Default constructor for testing
@@ -195,7 +199,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Access Token that can be used as a bearer token to access protected web APIs
         /// </summary>
-        public string AccessToken { get; }
+        public string AccessToken { get; set; }
 
         /// <summary>
         /// In case when Azure AD has an outage, to be more resilient, it can return tokens with
