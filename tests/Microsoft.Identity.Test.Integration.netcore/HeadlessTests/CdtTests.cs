@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             MsalAuthenticationExtension cdtExtension = new MsalAuthenticationExtension()
             {
-                AuthenticationExtension = new CdtAuthenticationScheme(constraintAsString),
+                AuthenticationOperation = new CdtAuthenticationScheme(constraintAsString),
                 AdditionalCacheParameters = new[] { CdtAuthenticationScheme.CdtNonce, CdtAuthenticationScheme.CdtEncKey }
             };
 

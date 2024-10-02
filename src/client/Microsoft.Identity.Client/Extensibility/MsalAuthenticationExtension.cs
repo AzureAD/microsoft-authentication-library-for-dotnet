@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// Enables the developer to provide a custom authentication extension.
         /// </summary>
         /// TODO: guidance on how this interacts with OnBeforeTokenRequestHandler
-        public IAuthenticationOperation AuthenticationExtension { get; set; }
+        public IAuthenticationOperation AuthenticationOperation { get; set; }
 
         /// <summary>
         /// Specifies additional parameters acquired from authentication responses to be cached

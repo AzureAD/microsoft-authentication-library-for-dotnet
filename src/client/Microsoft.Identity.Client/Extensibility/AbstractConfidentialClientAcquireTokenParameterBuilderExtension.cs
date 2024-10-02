@@ -82,8 +82,8 @@ namespace Microsoft.Identity.Client.Extensibility
 
             builder.CommonParameters.OnBeforeTokenRequestHandler = authenticationExtension.OnBeforeTokenRequestHandler;
 
-            if (authenticationExtension.AuthenticationExtension != null)
-                builder.WithAuthenticationOperation(authenticationExtension.AuthenticationExtension);
+            if (authenticationExtension.AuthenticationOperation != null)
+                builder.WithAuthenticationOperation(authenticationExtension.AuthenticationOperation);
 
             if (authenticationExtension.AdditionalCacheParameters != null)
                 builder.WithAdditionalCacheParameters(authenticationExtension.AdditionalCacheParameters);
