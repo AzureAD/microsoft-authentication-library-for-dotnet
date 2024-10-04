@@ -14,6 +14,7 @@
 </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\MsalCdtExtension\MsalCdtExtension.csproj" />
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj" Condition="$(TargetFramework)==$(TargetFrameworkNetDesktop48)" />
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Broker\Microsoft.Identity.Client.Broker.csproj" />
     <ProjectReference Include="..\..\src\client\Microsoft.Identity.Client.Extensions.Msal\Microsoft.Identity.Client.Extensions.Msal.csproj" />
