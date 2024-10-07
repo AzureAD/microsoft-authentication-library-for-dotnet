@@ -110,8 +110,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string ADFSAuthority2 = "https://someAdfs.com/adfs/";
 
         public const string DstsAuthorityTenantless = "https://some.url.dsts.core.azure-test.net/dstsv2/";
-        public const string DstsAuthorityTenanted = "https://some.url.dsts.core.azure-test.net/dstsv2/" + TenantId + "/";
-        public const string DstsAuthorityCommon = "https://some.url.dsts.core.azure-test.net/dstsv2/" + Common + "/";
+        public const string DstsAuthorityTenanted = DstsAuthorityTenantless + TenantId + "/";
+        public const string DstsAuthorityCommon = DstsAuthorityTenantless + Common + "/";
 
         public const string GenericAuthority = "https://demo.duendesoftware.com";
 

@@ -501,7 +501,8 @@ namespace Microsoft.Identity.Client
                 cloudInstanceUri,
                 tenant,
                 validateAuthority);
-            Config.Authority = new AadAuthority(authorityInfo);
+
+            Config.Authority = authorityInfo.CreateAuthority();
 
             return this as T;
         }
