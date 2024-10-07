@@ -17,7 +17,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Internal.Broker;
 using System.Security.Cryptography.X509Certificates;
-
+using Microsoft.Identity.Client.ManagedIdentity;
 #if SUPPORTS_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
@@ -41,6 +41,7 @@ namespace Microsoft.Identity.Client.OAuth2
         private readonly IDictionary<string, string> _bodyParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
         private readonly X509Certificate2 _mtlsCertificate;
+        private StringContent _stringContent;
 
         public OAuth2Client(ILoggerAdapter logger, IHttpManager httpManager, X509Certificate2 mtlsCertificate)
         {
@@ -70,9 +71,23 @@ namespace Microsoft.Identity.Client.OAuth2
             _headers[key] = value;
         }
 
+        public void AddBodyContent(StringContent content)
+        {
+            if (content != null)
+            {
+                _stringContent = content;
+            }
+        }
+
         internal IReadOnlyDictionary<string, string> GetBodyParameters()
         {
             return new ReadOnlyDictionary<string, string>(_bodyParameters);
+        }
+
+        public async Task<ManagedIdentityCredentialResponse> GetCredentialResponseAsync(Uri endpoint, RequestContext requestContext)
+        {
+            return await ExecuteRequestAsync<ManagedIdentityCredentialResponse>(endpoint, HttpMethod.Post, requestContext)
+                       .ConfigureAwait(false);
         }
 
         public Task<InstanceDiscoveryResponse> DiscoverAadInstanceAsync(Uri endpoint, RequestContext requestContext)

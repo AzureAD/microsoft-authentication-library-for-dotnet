@@ -413,7 +413,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     expectedQueryParams.Add("resource", resource);
                     expectedRequestHeaders.Add("Metadata", "true");
                     break;
-                case ManagedIdentitySource.Imds:
+                case ManagedIdentitySource.Credential:
                     httpMessageHandler.ExpectedMethod = HttpMethod.Get;
                     expectedQueryParams.Add("api-version", "2018-02-01");
                     expectedQueryParams.Add("resource", resource);

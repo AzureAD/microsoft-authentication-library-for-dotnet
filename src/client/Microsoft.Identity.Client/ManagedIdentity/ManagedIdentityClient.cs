@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                 ManagedIdentitySource.AppService => AppServiceManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.CloudShell => CloudShellManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.Create(requestContext),
-                _ => new ImdsManagedIdentitySource(requestContext)
+                _ => new CredentialManagedIdentitySource(requestContext)
             };
         }
 
@@ -55,11 +55,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
             string identityHeader = EnvironmentVariables.IdentityHeader;
             string identityServerThumbprint = EnvironmentVariables.IdentityServerThumbprint;
-            string msiSecret = EnvironmentVariables.IdentityHeader;
             string msiEndpoint = EnvironmentVariables.MsiEndpoint;
             string imdsEndpoint = EnvironmentVariables.ImdsEndpoint;
-            string podIdentityEndpoint = EnvironmentVariables.PodIdentityEndpoint;
-
             
             if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader))
             {
@@ -80,9 +77,10 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 return ManagedIdentitySource.AzureArc;
             }
+            //Fall-back to Credential (Replacing the old IMDS logic with Credential logic)
             else
             {
-                return ManagedIdentitySource.DefaultToImds;
+                return ManagedIdentitySource.Credential;
             }
         }
 

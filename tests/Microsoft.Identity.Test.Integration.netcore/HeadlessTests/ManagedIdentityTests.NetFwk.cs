@@ -326,7 +326,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
                 //set the expected resource
                 ManagedIdentitySource expectedResource = azureResource == MsiAzureResource.VM ?
-                    ManagedIdentitySource.Imds : ManagedIdentitySource.AppService;
+                    ManagedIdentitySource.Credential : ManagedIdentitySource.AppService;
 
                 //Assert
                 Assert.IsTrue(ex.ErrorCode == MsalError.ManagedIdentityRequestFailed);
