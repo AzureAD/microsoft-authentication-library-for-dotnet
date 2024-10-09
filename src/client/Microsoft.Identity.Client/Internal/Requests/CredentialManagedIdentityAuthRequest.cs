@@ -23,9 +23,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class CredentialManagedIdentityAuthRequest : ManagedIdentityAuthRequest
     {
+        private const string DefaultMessage = "[Managed Identity] Service request failed.";
+
+        internal const string IdentityUnavailableError = "[Managed Identity] Authentication unavailable. " +
+            "Either the requested identity has not been assigned to this resource, or other errors could " +
+            "be present. Ensure the identity is correctly assigned and check the inner exception for more " +
+            "details. For more information, visit https://aka.ms/msal-managed-identity.";
+
+        internal const string GatewayError = "[Managed Identity] Authentication unavailable. The request failed due to a gateway error.";
+
         private readonly Uri _credentialEndpoint;
         private readonly X509Certificate2 _certificate;
-        private readonly string _certificateName = "SERVER_CERTIFICATE_NAME";
+        private readonly string _certificateName = "devicecert.mtlsauth.local";
 
         private CredentialManagedIdentityAuthRequest(
             IServiceBundle serviceBundle,
@@ -112,7 +121,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             try
             {
-                logger.Verbose(() => "[CredentialManagedIdentityAuthRequest] Getting token from the managed identity endpoint.");
+                logger.Verbose(() => $"[CredentialManagedIdentityAuthRequest] Getting token from the managed identity endpoint using certificate: " +
+                     $"Subject: {_certificate.Subject}, " +
+                     $"Expiration: {_certificate.NotAfter}, " +
+                     $"Issuer: {_certificate.Issuer}");
 
                 ManagedIdentityCredentialResponse credentialResponse =
                     await GetCredentialAssertionAsync(_certificate, logger, cancellationToken).ConfigureAwait(false);
@@ -178,7 +190,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             MsalException msalException = MsalServiceExceptionFactory.CreateManagedIdentityException(
-                MsalError.CredentialRequestFailed,
+                MsalError.ManagedIdentityRequestFailed,
                 message,
                 exception,
                 ManagedIdentitySource.Credential,
@@ -250,17 +262,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             RequestContext requestContext,
             out Uri credentialEndpointUri)
         {
-            credentialEndpointUri = null;
-
-            X509Certificate2 managedIdentityCertificate = null;
-            ;
-
-            if (managedIdentityCertificate == null)
-            {
-                requestContext.Logger.Verbose(() => "[CredentialManagedIdentityAuthRequest] Credential based managed identity is unavailable.");
-                return false;
-            }
-
             // Initialize the credentialUri with the constant CredentialEndpoint and API version.
             string credentialUri = Constants.CredentialEndpoint;
 

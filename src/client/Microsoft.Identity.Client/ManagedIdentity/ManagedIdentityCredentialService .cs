@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
                 // Throw an exception indicating that the CredentialResponse is invalid
                 MsalException exception = MsalServiceExceptionFactory.CreateManagedIdentityException(
-                    MsalError.CredentialRequestFailed,
+                    MsalError.ManagedIdentityRequestFailed,
                     MsalErrorMessage.ManagedIdentityInvalidResponse,
                     null,
                     ManagedIdentitySource.Credential,
@@ -114,7 +114,6 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// <param name="httpManager"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        /// <exception cref="MsalManagedIdentityException"></exception>
         private async Task<ManagedIdentityCredentialResponse> FetchFromServiceAsync(
             IHttpManager httpManager,
             CancellationToken cancellationToken)
@@ -152,11 +151,15 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         /// </summary>
         private string GetCredentialPayload()
         {
+            _requestContext.Logger.Verbose(() => $"[CredentialManagedIdentityAuthRequest] Creating credential payload using using certificate: " +
+                     $"Subject: {_bindingCertificate.Subject}, " +
+                     $"Expiration: {_bindingCertificate.NotAfter}, " +
+                     $"Issuer: {_bindingCertificate.Issuer}");
+
             string certificateBase64 = Convert.ToBase64String(_bindingCertificate.Export(X509ContentType.Cert));
 
             return @"{""cnf"":{""jwk"":{""kty"":""RSA"",""use"":""sig"",""alg"":""RS256"",""kid"":""" + _bindingCertificate.Thumbprint +
                 @""",""x5c"":[""" + certificateBase64 + @"""]}},""latch_key"":false}";
         }
-
     }
 }

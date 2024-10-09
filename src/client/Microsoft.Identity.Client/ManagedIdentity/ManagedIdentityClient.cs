@@ -37,14 +37,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
         private static AbstractManagedIdentity SelectManagedIdentitySource(RequestContext requestContext)
         {
-            return GetManagedIdentitySource(requestContext.Logger) switch
+            var managedIdentitySource = GetManagedIdentitySource(requestContext.Logger);
+
+            switch (managedIdentitySource)
             {
-                ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.Create(requestContext),
-                ManagedIdentitySource.AppService => AppServiceManagedIdentitySource.Create(requestContext),
-                ManagedIdentitySource.CloudShell => CloudShellManagedIdentitySource.Create(requestContext),
-                ManagedIdentitySource.AzureArc => AzureArcManagedIdentitySource.Create(requestContext),
-                _ => new CredentialManagedIdentitySource(requestContext)
-            };
+                case ManagedIdentitySource.ServiceFabric:
+                    return ServiceFabricManagedIdentitySource.Create(requestContext);
+                case ManagedIdentitySource.AppService:
+                    return AppServiceManagedIdentitySource.Create(requestContext);
+                case ManagedIdentitySource.CloudShell:
+                    return CloudShellManagedIdentitySource.Create(requestContext);
+                case ManagedIdentitySource.AzureArc:
+                    return AzureArcManagedIdentitySource.Create(requestContext);
+                default:
+                    requestContext.Logger.Warning("No valid Legacy Managed Identity source found.");
+                    return null;
+            }
         }
 
         // Detect managed identity source based on the availability of environment variables.

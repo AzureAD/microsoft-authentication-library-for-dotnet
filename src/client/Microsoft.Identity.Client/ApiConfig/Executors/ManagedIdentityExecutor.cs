@@ -40,14 +40,20 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 requestContext,
                 _managedIdentityApplication.AppTokenCacheInternal).ConfigureAwait(false);
 
-            var handler = new LegacyManagedIdentityAuthRequest(
+            // MSI factory logic - decide if we need to use the legacy or the new MSI flow
+            RequestBase handler = null;
+
+            handler = LegacyManagedIdentityAuthRequest.TryCreate(
+                    ServiceBundle,
+                    requestParams,
+                    managedIdentityParameters);
+
+            handler ??= CredentialManagedIdentityAuthRequest.Create(
                 ServiceBundle,
                 requestParams,
                 managedIdentityParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
-
-     
     }
 }

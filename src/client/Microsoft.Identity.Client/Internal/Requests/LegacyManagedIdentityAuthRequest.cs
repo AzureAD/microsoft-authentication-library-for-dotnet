@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,12 +22,25 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class LegacyManagedIdentityAuthRequest
         : ManagedIdentityAuthRequest
     {
-        public LegacyManagedIdentityAuthRequest(
+        internal LegacyManagedIdentityAuthRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenForManagedIdentityParameters managedIdentityParameters)
             : base(serviceBundle, authenticationRequestParameters, managedIdentityParameters)
         { }
+
+        public static LegacyManagedIdentityAuthRequest TryCreate(
+            IServiceBundle serviceBundle,
+            AuthenticationRequestParameters authenticationRequestParameters,
+            AcquireTokenForManagedIdentityParameters managedIdentityParameters)
+        {
+            return ManagedIdentityClient.GetManagedIdentitySource(
+                authenticationRequestParameters.RequestContext.Logger) != ManagedIdentitySource.Credential ?
+                    new LegacyManagedIdentityAuthRequest(
+                    serviceBundle,
+                    authenticationRequestParameters,
+                    managedIdentityParameters) : null;
+        }
 
         protected override async Task<AuthenticationResult> GetAccessTokenAsync(
             CancellationToken cancellationToken,

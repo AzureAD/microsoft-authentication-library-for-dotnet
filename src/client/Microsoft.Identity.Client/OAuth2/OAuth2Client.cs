@@ -136,6 +136,8 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 try
                 {
+                    requestContext.Logger.Verbose(() => $"[Oauth2Client] Send request to {endpointUri.Host} over MTLS: {_mtlsCertificate} ");
+
                     if (method == HttpMethod.Post)
                     {
                         if (onBeforePostRequestData != null)
@@ -149,7 +151,7 @@ namespace Microsoft.Identity.Client.OAuth2
                         response = await _httpManager.SendRequestAsync(
                             endpointUri,
                             _headers,
-                            body: new FormUrlEncodedContent(_bodyParameters),
+                            body: _stringContent == null ? new FormUrlEncodedContent(_bodyParameters) : _stringContent,
                             HttpMethod.Post,
                             logger: requestContext.Logger,
                             doNotThrow: false,
