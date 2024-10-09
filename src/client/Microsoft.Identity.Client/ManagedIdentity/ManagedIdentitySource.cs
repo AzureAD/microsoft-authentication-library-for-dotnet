@@ -25,6 +25,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         Imds,
 
         /// <summary>
+        /// The source to acquire token for managed identity is Credential.
+        /// </summary>
+        Credential,
+
+        /// <summary>
         /// The source to acquire token for managed identity is App Service.
         /// </summary>
         AppService,
