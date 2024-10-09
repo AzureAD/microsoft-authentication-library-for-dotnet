@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if !ANDROID && !iOS 
 using System;
 using System.IO;
 using System.Net;
@@ -304,6 +303,99 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
+        [TestMethod]
+        public async Task MsalForceRegionIsSet_RegionIsUsed()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                Environment.SetEnvironmentVariable(
+                    ConfidentialClientApplicationBuilder.ForceRegionEnvVariable, TestConstants.Region);
+
+                httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
+                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(expectRegional: true));
+
+                var cca = ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithHttpManager(httpManager)
+                                 .WithClientSecret(TestConstants.ClientSecret)
+                                 .Build();
+
+                AuthenticationResult result = await cca
+                        .AcquireTokenForClient(TestConstants.s_scope)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
+                Assert.AreEqual(RegionAutodetectionSource.Imds, result.ApiEvent.RegionAutodetectionSource);
+
+                Assert.AreEqual(TestConstants.Region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+                Assert.AreEqual(RegionOutcome.UserProvidedValid, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
+                Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
+            }
+        }
+
+        [TestMethod]
+        public async Task MsalForceRegionIsSet_WithRegionIsSet_WithRegionWins()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                // this will be ignored, in favor of TestConstants.Region
+                Environment.SetEnvironmentVariable(
+                    ConfidentialClientApplicationBuilder.ForceRegionEnvVariable, "someOtherRegion");
+
+                httpManager.AddRegionDiscoveryMockHandler(TestConstants.Region);
+                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(expectRegional: true));
+
+                var cca = ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithHttpManager(httpManager)
+                                 .WithAzureRegion(TestConstants.Region)
+                                 .WithClientSecret(TestConstants.ClientSecret)
+                                 .Build();
+
+                AuthenticationResult result = await cca
+                        .AcquireTokenForClient(TestConstants.s_scope)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                Assert.AreEqual(TestConstants.Region, result.ApiEvent.RegionUsed);
+                Assert.AreEqual(RegionAutodetectionSource.Imds, result.ApiEvent.RegionAutodetectionSource);
+
+                Assert.AreEqual(TestConstants.Region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
+                Assert.AreEqual(RegionOutcome.UserProvidedValid, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
+                Assert.IsNull(result.AuthenticationResultMetadata.RegionDetails.AutoDetectionError);
+            }
+        }
+
+        [TestMethod]
+        public async Task MsalForceRegionIsSet_WithRegionIsSetToOptOut_NoRegionIsUsed()
+        {
+            using (new EnvVariableContext())
+            using (var httpManager = new MockHttpManager())
+            {
+                Environment.SetEnvironmentVariable(
+                    ConfidentialClientApplicationBuilder.ForceRegionEnvVariable, TestConstants.Region);
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(expectRegional: false));
+
+                var cca = ConfidentialClientApplicationBuilder
+                                 .Create(TestConstants.ClientId)
+                                 .WithHttpManager(httpManager)
+                                 .WithAzureRegion(ConfidentialClientApplicationBuilder.DisableForceRegion)
+                                 .WithClientSecret(TestConstants.ClientSecret)
+                                 .Build();
+
+                AuthenticationResult result = await cca
+                        .AcquireTokenForClient(TestConstants.s_scope)
+                        .ExecuteAsync()
+                        .ConfigureAwait(false);
+
+                Assert.IsNull(result.ApiEvent.RegionUsed);
+            }
+        }
         [TestMethod]
         public void WithAzureRegionThrowsOnNullArg()
         {
@@ -724,4 +816,3 @@ namespace Microsoft.Identity.Test.Unit
 
     }
 }
-#endif
