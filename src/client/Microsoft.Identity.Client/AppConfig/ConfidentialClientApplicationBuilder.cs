@@ -9,12 +9,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.ClientCredential;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.Identity.Client
@@ -26,6 +23,9 @@ namespace Microsoft.Identity.Client
 #endif
     public class ConfidentialClientApplicationBuilder : AbstractApplicationBuilder<ConfidentialClientApplicationBuilder>
     {
+        internal const string ForceRegionEnvVariable = "MSAL_FORCE_REGION";
+        internal const string DisableForceRegion = "DisableMsalForceRegion";
+
         /// <inheritdoc/>
         internal ConfidentialClientApplicationBuilder(ApplicationConfiguration configuration)
             : base(configuration)
@@ -380,9 +380,24 @@ namespace Microsoft.Identity.Client
                 throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
             }
 
-            if (!string.IsNullOrEmpty(Config.AzureRegion) && (Config.CustomInstanceDiscoveryMetadata != null || Config.CustomInstanceDiscoveryMetadataUri != null))
+            if (!string.IsNullOrEmpty(Config.AzureRegion) && 
+                (Config.CustomInstanceDiscoveryMetadata != null || Config.CustomInstanceDiscoveryMetadataUri != null))
             {
                 throw new MsalClientException(MsalError.RegionDiscoveryWithCustomInstanceMetadata, MsalErrorMessage.RegionDiscoveryWithCustomInstanceMetadata);
+            }
+
+            // use regional if MSAL_FORCE_REGION is used, as per #4930
+            if (string.Equals(Config.AzureRegion, DisableForceRegion, StringComparison.OrdinalIgnoreCase))
+            {
+                Config.AzureRegion = null;
+            }
+            else if (Config.AzureRegion == null)
+            {
+                string forcedRegion = Environment.GetEnvironmentVariable(ForceRegionEnvVariable);
+                if (!string.IsNullOrEmpty(forcedRegion))
+                {
+                    Config.AzureRegion = forcedRegion;
+                }
             }
         }
 
