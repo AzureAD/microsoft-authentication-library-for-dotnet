@@ -30,6 +30,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         private const string DurationInL1CacheHistogramName = "MsalDurationInL1CacheInUs.1B";
         private const string DurationInL2CacheHistogramName = "MsalDurationInL2Cache.1A";
         private const string DurationInHttpHistogramName = "MsalDurationInHttp.1A";
+        private const string DurationInCdtInMsHistogram = "DurationInCdtInMs.1B";
 
         /// <summary>
         /// Meter to hold the MSAL metrics.
@@ -81,6 +82,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             DurationInHttpHistogramName,
             unit: "ms",
             description: "Performance of token acquisition calls network latency"));
+
+        /// <summary>
+        /// Histogram to record total duration of Constrained delegation token creation in microseconds(us).
+        /// </summary>
+        internal static readonly Lazy<Histogram<long>> s_durationInCdtInMs = new(() => Meter.CreateHistogram<long>(
+            DurationInCdtInMsHistogram,
+            unit: "us",
+            description: "Performance of token acquisition calls Cdt creation latency."));
 
         public OtelInstrumentation()
         {
@@ -150,6 +159,16 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
                 new(TelemetryConstants.CacheLevel, authResultMetadata.CacheLevel),
                 new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason));
+            }
+
+            if (s_durationInCdtInMs.Value.Enabled)
+            {
+                s_durationInCdtInMs.Value.Record(authResultMetadata.DurationCreatingCdtInUs,
+                new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
+                new(TelemetryConstants.Platform, platform),
+                new(TelemetryConstants.ApiId, apiId),
+                new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
+                new(TelemetryConstants.CacheLevel, authResultMetadata.CacheLevel));
             }
         }
 

@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Time, in milliseconds, spent in the token creation of the constrained delegation token.
         /// </summary>
-        public long DurationInCdtInMs { get; set; }
+        public long DurationCreatingCdtInUs { get; set; }
 
         /// <summary>
         /// May contain telemetry data. 
