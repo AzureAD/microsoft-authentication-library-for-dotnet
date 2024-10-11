@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -127,17 +128,17 @@ namespace Microsoft.Identity.Client
 
         internal AuthenticationResult(
             MsalAccessTokenCacheItem msalAccessTokenCacheItem,
-            MsalIdTokenCacheItem msalIdTokenCacheItem, 
+            MsalIdTokenCacheItem msalIdTokenCacheItem,
             IAuthenticationOperation authenticationScheme,
             Guid correlationID,
-            TokenSource tokenSource, 
+            TokenSource tokenSource,
             ApiEvent apiEvent,
             Account account,
-            string spaAuthCode, 
+            string spaAuthCode,
             IReadOnlyDictionary<string, string> additionalResponseParameters)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
-            
+
             string homeAccountId =
                 msalAccessTokenCacheItem?.HomeAccountId ??
                 msalIdTokenCacheItem?.HomeAccountId;
@@ -167,7 +168,7 @@ namespace Microsoft.Identity.Client
             ApiEvent = apiEvent;
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
             AdditionalResponseParameters = msalAccessTokenCacheItem?.PersistedCacheParameters?.Count > 0 ?
-                                                                    (IReadOnlyDictionary<string, string>)msalAccessTokenCacheItem.PersistedCacheParameters : 
+                                                                    (IReadOnlyDictionary<string, string>)msalAccessTokenCacheItem.PersistedCacheParameters :
                                                                     additionalResponseParameters;
             if (msalAccessTokenCacheItem != null)
             {
@@ -185,13 +186,30 @@ namespace Microsoft.Identity.Client
                 {
                     AuthenticationResultMetadata.RefreshOn = msalAccessTokenCacheItem.RefreshOn;
                 }
-                
+
                 AccessToken = msalAccessTokenCacheItem.Secret;
             }
 
-            //Important: only call this at the end
-            authenticationScheme.FormatResult(this);
+            var measuredResultDuration = StopwatchService.MeasureCodeBlock(() =>
+            {
+                //Important: only call this at the end
+                authenticationScheme.FormatResult(this);
+            });
+
+            LogMeasuredDuration(measuredResultDuration, authenticationScheme.TelemetryTokenType);
         }
+
+        private void LogMeasuredDuration(MeasureDurationResult measuredResultDuration, int telemetryTokenType)
+        {
+            switch((TokenType)telemetryTokenType)
+            {
+                case AuthScheme.TokenType.Cdt:
+                    AuthenticationResultMetadata.DurationCreatingCdtInUs = measuredResultDuration.Microseconds;
+                    break;
+                default:
+                    break;
+                }
+            }
 
         //Default constructor for testing
         internal AuthenticationResult() { }
