@@ -296,7 +296,6 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 SetEnvironmentVariables(managedIdentitySource, endpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
-                    .WithExperimentalFeatures(true)
                     .WithClientCapabilities(TestConstants.ClientCapabilities)
                     .WithHttpManager(httpManager);
 

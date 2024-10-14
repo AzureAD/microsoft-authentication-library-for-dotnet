@@ -73,7 +73,6 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder to chain .With methods.</returns>
         public AcquireTokenForManagedIdentityParameterBuilder WithClaims(string claims)
         {
-            ValidateUseOfExperimentalFeature("WithClaims");
             CommonParameters.Claims = claims;
             return this;
         }
