@@ -1,8 +1,5 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-using System.Data;
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Policy;
 using System.Text.Json;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AuthScheme;
@@ -11,39 +8,31 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.Identity.Client
 {
-    //Temporary location
-    public sealed class CdtAuthenticationScheme : IAuthenticationOperation
+    public sealed class CdtAuthenticationOperation : IAuthenticationOperation
     {
         //CDT
         public const string CdtKey = "xms_ds_cnf";
         public const string CdtNonce = "xms_ds_nonce";
         public const string CdtEncKey = "xms_ds_enc";
         public const string NoAlgorythmPrefix = "none";
-        public const string JasonWebTokenType = "JWT";
+        public const string JsonWebTokenType = "JWT";
         public const string CdtTokenType = "CDT";
         public const string CdtEncryptedAlgoryth = "dir";
         public const string CdtEncryptedValue = "A256CBC-HS256";
         public const string CdtRequestConfirmation = "req_ds_cnf";
         public const string CdtConstraints = "constraints";
 
-        private readonly CdtCryptoProvider _cdtCryptoProvider;
+        private static CdtCryptoProvider? s_cdtCryptoProvider;
         private readonly string _constraints;
-        private readonly string _dsReqCnf;
 
         /// <summary>
         /// Creates Cdt tokens, i.e. tokens that are bound to an HTTP request and are digitally signed.
         /// </summary>
-        /// <remarks>
-        /// Currently the signing credential algorithm is hard-coded to RSA with SHA256. Extensibility should be done
-        /// by integrating Wilson's SigningCredentials
-        /// </remarks>
-        public CdtAuthenticationScheme(string constraints)
+        public CdtAuthenticationOperation(string constraints)
         {
             _constraints = constraints ?? throw new ArgumentNullException(nameof(constraints));
 
-            _cdtCryptoProvider = new CdtCryptoProvider();
-
-            _dsReqCnf = _cdtCryptoProvider.CannonicalPublicKeyJwk;
+            s_cdtCryptoProvider ??= new CdtCryptoProvider();
         }
 
         public int TelemetryTokenType => 5; //represents CDT token type in MSAL telemetry
@@ -55,19 +44,18 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// For Cdt, we chose to use the base64(jwk_thumbprint)
         /// </summary>
-        public string? KeyId { get; }
+        public string? KeyId => s_cdtCryptoProvider?.KeyId;
 
         int IAuthenticationOperation.TelemetryTokenType => 4;
 
         /// <summary>
         /// Represents additional parameters to be sent to Ests for the Cdt token request.
         /// </summary>
-        /// <returns></returns>
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()
         {
             return new Dictionary<string, string>() {
                 { "token_type", AccessTokenType},
-                { CdtRequestConfirmation, Base64UrlEncoder.Encode(_dsReqCnf)}
+                { CdtRequestConfirmation, s_cdtCryptoProvider?.CannonicalPublicKeyJwk!}
             };
         }
 
@@ -91,9 +79,12 @@ namespace Microsoft.Identity.Client
                 {
                   {CdtConstraints, _constraints },
                   {CdtNonce, nonce }
-              },
-                TokenType = JasonWebTokenType,
-                SigningCredentials = new SigningCredentials(new RsaSecurityKey(_cdtCryptoProvider.GetKey()), _cdtCryptoProvider.CryptographicAlgorithm)
+               },
+                AdditionalHeaderClaims = new Dictionary<string, object>()
+                {
+                },
+                TokenType = JsonWebTokenType,
+                SigningCredentials = s_cdtCryptoProvider!.SigningCredentials
             };
             jsonWebTokenHandler.SetDefaultTimesOnTokenCreation = false;
 
@@ -104,7 +95,7 @@ namespace Microsoft.Identity.Client
         {
             var header = new
             {
-                typ = "CDT",
+                typ = "CDT+JWT",
                 alg = "none",
             };
 
@@ -118,6 +109,12 @@ namespace Microsoft.Identity.Client
             string bodyJson = JsonSerializer.Serialize(body);
             JsonWebToken cdtToken = new JsonWebToken(headerJson, bodyJson);
             return cdtToken.EncodedToken;
+        }
+
+        //For testing purposes
+        internal static void ClearKey()
+        {
+            s_cdtCryptoProvider = null;
         }
     }
 }

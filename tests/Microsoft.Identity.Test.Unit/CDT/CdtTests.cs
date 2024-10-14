@@ -65,8 +65,8 @@ namespace Microsoft.Identity.Test.Unit.CDT
 
                 MsalAuthenticationExtension cdtExtension = new MsalAuthenticationExtension()
                 {
-                    AuthenticationOperation = new CdtAuthenticationScheme(constraintAsString),
-                    AdditionalCacheParameters = new[] { CdtAuthenticationScheme.CdtNonce, CdtAuthenticationScheme.CdtEncKey}
+                    AuthenticationOperation = new CdtAuthenticationOperation(constraintAsString),
+                    AdditionalCacheParameters = new[] { CdtAuthenticationOperation.CdtNonce, CdtAuthenticationOperation.CdtEncKey}
                 };
 
                 // Act

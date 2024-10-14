@@ -63,8 +63,8 @@ namespace Microsoft.Identity.Test.Integration.NetCore.HeadlessTests
 
             MsalAuthenticationExtension cdtExtension = new MsalAuthenticationExtension()
             {
-                AuthenticationOperation = new CdtAuthenticationScheme(constraintAsString),
-                AdditionalCacheParameters = new[] { CdtAuthenticationScheme.CdtNonce, CdtAuthenticationScheme.CdtEncKey }
+                AuthenticationOperation = new CdtAuthenticationOperation(constraintAsString),
+                AdditionalCacheParameters = new[] { CdtAuthenticationOperation.CdtNonce, CdtAuthenticationOperation.CdtEncKey }
             };
 
             var result = await confidentialApp.AcquireTokenForClient(s_scopes)
