@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client
             popConfig.HttpMethod = httpMethod;
 
             CommonParameters.PopAuthenticationConfiguration = popConfig;
-            CommonParameters.AuthenticationOperation = new PopBrokerAuthenticationScheme();
+            CommonParameters.AuthenticationOperation = new PopBrokerAuthenticationOperation();
 
             return this;
         }

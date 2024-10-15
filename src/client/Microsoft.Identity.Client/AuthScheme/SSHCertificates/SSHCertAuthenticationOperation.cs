@@ -8,12 +8,12 @@ using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
 {
-    internal class SSHCertAuthenticationScheme : IAuthenticationOperation
+    internal class SSHCertAuthenticationOperation : IAuthenticationOperation
     {
         internal const string SSHCertTokenType = "ssh-cert";
         private readonly string _jwk;
 
-        public SSHCertAuthenticationScheme(string keyId, string jwk)
+        public SSHCertAuthenticationOperation(string keyId, string jwk)
         {
             if (string.IsNullOrEmpty(keyId))
             {

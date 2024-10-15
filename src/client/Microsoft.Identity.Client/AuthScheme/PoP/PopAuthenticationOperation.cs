@@ -21,7 +21,7 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
-    internal class PopAuthenticationScheme : IAuthenticationOperation
+    internal class PopAuthenticationOperation : IAuthenticationOperation
     {
         private readonly PoPAuthenticationConfiguration _popAuthenticationConfiguration;
         private readonly IPoPCryptoProvider _popCryptoProvider;
@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         /// Currently the signing credential algorithm is hard-coded to RSA with SHA256. Extensibility should be done
         /// by integrating Wilson's SigningCredentials
         /// </remarks>
-        public PopAuthenticationScheme(PoPAuthenticationConfiguration popAuthenticationConfiguration, IServiceBundle serviceBundle)
+        public PopAuthenticationOperation(PoPAuthenticationConfiguration popAuthenticationConfiguration, IServiceBundle serviceBundle)
         {
             if (serviceBundle == null)
             {

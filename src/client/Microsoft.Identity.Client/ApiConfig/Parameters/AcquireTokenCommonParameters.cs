@@ -24,7 +24,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IDictionary<string, string> ExtraQueryParameters { get; set; }
         public string Claims { get; set; }
         public AuthorityInfo AuthorityOverride { get; set; }
-        public IAuthenticationOperation AuthenticationOperation { get; set; } = new BearerAuthenticationScheme();
+        public IAuthenticationOperation AuthenticationOperation { get; set; } = new BearerAuthenticationOperation();
         public IDictionary<string, string> ExtraHttpHeaders { get; set; }
         public PoPAuthenticationConfiguration PopAuthenticationConfiguration { get; set; }
         public Func<OnBeforeTokenRequestData, Task> OnBeforeTokenRequestHandler { get; internal set; }

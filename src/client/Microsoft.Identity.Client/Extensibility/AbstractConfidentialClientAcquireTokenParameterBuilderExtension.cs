@@ -64,13 +64,11 @@ namespace Microsoft.Identity.Client.Extensibility
         }
 #if !MOBILE
         /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="builder"></param>
-        /// <param name="authenticationExtension"></param>
+        /// Enables client applications to provide a custom authentication operation to be used in the token acquisition request.
+        /// <param name="builder">The builder to chain options to</param>
+        /// <param name="authenticationExtension">The implementation of the authenticaiton operation.</param>
         /// <returns></returns>
-        public static AbstractAcquireTokenParameterBuilder<T> WithAuthenticationExtension<T>( // TODO: bogavril - support a list of add-ins ? 
+        public static AbstractAcquireTokenParameterBuilder<T> WithAuthenticationExtension<T>(
            this AbstractAcquireTokenParameterBuilder<T> builder,
            MsalAuthenticationExtension authenticationExtension)
             where T : AbstractAcquireTokenParameterBuilder<T>
@@ -88,7 +86,6 @@ namespace Microsoft.Identity.Client.Extensibility
             if (authenticationExtension.AdditionalCacheParameters != null)
                 builder.WithAdditionalCacheParameters(authenticationExtension.AdditionalCacheParameters);
 
-            // TODO: bogavril - AdditionalAccessTokenPropertiesToCache needs implementation
             return builder;
         }
 

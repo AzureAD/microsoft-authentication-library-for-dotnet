@@ -28,7 +28,7 @@ using NSubstitute;
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
-    public class AuthenticationSchemeTests : TestBase
+    public class AuthenticationOperationTests : TestBase
     {
         [TestInitialize]
         public override void TestInitialize()

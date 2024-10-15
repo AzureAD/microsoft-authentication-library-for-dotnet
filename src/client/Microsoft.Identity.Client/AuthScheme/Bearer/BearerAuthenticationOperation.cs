@@ -7,11 +7,11 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AuthScheme.Bearer
 {
-    internal class BearerAuthenticationScheme : IAuthenticationOperation
+    internal class BearerAuthenticationOperation : IAuthenticationOperation
     {
         internal const string BearerTokenType = "bearer";
 
-        public int TelemetryTokenType => (int)  TokenType.Bearer;
+        public int TelemetryTokenType => (int)TokenType.Bearer;
 
         public string AuthorizationHeaderPrefix => "Bearer";
 

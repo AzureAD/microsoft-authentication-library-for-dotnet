@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client
 
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
-            CommonParameters.AuthenticationOperation = new PopAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
+            CommonParameters.AuthenticationOperation = new PopAuthenticationOperation(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
 
             return this as T;
         }

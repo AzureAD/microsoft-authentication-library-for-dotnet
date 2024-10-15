@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client
 
             CommonParameters.PopAuthenticationConfiguration = popAuthenticationConfiguration ?? throw new ArgumentNullException(nameof(popAuthenticationConfiguration));
 
-            CommonParameters.AuthenticationOperation = new PopAuthenticationScheme(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
+            CommonParameters.AuthenticationOperation = new PopAuthenticationOperation(CommonParameters.PopAuthenticationConfiguration, ServiceBundle);
 
             return this;
         }
@@ -238,11 +238,11 @@ namespace Microsoft.Identity.Client
             if (ServiceBundle.Config.IsBrokerEnabled)
             {
                 popConfig.SignHttpRequest = false;
-                authenticationScheme = new PopBrokerAuthenticationScheme();
+                authenticationScheme = new PopBrokerAuthenticationOperation();
             }
             else
             {
-                authenticationScheme = new PopAuthenticationScheme(popConfig, ServiceBundle);
+                authenticationScheme = new PopAuthenticationOperation(popConfig, ServiceBundle);
             }
             CommonParameters.PopAuthenticationConfiguration = popConfig;
             CommonParameters.AuthenticationOperation = authenticationScheme;

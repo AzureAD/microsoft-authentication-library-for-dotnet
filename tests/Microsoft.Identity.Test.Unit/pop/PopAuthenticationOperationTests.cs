@@ -23,7 +23,7 @@ using NSubstitute;
 namespace Microsoft.Identity.Test.Unit.Pop
 {
     [TestClass]
-    public class PopAuthenticationSchemeTests : TestBase
+    public class PopAuthenticationOperationTests : TestBase
     {
         // Key and JWT copied from the JWT spec https://tools.ietf.org/html/rfc7638#section-3
         private const string JWK = "{\"e\":\"AQAB\",\"kty\":\"RSA\",\"n\":\"0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw\"}";
@@ -37,12 +37,12 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 Uri uri = new Uri("https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b");
                 PoPAuthenticationConfiguration config = null;
 
-                AssertException.Throws<ArgumentNullException>(() => new PopAuthenticationScheme(config, harness.ServiceBundle));
+                AssertException.Throws<ArgumentNullException>(() => new PopAuthenticationOperation(config, harness.ServiceBundle));
 
                 config = new PoPAuthenticationConfiguration(uri);
                 config.PopCryptoProvider = new InMemoryCryptoProvider();
 
-                AssertException.Throws<ArgumentNullException>(() => new PopAuthenticationScheme(config, null));
+                AssertException.Throws<ArgumentNullException>(() => new PopAuthenticationOperation(config, null));
                 AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationConfiguration((HttpRequestMessage)null));
                 AssertException.Throws<ArgumentNullException>(() => new PoPAuthenticationConfiguration((Uri)null));
             }
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 msalAccessTokenCacheItem.Secret = AtSecret;
 
                 // Act
-                PopAuthenticationScheme authenticationScheme = new PopAuthenticationScheme(popConfig, harness.ServiceBundle);
+                PopAuthenticationOperation authenticationScheme = new PopAuthenticationOperation(popConfig, harness.ServiceBundle);
                 var tokenParams = authenticationScheme.GetTokenRequestParams();
                 AuthenticationResult ar = new AuthenticationResult(msalAccessTokenCacheItem, null, authenticationScheme, Guid.NewGuid(), TokenSource.IdentityProvider, default, default, default, default);
                 authenticationScheme.FormatResult(ar);

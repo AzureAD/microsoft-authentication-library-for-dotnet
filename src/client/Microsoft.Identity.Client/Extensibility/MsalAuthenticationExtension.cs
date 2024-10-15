@@ -9,24 +9,24 @@ using Microsoft.Identity.Client.AuthScheme;
 namespace Microsoft.Identity.Client.Extensibility
 {
     /// <summary>
+    /// Enables the extension of the MSAL authentication process by providing a custom authentication operation. 
+    /// These operations are provided through the implementation of the <see cref="IAuthenticationOperation"/> interface.
     /// TODO: design for 2 things - Test User and CDT
     /// </summary>
     public class MsalAuthenticationExtension
-
     {
         /// <summary>
-        /// 
+        /// A delegate which gets invoked just before MSAL makes a token request.
         /// </summary>
         public Func<OnBeforeTokenRequestData, Task> OnBeforeTokenRequestHandler { get; set; }
 
         /// <summary>
         /// Enables the developer to provide a custom authentication extension.
         /// </summary>
-        /// TODO: guidance on how this interacts with OnBeforeTokenRequestHandler
         public IAuthenticationOperation AuthenticationOperation { get; set; }
 
         /// <summary>
-        /// Specifies additional parameters acquired from authentication responses to be cached
+        /// Specifies additional parameters acquired from authentication responses to be cached.
         /// </summary>
         public IEnumerable<string> AdditionalCacheParameters { get; set; }
     }

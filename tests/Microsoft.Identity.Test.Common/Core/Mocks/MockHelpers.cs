@@ -355,18 +355,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\"" + additionalparams + "}");
         }
 
-        public static HttpResponseMessage CreateSuccessfulCDTClientCredentialTokenResponseMessage(
-            string token = "header.payload.signature",
-            string expiry = "3599",
-            string tokenType = "Bearer",
-            string confirmation = "some_cnf",
-            string nonce = "nonce",
-            string encKey = "someKey")
-        {
-            return CreateSuccessResponseMessage(
-                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\", \"xms_ds_cnf\":\"" + confirmation + "\", \"xms_ds_nonce\":\"" + nonce + "\", \"xms_ds_enc\":\"" + encKey + "\"}");
-        }
-
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(
             string uniqueId,
             string displayableId,

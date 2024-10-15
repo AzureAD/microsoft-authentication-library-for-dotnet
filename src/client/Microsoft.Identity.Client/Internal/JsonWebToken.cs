@@ -27,8 +27,6 @@ namespace Microsoft.Identity.Client.Internal
         private readonly string _clientId;
         private readonly string _audience;
         private readonly bool _appendDefaultClaims;
-        private string _headerJson;
-        private string _bodyJson;
 
         public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience)
         {
@@ -47,12 +45,6 @@ namespace Microsoft.Identity.Client.Internal
         {
             _claimsToSign = claimsToSign;
             _appendDefaultClaims = appendDefaultClaims;
-        }
-
-        public JsonWebToken(string headerJson, string bodyJson)
-        {
-            _headerJson = headerJson;
-            _bodyJson = bodyJson;
         }
 
         private string CreateJsonPayload()
