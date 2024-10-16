@@ -3,19 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Extensibility;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.AuthExtension;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -28,7 +20,6 @@ namespace Microsoft.Identity.Test.Unit.CDT
         private const string ProtectedUrl = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
 
         [TestMethod]
-        [DeploymentItem(@"Resources\testCert.crtfile")]
         public async Task AuthenticationOperationTest_Async()
         {
             using (var httpManager = new MockHttpManager())
@@ -43,10 +34,68 @@ namespace Microsoft.Identity.Test.Unit.CDT
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(tokenType: "someAccessTokenType");
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(tokenType: "someAccessTokenType", additionalparams: string.Empty);
 
                 MsalAuthenticationExtension cdtExtension = new MsalAuthenticationExtension()
                 {
+                    AuthenticationOperation = new MsalTestAuthenticationOperation()
+                };
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithTenantId(TestConstants.Utid)
+                    .WithAuthenticationExtension(cdtExtension)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                var expectedAt = "header.payload.signature" + "AccessTokenModifier";
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.IsFalse(result.AdditionalResponseParameters.Any());
+                Assert.AreEqual(expectedAt, result.AccessToken);
+
+                //Verify that the original AT token is cached and the CDT can be recreated
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithTenantId(TestConstants.Utid)
+                    .WithAuthenticationExtension(cdtExtension)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.IsTrue(result.AdditionalResponseParameters == null);
+                Assert.AreEqual(expectedAt, result.AccessToken);
+            }
+        }
+
+        [TestMethod]
+        public async Task AuthenticationOperationWithCachingTest_Async()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication app =
+                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .WithExperimentalFeatures(true)
+                                                              .BuildConcrete();
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
+
+                Dictionary<string, string> expectedRequestHeaders = new Dictionary<string, string>
+                {
+                    { "key1", "value1" }
+                };
+                
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(tokenType: "someAccessTokenType", expectedRequestHeaders: expectedRequestHeaders);
+
+                MsalAuthenticationExtension cdtExtension = new MsalAuthenticationExtension()
+                {
+                    OnBeforeTokenRequestHandler = async (data) =>
+                    {
+                        data.Headers.Add("key1", "value1");
+                        await Task.CompletedTask.ConfigureAwait(false);
+                    },
+
                     AuthenticationOperation = new MsalTestAuthenticationOperation(),
                     AdditionalCacheParameters = new[] { "additional_param1", "additional_param2" }
                 };
@@ -58,13 +107,13 @@ namespace Microsoft.Identity.Test.Unit.CDT
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
+                var expectedAt = "header.payload.signature"
+                 + "AccessTokenModifier"
+                 + result.AdditionalResponseParameters["additional_param1"]
+                 + result.AdditionalResponseParameters["additional_param2"];
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.IsTrue(result.AdditionalResponseParameters.Keys.Contains("additional_param1"));
                 Assert.IsTrue(result.AdditionalResponseParameters.Keys.Contains("additional_param2"));
-                var expectedAt = "header.payload.signature"
-                                 + "AccessTokenModifier"
-                                 + result.AdditionalResponseParameters["additional_param1"]
-                                 + result.AdditionalResponseParameters["additional_param2"];
                 Assert.AreEqual(expectedAt, result.AccessToken);
 
                 //Verify that the original AT token is cached and the CDT can be recreated

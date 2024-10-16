@@ -23,10 +23,15 @@ namespace Microsoft.Identity.Test.Unit.AuthExtension
 
         public void FormatResult(AuthenticationResult authenticationResult)
         {
+            string cacheValue1 = string.Empty;
+            string cacheValue2 = string.Empty;
+            authenticationResult?.AdditionalResponseParameters?.TryGetValue("additional_param1", out cacheValue1);
+            authenticationResult?.AdditionalResponseParameters?.TryGetValue("additional_param2", out cacheValue2);
+
             authenticationResult.AccessToken = authenticationResult.AccessToken 
                                                 + "AccessTokenModifier" 
-                                                + authenticationResult.AdditionalResponseParameters["additional_param1"]
-                                                + authenticationResult.AdditionalResponseParameters["additional_param2"];
+                                                + cacheValue1
+                                                + cacheValue2;
         }
 
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()
