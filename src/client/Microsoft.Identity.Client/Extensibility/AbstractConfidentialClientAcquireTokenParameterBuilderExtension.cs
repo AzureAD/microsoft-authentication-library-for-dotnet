@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Extensibility
 
             return builder;
         }
-#if !MOBILE
+
         /// <summary>
         /// Enables client applications to provide a custom authentication operation to be used in the token acquisition request.
         /// <param name="builder">The builder to chain options to</param>
@@ -119,6 +119,5 @@ namespace Microsoft.Identity.Client.Extensibility
             }
             return builder;
         }
-#endif
     }   
 }

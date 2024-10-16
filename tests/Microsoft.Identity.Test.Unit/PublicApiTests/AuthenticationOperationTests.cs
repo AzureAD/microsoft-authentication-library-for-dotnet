@@ -37,7 +37,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        [Ignore]
         public async Task Interactive_WithCustomAuthScheme_ThenSilent_Async()
         {
             // Arrange

@@ -12,7 +12,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit.AuthExtension;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Unit.CDT
+namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
     public class AuthenticationOperationTests : TestBase
@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Unit.CDT
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(tokenType: "someAccessTokenType", additionalparams: string.Empty);
 
-                MsalAuthenticationExtension cdtExtension = new MsalAuthenticationExtension()
+                MsalAuthenticationExtension authExtension = new MsalAuthenticationExtension()
                 {
                     AuthenticationOperation = new MsalTestAuthenticationOperation()
                 };
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Unit.CDT
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithAuthenticationExtension(cdtExtension)
+                    .WithAuthenticationExtension(authExtension)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -53,10 +53,10 @@ namespace Microsoft.Identity.Test.Unit.CDT
                 Assert.IsFalse(result.AdditionalResponseParameters.Any());
                 Assert.AreEqual(expectedAt, result.AccessToken);
 
-                //Verify that the original AT token is cached and the CDT can be recreated
+                //Verify that the original AT token is cached and the extension is reused
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithAuthenticationExtension(cdtExtension)
+                    .WithAuthenticationExtension(authExtension)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Test.Unit.CDT
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(tokenType: "someAccessTokenType", expectedRequestHeaders: expectedRequestHeaders);
 
-                MsalAuthenticationExtension cdtExtension = new MsalAuthenticationExtension()
+                MsalAuthenticationExtension authExtension = new MsalAuthenticationExtension()
                 {
                     OnBeforeTokenRequestHandler = async (data) =>
                     {
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Test.Unit.CDT
                 // Act
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithAuthenticationExtension(cdtExtension)
+                    .WithAuthenticationExtension(authExtension)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 
@@ -116,10 +116,9 @@ namespace Microsoft.Identity.Test.Unit.CDT
                 Assert.IsTrue(result.AdditionalResponseParameters.Keys.Contains("additional_param2"));
                 Assert.AreEqual(expectedAt, result.AccessToken);
 
-                //Verify that the original AT token is cached and the CDT can be recreated
                 result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
                     .WithTenantId(TestConstants.Utid)
-                    .WithAuthenticationExtension(cdtExtension)
+                    .WithAuthenticationExtension(authExtension)
                     .ExecuteAsync()
                     .ConfigureAwait(false);
 

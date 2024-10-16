@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Client
                 AccessToken = msalAccessTokenCacheItem.Secret;
             }
 
-            //Important: only call this at the end
+            // Important: only call this at the end
             authenticationScheme.FormatResult(this);
         }
 

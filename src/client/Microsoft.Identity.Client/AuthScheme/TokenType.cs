@@ -29,8 +29,9 @@ namespace Microsoft.Identity.Client.AuthScheme
         External = 4,
 
         /// <summary>
-        /// Cdt token type.
+        /// Extension token type.
+        /// Extension = 5
         /// </summary>
-        Cdt = 5
+        Extension = 5
     }
 }

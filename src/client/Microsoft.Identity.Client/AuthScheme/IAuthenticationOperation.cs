@@ -27,8 +27,8 @@ namespace Microsoft.Identity.Client.AuthScheme
         /// External token type.
         /// External = 4,
         ///
-        /// Cdt token type.
-        /// Cdt = 5
+        /// Extension token type.
+        /// Extension = 5
         /// </summary>
         int TelemetryTokenType { get; }
 

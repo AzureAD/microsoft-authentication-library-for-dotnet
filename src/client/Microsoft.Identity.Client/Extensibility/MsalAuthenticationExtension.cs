@@ -11,7 +11,6 @@ namespace Microsoft.Identity.Client.Extensibility
     /// <summary>
     /// Enables the extension of the MSAL authentication process by providing a custom authentication operation. 
     /// These operations are provided through the implementation of the <see cref="IAuthenticationOperation"/> interface.
-    /// TODO: design for 2 things - Test User and CDT
     /// </summary>
     public class MsalAuthenticationExtension
     {

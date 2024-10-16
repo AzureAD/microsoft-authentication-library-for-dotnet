@@ -49,7 +49,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
         }
 
         [TestMethod]
-        [Ignore]
         public void ValidatePopRequestAndToken()
         {
             using (var harness = CreateTestHarness())
