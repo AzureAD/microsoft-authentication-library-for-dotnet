@@ -330,26 +330,44 @@ namespace Microsoft.Identity.Test.Unit
         private async Task AcquireTokenSuccessAsync(bool withExtension = false)
         {
             _harness.HttpManager.AddInstanceDiscoveryMockHandler();
-            _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "someAccessTokenType");
+            AuthenticationResult result;
 
-            MsalAuthenticationExtension authExtension = new MsalAuthenticationExtension()
+            if (withExtension)
             {
-                AuthenticationOperation = new MsalTestAuthenticationOperation()
-            };
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "someAccessTokenType");
+                MsalAuthenticationExtension authExtension = new MsalAuthenticationExtension()
+                {
+                    AuthenticationOperation = new MsalTestAuthenticationOperation()
+                };
 
-            // Acquire token for client with scope
-            var result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
-                .WithAuthenticationExtension(authExtension)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-            Assert.IsNotNull(result);
+                // Acquire token for client with scope
+                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithAuthenticationExtension(authExtension)
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
 
-            // Acquire token from the cache
-            result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
-                .WithAuthenticationExtension(authExtension)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-            Assert.IsNotNull(result);
+                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithAuthenticationExtension(authExtension)
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+            } 
+            else
+            {
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                // Acquire token for client with scope
+                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+
+                // Acquire token from the cache
+                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+            }
         }
 
         private async Task AcquireTokenMsalServiceExceptionAsync()
