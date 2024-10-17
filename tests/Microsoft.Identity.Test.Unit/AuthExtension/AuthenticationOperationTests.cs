@@ -20,7 +20,7 @@ namespace Microsoft.Identity.Test.Unit
         private const string ProtectedUrl = "https://www.contoso.com/path1/path2?queryParam1=a&queryParam2=b";
 
         [TestMethod]
-        public async Task AuthenticationOperationTest_Async()
+        public async Task Should_UseCustomRequestHeaders_And_StoreAdditionalParameters()
         {
             using (var httpManager = new MockHttpManager())
             {

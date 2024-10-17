@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client
         public RegionDetails RegionDetails { get; set; }
 
         /// <summary>
-        /// Time, in milliseconds, spent in the token creation of the extended token.
+        /// Time, in microseconds, spent in the token creation of the extended token.
         /// </summary>
         public long DurationCreatingExtendedTokenInUs { get; set; }
 
