@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        public async Task AuthenticationOperationWithCachingTest_Async()
+        public async Task Should_UseCustomRequestHeaders_And_StoreAdditionalParametersWithCaching()
         {
             using (var httpManager = new MockHttpManager())
             {
@@ -126,6 +126,50 @@ namespace Microsoft.Identity.Test.Unit
 
                 Assert.IsTrue(result.AdditionalResponseParameters.Keys.Contains("additional_param1"));
                 Assert.IsTrue(result.AdditionalResponseParameters.Keys.Contains("additional_param2"));
+                Assert.AreEqual(expectedAt, result.AccessToken);
+            }
+        }
+
+        [TestMethod]
+        public async Task Should_UseEmptyExtension_And_Parameters()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                ConfidentialClientApplication app =
+                    ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                              .WithClientSecret(TestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .WithExperimentalFeatures(true)
+                                                              .BuildConcrete();
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(ProtectedUrl));
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(additionalparams: string.Empty);
+
+                MsalAuthenticationExtension authExtension = new MsalAuthenticationExtension();
+
+                // Act
+                var result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithTenantId(TestConstants.Utid)
+                    .WithAuthenticationExtension(authExtension)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                var expectedAt = "header.payload.signature";
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+                Assert.IsFalse(result.AdditionalResponseParameters.Any());
+                Assert.AreEqual(expectedAt, result.AccessToken);
+
+                //Verify that the original AT token is cached and the extension is reused
+                result = await app.AcquireTokenForClient(TestConstants.s_scope.ToArray())
+                    .WithTenantId(TestConstants.Utid)
+                    .WithAuthenticationExtension(authExtension)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
+                Assert.IsTrue(result.AdditionalResponseParameters == null);
                 Assert.AreEqual(expectedAt, result.AccessToken);
             }
         }
