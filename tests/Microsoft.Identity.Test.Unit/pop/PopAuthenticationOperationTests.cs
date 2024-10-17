@@ -71,7 +71,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 PopAuthenticationOperation authenticationScheme = new PopAuthenticationOperation(popConfig, harness.ServiceBundle);
                 var tokenParams = authenticationScheme.GetTokenRequestParams();
                 AuthenticationResult ar = new AuthenticationResult(msalAccessTokenCacheItem, null, authenticationScheme, Guid.NewGuid(), TokenSource.IdentityProvider, default, default, default, default);
-                authenticationScheme.FormatResult(ar);
                 JwtSecurityToken decodedPopToken = new JwtSecurityToken(ar.AccessToken);
 
                 // Assert

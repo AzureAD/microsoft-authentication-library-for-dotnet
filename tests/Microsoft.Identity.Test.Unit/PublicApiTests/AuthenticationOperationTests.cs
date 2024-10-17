@@ -46,13 +46,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             authScheme.KeyId.Returns("keyid");
             authScheme.GetTokenRequestParams().Returns(new Dictionary<string, string>() { { "tokenParam", "tokenParamValue" } });
             // When FormatResult is called, change the AccessToken property 
-            authScheme.WhenForAnyArgs(x => x.FormatResult(default)).Do(x => x[0] = "enhanced_secret_" + ((AuthenticationResult)x[0]).AccessToken);
+            authScheme.WhenForAnyArgs(x => x.FormatResult(default)).Do(x => ((AuthenticationResult)x[0]).AccessToken = "enhanced_secret_" + ((AuthenticationResult)x[0]).AccessToken);
 
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithExperimentalFeatures()
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -173,6 +174,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(TestConstants.ClientId)
+                                                                            .WithExperimentalFeatures()
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 

@@ -196,7 +196,10 @@ namespace Microsoft.Identity.Client
                 authenticationScheme.FormatResult(this);
             });
 
-            AuthenticationResultMetadata.DurationCreatingExtendedTokenInUs = measuredResultDuration.Microseconds;
+            if (authenticationScheme.TelemetryTokenType == 5)
+            {
+                AuthenticationResultMetadata.DurationCreatingExtendedTokenInUs = measuredResultDuration.Microseconds;
+            }
         }
 
         //Default constructor for testing
