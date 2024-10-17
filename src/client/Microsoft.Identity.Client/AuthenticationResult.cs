@@ -196,20 +196,8 @@ namespace Microsoft.Identity.Client
                 authenticationScheme.FormatResult(this);
             });
 
-            LogMeasuredDuration(measuredResultDuration, authenticationScheme.TelemetryTokenType);
+            AuthenticationResultMetadata.DurationCreatingExtendedTokenInUs = measuredResultDuration.Microseconds;
         }
-
-        private void LogMeasuredDuration(MeasureDurationResult measuredResultDuration, int telemetryTokenType)
-        {
-            switch((TokenType)telemetryTokenType)
-            {
-                case AuthScheme.TokenType.Cdt:
-                    AuthenticationResultMetadata.DurationCreatingCdtInUs = measuredResultDuration.Microseconds;
-                    break;
-                default:
-                    break;
-                }
-            }
 
         //Default constructor for testing
         internal AuthenticationResult() { }

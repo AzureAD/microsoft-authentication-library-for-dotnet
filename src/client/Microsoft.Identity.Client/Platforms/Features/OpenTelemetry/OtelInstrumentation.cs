@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         private const string DurationInL1CacheHistogramName = "MsalDurationInL1CacheInUs.1B";
         private const string DurationInL2CacheHistogramName = "MsalDurationInL2Cache.1A";
         private const string DurationInHttpHistogramName = "MsalDurationInHttp.1A";
-        private const string DurationInCdtInMsHistogram = "DurationInCdtInMs.1B";
+        private const string DurationInExtensionInMsHistogram = "MsalDurationInExtensionInMs.1B";
 
         /// <summary>
         /// Meter to hold the MSAL metrics.
@@ -84,12 +84,12 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             description: "Performance of token acquisition calls network latency"));
 
         /// <summary>
-        /// Histogram to record total duration of Constrained delegation token creation in microseconds(us).
+        /// Histogram to record total duration of extension modifications in microseconds(us).
         /// </summary>
-        internal static readonly Lazy<Histogram<long>> s_durationInCdtInMs = new(() => Meter.CreateHistogram<long>(
-            DurationInCdtInMsHistogram,
+        internal static readonly Lazy<Histogram<long>> s_durationInExtensionInMs = new(() => Meter.CreateHistogram<long>(
+            DurationInExtensionInMsHistogram,
             unit: "us",
-            description: "Performance of token acquisition calls Cdt creation latency."));
+            description: "Performance of token acquisition calls extension latency."));
 
         public OtelInstrumentation()
         {
@@ -161,9 +161,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason));
             }
 
-            if (s_durationInCdtInMs.Value.Enabled)
+            if (s_durationInExtensionInMs.Value.Enabled)
             {
-                s_durationInCdtInMs.Value.Record(authResultMetadata.DurationCreatingCdtInUs,
+                s_durationInExtensionInMs.Value.Record(authResultMetadata.DurationCreatingExtendedTokenInUs,
                 new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
                 new(TelemetryConstants.Platform, platform),
                 new(TelemetryConstants.ApiId, apiId),
