@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1729270040226,
+  "lastUpdate": 1729270669717,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6506,6 +6506,42 @@ window.BENCHMARK_DATA = {
             "value": 329176.25,
             "unit": "ns",
             "range": "± 3038.091180779022"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6d9fdac2a5c2e2f4ede4069a14b4bc064be80cf8",
+          "message": "fix the warning - XML comment has badly formed XML (#4959)\n\n* Update AbstractConfidentialClientAcquireTokenParameterBuilderExtension.cs\r\n\r\n* Update AbstractConfidentialClientAcquireTokenParameterBuilderExtension.cs",
+          "timestamp": "2024-10-18T09:50:23-07:00",
+          "tree_id": "34f9332cb0ace90ba46dd8c95b68588411b4b108",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/6d9fdac2a5c2e2f4ede4069a14b4bc064be80cf8"
+        },
+        "date": 1729270666053,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 259662.9,
+            "unit": "ns",
+            "range": "± 7731.200193885232"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 373286.4285714286,
+            "unit": "ns",
+            "range": "± 6138.18182444037"
           }
         ]
       }
