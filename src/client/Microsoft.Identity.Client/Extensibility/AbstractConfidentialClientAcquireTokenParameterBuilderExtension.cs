@@ -65,6 +65,7 @@ namespace Microsoft.Identity.Client.Extensibility
 
         /// <summary>
         /// Enables client applications to provide a custom authentication operation to be used in the token acquisition request.
+        /// </summary>
         /// <param name="builder">The builder to chain options to</param>
         /// <param name="authenticationExtension">The implementation of the authentication operation.</param>
         /// <returns></returns>
