@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1729210118529,
+  "lastUpdate": 1729270034358,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6470,6 +6470,42 @@ window.BENCHMARK_DATA = {
             "value": 343740.6923076923,
             "unit": "ns",
             "range": "± 4494.059233859284"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bogavril@microsoft.com",
+            "name": "Bogdan Gavril",
+            "username": "bgavrilMS"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cd459f615e796ca762a3012e6a46487c830e2a33",
+          "message": "Opt-in to regional when env variable MSAL_FORCE_REGION is set (#4954)\n\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-10-18T09:39:29-07:00",
+          "tree_id": "987d6672c2f33827f4047d20ee783367f995933f",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/cd459f615e796ca762a3012e6a46487c830e2a33"
+        },
+        "date": 1729270030640,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 254662.4,
+            "unit": "ns",
+            "range": "± 2917.759703216542"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 329176.25,
+            "unit": "ns",
+            "range": "± 3038.091180779022"
           }
         ]
       }
