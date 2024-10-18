@@ -65,6 +65,7 @@ namespace Microsoft.Identity.Client.Extensibility
 
         /// <summary>
         /// Enables client applications to provide a custom authentication operation to be used in the token acquisition request.
+        /// </summary>
         /// <param name="builder">The builder to chain options to</param>
         /// <param name="authenticationExtension">The implementation of the authentication operation.</param>
         /// <returns></returns>
@@ -88,7 +89,8 @@ namespace Microsoft.Identity.Client.Extensibility
 
             return builder;
         }
-
+        
+        /// <summary>
         /// Specifies additional parameters acquired from authentication responses to be cached with the access token that are normally not included in the cache object.
         /// these values can be read from the <see cref="AuthenticationResult.AdditionalResponseParameters"/> parameter.
         /// </summary>
