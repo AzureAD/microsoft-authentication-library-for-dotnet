@@ -88,7 +88,8 @@ namespace Microsoft.Identity.Client.Extensibility
 
             return builder;
         }
-
+        
+        /// <summary>
         /// Specifies additional parameters acquired from authentication responses to be cached with the access token that are normally not included in the cache object.
         /// these values can be read from the <see cref="AuthenticationResult.AdditionalResponseParameters"/> parameter.
         /// </summary>
