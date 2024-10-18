@@ -538,7 +538,7 @@ namespace Microsoft.Identity.Client
         {
             tokenCacheItems.FilterWithLogging(item =>
                             string.Equals(
-                                item.TokenType ?? BearerAuthenticationScheme.BearerTokenType,
+                                item.TokenType ?? BearerAuthenticationOperation.BearerTokenType,
                                 requestParams.AuthenticationScheme.AccessTokenType,
                                 StringComparison.OrdinalIgnoreCase),
                             requestParams.RequestContext.Logger,

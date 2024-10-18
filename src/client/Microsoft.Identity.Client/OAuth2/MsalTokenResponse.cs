@@ -49,7 +49,6 @@ namespace Microsoft.Identity.Client.OAuth2
 
         // Hybrid SPA - see https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/3994
         public const string SpaCode = "spa_code";
-
     }
 
     [JsonObject]

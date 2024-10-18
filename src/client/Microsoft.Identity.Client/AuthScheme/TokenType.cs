@@ -26,6 +26,12 @@ namespace Microsoft.Identity.Client.AuthScheme
         /// <summary>
         /// External token type.
         /// </summary>
-        External = 4
+        External = 4,
+
+        /// <summary>
+        /// Extension token type.
+        /// Extension = 5
+        /// </summary>
+        Extension = 5
     }
 }

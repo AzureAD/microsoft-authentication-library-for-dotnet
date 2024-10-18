@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.ManagedIdentity;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Platforms.Features.OpenTelemetry;
@@ -17,6 +18,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Unit.AuthExtension;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
@@ -69,6 +71,21 @@ namespace Microsoft.Identity.Test.Unit
 
                 s_meterProvider.ForceFlush();
                 VerifyMetrics(5, _exportedMetrics, 2, 2);
+            }
+        }
+
+        [TestMethod]
+        public async Task AcquireTokenOTelTestWithExtensionAsync()
+        {
+            using (_harness = CreateTestHarness())
+            {
+                CreateApplication();
+                await AcquireTokenSuccessAsync(true).ConfigureAwait(false);
+                await AcquireTokenMsalServiceExceptionAsync().ConfigureAwait(false);
+                await AcquireTokenMsalClientExceptionAsync().ConfigureAwait(false);
+
+                s_meterProvider.ForceFlush();
+                VerifyMetrics(6, _exportedMetrics, 2, 2);
             }
         }
 
@@ -310,22 +327,47 @@ namespace Microsoft.Identity.Test.Unit
             }
         }
 
-        private async Task AcquireTokenSuccessAsync()
+        private async Task AcquireTokenSuccessAsync(bool withExtension = false)
         {
             _harness.HttpManager.AddInstanceDiscoveryMockHandler();
-            _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+            AuthenticationResult result;
 
-            // Acquire token for client with scope
-            var result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-            Assert.IsNotNull(result);
+            if (withExtension)
+            {
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(tokenType: "someAccessTokenType");
+                MsalAuthenticationExtension authExtension = new MsalAuthenticationExtension()
+                {
+                    AuthenticationOperation = new MsalTestAuthenticationOperation()
+                };
 
-            // Acquire token from the cache
-            result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
-                .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-            Assert.IsNotNull(result);
+                // Acquire token for client with scope
+                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithAuthenticationExtension(authExtension)
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+
+                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .WithAuthenticationExtension(authExtension)
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+            } 
+            else
+            {
+                _harness.HttpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+                // Acquire token for client with scope
+                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+
+                // Acquire token from the cache
+                result = await _cca.AcquireTokenForClient(TestConstants.s_scope)
+                    .WithExtraQueryParameters(new Dictionary<string, string> { { "caller-sdk-id", callerSdkId }, { "caller-sdk-ver", callerSdkVersion } })
+                    .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+            }
         }
 
         private async Task AcquireTokenMsalServiceExceptionAsync()
@@ -360,6 +402,7 @@ namespace Microsoft.Identity.Test.Unit
         {
             _cca = ConfidentialClientApplicationBuilder
                         .Create(TestConstants.ClientId)
+                        .WithExperimentalFeatures()
                         .WithAuthority(TestConstants.AuthorityUtidTenant)
                         .WithClientSecret(TestConstants.ClientSecret)
                         .WithHttpManager(_harness.HttpManager)
@@ -484,6 +527,23 @@ namespace Microsoft.Identity.Test.Unit
                         expectedTags.Add(TelemetryConstants.MsalVersion);
                         expectedTags.Add(TelemetryConstants.Platform);
                         expectedTags.Add(TelemetryConstants.ApiId);
+
+                        foreach (var metricPoint in exportedItem.GetMetricPoints())
+                        {
+                            AssertTags(metricPoint.Tags, expectedTags);
+                        }
+
+                        break;
+
+                    case "MsalDurationInExtensionInMs.1B":
+                        Trace.WriteLine("Verify the metrics captured for MsalDurationInExtensionInMs.1B histogram.");
+                        Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
+
+                        expectedTags.Add(TelemetryConstants.MsalVersion);
+                        expectedTags.Add(TelemetryConstants.Platform);
+                        expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.TokenSource);
+                        expectedTags.Add(TelemetryConstants.CacheLevel);
 
                         foreach (var metricPoint in exportedItem.GetMetricPoints())
                         {

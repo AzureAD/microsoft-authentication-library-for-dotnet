@@ -10,12 +10,12 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     /// <summary>
     /// This factory ensures key rotation every 8h
     /// </summary>
-    internal static class PoPProviderFactory
+    internal static class PoPCryptoProviderFactory
     {
         private static InMemoryCryptoProvider s_currentProvider;
         private static DateTime s_providerExpiration;
 
-        public /* public for test only */ static TimeSpan KeyRotationInterval { get; } 
+        public /* public for test only */ static TimeSpan KeyRotationInterval { get; }
             = TimeSpan.FromHours(8);
 
         private static object s_lock = new object();

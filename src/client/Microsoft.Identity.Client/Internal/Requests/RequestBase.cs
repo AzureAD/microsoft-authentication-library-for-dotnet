@@ -23,6 +23,7 @@ using Microsoft.Identity.Client.TelemetryCore.TelemetryClient;
 using Microsoft.Identity.Client.TelemetryCore.OpenTelemetry;
 using Microsoft.Identity.Client.Internal.Broker;
 using System.Runtime.ConstrainedExecution;
+using Microsoft.Identity.Client.AuthScheme;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -244,7 +245,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
 
             apiEvent.CacheInfo = CacheRefreshReason.NotApplicable;
-            apiEvent.TokenType = AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
+            apiEvent.TokenType = (TokenType)AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
             apiEvent.AssertionType = GetAssertionType();
 
             UpdateCallerSdkDetails(apiEvent);
