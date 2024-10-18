@@ -27,7 +27,12 @@ namespace Microsoft.Identity.Client.Extensibility
             this AbstractAcquireTokenParameterBuilder<T> builder, 
             Func<OnBeforeTokenRequestData, Task> onBeforeTokenRequestHandler) 
             where T : AbstractAcquireTokenParameterBuilder<T>
-        {            
+        {
+            if (builder.CommonParameters.OnBeforeTokenRequestHandler != null && onBeforeTokenRequestHandler != null)
+            {
+                throw new InvalidOperationException("Cannot set OnBeforeTokenRequest handler twice.");
+            }
+
             builder.CommonParameters.OnBeforeTokenRequestHandler = onBeforeTokenRequestHandler;
 
             return builder;
@@ -53,12 +58,38 @@ namespace Microsoft.Identity.Client.Extensibility
             }
 
             builder.ValidateUseOfExperimentalFeature();
-            builder.CommonParameters.AuthenticationScheme = new ExternalBoundTokenScheme(keyId, expectedTokenTypeFromAad);
+            builder.CommonParameters.AuthenticationOperation = new ExternalBoundTokenScheme(keyId, expectedTokenTypeFromAad);
 
             return builder;
         }
 
-#if !MOBILE
+        /// <summary>
+        /// Enables client applications to provide a custom authentication operation to be used in the token acquisition request.
+        /// </summary>
+        /// <param name="builder">The builder to chain options to</param>
+        /// <param name="authenticationExtension">The implementation of the authentication operation.</param>
+        /// <returns></returns>
+        public static AbstractAcquireTokenParameterBuilder<T> WithAuthenticationExtension<T>(
+           this AbstractAcquireTokenParameterBuilder<T> builder,
+           MsalAuthenticationExtension authenticationExtension)
+            where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            if (builder.CommonParameters.OnBeforeTokenRequestHandler != null && authenticationExtension.OnBeforeTokenRequestHandler != null)
+            {
+                throw new InvalidOperationException("Cannot set both an AuthenticaitonOperation and an OnBeforeTokenRequestHandler");
+            }
+
+            builder.CommonParameters.OnBeforeTokenRequestHandler = authenticationExtension.OnBeforeTokenRequestHandler;
+
+            if (authenticationExtension.AuthenticationOperation != null)
+                builder.WithAuthenticationOperation(authenticationExtension.AuthenticationOperation);
+
+            if (authenticationExtension.AdditionalCacheParameters != null)
+                builder.WithAdditionalCacheParameters(authenticationExtension.AdditionalCacheParameters);
+
+            return builder;
+        }
+        
         /// <summary>
         /// Specifies additional parameters acquired from authentication responses to be cached with the access token that are normally not included in the cache object.
         /// these values can be read from the <see cref="AuthenticationResult.AdditionalResponseParameters"/> parameter.
@@ -90,6 +121,5 @@ namespace Microsoft.Identity.Client.Extensibility
             }
             return builder;
         }
-#endif
     }   
 }

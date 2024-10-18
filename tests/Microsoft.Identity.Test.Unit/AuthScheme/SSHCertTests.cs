@@ -17,16 +17,16 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         public void NullArgs()
         {
-            AssertException.Throws<ArgumentNullException>(() => new SSHCertAuthenticationScheme(null, "jwk"));
-            AssertException.Throws<ArgumentNullException>(() => new SSHCertAuthenticationScheme("", "jwk"));
-            AssertException.Throws<ArgumentNullException>(() => new SSHCertAuthenticationScheme("kid", ""));
-            AssertException.Throws<ArgumentNullException>(() => new SSHCertAuthenticationScheme("kid", null));
+            AssertException.Throws<ArgumentNullException>(() => new SSHCertAuthenticationOperation(null, "jwk"));
+            AssertException.Throws<ArgumentNullException>(() => new SSHCertAuthenticationOperation("", "jwk"));
+            AssertException.Throws<ArgumentNullException>(() => new SSHCertAuthenticationOperation("kid", ""));
+            AssertException.Throws<ArgumentNullException>(() => new SSHCertAuthenticationOperation("kid", null));
         }
 
         [TestMethod]
         public void NoAuthPrefix()
         {
-            var scheme = new SSHCertAuthenticationScheme("kid", "jwk");
+            var scheme = new SSHCertAuthenticationOperation("kid", "jwk");
             MsalClientException ex = AssertException.Throws<MsalClientException>(() => scheme.AuthorizationHeaderPrefix);
             Assert.AreEqual(MsalError.SSHCertUsedAsHttpHeader, ex.ErrorCode);
         }
@@ -34,13 +34,13 @@ namespace Microsoft.Identity.Test.Unit
         [TestMethod]
         public void ParamsAndKeyId()
         {
-            var scheme = new SSHCertAuthenticationScheme("kid", "jwk");
+            var scheme = new SSHCertAuthenticationOperation("kid", "jwk");
             Assert.AreEqual("kid", scheme.KeyId);
-            Assert.AreEqual(SSHCertAuthenticationScheme.SSHCertTokenType,
+            Assert.AreEqual(SSHCertAuthenticationOperation.SSHCertTokenType,
                 scheme.GetTokenRequestParams()[OAuth2Parameter.TokenType]);
             Assert.AreEqual("jwk",
                 scheme.GetTokenRequestParams()[OAuth2Parameter.RequestConfirmation]);
-            Assert.AreEqual(TokenType.SshCert, scheme.TelemetryTokenType);
+            Assert.AreEqual(TokenType.SshCert, (TokenType)scheme.TelemetryTokenType);
 
         }
     }

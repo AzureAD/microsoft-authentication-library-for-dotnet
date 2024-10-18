@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -20,7 +21,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public partial class AuthenticationResult
     {
-        private readonly IAuthenticationScheme _authenticationScheme;
+        private readonly IAuthenticationOperation _authenticationScheme;
 
         /// <summary>
         /// Constructor meant to help application developers test their apps. Allows mocking of authentication flows.
@@ -127,17 +128,17 @@ namespace Microsoft.Identity.Client
 
         internal AuthenticationResult(
             MsalAccessTokenCacheItem msalAccessTokenCacheItem,
-            MsalIdTokenCacheItem msalIdTokenCacheItem, 
-            IAuthenticationScheme authenticationScheme,
+            MsalIdTokenCacheItem msalIdTokenCacheItem,
+            IAuthenticationOperation authenticationScheme,
             Guid correlationID,
-            TokenSource tokenSource, 
+            TokenSource tokenSource,
             ApiEvent apiEvent,
             Account account,
-            string spaAuthCode, 
+            string spaAuthCode,
             IReadOnlyDictionary<string, string> additionalResponseParameters)
         {
             _authenticationScheme = authenticationScheme ?? throw new ArgumentNullException(nameof(authenticationScheme));
-            
+
             string homeAccountId =
                 msalAccessTokenCacheItem?.HomeAccountId ??
                 msalIdTokenCacheItem?.HomeAccountId;
@@ -167,11 +168,10 @@ namespace Microsoft.Identity.Client
             ApiEvent = apiEvent;
             AuthenticationResultMetadata = new AuthenticationResultMetadata(tokenSource);
             AdditionalResponseParameters = msalAccessTokenCacheItem?.PersistedCacheParameters?.Count > 0 ?
-                                                                    (IReadOnlyDictionary<string, string>)msalAccessTokenCacheItem.PersistedCacheParameters : 
+                                                                    (IReadOnlyDictionary<string, string>)msalAccessTokenCacheItem.PersistedCacheParameters :
                                                                     additionalResponseParameters;
             if (msalAccessTokenCacheItem != null)
             {
-                AccessToken = authenticationScheme.FormatAccessToken(msalAccessTokenCacheItem);
                 ExpiresOn = msalAccessTokenCacheItem.ExpiresOn;
                 Scopes = msalAccessTokenCacheItem.ScopeSet;
 
@@ -186,6 +186,19 @@ namespace Microsoft.Identity.Client
                 {
                     AuthenticationResultMetadata.RefreshOn = msalAccessTokenCacheItem.RefreshOn;
                 }
+
+                AccessToken = msalAccessTokenCacheItem.Secret;
+            }
+
+            var measuredResultDuration = StopwatchService.MeasureCodeBlock(() =>
+            {
+                //Important: only call this at the end
+                authenticationScheme.FormatResult(this);
+            });
+
+            if (authenticationScheme.TelemetryTokenType == 5)
+            {
+                AuthenticationResultMetadata.DurationCreatingExtendedTokenInUs = measuredResultDuration.Microseconds;
             }
         }
 
@@ -195,7 +208,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Access Token that can be used as a bearer token to access protected web APIs
         /// </summary>
-        public string AccessToken { get; }
+        public string AccessToken { get; set; }
 
         /// <summary>
         /// In case when Azure AD has an outage, to be more resilient, it can return tokens with

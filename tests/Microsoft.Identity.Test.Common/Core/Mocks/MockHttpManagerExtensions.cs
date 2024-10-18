@@ -203,13 +203,15 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             string expiresIn = "3599",
             string tokenType = "Bearer",
             IList<string> unexpectedHttpHeaders = null,
-            string additionalparams = ",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\",\"additional_param4\":[\"GUID\",\"GUID2\",\"GUID3\"],\"additional_param5\":{\"value5json\":\"value5\"}")
+            string additionalparams = ",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\",\"additional_param4\":[\"GUID\",\"GUID2\",\"GUID3\"],\"additional_param5\":{\"value5json\":\"value5\"}",
+            IDictionary<string, string> expectedRequestHeaders = null)
         {
             var handler = new MockHttpMessageHandler()
             {
                 ExpectedMethod = HttpMethod.Post,
                 ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(token, expiresIn, tokenType, additionalparams),
-                UnexpectedRequestHeaders = unexpectedHttpHeaders
+                UnexpectedRequestHeaders = unexpectedHttpHeaders,
+                ExpectedRequestHeaders = expectedRequestHeaders
             };
 
             httpManager.AddMockHandler(handler);

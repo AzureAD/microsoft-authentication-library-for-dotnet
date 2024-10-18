@@ -26,7 +26,7 @@ namespace Microsoft.Identity.Client.SSHCertificates
             string publicKeyJwk,
             string keyId)
         {
-            builder.CommonParameters.AuthenticationScheme = new SSHCertAuthenticationScheme(keyId, publicKeyJwk);
+            builder.CommonParameters.AuthenticationOperation = new SSHCertAuthenticationOperation(keyId, publicKeyJwk);
             return builder;
         }
 
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.SSHCertificates
             string publicKeyJwk,
             string keyId)
         {
-            builder.CommonParameters.AuthenticationScheme = new SSHCertAuthenticationScheme(keyId, publicKeyJwk);
+            builder.CommonParameters.AuthenticationOperation = new SSHCertAuthenticationOperation(keyId, publicKeyJwk);
             return builder;
         }
     }

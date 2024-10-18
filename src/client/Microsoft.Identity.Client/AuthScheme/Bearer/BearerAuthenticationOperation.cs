@@ -7,11 +7,11 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AuthScheme.Bearer
 {
-    internal class BearerAuthenticationScheme : IAuthenticationScheme
+    internal class BearerAuthenticationOperation : IAuthenticationOperation
     {
         internal const string BearerTokenType = "bearer";
 
-        public TokenType TelemetryTokenType => TokenType.Bearer;
+        public int TelemetryTokenType => (int)TokenType.Bearer;
 
         public string AuthorizationHeaderPrefix => "Bearer";
 
@@ -19,9 +19,9 @@ namespace Microsoft.Identity.Client.AuthScheme.Bearer
 
         public string KeyId => null;
 
-        public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        public void FormatResult(AuthenticationResult authenticationResult)
         {
-            return msalAccessTokenCacheItem.Secret;
+            // no-op
         }
 
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()

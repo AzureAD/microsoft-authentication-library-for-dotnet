@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.Extensibility
             }
 
             builder.ValidateUseOfExperimentalFeature();
-            builder.CommonParameters.AuthenticationScheme = new ExternalBoundTokenScheme(keyId, expectedTokenTypeFromAad);
+            builder.CommonParameters.AuthenticationOperation = new ExternalBoundTokenScheme(keyId, expectedTokenTypeFromAad);
 
             return builder;
         }

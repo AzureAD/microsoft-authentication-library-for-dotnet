@@ -8,12 +8,12 @@ using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
 {
-    internal class SSHCertAuthenticationScheme : IAuthenticationScheme
+    internal class SSHCertAuthenticationOperation : IAuthenticationOperation
     {
         internal const string SSHCertTokenType = "ssh-cert";
         private readonly string _jwk;
 
-        public SSHCertAuthenticationScheme(string keyId, string jwk)
+        public SSHCertAuthenticationOperation(string keyId, string jwk)
         {
             if (string.IsNullOrEmpty(keyId))
             {
@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
             _jwk = jwk;
         }
 
-        public TokenType TelemetryTokenType => TokenType.SshCert;
+        public int TelemetryTokenType => (int)TokenType.SshCert;
 
         public string AuthorizationHeaderPrefix =>
             throw new MsalClientException(
@@ -39,9 +39,9 @@ namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
 
         public string KeyId { get; }
 
-        public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        public void FormatResult(AuthenticationResult authenticationResult)
         {
-            return msalAccessTokenCacheItem.Secret;
+            // no-op
         }
 
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()
