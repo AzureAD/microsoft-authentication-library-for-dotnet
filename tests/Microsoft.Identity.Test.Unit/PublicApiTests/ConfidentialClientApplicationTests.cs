@@ -1829,11 +1829,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [DataRow(null)]
         public async Task ValidateGetAccountAsyncWithNullEmptyAccountIdAsync(string accountId)
         {
+            var testIdentiyLogger = new TestIdentityLogger();
             using (var httpManager = new MockHttpManager())
             {
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                                               .WithClientSecret(TestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
+                                                              .WithLogging(testIdentiyLogger)
                                                               .BuildConcrete();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
