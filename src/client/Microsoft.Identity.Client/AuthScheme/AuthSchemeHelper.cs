@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.AuthScheme
         {
             if (string.Equals(
                 tokenType,
-                BearerAuthenticationScheme.BearerTokenType,
+                BearerAuthenticationOperation.BearerTokenType,
                 StringComparison.OrdinalIgnoreCase))
             {
                 return false;
@@ -27,7 +27,7 @@ namespace Microsoft.Identity.Client.AuthScheme
 
             if (string.Equals(
                 tokenType,
-                SSHCertAuthenticationScheme.SSHCertTokenType,
+                SSHCertAuthenticationOperation.SSHCertTokenType,
                 StringComparison.OrdinalIgnoreCase))
             {
                 return false;

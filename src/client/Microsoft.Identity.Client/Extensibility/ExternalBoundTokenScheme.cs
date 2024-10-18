@@ -8,7 +8,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Extensibility
 {
-    internal class ExternalBoundTokenScheme : IAuthenticationScheme
+    internal class ExternalBoundTokenScheme : IAuthenticationOperation
     {
         private readonly string _keyId;
         private readonly string _tokenType;
@@ -19,7 +19,7 @@ namespace Microsoft.Identity.Client.Extensibility
             _tokenType = expectedTokenTypeFromEsts;
         }
 
-        public TokenType TelemetryTokenType => TokenType.External;
+        public int TelemetryTokenType => (int)TokenType.External;
 
         public string AuthorizationHeaderPrefix => _tokenType;
 
@@ -27,9 +27,9 @@ namespace Microsoft.Identity.Client.Extensibility
 
         public string AccessTokenType => _tokenType;
 
-        public string FormatAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        public void FormatResult(AuthenticationResult authenticationResult)
         {
-            return msalAccessTokenCacheItem.Secret;
+            // no-op
         }
 
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()

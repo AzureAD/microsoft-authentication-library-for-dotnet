@@ -262,7 +262,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         public override IPoPCryptoProvider GetDefaultPoPCryptoProvider()
         {
-            return PoPProviderFactory.GetOrCreateProvider();
+            return PoPCryptoProviderFactory.GetOrCreateProvider();
         }
 
         public override bool BrokerSupportsWamAccounts => true;
