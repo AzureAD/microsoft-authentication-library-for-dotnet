@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1729210116467,
+  "lastUpdate": 1729210118529,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -32264,6 +32264,66 @@ window.BENCHMARK_DATA = {
             "value": 131940.0752688172,
             "unit": "ns",
             "range": "± 13528.805916520561"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "travis.walker@microsoft.com",
+            "name": "Travis Walker",
+            "username": "trwalke"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "97c51de3dcb87f4843b5767b5d73a6b5d82f4225",
+          "message": "Adding authentication extension api to enable the extending of MSAL (#4859)\n\n* Initial commit\r\n\r\n* Updating Core logic for CDT\r\n\r\n* Updates\r\n\r\n* Refactoring CdtAuthScheme\r\nAdding unit tests\r\n\r\n* Adding cache test case\r\n\r\n* Resolving issues\r\n\r\n* Update\r\n\r\n* Adding api to enable additional caching parameters\r\n\r\n* clean up\r\n\r\n* Clean up, Refactoring, Updating tests\r\n\r\n* Fixing test issue\r\n\r\n* Resolving build issue\r\n\r\n* Test fix\r\n\r\n* Refactoring CDT logic to make it extensible\r\n\r\n* hooking up addin\r\n\r\n* Adding support for arrays and objects\r\n\r\n* Hooking up Additional cache param logic\r\n\r\n* Clean up\r\nfix test\r\n\r\n* Adding integration test\r\n\r\n* Fixing tests\r\n\r\n* Ignoring test\r\n\r\n* Resolving build error\r\n\r\n* Making constraints an array\r\n\r\n* Updating CDT format\r\n\r\n* Moving CDT implementation to new project.\r\n\r\n* clean up\r\n\r\n* Moving cdt implementation to new project. Removing MSAL internal dependencies\r\n\r\n* Setting tokenType to internal\r\n\r\n* Resolving build issues\r\n\r\n* Refactoring CdtAuthScheme to use wilson\r\n\r\n* Resolving build errors\r\n\r\n* Revert \"Resolving build errors\"\r\n\r\nThis reverts commit 68a892261c063f020975583a35ec38aba064a595.\r\n\r\n* Fixing error\r\n\r\n* Revert \"Fixing error\"\r\n\r\nThis reverts commit 75e995521d94a69f169fc5f5c852e0a8558dc03f.\r\n\r\n* Revert \"Revert \"Resolving build errors\"\"\r\n\r\nThis reverts commit 3fba7ba7df1ff2b339fce587a1a6ef6b041629e2.\r\n\r\n* Revert \"Resolving build errors\"\r\n\r\nThis reverts commit 68a892261c063f020975583a35ec38aba064a595.\r\n\r\n* Renaming authentication extension apis\r\n\r\n* Removing CDT\r\n\r\n* Ignoring failing test\r\n\r\n* Revert \"Removing CDT\"\r\n\r\nThis reverts commit 54fb683aa05ae617d53cee6c78afe69b35613ba6.\r\n\r\n* Updating naming\r\n\r\n* Revert \"Revert \"Removing CDT\"\"\r\n\r\nThis reverts commit fba6bd96c797d67c6ab754c016e882522686d5cc.\r\n\r\n* Update Microsoft.Identity.Client.csproj\r\n\r\n* Revert \"Revert \"Revert \"Removing CDT\"\"\"\r\n\r\nThis reverts commit 2a968233dd46c538d498860274cb70f6a431658d.\r\n\r\n* Revert \"Revert \"Revert \"Revert \"Removing CDT\"\"\"\"\r\n\r\nThis reverts commit ab14305dacbd4bedfa3621cd99bb76782ff2dc4b.\r\n\r\n* Refactoring.\r\nClean up.\r\nRemoving CDT\r\n\r\n* Additional test cases\r\n\r\n* Clean up\r\n\r\n* Refactoring\r\nclean up\r\n\r\n* Enabling CdtTelemetry\r\n\r\n* Renaming\r\n\r\n* TestFix\r\n\r\n* Apply suggestions from code review\r\n\r\nCo-authored-by: Ray Luo <rayluo@microsoft.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>\r\n\r\n* Adding test\r\n\r\n* Fixing test issue\r\n\r\n---------\r\n\r\nCo-authored-by: trwalke <trwalke@microsoft.com>\r\nCo-authored-by: Ray Luo <rayluo@microsoft.com>\r\nCo-authored-by: Gladwin Johnson <90415114+gladjohn@users.noreply.github.com>",
+          "timestamp": "2024-10-17T17:01:25-07:00",
+          "tree_id": "6fd58e0f4825a40caaacbbcdd02eec683326cfc6",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/97c51de3dcb87f4843b5767b5d73a6b5d82f4225"
+        },
+        "date": 1729210117970,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (1, 10))",
+            "value": 17808.383705647786,
+            "unit": "ns",
+            "range": "± 121.42700580257329"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.AcquireTokenSilent_TestAsync(CacheSize: (10000, 10))",
+            "value": 28999.64062906901,
+            "unit": "ns",
+            "range": "± 212.4934070002525"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 9539.255258413461,
+            "unit": "ns",
+            "range": "± 22.80996309024862"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.GetAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 19996.71075439453,
+            "unit": "ns",
+            "range": "± 170.1445599232423"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (1, 10))",
+            "value": 38046.92857142857,
+            "unit": "ns",
+            "range": "± 271.89349280291987"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.TokenCacheTests.RemoveAccountAsync_TestAsync(CacheSize: (10000, 10))",
+            "value": 137447.44,
+            "unit": "ns",
+            "range": "± 17732.123180011775"
           }
         ]
       }
