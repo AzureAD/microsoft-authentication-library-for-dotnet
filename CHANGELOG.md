@@ -1,3 +1,9 @@
+4.66.0
+==========
+### New Features
+- Enabled extended functionality in the MSAL authentication flow through the implementation of `IAuthenticationOperation`. This allows for custom extensions in the authentication flow by providing an authentication operation interface. See [Issue #4956](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4956)
+- MSAL.NET will now opt-in to regional ESTS when the environment variable MSAL_FORCE_REGION is set `(e.g., MSAL_FORCE_REGION=eastus)`. This automatically directs MSAL to use the specified region for token acquisition. If the region is explicitly set to `"DisableMsalForceRegion"`, MSAL will not opt-in to regional ESTS. Use of the `WithAzureRegion(xyz)` API takes precedence over the environment variable. See [Issue #4930](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4930)
+
 4.65.0
 ==========
 ### New Features
