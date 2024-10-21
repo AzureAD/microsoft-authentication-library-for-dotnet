@@ -63,39 +63,39 @@ namespace Microsoft.Identity.Client.Utils
             return (long)unixTimestamp - CurrDateTimeInUnixTimestamp();
         }
 
-        public static long GetDurationFromNowInSeconds(string expiresOn)
+        public static long GetDurationFromNowInSeconds(string dateTimeStamp)
         {
-            if (string.IsNullOrEmpty(expiresOn))
+            if (string.IsNullOrEmpty(dateTimeStamp))
             {
                 return 0;
             }
 
             // First, try to parse as Unix timestamp (number of seconds since epoch)
-            if (long.TryParse(expiresOn, out long expiresOnUnixTimestamp))
+            if (long.TryParse(dateTimeStamp, out long expiresOnUnixTimestamp))
             {
                 return expiresOnUnixTimestamp - DateTimeHelpers.CurrDateTimeInUnixTimestamp();
             }
 
             // Try parsing as ISO 8601 
-            if (DateTimeOffset.TryParse(expiresOn, null, DateTimeStyles.RoundtripKind, out DateTimeOffset expiresOnDateTime))
+            if (DateTimeOffset.TryParse(dateTimeStamp, null, DateTimeStyles.RoundtripKind, out DateTimeOffset expiresOnDateTime))
             {
                 return (long)(expiresOnDateTime - DateTimeOffset.UtcNow).TotalSeconds;
             }
 
             // Try RFC 1123 format 
-            if (DateTimeOffset.TryParseExact(expiresOn, "R", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out expiresOnDateTime))
+            if (DateTimeOffset.TryParseExact(dateTimeStamp, "R", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out expiresOnDateTime))
             {
                 return (long)(expiresOnDateTime - DateTimeOffset.UtcNow).TotalSeconds;
             }
 
             // Try parsing Unix timestamp in milliseconds 
-            if (long.TryParse(expiresOn, out long expiresOnMillisTimestamp) && expiresOn.Length > 10)
+            if (long.TryParse(dateTimeStamp, out long expiresOnMillisTimestamp) && dateTimeStamp.Length > 10)
             {
                 return (expiresOnMillisTimestamp / 1000) - DateTimeHelpers.CurrDateTimeInUnixTimestamp();
             }
 
             // If no format works, throw an MSAL client exception
-            throw new MsalClientException("invalid_token_expiration_format", $"Failed to parse Expires On value. Invalid format for expiresOn: '{expiresOn}'.");
+            throw new MsalClientException("invalid_timestamp_format", $"Failed to parse date-time stamp from identity provider. Invalid format: '{dateTimeStamp}'.");
         }
 
         public static DateTimeOffset? DateTimeOffsetFromDuration(long? duration)
