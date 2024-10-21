@@ -806,10 +806,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow(1, false)]
-        [DataRow(2, false)]
-        [DataRow(3, true)]
-        public async Task ManagedIdentityExpiresOnTestAsync(int expiresInHours, bool refreshOnHasValue)
+        [DataRow(1, false, false)]
+        [DataRow(2, false, false)]
+        [DataRow(3, true, false)]
+        [DataRow(1, false, true)]
+        [DataRow(2, false, true)]
+        [DataRow(3, true, true)]
+        public async Task ManagedIdentityExpiresOnTestAsync(int expiresInHours, bool refreshOnHasValue, bool useIsoFormat)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))

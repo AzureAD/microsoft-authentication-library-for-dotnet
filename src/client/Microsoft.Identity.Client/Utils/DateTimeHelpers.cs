@@ -63,15 +63,39 @@ namespace Microsoft.Identity.Client.Utils
             return (long)unixTimestamp - CurrDateTimeInUnixTimestamp();
         }
 
-        public static long GetDurationFromNowInSeconds(string unixTimestampInFuture)
+        public static long GetDurationFromNowInSeconds(string expiresOn)
         {
-            if (string.IsNullOrEmpty(unixTimestampInFuture))
+            if (string.IsNullOrEmpty(expiresOn))
             {
                 return 0;
             }
 
-            long expiresOnUnixTimestamp = long.Parse(unixTimestampInFuture, CultureInfo.InvariantCulture);
-            return expiresOnUnixTimestamp - CurrDateTimeInUnixTimestamp();
+            // First, try to parse as Unix timestamp (number of seconds since epoch)
+            if (long.TryParse(expiresOn, out long expiresOnUnixTimestamp))
+            {
+                return expiresOnUnixTimestamp - DateTimeHelpers.CurrDateTimeInUnixTimestamp();
+            }
+
+            // Try parsing as ISO 8601 
+            if (DateTimeOffset.TryParse(expiresOn, null, DateTimeStyles.RoundtripKind, out DateTimeOffset expiresOnDateTime))
+            {
+                return (long)(expiresOnDateTime - DateTimeOffset.UtcNow).TotalSeconds;
+            }
+
+            // Try RFC 1123 format 
+            if (DateTimeOffset.TryParseExact(expiresOn, "R", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out expiresOnDateTime))
+            {
+                return (long)(expiresOnDateTime - DateTimeOffset.UtcNow).TotalSeconds;
+            }
+
+            // Try parsing Unix timestamp in milliseconds 
+            if (long.TryParse(expiresOn, out long expiresOnMillisTimestamp) && expiresOn.Length > 10)
+            {
+                return (expiresOnMillisTimestamp / 1000) - DateTimeHelpers.CurrDateTimeInUnixTimestamp();
+            }
+
+            // If no format works, throw an MSAL client exception
+            throw new MsalClientException("invalid_token_expiration_format", $"Failed to parse Expires On value. Invalid format for expiresOn: '{expiresOn}'.");
         }
 
         public static DateTimeOffset? DateTimeOffsetFromDuration(long? duration)
