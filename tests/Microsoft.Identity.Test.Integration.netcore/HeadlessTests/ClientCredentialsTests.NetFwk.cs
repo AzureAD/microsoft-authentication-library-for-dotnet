@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -50,9 +51,46 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ResetInternalStaticCaches();
         }
 
+        // regression test based on SAL introducing a new SKU value and making ESTS not issue the refresh_in value
+        // This needs to run on .NET and .NET FWK to protect against MSAL SKU value changes
         [DataTestMethod]
-        [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore )]
-        [DataRow(Cloud.Adfs, TargetFrameworks.NetFx | TargetFrameworks.NetCore )]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task RefreshOnIsEnabled(bool useRegional)
+        {
+            // if this test runs on AzureDevOps, disable it
+            if (useRegional && Environment.GetEnvironmentVariable("TF_BUILD") == null)
+            {
+                Assert.Inconclusive("Can't run regional on local devbox.");
+            }
+
+            var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            var builder = ConfidentialClientApplicationBuilder.Create(LabAuthenticationHelper.LabAccessConfidentialClientId)
+                .WithCertificate(cert, sendX5C: true)
+                .WithAuthority(LabAuthenticationHelper.LabClientInstance, LabAuthenticationHelper.LabClientTenantId);
+
+            // auto-detect should work on Azure DevOps build
+            if (useRegional)
+                builder = builder.WithAzureRegion();
+
+            var cca = builder.Build();
+
+            var result = await cca.AcquireTokenForClient([LabAuthenticationHelper.LabScope]).ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn.HasValue);
+
+            if (useRegional)
+                Assert.AreEqual(
+                    Client.Region.RegionOutcome.AutodetectSuccess,
+                    result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
+        }
+
+
+        [DataTestMethod]
+        [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
+        [DataRow(Cloud.Adfs, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
         //[DataRow(Cloud.PPE, TargetFrameworks.NetFx)]      
         [DataRow(Cloud.Public, TargetFrameworks.NetCore, true)]
         //[DataRow(Cloud.Arlington)] - cert not setup
@@ -63,7 +101,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [DataTestMethod]
-        [DataRow(Cloud.Public,  TargetFrameworks.NetCore)]
+        [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
         //[DataRow(Cloud.Arlington, TargetFrameworks.NetCore)] TODO: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4905
         //[DataRow(Cloud.PPE)] - secret not setup
@@ -74,8 +112,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [DataTestMethod]
-        [DataRow(Cloud.Public,  TargetFrameworks.NetCore)]
-        [DataRow(Cloud.Adfs,  TargetFrameworks.NetCore)]
+        [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
+        [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
         //[DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientAssertion_Manual_TestAsync(Cloud cloud, TargetFrameworks runOn)
@@ -85,7 +123,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [DataTestMethod]
-        [DataRow(Cloud.Public, TargetFrameworks.NetFx  )]
+        [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
         //[DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
@@ -134,7 +172,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [DataTestMethod]
-        [DataRow(Cloud.Public, TargetFrameworks.NetCore)]                
+        [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
         public async Task WithOnBeforeTokenRequest_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
             runOn.AssertFramework();
@@ -148,7 +186,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(settings.Authority, true)
                 .WithTestLogging()
                 .Build();
-            
+
             authResult = await confidentialApp
                 .AcquireTokenForClient(settings.AppScopes)
                 .OnBeforeTokenRequest((data) =>
@@ -171,7 +209,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .ExecuteAsync()
                .ConfigureAwait(false);
 
-            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);            
+            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -229,9 +267,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string tokenEndpoint = data.RequestUri.AbsoluteUri;
 
             string assertion = GetSignedClientAssertionManual(
-                issuer: clientId, 
-                audience: tokenEndpoint, 
-                certificate: certificate, 
+                issuer: clientId,
+                audience: tokenEndpoint,
+                certificate: certificate,
                 useSha2AndPss: true);
 
             data.BodyParameters.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
@@ -294,9 +332,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         private static IConfidentialClientApplication CreateApp(
-            CredentialType credentialType, 
-            IConfidentialAppSettings settings, 
-            bool sendX5C, 
+            CredentialType credentialType,
+            IConfidentialAppSettings settings,
+            bool sendX5C,
             bool useSha2AndPssForAssertion)
         {
             var builder = ConfidentialClientApplicationBuilder
@@ -420,9 +458,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// <param name="certificate"></param>
         /// <returns></returns>
         private static string GetSignedClientAssertionManual(
-            string issuer, 
-            string audience, 
-            X509Certificate2 certificate, 
+            string issuer,
+            string audience,
+            X509Certificate2 certificate,
             bool useSha2AndPss)
         {
             const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
@@ -464,7 +502,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                   { "x5t", Base64UrlHelpers.Encode(certificate.GetCertHash())},
                 };
             }
-          
+
 
             var headerBytes = JsonSerializer.SerializeToUtf8Bytes(header);
             var claimsBytes = JsonSerializer.SerializeToUtf8Bytes(claims);
