@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 case ManagedIdentitySource.AppService:
                     return "{\"statusCode\":500,\"message\":\"An unexpected error occured while fetching the AAD Token.\",\"correlationId\":\"4ce26535-1769-4001-96e3-9019ce00922d\"}";
 
-                case ManagedIdentitySource.Imds:
+                case ManagedIdentitySource.Credential:
                 case ManagedIdentitySource.AzureArc:
                 case ManagedIdentitySource.ServiceFabric:
                     return "{\"error\":\"invalid_resource\",\"error_description\":\"AADSTS500011: The resource principal named scope was not found in the tenant named Microsoft. This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant. You might have sent your authentication request to the wrong tenant.\\r\\nTrace ID: GUID\\r\\nCorrelation ID: GUID\\r\\nTimestamp: 2024-02-14 23:11:50Z\",\"error_codes\":\"[500011]\",\"timestamp\":\"2022-11-10 23:11:50Z\",\"trace_id\":\"GUID\",\"correlation_id\":\"GUID\",\"error_uri\":\"errorUri\"}";
