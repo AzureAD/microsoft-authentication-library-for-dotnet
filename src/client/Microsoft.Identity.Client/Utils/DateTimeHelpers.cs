@@ -63,7 +63,18 @@ namespace Microsoft.Identity.Client.Utils
             return (long)unixTimestamp - CurrDateTimeInUnixTimestamp();
         }
 
-        public static long GetDurationFromNowInSeconds(string dateTimeStamp)
+        public static long GetDurationFromNowInSeconds(string unixTimestampInFuture)
+        {
+            if (string.IsNullOrEmpty(unixTimestampInFuture))
+            {
+                return 0;
+            }
+
+            long expiresOnUnixTimestamp = long.Parse(unixTimestampInFuture, CultureInfo.InvariantCulture);
+            return expiresOnUnixTimestamp - CurrDateTimeInUnixTimestamp();
+        }
+
+        public static long GetDurationFromManagedIdentityTimestamp(string dateTimeStamp)
         {
             if (string.IsNullOrEmpty(dateTimeStamp))
             {
@@ -71,27 +82,17 @@ namespace Microsoft.Identity.Client.Utils
             }
 
             // First, try to parse as Unix timestamp (number of seconds since epoch)
+            // Example: "1697490590" (Unix timestamp representing seconds since 1970-01-01)
             if (long.TryParse(dateTimeStamp, out long expiresOnUnixTimestamp))
             {
                 return expiresOnUnixTimestamp - DateTimeHelpers.CurrDateTimeInUnixTimestamp();
             }
 
             // Try parsing as ISO 8601 
+            // Example: "2024-10-18T19:51:37.0000000+00:00" (ISO 8601 format)
             if (DateTimeOffset.TryParse(dateTimeStamp, null, DateTimeStyles.RoundtripKind, out DateTimeOffset expiresOnDateTime))
             {
                 return (long)(expiresOnDateTime - DateTimeOffset.UtcNow).TotalSeconds;
-            }
-
-            // Try RFC 1123 format 
-            if (DateTimeOffset.TryParseExact(dateTimeStamp, "R", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out expiresOnDateTime))
-            {
-                return (long)(expiresOnDateTime - DateTimeOffset.UtcNow).TotalSeconds;
-            }
-
-            // Try parsing Unix timestamp in milliseconds 
-            if (long.TryParse(dateTimeStamp, out long expiresOnMillisTimestamp) && dateTimeStamp.Length > 10)
-            {
-                return (expiresOnMillisTimestamp / 1000) - DateTimeHelpers.CurrDateTimeInUnixTimestamp();
             }
 
             // If no format works, throw an MSAL client exception

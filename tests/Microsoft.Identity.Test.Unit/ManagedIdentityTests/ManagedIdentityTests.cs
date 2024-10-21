@@ -841,6 +841,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity, builder.CommonParameters.ApiId);
                 Assert.AreEqual(refreshOnHasValue, result.AuthenticationResultMetadata.RefreshOn.HasValue);
+                Assert.IsTrue(result.ExpiresOn > DateTimeOffset.UtcNow, "The token's ExpiresOn should be in the future.");
+
             }
         }
 
