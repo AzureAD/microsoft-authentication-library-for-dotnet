@@ -113,9 +113,21 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ",\"id_token_expires_in\":\"3600\"}";
         }
 
-        public static string GetMsiSuccessfulResponse(int expiresInHours = 1)
+        public static string GetMsiSuccessfulResponse(int expiresInHours = 1, bool useIsoFormat = false)
         {
-            string expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(expiresInHours));
+            string expiresOn;
+
+            if (useIsoFormat)
+            {
+                // Return ISO 8601 format
+                expiresOn = DateTime.UtcNow.AddHours(expiresInHours).ToString("o", CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                // Return Unix timestamp format
+                expiresOn = DateTimeHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow.AddHours(expiresInHours));
+            }
+
             return
           "{\"access_token\":\"" + TestConstants.ATSecret + "\",\"expires_on\":\"" + expiresOn + "\",\"resource\":\"https://management.azure.com/\",\"token_type\":" +
           "\"Bearer\",\"client_id\":\"client_id\"}";

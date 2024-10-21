@@ -251,7 +251,7 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             ValidateManagedIdentityResult(managedIdentityResponse);
 
-            long expiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(managedIdentityResponse.ExpiresOn);
+            long expiresIn = DateTimeHelpers.GetDurationFromManagedIdentityTimestamp(managedIdentityResponse.ExpiresOn);
 
             return new MsalTokenResponse
             {
