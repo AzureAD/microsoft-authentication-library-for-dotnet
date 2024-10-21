@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var result = await cca.AcquireTokenForClient([LabAuthenticationHelper.LabScope]).ExecuteAsync().ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
-            Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn.HasValue);
+            Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn.HasValue, "refresh_in was not issued - did the MSAL SKU value change?");
 
             if (useRegional)
                 Assert.AreEqual(
