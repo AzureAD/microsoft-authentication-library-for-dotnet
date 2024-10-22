@@ -51,8 +51,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [DataTestMethod]
-        [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore )]
-        [DataRow(Cloud.Adfs, TargetFrameworks.NetFx | TargetFrameworks.NetCore )]
+        [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
+        [DataRow(Cloud.Adfs, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
         //[DataRow(Cloud.PPE, TargetFrameworks.NetFx)]      
         [DataRow(Cloud.Public, TargetFrameworks.NetCore, true)]
         //[DataRow(Cloud.Arlington)] - cert not setup
@@ -63,7 +63,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [DataTestMethod]
-        [DataRow(Cloud.Public,  TargetFrameworks.NetCore)]
+        [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
+        public async Task WithMtlsCertificate_TestAsync(Cloud cloud, TargetFrameworks runOn, bool useAppIdUri = false)
+        {
+            runOn.AssertFramework();
+            await RunClientCredsAsync(cloud, CredentialType.Cert, useAppIdUri, false, true).ConfigureAwait(false);
+        }
+
+        [DataTestMethod]
+        [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
         //[DataRow(Cloud.Arlington, TargetFrameworks.NetCore)] TODO: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4905
         //[DataRow(Cloud.PPE)] - secret not setup
@@ -74,8 +82,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [DataTestMethod]
-        [DataRow(Cloud.Public,  TargetFrameworks.NetCore)]
-        [DataRow(Cloud.Adfs,  TargetFrameworks.NetCore)]
+        [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
+        [DataRow(Cloud.Adfs, TargetFrameworks.NetCore)]
         //[DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
         public async Task WithClientAssertion_Manual_TestAsync(Cloud cloud, TargetFrameworks runOn)
@@ -85,7 +93,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [DataTestMethod]
-        [DataRow(Cloud.Public, TargetFrameworks.NetFx  )]
+        [DataRow(Cloud.Public, TargetFrameworks.NetFx)]
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
         //[DataRow(Cloud.PPE, TargetFrameworks.NetCore)]
         // [DataRow(Cloud.Arlington)] - cert not setup
@@ -134,7 +142,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [DataTestMethod]
-        [DataRow(Cloud.Public, TargetFrameworks.NetCore)]                
+        [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
         public async Task WithOnBeforeTokenRequest_TestAsync(Cloud cloud, TargetFrameworks runOn)
         {
             runOn.AssertFramework();
@@ -148,7 +156,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .WithAuthority(settings.Authority, true)
                 .WithTestLogging()
                 .Build();
-            
+
             authResult = await confidentialApp
                 .AcquireTokenForClient(settings.AppScopes)
                 .OnBeforeTokenRequest((data) =>
@@ -171,7 +179,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .ExecuteAsync()
                .ConfigureAwait(false);
 
-            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);            
+            Assert.AreEqual(TokenSource.Cache, authResult.AuthenticationResultMetadata.TokenSource);
         }
 
         [RunOn(TargetFrameworks.NetCore)]
@@ -229,16 +237,20 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             string tokenEndpoint = data.RequestUri.AbsoluteUri;
 
             string assertion = GetSignedClientAssertionManual(
-                issuer: clientId, 
-                audience: tokenEndpoint, 
-                certificate: certificate, 
+                issuer: clientId,
+                audience: tokenEndpoint,
+                certificate: certificate,
                 useSha2AndPss: true);
 
             data.BodyParameters.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer");
             data.BodyParameters.Add("client_assertion", assertion);
         }
 
-        private async Task RunClientCredsAsync(Cloud cloud, CredentialType credentialType, bool UseAppIdUri = false, bool sendX5C = false)
+        private async Task RunClientCredsAsync(Cloud cloud,
+            CredentialType credentialType,
+            bool UseAppIdUri = false,
+            bool sendX5C = false,
+            bool useMtls = false)
         {
             Trace.WriteLine($"Running test with settings for cloud {cloud}, credential type {credentialType}");
             IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(cloud);
@@ -247,12 +259,20 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             AuthenticationResult authResult;
 
-            IConfidentialClientApplication confidentialApp = CreateApp(credentialType, settings, sendX5C, cloud != Cloud.Adfs);
+            IConfidentialClientApplication confidentialApp = CreateApp(credentialType, settings, sendX5C, cloud != Cloud.Adfs, useMtls);
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
             Guid correlationId = Guid.NewGuid();
-            authResult = await confidentialApp
+
+            AcquireTokenForClientParameterBuilder acquireTokenBuilder = confidentialApp
                 .AcquireTokenForClient(settings.AppScopes)
-                .WithCorrelationId(correlationId)
+                .WithCorrelationId(correlationId);
+
+            if (useMtls)
+            {
+                acquireTokenBuilder = acquireTokenBuilder.WithMtlsPop();
+            }
+
+            authResult = await acquireTokenBuilder
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -294,15 +314,26 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         private static IConfidentialClientApplication CreateApp(
-            CredentialType credentialType, 
-            IConfidentialAppSettings settings, 
-            bool sendX5C, 
-            bool useSha2AndPssForAssertion)
+            CredentialType credentialType,
+            IConfidentialAppSettings settings,
+            bool sendX5C,
+            bool useSha2AndPssForAssertion,
+            bool useMtls = false)
         {
-            var builder = ConfidentialClientApplicationBuilder
-                .Create(settings.ClientId)
-                .WithAuthority(settings.Authority, true)
-                .WithTestLogging();
+            ConfidentialClientApplicationBuilder builder = ConfidentialClientApplicationBuilder
+                .Create(settings.ClientId).WithTestLogging();
+
+            //using an existing test for now to test the flow
+            //better to add unit tests for now 
+            if (useMtls)
+            {
+                builder = builder.WithAzureRegion("centraluseuap")
+                    .WithTenantId("72f988bf-86f1-41af-91ab-2d7cd011db47");
+            }
+            else
+            {
+                builder = builder.WithAuthority(settings.Authority, true);
+            }
 
             switch (credentialType)
             {
@@ -420,9 +451,9 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         /// <param name="certificate"></param>
         /// <returns></returns>
         private static string GetSignedClientAssertionManual(
-            string issuer, 
-            string audience, 
-            X509Certificate2 certificate, 
+            string issuer,
+            string audience,
+            X509Certificate2 certificate,
             bool useSha2AndPss)
         {
             const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
@@ -464,7 +495,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                   { "x5t", Base64UrlHelpers.Encode(certificate.GetCertHash())},
                 };
             }
-          
+
 
             var headerBytes = JsonSerializer.SerializeToUtf8Bytes(header);
             var claimsBytes = JsonSerializer.SerializeToUtf8Bytes(claims);
