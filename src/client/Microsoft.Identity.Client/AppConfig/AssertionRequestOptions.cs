@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.Threading;
 namespace Microsoft.Identity.Client
 {
@@ -25,6 +26,11 @@ namespace Microsoft.Identity.Client
         /// The intended token endpoint
         /// </summary>
         public string TokenEndpoint { get; set; }
+
+        /// <summary>
+        /// Client Capabilities to be included in the client assertion
+        /// </summary>
+        public IEnumerable<string> ClientCapabilities { get; set; }
 
         /// <summary>
         /// Claims to be included in the client assertion
