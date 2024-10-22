@@ -806,12 +806,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow(1, false, false)]
-        [DataRow(2, false, false)]
-        [DataRow(3, true, false)]
-        [DataRow(1, false, true)]
-        [DataRow(2, false, true)]
-        [DataRow(3, true, true)]
+        [DataRow(1, false, false)] // Unix timestamp
+        [DataRow(2, false, false)] // Unix timestamp
+        [DataRow(3, true, false)]  // Unix timestamp
+        [DataRow(1, false, true)]  // ISO 8601
+        [DataRow(2, false, true)]  // ISO 8601
+        [DataRow(3, true, true)]   // ISO 8601
         public async Task ManagedIdentityExpiresOnTestAsync(int expiresInHours, bool refreshOnHasValue, bool useIsoFormat)
         {
             using (new EnvVariableContext())
@@ -830,7 +830,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddManagedIdentityMockHandler(
                     AppServiceEndpoint,
                     Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(expiresInHours),
+                    MockHelpers.GetMsiSuccessfulResponse(expiresInHours, useIsoFormat),
                     ManagedIdentitySource.AppService);
 
                 AcquireTokenForManagedIdentityParameterBuilder builder = mi.AcquireTokenForManagedIdentity(Resource);

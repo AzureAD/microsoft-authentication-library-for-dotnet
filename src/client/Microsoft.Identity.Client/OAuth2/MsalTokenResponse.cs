@@ -282,7 +282,8 @@ namespace Microsoft.Identity.Client.OAuth2
                 HandleInvalidExternalValueError(nameof(response.AccessToken));
             }
 
-            long expiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(response.ExpiresOn);
+            long expiresIn = DateTimeHelpers.GetDurationFromManagedIdentityTimestamp(response.ExpiresOn);
+
             if (expiresIn <= 0)
             {
                 HandleInvalidExternalValueError(nameof(response.ExpiresOn));
