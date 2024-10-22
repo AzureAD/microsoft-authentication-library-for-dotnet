@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1729270675603,
+  "lastUpdate": 1729608691680,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6542,6 +6542,42 @@ window.BENCHMARK_DATA = {
             "value": 373286.4285714286,
             "unit": "ns",
             "range": "± 6138.18182444037"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "afb2fa91c9e7de40eedb264cd09614218fa23c83",
+          "message": "Fix Date-Time Parsing in GetDurationFromNowInSeconds for Multiple Formats (#4964)\n\n* init\r\n\r\n* dateTimeStamp\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* pr comment\r\n\r\n---------\r\n\r\nCo-authored-by: Gladwin Johnson <gljohns@microsoft.com>",
+          "timestamp": "2024-10-22T07:44:02-07:00",
+          "tree_id": "d5400d453b672d6ba4349b84dc598b88e7902589",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/afb2fa91c9e7de40eedb264cd09614218fa23c83"
+        },
+        "date": 1729608687502,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 249163.75757575757,
+            "unit": "ns",
+            "range": "± 6975.77580824484"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 335886.97826086957,
+            "unit": "ns",
+            "range": "± 6973.47017351258"
           }
         ]
       }
