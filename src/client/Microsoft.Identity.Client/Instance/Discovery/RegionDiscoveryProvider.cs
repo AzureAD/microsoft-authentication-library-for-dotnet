@@ -14,6 +14,7 @@ namespace Microsoft.Identity.Client.Region
     {
         private readonly IRegionManager _regionManager;
         public const string PublicEnvForRegional = "login.microsoft.com";
+        public const string PublicEnvForMtls = "mtlsauth.microsoft.com";
 
         public RegionDiscoveryProvider(IHttpManager httpManager, bool clearCache)
         {
@@ -56,8 +57,13 @@ namespace Microsoft.Identity.Client.Region
 
         private static string GetRegionalizedEnvironment(Uri authority, string region, RequestContext requestContext)
         {
-
             string host = authority.Host;
+
+            if (requestContext.ServiceBundle.Config.UseMtlsPop)
+            {
+                requestContext.Logger.Info(() => $"[Region discovery] Using MTLS public endpoint: {PublicEnvForMtls}");
+                return $"{region}.{PublicEnvForMtls}";
+            }
 
             if (KnownMetadataProvider.IsPublicEnvironment(host))
             {

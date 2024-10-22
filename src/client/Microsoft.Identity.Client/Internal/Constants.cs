@@ -34,7 +34,9 @@ namespace Microsoft.Identity.Client.Internal
         public static readonly TimeSpan AccessTokenExpirationBuffer = TimeSpan.FromMinutes(5);
         public const string EnableSpaAuthCode = "1";
         public const string PoPTokenType = "pop";
-        public const string PoPAuthHeaderPrefix = "PoP"; 
+        public const string MtlsPoPTokenType = "mtls_pop";
+        public const string PoPAuthHeaderPrefix = "PoP";
+        public const string MtlsPoPAuthHeaderPrefix = "mtls_pop";
         public const string RequestConfirmation = "req_cnf";
         public const string BearerAuthHeaderPrefix = "Bearer";
 

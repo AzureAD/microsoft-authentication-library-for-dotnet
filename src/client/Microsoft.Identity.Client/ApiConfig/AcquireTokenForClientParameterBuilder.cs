@@ -75,6 +75,16 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Specifies that the certificate provided will be used for PoP tokens with MTLS (Mutual TLS) authentication.
+        /// </summary>
+        /// <returns>The current instance of <see cref="AcquireTokenForClientParameterBuilder"/> to enable method chaining.</returns>
+        public AcquireTokenForClientParameterBuilder WithMtlsPop()
+        {
+            Parameters.UseMtlsPop = true;
+            return this; // Return the builder to allow method chaining
+        }
+
+        /// <summary>
         /// Please use WithAzureRegion on the ConfidentialClientApplicationBuilder object
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
