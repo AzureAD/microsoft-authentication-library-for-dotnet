@@ -249,10 +249,21 @@ namespace Microsoft.Identity.Client.OAuth2
 
         internal static MsalTokenResponse CreateFromManagedIdentityResponse(ManagedIdentityResponse managedIdentityResponse)
         {
-            ValidateManagedIdentityResult(managedIdentityResponse);
+            // Validate that the access token is present. If it is missing, handle the error accordingly.
+            if (string.IsNullOrEmpty(managedIdentityResponse.AccessToken))
+            {
+                HandleInvalidExternalValueError(nameof(managedIdentityResponse.AccessToken));
+            }
 
-            long expiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(managedIdentityResponse.ExpiresOn);
+            // Parse and validate the "ExpiresOn" timestamp, which indicates when the token will expire.
+            long expiresIn = DateTimeHelpers.GetDurationFromManagedIdentityTimestamp(managedIdentityResponse.ExpiresOn);
 
+            if (expiresIn <= 0)
+            {
+                HandleInvalidExternalValueError(nameof(managedIdentityResponse.ExpiresOn));
+            }
+
+            // Construct and return an MsalTokenResponse object with the necessary details.
             return new MsalTokenResponse
             {
                 AccessToken = managedIdentityResponse.AccessToken,
@@ -273,20 +284,6 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 
             return null;
-        }
-
-        private static void ValidateManagedIdentityResult(ManagedIdentityResponse response)
-        {
-            if (string.IsNullOrEmpty(response.AccessToken))
-            {
-                HandleInvalidExternalValueError(nameof(response.AccessToken));
-            }
-
-            long expiresIn = DateTimeHelpers.GetDurationFromNowInSeconds(response.ExpiresOn);
-            if (expiresIn <= 0)
-            {
-                HandleInvalidExternalValueError(nameof(response.ExpiresOn));
-            }
         }
 
         internal static MsalTokenResponse CreateFromAppProviderResponse(AppTokenProviderResult tokenProviderResponse)
