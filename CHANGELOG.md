@@ -1,3 +1,8 @@
+4.66.1
+==========
+### Bug Fixes
+- Fixed a bug where MSAL .NET fails to correctly handle the expires_on field for Managed Identity tokens in ISO 8601 format. This fix ensures accurate parsing of ISO 8601 date-time formats during token acquisition. See [Issue #4963](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4963)
+
 4.66.0
 ==========
 ### New Features
