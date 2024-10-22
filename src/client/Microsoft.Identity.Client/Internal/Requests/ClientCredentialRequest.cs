@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // Get a token from AAD
             if (ServiceBundle.Config.AppTokenProvider == null)
             {
-                MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+                MsalTokenResponse msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(_clientParameters.UseMtlsPop), cancellationToken).ConfigureAwait(false);
                 return await CacheTokenResponseAndCreateAuthenticationResultAsync(msalTokenResponse).ConfigureAwait(false);
             }
 
@@ -224,13 +224,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return new SortedSet<string>(inputScopes);
         }
 
-        private Dictionary<string, string> GetBodyParameters()
+        private Dictionary<string, string> GetBodyParameters(bool useMtlsPop)
         {
             var dict = new Dictionary<string, string>
             {
                 [OAuth2Parameter.GrantType] = OAuth2GrantType.ClientCredentials,
                 [OAuth2Parameter.Scope] = AuthenticationRequestParameters.Scope.AsSingleString()
             };
+
+            // Only add TokenType if useMtlsPop is true
+            if (useMtlsPop)
+            {
+                dict[OAuth2Parameter.TokenType] = RequestTokenType.MTLSPop;
+            }
+
             return dict;
         }
 

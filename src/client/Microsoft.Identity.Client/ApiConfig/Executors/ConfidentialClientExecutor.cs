@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AuthScheme.PoP;
 using Microsoft.Identity.Client.Instance.Discovery;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
@@ -62,6 +63,16 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 _confidentialClientApplication.AppTokenCacheInternal).ConfigureAwait(false);
        
             requestParams.SendX5C = clientParameters.SendX5C ?? false;
+
+            requestParams.UseMtlsPop = clientParameters.UseMtlsPop;
+
+            if (requestParams.UseMtlsPop)
+            {
+                commonParameters.MtlsCertificate = _confidentialClientApplication.Certificate;
+                commonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(_confidentialClientApplication.Certificate);
+                ServiceBundle.Config.ClientCredential = null;
+                ServiceBundle.Config.UseMtlsPop = true;
+            }
 
             var handler = new ClientCredentialRequest(
                 ServiceBundle,
