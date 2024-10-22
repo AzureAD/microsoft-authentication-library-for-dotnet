@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1729608694150,
+  "lastUpdate": 1729608696607,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -22870,6 +22870,54 @@ window.BENCHMARK_DATA = {
             "value": 173482.68287760418,
             "unit": "ns",
             "range": "± 1268.6440340179215"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90415114+gladjohn@users.noreply.github.com",
+            "name": "Gladwin Johnson",
+            "username": "gladjohn"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "afb2fa91c9e7de40eedb264cd09614218fa23c83",
+          "message": "Fix Date-Time Parsing in GetDurationFromNowInSeconds for Multiple Formats (#4964)\n\n* init\r\n\r\n* dateTimeStamp\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* pr comment\r\n\r\n---------\r\n\r\nCo-authored-by: Gladwin Johnson <gljohns@microsoft.com>",
+          "timestamp": "2024-10-22T07:44:02-07:00",
+          "tree_id": "d5400d453b672d6ba4349b84dc598b88e7902589",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/afb2fa91c9e7de40eedb264cd09614218fa23c83"
+        },
+        "date": 1729608695787,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: False)",
+            "value": 22150.723423258463,
+            "unit": "ns",
+            "range": "± 168.60792655348365"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (1, 10), EnableCacheSerialization: True)",
+            "value": 170117.55558268228,
+            "unit": "ns",
+            "range": "± 1164.0236324823484"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: False)",
+            "value": 33856.31161264273,
+            "unit": "ns",
+            "range": "± 76.11071164055917"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenForOboCacheTests.AcquireTokenOnBehalfOf_TestAsync(CacheSize: (10000, 10), EnableCacheSerialization: True)",
+            "value": 176280.9545735677,
+            "unit": "ns",
+            "range": "± 1729.5689259997796"
           }
         ]
       }
