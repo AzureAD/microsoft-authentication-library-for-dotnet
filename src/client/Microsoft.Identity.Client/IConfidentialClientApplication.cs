@@ -96,8 +96,6 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Use <see cref="IClientApplicationBase.GetAccountAsync(string)"/> in web apps and web APIs, and use a token cache serializer for better security and performance. See https://aka.ms/msal-net-cca-token-cache-serialization.
         /// </summary>
-        [Obsolete("Use GetAccountAsync(identifier) in web apps and web APIs, and use a token cache serializer for better security and performance. See https://aka.ms/msal-net-cca-token-cache-serialization.")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
         new Task<IEnumerable<IAccount>> GetAccountsAsync();
     }
 }
