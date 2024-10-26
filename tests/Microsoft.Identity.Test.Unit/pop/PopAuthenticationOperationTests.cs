@@ -113,7 +113,6 @@ namespace Microsoft.Identity.Test.Unit.Pop
 
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                                 .WithHttpManager(harness.HttpManager)
-                                .WithExperimentalFeatures()
                                 .WithClientSecret("some-secret")
                                 .BuildConcrete();
 
@@ -132,7 +131,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 PoPCryptoProviderFactory.TimeService = testClock;
 
                 var result = await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithProofOfPossession(popConfig)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
                 var initialToken = result.AccessToken;
@@ -142,7 +141,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 PoPCryptoProviderFactory.TimeService = testClock;
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithProofOfPossession(popConfig)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
@@ -155,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.Pop
                 PoPCryptoProviderFactory.TimeService = testClock;
 
                 result = await app.AcquireTokenForClient(TestConstants.s_scope)
-                    .WithProofOfPossession(popConfig)
+                    .WithSignedHttpRequestProofOfPossession(popConfig)
                     .ExecuteAsync(CancellationToken.None)
                     .ConfigureAwait(false);
 
