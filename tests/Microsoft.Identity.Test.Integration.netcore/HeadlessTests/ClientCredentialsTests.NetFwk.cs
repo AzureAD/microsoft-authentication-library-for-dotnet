@@ -63,14 +63,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [DataTestMethod]
-        [DataRow(Cloud.Public, TargetFrameworks.NetFx | TargetFrameworks.NetCore)]
-        public async Task WithMtlsCertificate_TestAsync(Cloud cloud, TargetFrameworks runOn, bool useAppIdUri = false)
-        {
-            runOn.AssertFramework();
-            await RunClientCredsAsync(cloud, CredentialType.Cert, useAppIdUri, false, true).ConfigureAwait(false);
-        }
-
-        [DataTestMethod]
         [DataRow(Cloud.Public, TargetFrameworks.NetCore)]
         [DataRow(Cloud.Adfs, TargetFrameworks.NetFx)]
         //[DataRow(Cloud.Arlington, TargetFrameworks.NetCore)] TODO: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4905
@@ -246,11 +238,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             data.BodyParameters.Add("client_assertion", assertion);
         }
 
-        private async Task RunClientCredsAsync(Cloud cloud,
-            CredentialType credentialType,
-            bool UseAppIdUri = false,
-            bool sendX5C = false,
-            bool useMtls = false)
+        private async Task RunClientCredsAsync(Cloud cloud, CredentialType credentialType, bool UseAppIdUri = false, bool sendX5C = false)
         {
             Trace.WriteLine($"Running test with settings for cloud {cloud}, credential type {credentialType}");
             IConfidentialAppSettings settings = ConfidentialAppSettings.GetSettings(cloud);
@@ -259,20 +247,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             AuthenticationResult authResult;
 
-            IConfidentialClientApplication confidentialApp = CreateApp(credentialType, settings, sendX5C, cloud != Cloud.Adfs, useMtls);
+            IConfidentialClientApplication confidentialApp = CreateApp(credentialType, settings, sendX5C, cloud != Cloud.Adfs);
             var appCacheRecorder = confidentialApp.AppTokenCache.RecordAccess();
             Guid correlationId = Guid.NewGuid();
-
-            AcquireTokenForClientParameterBuilder acquireTokenBuilder = confidentialApp
+            authResult = await confidentialApp
                 .AcquireTokenForClient(settings.AppScopes)
-                .WithCorrelationId(correlationId);
-
-            if (useMtls)
-            {
-                acquireTokenBuilder = acquireTokenBuilder.WithMtlsPop();
-            }
-
-            authResult = await acquireTokenBuilder
+                .WithCorrelationId(correlationId)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
@@ -317,23 +297,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             CredentialType credentialType,
             IConfidentialAppSettings settings,
             bool sendX5C,
-            bool useSha2AndPssForAssertion,
-            bool useMtls = false)
+            bool useSha2AndPssForAssertion)
         {
-            ConfidentialClientApplicationBuilder builder = ConfidentialClientApplicationBuilder
-                .Create(settings.ClientId).WithTestLogging();
-
-            //using an existing test for now to test the flow
-            //better to add unit tests for now 
-            if (useMtls)
-            {
-                builder = builder.WithAzureRegion("centraluseuap")
-                    .WithTenantId("72f988bf-86f1-41af-91ab-2d7cd011db47");
-            }
-            else
-            {
-                builder = builder.WithAuthority(settings.Authority, true);
-            }
+            var builder = ConfidentialClientApplicationBuilder
+                .Create(settings.ClientId)
+                .WithAuthority(settings.Authority, true)
+                .WithTestLogging();
 
             switch (credentialType)
             {

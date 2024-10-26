@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache;
@@ -42,6 +43,7 @@ namespace Microsoft.Identity.Client
         /// <param name="claimsPrincipal">Claims from the ID token</param>
         /// <param name="spaAuthCode">Auth Code returned by the Microsoft identity platform when you use AcquireTokenByAuthorizationCode.WithSpaAuthorizationCode(). This auth code is meant to be redeemed by the frontend code. See https://aka.ms/msal-net/spa-auth-code</param>
         /// <param name="additionalResponseParameters">Other properties from the token response.</param>
+        /// <param name="mtlsCertificate">MTLS certificate used in the token acquisition, if any. For MTLS Pop you may need to use this while calling the target resource</param>
         public AuthenticationResult( // for backwards compat with 4.16-
             string accessToken,
             bool isExtendedLifeTimeToken,
@@ -57,7 +59,8 @@ namespace Microsoft.Identity.Client
             AuthenticationResultMetadata authenticationResultMetadata = null, 
             ClaimsPrincipal claimsPrincipal = null,
             string spaAuthCode = null,
-            IReadOnlyDictionary<string, string> additionalResponseParameters = null)
+            IReadOnlyDictionary<string, string> additionalResponseParameters = null,
+            X509Certificate2 mtlsCertificate = null)
         {
             AccessToken = accessToken;
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -76,6 +79,7 @@ namespace Microsoft.Identity.Client
             ClaimsPrincipal = claimsPrincipal;
             SpaAuthCode = spaAuthCode;
             AdditionalResponseParameters = additionalResponseParameters;
+            MtlsCertificate = mtlsCertificate;
         }
 
         /// <summary>
@@ -314,6 +318,11 @@ namespace Microsoft.Identity.Client
         /// Contains metadata for the Authentication result.
         /// </summary>
         public AuthenticationResultMetadata AuthenticationResultMetadata { get; }
+
+        /// <summary>
+        /// Exposes the MTLS certificate used for authentication, if applicable.
+        /// </summary
+        public X509Certificate2 MtlsCertificate { get; internal set; }
 
         /// <summary>
         /// Creates the content for an HTTP authorization header from this authentication result, so

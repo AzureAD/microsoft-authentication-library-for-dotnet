@@ -20,10 +20,5 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         /// This overrides application config settings.
         /// </summary>
         public bool? SendX5C { get; set; }
-
-        /// <summary>
-        /// Whether to use MTLS Proof of Possession (PoP)
-        /// </summary>
-        public bool UseMtlsPop { get; set; } = false;
     }
 }

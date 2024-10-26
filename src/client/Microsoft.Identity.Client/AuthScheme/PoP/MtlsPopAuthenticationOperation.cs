@@ -32,14 +32,14 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             KeyId = mtlsCert.Thumbprint;
         }
 
-        public int TelemetryTokenType => (int)TokenType.Pop;
+        public int TelemetryTokenType => (int)TokenType.Mtls;
 
         public string AuthorizationHeaderPrefix => Constants.MtlsPoPAuthHeaderPrefix;
 
         public string AccessTokenType => Constants.MtlsPoPTokenType;
 
         /// <summary>
-        /// For PoP, we chose to use the base64(jwk_thumbprint)
+        /// For MTLS PoP, we use x5t
         /// </summary>
         public string KeyId { get; }
 
@@ -54,25 +54,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             header[JsonWebTokenConstants.KeyId] = KeyId;
             header[JsonWebTokenConstants.Type] = Constants.MtlsPoPTokenType;
 
-            //authenticationResult.Certificate = _mtlsCert;
-        }
-
-        private JObject CreateBody(string accessToken)
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// A key ID that uniquely describes a public / private key pair. While KeyID is not normally
-        /// strict, AAD support for PoP requires that we use the base64 encoded JWK thumbprint, as described by 
-        /// https://tools.ietf.org/html/rfc7638
-        /// </summary>
-        private static byte[] ComputeThumbprint(string canonicalJwk)
-        {
-            using (SHA256 hash = SHA256.Create())
-            {
-                return hash.ComputeHash(Encoding.UTF8.GetBytes(canonicalJwk));
-            }
+            authenticationResult.MtlsCertificate = _mtlsCert;
         }
     }
 }
