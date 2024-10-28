@@ -29,6 +29,10 @@ namespace Microsoft.Identity.Client
             /// Use broker on Windows OS
             /// </summary>
             Windows = 0b_0000_0001,  // 1
+            /// <summary>
+            /// Use broker on Linux
+            /// </summary>
+            Linux = 0b_0000_0010,  // 1
         }
 
         /// <summary>
@@ -80,6 +84,9 @@ namespace Microsoft.Identity.Client
         {
             if (EnabledOn.HasFlag(OperatingSystems.Windows) && DesktopOsHelper.IsWindows())
             {
+                return true;
+            } else if (DesktopOsHelper.IsLinux()) {
+                Console.WriteLine("Broekr enabled on Linux");
                 return true;
             }
 

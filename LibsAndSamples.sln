@@ -106,7 +106,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetDesktopWinFormsWAM", "te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreWinFormsWAM", "tests\devapps\WAM\NetCoreWinFormsWam\NetCoreWinFormsWAM.csproj", "{339E0B2B-4408-4947-B134-E8C5AAB11286}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetDesktopWpfWAM", "tests\devapps\WAM\NetDesktopWpf\NetDesktopWpfWAM.csproj", "{2AF48872-DD47-4DA1-A153-DF4DA13882C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetWSLWam", "tests\devapps\WAM\NetWSLWam\test.csproj", "{2AF48872-DD47-4DA1-A153-DF4DA13882C2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Integration.NetFx", "tests\Microsoft.Identity.Test.Integration.netfx\Microsoft.Identity.Test.Integration.NetFx.csproj", "{743BEA88-1903-4AF0-A791-705774F4B99D}"
 EndProject

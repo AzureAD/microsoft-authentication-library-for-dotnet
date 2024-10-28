@@ -34,28 +34,29 @@ namespace WAMClassLibrary
 
             // 1. Configuration - read below about redirect URI
             var pca = PublicClientApplicationBuilder.Create("04f0c124-f2bc-4f59-8241-bf6df9866bbd")
-                          .WithAuthority(AzureCloudInstance.AzurePublic, "organizations")
+                          .WithAuthority("https://login.microsoftonline.com/common")
                           .WithDefaultRedirectUri()
-                          .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows))
+                          .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Linux))
                           .WithParentActivityOrWindow(consoleWindowHandleProvider)
+                          .WithLogging((x, y, z) => Console.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                           .Build();
 
             // Add a token cache, see https://learn.microsoft.com/entra/msal/dotnet/how-to/token-cache-serialization?tabs=desktop
 
             // 2. GetAccounts
-            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-            var accountToLogin = accounts.FirstOrDefault();
+            // var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            // var accountToLogin = accounts.FirstOrDefault();
 
-            try
-            {
-                var authResult = await pca.AcquireTokenSilent(new[] { "user.read" }, accountToLogin)
-                                      .ExecuteAsync().ConfigureAwait(false);
-            }
-            catch (MsalUiRequiredException ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.ErrorCode);
-            }
+            // try
+            // {
+            //     var authResult = await pca.AcquireTokenSilent(new[] { "user.read" }, accountToLogin)
+            //                           .ExecuteAsync().ConfigureAwait(false);
+            // }
+            // catch (MsalUiRequiredException ex)
+            // {
+            //     Console.WriteLine(ex.Message);
+            //     Console.WriteLine(ex.ErrorCode);
+            // }
 
             try
             {
@@ -108,6 +109,11 @@ namespace WAMClassLibrary
                 Console.WriteLine("Error Acquiring Token (ErrCode " + errorCode + "): " + ex);
             }
             Console.Read();
+        }
+
+        public static void Main(string[] args)
+        {
+            InvokeBrokerAsync().Wait();
         }
     }
 }

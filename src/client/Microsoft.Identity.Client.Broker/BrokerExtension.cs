@@ -47,6 +47,7 @@ namespace Microsoft.Identity.Client.Broker
         /// parameters, and to create a public client application instance</returns>
         public static PublicClientApplicationBuilder WithBroker(this PublicClientApplicationBuilder builder, BrokerOptions brokerOptions)
         {
+            Console.WriteLine("namespace Microsoft.Identity.Client.Broker ");
             AddRuntimeSupport(builder);
             builder.Config.BrokerOptions = brokerOptions;
             builder.Config.IsBrokerEnabled = brokerOptions.IsBrokerEnabledOnCurrentOs();
@@ -77,6 +78,14 @@ namespace Microsoft.Identity.Client.Broker
                      (uiParent, appConfig, logger) =>
                      {
                          logger.Info("[Runtime] WAM supported OS.");
+                         return new RuntimeBroker(uiParent, appConfig, logger);
+                     };
+            } else if (DesktopOsHelper.IsLinux()) {
+                Console.WriteLine("Support WAM in WSL");
+                builder.Config.BrokerCreatorFunc =
+                     (uiParent, appConfig, logger) =>
+                     {
+                         logger.Info("[Runtime] WAM supported OS WSL.");
                          return new RuntimeBroker(uiParent, appConfig, logger);
                      };
             }

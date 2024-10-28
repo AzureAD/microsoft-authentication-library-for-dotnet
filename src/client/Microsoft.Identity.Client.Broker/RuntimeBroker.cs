@@ -126,6 +126,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
             AuthenticationRequestParameters authenticationRequestParameters,
             AcquireTokenInteractiveParameters acquireTokenInteractiveParameters)
         {
+            Console.WriteLine("Runtime Broker AcquireTokenInteractiveAsync");
             using LogEventWrapper logEventWrapper = new LogEventWrapper(this);
             Debug.Assert(s_lazyCore.Value != null, "Should not call this API if MSAL runtime init failed");
 
@@ -586,6 +587,10 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
         public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
         {
+            if (DesktopOsHelper.IsLinux()) {
+                _logger?.Info(() => "[RuntimeBroker] MsalRuntime running in WSL");
+                return true;
+            }
             if (!DesktopOsHelper.IsWin10OrServerEquivalent())
             {
                 _logger?.Warning("[RuntimeBroker] Not a supported operating system. WAM broker is not available. ");

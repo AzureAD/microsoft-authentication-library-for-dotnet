@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <LangVersion>latest</LangVersion>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
@@ -15,5 +15,12 @@
       <Project>{60117a9b-4bb8-472e-bfff-52cbf67ca95a}</Project>
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+      <Content Include="..\..\..\..\libmsalruntime.so">
+          <Link>libmsalruntime.so</Link>
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
   </ItemGroup>
 </Project>
