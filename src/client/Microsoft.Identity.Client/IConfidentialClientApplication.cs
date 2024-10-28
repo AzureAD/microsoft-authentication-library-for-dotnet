@@ -94,6 +94,7 @@ namespace Microsoft.Identity.Client
         new AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint);
 
         /// <summary>
+        /// This method is strictly to be used with ROPC flow in test environments. It is not recommended to use ROPC in production applications.
         /// Use <see cref="IClientApplicationBase.GetAccountAsync(string)"/> in web apps and web APIs, and use a token cache serializer for better security and performance. See https://aka.ms/msal-net-cca-token-cache-serialization.
         /// </summary>
         new Task<IEnumerable<IAccount>> GetAccountsAsync();
