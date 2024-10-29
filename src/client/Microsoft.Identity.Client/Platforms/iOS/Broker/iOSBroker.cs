@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 () => iOSBrokerConstants.BrokerPayloadPii + paramsAsQuery,
                 () => iOSBrokerConstants.BrokerPayloadNoPii + brokerPayload.Count);
 
-            DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.OpenUrl(url));
+            DispatchQueue.MainQueue.DispatchAsync(() => UIApplication.SharedApplication.open(url, new NSDictionary(), null));
 
             using (_logger.LogBlockDuration("waiting for broker response"))
             {
