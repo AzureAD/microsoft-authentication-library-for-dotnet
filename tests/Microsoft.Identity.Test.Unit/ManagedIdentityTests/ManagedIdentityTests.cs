@@ -806,10 +806,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [DataTestMethod]
-        [DataRow(1, false)]
-        [DataRow(2, false)]
-        [DataRow(3, true)]
-        public async Task ManagedIdentityExpiresOnTestAsync(int expiresInHours, bool refreshOnHasValue)
+        [DataRow(1, false, false)] // Unix timestamp
+        [DataRow(2, false, false)] // Unix timestamp
+        [DataRow(3, true, false)]  // Unix timestamp
+        [DataRow(1, false, true)]  // ISO 8601
+        [DataRow(2, false, true)]  // ISO 8601
+        [DataRow(3, true, true)]   // ISO 8601
+        public async Task ManagedIdentityExpiresOnTestAsync(int expiresInHours, bool refreshOnHasValue, bool useIsoFormat)
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))
@@ -827,7 +830,7 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddManagedIdentityMockHandler(
                     AppServiceEndpoint,
                     Resource,
-                    MockHelpers.GetMsiSuccessfulResponse(expiresInHours),
+                    MockHelpers.GetMsiSuccessfulResponse(expiresInHours, useIsoFormat),
                     ManagedIdentitySource.AppService);
 
                 AcquireTokenForManagedIdentityParameterBuilder builder = mi.AcquireTokenForManagedIdentity(Resource);
@@ -838,6 +841,8 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
                 Assert.AreEqual(ApiEvent.ApiIds.AcquireTokenForSystemAssignedManagedIdentity, builder.CommonParameters.ApiId);
                 Assert.AreEqual(refreshOnHasValue, result.AuthenticationResultMetadata.RefreshOn.HasValue);
+                Assert.IsTrue(result.ExpiresOn > DateTimeOffset.UtcNow, "The token's ExpiresOn should be in the future.");
+
             }
         }
 
