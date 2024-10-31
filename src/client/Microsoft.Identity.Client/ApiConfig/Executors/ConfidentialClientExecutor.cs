@@ -64,13 +64,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
        
             requestParams.SendX5C = clientParameters.SendX5C ?? false;
 
-            if (clientParameters.UseMtlsPop)
-            {
-                commonParameters.MtlsCertificate = _confidentialClientApplication.Certificate;
-                commonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(_confidentialClientApplication.Certificate);
-                ServiceBundle.Config.ClientCredential = null;
-                requestContext.UseMtlsPop = true;
-            }
+            // Perform MTLS PoP validations if required
+            ValidateAndConfigureMtlsPopForAcquireTokenForClient(clientParameters, commonParameters, requestContext);
 
             var handler = new ClientCredentialRequest(
                 ServiceBundle,
@@ -78,6 +73,38 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 clientParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private void ValidateAndConfigureMtlsPopForAcquireTokenForClient(
+            AcquireTokenForClientParameters clientParameters,
+            AcquireTokenCommonParameters commonParameters,
+            RequestContext requestContext)
+        {
+            if (clientParameters.UseMtlsPop)
+            {
+                // Validate that the certificate is not null for MTLS PoP
+                if (_confidentialClientApplication.Certificate == null)
+                {
+                    throw new MsalClientException(
+                        MsalError.MtlsCertificateNotProvided,
+                        MsalErrorMessage.MtlsCertificateNotProvidedMessage);
+                }
+
+                // Validate that a region is specified when MTLS PoP is enabled
+                bool isRegionMissing = string.IsNullOrEmpty(requestContext.ServiceBundle.Config.AzureRegion);
+
+                if (isRegionMissing)
+                {
+                    throw new MsalClientException(
+                        MsalError.MtlsPopWithoutRegion,
+                        MsalErrorMessage.MtlsPopWithoutRegion);
+                }
+
+                commonParameters.MtlsCertificate = _confidentialClientApplication.Certificate;
+                commonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(_confidentialClientApplication.Certificate);
+                ServiceBundle.Config.ClientCredential = null;
+                requestContext.UseMtlsPop = true;
+            }
         }
 
         public async Task<AuthenticationResult> ExecuteAsync(

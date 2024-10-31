@@ -814,5 +814,45 @@ namespace Microsoft.Identity.Test.Unit
                           MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid));
         }
 
+        [TestMethod]
+        public async Task RegionFallbackToGlobal_WhenImdsFailsAndNoEnvVarSet()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddRegionDiscoveryMockHandlerNotFound();
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandler(CreateTokenResponseHttpHandler(false));
+
+                IConfidentialClientApplication app = CreateCca(
+                    httpManager,
+                    ConfidentialClientApplication.AttemptRegionDiscovery);
+
+                AuthenticationResult result = await app
+                    .AcquireTokenForClient(TestConstants.s_scope)
+                    .ExecuteAsync()
+                    .ConfigureAwait(false);
+
+                Assert.IsNotNull(result.AccessToken);
+                Assert.IsNull(result.ApiEvent.RegionUsed);
+                Assert.AreEqual(RegionOutcome.FallbackToGlobal, result.ApiEvent.RegionOutcome);
+                Assert.AreEqual(RegionOutcome.FallbackToGlobal, result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
+            }
+        }
+
+        [TestMethod]
+        public void RegionDiscoveryThrowsException_WhenCustomMetadataAndRegionDiscoveryEnabled()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var ex = Assert.ThrowsException<MsalClientException>(() => CreateCca(
+                    httpManager,
+                    ConfidentialClientApplication.AttemptRegionDiscovery,
+                    hasCustomInstanceMetadata: true));
+
+                Assert.AreEqual(MsalError.RegionDiscoveryWithCustomInstanceMetadata, ex.ErrorCode);
+                Assert.AreEqual(MsalErrorMessage.RegionDiscoveryWithCustomInstanceMetadata, ex.Message);
+            }
+        }
+
     }
 }
