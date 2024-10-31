@@ -10,13 +10,13 @@ using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Region
 {
-    internal class RegionDiscoveryProvider : IRegionDiscoveryProvider
+    internal class RegionAndMtlsDiscoveryProvider : IRegionDiscoveryProvider
     {
         private readonly IRegionManager _regionManager;
         public const string PublicEnvForRegional = "login.microsoft.com";
         public const string PublicEnvForMtls = "mtlsauth.microsoft.com";
 
-        public RegionDiscoveryProvider(IHttpManager httpManager, bool clearCache)
+        public RegionAndMtlsDiscoveryProvider(IHttpManager httpManager, bool clearCache)
         {
             _regionManager = new RegionManager(httpManager, shouldClearStaticCache: clearCache);
         }
@@ -59,12 +59,6 @@ namespace Microsoft.Identity.Client.Region
         {
             string host = authority.Host;
 
-            if (requestContext.ServiceBundle.Config.UseMtlsPop)
-            {
-                requestContext.Logger.Info(() => $"[Region discovery] Using MTLS public endpoint: {PublicEnvForMtls}");
-                return $"{region}.{PublicEnvForMtls}";
-            }
-
             if (KnownMetadataProvider.IsPublicEnvironment(host))
             {
                 requestContext.Logger.Info(() => $"[Region discovery] Regionalized Environment is : {region}.{PublicEnvForRegional}. ");
@@ -79,7 +73,18 @@ namespace Microsoft.Identity.Client.Region
             }
 
             requestContext.Logger.Info(() => $"[Region discovery] Regionalized Environment is : {region}.{host}. ");
-            return $"{region}.{host}";
+
+            // Decide whether to use MTLS or standard environment
+            if (!requestContext.UseMtlsPop)
+            {
+                requestContext.Logger.Info(() => $"[Region discovery] Using standard regional environment: {region}.{host}");
+                return $"{region}.{host}";
+            }
+            else
+            {
+                requestContext.Logger.Info(() => $"[Region discovery] Using MTLS public endpoint: {PublicEnvForMtls}");
+                return $"{region}.{PublicEnvForMtls}";
+            }
         }
     }
 }

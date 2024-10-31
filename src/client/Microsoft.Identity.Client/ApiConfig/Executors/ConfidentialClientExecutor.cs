@@ -34,9 +34,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByAuthorizationCodeParameters authorizationCodeParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
+            RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
-            var requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
+            AuthenticationRequestParameters requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
                 _confidentialClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
@@ -55,23 +55,21 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenForClientParameters clientParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
+            RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
-            var requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
+            AuthenticationRequestParameters requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
                 _confidentialClientApplication.AppTokenCacheInternal).ConfigureAwait(false);
        
             requestParams.SendX5C = clientParameters.SendX5C ?? false;
 
-            requestParams.UseMtlsPop = clientParameters.UseMtlsPop;
-
-            if (requestParams.UseMtlsPop)
+            if (clientParameters.UseMtlsPop)
             {
                 commonParameters.MtlsCertificate = _confidentialClientApplication.Certificate;
                 commonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(_confidentialClientApplication.Certificate);
                 ServiceBundle.Config.ClientCredential = null;
-                ServiceBundle.Config.UseMtlsPop = true;
+                requestContext.UseMtlsPop = true;
             }
 
             var handler = new ClientCredentialRequest(
@@ -87,9 +85,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenOnBehalfOfParameters onBehalfOfParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
+            RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
-            var requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
+            AuthenticationRequestParameters requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
                 _confidentialClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
@@ -111,9 +109,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             GetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
+            RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
-            var requestParameters = await _confidentialClientApplication.CreateRequestParametersAsync(
+            AuthenticationRequestParameters requestParameters = await _confidentialClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
                 _confidentialClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
@@ -144,22 +142,22 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
         public async Task<AuthenticationResult> ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
+            AcquireTokenByUsernamePasswordParameters userNamePasswordParameters,
             CancellationToken cancellationToken)
         {
-            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
+            RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
-            var requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
+            AuthenticationRequestParameters requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
                 _confidentialClientApplication.UserTokenCacheInternal).ConfigureAwait(false);
             
-            requestParams.SendX5C = usernamePasswordParameters.SendX5C ?? false;
+            requestParams.SendX5C = userNamePasswordParameters.SendX5C ?? false;
 
             var handler = new UsernamePasswordRequest(
                 ServiceBundle,
                 requestParams,
-                usernamePasswordParameters);
+                userNamePasswordParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }

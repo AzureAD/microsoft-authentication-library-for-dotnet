@@ -163,12 +163,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public string LongRunningOboCacheKey { get; set; }
 
         public KeyValuePair<string, string>? CcsRoutingHint { get; set; }
-
-        /// <summary>
-        /// Indicates if MTLS Proof of Possession should be used.
-        /// </summary>
-        public bool UseMtlsPop { get; set; } = false;
-
         #endregion
 
         public void LogParameters()
@@ -191,7 +185,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 builder.AppendLine("ApiId - " + ApiId);
                 builder.AppendLine("IsConfidentialClient - " + AppConfig.IsConfidentialClient);
                 builder.AppendLine("SendX5C - " + SendX5C);
-                builder.AppendLine("UseMtlsPop - " + UseMtlsPop);
                 builder.AppendLine("LoginHint - " + LoginHint);
                 builder.AppendLine("IsBrokerConfigured - " + AppConfig.IsBrokerEnabled);
                 builder.AppendLine("HomeAccountId - " + HomeAccountId);
@@ -212,7 +205,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 builder.AppendLine("ApiId - " + ApiId);
                 builder.AppendLine("IsConfidentialClient - " + AppConfig.IsConfidentialClient);
                 builder.AppendLine("SendX5C - " + SendX5C);
-                builder.AppendLine("UseMtlsPop - " + UseMtlsPop);
                 builder.AppendLine("LoginHint ? " + !string.IsNullOrEmpty(LoginHint));
                 builder.AppendLine("IsBrokerConfigured - " + AppConfig.IsBrokerEnabled);
                 builder.AppendLine("HomeAccountId - " + !string.IsNullOrEmpty(HomeAccountId));
