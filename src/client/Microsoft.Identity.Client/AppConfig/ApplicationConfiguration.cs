@@ -123,7 +123,6 @@ namespace Microsoft.Identity.Client
         public bool IsPublicClient => !IsConfidentialClient && !IsManagedIdentity;
 
         public Func<AppTokenProviderParameters, Task<AppTokenProviderResult>> AppTokenProvider;
-        public bool UseMtlsPop { get; internal set; } = false;
 
         #region ClientCredentials
 
