@@ -1,4 +1,4 @@
-name: .NET Core
+name: Code Coverage
 
 permissions:
   contents: read
@@ -15,7 +15,7 @@ on:
       - reopened
       - ready_for_review
     branches:
-      - dev
+      - main
 
 jobs:
   build:
