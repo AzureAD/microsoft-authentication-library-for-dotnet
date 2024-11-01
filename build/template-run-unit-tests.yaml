@@ -18,6 +18,7 @@ steps:
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
     pathtoCustomTestAdapters: 'C:\temp' # Workaround for test failure, as NUnit Test Adapter that gets detected seems to mess something up
+    runSettingsFile: 'build\CodeCoverage.runsettings'
 
 - task: VSTest@2
   displayName: 'Run unit tests (.NET FX) on OneBranch'
@@ -30,6 +31,7 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
+    runSettingsFile: 'build\CodeCoverage.runsettings'
 
 - task: VSTest@2
   displayName: 'Run unit tests (.NET 6)'
@@ -41,3 +43,4 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
+    runSettingsFile: 'build\CodeCoverage.runsettings'
