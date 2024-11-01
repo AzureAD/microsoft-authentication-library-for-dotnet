@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1729608698938,
+  "lastUpdate": 1730493962635,
   "repoUrl": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet",
   "entries": {
     "AcquireTokenNoCache": [
@@ -6578,6 +6578,42 @@ window.BENCHMARK_DATA = {
             "value": 335886.97826086957,
             "unit": "ns",
             "range": "± 6973.47017351258"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dharshanb@microsoft.com",
+            "name": "Dharshan BJ",
+            "username": "DharshanBJ"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f29be924b3d220976b594c56d11dad5ae79df63d",
+          "message": "update the deprecated openURL(:) api to openURL(:options:completionHandler)  (#4980)\n\n* update the api openURL(:) to open(:options:completionHandler) as openURL(:) is deprecated",
+          "timestamp": "2024-11-01T13:38:43-07:00",
+          "tree_id": "9aa965e44a3d914183ae92e76ef86e0c760401f2",
+          "url": "https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/commit/f29be924b3d220976b594c56d11dad5ae79df63d"
+        },
+        "date": 1730493958531,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenForClient_TestAsync",
+            "value": 255203.23015873015,
+            "unit": "ns",
+            "range": "± 11724.269359182108"
+          },
+          {
+            "name": "Microsoft.Identity.Test.Performance.AcquireTokenNoCacheTests.AcquireTokenOnBehalfOf_TestAsync",
+            "value": 333064,
+            "unit": "ns",
+            "range": "± 9106.931005558348"
           }
         ]
       }
