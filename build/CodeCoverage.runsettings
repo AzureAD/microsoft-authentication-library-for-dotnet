@@ -7,39 +7,24 @@
 <RunSettings>
     <DataCollectionRunSettings>
         <DataCollectors>
-            <DataCollector friendlyName="Code Coverage" uri="datacollector://Microsoft/CodeCoverage/2.0">
+            <DataCollector friendlyName="Code Coverage" uri="datacollector://Microsoft/CodeCoverage/2.0" assemblyQualifiedName="Microsoft.VisualStudio.Coverage.DynamicCoverageDataCollector, Microsoft.VisualStudio.TraceCollector, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
                 <Configuration>
-                    <Format>Cobertura</Format>
                     <CodeCoverage>
 
-                        <!--
-About include/exclude lists:
-Empty "Include" clauses imply all; empty "Exclude" clauses imply none.
-Each element in the list is a regular expression (ECMAScript syntax). See http://msdn.microsoft.com/library/2k3te2cs.aspx.
-An item must first match at least one entry in the include list to be included.
-Included items must then not match any entries in the exclude list to remain included.
+                        <!--  
+About include/exclude lists:  
+Empty "Include" clauses imply all; empty "Exclude" clauses imply none.  
+Each element in the list is a regular expression (ECMAScript syntax). See http://msdn.microsoft.com/library/2k3te2cs.aspx.  
+An item must first match at least one entry in the include list to be included.  
+Included items must then not match any entries in the exclude list to remain included.  
 -->
 
-                        <!-- Match assembly file paths: -->
-                        <ModulePaths>
-                            <Exclude>
-                                <ModulePath>.*\\test\\.*</ModulePath>
-                                <ModulePath>.*Test\.dll</ModulePath>
-                            </Exclude>
-                        </ModulePaths>
-                        <Attributes>
-                            <Exclude>
-                                <Attribute>^System\.Diagnostics\.CodeAnalysis\.ExcludeFromCodeCoverageAttribute$</Attribute>
-                                <Attribute>^System\.CodeDom\.Compiler\.GeneratedCodeAttribute$</Attribute>
-                            </Exclude>
-                        </Attributes>
                         <Sources>
                             <Include>
                                 <Source>.src\client\**\*.cs$</Source>
                             </Include>
                             <Exclude>
                                 <Source>.src\client\json\**\*.cs$</Source>
-                                <Source>.*\.g</Source>
                             </Exclude>
                         </Sources>
                     </CodeCoverage>
