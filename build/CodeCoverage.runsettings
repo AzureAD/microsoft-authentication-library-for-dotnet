@@ -35,10 +35,11 @@ Included items must then not match any entries in the exclude list to remain inc
                         </Attributes>
                         <Sources>
                             <Include>
-                                <Source>.src\client\*\*.cs</Source>
+                                <Source>.src\client\**\*.cs$</Source>
                             </Include>
                             <Exclude>
-                                <Source>.*\.g\.cs$</Source>
+                                <Source>.src\client\json\**\*.cs$</Source>
+                                <Source>.*\.g</Source>
                             </Exclude>
                         </Sources>
                     </CodeCoverage>
