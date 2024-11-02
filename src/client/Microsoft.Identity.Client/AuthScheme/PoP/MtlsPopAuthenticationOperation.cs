@@ -45,15 +45,14 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()
         {
-            return CollectionHelpers.GetEmptyDictionary<string, string>();
+            return new Dictionary<string, string>
+            {
+                { OAuth2Parameter.TokenType, Constants.MtlsPoPTokenType }
+            };
         }
 
         public void FormatResult(AuthenticationResult authenticationResult)
         {
-            var header = new JObject();
-            header[JsonWebTokenConstants.KeyId] = KeyId;
-            header[JsonWebTokenConstants.Type] = Constants.MtlsPoPTokenType;
-
             authenticationResult.MtlsCertificate = _mtlsCert;
         }
     }

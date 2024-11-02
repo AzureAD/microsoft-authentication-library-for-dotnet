@@ -35,6 +35,6 @@ namespace Microsoft.Identity.Client.Internal
             Logger = LoggerHelper.CreateLogger(correlationId, ServiceBundle.Config);
             CorrelationId = correlationId;
             UserCancellationToken = cancellationToken;
-        }       
+        }
     }
 }
