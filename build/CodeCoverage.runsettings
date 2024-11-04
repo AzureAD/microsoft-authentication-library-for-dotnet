@@ -30,6 +30,7 @@ Included items must then not match any entries in the exclude list to remain inc
                             </Include>
                             <Exclude>
                                 <Source>.*\\test\\.*</Source>
+                                <Source>.*\\src\\.*</Source>
                                 <Source>test\/.*</Source>
                                 <Source>.src\client\json\**\*.cs$</Source>
                             </Exclude>
