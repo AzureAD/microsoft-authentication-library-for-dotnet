@@ -18,14 +18,20 @@ Each element in the list is a regular expression (ECMAScript syntax). See http:/
 An item must first match at least one entry in the include list to be included.  
 Included items must then not match any entries in the exclude list to remain included.  
 -->
-
+                        <ModulePaths>
+                            <Exclude>
+                                <ModulePath>.test\**\*</ModulePath>
+                                <ModulePath>.*Test\.dll</ModulePath>
+                                <ModulePath>.*test\.dll</ModulePath>
+                            </Exclude>
+                        </ModulePaths>
                         <Sources>
                             <Include>
                                 <Source>.src\client\**\*.cs$</Source>
                             </Include>
                             <Exclude>
                                 <Source>.*\\test\\.*</Source>
-                                <Source>.*tests\**\*.cs$</Source>
+                                <Source>.tests\**\*.cs$</Source>
                                 <Source>.src\client\json\**\*.cs$</Source>
                             </Exclude>
                         </Sources>
