@@ -20,18 +20,17 @@ Included items must then not match any entries in the exclude list to remain inc
 -->
                         <ModulePaths>
                             <Exclude>
-                                <ModulePath>.test\**\*</ModulePath>
-                                <ModulePath>.*Test\.dll</ModulePath>
-                                <ModulePath>.*test\.dll</ModulePath>
+                                <ModulePath>.*\.dll$</ModulePath>
+                                <ModulePath>.*\.exe$</ModulePath>
                             </Exclude>
                         </ModulePaths>
                         <Sources>
                             <Include>
-                                <Source>.src\client\**\*.cs$</Source>
+                                <Source>src\/.*\.cs</Source>
                             </Include>
                             <Exclude>
                                 <Source>.*\\test\\.*</Source>
-                                <Source>.tests\**\*.cs$</Source>
+                                <Source>test\/.*</Source>
                                 <Source>.src\client\json\**\*.cs$</Source>
                             </Exclude>
                         </Sources>
