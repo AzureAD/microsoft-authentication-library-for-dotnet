@@ -24,6 +24,8 @@ Included items must then not match any entries in the exclude list to remain inc
                                 <Source>.src\client\**\*.cs$</Source>
                             </Include>
                             <Exclude>
+                                <Source>.*\\test\\.*</Source>
+                                <Source>.*tests\**\*.cs$</Source>
                                 <Source>.src\client\json\**\*.cs$</Source>
                             </Exclude>
                         </Sources>
