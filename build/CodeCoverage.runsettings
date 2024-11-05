@@ -20,9 +20,16 @@ An item must first match at least one entry in the include list to be included.
 Included items must then not match any entries in the exclude list to remain included.  
 -->
                         <ModulePaths>
+                            <Include>  
+                                <ModulePath>.*\microsoft.identitymodel.clients.activedirectory.dll$</ModulePath>                  
+                                <ModulePath>.*\microsoft.identity.core.dll$</ModulePath>
+                                <ModulePath>.*\microsoft.identity.client.dll$</ModulePath>
+                              </Include>  
                             <Exclude>
-                                <ModulePath>.*\.dll$</ModulePath>
-                                <ModulePath>.*\.exe$</ModulePath>
+                                <ModulePath>.*\\test\\.*</ModulePath>
+                                <ModulePath>.*Test\.dll</ModulePath>
+                                <ModulePath>.*Test\.exe</ModulePath>
+                                <ModulePath>.*Test\*.exe</ModulePath>
                             </Exclude>
                         </ModulePaths>
                         <Sources>
