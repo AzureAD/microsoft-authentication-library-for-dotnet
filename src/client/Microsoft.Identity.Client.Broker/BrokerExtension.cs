@@ -80,8 +80,7 @@ namespace Microsoft.Identity.Client.Broker
                          logger.Info("[Runtime] WAM supported OS.");
                          return new RuntimeBroker(uiParent, appConfig, logger);
                      };
-            } else if (DesktopOsHelper.IsLinux()) {
-                Console.WriteLine("Support WAM in WSL");
+            } else if (DesktopOsHelper.IsRunningOnWsl()) {
                 builder.Config.BrokerCreatorFunc =
                      (uiParent, appConfig, logger) =>
                      {
