@@ -1,24 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
-#if SUPPORTS_SYSTEM_TEXT_JSON
-using JObject = System.Text.Json.Nodes.JsonObject;
-using JToken = System.Text.Json.Nodes.JsonNode;
-#else
-using Microsoft.Identity.Json;
-using Microsoft.Identity.Json.Linq;
-#endif
 
 namespace Microsoft.Identity.Client.AuthScheme.PoP
 {
@@ -29,18 +17,15 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         public MtlsPopAuthenticationOperation(X509Certificate2 mtlsCert)
         {
             _mtlsCert = mtlsCert;
-            KeyId = mtlsCert.Thumbprint;
+            KeyId = ComputeX5tS256KeyId(_mtlsCert);
         }
 
-        public int TelemetryTokenType => (int)TokenType.Mtls;
+        public int TelemetryTokenType => (int)TokenType.Mtls_Pop;
 
         public string AuthorizationHeaderPrefix => Constants.MtlsPoPAuthHeaderPrefix;
 
         public string AccessTokenType => Constants.MtlsPoPTokenType;
 
-        /// <summary>
-        /// For MTLS PoP, we use x5t
-        /// </summary>
         public string KeyId { get; }
 
         public IReadOnlyDictionary<string, string> GetTokenRequestParams()
@@ -54,6 +39,21 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         public void FormatResult(AuthenticationResult authenticationResult)
         {
             authenticationResult.MtlsCertificate = _mtlsCert;
+        }
+
+        private static string ComputeX5tS256KeyId(X509Certificate2 certificate)
+        {
+            // Extract the raw bytes of the certificate’s public key.
+            var publicKey = certificate.GetPublicKey();
+
+            // Compute the SHA-256 hash of the public key.
+            using (var sha256 = SHA256.Create())
+            {
+                byte[] hash = sha256.ComputeHash(publicKey);
+
+                // Return the hash encoded in Base64 URL format.
+                return Base64UrlHelpers.Encode(hash);
+            }
         }
     }
 }

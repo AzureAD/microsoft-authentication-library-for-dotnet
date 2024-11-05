@@ -11,6 +11,7 @@ using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
@@ -47,11 +48,11 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <exception cref="MsalClientException"></exception>
         protected override void Validate()
-        {            
+        {
             // Confidential client must have a credential
             if (ServiceBundle?.Config.ClientCredential == null &&
                 CommonParameters.OnBeforeTokenRequestHandler == null &&
-                ServiceBundle?.Config.AppTokenProvider == null
+                ServiceBundle?.Config.AppTokenProvider == null 
                 )
             {
                 throw new MsalClientException(
@@ -73,13 +74,13 @@ namespace Microsoft.Identity.Client
         /// <returns>The builder.</returns>
         /// <remarks>
         /// <list type="bullet">
-        /// <item><description>An Authentication header is automatically added to the request.</description></item>
         /// <item><description>The PoP token is bound to the HTTP request, more specifically to the HTTP method (GET, POST, etc.) and to the Uri (path and query, but not query parameters).</description></item>
         /// <item><description>MSAL creates, reads and stores a key in memory that will be cycled every 8 hours.</description></item>
         /// <item><description>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</description></item>
         /// </list>
         /// </remarks>
         [EditorBrowsable(EditorBrowsableState.Never)] // Soft deprecate
+        [Obsolete]
         public T WithProofOfPossession(PoPAuthenticationConfiguration popAuthenticationConfiguration)
         {
             ValidateUseOfExperimentalFeature();
@@ -92,17 +93,17 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///  Modifies the token acquisition request so that the acquired token is a Proof-of-Possession token (PoP), rather than a Bearer token. 
-        ///  PoP tokens are similar to Bearer tokens, but are bound to the HTTP request and to a cryptographic key, which MSAL can manage on Windows.
-        ///  See https://aka.ms/msal-net-pop
+        ///  Modifies the token acquisition request so that the acquired token is a Signed HTTP Request (SHR) Proof-of-Possession (PoP) token, rather than a Bearer token.
+        ///  SHR PoP tokens are bound to the HTTP request and to a cryptographic key, which MSAL can manage on Windows.
+        ///  This differs from MTLS PoP tokens, which are used for Mutual TLS (mTLS) authentication. See <see href="https://aka.ms/mtls-pop"/> for mTLS PoP details.
+        ///  See <see href="https://aka.ms/msal-net-pop"/> for general PoP token information.
         /// </summary>
         /// <param name="popAuthenticationConfiguration">Configuration properties used to construct a Proof-of-Possession request.</param>
         /// <returns>The builder.</returns>
         /// <remarks>
         /// <list type="bullet">
-        /// <item><description>An Authentication header is automatically added to the request.</description></item>
-        /// <item><description>The PoP token is bound to the HTTP request, more specifically to the HTTP method (GET, POST, etc.) and to the Uri (path and query, but not query parameters).</description></item>
-        /// <item><description>MSAL creates, reads and stores a key in memory that will be cycled every 8 hours.</description></item>
+        /// <item><description>The SHR PoP token is bound to the HTTP request, more specifically to the HTTP method (GET, POST, etc.) and to the URI (path and query, but not query parameters).</description></item>
+        /// <item><description>MSAL creates, reads, and stores a key in memory that will be cycled every 8 hours.</description></item>
         /// <item><description>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</description></item>
         /// </list>
         /// </remarks>
