@@ -431,14 +431,14 @@ namespace NetCoreTestApp
         private static IConfidentialClientApplication CreateCcaForMtlsPop(string region, X509Certificate2 certificate = null)
         {
             ConfidentialClientApplicationBuilder ccaBuilder = ConfidentialClientApplicationBuilder
-                .Create(s_clientIdForConfidentialApp)
-                .WithAuthority(s_ccaAuthority)
+                .Create("c6a1a188-95c6-4589-9030-7ec66bed1589")
+                .WithTenantId("72f988bf-86f1-41af-91ab-2d7cd011db47")
                 .WithAzureRegion(region);
 
             // Use WithCertificate if a certificate is provided; otherwise, use WithClientSecret.
             if (certificate != null)
             {
-                ccaBuilder = ccaBuilder.WithCertificate(certificate);
+                ccaBuilder = ccaBuilder.WithCertificate(certificate, true);
 
                 //Add Experimental feature for MTLS PoP
                 ccaBuilder = ccaBuilder.WithExperimentalFeatures();
