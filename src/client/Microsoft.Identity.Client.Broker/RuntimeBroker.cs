@@ -587,11 +587,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.RuntimeBroker
 
         public bool IsBrokerInstalledAndInvokable(AuthorityType authorityType)
         {
-            if (DesktopOsHelper.IsLinux()) {
-                _logger?.Info(() => "[RuntimeBroker] MsalRuntime running in WSL");
-                return true;
-            }
-            if (!DesktopOsHelper.IsWin10OrServerEquivalent())
+            if (!DesktopOsHelper.IsWin10OrServerEquivalent() && !DesktopOsHelper.IsRunningOnWsl())
             {
                 _logger?.Warning("[RuntimeBroker] Not a supported operating system. WAM broker is not available. ");
                 return false;

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Identity.Client.Utils;
@@ -53,6 +54,15 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 #else
             return false;
 #endif
+        }
+
+        public static bool IsRunningOnWsl()
+        {
+            if (IsLinux()) {
+                var versionInfo = File.ReadAllText("/proc/version");
+                return versionInfo.Contains("Microsoft") || versionInfo.Contains("WSL");
+            }
+            return false;
         }
 
         /// <summary>
