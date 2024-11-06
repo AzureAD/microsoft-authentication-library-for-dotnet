@@ -14,6 +14,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
@@ -28,6 +29,71 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
+    internal class MsalTestAuthenticationOperation : IAuthenticationOperation
+    {
+        //private readonly RSA key;
+        private readonly RSA _signingKey;
+        internal const int RsaKeySize = 2048;
+        string CanonicalPublicKeyJwk;
+
+        public MsalTestAuthenticationOperation()
+        {
+#if NETFRAMEWORK
+            // This method was obsolete in .NET,
+            // but Create() on .NET FWK defaults to PKCS1 padding.
+            _signingKey = RSA.Create("RSAPSS");
+#else
+            _signingKey = RSA.Create();
+#endif
+
+            _signingKey.KeySize = RsaKeySize;
+            RSAParameters publicKeyInfo = _signingKey.ExportParameters(false);
+
+            CanonicalPublicKeyJwk = ComputeCanonicalJwk(publicKeyInfo);
+        }
+
+        /// <summary>
+        /// Creates the canonical representation of the JWK.  See https://tools.ietf.org/html/rfc7638#section-3.
+        /// The number of parameters as well as the lexicographic order is important, as this string will be hashed to get a thumbprint.
+        /// </summary>
+        private static string ComputeCanonicalJwk(RSAParameters rsaPublicKey)
+        {
+            return $@"{{""e"":""{Base64UrlEncoder.Encode(rsaPublicKey.Exponent)}"",""kty"":""RSA"",""n"":""{Base64UrlEncoder.Encode(rsaPublicKey.Modulus)}""}}";
+        }
+
+        public int TelemetryTokenType => 5;
+
+        public string AuthorizationHeaderPrefix => "someHeader";
+
+        public string KeyId => "someKeyId";
+
+        public string AccessTokenType => "someAccessTokenType";
+
+        public void FormatResult(AuthenticationResult authenticationResult)
+        {
+            string cacheValue1 = string.Empty;
+            string cacheValue2 = string.Empty;
+            authenticationResult?.AdditionalResponseParameters?.TryGetValue("additional_param1", out cacheValue1);
+            authenticationResult?.AdditionalResponseParameters?.TryGetValue("additional_param2", out cacheValue2);
+
+            authenticationResult.AccessToken = authenticationResult.AccessToken
+                                                + "AccessTokenModifier"
+                                                + cacheValue1!
+                                                + cacheValue2!;
+        }
+
+        public IReadOnlyDictionary<string, string> GetTokenRequestParams()
+        {
+            IDictionary<string, string> requestParams = new Dictionary<string, string>();
+            requestParams.Add("key1", "value1");
+            requestParams.Add("key2", "value2");
+            requestParams.Add("token_type", "Bearer");
+            requestParams.Add("req_ds_cnf", CanonicalPublicKeyJwk);
+
+            return (IReadOnlyDictionary<string, string>)requestParams;
+        }
+    }
+
     // Tests in this class will run on .NET Core and .NET FWK
     [TestClass]
     public class ClientCredentialsTests
@@ -68,7 +134,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var builder = ConfidentialClientApplicationBuilder.Create(LabAuthenticationHelper.LabAccessConfidentialClientId)
                 .WithCertificate(cert, sendX5C: true)
+                .WithExperimentalFeatures()
                 .WithAuthority(LabAuthenticationHelper.LabClientInstance, LabAuthenticationHelper.LabClientTenantId);
+
+            MsalAuthenticationExtension authExtension = new MsalAuthenticationExtension()
+            {
+                AuthenticationOperation = new MsalTestAuthenticationOperation()
+            };
 
             // auto-detect should work on Azure DevOps build
             if (useRegional)
@@ -76,15 +148,19 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var cca = builder.Build();
 
-            var result = await cca.AcquireTokenForClient([LabAuthenticationHelper.LabScope]).ExecuteAsync().ConfigureAwait(false);
+            var result = await cca.AcquireTokenForClient([LabAuthenticationHelper.LabScope]).WithAuthenticationExtension(authExtension).ExecuteAsync().ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
             Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn.HasValue, "refresh_in was not issued - did the MSAL SKU value change?");
+            Console.WriteLine(result.AccessToken);
 
             if (useRegional)
                 Assert.AreEqual(
                     Client.Region.RegionOutcome.AutodetectSuccess,
                     result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
+
+            result = await cca.AcquireTokenForClient([LabAuthenticationHelper.LabScope]).WithForceRefresh(true).WithAuthenticationExtension(authExtension).ExecuteAsync().ConfigureAwait(false);
+            Console.WriteLine(result.AccessToken);
         }
 
 
