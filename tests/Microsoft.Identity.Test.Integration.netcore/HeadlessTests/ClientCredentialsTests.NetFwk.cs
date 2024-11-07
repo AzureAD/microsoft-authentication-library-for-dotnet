@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [DataRow(false)]
         public async Task RefreshOnIsEnabled(bool useRegional)
         {
-            // if this test runs on AzureDevOps, disable it
+            // if this test runs on local devbox, disable it
             if (useRegional && Environment.GetEnvironmentVariable("TF_BUILD") == null)
             {
                 Assert.Inconclusive("Can't run regional on local devbox.");
