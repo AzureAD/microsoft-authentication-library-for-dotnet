@@ -20,13 +20,8 @@ An item must first match at least one entry in the include list to be included.
 Included items must then not match any entries in the exclude list to remain included.  
 -->
                         <ModulePaths>
-                            <Include>  
-                                <ModulePath>.*\microsoft.identitymodel.clients.activedirectory.dll$</ModulePath>                  
-                                <ModulePath>.*\microsoft.identity.core.dll$</ModulePath>
+                            <Include>               
                                 <ModulePath>.*\microsoft.identity.client.dll$</ModulePath>
-                                <ModulePath>.*\microsoft.identity.client.Broker.dll$</ModulePath>
-                                <ModulePath>.*\microsoft.identity.client.Desktop.dll$</ModulePath>
-                                <ModulePath>.*\microsoft.identity.client.Extensions.Msal.dll$</ModulePath>
                               </Include>  
                             <Exclude>
                                 <ModulePath>.*\\test\\.*</ModulePath>
@@ -42,6 +37,7 @@ Included items must then not match any entries in the exclude list to remain inc
                             </Include>
                             <Exclude>
                                 <Source>.*\\test\\.*</Source>
+                                <Source>.*\\json\\.*</Source>
                                 <Source>test\/.*</Source>
                                 <Source>.src\client\json\**\*.cs$</Source>
                             </Exclude>
