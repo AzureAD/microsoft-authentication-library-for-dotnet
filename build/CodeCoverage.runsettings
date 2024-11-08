@@ -25,10 +25,10 @@ Included items must then not match any entries in the exclude list to remain inc
                             </Include>
                             <Exclude>
                                 <ModulePath>.*\\test\\.*</ModulePath>
-                                <Source>.*\\devapps\\.*</Source>
-                                <Source>.*\\CacheCompat\\.*</Source>
-                                <Source>.*\\obj\\.*</Source>
-                                <Source>.*\\json\\.*</Source>
+                                <ModulePath>.*\\devapps\\.*</ModulePath>
+                                <ModulePath>.*\\CacheCompat\\.*</ModulePath>
+                                <ModulePath>.*\\obj\\.*</ModulePath>
+                                <ModulePath>.*\\json\\.*</ModulePath>
                             </Exclude>
                         </ModulePaths>
                         <Sources>
