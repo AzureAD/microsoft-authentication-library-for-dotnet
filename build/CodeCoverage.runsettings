@@ -21,7 +21,7 @@ Included items must then not match any entries in the exclude list to remain inc
 -->
                         <ModulePaths>
                             <Include>
-                                <ModulePath>.*\src\client\Microsoft.Identity.Client\microsoft.identity.client.dll$</ModulePath>
+                                <ModulePath>.*microsoft.identity.client.dll$</ModulePath>
                             </Include>
                             <Exclude>
                                 <ModulePath>.*\\test\\.*</ModulePath>
