@@ -31,10 +31,6 @@ Included items must then not match any entries in the exclude list to remain inc
                             </Exclude>
                         </ModulePaths>
                         <Sources>
-                            <Include>
-                                <Source>src\/.*\.cs</Source>
-                                <Source>.*\\src\\.*</Source>
-                            </Include>
                             <Exclude>
                                 <Source>.*\\test\\.*</Source>
                                 <Source>.*\\obj\\.*</Source>
