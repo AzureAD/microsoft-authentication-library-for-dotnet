@@ -27,6 +27,7 @@ Included items must then not match any entries in the exclude list to remain inc
                                 <ModulePath>.*Test\.dll$</ModulePath>
                                 <ModulePath>.*Test\.exe$</ModulePath>
                                 <ModulePath>.*Test\*.exe$</ModulePath>
+                                <ModulePath>.*\*.exe$</ModulePath>
                             </Exclude>
                         </ModulePaths>
                         <Sources>
