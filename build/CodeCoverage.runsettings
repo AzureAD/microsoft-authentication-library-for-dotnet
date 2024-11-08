@@ -21,8 +21,6 @@ Included items must then not match any entries in the exclude list to remain inc
 -->
                         <ModulePaths>
                             <Include>
-                                <ModulePath>.*\microsoft.identitymodel.clients.activedirectory.dll$</ModulePath>
-                                <ModulePath>.*\microsoft.identity.core.dll$</ModulePath>
                                 <ModulePath>.*\microsoft.identity.client.dll$</ModulePath>
                             </Include>
                             <Exclude>
@@ -33,12 +31,10 @@ Included items must then not match any entries in the exclude list to remain inc
                             </Exclude>
                         </ModulePaths>
                         <Sources>
-                            <Include>
-                                <Source>src\/.*\.cs</Source>
-                                <Source>.*\\src\\.*</Source>
-                            </Include>
                             <Exclude>
                                 <Source>.*\\test\\.*</Source>
+                                <Source>test\/.*</Source>
+                                <Source>.src\client\json\**\*.cs$</Source>
                                 <Source>.*\\devapps\\.*</Source>
                                 <Source>.*\\CacheCompat\\.*</Source>
                                 <Source>.*\\obj\\.*</Source>
