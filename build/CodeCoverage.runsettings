@@ -25,16 +25,15 @@ Included items must then not match any entries in the exclude list to remain inc
                             </Include>
                             <Exclude>
                                 <ModulePath>.*\\test\\.*</ModulePath>
-                                <ModulePath>.*Test\.dll</ModulePath>
-                                <ModulePath>.*Test\.exe</ModulePath>
-                                <ModulePath>.*Test\*.exe</ModulePath>
+                                <Source>.*\\devapps\\.*</Source>
+                                <Source>.*\\CacheCompat\\.*</Source>
+                                <Source>.*\\obj\\.*</Source>
+                                <Source>.*\\json\\.*</Source>
                             </Exclude>
                         </ModulePaths>
                         <Sources>
                             <Exclude>
                                 <Source>.*\\test\\.*</Source>
-                                <Source>test\/.*</Source>
-                                <Source>.src\client\json\**\*.cs$</Source>
                                 <Source>.*\\devapps\\.*</Source>
                                 <Source>.*\\CacheCompat\\.*</Source>
                                 <Source>.*\\obj\\.*</Source>
