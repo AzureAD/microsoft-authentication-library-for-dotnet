@@ -57,15 +57,15 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             RequestContext requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.CorrelationId, cancellationToken);
 
+            // Perform MTLS PoP validations if required
+            ValidateAndConfigureMtlsPopForAcquireTokenForClient(clientParameters, commonParameters, requestContext);
+
             AuthenticationRequestParameters requestParams = await _confidentialClientApplication.CreateRequestParametersAsync(
                 commonParameters,
                 requestContext,
                 _confidentialClientApplication.AppTokenCacheInternal).ConfigureAwait(false);
        
             requestParams.SendX5C = clientParameters.SendX5C ?? false;
-
-            // Perform MTLS PoP validations if required
-            ValidateAndConfigureMtlsPopForAcquireTokenForClient(clientParameters, commonParameters, requestContext);
 
             var handler = new ClientCredentialRequest(
                 ServiceBundle,
@@ -102,7 +102,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
                 commonParameters.MtlsCertificate = _confidentialClientApplication.Certificate;
                 commonParameters.AuthenticationOperation = new MtlsPopAuthenticationOperation(_confidentialClientApplication.Certificate);
-                ServiceBundle.Config.ClientCredential = null;
+                ServiceBundle.Config.IsInstanceDiscoveryEnabled = false;
+                ServiceBundle.Config.ClientCredential = null;              
                 requestContext.UseMtlsPop = true;
             }
         }

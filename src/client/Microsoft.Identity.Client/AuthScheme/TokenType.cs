@@ -36,8 +36,8 @@ namespace Microsoft.Identity.Client.AuthScheme
 
         /// <summary>
         /// MTLS Pop token type.
-        /// MTLS_Pop = 5
+        /// MTLS_Pop = 6
         /// </summary>
-        Mtls_Pop = 5
+        Mtls_Pop = 6
     }
 }

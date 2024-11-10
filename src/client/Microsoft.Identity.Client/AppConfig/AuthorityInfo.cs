@@ -508,13 +508,16 @@ namespace Microsoft.Identity.Client
                 AuthorityInfo requestAuthorityInfo,
                 IAccount account = null)
             {
-                var configAuthority = requestContext.ServiceBundle.Config.Authority;
-                var configAuthorityInfo = configAuthority.AuthorityInfo;
+                Authority configAuthority = requestContext.ServiceBundle.Config.Authority;
+                AuthorityInfo configAuthorityInfo = configAuthority.AuthorityInfo;
 
                 if (configAuthorityInfo == null)
                 {
                     throw new ArgumentNullException(nameof(requestContext.ServiceBundle.Config.Authority.AuthorityInfo));
                 }
+
+                // Apply any specific MTLS handling based on `RequestContext`
+                configAuthorityInfo = GetMtlsAdjustedAuthorityInfo(requestContext, configAuthorityInfo);
 
                 ValidateTypeMismatch(configAuthorityInfo, requestAuthorityInfo);
 
@@ -542,19 +545,40 @@ namespace Microsoft.Identity.Client
 
                     case AuthorityType.Aad:
 
-                        bool updateEnvironment = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null && !PublicClientApplication.IsOperatingSystemAccount(account);
+                        bool isMultiCloudSupported = requestContext.ServiceBundle.Config.MultiCloudSupportEnabled && account != null && !PublicClientApplication.IsOperatingSystemAccount(account);
+
+                        bool useMtlsEnvironment = requestContext != null && requestContext.UseMtlsPop;
+
+                        bool updateEnvironment = isMultiCloudSupported || useMtlsEnvironment;
 
                         if (requestAuthorityInfo == null)
                         {
-                            return updateEnvironment ?
-                                CreateAuthorityWithTenant(
-                                    CreateAuthorityWithEnvironment(configAuthorityInfo, account.Environment),
-                                    account?.HomeAccountId?.TenantId, 
-                                    forceSpecifiedTenant: false) :
-                                CreateAuthorityWithTenant(
-                                    configAuthority, 
-                                    account?.HomeAccountId?.TenantId, 
+                            if (updateEnvironment)
+                            {
+                                if (useMtlsEnvironment)
+                                {
+                                    // Use the MTLS-specific authority creation
+                                    return CreateAuthorityForMtlsWithTenant(
+                                        configAuthorityInfo,
+                                        account?.HomeAccountId?.TenantId);
+                                }
+                                else
+                                {
+                                    // Use the environment update with standard authority creation
+                                    return CreateAuthorityWithTenant(
+                                        CreateAuthorityWithEnvironment(configAuthorityInfo, account?.Environment),
+                                        account?.HomeAccountId?.TenantId,
+                                        forceSpecifiedTenant: false);
+                                }
+                            }
+                            else
+                            {
+                                // Default non-MTLS environment authority creation
+                                return CreateAuthorityWithTenant(
+                                    configAuthority,
+                                    account?.HomeAccountId?.TenantId,
                                     forceSpecifiedTenant: false);
+                            }
                         }
 
                         // In case the authority is defined only at the request level
@@ -605,6 +629,19 @@ namespace Microsoft.Identity.Client
                 };
 
                 return Authority.CreateAuthority(uriBuilder.Uri.AbsoluteUri, authorityInfo.ValidateAuthority);
+            }
+
+            internal static Authority CreateAuthorityForMtlsWithTenant(AuthorityInfo authorityInfo, string tenantId)
+            {
+                // Construct the authority URI using the canonical authority and append the tenant ID
+                var uriBuilder = new UriBuilder(authorityInfo.CanonicalAuthority)
+                {
+                    Path = $"{authorityInfo.CanonicalAuthority.AbsolutePath}/{tenantId}/"
+                };
+
+                string tenantedAuthority = uriBuilder.Uri.AbsoluteUri;
+
+                return Authority.CreateAuthority(tenantedAuthority, false);
             }
 
             private static void ValidateTypeMismatch(AuthorityInfo configAuthorityInfo, AuthorityInfo requestAuthorityInfo)
@@ -678,6 +715,37 @@ namespace Microsoft.Identity.Client
                 var result = await instanceDiscoveryManager.GetMetadataEntryAsync(requestContext.ServiceBundle.Config.Authority.AuthorityInfo, requestContext).ConfigureAwait(false);
 
                 return result.Aliases.Any(alias => alias.Equals(requestAuthorityInfo.Host));
+            }
+
+            private static AuthorityInfo GetMtlsAdjustedAuthorityInfo(RequestContext requestContext, AuthorityInfo configAuthorityInfo)
+            {
+                bool useMtlsPop = requestContext != null && requestContext.UseMtlsPop;
+                string authorityPath = configAuthorityInfo.CanonicalAuthority.AbsolutePath;
+                string authorityHost = configAuthorityInfo.Host;
+
+                // Check if the authority tenant is "common", meaning no specific authority was provided by the user
+                if (useMtlsPop && authorityPath.Contains("/common", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new MsalClientException(
+                        MsalError.AuthorityHostMismatch,
+                        "MTLS authentication requires a specific authority. Please provide an authority instead of using the default 'common'. " +
+                        "\nSee https://aka.ms/msal-net-authority-override for details.");
+                }
+
+                if (useMtlsPop && authorityHost.Equals("login.microsoftonline.com", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Create a new URI with the modified host, preserving the tenant ID from the original authority
+                    Uri mtlsAuthorityUri = new UriBuilder(configAuthorityInfo.CanonicalAuthority)
+                    {
+                        Host = "mtlsauth.microsoft.com"
+                    }.Uri;
+
+                    // Return the updated configAuthorityInfo with the new MTLS authority URI
+                    return new AuthorityInfo(configAuthorityInfo.AuthorityType, mtlsAuthorityUri, false);
+                }
+
+                // Return original configAuthorityInfo if no MTLS handling is applied
+                return configAuthorityInfo;
             }
         }
     }
