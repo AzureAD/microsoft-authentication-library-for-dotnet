@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -48,6 +49,42 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();
+        }
+
+        // regression test based on SAL introducing a new SKU value and making ESTS not issue the refresh_in value
+        // This needs to run on .NET and .NET FWK to protect against MSAL SKU value changes
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task RefreshOnIsEnabled(bool useRegional)
+        {
+            // if this test runs on local devbox, disable it
+            if (useRegional && Environment.GetEnvironmentVariable("TF_BUILD") == null)
+            {
+                Assert.Inconclusive("Can't run regional on local devbox.");
+            }
+
+            var cert = CertificateHelper.FindCertificateByName(TestConstants.AutomationTestCertName);
+
+            var builder = ConfidentialClientApplicationBuilder.Create(LabAuthenticationHelper.LabAccessConfidentialClientId)
+                .WithCertificate(cert, sendX5C: true)
+                .WithAuthority(LabAuthenticationHelper.LabClientInstance, LabAuthenticationHelper.LabClientTenantId);
+
+            // auto-detect should work on Azure DevOps build
+            if (useRegional)
+                builder = builder.WithAzureRegion();
+
+            var cca = builder.Build();
+
+            var result = await cca.AcquireTokenForClient([LabAuthenticationHelper.LabScope]).ExecuteAsync().ConfigureAwait(false);
+
+            Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+            Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn.HasValue, "refresh_in was not issued - did the MSAL SKU value change?");
+
+            if (useRegional)
+                Assert.AreEqual(
+                    Client.Region.RegionOutcome.AutodetectSuccess,
+                    result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
         }
 
         [DataTestMethod]
