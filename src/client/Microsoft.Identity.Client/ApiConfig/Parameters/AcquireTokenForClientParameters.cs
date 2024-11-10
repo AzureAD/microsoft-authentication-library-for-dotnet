@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public bool ForceRefresh { get; set; }
 
         /// <summary>
-        /// Whether to use MTLS Proof of Possession (PoP)
+        /// Determines whether to use mTLS Proof of Possession (PoP).
         /// </summary>
         public bool UseMtlsPop { get; set; } = false;
 

@@ -430,15 +430,15 @@ namespace Microsoft.Identity.Client
         public const string CryptographicError = "A cryptographic exception occurred. Possible cause: the certificate has been disposed. See inner exception for full details.";
 
         /// <summary>
-        /// MTLS Proof of Possession (PoP) requires a region to be specified in the configuration.
-        /// <para>What happens?</para> You have enabled MTLS PoP, but no region is specified.
-        /// <para>Mitigation</para> Ensure that a region is set when using MTLS PoP by configuring AzureRegion in the application.
+        /// mTLS Proof-of-Possession (PoP) requires a region to be specified in the configuration.
+        /// <para>What happened?</para> You enabled mTLS PoP but no region was specified.
+       /// <para>Mitigation</para> Ensure that a region is set when using mTLS PoP by configuring `AzureRegion` in the application.
         /// </summary>
         public const string MtlsPopWithoutRegion = "MTLS Proof of Possession requires a region to be specified. Please set AzureRegion in the configuration at the application level.";
 
         /// <summary>
-        /// <para>What happens?</para> MTLS Proof of Possession requires a certificate to be configured.
-        /// <para>Mitigation</para> Provide a certificate in the configuration to enable MTLS PoP. This is required to perform mutual TLS.
+        /// <para>What happened?</para> mTLS Proof-of-Possession requires a certificate to be configured.
+       /// <para>Mitigation</para> Provide a certificate in the configuration to enable mTLS PoP.
         /// </summary>
         public const string MtlsCertificateNotProvidedMessage = "MTLS Proof of Possession requires a certificate to be configured. Please provide a certificate at the application level using the .WithCertificate().";
     }
