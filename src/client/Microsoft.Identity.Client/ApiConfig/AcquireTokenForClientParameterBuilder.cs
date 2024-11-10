@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Specifies that the certificate provided will be used for PoP tokens with mTLS (Mutual TLS) authentication.
-        /// For more information, refer to the documentation at: /// https://aka.ms/mtls-pop
+        /// For more information, refer to the <see href="https://aka.ms/mtls-pop">Proof-of-Posession documentation</see>.
         /// </summary>
         /// <returns>The current instance of <see cref="AcquireTokenForClientParameterBuilder"/> to enable method chaining.</returns>
         public AcquireTokenForClientParameterBuilder WithMtlsProofOfPossession()
