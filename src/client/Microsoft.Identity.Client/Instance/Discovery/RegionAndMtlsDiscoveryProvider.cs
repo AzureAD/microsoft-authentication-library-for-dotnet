@@ -24,6 +24,7 @@ namespace Microsoft.Identity.Client.Region
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataAsync(Uri authority, RequestContext requestContext)
         {
             string region = null;
+
             if (requestContext.ApiEvent?.ApiId == TelemetryCore.Internal.Events.ApiEvent.ApiIds.AcquireTokenForClient)
             {
                 region = await _regionManager.GetAzureRegionAsync(requestContext).ConfigureAwait(false);
@@ -31,6 +32,15 @@ namespace Microsoft.Identity.Client.Region
 
             if (string.IsNullOrEmpty(region))
             {
+                if (requestContext.UseMtlsPop)
+                {
+                    requestContext.Logger.Info("[Region discovery] Region discovery failed during mTLS Pop. ");
+
+                    throw new MsalServiceException(
+                        "region_required_for_mtls_pop",
+                        "Regional auto-detect failed. MTLS Proof of Possession requires a region to be specified, as there is no global endpoint for MTLS.");
+                }
+
                 requestContext.Logger.Info("[Region discovery] Not using a regional authority. ");
                 return null;
             }
@@ -82,8 +92,17 @@ namespace Microsoft.Identity.Client.Region
             }
             else
             {
-                requestContext.Logger.Info(() => $"[Region discovery] Using MTLS public endpoint: {PublicEnvForMtls}");
-                return $"{region}.{PublicEnvForMtls}";
+                // Check if a host is present; if not, use the MTLS public endpoint
+                if (!string.IsNullOrEmpty(host))
+                {
+                    requestContext.Logger.Info(() => $"[Region discovery] Using MTLS with specified host: {region}.{host}");
+                    return $"{region}.{host}";
+                }
+                else
+                {
+                    requestContext.Logger.Info(() => $"[Region discovery] Using MTLS public endpoint: {PublicEnvForMtls}");
+                    return $"{region}.{PublicEnvForMtls}";
+                }
             }
         }
     }
