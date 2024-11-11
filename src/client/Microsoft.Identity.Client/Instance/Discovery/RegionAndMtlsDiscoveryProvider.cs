@@ -14,7 +14,6 @@ namespace Microsoft.Identity.Client.Region
     {
         private readonly IRegionManager _regionManager;
         public const string PublicEnvForRegional = "login.microsoft.com";
-        public const string PublicEnvForMtls = "mtlsauth.microsoft.com";
 
         public RegionAndMtlsDiscoveryProvider(IHttpManager httpManager, bool clearCache)
         {
@@ -92,17 +91,8 @@ namespace Microsoft.Identity.Client.Region
             }
             else
             {
-                // Check if a host is present; if not, use the MTLS public endpoint
-                if (!string.IsNullOrEmpty(host))
-                {
-                    requestContext.Logger.Info(() => $"[Region discovery] Using MTLS with specified host: {region}.{host}");
-                    return $"{region}.{host}";
-                }
-                else
-                {
-                    requestContext.Logger.Info(() => $"[Region discovery] Using MTLS public endpoint: {PublicEnvForMtls}");
-                    return $"{region}.{PublicEnvForMtls}";
-                }
+                requestContext.Logger.Info(() => $"[Region discovery] Using MTLS with specified host: {region}.{host}");
+                return $"{region}.{host}";
             }
         }
     }

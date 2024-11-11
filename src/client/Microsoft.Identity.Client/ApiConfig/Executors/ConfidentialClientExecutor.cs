@@ -82,6 +82,14 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
         {
             if (clientParameters.UseMtlsPop)
             {
+                // Throw if Authority != AAD for MTLS PoP as it is only supported for AAD
+                if (_confidentialClientApplication.AuthorityInfo.AuthorityType != AuthorityType.Aad)
+                {
+                    throw new MsalClientException(
+                        MsalError.InvalidAuthorityType,
+                        "MTLS PoP is only supported for AAD authority type.");
+                }
+
                 // Validate that the certificate is not null for MTLS PoP
                 if (_confidentialClientApplication.Certificate == null)
                 {
