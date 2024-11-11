@@ -13,11 +13,10 @@ steps:
     rerunFailedTests: true
     rerunMaxAttempts: '3'
     runInParallel: false
-    codeCoverageEnabled: true
+    codeCoverageEnabled: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
     pathtoCustomTestAdapters: 'C:\temp' # Workaround for test failure, as NUnit Test Adapter that gets detected seems to mess something up
-    runSettingsFile: 'build\CodeCoverage.runsettings'
 
 - task: VSTest@2
   displayName: 'Run integration tests (.NET FX) On OneBranch'
@@ -29,10 +28,9 @@ steps:
     rerunFailedTests: true
     rerunMaxAttempts: '3'
     runInParallel: false
-    codeCoverageEnabled: true
+    codeCoverageEnabled: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
-    runSettingsFile: 'build\CodeCoverage.runsettings'
 
 - task: VSTest@2
   displayName: 'Run integration tests (.NET Core)'
