@@ -94,16 +94,15 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        ///  Modifies the token acquisition request so that the acquired token is a Signed HTTP Request (SHR) Proof-of-Possession (PoP) token, rather than a Bearer token.
-        ///  SHR PoP tokens are bound to the HTTP request and to a cryptographic key, which MSAL can manage on Windows.
-        ///  This differs from MTLS PoP tokens, which are used for Mutual TLS (mTLS) authentication. See <see href="https://aka.ms/mtls-pop"/> for mTLS PoP details.
-        ///  See <see href="https://aka.ms/msal-net-pop"/> for general PoP token information.
+        /// Modifies the request to acquire a Signed HTTP Request (SHR) Proof-of-Possession (PoP) token, rather than a Bearer.
+        /// SHR PoP tokens are bound to the HTTP request and to a cryptographic key, which MSAL manages on Windows.
+       /// SHR PoP tokens are different from mTLS PoP tokens, which are used for Mutual TLS (mTLS) authentication. See <see href="https://aka.ms/mtls-pop"/> for details.
         /// </summary>
         /// <param name="popAuthenticationConfiguration">Configuration properties used to construct a Proof-of-Possession request.</param>
         /// <returns>The builder.</returns>
         /// <remarks>
         /// <list type="bullet">
-        /// <item><description>The SHR PoP token is bound to the HTTP request, more specifically to the HTTP method (GET, POST, etc.) and to the URI (path and query, but not query parameters).</description></item>
+        /// <item><description>The SHR PoP token is bound to the HTTP request, specifically to the HTTP method (for example, `GET` or `POST`) and to the URI path and query, excluding query parameters.</description></item>
         /// <item><description>MSAL creates, reads, and stores a key in memory that will be cycled every 8 hours.</description></item>
         /// <item><description>This is an experimental API. The method signature may change in the future without involving a major version upgrade.</description></item>
         /// </list>

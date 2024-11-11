@@ -1151,14 +1151,14 @@ namespace Microsoft.Identity.Client
         public const string CryptographicError = "cryptographic_error";
 
         /// <summary>
-        /// <para>What happens?</para>MTLS Proof of Possession (PoP) is configured, but a region is not specified.
-        /// <para>Mitigation</para>Ensure that the AzureRegion configuration is set when using MTLS PoP, as MTLS PoP requires a regional endpoint.
+        /// <para>What happened?</para>mTLS Proof of Possession (PoP) is configured but a region was not specified.
+        /// <para>Mitigation</para>Ensure that the AzureRegion configuration is set when using mTLS PoP as it requires a regional endpoint.
         /// </summary>
         public const string MtlsPopWithoutRegion = "mtls_pop_without_region";
 
         /// <summary>
-        /// <para>What happens?</para> MTLS Proof of Possession (PoP) is configured, but a certificate is not provided.
-        /// <para>Mitigation</para> Ensure that a valid certificate is provided in the configuration, as MTLS PoP requires a certificate for secure authentication.
+        /// <para>What happened?</para> mTLS Proof of Possession (PoP) is configured but a certificate was not provided.
+        /// <para>Mitigation</para> Ensure that a valid certificate is provided in the configuration when using mTLS PoP as it is required for secure authentication.
         /// </summary>
         public const string MtlsCertificateNotProvided = "mtls_certificate_not_provided";
     }
