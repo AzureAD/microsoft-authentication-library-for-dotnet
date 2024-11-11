@@ -39,6 +39,10 @@ Included items must then not match any entries in the exclude list to remain inc
                             </Include>
                             <Exclude>
                                 <Source>.*\\test\\.*</Source>
+                                <Source>.*\\devapps\\.*</Source>
+                                <Source>.*\\CacheCompat\\.*</Source>
+                                <Source>.*\\obj\\.*</Source>
+                                <Source>.*\\json\\.*</Source>
                                 <Source>test\/.*</Source>
                                 <Source>.src\client\json\**\*.cs$</Source>
                             </Exclude>
