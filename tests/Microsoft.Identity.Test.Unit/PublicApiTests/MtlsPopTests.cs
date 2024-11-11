@@ -182,11 +182,14 @@ namespace Microsoft.Identity.Test.Unit
             {
                 Environment.SetEnvironmentVariable("REGION_NAME", region);
 
-                // Construct expected token endpoint URL
-                // Determine the expected token endpoint based on the authority URL
-                string expectedTokenEndpoint = authorityUrl.Contains("microsoftonline.com")
-                    ? $"https://{region}.mtlsauth.microsoft.com/123456-1234-2345-1234561234/oauth2/v2.0/token"
-                    : $"https://{region}.{new Uri(authorityUrl).Host}/123456-1234-2345-1234561234/oauth2/v2.0/token";
+                // Set the expected mTLS endpoint based on the cloud type
+                string globalEndpoint = authorityUrl.Contains("microsoftonline.com")
+                    ? "mtlsauth.microsoft.com"
+                    : authorityUrl.Contains("microsoftonline.us")
+                        ? "mtlsauth.microsoftonline.us"
+                        : "mtlsauth.partner.microsoftonline.cn";
+
+                string expectedTokenEndpoint = $"https://{region}.{globalEndpoint}/123456-1234-2345-1234561234/oauth2/v2.0/token";
 
                 using (var httpManager = new MockHttpManager())
                 {
