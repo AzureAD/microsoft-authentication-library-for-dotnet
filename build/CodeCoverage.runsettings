@@ -21,23 +21,26 @@ Included items must then not match any entries in the exclude list to remain inc
 -->
                         <ModulePaths>
                             <Include>
-                                <ModulePath>.*microsoft.identity.client.dll$</ModulePath>
+                                <ModulePath>.*\microsoft.identitymodel.clients.activedirectory.dll$</ModulePath>
+                                <ModulePath>.*\microsoft.identity.core.dll$</ModulePath>
+                                <ModulePath>.*\microsoft.identity.client.dll$</ModulePath>
                             </Include>
                             <Exclude>
                                 <ModulePath>.*\\test\\.*</ModulePath>
-                                <ModulePath>.*\\devapps\\.*</ModulePath>
-                                <ModulePath>.*\\CacheCompat\\.*</ModulePath>
-                                <ModulePath>.*\\obj\\.*</ModulePath>
-                                <ModulePath>.*\\json\\.*</ModulePath>
+                                <ModulePath>.*Test\.dll</ModulePath>
+                                <ModulePath>.*Test\.exe</ModulePath>
+                                <ModulePath>.*Test\*.exe</ModulePath>
                             </Exclude>
                         </ModulePaths>
                         <Sources>
+                            <Include>
+                                <Source>src\/.*\.cs</Source>
+                                <Source>.*\\src\\.*</Source>
+                            </Include>
                             <Exclude>
                                 <Source>.*\\test\\.*</Source>
-                                <Source>.*\\devapps\\.*</Source>
-                                <Source>.*\\CacheCompat\\.*</Source>
-                                <Source>.*\\obj\\.*</Source>
-                                <Source>.*\\json\\.*</Source>
+                                <Source>test\/.*</Source>
+                                <Source>.src\client\json\**\*.cs$</Source>
                             </Exclude>
                         </Sources>
                     </CodeCoverage>
