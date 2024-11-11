@@ -1,3 +1,8 @@
+4.66.2
+==========
+### Bug Fixes
+- Fixed a bug where MSAL .NET fails to launch the iOS broker on IOS 18.0.1. See [Issue #4958](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/4958)
+
 4.66.1
 ==========
 ### Bug Fixes
