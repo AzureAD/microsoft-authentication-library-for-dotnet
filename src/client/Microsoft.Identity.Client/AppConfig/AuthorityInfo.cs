@@ -731,12 +731,32 @@ namespace Microsoft.Identity.Client
                         "MTLS authentication requires a specific authority. Please provide an authority instead of using the default 'common'. See https://aka.ms/msal-net-authority-override for details.");
                 }
 
-                if (useMtlsPop && authorityHost.Equals("login.microsoftonline.com", StringComparison.OrdinalIgnoreCase))
+                // Select the appropriate mTLS endpoint based on the cloud environment
+                if (useMtlsPop)
                 {
-                    // Create a new URI with the modified host, preserving the tenant ID from the original authority
+                    string mtlsHost;
+                    if (authorityHost.Equals("login.microsoftonline.com", StringComparison.OrdinalIgnoreCase))
+                    {
+                        mtlsHost = "mtlsauth.microsoft.com"; // Public cloud
+                    }
+                    else if (authorityHost.Equals("login.microsoftonline.us", StringComparison.OrdinalIgnoreCase))
+                    {
+                        mtlsHost = "mtlsauth.microsoftonline.us"; // US Government cloud
+                    }
+                    else if (authorityHost.Equals("login.partner.microsoftonline.cn", StringComparison.OrdinalIgnoreCase))
+                    {
+                        mtlsHost = "mtlsauth.partner.microsoftonline.cn"; // China cloud
+                    }
+                    else
+                    {
+                        // If the authority is unknown or unsupported for mTLS, return the original configAuthorityInfo
+                        return configAuthorityInfo;
+                    }
+
+                    // Create a new URI with the modified mTLS host, preserving the tenant ID from the original authority
                     Uri mtlsAuthorityUri = new UriBuilder(configAuthorityInfo.CanonicalAuthority)
                     {
-                        Host = "mtlsauth.microsoft.com"
+                        Host = mtlsHost
                     }.Uri;
 
                     // Return the updated configAuthorityInfo with the new MTLS authority URI
