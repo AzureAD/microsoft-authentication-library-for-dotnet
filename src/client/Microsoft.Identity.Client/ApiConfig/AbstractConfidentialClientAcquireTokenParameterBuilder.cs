@@ -80,7 +80,8 @@ namespace Microsoft.Identity.Client
         /// </list>
         /// </remarks>
         [EditorBrowsable(EditorBrowsableState.Never)] // Soft deprecate
-        [Obsolete]
+        [Obsolete("WithProofOfPossession is deprecated. Please use WithSignedHttpRequestProofOfPossession for SHR Proof-of-Possession functionality. " +
+          "For more details and to learn about other Proof-of-Possession MSAL supports, see the MSAL documentation: https://aka.ms/msal-net-pop")]
         public T WithProofOfPossession(PoPAuthenticationConfiguration popAuthenticationConfiguration)
         {
             ValidateUseOfExperimentalFeature();

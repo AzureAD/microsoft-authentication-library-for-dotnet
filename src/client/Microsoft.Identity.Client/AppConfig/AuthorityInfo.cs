@@ -728,8 +728,7 @@ namespace Microsoft.Identity.Client
                 {
                     throw new MsalClientException(
                         MsalError.AuthorityHostMismatch,
-                        "MTLS authentication requires a specific authority. Please provide an authority instead of using the default 'common'. " +
-                        "\nSee https://aka.ms/msal-net-authority-override for details.");
+                        "MTLS authentication requires a specific authority. Please provide an authority instead of using the default 'common'. See https://aka.ms/msal-net-authority-override for details.");
                 }
 
                 if (useMtlsPop && authorityHost.Equals("login.microsoftonline.com", StringComparison.OrdinalIgnoreCase))
