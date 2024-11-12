@@ -16,6 +16,7 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Internal
 {
+
     internal class JsonWebToken
     {
         // (64K) This is an arbitrary large value for the token length. We can adjust it as needed.
@@ -135,6 +136,8 @@ namespace Microsoft.Identity.Client.Internal
             return header;
         }
 
+
+
         private static string ComputeCertThumbprint(X509Certificate2 certificate, bool useSha2)
         {
             string thumbprint = null;
@@ -146,11 +149,11 @@ namespace Microsoft.Identity.Client.Internal
 
                     thumbprint = Base64UrlHelpers.Encode(certificate.GetCertHash(HashAlgorithmName.SHA256));
 #else
-                using (var hasher = SHA256.Create())
-                {
-                    byte[] hash = hasher.ComputeHash(certificate.RawData);
-                    thumbprint = Base64UrlHelpers.Encode(hash);
-                }
+                    using (var hasher = SHA256.Create())
+                    {
+                        byte[] hash = hasher.ComputeHash(certificate.RawData);
+                        thumbprint = Base64UrlHelpers.Encode(hash);
+                    }
 #endif
                 }
                 else

@@ -21,7 +21,11 @@ namespace Microsoft.Identity.Test.Performance
 
         public BuilderTests()
         {
-            _certificate = CertificateHelper.CreateCertificate("CN=rsa2048", RSA.Create(2048), HashAlgorithmName.SHA256, null);
+            _certificate = CertificateHelper.FindCertificateByName(
+                TestConstants.AutomationTestCertName,
+                StoreLocation.CurrentUser,
+                StoreName.My);
+
             _cca = ConfidentialClientApplicationBuilder
                 .Create(TestConstants.ClientId)
                 .WithAuthority(TestConstants.AuthorityTenant)

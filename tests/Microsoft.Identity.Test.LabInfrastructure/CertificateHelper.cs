@@ -27,6 +27,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
             return null;
         }
+
         /// <summary>
         /// Try and locate a certificate matching the given <paramref name="certName"/> by searching in
         /// the in the given <see cref="StoreName"/> and <see cref="StoreLocation"/>.

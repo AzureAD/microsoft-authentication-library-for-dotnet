@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net462;net6.0;net471</TargetFrameworks>
     <Configurations>Debug;Release</Configurations>
     <!-- Uncomment only when running EtwProfiler diagnoser on Release-->
     <!-- https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-options/code-generation#debugtype -->

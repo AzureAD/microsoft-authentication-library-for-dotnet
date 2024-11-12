@@ -3,6 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Utils;
@@ -12,6 +14,67 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.UtilTests
 {
+    public static class X509Certificate2Helper
+    {
+        /// <summary>
+        /// Extension method to compute the cert's X5T#SHA25, i.e. the base64 url encoding of the SHA256 hash of the certificate.
+        /// </summary>
+        public static string GetX5TSha256(this X509Certificate2 certificate, int algo)
+        {
+#if NET6_0_OR_GREATER
+            byte[] hash = certificate.GetCertHash(HashAlgorithmName.SHA256);
+            return Base64UrlHelpers.Encode(hash);
+#else
+            using (var hasher = SHA256.Create())
+            {
+                byte[] hashBytes = hasher.ComputeHash(certificate.RawData);
+
+                switch (algo)
+                {
+
+                    case 1:
+                        return MSAL_Style(hashBytes);
+                    case 2:
+                        return ESTS_Style(hashBytes);
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+#endif
+        }
+
+   
+
+        private static string MSAL_Style(byte[] ba)
+        {
+            return Base64UrlHelpers.Encode(ba);
+        }
+
+        private static string ESTS_Style(byte[] ba)
+        {
+            byte[] bytes = Decode(BitConverter.ToString(ba).Replace("-", string.Empty).ToLowerInvariant());
+            return Base64UrlHelpers.Encode(bytes);
+        }
+
+        private static byte[] Decode(string hexString)
+        {
+            if (hexString == null)
+            {
+                // Equivalent of assert. Not expected at runtime because higher layers should handle this.
+                throw new NullReferenceException(nameof(hexString));
+            }
+
+            byte[] bytes = new byte[hexString.Length >> 1];
+
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                bytes[i] = Convert.ToByte(hexString.Substring(i << 1, 2), 16);
+            }
+
+            return bytes;
+        }
+    }
+
     [TestClass]
     public class ScopeHelperTests
     {
@@ -21,6 +84,43 @@ namespace Microsoft.Identity.Test.Unit.UtilTests
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();
+        }
+        public static X509Certificate2 FindCertificateByName(string certName, StoreLocation location, StoreName name)
+        {
+            // Don't validate certs, since the test root isn't installed.
+            const bool validateCerts = false;
+
+            using (var store = new X509Store(name, location))
+            {
+                store.Open(OpenFlags.ReadOnly);
+                X509Certificate2Collection collection = store.Certificates.Find(X509FindType.FindBySubjectName, certName, validateCerts);
+
+                X509Certificate2 certToUse = null;
+
+                // select the "freshest" certificate
+                foreach (X509Certificate2 cert in collection)
+                {
+                    if (certToUse == null || cert.NotBefore > certToUse.NotBefore)
+                    {
+                        certToUse = cert;
+                    }
+                }
+
+                return certToUse;
+
+            }
+        }
+
+        [TestMethod]
+        public void GetThumbprint()
+        {
+            var certificate = FindCertificateByName(
+              TestConstants.AutomationTestCertName,
+              StoreLocation.CurrentUser,
+              StoreName.My);
+
+            string s1 = X509Certificate2Helper.GetX5TSha256(certificate, 1);
+            string s2 = X509Certificate2Helper.GetX5TSha256(certificate, 2);
         }
 
         [TestMethod]

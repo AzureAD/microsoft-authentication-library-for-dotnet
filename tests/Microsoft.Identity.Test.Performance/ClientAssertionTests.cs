@@ -12,6 +12,7 @@ using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Performance
 {
+#if NET6_0_OR_GREATER
     public class ClientAssertionTests
     {
         private static X509Certificate2 s_certificate = 
@@ -48,4 +49,5 @@ namespace Microsoft.Identity.Test.Performance
             msalJwtTokenObj.Sign(s_certificate, UseX5C, useSha2AndPss: true);
         }
     }
+#endif
 }

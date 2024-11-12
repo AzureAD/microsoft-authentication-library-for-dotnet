@@ -16,6 +16,7 @@ using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Performance
 {
+#if NET6_0_OR_GREATER
     /// <summary>
     /// Specifically used to test <c>SignWithCertificate</c> method 
     /// </summary>
@@ -87,4 +88,5 @@ namespace Microsoft.Identity.Test.Performance
                     });
         }
     }
+#endif
 }

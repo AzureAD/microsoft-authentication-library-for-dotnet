@@ -22,10 +22,10 @@ namespace Microsoft.Identity.Test.Performance
             try
             {
                 var results = BenchmarkSwitcher.FromTypes(new[] {
-                    typeof(AcquireTokenForClientCacheTests),
-                    typeof(AcquireTokenForOboCacheTests),
-                    typeof(TokenCacheTests),
-                    typeof(AcquireTokenNoCacheTests),
+                    //typeof(AcquireTokenForClientCacheTests),
+                    //typeof(AcquireTokenForOboCacheTests),
+                    //typeof(TokenCacheTests),
+                    typeof(CertificateSha256Thumbprint),
                 }).RunAll(
 #if DEBUG
                     new DebugInProcessConfig() // Allows debugging into benchmarks
@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Test.Performance
                     DefaultConfig.Instance
                         .AddJob(Job.Default.WithId("Job-PerfTests"))
 #endif
-                        .WithOptions(ConfigOptions.DisableLogFile)
+                        .WithOptions(ConfigOptions.DisableLogFile)                        
                         .WithOptions(ConfigOptions.StopOnFirstError)
                         //.WithOptions(ConfigOptions.JoinSummary) // Should be commented for Benchmark GitHub Action to work.
                         .WithOrderer(new DefaultOrderer(SummaryOrderPolicy.Method))
