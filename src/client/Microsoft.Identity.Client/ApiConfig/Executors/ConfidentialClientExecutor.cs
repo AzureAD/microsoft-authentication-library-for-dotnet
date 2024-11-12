@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 {
                     throw new MsalClientException(
                         MsalError.InvalidAuthorityType,
-                        "MTLS PoP is only supported for AAD authority type.");
+                        MsalErrorMessage.MtlsInvalidAuthorityTypeMessage);
                 }
 
                 // Validate that the certificate is not null for MTLS PoP

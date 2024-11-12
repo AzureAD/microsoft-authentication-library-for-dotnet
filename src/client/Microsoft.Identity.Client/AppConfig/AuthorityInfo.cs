@@ -728,7 +728,7 @@ namespace Microsoft.Identity.Client
                 {
                     throw new MsalClientException(
                         MsalError.AuthorityHostMismatch,
-                        "MTLS authentication requires a specific authority. Please provide an authority instead of using the default 'common'. See https://aka.ms/msal-net-authority-override for details.");
+                        MsalErrorMessage.MtlsCommonAuthorityNotAllowedMessage);
                 }
 
                 // Select the appropriate mTLS endpoint based on the cloud environment

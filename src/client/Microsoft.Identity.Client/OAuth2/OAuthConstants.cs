@@ -90,12 +90,6 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string AuthorizationPending = "authorization_pending";
     }
 
-    internal static class RequestTokenType
-    {
-        public const string Bearer = "bearer";
-        public const string MTLSPop = "mtls_pop";
-    }
-
     internal static class OAuth2Value
     {
         public const string CodeChallengeMethodValue = "S256";
