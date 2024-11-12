@@ -336,8 +336,8 @@ namespace Microsoft.Identity.Test.Unit
                             .ConfigureAwait(false))
                         .ConfigureAwait(false);
 
-                    Assert.AreEqual("region_required_for_mtls_pop", ex.ErrorCode);
-                    Assert.AreEqual("Regional auto-detect failed. MTLS Proof of Possession requires a region to be specified, as there is no global endpoint for MTLS.", ex.Message);
+                    Assert.AreEqual(MsalError.RegionRequiredForMtlsPop, ex.ErrorCode);
+                    Assert.AreEqual(MsalErrorMessage.RegionRequiredForMtlsPopMessage, ex.Message);
                 }
             }
         }
@@ -363,7 +363,7 @@ namespace Microsoft.Identity.Test.Unit
                 .ConfigureAwait(false);
 
             Assert.AreEqual(MsalError.InvalidAuthorityType, ex.ErrorCode);
-            Assert.AreEqual("MTLS PoP is only supported for AAD authority type.", ex.Message, $"{authorityType} test failed.");
+            Assert.AreEqual(MsalErrorMessage.MtlsInvalidAuthorityTypeMessage, ex.Message, $"{authorityType} test failed.");
         }
 
         [DataTestMethod]
@@ -397,7 +397,7 @@ namespace Microsoft.Identity.Test.Unit
                         .ConfigureAwait(false);
 
                     Assert.AreEqual(MsalError.AuthorityHostMismatch, ex.ErrorCode);
-                    Assert.AreEqual("MTLS authentication requires a specific authority. Please provide an authority instead of using the default 'common'. See https://aka.ms/msal-net-authority-override for details.", ex.Message);
+                    Assert.AreEqual(MsalErrorMessage.MtlsCommonAuthorityNotAllowedMessage, ex.Message);
                 }
             }
         }

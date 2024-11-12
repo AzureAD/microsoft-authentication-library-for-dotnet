@@ -259,8 +259,10 @@ namespace Microsoft.Identity.Client
 
         public const string AuthorityDoesNotHaveTwoSegments =
             "Authority should be in the form <host>/<audience>, for example https://login.microsoftonline.com/common. ";
+        
         public const string DstsAuthorityDoesNotHaveThreeSegments =
             "Authority should be in the form <host>/<audience>/<tenantID>, for example https://login.microsoftonline.com/dsts/<tenantid>. ";
+        
         public const string AzureAdMyOrgRequiresSpecifyingATenant = "When specifying AadAuthorityAudience.AzureAdMyOrg, you must also specify a tenant domain or tenant GUID. ";
 
         public const string CustomWebUiReturnedInvalidUri = "ICustomWebUi returned an invalid URI - it is empty or has no query. ";
@@ -428,18 +430,10 @@ namespace Microsoft.Identity.Client
         public const string SetCiamAuthorityAtRequestLevelNotSupported = "Setting the CIAM authority (ex. \"{tenantName}.ciamlogin.com\") at the request level is not supported. The CIAM authority must be set during application creation";
         public const string ClaimsChallenge = "The returned error contains a claims challenge. For additional info on how to handle claims related to multifactor authentication, Conditional Access, and incremental consent, see https://aka.ms/msal-conditional-access-claims. If you are using the On-Behalf-Of flow, see https://aka.ms/msal-conditional-access-claims-obo for details.";
         public const string CryptographicError = "A cryptographic exception occurred. Possible cause: the certificate has been disposed. See inner exception for full details.";
-
-        /// <summary>
-        /// mTLS Proof-of-Possession (PoP) requires a region to be specified in the configuration.
-        /// <para>What happened?</para> You enabled mTLS PoP but no region was specified.
-       /// <para>Mitigation</para> Ensure that a region is set when using mTLS PoP by configuring `AzureRegion` in the application.
-        /// </summary>
         public const string MtlsPopWithoutRegion = "MTLS Proof of Possession requires a region to be specified. Please set AzureRegion in the configuration at the application level.";
-
-        /// <summary>
-        /// <para>What happened?</para> mTLS Proof-of-Possession requires a certificate to be configured.
-       /// <para>Mitigation</para> Provide a certificate in the configuration to enable mTLS PoP.
-        /// </summary>
         public const string MtlsCertificateNotProvidedMessage = "MTLS Proof of Possession requires a certificate to be configured. Please provide a certificate at the application level using the .WithCertificate().";
+        public const string MtlsInvalidAuthorityTypeMessage = "MTLS PoP is only supported for AAD authority type.";
+        public const string MtlsCommonAuthorityNotAllowedMessage = "MTLS authentication requires a specific authority. Please provide an authority instead of using the default 'common'. See https://aka.ms/msal-net-authority-override for details.";
+        public const string RegionRequiredForMtlsPopMessage = "Regional auto-detect failed. MTLS Proof of Possession requires a region to be specified, as there is no global endpoint for MTLS.";
     }
 }

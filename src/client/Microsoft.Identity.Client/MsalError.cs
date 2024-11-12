@@ -1161,5 +1161,11 @@ namespace Microsoft.Identity.Client
         /// <para>Mitigation</para> Ensure that a valid certificate is provided in the configuration when using mTLS PoP as it is required for secure authentication.
         /// </summary>
         public const string MtlsCertificateNotProvided = "mtls_certificate_not_provided";
+
+        /// <summary>
+        /// <para>What happened?</para> mTLS Proof of Possession (PoP) requires a specific Azure region to be specified.
+        /// <para>Mitigation:</para> Ensure that the AzureRegion configuration is set when using mTLS PoP as it requires a regional endpoint.
+        /// </summary>
+        public const string RegionRequiredForMtlsPop = "region_required_for_mtls_pop";
     }
 }

@@ -36,8 +36,8 @@ namespace Microsoft.Identity.Client.Region
                     requestContext.Logger.Info("[Region discovery] Region discovery failed during mTLS Pop. ");
 
                     throw new MsalServiceException(
-                        "region_required_for_mtls_pop",
-                        "Regional auto-detect failed. MTLS Proof of Possession requires a region to be specified, as there is no global endpoint for MTLS.");
+                        MsalError.RegionRequiredForMtlsPop,
+                        MsalErrorMessage.RegionRequiredForMtlsPopMessage);
                 }
 
                 requestContext.Logger.Info("[Region discovery] Not using a regional authority. ");
