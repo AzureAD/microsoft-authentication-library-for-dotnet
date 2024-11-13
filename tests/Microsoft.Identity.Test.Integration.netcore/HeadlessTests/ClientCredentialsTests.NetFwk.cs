@@ -68,7 +68,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var builder = ConfidentialClientApplicationBuilder.Create(LabAuthenticationHelper.LabAccessConfidentialClientId)
                 .WithCertificate(cert, sendX5C: true)
-                .WithAuthority(LabAuthenticationHelper.LabClientInstance, LabAuthenticationHelper.LabClientTenantId);
+                .WithAuthority(LabAuthenticationHelper.LabClientInstance, LabAuthenticationHelper.LabClientTenantId)
+                .WithTestLogging();
 
             // auto-detect should work on Azure DevOps build
             if (useRegional)
