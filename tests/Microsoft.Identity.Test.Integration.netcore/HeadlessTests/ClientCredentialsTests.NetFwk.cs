@@ -80,6 +80,15 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var result = await cca.AcquireTokenForClient([LabAuthenticationHelper.LabScope]).ExecuteAsync().ConfigureAwait(false);
 
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+            // Print 
+            Console.WriteLine("AuthenticationResultMetadata:");
+            Console.WriteLine($" - RefreshOn: {result.AuthenticationResultMetadata.RefreshOn}");
+            Console.WriteLine($" - DurationInMs: {result.AuthenticationResultMetadata.CacheRefreshReason}");
+            Console.WriteLine($" - TokenSource: {result.AuthenticationResultMetadata.TokenSource}");
+            Console.WriteLine($" - CacheRefreshReason: {result.AuthenticationResultMetadata.RegionDetails}");
+            Console.WriteLine($" - ApiErrorCode: {result.AuthenticationResultMetadata.TokenEndpoint}");
+
             Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn.HasValue, "refresh_in was not issued - did the MSAL SKU value change?");
 
             if (useRegional)
