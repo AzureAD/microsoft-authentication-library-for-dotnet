@@ -195,8 +195,7 @@ namespace Microsoft.Identity.Test.Unit
                 {
                     // Set up mock handler with expected token endpoint URL
                     httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage(
-                        tokenType: "mtls_pop",
-                        expectedUrl: expectedTokenEndpoint);
+                        tokenType: "mtls_pop");
 
                     var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                         .WithCertificate(s_testCertificate)
@@ -235,6 +234,9 @@ namespace Microsoft.Identity.Test.Unit
         public async Task MtlsPop_KnownRegionAsync()
         {
             const string region = "centralus";
+            string authorityUrl = "https://login.microsoftonline.com/123456-1234-2345-1234561234";
+            string globalEndpoint = "mtlsauth.microsoft.com";
+            string expectedTokenEndpoint = $"https://{region}.{globalEndpoint}/123456-1234-2345-1234561234/oauth2/v2.0/token";
 
             using (var httpManager = new MockHttpManager())
             {
@@ -243,7 +245,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 var app = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithCertificate(s_testCertificate)
-                    .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                    .WithAuthority(authorityUrl)
                     .WithAzureRegion(region)
                     .WithHttpManager(httpManager)
                     .WithExperimentalFeatures()
@@ -257,6 +259,7 @@ namespace Microsoft.Identity.Test.Unit
                 Assert.AreEqual("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(region, result.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                 Assert.AreEqual(RegionOutcome.UserProvidedValid, result.ApiEvent.RegionOutcome);
+                Assert.AreEqual(expectedTokenEndpoint, result.AuthenticationResultMetadata.TokenEndpoint);
             }
         }
 
@@ -264,6 +267,9 @@ namespace Microsoft.Identity.Test.Unit
         public async Task MtlsPop_RegionalTokenCacheInterchangeabilityAsync()
         {
             const string region = "centralus";
+            string authorityUrl = "https://login.microsoftonline.com/123456-1234-2345-1234561234";
+            string globalEndpoint = "mtlsauth.microsoft.com";
+            string expectedTokenEndpoint = $"https://{region}.{globalEndpoint}/123456-1234-2345-1234561234/oauth2/v2.0/token";
 
             using (var httpManager = new MockHttpManager())
             {
@@ -298,6 +304,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 Assert.AreEqual(region, regionalResult1.AuthenticationResultMetadata.RegionDetails.RegionUsed);
                 Assert.AreEqual(TokenSource.IdentityProvider, regionalResult1.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(expectedTokenEndpoint, regionalResult1.AuthenticationResultMetadata.TokenEndpoint);
 
                 // Attempt acquisition with the other regional app, should retrieve from cache
                 var regionalResult2 = await regionalApp2.AcquireTokenForClient(TestConstants.s_scope)
@@ -306,6 +313,7 @@ namespace Microsoft.Identity.Test.Unit
                     .ConfigureAwait(false);
                 
                 Assert.AreEqual(TokenSource.Cache, regionalResult2.AuthenticationResultMetadata.TokenSource);
+                Assert.AreEqual(region, regionalResult2.AuthenticationResultMetadata.RegionDetails.RegionUsed);
             }
         }
 
