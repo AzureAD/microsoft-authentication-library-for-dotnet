@@ -73,4 +73,4 @@ jobs: #Build and stage projects
       checkCoverage: true
       coverageFailOption: 'fixed'
       coverageType: 'lines'
-      coverageThreshold: '80'
+      coverageThreshold: '$(CodeCoverageBaseLine)'
