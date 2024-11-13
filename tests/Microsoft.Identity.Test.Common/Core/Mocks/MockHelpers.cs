@@ -350,16 +350,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseMessage(
             string token = "header.payload.signature",
             string expiry = "3599",
-            string tokenType = "Bearer",
-            string tokenEndpoint = null)
+            string tokenType = "Bearer")
         {
-            // Create the success response message, including the token endpoint
             return CreateSuccessResponseMessage(
-                "{\"token_type\":\"" + tokenType + "\"," +
-                "\"expires_in\":\"" + expiry + "\"," +
-                "\"access_token\":\"" + token + "\"," +
-                "\"token_endpoint\":\"" + tokenEndpoint + "\"," + // Include tokenEndpoint in response
-                "\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\"}");
+                "{\"token_type\":\"" + tokenType + "\",\"expires_in\":\"" + expiry + "\",\"access_token\":\"" + token + "\",\"additional_param1\":\"value1\",\"additional_param2\":\"value2\",\"additional_param3\":\"value3\"}");
         }
 
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseWithAdditionalParamsMessage(
