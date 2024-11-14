@@ -84,10 +84,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // Print 
             Console.WriteLine("AuthenticationResultMetadata:");
             Console.WriteLine($" - RefreshOn: {result.AuthenticationResultMetadata.RefreshOn}");
-            Console.WriteLine($" - DurationInMs: {result.AuthenticationResultMetadata.CacheRefreshReason}");
+            Console.WriteLine($" - CacheRefreshReason: {result.AuthenticationResultMetadata.CacheRefreshReason}");
             Console.WriteLine($" - TokenSource: {result.AuthenticationResultMetadata.TokenSource}");
-            Console.WriteLine($" - CacheRefreshReason: {result.AuthenticationResultMetadata.RegionDetails}");
-            Console.WriteLine($" - ApiErrorCode: {result.AuthenticationResultMetadata.TokenEndpoint}");
+            Console.WriteLine($" - RegionDetails: {result.AuthenticationResultMetadata.RegionDetails}");
+            Console.WriteLine($" - TokenEndpoint: {result.AuthenticationResultMetadata.TokenEndpoint}");
 
             Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn.HasValue, "refresh_in was not issued - did the MSAL SKU value change?");
 
