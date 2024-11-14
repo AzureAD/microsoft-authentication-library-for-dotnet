@@ -22,6 +22,7 @@ steps:
 - template: template-run-all-tests.yaml
   parameters:
     BuildConfiguration: '$(BuildConfiguration)'
+    MsalClientSemVer: $(MsalClientSemVer)
 
 - task: VSTest@2
   displayName: 'Run cache compat tests'
