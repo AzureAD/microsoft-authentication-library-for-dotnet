@@ -83,19 +83,24 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
             // Print 
-            TestContext.WriteLine("AuthenticationResultMetadata:");
-            TestContext.WriteLine($" - RefreshOn: {result.AuthenticationResultMetadata.RefreshOn}");
-            TestContext.WriteLine($" - CacheRefreshReason: {result.AuthenticationResultMetadata.CacheRefreshReason}");
-            TestContext.WriteLine($" - TokenSource: {result.AuthenticationResultMetadata.TokenSource}");
-            TestContext.WriteLine($" - RegionDetails: {result.AuthenticationResultMetadata.RegionDetails}");
-            TestContext.WriteLine($" - TokenEndpoint: {result.AuthenticationResultMetadata.TokenEndpoint}");
+            Console.Error.WriteLine("AuthenticationResultMetadata : ");
+            Console.Error.WriteLine($" - RefreshOn: {result.AuthenticationResultMetadata.RefreshOn}");
+            Console.Error.WriteLine($" - CacheRefreshReason: {result.AuthenticationResultMetadata.CacheRefreshReason}");
+            Console.Error.WriteLine($" - TokenSource: {result.AuthenticationResultMetadata.TokenSource}");
+            Console.Error.WriteLine($" - RegionDetails: {result.AuthenticationResultMetadata.RegionDetails}");
+            Console.Error.WriteLine($" - TokenEndpoint: {result.AuthenticationResultMetadata.TokenEndpoint}");
 
-            Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn.HasValue, "refresh_in was not issued - did the MSAL SKU value change?");
+            // Assert that RefreshOn does not have a value, failing if it does and printing the value
+            Assert.IsFalse(result.AuthenticationResultMetadata.RefreshOn.HasValue,
+                $"Test failed: 'RefreshOn' was issued unexpectedly with the value {result.AuthenticationResultMetadata.RefreshOn.Value}. " +
+                $"This might indicate a change in the MSAL SKU value.");
 
             if (useRegional)
                 Assert.AreEqual(
                     Client.Region.RegionOutcome.AutodetectSuccess,
                     result.AuthenticationResultMetadata.RegionDetails.RegionOutcome);
+
+            Console.Error.WriteLine("Test passed: Regional auto-detection succeeded as expected for the region.");
         }
 
         [DataTestMethod]
