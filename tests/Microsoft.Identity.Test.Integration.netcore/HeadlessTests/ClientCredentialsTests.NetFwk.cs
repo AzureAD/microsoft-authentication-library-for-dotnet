@@ -34,6 +34,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     {
         private static readonly string[] s_scopes = { "User.Read" };
         private static readonly string[] s_keyvaultScope = { "https://vault.azure.net/.default" };
+        public TestContext TestContext { get; set; }
 
         private enum CredentialType
         {
@@ -82,12 +83,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
 
             // Print 
-            Console.WriteLine("AuthenticationResultMetadata:");
-            Console.WriteLine($" - RefreshOn: {result.AuthenticationResultMetadata.RefreshOn}");
-            Console.WriteLine($" - CacheRefreshReason: {result.AuthenticationResultMetadata.CacheRefreshReason}");
-            Console.WriteLine($" - TokenSource: {result.AuthenticationResultMetadata.TokenSource}");
-            Console.WriteLine($" - RegionDetails: {result.AuthenticationResultMetadata.RegionDetails}");
-            Console.WriteLine($" - TokenEndpoint: {result.AuthenticationResultMetadata.TokenEndpoint}");
+            TestContext.WriteLine("AuthenticationResultMetadata:");
+            TestContext.WriteLine($" - RefreshOn: {result.AuthenticationResultMetadata.RefreshOn}");
+            TestContext.WriteLine($" - CacheRefreshReason: {result.AuthenticationResultMetadata.CacheRefreshReason}");
+            TestContext.WriteLine($" - TokenSource: {result.AuthenticationResultMetadata.TokenSource}");
+            TestContext.WriteLine($" - RegionDetails: {result.AuthenticationResultMetadata.RegionDetails}");
+            TestContext.WriteLine($" - TokenEndpoint: {result.AuthenticationResultMetadata.TokenEndpoint}");
 
             Assert.IsTrue(result.AuthenticationResultMetadata.RefreshOn.HasValue, "refresh_in was not issued - did the MSAL SKU value change?");
 
