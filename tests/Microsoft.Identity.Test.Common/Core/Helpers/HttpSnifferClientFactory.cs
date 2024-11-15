@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Test.Common
         {
             if (x509Certificate2 == null)
             {
-                throw new ArgumentNullException(nameof(x509Certificate2), "Certificate cannot be null for MTLS.");
+                return GetHttpClient();
             }
 
             var handler = new HttpClientHandler();
