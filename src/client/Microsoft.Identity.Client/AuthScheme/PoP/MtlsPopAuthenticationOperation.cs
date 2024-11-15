@@ -20,11 +20,11 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
             KeyId = ComputeX5tS256KeyId(_mtlsCert);
         }
 
-        public int TelemetryTokenType => (int)TokenType.Mtls_Pop;
+        public int TelemetryTokenType => (int)TokenType.Bearer;
 
-        public string AuthorizationHeaderPrefix => Constants.MtlsPoPAuthHeaderPrefix;
+        public string AuthorizationHeaderPrefix => Constants.BearerAuthHeaderPrefix;
 
-        public string AccessTokenType => Constants.MtlsPoPTokenType;
+        public string AccessTokenType => Constants.BearerTokenType;
 
         public string KeyId { get; }
 
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         {
             return new Dictionary<string, string>
             {
-                { OAuth2Parameter.TokenType, Constants.MtlsPoPTokenType }
+                { OAuth2Parameter.TokenType, Constants.BearerTokenType }
             };
         }
 
