@@ -11,6 +11,7 @@ using System.Diagnostics.Metrics;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
 using static Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos.NativeMethods;
+using static Microsoft.Identity.Client.TelemetryCore.Internal.Events.ApiEvent;
 
 namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
 {
@@ -30,7 +31,8 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
         private const string DurationInL1CacheHistogramName = "MsalDurationInL1CacheInUs.1B";
         private const string DurationInL2CacheHistogramName = "MsalDurationInL2Cache.1A";
         private const string DurationInHttpHistogramName = "MsalDurationInHttp.1A";
-        private const string DurationInExtensionInMsHistogram = "MsalDurationInExtensionInMs.1B";
+
+        private static Lazy<Dictionary<string, Histogram<long>>> ExtensionCounters = new(() => new Dictionary<string, Histogram<long> > ());
 
         /// <summary>
         /// Meter to hold the MSAL metrics.
@@ -83,13 +85,13 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             unit: "ms",
             description: "Performance of token acquisition calls network latency"));
 
-        /// <summary>
-        /// Histogram to record total duration of extension modifications in microseconds(us).
-        /// </summary>
-        internal static readonly Lazy<Histogram<long>> s_durationInExtensionInMs = new(() => Meter.CreateHistogram<long>(
-            DurationInExtensionInMsHistogram,
-            unit: "us",
-            description: "Performance of token acquisition calls extension latency."));
+        ///// <summary>
+        ///// Histogram to record total duration of extension modifications in microseconds(us).
+        ///// </summary>
+        //internal static readonly Lazy<Histogram<long>> s_durationInExtensionInMs = new(() => Meter.CreateHistogram<long>(
+        //    DurationInExtensionInMsHistogram,
+        //    unit: "us",
+        //    description: "Performance of token acquisition calls extension latency."));
 
         public OtelInstrumentation()
         {
@@ -161,14 +163,36 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
                 new(TelemetryConstants.CacheRefreshReason, authResultMetadata.CacheRefreshReason));
             }
 
-            if (s_durationInExtensionInMs.Value.Enabled && authResultMetadata.DurationCreatingExtendedTokenInUs > 0)
+            LogExtensionMetrics(authResultMetadata, platform, apiId);
+        }
+
+        private void LogExtensionMetrics(AuthenticationResultMetadata authenticationResultMetadata, string platform, ApiEvent.ApiIds apiId)
+        {
+            if (authenticationResultMetadata.DurationCreatingExtendedTokenInUs <= 0)
             {
-                s_durationInExtensionInMs.Value.Record(authResultMetadata.DurationCreatingExtendedTokenInUs,
-                new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
-                new(TelemetryConstants.Platform, platform),
-                new(TelemetryConstants.ApiId, apiId),
-                new(TelemetryConstants.TokenSource, authResultMetadata.TokenSource),
-                new(TelemetryConstants.CacheLevel, authResultMetadata.CacheLevel));
+                return;
+            }
+
+            if (ExtensionCounters.Value.TryGetValue(authenticationResultMetadata.TelemetryTokenType, out Histogram<long> tokenCounter))
+            {
+                if (tokenCounter.Enabled)
+                {
+                    tokenCounter.Record(authenticationResultMetadata.DurationCreatingExtendedTokenInUs,
+                        new(TelemetryConstants.MsalVersion, MsalIdHelper.GetMsalVersion()),
+                        new(TelemetryConstants.Platform, platform),
+                        new(TelemetryConstants.ApiId, apiId),
+                        new(TelemetryConstants.TokenSource, authenticationResultMetadata.TokenSource),
+                        new(TelemetryConstants.CacheLevel, authenticationResultMetadata.CacheLevel));
+                }
+            }
+            else
+            {
+                Histogram<long> newHistogram = Meter.CreateHistogram<long>(
+                    $"MsalDuration{authenticationResultMetadata.TelemetryTokenType}Extension.1B",
+                    unit: "us",
+                    description: "Performance of token acquisition calls extension latency");
+
+                ExtensionCounters.Value.Add(authenticationResultMetadata.TelemetryTokenType, newHistogram);
             }
         }
 

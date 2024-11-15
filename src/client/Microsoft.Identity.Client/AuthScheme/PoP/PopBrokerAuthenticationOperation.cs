@@ -17,7 +17,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
     //This is because tokens are cached in the broker instead so MSAL will rely on the broker's cache for silent requests.
     internal class PopBrokerAuthenticationOperation : IAuthenticationOperation
     {
-        public int TelemetryTokenType => (int)TokenType.Pop;
+        public string TelemetryTokenType => TokenType.Pop.ToString();
 
         public string AuthorizationHeaderPrefix => Constants.PoPAuthHeaderPrefix;
 

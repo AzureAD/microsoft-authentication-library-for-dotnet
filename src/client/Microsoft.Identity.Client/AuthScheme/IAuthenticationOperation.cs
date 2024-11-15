@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.AuthScheme
         /// Extension token type.
         /// Extension = 5
         /// </summary>
-        int TelemetryTokenType { get; }
+        string TelemetryTokenType { get; }
 
         /// <summary>
         /// Prefix for the HTTP header that has the token. E.g. "Bearer" or "POP"
@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.AuthScheme
         string AuthorizationHeaderPrefix { get; }
 
         /// <summary>
-        /// Extra parameters that are added to the request to the /token endpoint. 
+        /// Extra parameters that are added to the request to the /token endpoint.
         /// </summary>
         /// <returns>Name and values of params</returns>
         IReadOnlyDictionary<string, string> GetTokenRequestParams();

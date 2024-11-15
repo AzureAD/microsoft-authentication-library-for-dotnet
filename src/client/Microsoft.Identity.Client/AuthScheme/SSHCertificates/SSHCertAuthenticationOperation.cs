@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
             _jwk = jwk;
         }
 
-        public int TelemetryTokenType => (int)TokenType.SshCert;
+        public string TelemetryTokenType => TokenType.SshCert.ToString();
 
         public string AuthorizationHeaderPrefix =>
             throw new MsalClientException(
