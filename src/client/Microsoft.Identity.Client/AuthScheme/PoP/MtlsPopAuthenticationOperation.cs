@@ -22,9 +22,9 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
 
         public int TelemetryTokenType => (int)TokenType.Bearer;
 
-        public string AuthorizationHeaderPrefix => Constants.BearerAuthHeaderPrefix;
+        public string AuthorizationHeaderPrefix => Constants.MtlsPoPAuthHeaderPrefix;
 
-        public string AccessTokenType => Constants.BearerTokenType;
+        public string AccessTokenType => Constants.MtlsPoPTokenType;
 
         public string KeyId { get; }
 
@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.AuthScheme.PoP
         {
             return new Dictionary<string, string>
             {
-                { OAuth2Parameter.TokenType, Constants.BearerTokenType }
+                { OAuth2Parameter.TokenType, Constants.MtlsPoPTokenType }
             };
         }
 

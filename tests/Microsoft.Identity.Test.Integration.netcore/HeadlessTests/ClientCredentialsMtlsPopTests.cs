@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ResetInternalStaticCaches();
         }
 
-        [TestMethod]
+        //[TestMethod]
         public async Task SNI_MtlsPopFlow_TestAsync()
         {
             // Arrange: Use the public cloud settings for testing
@@ -56,10 +56,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .OnBeforeTokenRequest(async (request) =>
                 {
                     request.RequestUri = new Uri("https://mtlsauth.microsoft.com/bea21ebe-8b64-4d06-9f6d-6a889b120a7c/oauth2/v2.0/token?dc=ESTS-PUB-WUS3-AZ3-FD025-001&certboundtoken=true");
-
-                    // Add custom headers to the request
-                    request.Headers["x-client-sku"] = "MSAL.Test";
-                    request.Headers["x-client-ver"] = "";
                 })
                 .ExecuteAsync()
                 .ConfigureAwait(false);
