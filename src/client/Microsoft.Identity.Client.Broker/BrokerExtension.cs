@@ -47,7 +47,6 @@ namespace Microsoft.Identity.Client.Broker
         /// parameters, and to create a public client application instance</returns>
         public static PublicClientApplicationBuilder WithBroker(this PublicClientApplicationBuilder builder, BrokerOptions brokerOptions)
         {
-            Console.WriteLine("namespace Microsoft.Identity.Client.Broker ");
             AddRuntimeSupport(builder);
             builder.Config.BrokerOptions = brokerOptions;
             builder.Config.IsBrokerEnabled = brokerOptions.IsBrokerEnabledOnCurrentOs();

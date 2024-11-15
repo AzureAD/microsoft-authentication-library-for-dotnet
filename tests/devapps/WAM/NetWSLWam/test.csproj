@@ -16,11 +16,4 @@
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
   </ItemGroup>
-
-  <ItemGroup>
-      <Content Include="..\..\..\..\libmsalruntime.so">
-          <Link>libmsalruntime.so</Link>
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-  </ItemGroup>
 </Project>

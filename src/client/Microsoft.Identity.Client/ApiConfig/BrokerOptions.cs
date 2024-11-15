@@ -85,8 +85,7 @@ namespace Microsoft.Identity.Client
             if (EnabledOn.HasFlag(OperatingSystems.Windows) && DesktopOsHelper.IsWindows())
             {
                 return true;
-            } else if (DesktopOsHelper.IsLinux()) {
-                Console.WriteLine("Broekr enabled on Linux");
+            } else if (DesktopOsHelper.IsRunningOnWsl()) {
                 return true;
             }
 

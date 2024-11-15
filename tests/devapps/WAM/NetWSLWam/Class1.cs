@@ -44,8 +44,8 @@ namespace WAMClassLibrary
             // Add a token cache, see https://learn.microsoft.com/entra/msal/dotnet/how-to/token-cache-serialization?tabs=desktop
 
             // 2. GetAccounts
-            // var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
-            // var accountToLogin = accounts.FirstOrDefault();
+            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
+            var accountToLogin = accounts.FirstOrDefault();
 
             // try
             // {
@@ -60,39 +60,13 @@ namespace WAMClassLibrary
 
             try
             {
-                var authResult = await pca.AcquireTokenInteractive(new[] { "user.read" })
+                var authResult = await pca.AcquireTokenInteractive(new[] { "user.read" }).WithLoginHint("idlab@msidlab4.onmicrosoft.com")
                                       .ExecuteAsync().ConfigureAwait(false);
 
                 Console.WriteLine(authResult.Account);
 
                 Console.WriteLine("Acquired Token Successfully!!!");
 
-                //logout
-                IEnumerable<IAccount> account = await pca.GetAccountsAsync().ConfigureAwait(false);
-                if (account.Any())
-                {
-                    try
-                    {
-                        await pca.RemoveAsync(account.FirstOrDefault()).ConfigureAwait(false);
-                        Console.WriteLine("User has signed-out");
-                    }
-                    catch (MsalClientException ex)
-                    {
-                        int errorCode = Marshal.GetHRForException(ex) & ((1 << 16) - 1);
-                        Console.WriteLine("MsalClientException (ErrCode " + errorCode + "): " + ex.Message);
-                    }
-                    catch (MsalException ex)
-                    {
-                        Console.WriteLine($"MsalException Error signing-out user: {ex.Message}");
-                    }
-                    catch (Exception ex)
-                    {
-                        int errorCode = Marshal.GetHRForException(ex) & ((1 << 16) - 1);
-                        Console.WriteLine("Error Acquiring Token (ErrCode " + errorCode + "): " + ex);
-                    }
-                }
-
-                Console.Read();
             }
             catch (MsalClientException ex)
             {

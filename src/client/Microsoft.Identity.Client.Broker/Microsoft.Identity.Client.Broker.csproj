@@ -5,8 +5,8 @@
     <TargetFrameworkNetDesktop Condition="$([MSBuild]::IsOsPlatform('Windows'))">net462</TargetFrameworkNetDesktop>
     <TargetFrameworkNetCore>net6.0</TargetFrameworkNetCore>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <!-- <TargetFramework Condition="'$(TargetFrameworkNetDesktop)' == ''">$(TargetFrameworkNetStandard)</TargetFramework> -->
-    <!-- <TargetFrameworks Condition="'$(TargetFrameworkNetDesktop)' != ''">$(TargetFrameworkNetStandard);$(TargetFrameworkNetDesktop)</TargetFrameworks> -->
+    <TargetFramework Condition="'$(TargetFrameworkNetDesktop)' == '' And !$([MSBuild]::IsOsPlatform('Linux'))">$(TargetFrameworkNetStandard)</TargetFramework>
+    <TargetFrameworks Condition="'$(TargetFrameworkNetDesktop)' != ''">$(TargetFrameworkNetStandard);$(TargetFrameworkNetDesktop)</TargetFrameworks>
     <TargetFramework Condition="$([MSBuild]::IsOsPlatform('Linux'))">$(TargetFrameworkNetCore)</TargetFramework>
     <Configurations>Debug;Release;Debug + MobileApps</Configurations>
   </PropertyGroup>
