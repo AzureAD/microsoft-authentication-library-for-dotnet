@@ -431,9 +431,9 @@ namespace Microsoft.Identity.Client
         public const string ClaimsChallenge = "The returned error contains a claims challenge. For additional info on how to handle claims related to multifactor authentication, Conditional Access, and incremental consent, see https://aka.ms/msal-conditional-access-claims. If you are using the On-Behalf-Of flow, see https://aka.ms/msal-conditional-access-claims-obo for details.";
         public const string CryptographicError = "A cryptographic exception occurred. Possible cause: the certificate has been disposed. See inner exception for full details.";
         public const string MtlsPopWithoutRegion = "MTLS Proof of Possession requires a region to be specified. Please set AzureRegion in the configuration at the application level.";
-        public const string MtlsCertificateNotProvidedMessage = "MTLS Proof of Possession requires a certificate to be configured. Please provide a certificate at the application level using the .WithCertificate().";
-        public const string MtlsInvalidAuthorityTypeMessage = "MTLS PoP is only supported for AAD authority type.";
+        public const string MtlsCertificateNotProvidedMessage = "MTLS Proof of Possession requires a certificate to be configured. Please provide a certificate at the application level using the .WithCertificate(). See https://aka.ms/msal-net-pop for details.";
+        public const string MtlsInvalidAuthorityTypeMessage = "MTLS PoP is only supported for AAD authority type. See https://aka.ms/msal-net-pop for details.";
         public const string MtlsCommonAuthorityNotAllowedMessage = "MTLS authentication requires a specific authority. Please provide an authority instead of using the default 'common'. See https://aka.ms/msal-net-authority-override for details.";
-        public const string RegionRequiredForMtlsPopMessage = "Regional auto-detect failed. MTLS Proof of Possession requires a region to be specified, as there is no global endpoint for MTLS.";
+        public const string RegionRequiredForMtlsPopMessage = "Regional auto-detect failed. MTLS Proof of Possession requires a region to be specified, as there is no global endpoint for MTLS. See https://aka.ms/msal-net-pop for details.";
     }
 }

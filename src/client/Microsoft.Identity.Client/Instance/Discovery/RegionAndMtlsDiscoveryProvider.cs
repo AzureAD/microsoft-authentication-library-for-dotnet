@@ -83,17 +83,12 @@ namespace Microsoft.Identity.Client.Region
 
             requestContext.Logger.Info(() => $"[Region discovery] Regionalized Environment is : {region}.{host}. ");
 
-            // Decide whether to use MTLS or standard environment
-            if (!requestContext.UseMtlsPop)
-            {
-                requestContext.Logger.Info(() => $"[Region discovery] Using standard regional environment: {region}.{host}");
-                return $"{region}.{host}";
-            }
-            else
-            {
-                requestContext.Logger.Info(() => $"[Region discovery] Using MTLS with specified host: {region}.{host}");
-                return $"{region}.{host}";
-            }
+            // Log the environment being resolved
+            string resolvedEnvironment = $"{region}.{host}";
+            string environmentType = requestContext.UseMtlsPop ? "MTLS with regional environment" : "standard regional environment";
+            requestContext.Logger.Info(() => $"[Region Discovery] Using {environmentType}: {resolvedEnvironment}.");
+
+            return resolvedEnvironment;
         }
     }
 }
