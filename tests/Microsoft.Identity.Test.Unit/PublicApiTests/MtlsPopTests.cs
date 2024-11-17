@@ -267,7 +267,7 @@ namespace Microsoft.Identity.Test.Unit
         public async Task MtlsPop_RegionalTokenCacheInterchangeabilityAsync()
         {
             const string region = "centralus";
-            string authorityUrl = "https://login.microsoftonline.com/123456-1234-2345-1234561234";
+            string authority = "https://login.microsoftonline.com/123456-1234-2345-1234561234";
             string globalEndpoint = "mtlsauth.microsoft.com";
             string expectedTokenEndpoint = $"https://{region}.{globalEndpoint}/123456-1234-2345-1234561234/oauth2/v2.0/token";
 
@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Test.Unit
                 IConfidentialClientApplication regionalApp1 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithCertificate(s_testCertificate)
                     .WithAzureRegion(region)
-                    .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                    .WithAuthority(authority)
                     .WithHttpManager(httpManager)
                     .WithExperimentalFeatures()
                     .BuildConcrete();
@@ -287,7 +287,7 @@ namespace Microsoft.Identity.Test.Unit
                 IConfidentialClientApplication regionalApp2 = ConfidentialClientApplicationBuilder.Create(TestConstants.ClientId)
                     .WithCertificate(s_testCertificate)
                     .WithAzureRegion(region)
-                    .WithAuthority("https://login.microsoftonline.com/123456-1234-2345-1234561234")
+                    .WithAuthority(authority)
                     .WithHttpManager(httpManager)
                     .WithExperimentalFeatures()
                     .BuildConcrete();

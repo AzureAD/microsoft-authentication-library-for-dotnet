@@ -321,7 +321,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Exposes the MTLS certificate used for authentication, if applicable.
-        /// </summary
+        /// </summary>
         public X509Certificate2 MtlsCertificate { get; internal set; }
 
         /// <summary>
