@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Extensibility
@@ -19,7 +20,7 @@ namespace Microsoft.Identity.Client.Extensibility
             _tokenType = expectedTokenTypeFromEsts;
         }
 
-        public string TelemetryTokenType => TokenType.External.ToString();
+        public string TelemetryTokenType => Constants.External;
 
         public string AuthorizationHeaderPrefix => _tokenType;
 

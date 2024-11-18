@@ -188,9 +188,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.OpenTelemetry
             else
             {
                 Histogram<long> newHistogram = Meter.CreateHistogram<long>(
-                    $"MsalDuration{authenticationResultMetadata.TelemetryTokenType}Extension.1B",
+                    $"MsalDuration{authenticationResultMetadata.TelemetryTokenType}Operation.1B",
                     unit: "us",
-                    description: "Performance of token acquisition calls extension latency");
+                    description: "Performance of token acquisition calls operation latency");
 
                 ExtensionCounters.Value.Add(authenticationResultMetadata.TelemetryTokenType, newHistogram);
             }

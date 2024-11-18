@@ -245,16 +245,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.ServiceBundle.Config.LegacyCacheCompatibilityEnabled;
 
             apiEvent.CacheInfo = CacheRefreshReason.NotApplicable;
-
-            if (Enum.TryParse(AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType, out TokenType tokenTypeEnum))
-            {
-                apiEvent.TokenType = tokenTypeEnum;
-            }
-            else
-            {
-                apiEvent.TokenType = TokenType.Extension;
-            }
-
+            apiEvent.TokenType = AuthenticationRequestParameters.AuthenticationScheme.TelemetryTokenType;
             apiEvent.AssertionType = GetAssertionType();
 
             UpdateCallerSdkDetails(apiEvent);

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
@@ -29,7 +30,7 @@ namespace Microsoft.Identity.Client.AuthScheme.SSHCertificates
             _jwk = jwk;
         }
 
-        public string TelemetryTokenType => TokenType.SshCert.ToString();
+        public string TelemetryTokenType => Constants.SshCert;
 
         public string AuthorizationHeaderPrefix =>
             throw new MsalClientException(

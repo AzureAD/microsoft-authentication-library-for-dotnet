@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Unit
                 await AcquireTokenMsalClientExceptionAsync().ConfigureAwait(false);
 
                 s_meterProvider.ForceFlush();
-                VerifyMetrics(5, _exportedMetrics, 2, 2);
+                VerifyMetrics(6, _exportedMetrics, 2, 2);
             }
         }
 
@@ -535,8 +535,8 @@ namespace Microsoft.Identity.Test.Unit
 
                         break;
 
-                    case "MsalDurationInExtensionInMs.1B":
-                        Trace.WriteLine("Verify the metrics captured for MsalDurationInExtensionInMs.1B histogram.");
+                    case "MsalDurationExtensionOperation.1B":
+                        Trace.WriteLine("Verify the metrics captured for MsalDurationExtensionOperation.1B histogram.");
                         Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
 
                         expectedTags.Add(TelemetryConstants.MsalVersion);
@@ -552,6 +552,22 @@ namespace Microsoft.Identity.Test.Unit
 
                         break;
 
+                    case "MsalDurationBearerOperation.1B":
+                        Trace.WriteLine("Verify the metrics captured for MsalDurationBearerOperation.1B histogram.");
+                        Assert.AreEqual(MetricType.Histogram, exportedItem.MetricType);
+
+                        expectedTags.Add(TelemetryConstants.MsalVersion);
+                        expectedTags.Add(TelemetryConstants.Platform);
+                        expectedTags.Add(TelemetryConstants.ApiId);
+                        expectedTags.Add(TelemetryConstants.TokenSource);
+                        expectedTags.Add(TelemetryConstants.CacheLevel);
+
+                        foreach (var metricPoint in exportedItem.GetMetricPoints())
+                        {
+                            AssertTags(metricPoint.Tags, expectedTags);
+                        }
+
+                        break;
                     default:
                         Assert.Fail("Unexpected metrics logged.");
                         break;

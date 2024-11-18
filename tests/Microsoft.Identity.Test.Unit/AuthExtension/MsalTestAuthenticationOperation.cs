@@ -8,12 +8,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AuthScheme;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Test.Unit.AuthExtension
 {
     internal class MsalTestAuthenticationOperation : IAuthenticationOperation
     {
-        public int TelemetryTokenType => 5;
+        public string TelemetryTokenType => Constants.Extension;
 
         public string AuthorizationHeaderPrefix => "someHeader";
 
