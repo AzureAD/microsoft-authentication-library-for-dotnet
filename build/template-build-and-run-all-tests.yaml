@@ -67,10 +67,16 @@ jobs: #Build and stage projects
 
   steps:
   - template: template-desktop-unit-and-automation.yaml
-  
+
   - task: BuildQualityChecks@9
     inputs:
       checkCoverage: true
-      coverageFailOption: 'fixed'
+      coverageFailOption: 'build'
       coverageType: 'lines'
-      coverageThreshold: '$(CodeCoverageBaseLine)'
+      treat0of0as100: true
+      forceCoverageImprovement: true
+      coverageUpperThreshold: '90'
+      includePartiallySucceeded: false
+      fallbackOnPRTargetBranch: false
+      baseDefinitionId: '905'
+      baseBranchRef: 'main'
