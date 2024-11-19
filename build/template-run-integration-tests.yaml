@@ -13,7 +13,7 @@ steps:
     rerunFailedTests: true
     rerunMaxAttempts: '3'
     runInParallel: false
-    codeCoverageEnabled: true
+    codeCoverageEnabled: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
     pathtoCustomTestAdapters: 'C:\temp' # Workaround for test failure, as NUnit Test Adapter that gets detected seems to mess something up
@@ -28,7 +28,7 @@ steps:
     rerunFailedTests: true
     rerunMaxAttempts: '3'
     runInParallel: false
-    codeCoverageEnabled: true
+    codeCoverageEnabled: false
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
 
@@ -44,3 +44,4 @@ steps:
     codeCoverageEnabled: true
     failOnMinTestsNotRun: true
     minimumExpectedTests: '1'
+    runSettingsFile: 'build\CodeCoverage.runsettings'
