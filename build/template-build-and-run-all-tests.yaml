@@ -78,5 +78,5 @@ jobs: #Build and stage projects
       coverageUpperThreshold: '90'
       includePartiallySucceeded: false
       fallbackOnPRTargetBranch: false
-      baseDefinitionId: '905'
+      baseDefinitionId: '905' #this is the PR build and it is used as a baseline
       baseBranchRef: 'main'
