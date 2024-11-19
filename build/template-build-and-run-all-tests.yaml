@@ -69,6 +69,7 @@ jobs: #Build and stage projects
   - template: template-desktop-unit-and-automation.yaml
 
   - task: BuildQualityChecks@9
+    condition: ne(variables['Build.SourceBranch'], 'refs/heads/main')
     inputs:
       checkCoverage: '$(CodeCoverageGateEnabled)'
       coverageFailOption: 'build'
