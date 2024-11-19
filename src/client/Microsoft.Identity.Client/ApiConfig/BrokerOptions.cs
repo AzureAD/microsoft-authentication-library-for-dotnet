@@ -32,7 +32,11 @@ namespace Microsoft.Identity.Client
             /// <summary>
             /// Use broker on Linux
             /// </summary>
-            Linux = 0b_0000_0010,  // 1
+            Linux = 0b_0000_0010,  // 2
+            /// <summary>
+            /// Use broker on Linux
+            /// </summary>
+            WSL = 0b_0000_0011,  // 3
         }
 
         /// <summary>
@@ -85,7 +89,7 @@ namespace Microsoft.Identity.Client
             if (EnabledOn.HasFlag(OperatingSystems.Windows) && DesktopOsHelper.IsWindows())
             {
                 return true;
-            } else if (DesktopOsHelper.IsRunningOnWsl()) {
+            } else if (DesktopOsHelper.IsLinux()) {
                 return true;
             }
 
