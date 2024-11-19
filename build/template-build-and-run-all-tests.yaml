@@ -69,14 +69,14 @@ jobs: #Build and stage projects
   - template: template-desktop-unit-and-automation.yaml
 
   - task: BuildQualityChecks@9
-    condition: ne(variables['Build.SourceBranch'], 'refs/heads/main')
+    condition: ne(variables['Build.SourceBranch'], 'refs/heads/main') #gate should not run on main branch
     inputs:
       checkCoverage: '$(CodeCoverageGateEnabled)'
       coverageFailOption: 'build'
       coverageType: 'lines'
       treat0of0as100: true
       forceCoverageImprovement: true
-      coverageUpperThreshold: '$(CodeCoverageUpperThreshold)'
+      coverageUpperThreshold: '$(CodeCoverageUpperThreshold)' #default of 90
       includePartiallySucceeded: false
       fallbackOnPRTargetBranch: false
       baseDefinitionId: '905' #this is the PR build and it is used as a baseline
