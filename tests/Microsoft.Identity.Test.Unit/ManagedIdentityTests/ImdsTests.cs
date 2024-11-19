@@ -17,6 +17,13 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
     [TestClass]
     public class ImdsTests : TestBase
     {
+        [TestInitialize]
+        public override void TestInitialize()
+        {
+            // Reset the static cache to ensure tests start fresh
+            ManagedIdentityClient.ResetManagedIdentitySourceCache();
+        }
+
         [TestMethod]
         public async Task ImdsBadRequestTestAsync()
         {

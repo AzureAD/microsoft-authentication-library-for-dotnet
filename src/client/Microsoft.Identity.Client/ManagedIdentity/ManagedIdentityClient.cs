@@ -19,6 +19,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
     {
         private const string WindowsHimdsFilePath = "%Programfiles%\\AzureConnectedMachineAgent\\himds.exe";
         private const string LinuxHimdsFilePath = "/opt/azcmagent/bin/himds";
+
+        // Cache for the managed identity source
+        private static ManagedIdentitySource? s_cachedManagedIdentitySource;
+        private static readonly object s_lock = new();
+
         private readonly AbstractManagedIdentity _identitySource;
 
         public ManagedIdentityClient(RequestContext requestContext)
@@ -26,6 +31,17 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             using (requestContext.Logger.LogMethodDuration())
             {
                 _identitySource = SelectManagedIdentitySource(requestContext);
+            }
+        }
+
+        /// <summary>
+        /// Resets the cached managed identity source. Used only for testing purposes.
+        /// </summary>
+        internal static void ResetManagedIdentitySourceCache()
+        {
+            lock (s_lock)
+            {
+                s_cachedManagedIdentitySource = null;
             }
         }
 
@@ -37,7 +53,7 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
         private static AbstractManagedIdentity SelectManagedIdentitySource(RequestContext requestContext)
         {
-            return GetManagedIdentitySource(requestContext.Logger) switch
+            return GetOrCreateManagedIdentitySource(requestContext.Logger) switch
             {
                 ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.AppService => AppServiceManagedIdentitySource.Create(requestContext),
@@ -47,20 +63,39 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             };
         }
 
-        // Detect managed identity source based on the availability of environment variables.
-        // The result of this method is not cached because reading environment variables is cheap. 
-        // This method is perf sensitive any changes should be benchmarked.
+        // Caches the result of detecting the managed identity source.
+        internal static ManagedIdentitySource GetOrCreateManagedIdentitySource(ILoggerAdapter logger)
+        {
+            logger?.Verbose(() => s_cachedManagedIdentitySource.HasValue ? 
+            "[Managed Identity] Using cached managed identity source." 
+            : "[Managed Identity] Computing managed identity source.");
+
+            if (s_cachedManagedIdentitySource.HasValue)
+            {
+                return s_cachedManagedIdentitySource.Value;
+            }
+
+            lock (s_lock)
+            {
+                if (!s_cachedManagedIdentitySource.HasValue)
+                {
+                    s_cachedManagedIdentitySource = GetManagedIdentitySource(logger);
+                }
+            }
+
+            return s_cachedManagedIdentitySource.Value;
+        }
+
+        // Detect managed identity source based on the availability of environment variables
+        // or the new /credential endpoint. And cache the result of this method.
         internal static ManagedIdentitySource GetManagedIdentitySource(ILoggerAdapter logger = null)
         {
             string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
             string identityHeader = EnvironmentVariables.IdentityHeader;
             string identityServerThumbprint = EnvironmentVariables.IdentityServerThumbprint;
-            string msiSecret = EnvironmentVariables.IdentityHeader;
             string msiEndpoint = EnvironmentVariables.MsiEndpoint;
             string imdsEndpoint = EnvironmentVariables.ImdsEndpoint;
-            string podIdentityEndpoint = EnvironmentVariables.PodIdentityEndpoint;
 
-            
             if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader))
             {
                 if (!string.IsNullOrEmpty(identityServerThumbprint))
@@ -86,6 +121,8 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
+
+
         // Method to return true if a file exists and is not empty to validate the Azure arc environment.
         private static bool ValidateAzureArcEnvironment(string identityEndpoint, string imdsEndpoint, ILoggerAdapter logger)
         {
@@ -104,12 +141,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             {
                 logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is available through file detection.");
                 return true;
-            } 
+            }
             else
             {
                 logger?.Warning("[Managed Identity] Azure Arc managed identity cannot be configured on a platform other than Windows and Linux.");
             }
-            
+
             logger?.Verbose(() => "[Managed Identity] Azure Arc managed identity is not available.");
             return false;
         }

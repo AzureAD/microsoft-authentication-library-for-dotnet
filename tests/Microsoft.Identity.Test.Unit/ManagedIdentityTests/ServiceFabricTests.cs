@@ -30,6 +30,9 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         public void TestInitialize()
         {
             TestCommon.ResetInternalStaticCaches();
+
+            // Reset the static cache to ensure tests start fresh
+            ManagedIdentityClient.ResetManagedIdentitySourceCache();
         }
 
         [TestMethod]
