@@ -70,12 +70,12 @@ jobs: #Build and stage projects
 
   - task: BuildQualityChecks@9
     inputs:
-      checkCoverage: true
+      checkCoverage: '$(CodeCoverageGateEnabled)'
       coverageFailOption: 'build'
       coverageType: 'lines'
       treat0of0as100: true
       forceCoverageImprovement: true
-      coverageUpperThreshold: '90'
+      coverageUpperThreshold: '$(CodeCoverageUpperThreshold)'
       includePartiallySucceeded: false
       fallbackOnPRTargetBranch: false
       baseDefinitionId: '905' #this is the PR build and it is used as a baseline
