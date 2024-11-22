@@ -22,10 +22,6 @@ steps:
   inputs:
     version: 6.x
 
-steps:
-- script: echo "Building solution: $(Solution)"
-  displayName: 'Build Solution'
-
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: DotNetCoreCLI@2
     displayName: 'dotnet workload restore for Desktop project'
