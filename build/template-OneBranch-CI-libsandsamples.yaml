@@ -6,6 +6,7 @@ parameters:
   BuildConfiguration: 'release'
   MsalClientSemVer: '4.60.0-devopsbuild' 
   MsalSourceDir: 'microsoft-authentication-library-for-dotnet\' #Default MSAL Location
+  Mode: 'build' # Default to 'build'
 
 steps:
 
@@ -21,20 +22,42 @@ steps:
   inputs:
     version: 6.x
 
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet workload restore for Desktop project'
-  inputs:
-    command: 'custom'
-    custom: 'workload'
-    arguments: 'restore microsoft-authentication-library-for-dotnet\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
+steps:
+- script: echo "Building solution: $(Solution)"
+  displayName: 'Build Solution'
 
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet workload restore for Identity.Client'
-  inputs:
-    command: 'custom'
-    custom: 'workload'
-    arguments: 'restore microsoft-authentication-library-for-dotnet\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+- ${{ if eq(parameters.Mode, 'build') }}:
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet workload restore for Desktop project'
+    inputs:
+      command: 'custom'
+      custom: 'workload'
+      arguments: 'restore microsoft-authentication-library-for-dotnet\src\client\Microsoft.Identity.Client\\Microsoft.Identity.Client.Desktop.csproj'
 
+- ${{ if eq(parameters.Mode, 'test') }}:
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet workload restore for Desktop project'
+    inputs:
+      command: 'custom'
+      custom: 'workload'
+      arguments: 'restore .\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
+      
+- ${{ if eq(parameters.Mode, 'build') }}:
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet workload restore for Identity.Client project'
+    inputs:
+      command: 'custom'
+      custom: 'workload'
+      arguments: 'restore microsoft-authentication-library-for-dotnet\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+
+- ${{ if eq(parameters.Mode, 'test') }}:
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet workload restore for Identity.Client project'
+    inputs:
+      command: 'custom'
+      custom: 'workload'
+      arguments: 'restore .\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.csproj'
+      
 - task: PowerShell@2
   displayName: Install MAUI
   inputs:
