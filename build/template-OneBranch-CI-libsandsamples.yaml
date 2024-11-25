@@ -24,35 +24,35 @@ steps:
 
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: DotNetCoreCLI@2
-    displayName: 'dotnet workload restore for Desktop project'
+    displayName: 'dotnet workload restore for Desktop project - Build'
     inputs:
       command: 'custom'
       custom: 'workload'
-      arguments: 'restore microsoft-authentication-library-for-dotnet\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
+      arguments: 'restore $(Build.SourcesDirectory)/$(parameters.MsalSourceDir)src/client/Microsoft.Identity.Client.Desktop/Microsoft.Identity.Client.Desktop.csproj'
 
 - ${{ if eq(parameters.Mode, 'test') }}:
   - task: DotNetCoreCLI@2
-    displayName: 'dotnet workload restore for Desktop project'
+    displayName: 'dotnet workload restore for Desktop project - Test'
     inputs:
       command: 'custom'
       custom: 'workload'
-      arguments: 'restore .\src\client\Microsoft.Identity.Client.Desktop\Microsoft.Identity.Client.Desktop.csproj'
-      
+      arguments: 'restore $(Build.SourcesDirectory)/src/client/Microsoft.Identity.Client.Desktop/Microsoft.Identity.Client.Desktop.csproj'
+
 - ${{ if eq(parameters.Mode, 'build') }}:
   - task: DotNetCoreCLI@2
-    displayName: 'dotnet workload restore for Identity.Client project'
+    displayName: 'dotnet workload restore for Identity.Client project - Build'
     inputs:
       command: 'custom'
       custom: 'workload'
-      arguments: 'restore microsoft-authentication-library-for-dotnet\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+      arguments: 'restore $(Build.SourcesDirectory)/$(parameters.MsalSourceDir)src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj'
 
 - ${{ if eq(parameters.Mode, 'test') }}:
   - task: DotNetCoreCLI@2
-    displayName: 'dotnet workload restore for Identity.Client project'
+    displayName: 'dotnet workload restore for Identity.Client project - Test'
     inputs:
       command: 'custom'
       custom: 'workload'
-      arguments: 'restore .\src\client\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj'
+      arguments: 'restore $(Build.SourcesDirectory)/src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj'
       
 - task: PowerShell@2
   displayName: Install MAUI
