@@ -28,7 +28,7 @@ steps:
     inputs:
       command: 'custom'
       custom: 'workload'
-      arguments: 'restore $(Build.SourcesDirectory)/$(parameters.MsalSourceDir)src/client/Microsoft.Identity.Client.Desktop/Microsoft.Identity.Client.Desktop.csproj'
+      arguments: 'restore $(Build.SourcesDirectory)/$(MsalSourceDir)src/client/Microsoft.Identity.Client.Desktop/Microsoft.Identity.Client.Desktop.csproj'
 
 - ${{ if eq(parameters.Mode, 'test') }}:
   - task: DotNetCoreCLI@2
@@ -44,7 +44,7 @@ steps:
     inputs:
       command: 'custom'
       custom: 'workload'
-      arguments: 'restore $(Build.SourcesDirectory)/$(parameters.MsalSourceDir)src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj'
+      arguments: 'restore $(Build.SourcesDirectory)/$(MsalSourceDir)src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj'
 
 - ${{ if eq(parameters.Mode, 'test') }}:
   - task: DotNetCoreCLI@2
