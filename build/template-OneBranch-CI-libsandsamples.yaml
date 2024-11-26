@@ -22,37 +22,33 @@ steps:
   inputs:
     version: 6.x
 
-- ${{ if eq(parameters.Mode, 'build') }}:
-  - task: DotNetCoreCLI@2
-    displayName: 'dotnet workload restore for Desktop project - Build'
-    inputs:
-      command: 'custom'
-      custom: 'workload'
-      arguments: 'restore $(Build.SourcesDirectory)/$(MsalSourceDir)src/client/Microsoft.Identity.Client.Desktop/Microsoft.Identity.Client.Desktop.csproj'
+# Compute the source directory based on the parameter MsalSourceDir
+- task: PowerShell@2
+  displayName: 'Compute Source Directory'
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Check if the projects are under MsalSourceDir
+      $MsalBaseDir = "$(Build.SourcesDirectory)/$(MsalSourceDir)"
+      if (Test-Path "$MsalBaseDir/src/client/Microsoft.Identity.Client.Desktop" -and Test-Path "$MsalBaseDir/src/client/Microsoft.Identity.Client") {
+          Write-Host "##vso[task.setvariable variable=SourceDir]$MsalBaseDir"
+      } elseif (Test-Path "$(Build.SourcesDirectory)/src/client/Microsoft.Identity.Client.Desktop" -and Test-Path "$(Build.SourcesDirectory)/src/client/Microsoft.Identity.Client") {
+          Write-Host "##vso[task.setvariable variable=SourceDir]$(Build.SourcesDirectory)/"
+      } else {
+          Write-Error "Unable to determine the correct source directory structure."
+          exit 1
+      }
+  condition: always()
 
-- ${{ if eq(parameters.Mode, 'test') }}:
-  - task: DotNetCoreCLI@2
-    displayName: 'dotnet workload restore for Desktop project - Test'
-    inputs:
-      command: 'custom'
-      custom: 'workload'
-      arguments: 'restore $(Build.SourcesDirectory)/src/client/Microsoft.Identity.Client.Desktop/Microsoft.Identity.Client.Desktop.csproj'
-
-- ${{ if eq(parameters.Mode, 'build') }}:
-  - task: DotNetCoreCLI@2
-    displayName: 'dotnet workload restore for Identity.Client project - Build'
-    inputs:
-      command: 'custom'
-      custom: 'workload'
-      arguments: 'restore $(Build.SourcesDirectory)/$(MsalSourceDir)src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj'
-
-- ${{ if eq(parameters.Mode, 'test') }}:
-  - task: DotNetCoreCLI@2
-    displayName: 'dotnet workload restore for Identity.Client project - Test'
-    inputs:
-      command: 'custom'
-      custom: 'workload'
-      arguments: 'restore $(Build.SourcesDirectory)/src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj'
+# Use the computed SourceDir for workload restore
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet workload restore for Desktop and Client projects'
+  inputs:
+    command: 'custom'
+    custom: 'workload'
+    arguments: |
+      restore $(SourceDir)src/client/Microsoft.Identity.Client.Desktop/Microsoft.Identity.Client.Desktop.csproj
+      restore $(SourceDir)src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj
       
 - task: PowerShell@2
   displayName: Install MAUI
