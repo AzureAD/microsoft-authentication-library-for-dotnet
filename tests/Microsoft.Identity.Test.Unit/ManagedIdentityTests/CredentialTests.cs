@@ -2,22 +2,34 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
+using System.Net.Sockets;
+using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.ManagedIdentity;
+using Microsoft.Identity.Client.TelemetryCore.Internal.Events;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenTelemetry.Resources;
 using static Microsoft.Identity.Test.Common.Core.Helpers.ManagedIdentityTestUtil;
 
 namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
 {
+
     [TestClass]
-    public class ImdsTests : TestBase
+    public class CredentialTests : TestBase
     {
+        private const string ImdsEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token";
+        internal const string Resource = "https://management.azure.com";
+
         [TestInitialize]
         public override void TestInitialize()
         {
@@ -26,13 +38,12 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
         }
 
         [TestMethod]
-        public async Task ImdsBadRequestTestAsync()
+        public async Task CredentialSourceFailedFallbackToImdsTestAsync()
         {
             using (new EnvVariableContext())
             using (var httpManager = new MockHttpManager(isManagedIdentity: true))
-
             {
-                SetEnvironmentVariables(ManagedIdentitySource.Imds, "http://169.254.169.254");
+                SetEnvironmentVariables(ManagedIdentitySource.Imds, ImdsEndpoint);
 
                 var miBuilder = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)
                     .WithHttpManager(httpManager);
@@ -47,17 +58,24 @@ namespace Microsoft.Identity.Test.Unit.ManagedIdentityTests
                 httpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
                 httpManager.AddMockHandlerContentNotFound(HttpMethod.Post);
 
-                httpManager.AddManagedIdentityMockHandler(ManagedIdentityTests.ImdsEndpoint, ManagedIdentityTests.Resource, MockHelpers.GetMsiImdsErrorResponse(),
-                    ManagedIdentitySource.Imds, statusCode: HttpStatusCode.BadRequest);
+                httpManager.AddManagedIdentityMockHandler(
+                ImdsEndpoint,
+                Resource,
+                MockHelpers.GetMsiSuccessfulResponse(),
+                ManagedIdentitySource.Imds);
 
-                MsalServiceException ex = await Assert.ThrowsExceptionAsync<MsalServiceException>(async () =>
-                    await mi.AcquireTokenForManagedIdentity(ManagedIdentityTests.Resource)
-                    .ExecuteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+                var result = await mi.AcquireTokenForManagedIdentity(Resource).ExecuteAsync().ConfigureAwait(false);
 
-                Assert.IsNotNull(ex);
-                Assert.AreEqual(ManagedIdentitySource.Imds.ToString(), ex.AdditionalExceptionData[MsalException.ManagedIdentitySource]);
-                Assert.AreEqual(MsalError.ManagedIdentityRequestFailed, ex.ErrorCode);
-                Assert.IsTrue(ex.Message.Contains(ImdsManagedIdentitySource.IdentityUnavailableError), $"The error message is not as expected. Error message: {ex.Message}. Expected message: {ImdsManagedIdentitySource.IdentityUnavailableError}");
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.IdentityProvider, result.AuthenticationResultMetadata.TokenSource);
+
+                result = await mi.AcquireTokenForManagedIdentity(Resource)
+                    .ExecuteAsync().ConfigureAwait(false);
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(TokenSource.Cache, result.AuthenticationResultMetadata.TokenSource);
             }
         }
     }

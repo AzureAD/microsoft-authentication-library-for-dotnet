@@ -45,6 +45,12 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         ServiceFabric,
 
         /// <summary>
+        /// Indicates that the source is credential endpoint based on the probe.
+        /// This is used to detect the new managed identity credential source.
+        /// </summary>
+        Credential,
+
+        /// <summary>
         /// Indicates that the source is defaulted to IMDS since no environment variables are set.
         /// This is used to detect the managed identity source.
         /// </summary>

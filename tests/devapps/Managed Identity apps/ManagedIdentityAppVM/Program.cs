@@ -5,6 +5,10 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.IdentityModel.Abstractions;
 
+var managedIdentitySource = await ManagedIdentityApplication.GetManagedIdentitySourceAsync().ConfigureAwait(false);
+
+Console.WriteLine($"Managed identity source detected: {managedIdentitySource}");
+
 IIdentityLogger identityLogger = new IdentityLogger();
 
 IManagedIdentityApplication mi = ManagedIdentityApplicationBuilder.Create(ManagedIdentityId.SystemAssigned)

@@ -9,6 +9,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using System.IO;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
@@ -23,15 +24,27 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         // Cache for the managed identity source
         private static ManagedIdentitySource? s_cachedManagedIdentitySource;
         private static readonly object s_lock = new();
-
         private readonly AbstractManagedIdentity _identitySource;
 
-        public ManagedIdentityClient(RequestContext requestContext)
+        internal static async Task<ManagedIdentityClient> CreateAsync(RequestContext requestContext, CancellationToken cancellationToken = default)
         {
-            using (requestContext.Logger.LogMethodDuration())
+            if (requestContext == null)
             {
-                _identitySource = SelectManagedIdentitySource(requestContext);
+                throw new ArgumentNullException(nameof(requestContext), "RequestContext cannot be null.");
             }
+
+            requestContext.Logger?.Info("[ManagedIdentityClient] Creating ManagedIdentityClient.");
+
+            AbstractManagedIdentity identitySource = await SelectManagedIdentitySourceAsync(requestContext, cancellationToken).ConfigureAwait(false);
+
+            requestContext.Logger?.Info($"[ManagedIdentityClient] Managed identity source selected: {identitySource.GetType().Name}.");
+
+            return new ManagedIdentityClient(identitySource);
+        }
+
+        private ManagedIdentityClient(AbstractManagedIdentity identitySource)
+        {
+            _identitySource = identitySource ?? throw new ArgumentNullException(nameof(identitySource), "Identity source cannot be null.");
         }
 
         /// <summary>
@@ -51,9 +64,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         // This method tries to create managed identity source for different sources, if none is created then defaults to IMDS.
-        private static AbstractManagedIdentity SelectManagedIdentitySource(RequestContext requestContext)
+        private static async Task<AbstractManagedIdentity> SelectManagedIdentitySourceAsync(RequestContext requestContext, CancellationToken cancellationToken = default)
         {
-            return GetOrCreateManagedIdentitySource(requestContext.Logger) switch
+            ManagedIdentitySource source = await GetOrCreateManagedIdentitySourceAsync(requestContext, cancellationToken).ConfigureAwait(false);
+
+            return source switch
             {
                 ManagedIdentitySource.ServiceFabric => ServiceFabricManagedIdentitySource.Create(requestContext),
                 ManagedIdentitySource.AppService => AppServiceManagedIdentitySource.Create(requestContext),
@@ -64,11 +79,11 @@ namespace Microsoft.Identity.Client.ManagedIdentity
         }
 
         // Caches the result of detecting the managed identity source.
-        internal static ManagedIdentitySource GetOrCreateManagedIdentitySource(ILoggerAdapter logger)
+        internal static async Task<ManagedIdentitySource> GetOrCreateManagedIdentitySourceAsync(RequestContext requestContext, CancellationToken cancellationToken = default)
         {
-            logger?.Verbose(() => s_cachedManagedIdentitySource.HasValue ? 
-            "[Managed Identity] Using cached managed identity source." 
-            : "[Managed Identity] Computing managed identity source.");
+            requestContext.ServiceBundle.ApplicationLogger?.Verbose(() => s_cachedManagedIdentitySource.HasValue
+                ? "[Managed Identity] Using cached managed identity source."
+                : "[Managed Identity] Computing managed identity source asynchronously.");
 
             if (s_cachedManagedIdentitySource.HasValue)
             {
@@ -77,9 +92,22 @@ namespace Microsoft.Identity.Client.ManagedIdentity
 
             lock (s_lock)
             {
+                if (s_cachedManagedIdentitySource.HasValue)
+                {
+                    return s_cachedManagedIdentitySource.Value;
+                }
+            }
+
+            // Call the new async GetManagedIdentitySourceAsync method
+            var managedIdentitySource = await GetManagedIdentitySourceAsync(
+                requestContext.ServiceBundle,
+                cancellationToken).ConfigureAwait(false);
+
+            lock (s_lock)
+            {
                 if (!s_cachedManagedIdentitySource.HasValue)
                 {
-                    s_cachedManagedIdentitySource = GetManagedIdentitySource(logger);
+                    s_cachedManagedIdentitySource = managedIdentitySource;
                 }
             }
 
@@ -121,7 +149,97 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             }
         }
 
+        public static async Task<ManagedIdentitySource> GetManagedIdentitySourceAsync(
+            IServiceBundle serviceBundle, 
+            CancellationToken cancellationToken = default)
+        {
+            if (serviceBundle == null)
+            {
+                throw new ArgumentNullException(nameof(serviceBundle), "ServiceBundle is required to initialize the probe manager.");
+            }
 
+            serviceBundle.ApplicationLogger.Verbose(() => s_cachedManagedIdentitySource.HasValue
+                ? "[Managed Identity] Using cached managed identity source."
+                : "[Managed Identity] Computing managed identity source asynchronously.");
+
+            if (s_cachedManagedIdentitySource.HasValue)
+            {
+                return s_cachedManagedIdentitySource.Value;
+            }
+
+            lock (s_lock)
+            {
+                if (s_cachedManagedIdentitySource.HasValue)
+                {
+                    return s_cachedManagedIdentitySource.Value;
+                }
+            }
+
+            // Initialize the probe manager if not already initialized
+            var probeManager = new ImdsCredentialProbeManager(
+                    serviceBundle.HttpManager,
+                    serviceBundle.ApplicationLogger);
+
+            ManagedIdentitySource result = await ComputeManagedIdentitySourceAsync(probeManager, serviceBundle.ApplicationLogger, cancellationToken).ConfigureAwait(false);
+
+            lock (s_lock)
+            {
+                if (!s_cachedManagedIdentitySource.HasValue)
+                {
+                    s_cachedManagedIdentitySource = result;
+                }
+            }
+
+            return s_cachedManagedIdentitySource.Value;
+        }
+
+        private static async Task<ManagedIdentitySource> ComputeManagedIdentitySourceAsync(
+            ImdsCredentialProbeManager imdsCredentialProbeManager,
+            ILoggerAdapter logger, 
+            CancellationToken cancellationToken)
+        {
+            string identityEndpoint = EnvironmentVariables.IdentityEndpoint;
+            string identityHeader = EnvironmentVariables.IdentityHeader;
+            string identityServerThumbprint = EnvironmentVariables.IdentityServerThumbprint;
+            string msiEndpoint = EnvironmentVariables.MsiEndpoint;
+            string imdsEndpoint = EnvironmentVariables.ImdsEndpoint;
+
+            if (!string.IsNullOrEmpty(identityEndpoint) && !string.IsNullOrEmpty(identityHeader))
+            {
+                if (!string.IsNullOrEmpty(identityServerThumbprint))
+                {
+                    return ManagedIdentitySource.ServiceFabric;
+                }
+                else
+                {
+                    return ManagedIdentitySource.AppService;
+                }
+            }
+            else if (!string.IsNullOrEmpty(msiEndpoint))
+            {
+                return ManagedIdentitySource.CloudShell;
+            }
+            else if (ValidateAzureArcEnvironment(identityEndpoint, imdsEndpoint, logger))
+            {
+                return ManagedIdentitySource.AzureArc;
+            }
+            else
+            {
+                logger?.Info("[Managed Identity] Probing for credential endpoint.");
+                bool isSuccess = await imdsCredentialProbeManager.ExecuteProbeAsync(cancellationToken).ConfigureAwait(false);
+
+                if (isSuccess)
+                {
+                    logger?.Info("[Managed Identity] Credential endpoint detected.");
+                    return ManagedIdentitySource.Credential;
+                }
+                else
+                {
+                    logger?.Verbose(() => "[Managed Identity] Defaulting to IMDS as credential endpoint not detected.");
+                    return ManagedIdentitySource.DefaultToImds;
+                }
+            }
+        }
 
         // Method to return true if a file exists and is not empty to validate the Azure arc environment.
         private static bool ValidateAzureArcEnvironment(string identityEndpoint, string imdsEndpoint, ILoggerAdapter logger)

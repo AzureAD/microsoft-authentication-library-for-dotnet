@@ -11,14 +11,11 @@ using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Client.ManagedIdentity
 {
-    internal class ImdsCredentialProbeManager : IProbe
+    internal class ImdsCredentialProbeManager
     {
         private const string CredentialEndpoint = "http://169.254.169.254/metadata/identity/credential";
         private const string ProbeBody = ".";
         private const string ImdsHeader = "IMDS/";
-        private static readonly SemaphoreSlim s_lock = new(1);
-        private static ProbeResult s_cachedResult;
-
         private readonly IHttpManager _httpManager;
         private readonly ILoggerAdapter _logger;
 
@@ -28,30 +25,23 @@ namespace Microsoft.Identity.Client.ManagedIdentity
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<ProbeResult> ExecuteProbeAsync(CancellationToken cancellationToken = default)
+        public async Task<bool> ExecuteProbeAsync(CancellationToken cancellationToken = default)
         {
-            if (s_cachedResult != null)
-            {
-                _logger.Info("[Probe] Using cached probe result.");
-                return s_cachedResult;
-            }
+            _logger.Info("[Probe] Initiating probe to IMDS credential endpoint.");
 
-            await s_lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            var request = new ManagedIdentityRequest(HttpMethod.Post, new Uri($"{CredentialEndpoint}?cred-api-version=1.0"))
+            {
+                Content = ProbeBody
+            };
+
+            HttpContent httpContent = request.CreateHttpContent();
+
+            _logger.Info($"[Probe] Sending request to {CredentialEndpoint}");
+            _logger.Verbose(() => $"[Probe] Request Headers: {string.Join(", ", request.Headers)}");
+            _logger.Verbose(() => $"[Probe] Request Body: {ProbeBody}");
+
             try
             {
-                if (s_cachedResult != null)
-                {
-                    return s_cachedResult;
-                }
-
-                _logger.Info("[Probe] Initiating probe to IMDS credential endpoint.");
-
-                var request = new ManagedIdentityRequest(HttpMethod.Post, new Uri($"{CredentialEndpoint}?cred-api-version=1.0"))
-                {
-                    Content = ProbeBody
-                };
-                HttpContent httpContent = request.CreateHttpContent();
-
                 HttpResponse response = await _httpManager.SendRequestAsync(
                     request.ComputeUri(),
                     request.Headers,
@@ -63,49 +53,54 @@ namespace Microsoft.Identity.Client.ManagedIdentity
                     customHttpClient: null,
                     cancellationToken).ConfigureAwait(false);
 
-                s_cachedResult = EvaluateProbeResponse(response);
-                return s_cachedResult;
+                LogResponseDetails(response);
+
+                return EvaluateProbeResponse(response);
             }
             catch (Exception ex)
             {
                 _logger.Error($"[Probe] Exception during probe: {ex.Message}");
-                s_cachedResult = ProbeResult.Failure(ex.Message);
-                return s_cachedResult;
-            }
-            finally
-            {
-                s_lock.Release();
+                _logger.Error($"[Probe] Stack Trace: {ex.StackTrace}");
+                return false;
             }
         }
 
-        private ProbeResult EvaluateProbeResponse(HttpResponse response)
+        private void LogResponseDetails(HttpResponse response)
         {
-            if (response.StatusCode == HttpStatusCode.BadRequest &&
-                response.HeadersAsDictionary.TryGetValue("Server", out string serverHeader) &&
+            if (response == null)
+            {
+                _logger.Error("[Probe] No response received from the server.");
+                return;
+            }
+
+            _logger.Info($"[Probe] Response Status Code: {response.StatusCode}");
+            _logger.Verbose(() => $"[Probe] Response Headers: {string.Join(", ", response.HeadersAsDictionary)}");
+
+            if (response.Body != null)
+            {
+                _logger.Verbose(() => $"[Probe] Response Body: {response.Body}");
+            }
+        }
+
+        private bool EvaluateProbeResponse(HttpResponse response)
+        {
+            if (response == null)
+            {
+                _logger.Error("[Probe] No response received from the server.");
+                return false;
+            }
+
+            _logger.Info($"[Probe] Evaluating response from credential endpoint. Status Code: {response.StatusCode}");
+
+            if (response.HeadersAsDictionary.TryGetValue("Server", out string serverHeader) &&
                 serverHeader.StartsWith(ImdsHeader, StringComparison.OrdinalIgnoreCase))
             {
                 _logger.Info($"[Probe] Credential endpoint supported. Server: {serverHeader}");
-                return ProbeResult.Success();
+                return true;
             }
 
-            _logger.Verbose(() => "[Probe] Credential endpoint not supported.");
-            return ProbeResult.Failure("Credential endpoint not supported.");
+            _logger.Warning($"[Probe] Credential endpoint not supported. Status Code: {response.StatusCode}");
+            return false;
         }
-    }
-
-    internal class ProbeResult
-    {
-        public bool IsSuccess { get; }
-        public string Message { get; }
-
-        private ProbeResult(bool isSuccess, string message)
-        {
-            IsSuccess = isSuccess;
-            Message = message;
-        }
-
-        public static ProbeResult Success() => new ProbeResult(true, "Credential endpoint is supported.");
-
-        public static ProbeResult Failure(string message) => new ProbeResult(false, message);
     }
 }
