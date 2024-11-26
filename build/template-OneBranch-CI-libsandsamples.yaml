@@ -28,17 +28,25 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      # Check if the projects are under MsalSourceDir
+      # Compute base directory
       $MsalBaseDir = "$(Build.SourcesDirectory)/$(MsalSourceDir)"
-      if (Test-Path "$MsalBaseDir/src/client/Microsoft.Identity.Client.Desktop" -and Test-Path "$MsalBaseDir/src/client/Microsoft.Identity.Client") {
+      
+      # Check if both projects exist under MsalSourceDir
+      $DesktopExists = Test-Path "$MsalBaseDir/src/client/Microsoft.Identity.Client.Desktop"
+      $ClientExists = Test-Path "$MsalBaseDir/src/client/Microsoft.Identity.Client"
+      
+      # Check if both projects exist directly under Build.SourcesDirectory
+      $AltDesktopExists = Test-Path "$(Build.SourcesDirectory)/src/client/Microsoft.Identity.Client.Desktop"
+      $AltClientExists = Test-Path "$(Build.SourcesDirectory)/src/client/Microsoft.Identity.Client"
+
+      if ($DesktopExists -and $ClientExists) {
           Write-Host "##vso[task.setvariable variable=SourceDir]$MsalBaseDir"
-      } elseif (Test-Path "$(Build.SourcesDirectory)/src/client/Microsoft.Identity.Client.Desktop" -and Test-Path "$(Build.SourcesDirectory)/src/client/Microsoft.Identity.Client") {
+      } elseif ($AltDesktopExists -and $AltClientExists) {
           Write-Host "##vso[task.setvariable variable=SourceDir]$(Build.SourcesDirectory)/"
       } else {
           Write-Error "Unable to determine the correct source directory structure."
           exit 1
       }
-  condition: always()
 
 # Use the computed SourceDir for workload restore
 - task: DotNetCoreCLI@2
