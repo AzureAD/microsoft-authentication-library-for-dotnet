@@ -36,6 +36,7 @@ Included items must then not match any entries in the exclude list to remain inc
                                 <Source>.*\\json\\.*</Source>
                                 <Source>.*\\android\\.*</Source>
                                 <Source>.*\\ios\\.*</Source>
+                                <Source>.*\\build\\.*</Source>
                             </Exclude>
                         </Sources>
                     </CodeCoverage>
