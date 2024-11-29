@@ -57,8 +57,6 @@ steps:
     arguments: |
       restore $(SourceDir)src/client/Microsoft.Identity.Client.Desktop/Microsoft.Identity.Client.Desktop.csproj
       restore $(SourceDir)src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj
-      #--configfile $(SourceDir)NuGet.config
-      #--verbosity detailed
       
 - task: PowerShell@2
   displayName: Install MAUI
