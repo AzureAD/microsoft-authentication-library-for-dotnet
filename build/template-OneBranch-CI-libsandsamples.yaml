@@ -61,17 +61,23 @@ steps:
   inputs:
     forceReinstallCredentialProvider: true
 
-# Use the computed SourceDir for workload restore
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet workload restore for Desktop and Client projects'
+  displayName: 'Restore for Microsoft.Identity.Client.Desktop.csproj'
   inputs:
-    command: 'custom'
-    custom: 'workload'
-    arguments: |
-      restore $(SourceDir)src/client/Microsoft.Identity.Client.Desktop/Microsoft.Identity.Client.Desktop.csproj
-      restore $(SourceDir)src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj
-    feedsToUse: config # Ensures only the NuGet.config file is used
-    includeNuGetOrg: false # Ensures public nuget.org is excluded
+    command: restore
+    projects: '$(SourceDir)src/client/Microsoft.Identity.Client.Desktop/Microsoft.Identity.Client.Desktop.csproj'
+    nugetConfigPath: '$(SourceDir)NuGet.config'
+    includeNuGetOrg: false
+    verbosityRestore: 'detailed'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Restore for Microsoft.Identity.Client.csproj'
+  inputs:
+    command: restore
+    projects: '$(SourceDir)src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj'
+    nugetConfigPath: '$(SourceDir)NuGet.config'
+    includeNuGetOrg: false
+    verbosityRestore: 'detailed'
       
 - task: PowerShell@2
   displayName: Install MAUI
