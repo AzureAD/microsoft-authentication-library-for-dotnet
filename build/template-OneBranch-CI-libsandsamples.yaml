@@ -66,6 +66,8 @@ steps:
       restore $(SourceDir)src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj
       --configfile $(SourceDir)NuGet.config
       --verbosity diagnostic
+    feedsToUse: config # Ensures only the NuGet.config file is used
+    includeNuGetOrg: false # Ensures public nuget.org is excluded
       
 - task: PowerShell@2
   displayName: Install MAUI
