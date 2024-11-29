@@ -66,6 +66,7 @@ steps:
   inputs:
     command: restore
     projects: '$(SourceDir)src/client/Microsoft.Identity.Client.Desktop/Microsoft.Identity.Client.Desktop.csproj'
+    feedsToUse: config
     nugetConfigPath: '$(SourceDir)NuGet.config'
     includeNuGetOrg: false
     verbosityRestore: 'detailed'
@@ -75,6 +76,7 @@ steps:
   inputs:
     command: restore
     projects: '$(SourceDir)src/client/Microsoft.Identity.Client/Microsoft.Identity.Client.csproj'
+    feedsToUse: config
     nugetConfigPath: '$(SourceDir)NuGet.config'
     includeNuGetOrg: false
     verbosityRestore: 'detailed'
